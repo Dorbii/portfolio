@@ -97,13 +97,13 @@ test("one camera span resolves the detail tier for every layer", () => {
   assert.equal(capital.requiresAuthoredTile, true);
   const site = resolveDetailState({
     origin: [0.45, 0.45],
-    span: [0.075, 0.075],
+    span: [0.085, 0.085],
   }).tier;
   assert.equal(site.id, "site");
   assert.equal(site.requiresAuthoredTile, true);
   const close = resolveDetailState({
     origin: [0.45, 0.45],
-    span: [0.04, 0.04],
+    span: [0.075, 0.075],
   }).tier;
   assert.equal(close.id, "close");
   assert.equal(close.requiresAuthoredTile, true);
@@ -134,7 +134,7 @@ test("one central LOD policy owns thresholds and render budget", () => {
       territory: 0.78,
       capital: 0.34,
       site: 0.1,
-      close: 0.05,
+      close: 0.075,
     },
   );
   assert.equal(
@@ -164,7 +164,8 @@ test("animated water resizes only when its observer or LOD requests it", async (
     assert.doesNotMatch(renderer, /const gl = this\.gl;\s*this\.resize\(\);/);
   }
   for (const controller of [openWaterController, inlandController]) {
-    assert.match(controller, /new ResizeObserver\(\(\) => \{\s*this\.renderer\.requestResize\(\);\s*this\.renderOnce\(\);/);
+    assert.match(controller, /new ResizeObserver\(\(\) => \{\s*this\.renderer\.requestResize\(\);\s*if \(!this\.resizeFrameRequest\) \{/);
+    assert.match(controller, /this\.resizeFrameRequest = requestAnimationFrame\(\(\) => \{\s*this\.resizeFrameRequest = 0;\s*this\.renderOnce\(\);/);
   }
 });
 
@@ -241,7 +242,7 @@ test("LOD nodes and registered rasters share semantic transition weights", () =>
   });
   const territory = resolveDetailState({
     origin: [0.2, 0.2],
-    span: [0.4, 0.4],
+    span: [0.41, 0.41],
   });
   const capital = resolveDetailState({
     origin: [0.4, 0.4],
@@ -249,11 +250,11 @@ test("LOD nodes and registered rasters share semantic transition weights", () =>
   });
   const site = resolveDetailState({
     origin: [0.45, 0.45],
-    span: [0.075, 0.075],
+    span: [0.09, 0.09],
   });
   const close = resolveDetailState({
     origin: [0.45, 0.45],
-    span: [0.04, 0.04],
+    span: [0.075, 0.075],
   });
 
   assert.equal(world.worldToTerritory, 0);

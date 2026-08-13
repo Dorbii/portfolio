@@ -11,6 +11,7 @@ export class WaterSurfaceController {
   private readonly resizeObserver: ResizeObserver | null;
   private readonly reduceMotion: boolean;
   private frameRequest = 0;
+  private resizeFrameRequest = 0;
   private cameraSettleTimer: ReturnType<typeof setTimeout> | null = null;
   private running = false;
   private elapsedSeconds = 0;
@@ -26,7 +27,12 @@ export class WaterSurfaceController {
       ? null
       : new ResizeObserver(() => {
         this.renderer.requestResize();
-        this.renderOnce();
+        if (!this.resizeFrameRequest) {
+          this.resizeFrameRequest = requestAnimationFrame(() => {
+            this.resizeFrameRequest = 0;
+            this.renderOnce();
+          });
+        }
       });
     this.resizeObserver?.observe(renderer.canvas);
     document.addEventListener("visibilitychange", this.handleVisibility);
@@ -79,6 +85,9 @@ export class WaterSurfaceController {
     this.clearCameraSettleTimer();
     if (this.frameRequest) {
       cancelAnimationFrame(this.frameRequest);
+    }
+    if (this.resizeFrameRequest) {
+      cancelAnimationFrame(this.resizeFrameRequest);
     }
     this.resizeObserver?.disconnect();
     document.removeEventListener("visibilitychange", this.handleVisibility);

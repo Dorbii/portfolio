@@ -10,6 +10,7 @@ export class NinjaOneInlandWaterController {
   private readonly resizeObserver: ResizeObserver | null;
   private readonly reduceMotion: boolean;
   private frameRequest = 0;
+  private resizeFrameRequest = 0;
   private cameraSettleTimer: ReturnType<typeof setTimeout> | null = null;
   private running = false;
   private elapsedSeconds = 0;
@@ -25,7 +26,12 @@ export class NinjaOneInlandWaterController {
       ? null
       : new ResizeObserver(() => {
         this.renderer.requestResize();
-        this.renderOnce();
+        if (!this.resizeFrameRequest) {
+          this.resizeFrameRequest = requestAnimationFrame(() => {
+            this.resizeFrameRequest = 0;
+            this.renderOnce();
+          });
+        }
       });
     this.resizeObserver?.observe(renderer.canvas);
     document.addEventListener("visibilitychange", this.handleVisibility);
@@ -40,6 +46,16 @@ export class NinjaOneInlandWaterController {
   setLight(light: WorldLight): void {
     this.renderer.setLight(light);
     if (!this.running) this.renderOnce();
+  }
+
+  setEffectsEnabled(enabled: boolean): void {
+    this.renderer.setEffectsEnabled(enabled);
+    this.renderOnce();
+  }
+
+  setAquaticLifeEnabled(enabled: boolean): void {
+    this.renderer.setAquaticLifeEnabled(enabled);
+    this.renderOnce();
   }
 
   setActive(active: boolean): void {
@@ -60,6 +76,7 @@ export class NinjaOneInlandWaterController {
     this.running = false;
     this.clearCameraSettleTimer();
     if (this.frameRequest) cancelAnimationFrame(this.frameRequest);
+    if (this.resizeFrameRequest) cancelAnimationFrame(this.resizeFrameRequest);
     this.resizeObserver?.disconnect();
     document.removeEventListener("visibilitychange", this.handleVisibility);
     this.renderer.destroy();

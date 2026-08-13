@@ -50,6 +50,7 @@ import {
 interface TerritoryLandformProps {
   readonly camera: CameraView;
   readonly detailState: DetailState;
+  readonly suppressDetailedStreaming?: boolean;
 }
 
 interface StreamSourceRequest {
@@ -135,6 +136,7 @@ function expectedCanvasDecodedBytes(
 export function TerritoryLandform({
   camera,
   detailState,
+  suppressDetailedStreaming = false,
 }: TerritoryLandformProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const worldPlateRef = useRef<HTMLImageElement | null>(null);
@@ -538,12 +540,16 @@ export function TerritoryLandform({
     ) {
       drawPlate(detailPlate, detailPresentationOpacity);
     }
-    const visibleStreamTiles = TERRAIN_STREAM_TILES.filter((tile) =>
-      terrainTileIntersectsCamera(tile, camera)
-    );
-    const visibleSiteTiles = TERRAIN_SITE_TILES.filter((tile) =>
-      terrainTileIntersectsCamera(tile, camera)
-    );
+    const visibleStreamTiles = suppressDetailedStreaming
+      ? []
+      : TERRAIN_STREAM_TILES.filter((tile) =>
+        terrainTileIntersectsCamera(tile, camera)
+      );
+    const visibleSiteTiles = suppressDetailedStreaming
+      ? []
+      : TERRAIN_SITE_TILES.filter((tile) =>
+        terrainTileIntersectsCamera(tile, camera)
+      );
     const streamVisibility = visibleStreamTiles.length > 0
       ? resolveRegisteredRasterVisibility(
         visibleStreamTiles[0],
@@ -798,6 +804,7 @@ export function TerritoryLandform({
     detailState,
     publishStreamMetrics,
     queueRender,
+    suppressDetailedStreaming,
   ]);
 
   useEffect(() => {
@@ -1077,23 +1084,27 @@ export function TerritoryLandform({
       || capitalPresentationRef.current.value
         > LOD_PRESENTATION_EPSILON
     );
-    const requestedTiers: readonly TerrainStreamSourceTier[] = [
-      ...(retainCapitalPresentation && needsCapitalFallback
-        ? ["capital" as const]
-        : []),
-      ...(retainSitePresentation ? ["site" as const] : []),
-    ];
-    const presentationRetainedKeys =
-      resolveRetainedLodPresentationKeys([
-        {
-          transition: capitalCohortRef.current,
-          value: capitalPresentationRef.current.value,
-        },
-        {
-          transition: siteCohortRef.current,
-          value: sitePresentationRef.current.value,
-        },
-      ], decodedStreamKeysRef.current);
+    const requestedTiers: readonly TerrainStreamSourceTier[] =
+      suppressDetailedStreaming
+        ? []
+        : [
+          ...(retainCapitalPresentation && needsCapitalFallback
+            ? ["capital" as const]
+            : []),
+          ...(retainSitePresentation ? ["site" as const] : []),
+        ];
+    const presentationRetainedKeys = suppressDetailedStreaming
+      ? []
+      : resolveRetainedLodPresentationKeys([
+          {
+            transition: capitalCohortRef.current,
+            value: capitalPresentationRef.current.value,
+          },
+          {
+            transition: siteCohortRef.current,
+            value: sitePresentationRef.current.value,
+          },
+        ], decodedStreamKeysRef.current);
     const viewportPixels = canvasViewportPixels(canvasRef.current);
     const canvas = canvasRef.current;
     const fixedDecodedBytes =
@@ -1226,6 +1237,7 @@ export function TerritoryLandform({
     detailState.renderScale,
     presentationRevision,
     publishStreamMetrics,
+    suppressDetailedStreaming,
     viewportRevision,
   ]);
 
@@ -1239,12 +1251,24 @@ export function TerritoryLandform({
     if (!canvas) {
       return;
     }
+    let resizeFrame = 0;
     const observer = new ResizeObserver(() => {
-      setViewportRevision((revision) => revision + 1);
-      queueRender();
+      if (resizeFrame) {
+        return;
+      }
+      resizeFrame = requestAnimationFrame(() => {
+        resizeFrame = 0;
+        setViewportRevision((revision) => revision + 1);
+        queueRender();
+      });
     });
     observer.observe(canvas);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (resizeFrame) {
+        cancelAnimationFrame(resizeFrame);
+      }
+    };
   }, [queueRender]);
 
   return (
@@ -1255,6 +1279,7 @@ export function TerritoryLandform({
         + "career-world__land-layer "
         + "career-world__land-canvas"
       }
+      data-authority-layer="L2"
       data-layer="territory-landform"
       data-camera-settled={cameraSettled}
       data-capital-lod={detailState.territoryToCapital.toFixed(3)}
@@ -1264,6 +1289,7 @@ export function TerritoryLandform({
       data-lod-tier={detailState.tier.id}
       data-site-lod={detailState.capitalToSite.toFixed(3)}
       data-stream-tile-count={TERRAIN_STREAM_TILES.length}
+      data-stream-suppressed={suppressDetailedStreaming}
       data-render-scale={detailState.renderScale.toFixed(3)}
       data-site-tile-count={TERRAIN_SITE_TILES.length}
       data-stream-transition-ms={LOD_PRESENTATION_TRANSITION_MS}

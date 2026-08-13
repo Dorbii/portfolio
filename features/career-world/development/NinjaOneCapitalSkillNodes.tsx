@@ -49,10 +49,8 @@ function CityNodeShadow({
 }
 
 function BlockedGoPad({
-  closeLabels,
   node,
 }: {
-  readonly closeLabels: boolean;
   readonly node: NinjaOneCapitalCityNode;
 }) {
   return (
@@ -62,34 +60,19 @@ function BlockedGoPad({
       transform={`translate(${node.anchor[0]} ${node.anchor[1]})`}
     >
       <title>Go building alpha extraction is pending</title>
-      {closeLabels ? (
-        <text
-          fill="rgba(223, 164, 116, 0.95)"
-          fontSize="11"
-          paintOrder="stroke"
-          stroke="rgba(5, 9, 9, 0.9)"
-          strokeWidth="3"
-          textAnchor="middle"
-          y="8"
-        >
-          GO BUILDING ASSET PENDING
-        </text>
-      ) : null}
     </g>
   );
 }
 
 function CityNodeAsset({
   animated,
-  closeLabels,
   node,
 }: {
   readonly animated: boolean;
-  readonly closeLabels: boolean;
   readonly node: NinjaOneCapitalCityNode;
 }) {
   if (!node.assetNodeReady) {
-    return <BlockedGoPad closeLabels={closeLabels} node={node} />;
+    return <BlockedGoPad node={node} />;
   }
   const sources = animated
     ? node.renderLayers
@@ -124,21 +107,6 @@ function CityNodeAsset({
           y={y}
         />
       ))}
-      {closeLabels ? (
-        <text
-          fill="rgba(237, 230, 207, 0.96)"
-          fontSize="13"
-          fontWeight="650"
-          paintOrder="stroke"
-          stroke="rgba(5, 9, 9, 0.9)"
-          strokeWidth="4"
-          textAnchor="middle"
-          x={node.anchor[0]}
-          y={node.anchor[1] + 25}
-        >
-          {node.label.toUpperCase()}
-        </text>
-      ) : null}
     </g>
   );
 }
@@ -156,7 +124,6 @@ export function NinjaOneCapitalSkillNodes({
     camera,
     detailState.tier.id,
   );
-  const closeLabels = detailState.tier.id === "close";
   const orderedNodes = [...visibleNodes].sort(
     (left, right) => left.anchor[1] + left.zBias - right.anchor[1] - right.zBias,
   );
@@ -167,18 +134,23 @@ export function NinjaOneCapitalSkillNodes({
       data-capital-city-node-count={orderedNodes.length}
       data-capital-city-node-focused-animation={animatedSkillId ?? "none"}
       data-capital-city-node-layer="skill-building-nodes"
-      data-capital-city-node-terrain-binding="blocked"
+      data-capital-city-node-terrain-binding="production-component-transition"
     >
-      <g data-capital-city-node-layer="building-ground-shadows">
+      <g
+        data-capital-city-node-layer="building-ground-shadows"
+        data-capital-layer="building-ground-shadows"
+      >
         {orderedNodes.filter(({ assetNodeReady }) => assetNodeReady).map((node) => (
           <CityNodeShadow key={node.slotId} light={light} node={node} />
         ))}
       </g>
-      <g data-capital-city-node-layer="building-assets">
+      <g
+        data-capital-city-node-layer="building-assets"
+        data-capital-layer="skill-building-nodes"
+      >
         {orderedNodes.map((node) => (
           <CityNodeAsset
             animated={node.skillId === animatedSkillId}
-            closeLabels={closeLabels}
             key={node.slotId}
             node={node}
           />

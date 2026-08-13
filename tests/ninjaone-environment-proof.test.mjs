@@ -402,7 +402,7 @@ test("the root-selectable environment proof renders semantic terrain and suppres
   );
   assert.match(
     scene,
-    /showNinjaOneInlandWater \? \([\s\S]*?<NinjaOneInlandWaterCanvas[\s\S]*?active=\{isPageVisible\}/,
+    /showNinjaOneInlandWater && inlandWaterAuthorityVisible \? \([\s\S]*?<NinjaOneInlandWaterCanvas[\s\S]*?active=\{isPageVisible && inlandWaterMotionVisible\}/,
   );
   assert.match(
     scene,

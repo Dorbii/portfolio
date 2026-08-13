@@ -215,7 +215,7 @@ function parseNode(
 if (
   cityNodeManifest.schemaVersion !== 1
   || cityNodeManifest.id !== "career-world/capitals/ninjaone/city-node-composition@r1"
-  || cityNodeManifest.status !== "concept-master-runtime-integration-preview"
+  || cityNodeManifest.status !== "production-component-recovery-baseline"
   || cityNodeManifest.productionReady !== false
   || cityNodeManifest.runtimeEligible !== true
   || cityNodeManifest.nodes.length !== 19
@@ -251,9 +251,21 @@ export const NINJAONE_CAPITAL_CITY_NODE_TERRAIN_BINDING_STATUS =
   cityNodeManifest.terrainBinding.status;
 
 export const NINJAONE_CAPITAL_CITY_VISUAL_LAYERS = Object.freeze({
-  overviewSettlement: parseRasterAsset(
-    cityNodeManifest.cityFabric.overviewSettlement,
-    "cityFabric.overviewSettlement",
+  productionCirculation: parseRasterAsset(
+    cityNodeManifest.cityFabric.productionCirculation,
+    "cityFabric.productionCirculation",
+  ),
+  productionTransitionDetail: parseRasterAsset(
+    cityNodeManifest.cityFabric.productionTransitionDetail,
+    "cityFabric.productionTransitionDetail",
+  ),
+  productionBridgeTransition: parseRasterAsset(
+    cityNodeManifest.cityFabric.productionBridgeTransition,
+    "cityFabric.productionBridgeTransition",
+  ),
+  registeredBridges: parseRasterAsset(
+    cityNodeManifest.cityFabric.productionBridges,
+    "cityFabric.productionBridges",
   ),
   populationSiteScaleCues: parseRasterAsset(
     cityNodeManifest.populationScaleCues.siteLayer,
@@ -286,10 +298,6 @@ export const NINJAONE_CAPITAL_CITY_VISUAL_LAYERS = Object.freeze({
   railTrack: parseRasterAsset(
     cityNodeManifest.transport.rail.trackLayer,
     "transport.rail.trackLayer",
-  ),
-  waterTransition: parseRasterAsset(
-    cityNodeManifest.cityFabric.waterTransition,
-    "cityFabric.waterTransition",
   ),
 });
 
@@ -372,8 +380,11 @@ export const NINJAONE_CAPITAL_CITY_CAMERA: CameraView = Object.freeze({
 // a capital-tier crop of that unchanged registration so the capital preset does
 // not open on a tier where the detailed city is intentionally hidden.
 export const NINJAONE_CAPITAL_CITY_PRESENTATION_CAMERA: CameraView = Object.freeze({
-  origin: Object.freeze([0.135, 0.01] as Pair),
-  span: Object.freeze([0.31, 0.31] as Pair),
+  // Present the complete authored city width on entry. The previous crop hid
+  // the summit, lower districts, and rail continuation, making the city read
+  // as a disconnected fragment before the user touched the camera.
+  origin: Object.freeze([0.125, 0] as Pair),
+  span: Object.freeze([0.25, 0.25] as Pair),
 });
 
 export function ninjaOneCapitalLocalCameraBounds(

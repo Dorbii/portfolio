@@ -635,8 +635,8 @@
     "siteTransparentRgbUnderZeroAlpha": 0,
     "closeTransparentRgbUnderZeroAlpha": 0,
     "displayHeightRange": [
-      21,
-      36
+      15,
+      25
     ],
     "terrainSupport": [
       {
@@ -647,7 +647,7 @@
           "x": 0.505,
           "y": 0.335
         },
-        "displayHeight": 26,
+        "displayHeight": 18,
         "terrainSupportAlpha": 255
       },
       {
@@ -658,7 +658,7 @@
           "x": 0.408,
           "y": 0.535
         },
-        "displayHeight": 23,
+        "displayHeight": 16,
         "terrainSupportAlpha": 255
       },
       {
@@ -669,7 +669,7 @@
           "x": 0.59,
           "y": 0.445
         },
-        "displayHeight": 33,
+        "displayHeight": 23,
         "terrainSupportAlpha": 255
       },
       {
@@ -680,7 +680,7 @@
           "x": 0.665,
           "y": 0.686
         },
-        "displayHeight": 36,
+        "displayHeight": 25,
         "terrainSupportAlpha": 255
       },
       {
@@ -691,7 +691,7 @@
           "x": 0.442,
           "y": 0.552
         },
-        "displayHeight": 31,
+        "displayHeight": 22,
         "terrainSupportAlpha": 255
       },
       {
@@ -702,7 +702,7 @@
           "x": 0.575,
           "y": 0.705
         },
-        "displayHeight": 27,
+        "displayHeight": 19,
         "terrainSupportAlpha": 255
       },
       {
@@ -713,7 +713,7 @@
           "x": 0.392,
           "y": 0.292
         },
-        "displayHeight": 33,
+        "displayHeight": 23,
         "terrainSupportAlpha": 255
       },
       {
@@ -724,7 +724,7 @@
           "x": 0.706,
           "y": 0.603
         },
-        "displayHeight": 21,
+        "displayHeight": 15,
         "terrainSupportAlpha": 255
       },
       {
@@ -735,7 +735,7 @@
           "x": 0.748,
           "y": 0.612
         },
-        "displayHeight": 30,
+        "displayHeight": 21,
         "terrainSupportAlpha": 255
       },
       {
@@ -746,7 +746,7 @@
           "x": 0.468,
           "y": 0.575
         },
-        "displayHeight": 36,
+        "displayHeight": 25,
         "terrainSupportAlpha": 255
       },
       {
@@ -757,7 +757,7 @@
           "x": 0.535,
           "y": 0.646
         },
-        "displayHeight": 26,
+        "displayHeight": 18,
         "terrainSupportAlpha": 255
       },
       {
@@ -768,7 +768,7 @@
           "x": 0.38,
           "y": 0.505
         },
-        "displayHeight": 23,
+        "displayHeight": 16,
         "terrainSupportAlpha": 255
       },
       {
@@ -779,7 +779,7 @@
           "x": 0.46,
           "y": 0.235
         },
-        "displayHeight": 33,
+        "displayHeight": 23,
         "terrainSupportAlpha": 255
       },
       {
@@ -790,7 +790,7 @@
           "x": 0.41,
           "y": 0.245
         },
-        "displayHeight": 31,
+        "displayHeight": 22,
         "terrainSupportAlpha": 255
       },
       {
@@ -801,7 +801,7 @@
           "x": 0.405,
           "y": 0.675
         },
-        "displayHeight": 36,
+        "displayHeight": 25,
         "terrainSupportAlpha": 255
       },
       {
@@ -812,7 +812,7 @@
           "x": 0.62,
           "y": 0.82
         },
-        "displayHeight": 27,
+        "displayHeight": 19,
         "terrainSupportAlpha": 255
       }
     ]

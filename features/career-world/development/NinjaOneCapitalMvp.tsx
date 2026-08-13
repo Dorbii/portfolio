@@ -47,8 +47,9 @@ function RegisteredRaster({
 
 function IndependentStation() {
   const station = NINJAONE_CAPITAL_CITY_STATION;
-  const height = station.displayWidth * station.dimensions[1] / station.dimensions[0];
-  const x = station.anchor[0] - station.displayWidth * station.groundAnchor[0];
+  const displayWidth = station.displayWidth;
+  const height = displayWidth * station.dimensions[1] / station.dimensions[0];
+  const x = station.anchor[0] - displayWidth * station.groundAnchor[0];
   const y = station.anchor[1] - height * station.groundAnchor[1];
   return (
     <g
@@ -62,14 +63,14 @@ function IndependentStation() {
         cy={station.anchor[1] + 2}
         fill="rgba(5, 9, 9, 0.28)"
         filter="url(#ninjaone-capital-contact-soften)"
-        rx={station.displayWidth * 0.4}
-        ry={Math.max(7, station.displayWidth * 0.065)}
+        rx={displayWidth * 0.4}
+        ry={Math.max(7, displayWidth * 0.065)}
       />
       <image
         height={height}
         href={station.path}
         preserveAspectRatio="xMidYMid meet"
-        width={station.displayWidth}
+        width={displayWidth}
         x={x}
         y={y}
       />
@@ -94,10 +95,14 @@ export function NinjaOneCapitalMvp({
     || detailState.tier.id === "close"
   );
   const cityVisible = detailedCityVisible;
-  const siteDetailVisible = (
-    detailState.tier.id === "site"
-    || detailState.tier.id === "close"
+  // The precomposed route is part of the capital silhouette: keeping its
+  // restrained track/bed visible prevents the reserved corridor from reading
+  // as an empty boulevard. Portals and support detail remain site/close only.
+  const transportVisible = detailedCityVisible;
+  const transportDetailVisible = (
+    detailState.tier.id === "site" || detailState.tier.id === "close"
   );
+  const closeDetailVisible = detailState.tier.id === "close";
 
   return (
     <>
@@ -123,6 +128,7 @@ export function NinjaOneCapitalMvp({
         data-capital-skill-node-terrain-binding={NINJAONE_CAPITAL_CITY_NODE_TERRAIN_BINDING_STATUS}
         data-capital-world-light-direction={light.direction.join(",")}
         data-lod-tier={detailState.tier.id}
+        data-capital-close-detail-visible={String(closeDetailVisible)}
         preserveAspectRatio="none"
         role="img"
         viewBox={cameraViewBox(camera, [WORLD_PLANE.width, WORLD_PLANE.height])}
@@ -140,48 +146,68 @@ export function NinjaOneCapitalMvp({
           <g transform={`translate(${worldX} ${worldY}) scale(${scaleX} ${scaleY})`}>
             {detailedCityVisible ? (
               <g>
-                <g data-capital-layer="capital-settlement-overview">
+                <g data-capital-layer="production-city-circulation">
                   <RegisteredRaster
-                    asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.overviewSettlement}
-                    layer="capital-settlement-overview"
+                    asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.productionCirculation}
+                    layer="production-city-circulation"
                   />
                 </g>
-                <g data-capital-layer="registered-water-shoreline-and-bridges">
+                <g data-capital-layer="production-city-transition-detail">
                   <RegisteredRaster
-                    asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.waterTransition}
-                    layer="registered-water-shoreline-and-bridges"
+                    asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.productionTransitionDetail}
+                    layer="production-city-transition-detail"
                   />
                 </g>
-                {siteDetailVisible ? (
+                <g data-capital-layer="production-bridge-transition">
+                  <RegisteredRaster
+                    asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.productionBridgeTransition}
+                    layer="production-bridge-transition"
+                  />
+                </g>
+                <g data-capital-layer="registered-bridges">
+                  <RegisteredRaster
+                    asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.registeredBridges}
+                    layer="registered-bridges"
+                  />
+                </g>
+                {transportVisible ? (
                   <g data-capital-layer="single-centerline-transport">
-                    <RegisteredRaster
-                      asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.railSupport}
-                      layer="rail-supports"
-                    />
+                    {transportDetailVisible ? (
+                      <RegisteredRaster
+                        asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.railSupport}
+                        layer="rail-supports"
+                      />
+                    ) : null}
                     <RegisteredRaster
                       asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.railBed}
                       layer="rail-bed"
                     />
-                    <RegisteredRaster
-                      asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.railPortalBack}
-                      layer="rail-portal-backs"
-                    />
+                    {transportDetailVisible ? (
+                      <RegisteredRaster
+                        asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.railPortalBack}
+                        layer="rail-portal-backs"
+                      />
+                    ) : null}
                     <RegisteredRaster
                       asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.railTrack}
                       layer="rail-track"
                     />
-                    <IndependentStation />
-                    <RegisteredRaster
-                      asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.railStationForeground}
-                      layer="rail-station-foreground"
-                    />
-                    <RegisteredRaster
-                      asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.railPortalForeground}
-                      layer="rail-portal-foreground"
-                    />
+                    {transportDetailVisible ? (
+                      <>
+                        <RegisteredRaster
+                          asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.railStationForeground}
+                          layer="rail-station-foreground"
+                        />
+                        <RegisteredRaster
+                          asset={NINJAONE_CAPITAL_CITY_VISUAL_LAYERS.railPortalForeground}
+                          layer="rail-portal-foregrounds"
+                        />
+                      </>
+                    ) : null}
                   </g>
                 ) : null}
-                {detailState.tier.id === "close" ? (
+                <IndependentStation />
+                {detailedCityVisible ? (
                   <NinjaOneCapitalSkillNodes
                     camera={camera}
                     detailState={detailState}
@@ -198,16 +224,6 @@ export function NinjaOneCapitalMvp({
         ) : null}
       </svg>
 
-      {cityVisible ? (
-        <aside className="ninjaone-capital-mvp__hud" aria-label="Capital layer status">
-          <p>NINJAONE CAPITAL · CITY COMPOSITION R1</p>
-          <strong>{detailState.tier.label}</strong>
-          <span>{NINJAONE_CAPITAL_CITY_NODE_COUNT} skill buildings · terrain-led districts</span>
-          <span>{NINJAONE_CAPITAL_CITY_POPULATION_CUE_COUNT} temporary fantasy scale cues</span>
-          <span>Intercity rail exits {NINJAONE_CAPITAL_CITY_RAIL_EXIT.direction}</span>
-          <span>Integration preview · independent train loop pending</span>
-        </aside>
-      ) : null}
     </>
   );
 }

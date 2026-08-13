@@ -40,8 +40,8 @@ test("capital preview camera and runtime registration use the full B1/B2/C1/C2 c
     span: [0.25, 1 / 3],
   });
   assert.deepEqual(NINJAONE_CAPITAL_CITY_PRESENTATION_CAMERA, {
-    origin: [0.135, 0.01],
-    span: [0.31, 0.31],
+    origin: [0.125, 0],
+    span: [0.25, 0.25],
   });
   assert.deepEqual(city.artboard.dimensions, NINJAONE_CAPITAL_CITY_ARTBOARD);
   assert.deepEqual(city.artboard.worldOrigin, NINJAONE_CAPITAL_CITY_WORLD_ORIGIN);
@@ -68,19 +68,19 @@ test("capital preview mounts distinct territory and detailed city stacks without
 
   assert.match(
     page,
-    /case "ninjaone-capital-mvp":[\s\S]*?<CareerWorld enableDevelopmentTools initialView="ninjaone-capital" \/>/,
+    /case "ninjaone-capital-mvp":[\s\S]*?<CareerWorld enablePerformanceProbe initialView="ninjaone-capital" \/>/,
   );
   assert.doesNotMatch(page, /capitalMvp/);
   assert.match(page, /default:[\s\S]*?return <CareerWorld \/>/);
   assert.match(scene, /<TerritoryLandform/);
   assert.match(
     scene,
-    /showNinjaOneInlandWater \? \([\s\S]*?<NinjaOneInlandWaterCanvas[\s\S]*?active=\{isPageVisible\}/,
+    /showNinjaOneInlandWater && inlandWaterAuthorityVisible \? \([\s\S]*?<NinjaOneInlandWaterCanvas[\s\S]*?active=\{isPageVisible && inlandWaterMotionVisible\}/,
   );
   assert.match(scene, /const showNinjaOneCapital = !topologyProof && !environmentProof/);
   assert.match(
     scene,
-    /showNinjaOneCapital \? \([\s\S]*?<NinjaOneCapitalMvp[\s\S]*?light=\{WORLD_LIGHT\}/,
+    /showNinjaOneCapital && !capitalRecoveryBaseline \? \([\s\S]*?<NinjaOneCapitalMvp[\s\S]*?light=\{WORLD_LIGHT\}/,
   );
   assert.match(
     developmentIndex,
@@ -100,8 +100,8 @@ test("capital preview mounts distinct territory and detailed city stacks without
     assert.match(scene, new RegExp(`<${productionLayer}`));
   }
   assert.match(renderer, /detailState\.tier\.id === "capital"/);
-  assert.match(renderer, /cityDetailOpacity = detailState\.territoryToCapital/);
   assert.doesNotMatch(renderer, /territory-settlement-overview/);
+  assert.doesNotMatch(renderer, /overviewSettlement|waterTransition/);
   assert.doesNotMatch(renderer, /NinjaOneStationRiverDetail/);
   assert.doesNotMatch(renderer, /city-terrain-contact/);
   assert.match(scene, /detailState\.tier\.id !== "world"/);
@@ -114,6 +114,10 @@ test("capital preview mounts distinct territory and detailed city stacks without
       assert.match(scene, /<NinjaOneInlandWaterCanvas/);
     } else if (layer === "building-ground-shadows") {
       assert.match(skillRenderer, /data-capital-city-node-layer="building-ground-shadows"/);
+    } else if (layer === "single-centerline-transport-site-close") {
+      assert.match(renderer, /data-capital-layer="single-centerline-transport"/);
+    } else if (layer === "skill-building-nodes") {
+      assert.match(skillRenderer, /data-capital-layer="skill-building-nodes"/);
     } else if (
       layer === "temporary-population-site-scale-cues"
       || layer === "temporary-population-close-detail-cues"
@@ -132,6 +136,15 @@ test("capital preview mounts distinct territory and detailed city stacks without
   assert.equal(city.cityFabric.contactLayer.containsTerrainPixels, true);
   assert.equal(city.cityFabric.contactLayer.runtimeVisible, false);
   assert.equal(city.layerOrder.includes("city-terrain-contact"), false);
+  assert.equal(city.cityFabric.overviewSettlement.runtimeVisible, false);
+  assert.equal(city.cityFabric.waterTransition.runtimeVisible, false);
+  assert.match(renderer, /NINJAONE_CAPITAL_CITY_VISUAL_LAYERS\.productionCirculation/);
+  assert.match(renderer, /NINJAONE_CAPITAL_CITY_VISUAL_LAYERS\.productionTransitionDetail/);
+  assert.match(renderer, /NINJAONE_CAPITAL_CITY_VISUAL_LAYERS\.productionBridgeTransition/);
+  assert.match(renderer, /NINJAONE_CAPITAL_CITY_VISUAL_LAYERS\.registeredBridges/);
+  assert.match(renderer, /\{detailedCityVisible \? \([\s\S]*?<NinjaOneCapitalSkillNodes/);
+  assert.match(skillRenderer, /ninjaOneCapitalVisibleCityNodes/);
+  assert.match(skillRenderer, /data-capital-city-node-terrain-binding="production-component-transition"/);
 });
 
 test("rail, station, and temporary population stay independent at runtime", async () => {
@@ -153,7 +166,7 @@ test("rail, station, and temporary population stay independent at runtime", asyn
   assert.match(renderer, /data-capital-rail-entry/);
   assert.match(renderer, /data-capital-rail-off-capital-entry/);
   assert.match(renderer, /data-capital-rail-terminates-at-building/);
-  assert.match(renderer, /data-asset-status="production-loop-not-yet-recovered"/);
+  assert.match(renderer, /data-capital-layer="single-centerline-transport"/);
   assert.match(renderer, /<NinjaOneCapitalPopulation/);
   assert.match(populationRenderer, /data-temporary-swappable-layer="true"/);
   assert.match(populationRenderer, /data-population-render-mode="camera-culled-individual-sprites"/);

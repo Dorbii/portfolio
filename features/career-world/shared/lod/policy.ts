@@ -15,13 +15,13 @@ export const DETAIL_POLICY = Object.freeze({
   territoryAssetPreloadSpan: 0.9,
   capitalAssetPreloadSpan: 0.4,
   siteAssetPreloadSpan: 0.16,
-  closeAssetPreloadSpan: 0.075,
+  closeAssetPreloadSpan: 0.1,
   tierMaximumSpan: Object.freeze({
     world: 1,
     territory: 0.78,
     capital: 0.34,
     site: 0.1,
-    close: 0.05,
+    close: 0.075,
   }),
   worldToTerritory: Object.freeze({
     startSpan: 0.86,
@@ -36,8 +36,8 @@ export const DETAIL_POLICY = Object.freeze({
     endSpan: 0.1,
   }),
   siteToClose: Object.freeze({
-    startSpan: 0.07,
-    endSpan: 0.045,
+    startSpan: 0.09,
+    endSpan: 0.075,
   }),
   renderScale: Object.freeze({
     world: 1,

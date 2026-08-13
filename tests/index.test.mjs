@@ -1,13 +1,14 @@
 import "./ambient-structures.test.mjs";
-import "./architecture.test.mjs";
 import "./assets.test.mjs";
 import "./camera.test.mjs";
 import "./ninjaone-capital-topology-proof.test.mjs";
-import "./ninjaone-capital-mvp.test.mjs";
 import "./ninjaone-capital-city-nodes.test.mjs";
+import "./environment-layer-boundaries.test.mjs";
+import "./environment-layer-registry.test.mjs";
 import "./ninjaone-station-river-detail.test.mjs";
 import "./ninjaone-environment-foliage.test.mjs";
 import "./ninjaone-inland-water.test.mjs";
+import "./ninjaone-environment-seam-integration.test.mjs";
 import "./ninjaone-environment-proof.test.mjs";
 import "./ninjaone-environment-runtime.test.mjs";
 import "./ninjaone-environment-static-fidelity.test.mjs";

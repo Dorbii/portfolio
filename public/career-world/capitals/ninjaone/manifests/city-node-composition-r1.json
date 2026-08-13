@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "career-world/capitals/ninjaone/city-node-composition@r1",
-  "status": "concept-master-runtime-integration-preview",
+  "status": "production-component-recovery-baseline",
   "productionReady": false,
   "runtimeEligible": true,
   "artboard": {
@@ -89,7 +89,7 @@
     ]
   },
   "terrainBinding": {
-    "status": "concept-master-registered-current-hydrology-integration-preview",
+    "status": "frozen-terrain-live-water-production-component-recovery",
     "canonicalLandMask": {
       "path": "/career-world/layers/territory-landform/masks/world-land-mask-r4.png",
       "sha256": "8801722b801b2ecabd048dc71ac99ff7f0c566e69e06a50d9c4e41706dd7003a",
@@ -216,10 +216,13 @@
   "layerOrder": [
     "external-terrain",
     "inland-water",
-    "capital-settlement-overview",
-    "registered-water-shoreline-and-bridges",
+    "production-city-circulation",
+    "production-city-transition-detail",
+    "production-bridge-transition",
+    "registered-bridges",
     "single-centerline-transport-site-close",
-    "single-focused-building-close",
+    "building-ground-shadows",
+    "skill-building-nodes",
     "temporary-population-site-scale-cues",
     "temporary-population-close-detail-cues"
   ],
@@ -301,10 +304,10 @@
         1254
       ],
       "localPosition": {
-        "x": 0.438,
-        "y": 0.54
+        "x": 0.42592800000000003,
+        "y": 0.38812800000000003
       },
-      "displayWidth": 343,
+      "displayWidth": 250,
       "groundAnchor": [
         0.5,
         0.85
@@ -315,9 +318,9 @@
     },
     "rail": {
       "owner": "territory-transport-layer",
-      "renderMethod": "concept-master-authored-isometric-segment-chains",
+      "renderMethod": "lod-stable-authored-isometric-through-route-r3",
       "screenSpaceRibbonForbidden": true,
-      "centerlineStatus": "concept-master-registered-r1",
+      "centerlineStatus": "single-continuous-station-to-south-southeast-route-r3",
       "stationLocalPosition": {
         "x": 0.438,
         "y": 0.54
@@ -336,36 +339,88 @@
       },
       "controlPoints": [
         {
-          "x": 0.295,
-          "y": 0.525
+          "x": 0.36,
+          "y": 0.347
         },
         {
-          "x": 0.33,
-          "y": 0.6
+          "x": 0.384,
+          "y": 0.361
         },
         {
-          "x": 0.38,
-          "y": 0.67
+          "x": 0.408,
+          "y": 0.375
         },
         {
-          "x": 0.44,
-          "y": 0.74
+          "x": 0.432,
+          "y": 0.39
         },
         {
-          "x": 0.5,
-          "y": 0.8
+          "x": 0.456,
+          "y": 0.404
         },
         {
-          "x": 0.58,
-          "y": 0.87
+          "x": 0.48,
+          "y": 0.418
         },
         {
-          "x": 0.67,
-          "y": 0.94
+          "x": 0.504,
+          "y": 0.433
         },
         {
-          "x": 0.75,
-          "y": 1.03
+          "x": 0.528,
+          "y": 0.447
+        },
+        {
+          "x": 0.552,
+          "y": 0.461
+        },
+        {
+          "x": 0.576,
+          "y": 0.475
+        },
+        {
+          "x": 0.6,
+          "y": 0.49
+        },
+        {
+          "x": 0.624,
+          "y": 0.504
+        },
+        {
+          "x": 0.648,
+          "y": 0.518
+        },
+        {
+          "x": 0.672,
+          "y": 0.532
+        },
+        {
+          "x": 0.696,
+          "y": 0.547
+        },
+        {
+          "x": 0.72,
+          "y": 0.561
+        },
+        {
+          "x": 0.744,
+          "y": 0.575
+        },
+        {
+          "x": 0.768,
+          "y": 0.589
+        },
+        {
+          "x": 0.792,
+          "y": 0.604
+        },
+        {
+          "x": 0.816,
+          "y": 0.618
+        },
+        {
+          "x": 0.84,
+          "y": 0.632
         }
       ],
       "exitDirection": "south-southeast",
@@ -390,267 +445,568 @@
       },
       "segments": [
         {
-          "id": "station-portal-straight",
+          "id": "northwest-mountain-portal-run",
           "chainIndex": 0,
           "sourceCell": [
             0,
             0
           ],
-          "localCenter": {
-            "x": 0.374,
-            "y": 0.46
-          },
-          "displayWidth": 150,
+          "conceptCenter": [
+            0.36,
+            0.347
+          ],
+          "displayWidth": 86,
+          "displayHeight": 62,
           "kind": "ground-straight-nw-se",
-          "rotationDegrees": 0
+          "rotationDegrees": 0,
+          "placedBounds": [
+            883,
+            638,
+            969,
+            700
+          ]
         },
         {
-          "id": "station-terminal-curve",
+          "id": "continuous-route-01",
           "chainIndex": 0,
           "sourceCell": [
-            2,
+            0,
             0
           ],
-          "localCenter": {
-            "x": 0.418,
-            "y": 0.508
-          },
-          "displayWidth": 146,
-          "kind": "ground-curve-nw-sse",
-          "rotationDegrees": 0
+          "conceptCenter": [
+            0.384,
+            0.361
+          ],
+          "displayWidth": 86,
+          "displayHeight": 62,
+          "kind": "ground-straight-nw-se",
+          "rotationDegrees": 0,
+          "placedBounds": [
+            944,
+            665,
+            1030,
+            727
+          ]
         },
         {
-          "id": "south-portal-curve",
-          "chainIndex": 1,
+          "id": "continuous-route-02",
+          "chainIndex": 0,
           "sourceCell": [
-            2,
+            0,
             0
           ],
-          "localCenter": {
-            "x": 0.315,
-            "y": 0.56
-          },
-          "displayWidth": 146,
-          "kind": "ground-curve-nw-sse",
-          "rotationDegrees": 0
-        },
-        {
-          "id": "south-ravine-viaduct-curve",
-          "chainIndex": 1,
-          "sourceCell": [
-            2,
-            1
+          "conceptCenter": [
+            0.408,
+            0.375
           ],
-          "localCenter": {
-            "x": 0.348,
-            "y": 0.627
-          },
-          "displayWidth": 157,
-          "kind": "elevated-curve-sse",
-          "rotationDegrees": 0
+          "displayWidth": 86,
+          "displayHeight": 62,
+          "kind": "ground-straight-nw-se",
+          "rotationDegrees": 0,
+          "placedBounds": [
+            1006,
+            692,
+            1092,
+            754
+          ]
         },
         {
-          "id": "south-ravine-viaduct",
-          "chainIndex": 1,
+          "id": "station-through",
+          "chainIndex": 0,
+          "sourceCell": [
+            0,
+            0
+          ],
+          "conceptCenter": [
+            0.432,
+            0.39
+          ],
+          "displayWidth": 86,
+          "displayHeight": 62,
+          "kind": "ground-straight-nw-se",
+          "rotationDegrees": 0,
+          "placedBounds": [
+            1068,
+            721,
+            1154,
+            783
+          ]
+        },
+        {
+          "id": "continuous-route-04",
+          "chainIndex": 0,
+          "sourceCell": [
+            0,
+            0
+          ],
+          "conceptCenter": [
+            0.456,
+            0.404
+          ],
+          "displayWidth": 86,
+          "displayHeight": 62,
+          "kind": "ground-straight-nw-se",
+          "rotationDegrees": 0,
+          "placedBounds": [
+            1129,
+            748,
+            1215,
+            810
+          ]
+        },
+        {
+          "id": "continuous-route-05",
+          "chainIndex": 0,
+          "sourceCell": [
+            0,
+            0
+          ],
+          "conceptCenter": [
+            0.48,
+            0.418
+          ],
+          "displayWidth": 86,
+          "displayHeight": 62,
+          "kind": "ground-straight-nw-se",
+          "rotationDegrees": 0,
+          "placedBounds": [
+            1191,
+            775,
+            1277,
+            837
+          ]
+        },
+        {
+          "id": "continuous-route-06",
+          "chainIndex": 0,
+          "sourceCell": [
+            0,
+            0
+          ],
+          "conceptCenter": [
+            0.504,
+            0.433
+          ],
+          "displayWidth": 86,
+          "displayHeight": 62,
+          "kind": "ground-straight-nw-se",
+          "rotationDegrees": 0,
+          "placedBounds": [
+            1253,
+            804,
+            1339,
+            866
+          ]
+        },
+        {
+          "id": "continuous-route-07",
+          "chainIndex": 0,
+          "sourceCell": [
+            0,
+            0
+          ],
+          "conceptCenter": [
+            0.528,
+            0.447
+          ],
+          "displayWidth": 86,
+          "displayHeight": 62,
+          "kind": "ground-straight-nw-se",
+          "rotationDegrees": 0,
+          "placedBounds": [
+            1314,
+            831,
+            1400,
+            893
+          ]
+        },
+        {
+          "id": "continuous-route-08",
+          "chainIndex": 0,
           "sourceCell": [
             1,
             1
           ],
-          "localCenter": {
-            "x": 0.392,
-            "y": 0.7
-          },
-          "displayWidth": 157,
+          "conceptCenter": [
+            0.552,
+            0.461
+          ],
+          "displayWidth": 90,
+          "displayHeight": 90,
           "kind": "elevated-straight-nw-se",
-          "rotationDegrees": 0
+          "rotationDegrees": 0,
+          "placedBounds": [
+            1374,
+            844,
+            1464,
+            934
+          ]
         },
         {
-          "id": "south-egress-1",
-          "chainIndex": 1,
+          "id": "continuous-route-09",
+          "chainIndex": 0,
+          "sourceCell": [
+            1,
+            1
+          ],
+          "conceptCenter": [
+            0.576,
+            0.475
+          ],
+          "displayWidth": 90,
+          "displayHeight": 90,
+          "kind": "elevated-straight-nw-se",
+          "rotationDegrees": 0,
+          "placedBounds": [
+            1436,
+            871,
+            1526,
+            961
+          ]
+        },
+        {
+          "id": "continuous-route-10",
+          "chainIndex": 0,
+          "sourceCell": [
+            1,
+            1
+          ],
+          "conceptCenter": [
+            0.6,
+            0.49
+          ],
+          "displayWidth": 90,
+          "displayHeight": 90,
+          "kind": "elevated-straight-nw-se",
+          "rotationDegrees": 0,
+          "placedBounds": [
+            1498,
+            900,
+            1588,
+            990
+          ]
+        },
+        {
+          "id": "continuous-route-11",
+          "chainIndex": 0,
+          "sourceCell": [
+            1,
+            1
+          ],
+          "conceptCenter": [
+            0.624,
+            0.504
+          ],
+          "displayWidth": 90,
+          "displayHeight": 90,
+          "kind": "elevated-straight-nw-se",
+          "rotationDegrees": 0,
+          "placedBounds": [
+            1559,
+            927,
+            1649,
+            1017
+          ]
+        },
+        {
+          "id": "continuous-route-12",
+          "chainIndex": 0,
           "sourceCell": [
             0,
             0
           ],
-          "localCenter": {
-            "x": 0.444,
-            "y": 0.731
-          },
-          "displayWidth": 150,
+          "conceptCenter": [
+            0.648,
+            0.518
+          ],
+          "displayWidth": 86,
+          "displayHeight": 62,
           "kind": "ground-straight-nw-se",
-          "rotationDegrees": 0
+          "rotationDegrees": 0,
+          "placedBounds": [
+            1623,
+            968,
+            1709,
+            1030
+          ]
         },
         {
-          "id": "south-egress-2",
-          "chainIndex": 1,
+          "id": "continuous-route-13",
+          "chainIndex": 0,
           "sourceCell": [
             0,
             0
           ],
-          "localCenter": {
-            "x": 0.4915,
-            "y": 0.772
-          },
-          "displayWidth": 150,
+          "conceptCenter": [
+            0.672,
+            0.532
+          ],
+          "displayWidth": 86,
+          "displayHeight": 62,
           "kind": "ground-straight-nw-se",
-          "rotationDegrees": 0
+          "rotationDegrees": 0,
+          "placedBounds": [
+            1685,
+            995,
+            1771,
+            1057
+          ]
         },
         {
-          "id": "south-egress-3",
-          "chainIndex": 1,
+          "id": "continuous-route-14",
+          "chainIndex": 0,
           "sourceCell": [
             0,
             0
           ],
-          "localCenter": {
-            "x": 0.539,
-            "y": 0.813
-          },
-          "displayWidth": 150,
+          "conceptCenter": [
+            0.696,
+            0.547
+          ],
+          "displayWidth": 86,
+          "displayHeight": 62,
           "kind": "ground-straight-nw-se",
-          "rotationDegrees": 0
+          "rotationDegrees": 0,
+          "placedBounds": [
+            1746,
+            1024,
+            1832,
+            1086
+          ]
         },
         {
-          "id": "south-egress-4",
-          "chainIndex": 1,
+          "id": "continuous-route-15",
+          "chainIndex": 0,
           "sourceCell": [
             0,
             0
           ],
-          "localCenter": {
-            "x": 0.5865,
-            "y": 0.854
-          },
-          "displayWidth": 150,
+          "conceptCenter": [
+            0.72,
+            0.561
+          ],
+          "displayWidth": 86,
+          "displayHeight": 62,
           "kind": "ground-straight-nw-se",
-          "rotationDegrees": 0
+          "rotationDegrees": 0,
+          "placedBounds": [
+            1808,
+            1051,
+            1894,
+            1113
+          ]
         },
         {
-          "id": "south-egress-5",
-          "chainIndex": 1,
+          "id": "continuous-route-16",
+          "chainIndex": 0,
           "sourceCell": [
             0,
             0
           ],
-          "localCenter": {
-            "x": 0.634,
-            "y": 0.895
-          },
-          "displayWidth": 150,
+          "conceptCenter": [
+            0.744,
+            0.575
+          ],
+          "displayWidth": 86,
+          "displayHeight": 62,
           "kind": "ground-straight-nw-se",
-          "rotationDegrees": 0
+          "rotationDegrees": 0,
+          "placedBounds": [
+            1870,
+            1078,
+            1956,
+            1140
+          ]
         },
         {
-          "id": "south-egress-6",
-          "chainIndex": 1,
+          "id": "continuous-route-17",
+          "chainIndex": 0,
           "sourceCell": [
             0,
             0
           ],
-          "localCenter": {
-            "x": 0.6815,
-            "y": 0.936
-          },
-          "displayWidth": 150,
+          "conceptCenter": [
+            0.768,
+            0.589
+          ],
+          "displayWidth": 86,
+          "displayHeight": 62,
           "kind": "ground-straight-nw-se",
-          "rotationDegrees": 0
+          "rotationDegrees": 0,
+          "placedBounds": [
+            1932,
+            1105,
+            2018,
+            1167
+          ]
         },
         {
-          "id": "south-egress-7",
-          "chainIndex": 1,
+          "id": "continuous-route-18",
+          "chainIndex": 0,
           "sourceCell": [
             0,
             0
           ],
-          "localCenter": {
-            "x": 0.729,
-            "y": 0.977
-          },
-          "displayWidth": 150,
+          "conceptCenter": [
+            0.792,
+            0.604
+          ],
+          "displayWidth": 86,
+          "displayHeight": 62,
           "kind": "ground-straight-nw-se",
-          "rotationDegrees": 0
+          "rotationDegrees": 0,
+          "placedBounds": [
+            1993,
+            1134,
+            2079,
+            1196
+          ]
+        },
+        {
+          "id": "continuous-route-19",
+          "chainIndex": 0,
+          "sourceCell": [
+            0,
+            0
+          ],
+          "conceptCenter": [
+            0.816,
+            0.618
+          ],
+          "displayWidth": 86,
+          "displayHeight": 62,
+          "kind": "ground-straight-nw-se",
+          "rotationDegrees": 0,
+          "placedBounds": [
+            2055,
+            1161,
+            2141,
+            1223
+          ]
         },
         {
           "id": "south-southeast-exit",
-          "chainIndex": 1,
+          "chainIndex": 0,
           "sourceCell": [
             0,
             0
           ],
-          "localCenter": {
-            "x": 0.7765,
-            "y": 1.018
-          },
-          "displayWidth": 150,
+          "conceptCenter": [
+            0.84,
+            0.632
+          ],
+          "displayWidth": 86,
+          "displayHeight": 62,
           "kind": "ground-straight-nw-se",
-          "rotationDegrees": 0
+          "rotationDegrees": 0,
+          "placedBounds": [
+            2117,
+            1188,
+            2203,
+            1250
+          ]
         }
       ],
       "segmentJoins": [
         {
-          "from": "station-portal-straight",
-          "to": "station-terminal-curve",
-          "alphaOverlapPixels": 351,
-          "alphaThreshold": 16
+          "from": "northwest-mountain-portal-run",
+          "to": "continuous-route-01",
+          "alphaOverlapPixels": 114
         },
         {
-          "from": "south-portal-curve",
-          "to": "south-ravine-viaduct-curve",
-          "alphaOverlapPixels": 309,
-          "alphaThreshold": 16
+          "from": "continuous-route-01",
+          "to": "continuous-route-02",
+          "alphaOverlapPixels": 92
         },
         {
-          "from": "south-ravine-viaduct-curve",
-          "to": "south-ravine-viaduct",
-          "alphaOverlapPixels": 211,
-          "alphaThreshold": 16
+          "from": "continuous-route-02",
+          "to": "station-through",
+          "alphaOverlapPixels": 136
         },
         {
-          "from": "south-ravine-viaduct",
-          "to": "south-egress-1",
-          "alphaOverlapPixels": 107,
-          "alphaThreshold": 16
+          "from": "station-through",
+          "to": "continuous-route-04",
+          "alphaOverlapPixels": 114
         },
         {
-          "from": "south-egress-1",
-          "to": "south-egress-2",
-          "alphaOverlapPixels": 245,
-          "alphaThreshold": 16
+          "from": "continuous-route-04",
+          "to": "continuous-route-05",
+          "alphaOverlapPixels": 92
         },
         {
-          "from": "south-egress-2",
-          "to": "south-egress-3",
-          "alphaOverlapPixels": 245,
-          "alphaThreshold": 16
+          "from": "continuous-route-05",
+          "to": "continuous-route-06",
+          "alphaOverlapPixels": 136
         },
         {
-          "from": "south-egress-3",
-          "to": "south-egress-4",
-          "alphaOverlapPixels": 245,
-          "alphaThreshold": 16
+          "from": "continuous-route-06",
+          "to": "continuous-route-07",
+          "alphaOverlapPixels": 114
         },
         {
-          "from": "south-egress-4",
-          "to": "south-egress-5",
-          "alphaOverlapPixels": 245,
-          "alphaThreshold": 16
+          "from": "continuous-route-07",
+          "to": "continuous-route-08",
+          "alphaOverlapPixels": 298
         },
         {
-          "from": "south-egress-5",
-          "to": "south-egress-6",
-          "alphaOverlapPixels": 236,
-          "alphaThreshold": 16
+          "from": "continuous-route-08",
+          "to": "continuous-route-09",
+          "alphaOverlapPixels": 642
         },
         {
-          "from": "south-egress-6",
-          "to": "south-egress-7",
-          "alphaOverlapPixels": 245,
-          "alphaThreshold": 16
+          "from": "continuous-route-09",
+          "to": "continuous-route-10",
+          "alphaOverlapPixels": 669
         },
         {
-          "from": "south-egress-7",
+          "from": "continuous-route-10",
+          "to": "continuous-route-11",
+          "alphaOverlapPixels": 683
+        },
+        {
+          "from": "continuous-route-11",
+          "to": "continuous-route-12",
+          "alphaOverlapPixels": 333
+        },
+        {
+          "from": "continuous-route-12",
+          "to": "continuous-route-13",
+          "alphaOverlapPixels": 92
+        },
+        {
+          "from": "continuous-route-13",
+          "to": "continuous-route-14",
+          "alphaOverlapPixels": 157
+        },
+        {
+          "from": "continuous-route-14",
+          "to": "continuous-route-15",
+          "alphaOverlapPixels": 92
+        },
+        {
+          "from": "continuous-route-15",
+          "to": "continuous-route-16",
+          "alphaOverlapPixels": 92
+        },
+        {
+          "from": "continuous-route-16",
+          "to": "continuous-route-17",
+          "alphaOverlapPixels": 92
+        },
+        {
+          "from": "continuous-route-17",
+          "to": "continuous-route-18",
+          "alphaOverlapPixels": 157
+        },
+        {
+          "from": "continuous-route-18",
+          "to": "continuous-route-19",
+          "alphaOverlapPixels": 92
+        },
+        {
+          "from": "continuous-route-19",
           "to": "south-southeast-exit",
-          "alphaOverlapPixels": 245,
-          "alphaThreshold": 16
+          "alphaOverlapPixels": 92
         }
       ],
       "scaleReference": {
@@ -674,7 +1030,7 @@
       },
       "supportLayer": {
         "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-rail-mountain-route-support-r1.png",
-        "sha256": "28d8bdbdcaa70f1f51cd8b24aca418659dd4b9e7251da67ffde94ea36669f9fc",
+        "sha256": "0412f904af45d09630da2b91e3c4eba1dd9c2a314bb3311c3d100d6b7193fb1c",
         "dimensions": [
           2571,
           1929
@@ -682,7 +1038,7 @@
       },
       "bedLayer": {
         "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-rail-mountain-route-bed-r1.png",
-        "sha256": "218c0cc856d287e5deabc50952ac3c3d7e4f8288dc7a6eccd2ae50f81e0f2dfa",
+        "sha256": "dd7ca1383f2779e1476bdb963e34b82cdcca89fe986ac7b75d51d10c7500d562",
         "dimensions": [
           2571,
           1929
@@ -690,7 +1046,7 @@
       },
       "trackLayer": {
         "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-rail-mountain-route-track-r1.png",
-        "sha256": "702cdff1dff5c582b1ee3089635dc954eb7edf87fba6eacfe97d68eac4b2d7d8",
+        "sha256": "08a79d47ade0b12305c12ef4f2b409d62fabdf5c883004db044ebd6cfc0bcce1",
         "dimensions": [
           2571,
           1929
@@ -789,7 +1145,7 @@
       },
       "portalBackLayer": {
         "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-rail-tunnel-backs-r1.png",
-        "sha256": "c642f036950f05cfd1b656161e44d7b5f8ff5926c68767a2ed586a7c86e19d2f",
+        "sha256": "1bc74bea6c16c5f3f1cff1b16e56a94495b510ea7bf619791fbb481020380c37",
         "dimensions": [
           2571,
           1929
@@ -797,7 +1153,7 @@
       },
       "portalForegroundLayer": {
         "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-rail-tunnel-foreground-r1.png",
-        "sha256": "b53c1bd1759562aa9448f2e890cfc8b3291a8304c45895fc355c9b4785ef62a0",
+        "sha256": "d165160aeec9d814c9efe38f8b18c61106ab33644df9685dc58f8bc2f767dad1",
         "dimensions": [
           2571,
           1929
@@ -805,7 +1161,7 @@
       },
       "stationForegroundLayer": {
         "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-rail-station-platform-track-r1.png",
-        "sha256": "330309a1624d791119cb98cabaeed7d0409ccdb498f9837be25f62e114d4355b",
+        "sha256": "375ed20a58d22613f264e1e97e51089db8986685b52d5651d873df929d95a0f6",
         "dimensions": [
           2571,
           1929
@@ -813,7 +1169,32 @@
       },
       "runtimeVisible": true,
       "rejectionReason": null,
-      "minimumDetailTier": "site"
+      "minimumDetailTier": "site",
+      "supportDerivedFromCenterline": true,
+      "stationTangentContinuous": true,
+      "portalTangentContinuous": true,
+      "orphanTrackCount": 0,
+      "minimumCurveRadiusPixels": 150,
+      "maximumLocalTurnDegrees": 0.219,
+      "interchangeSocket": {
+        "id": "ninjaone-south-southeast-intercity-socket-r3",
+        "localPosition": {
+          "x": 0.84,
+          "y": 0.632
+        },
+        "tangent": {
+          "x": 0.757,
+          "y": 0.653
+        },
+        "gaugePixels": 14,
+        "travelDirections": [
+          "inbound",
+          "outbound"
+        ],
+        "connectionStatus": "reserved-for-future-city-network"
+      },
+      "throughRoute": true,
+      "futureNetworkReady": true
     },
     "train": {
       "owner": "moving-vehicle-layer",
@@ -975,9 +1356,9 @@
         2571,
         1929
       ],
-      "lod": "capital-site-close-static-coherent-base",
-      "runtimeVisible": true,
-      "role": "single-draw-city-only-composition-base",
+      "lod": "qa-reference-only",
+      "runtimeVisible": false,
+      "role": "concept-derived-layout-reference-never-rendered",
       "containsTransitionTerrainPixels": true,
       "containsPopulation": false,
       "containsRailPixels": false,
@@ -991,7 +1372,8 @@
       "affectsSlope": false,
       "affectsCollision": false,
       "artboardCoverageRatio": 0.233354,
-      "edgeFeatherPixels": 30
+      "edgeFeatherPixels": 30,
+      "rejectionReason": "contains baked concept city and terrain-contact pixels"
     },
     "contactLayer": {
       "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-selected-environment-source-alpha-r1.png",
@@ -1131,15 +1513,20 @@
       "rule": "independent skill buildings sit on sparse modular civic infrastructure; the rejected monolithic plate is never rendered"
     },
     "runtimeAuthority": {
-      "id": "career-world/ninjaone-capital/concept-master-layout-registration@r1",
-      "status": "promoted-integration-preview",
-      "layoutPath": "art-source/career-world/ninjaone-capital/city-layer-r1/concept-master-layout-registration-r1.json",
-      "layoutSha256": "07c0f89300ebd3579233fd23d0d209419035c5166115683e5840259ee599f80d",
-      "identityRegistration": true,
+      "id": "career-world/ninjaone-capital/production-component-runtime@r1",
+      "status": "recovery-baseline",
+      "layoutReference": "career-world/ninjaone-capital/concept-master-layout-registration@r1",
+      "layoutReferenceIsRuntimeRaster": false,
       "frozenTerrainGeometryUnchanged": true,
-      "selectedSourceSha256": "0c94ae6f6bf9aac91a0c8f9a880b54d95bed1d9a6bb340967c162a2ff5d5f5b5",
-      "rejectedTerrainContactFamily": "city-selected-environment-source-alpha-r1",
-      "restoredCompositionFamily": "bounded-concept-city-contact-r1"
+      "productionPixelSources": [
+        "city-fabric-underlay-r3-current-hydrology-aperture",
+        "city-environment-transition-detail-r3-current-hydrology-aperture",
+        "city-production-bridges-r3",
+        "city-production-bridge-transition-r2",
+        "independent skill-building assets",
+        "independent intercity station",
+        "independent rail layers"
+      ]
     },
     "waterTransition": {
       "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-water-transition-foreground-r1.png",
@@ -1148,15 +1535,98 @@
         2571,
         1929
       ],
-      "role": "four-isolated-registered-bridges-above-inland-water",
+      "role": "superseded-bridge-proof-only",
       "containsTerrainPixels": false,
-      "runtimeVisible": true,
+      "runtimeVisible": false,
       "shorelineTransitionStatus": "deferred-to-terrain-owned-detail-layer",
       "visualOnly": true,
       "affectsLandMask": false,
       "affectsHeight": false,
       "affectsSlope": false,
       "affectsCollision": false
+    },
+    "productionCirculation": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-production-circulation-r1.png",
+      "sha256": "3968ca25fc99b5872d9a48f2f07efad878a0e1ae0d8cf6ba545ebcb9ffb7d93b",
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "runtimeVisible": true,
+      "containsTerrainPixels": false,
+      "containsBakedBuildings": true,
+      "bakedBuildingScope": "generic-subordinate-urban-infill-only",
+      "containsBakedSkillBuildings": false,
+      "containsRailPixels": false,
+      "minimumDetailTier": "capital",
+      "source": "city-circulation-infill-alpha-r7-current-hydrology-aperture",
+      "proceduralPadsOrCorridors": false
+    },
+    "productionTransitionDetail": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-production-transition-detail-r1.png",
+      "sha256": "d17e18aba8528c4d920bfa42939a8a8d1836f3b269711ef24bbafa3b81d50ad9",
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "runtimeVisible": true,
+      "containsTerrainPixels": false,
+      "containsBakedBuildings": false,
+      "containsWaterPixels": false,
+      "minimumDetailTier": "capital",
+      "source": "city-environment-transition-detail-r3-current-hydrology-aperture"
+    },
+    "productionBridgeTransition": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-production-bridge-transition-r2.png",
+      "sha256": "41843da3e862ab435cf68ec7f023ff788de7700db2a8796a0e4821293f777471",
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "runtimeVisible": true,
+      "containsTerrainPixels": false,
+      "containsBakedBuildings": false,
+      "containsWaterPixels": false,
+      "bridgeCount": 4,
+      "minimumDetailTier": "capital",
+      "source": "authored-circulation-water-contact-split-r3"
+    },
+    "productionBridges": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-production-bridges-r3.png",
+      "sha256": "94d3e8c0010aa8db274fd34b2a5b10a33c5495473c9e97f914915a4981380c10",
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "runtimeVisible": true,
+      "containsTerrainPixels": false,
+      "containsBakedBuildings": false,
+      "bridgeCount": "authored-network-crossings",
+      "minimumDetailTier": "capital",
+      "source": "authored-circulation-water-crossing-split-r3"
+    },
+    "productionSubstrate": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-production-substrate-r1.png",
+      "sha256": "5d3cacacac708cbef9d522641646a457c1799220b1f68e95ec3670d8b50bf16e",
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "runtimeVisible": true,
+      "role": "production-only-city-substrate-with-registered-apertures",
+      "conceptPixelsRendered": false,
+      "frozenTerrainGeometryUnchanged": true
+    },
+    "productionNodeForeground": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-production-node-foreground-r1.png",
+      "sha256": "6910f4252df8c436cd36614e28d2fd3417ea332ae8a2e45c801cfc2828fc1cf3",
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "runtimeVisible": true,
+      "role": "production-substrate-derived-node-contact-foreground",
+      "conceptPixelsRendered": false
     }
   },
   "populationScaleCues": {
@@ -1217,7 +1687,7 @@
         "closeDetailLayer"
       ]
     },
-    "registration": "identity-concept-master",
+    "registration": "compact-authored-city-fabric-r3",
     "cues": [
       {
         "id": "dwarf-mason",
@@ -1232,13 +1702,13 @@
           "y": 0.335
         },
         "localPosition": {
-          "x": 0.505,
-          "y": 0.335
+          "x": 0.47280000000000005,
+          "y": 0.3076
         },
-        "registration": "identity-concept-master",
+        "registration": "compact-authored-city-fabric-r3",
         "minimumDetailTier": "site",
         "sourceDisplayHeight": 18,
-        "displayHeight": 26,
+        "displayHeight": 18,
         "mirrored": false,
         "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-dwarf-mason-r1.png",
         "sha256": "b659c40e8150e9b8aefafb38fbd19813d5b94c670d039988532e9576f72e3eba",
@@ -1260,13 +1730,13 @@
           "y": 0.535
         },
         "localPosition": {
-          "x": 0.408,
-          "y": 0.535
+          "x": 0.41848,
+          "y": 0.41960000000000003
         },
-        "registration": "identity-concept-master",
+        "registration": "compact-authored-city-fabric-r3",
         "minimumDetailTier": "site",
         "sourceDisplayHeight": 16,
-        "displayHeight": 23,
+        "displayHeight": 16,
         "mirrored": false,
         "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-gnome-rail-engineer-r1.png",
         "sha256": "76ea2ebe9fbbc6d0800836cc0ce114c33c768dc0a45c909d59e4a9bf0e4f5fd6",
@@ -1288,13 +1758,13 @@
           "y": 0.445
         },
         "localPosition": {
-          "x": 0.59,
-          "y": 0.445
+          "x": 0.5204,
+          "y": 0.36920000000000003
         },
-        "registration": "identity-concept-master",
+        "registration": "compact-authored-city-fabric-r3",
         "minimumDetailTier": "site",
         "sourceDisplayHeight": 23,
-        "displayHeight": 33,
+        "displayHeight": 23,
         "mirrored": false,
         "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-elf-archivist-r1.png",
         "sha256": "456b415fc3fb82643219f8f6d21cbce6e4d5d1b57dae8e9648aa59e5aec46422",
@@ -1316,13 +1786,13 @@
           "y": 0.686
         },
         "localPosition": {
-          "x": 0.665,
-          "y": 0.686
+          "x": 0.5624,
+          "y": 0.50416
         },
-        "registration": "identity-concept-master",
+        "registration": "compact-authored-city-fabric-r3",
         "minimumDetailTier": "site",
         "sourceDisplayHeight": 25,
-        "displayHeight": 36,
+        "displayHeight": 25,
         "mirrored": false,
         "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-orc-foundry-artisan-r1.png",
         "sha256": "aa3cfadf37b1ef0022d7843407b89134ec7c13aef9bb4e0f6c539ab77d91363a",
@@ -1344,13 +1814,13 @@
           "y": 0.552
         },
         "localPosition": {
-          "x": 0.442,
-          "y": 0.552
+          "x": 0.43752,
+          "y": 0.42912000000000006
         },
-        "registration": "identity-concept-master",
+        "registration": "compact-authored-city-fabric-r3",
         "minimumDetailTier": "site",
         "sourceDisplayHeight": 22,
-        "displayHeight": 31,
+        "displayHeight": 22,
         "mirrored": false,
         "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-human-station-porter-r1.png",
         "sha256": "fd1ae87548783480106c52755553dc40a1bd23b8ab25be31db272271062609f0",
@@ -1372,13 +1842,13 @@
           "y": 0.705
         },
         "localPosition": {
-          "x": 0.575,
-          "y": 0.705
+          "x": 0.512,
+          "y": 0.5148
         },
-        "registration": "identity-concept-master",
+        "registration": "compact-authored-city-fabric-r3",
         "minimumDetailTier": "site",
         "sourceDisplayHeight": 19,
-        "displayHeight": 27,
+        "displayHeight": 19,
         "mirrored": false,
         "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-dwarf-surveyor-r1.png",
         "sha256": "c13caa02445f750c41870589f79b4543f29276e3bd257f83067e79ab839aa773",
@@ -1400,13 +1870,13 @@
           "y": 0.292
         },
         "localPosition": {
-          "x": 0.392,
-          "y": 0.292
+          "x": 0.40952,
+          "y": 0.28352
         },
-        "registration": "identity-concept-master",
+        "registration": "compact-authored-city-fabric-r3",
         "minimumDetailTier": "site",
         "sourceDisplayHeight": 23,
-        "displayHeight": 33,
+        "displayHeight": 23,
         "mirrored": false,
         "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-elf-ranger-r1.png",
         "sha256": "5e61dde6a034bbc18b47454e6cf86117869902365e86a0930ddc6f9444bfb13f",
@@ -1428,13 +1898,13 @@
           "y": 0.603
         },
         "localPosition": {
-          "x": 0.706,
-          "y": 0.603
+          "x": 0.58536,
+          "y": 0.45768000000000003
         },
-        "registration": "identity-concept-master",
+        "registration": "compact-authored-city-fabric-r3",
         "minimumDetailTier": "site",
         "sourceDisplayHeight": 15,
-        "displayHeight": 21,
+        "displayHeight": 15,
         "mirrored": false,
         "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-gnome-courier-r1.png",
         "sha256": "47cec636768ffeb0da3b4756a8c1dce816c9537f5073e4f04f9f3ad28e09e385",
@@ -1456,13 +1926,13 @@
           "y": 0.612
         },
         "localPosition": {
-          "x": 0.748,
-          "y": 0.612
+          "x": 0.6088800000000001,
+          "y": 0.46272
         },
-        "registration": "identity-concept-master",
+        "registration": "compact-authored-city-fabric-r3",
         "minimumDetailTier": "close",
         "sourceDisplayHeight": 21,
-        "displayHeight": 30,
+        "displayHeight": 21,
         "mirrored": true,
         "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-human-market-vendor-r1.png",
         "sha256": "6dd6b673a6820e177001c6e1071649c55317cfe165b01512bb6c06260cff46e2",
@@ -1484,13 +1954,13 @@
           "y": 0.575
         },
         "localPosition": {
-          "x": 0.468,
-          "y": 0.575
+          "x": 0.45208000000000004,
+          "y": 0.442
         },
-        "registration": "identity-concept-master",
+        "registration": "compact-authored-city-fabric-r3",
         "minimumDetailTier": "close",
         "sourceDisplayHeight": 25,
-        "displayHeight": 36,
+        "displayHeight": 25,
         "mirrored": true,
         "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-orc-freight-handler-r1.png",
         "sha256": "9f202ac5330bd6a602fd41e158e61933842b275032c244e4955fa494031a6260",
@@ -1512,13 +1982,13 @@
           "y": 0.646
         },
         "localPosition": {
-          "x": 0.535,
-          "y": 0.646
+          "x": 0.48960000000000004,
+          "y": 0.48176
         },
-        "registration": "identity-concept-master",
+        "registration": "compact-authored-city-fabric-r3",
         "minimumDetailTier": "close",
         "sourceDisplayHeight": 18,
-        "displayHeight": 26,
+        "displayHeight": 18,
         "mirrored": true,
         "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-dwarf-bridgewright-r1.png",
         "sha256": "13f987e0ad7bd76dbddbfa0407305d8d078b7f7697107713b35901b86670f0b4",
@@ -1540,13 +2010,13 @@
           "y": 0.505
         },
         "localPosition": {
-          "x": 0.38,
-          "y": 0.505
+          "x": 0.40280000000000005,
+          "y": 0.40280000000000005
         },
-        "registration": "identity-concept-master",
+        "registration": "compact-authored-city-fabric-r3",
         "minimumDetailTier": "close",
         "sourceDisplayHeight": 16,
-        "displayHeight": 23,
+        "displayHeight": 16,
         "mirrored": true,
         "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-gnome-signalkeeper-r1.png",
         "sha256": "c0dadc492c22ff3d4329fad9772c098fba0734c4dc37b91fa5139ce15f357b02",
@@ -1568,13 +2038,13 @@
           "y": 0.235
         },
         "localPosition": {
-          "x": 0.46,
-          "y": 0.235
+          "x": 0.44760000000000005,
+          "y": 0.2516
         },
-        "registration": "identity-concept-master",
+        "registration": "compact-authored-city-fabric-r3",
         "minimumDetailTier": "close",
         "sourceDisplayHeight": 23,
-        "displayHeight": 33,
+        "displayHeight": 23,
         "mirrored": true,
         "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-elf-citadel-steward-r1.png",
         "sha256": "e8c1e6547dbd0fbe90376b782d4629786b773a51cff756f3334b5ef9d57056e4",
@@ -1596,13 +2066,13 @@
           "y": 0.245
         },
         "localPosition": {
-          "x": 0.41,
-          "y": 0.245
+          "x": 0.4196,
+          "y": 0.2572
         },
-        "registration": "identity-concept-master",
+        "registration": "compact-authored-city-fabric-r3",
         "minimumDetailTier": "close",
         "sourceDisplayHeight": 22,
-        "displayHeight": 31,
+        "displayHeight": 22,
         "mirrored": false,
         "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-human-overlook-visitor-r1.png",
         "sha256": "fd1ae87548783480106c52755553dc40a1bd23b8ab25be31db272271062609f0",
@@ -1624,13 +2094,13 @@
           "y": 0.675
         },
         "localPosition": {
-          "x": 0.405,
-          "y": 0.675
+          "x": 0.41680000000000006,
+          "y": 0.49800000000000005
         },
-        "registration": "identity-concept-master",
+        "registration": "compact-authored-city-fabric-r3",
         "minimumDetailTier": "close",
         "sourceDisplayHeight": 25,
-        "displayHeight": 36,
+        "displayHeight": 25,
         "mirrored": false,
         "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-orc-rail-mason-r1.png",
         "sha256": "aa3cfadf37b1ef0022d7843407b89134ec7c13aef9bb4e0f6c539ab77d91363a",
@@ -1652,13 +2122,13 @@
           "y": 0.82
         },
         "localPosition": {
-          "x": 0.62,
-          "y": 0.82
+          "x": 0.5372,
+          "y": 0.5791999999999999
         },
-        "registration": "identity-concept-master",
+        "registration": "compact-authored-city-fabric-r3",
         "minimumDetailTier": "close",
         "sourceDisplayHeight": 19,
-        "displayHeight": 27,
+        "displayHeight": 19,
         "mirrored": true,
         "path": "/career-world/capitals/ninjaone/city-r1/population/temporary-dwarf-service-engineer-r1.png",
         "sha256": "a3aec1ad9e18e2552940dc00ea8d5be7ab961a1e4a93d08e0a208c98176398a2",
@@ -1668,7 +2138,8 @@
         ]
       }
     ],
-    "speciesScalePolicy": "building proportions may read as human elf dwarf gnome or orc scale without changing canonical terrain"
+    "speciesScalePolicy": "building proportions may read as human elf dwarf gnome or orc scale without changing canonical terrain",
+    "scaleAuthority": "source-species-height-against-independent-building-assets-r2"
   },
   "nodes": [
     {
@@ -1686,15 +2157,15 @@
       "label": "AI / Agent Systems",
       "layoutDistrictId": "knowledge-api-citadel",
       "localPosition": {
-        "x": 0.447,
-        "y": 0.21
+        "x": 0.43908800000000003,
+        "y": 0.183952
       },
       "supersededPlanningPosition": [
         0.47,
         0.205
       ],
       "elevationBand": 2,
-      "displayWidth": 228,
+      "displayWidth": 290,
       "slotDisplayScale": 1.3,
       "unscaledDisplayWidth": 205,
       "footprintFraction": {
@@ -1744,8 +2215,8 @@
         "buildableSlopeThreshold": 112
       },
       "terrainTransition": {
-        "version": "registered-city-fabric-transition-r1",
-        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "version": "compact-component-city-transition-r2",
+        "source": "infrastructure-transition-atlas-alpha-r2",
         "underlayPoints": [
           [
             1260.34,
@@ -1872,10 +2343,18 @@
         ]
       },
       "conceptPosition": {
-        "x": 0.447,
-        "y": 0.21
+        "x": 0.43908800000000003,
+        "y": 0.183952
       },
-      "scaleClass": "citadel"
+      "scaleClass": "citadel",
+      "scaleAuthority": "individual-building-environment-proportion-r1",
+      "targetVisibleHeight": 234,
+      "scaleAudit": {
+        "authority": "career-world/capitals/ninjaone/city-building-environment-scale@r1",
+        "confidence": "medium",
+        "hierarchyRole": "sole-city-centerpiece",
+        "explicitOutlierException": "The sole citadel is intentionally the visual centerpiece, but is reduced from 281px so its architectural modules share the common road and population scale."
+      }
     },
     {
       "slotId": "skill-mcp",
@@ -1892,15 +2371,15 @@
       "label": "MCP",
       "layoutDistrictId": "knowledge-api-citadel",
       "localPosition": {
-        "x": 0.405,
-        "y": 0.27
+        "x": 0.340808,
+        "y": 0.27008
       },
       "supersededPlanningPosition": [
         0.315,
         0.28
       ],
       "elevationBand": 2,
-      "displayWidth": 133,
+      "displayWidth": 184,
       "slotDisplayScale": 1.0,
       "unscaledDisplayWidth": 155,
       "footprintFraction": {
@@ -1950,8 +2429,8 @@
         "buildableSlopeThreshold": 112
       },
       "terrainTransition": {
-        "version": "registered-city-fabric-transition-r1",
-        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "version": "compact-component-city-transition-r2",
+        "source": "infrastructure-transition-atlas-alpha-r2",
         "underlayPoints": [
           [
             807.35,
@@ -2078,10 +2557,18 @@
         ]
       },
       "conceptPosition": {
-        "x": 0.405,
-        "y": 0.27
+        "x": 0.340808,
+        "y": 0.27008
       },
-      "scaleClass": "major"
+      "scaleClass": "major",
+      "scaleAuthority": "individual-building-environment-proportion-r1",
+      "targetVisibleHeight": 180,
+      "scaleAudit": {
+        "authority": "career-world/capitals/ninjaone/city-building-environment-scale@r1",
+        "confidence": "low",
+        "hierarchyRole": "district-major",
+        "explicitOutlierException": null
+      }
     },
     {
       "slotId": "skill-openapi-swagger",
@@ -2098,15 +2585,15 @@
       "label": "OpenAPI / Swagger",
       "layoutDistrictId": "knowledge-api-citadel",
       "localPosition": {
-        "x": 0.515,
-        "y": 0.29
+        "x": 0.509816,
+        "y": 0.272656
       },
       "supersededPlanningPosition": [
         0.49,
         0.28
       ],
       "elevationBand": 2,
-      "displayWidth": 141,
+      "displayWidth": 178,
       "slotDisplayScale": 1.0,
       "unscaledDisplayWidth": 165,
       "footprintFraction": {
@@ -2156,8 +2643,8 @@
         "buildableSlopeThreshold": 112
       },
       "terrainTransition": {
-        "version": "registered-city-fabric-transition-r1",
-        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "version": "compact-component-city-transition-r2",
+        "source": "infrastructure-transition-atlas-alpha-r2",
         "underlayPoints": [
           [
             1466.93,
@@ -2284,10 +2771,18 @@
         ]
       },
       "conceptPosition": {
-        "x": 0.515,
-        "y": 0.29
+        "x": 0.509816,
+        "y": 0.272656
       },
-      "scaleClass": "major"
+      "scaleClass": "major",
+      "scaleAuthority": "individual-building-environment-proportion-r1",
+      "targetVisibleHeight": 172,
+      "scaleAudit": {
+        "authority": "career-world/capitals/ninjaone/city-building-environment-scale@r1",
+        "confidence": "low",
+        "hierarchyRole": "district-major",
+        "explicitOutlierException": null
+      }
     },
     {
       "slotId": "skill-grpc-rest",
@@ -2304,15 +2799,15 @@
       "label": "gRPC / REST",
       "layoutDistrictId": "knowledge-api-citadel",
       "localPosition": {
-        "x": 0.355,
-        "y": 0.35
+        "x": 0.302168,
+        "y": 0.329888
       },
       "supersededPlanningPosition": [
         0.3,
         0.34
       ],
       "elevationBand": 2,
-      "displayWidth": 150,
+      "displayWidth": 180,
       "slotDisplayScale": 1.0,
       "unscaledDisplayWidth": 175,
       "footprintFraction": {
@@ -2362,8 +2857,8 @@
         "buildableSlopeThreshold": 112
       },
       "terrainTransition": {
-        "version": "registered-city-fabric-transition-r1",
-        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "version": "compact-component-city-transition-r2",
+        "source": "infrastructure-transition-atlas-alpha-r2",
         "underlayPoints": [
           [
             653.67,
@@ -2490,10 +2985,18 @@
         ]
       },
       "conceptPosition": {
-        "x": 0.355,
-        "y": 0.35
+        "x": 0.302168,
+        "y": 0.329888
       },
-      "scaleClass": "major"
+      "scaleClass": "major",
+      "scaleAuthority": "individual-building-environment-proportion-r1",
+      "targetVisibleHeight": 174,
+      "scaleAudit": {
+        "authority": "career-world/capitals/ninjaone/city-building-environment-scale@r1",
+        "confidence": "low",
+        "hierarchyRole": "district-major",
+        "explicitOutlierException": null
+      }
     },
     {
       "slotId": "skill-capability-contracts",
@@ -2510,15 +3013,15 @@
       "label": "Capability Contracts",
       "layoutDistrictId": "knowledge-api-citadel",
       "localPosition": {
-        "x": 0.47,
-        "y": 0.375
+        "x": 0.466136,
+        "y": 0.321096
       },
       "supersededPlanningPosition": [
         0.58,
         0.35
       ],
       "elevationBand": 2,
-      "displayWidth": 141,
+      "displayWidth": 194,
       "slotDisplayScale": 1.0,
       "unscaledDisplayWidth": 165,
       "footprintFraction": {
@@ -2568,8 +3071,8 @@
         "buildableSlopeThreshold": 112
       },
       "terrainTransition": {
-        "version": "registered-city-fabric-transition-r1",
-        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "version": "compact-component-city-transition-r2",
+        "source": "infrastructure-transition-atlas-alpha-r2",
         "underlayPoints": [
           [
             1309.61,
@@ -2696,10 +3199,18 @@
         ]
       },
       "conceptPosition": {
-        "x": 0.47,
-        "y": 0.375
+        "x": 0.466136,
+        "y": 0.321096
       },
-      "scaleClass": "major"
+      "scaleClass": "major",
+      "scaleAuthority": "individual-building-environment-proportion-r1",
+      "targetVisibleHeight": 129,
+      "scaleAudit": {
+        "authority": "career-world/capitals/ninjaone/city-building-environment-scale@r1",
+        "confidence": "medium",
+        "hierarchyRole": "district-major",
+        "explicitOutlierException": null
+      }
     },
     {
       "slotId": "skill-tool-generation",
@@ -2716,15 +3227,15 @@
       "label": "Tool Generation",
       "layoutDistrictId": "knowledge-api-citadel",
       "localPosition": {
-        "x": 0.555,
-        "y": 0.38
+        "x": 0.45415200000000006,
+        "y": 0.273664
       },
       "supersededPlanningPosition": [
         0.43,
         0.39
       ],
       "elevationBand": 2,
-      "displayWidth": 150,
+      "displayWidth": 174,
       "slotDisplayScale": 1.0,
       "unscaledDisplayWidth": 175,
       "footprintFraction": {
@@ -2774,8 +3285,8 @@
         "buildableSlopeThreshold": 112
       },
       "terrainTransition": {
-        "version": "registered-city-fabric-transition-r1",
-        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "version": "compact-component-city-transition-r2",
+        "source": "infrastructure-transition-atlas-alpha-r2",
         "underlayPoints": [
           [
             1635.22,
@@ -2902,10 +3413,18 @@
         ]
       },
       "conceptPosition": {
-        "x": 0.555,
-        "y": 0.38
+        "x": 0.45415200000000006,
+        "y": 0.273664
       },
-      "scaleClass": "major"
+      "scaleClass": "major",
+      "scaleAuthority": "individual-building-environment-proportion-r1",
+      "targetVisibleHeight": 168,
+      "scaleAudit": {
+        "authority": "career-world/capitals/ninjaone/city-building-environment-scale@r1",
+        "confidence": "low",
+        "hierarchyRole": "district-major",
+        "explicitOutlierException": null
+      }
     },
     {
       "slotId": "skill-typescript",
@@ -2922,15 +3441,15 @@
       "label": "TypeScript",
       "layoutDistrictId": "application-core",
       "localPosition": {
-        "x": 0.655,
-        "y": 0.465
+        "x": 0.36556,
+        "y": 0.36852799999999997
       },
       "supersededPlanningPosition": [
         0.59,
         0.45
       ],
       "elevationBand": 1,
-      "displayWidth": 141,
+      "displayWidth": 180,
       "slotDisplayScale": 1.0,
       "unscaledDisplayWidth": 165,
       "footprintFraction": {
@@ -2980,8 +3499,8 @@
         "buildableSlopeThreshold": 112
       },
       "terrainTransition": {
-        "version": "registered-city-fabric-transition-r1",
-        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "version": "compact-component-city-transition-r2",
+        "source": "infrastructure-transition-atlas-alpha-r2",
         "underlayPoints": [
           [
             933.37,
@@ -3108,10 +3627,18 @@
         ]
       },
       "conceptPosition": {
-        "x": 0.655,
-        "y": 0.465
+        "x": 0.36556,
+        "y": 0.36852799999999997
       },
-      "scaleClass": "major"
+      "scaleClass": "major",
+      "scaleAuthority": "individual-building-environment-proportion-r1",
+      "targetVisibleHeight": 174,
+      "scaleAudit": {
+        "authority": "career-world/capitals/ninjaone/city-building-environment-scale@r1",
+        "confidence": "low",
+        "hierarchyRole": "district-major",
+        "explicitOutlierException": null
+      }
     },
     {
       "slotId": "skill-react",
@@ -3128,15 +3655,15 @@
       "label": "React",
       "layoutDistrictId": "application-core",
       "localPosition": {
-        "x": 0.773,
-        "y": 0.482
+        "x": 0.6246720000000001,
+        "y": 0.40257600000000004
       },
       "supersededPlanningPosition": [
         0.7,
         0.47
       ],
       "elevationBand": 1,
-      "displayWidth": 163,
+      "displayWidth": 190,
       "slotDisplayScale": 1.0,
       "unscaledDisplayWidth": 190,
       "footprintFraction": {
@@ -3186,8 +3713,8 @@
         "buildableSlopeThreshold": 112
       },
       "terrainTransition": {
-        "version": "registered-city-fabric-transition-r1",
-        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "version": "compact-component-city-transition-r2",
+        "source": "infrastructure-transition-atlas-alpha-r2",
         "underlayPoints": [
           [
             1924.95,
@@ -3314,10 +3841,18 @@
         ]
       },
       "conceptPosition": {
-        "x": 0.773,
-        "y": 0.482
+        "x": 0.6246720000000001,
+        "y": 0.40257600000000004
       },
-      "scaleClass": "major"
+      "scaleClass": "major",
+      "scaleAuthority": "individual-building-environment-proportion-r1",
+      "targetVisibleHeight": 133,
+      "scaleAudit": {
+        "authority": "career-world/capitals/ninjaone/city-building-environment-scale@r1",
+        "confidence": "medium",
+        "hierarchyRole": "district-major",
+        "explicitOutlierException": null
+      }
     },
     {
       "slotId": "skill-tanstack",
@@ -3334,15 +3869,15 @@
       "label": "TanStack",
       "layoutDistrictId": "application-core",
       "localPosition": {
-        "x": 0.635,
-        "y": 0.55
+        "x": 0.4994,
+        "y": 0.355144
       },
       "supersededPlanningPosition": [
         0.81,
         0.51
       ],
       "elevationBand": 1,
-      "displayWidth": 163,
+      "displayWidth": 164,
       "slotDisplayScale": 1.0,
       "unscaledDisplayWidth": 190,
       "footprintFraction": {
@@ -3392,8 +3927,8 @@
         "buildableSlopeThreshold": 112
       },
       "terrainTransition": {
-        "version": "registered-city-fabric-transition-r1",
-        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "version": "compact-component-city-transition-r2",
+        "source": "infrastructure-transition-atlas-alpha-r2",
         "underlayPoints": [
           [
             1660.84,
@@ -3520,10 +4055,18 @@
         ]
       },
       "conceptPosition": {
-        "x": 0.635,
-        "y": 0.55
+        "x": 0.4994,
+        "y": 0.355144
       },
-      "scaleClass": "standard"
+      "scaleClass": "standard",
+      "scaleAuthority": "individual-building-environment-proportion-r1",
+      "targetVisibleHeight": 116,
+      "scaleAudit": {
+        "authority": "career-world/capitals/ninjaone/city-building-environment-scale@r1",
+        "confidence": "medium",
+        "hierarchyRole": "district-standard",
+        "explicitOutlierException": null
+      }
     },
     {
       "slotId": "skill-golang",
@@ -3540,15 +4083,15 @@
       "label": "Go (Golang)",
       "layoutDistrictId": "application-core",
       "localPosition": {
-        "x": 0.745,
-        "y": 0.575
+        "x": 0.636712,
+        "y": 0.45829600000000004
       },
       "supersededPlanningPosition": [
         0.53,
         0.56
       ],
       "elevationBand": 1,
-      "displayWidth": 163,
+      "displayWidth": 164,
       "slotDisplayScale": 1.0,
       "unscaledDisplayWidth": 190,
       "footprintFraction": {
@@ -3717,8 +4260,8 @@
         "buildableSlopeThreshold": 112
       },
       "terrainTransition": {
-        "version": "registered-city-fabric-transition-r1",
-        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "version": "compact-component-city-transition-r2",
+        "source": "infrastructure-transition-atlas-alpha-r2",
         "underlayPoints": [
           [
             1995.77,
@@ -3845,10 +4388,18 @@
         ]
       },
       "conceptPosition": {
-        "x": 0.745,
-        "y": 0.575
+        "x": 0.636712,
+        "y": 0.45829600000000004
       },
-      "scaleClass": "major"
+      "scaleClass": "major",
+      "scaleAuthority": "individual-building-environment-proportion-r1",
+      "targetVisibleHeight": 159,
+      "scaleAudit": {
+        "authority": "career-world/capitals/ninjaone/city-building-environment-scale@r1",
+        "confidence": "medium",
+        "hierarchyRole": "district-major",
+        "explicitOutlierException": null
+      }
     },
     {
       "slotId": "skill-csharp",
@@ -3865,15 +4416,15 @@
       "label": "C#",
       "layoutDistrictId": "application-core",
       "localPosition": {
-        "x": 0.6,
-        "y": 0.63
+        "x": 0.251488,
+        "y": 0.395856
       },
       "supersededPlanningPosition": [
         0.65,
         0.56
       ],
       "elevationBand": 1,
-      "displayWidth": 141,
+      "displayWidth": 162,
       "slotDisplayScale": 1.0,
       "unscaledDisplayWidth": 165,
       "footprintFraction": {
@@ -3923,8 +4474,8 @@
         "buildableSlopeThreshold": 112
       },
       "terrainTransition": {
-        "version": "registered-city-fabric-transition-r1",
-        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "version": "compact-component-city-transition-r2",
+        "source": "infrastructure-transition-atlas-alpha-r2",
         "underlayPoints": [
           [
             646.52,
@@ -4051,10 +4602,18 @@
         ]
       },
       "conceptPosition": {
-        "x": 0.6,
-        "y": 0.63
+        "x": 0.251488,
+        "y": 0.395856
       },
-      "scaleClass": "standard"
+      "scaleClass": "standard",
+      "scaleAuthority": "individual-building-environment-proportion-r1",
+      "targetVisibleHeight": 138,
+      "scaleAudit": {
+        "authority": "career-world/capitals/ninjaone/city-building-environment-scale@r1",
+        "confidence": "low",
+        "hierarchyRole": "district-standard",
+        "explicitOutlierException": null
+      }
     },
     {
       "slotId": "skill-python",
@@ -4071,15 +4630,15 @@
       "label": "Python",
       "layoutDistrictId": "application-core",
       "localPosition": {
-        "x": 0.69,
-        "y": 0.65
+        "x": 0.379504,
+        "y": 0.23088000000000003
       },
       "supersededPlanningPosition": [
         0.78,
         0.61
       ],
       "elevationBand": 1,
-      "displayWidth": 146,
+      "displayWidth": 164,
       "slotDisplayScale": 1.0,
       "unscaledDisplayWidth": 170,
       "footprintFraction": {
@@ -4129,8 +4688,8 @@
         "buildableSlopeThreshold": 112
       },
       "terrainTransition": {
-        "version": "registered-city-fabric-transition-r1",
-        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "version": "compact-component-city-transition-r2",
+        "source": "infrastructure-transition-atlas-alpha-r2",
         "underlayPoints": [
           [
             1547.87,
@@ -4257,10 +4816,18 @@
         ]
       },
       "conceptPosition": {
-        "x": 0.69,
-        "y": 0.65
+        "x": 0.379504,
+        "y": 0.23088000000000003
       },
-      "scaleClass": "standard"
+      "scaleClass": "standard",
+      "scaleAuthority": "individual-building-environment-proportion-r1",
+      "targetVisibleHeight": 154,
+      "scaleAudit": {
+        "authority": "career-world/capitals/ninjaone/city-building-environment-scale@r1",
+        "confidence": "medium",
+        "hierarchyRole": "district-standard",
+        "explicitOutlierException": null
+      }
     },
     {
       "slotId": "skill-postgresql",
@@ -4277,15 +4844,15 @@
       "label": "PostgreSQL",
       "layoutDistrictId": "application-core",
       "localPosition": {
-        "x": 0.785,
-        "y": 0.67
+        "x": 0.32804,
+        "y": 0.417528
       },
       "supersededPlanningPosition": [
         0.56,
         0.67
       ],
       "elevationBand": 1,
-      "displayWidth": 154,
+      "displayWidth": 166,
       "slotDisplayScale": 1.0,
       "unscaledDisplayWidth": 180,
       "footprintFraction": {
@@ -4335,8 +4902,8 @@
         "buildableSlopeThreshold": 112
       },
       "terrainTransition": {
-        "version": "registered-city-fabric-transition-r1",
-        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "version": "compact-component-city-transition-r2",
+        "source": "infrastructure-transition-atlas-alpha-r2",
         "underlayPoints": [
           [
             804.34,
@@ -4463,10 +5030,18 @@
         ]
       },
       "conceptPosition": {
-        "x": 0.785,
-        "y": 0.67
+        "x": 0.32804,
+        "y": 0.417528
       },
-      "scaleClass": "standard"
+      "scaleClass": "standard",
+      "scaleAuthority": "individual-building-environment-proportion-r1",
+      "targetVisibleHeight": 160,
+      "scaleAudit": {
+        "authority": "career-world/capitals/ninjaone/city-building-environment-scale@r1",
+        "confidence": "low",
+        "hierarchyRole": "district-standard",
+        "explicitOutlierException": null
+      }
     },
     {
       "slotId": "skill-redis",
@@ -4483,15 +5058,15 @@
       "label": "Redis",
       "layoutDistrictId": "application-core",
       "localPosition": {
-        "x": 0.635,
-        "y": 0.73
+        "x": 0.6753520000000001,
+        "y": 0.547504
       },
       "supersededPlanningPosition": [
         0.7,
         0.69
       ],
       "elevationBand": 1,
-      "displayWidth": 124,
+      "displayWidth": 152,
       "slotDisplayScale": 1.0,
       "unscaledDisplayWidth": 145,
       "footprintFraction": {
@@ -4541,8 +5116,8 @@
         "buildableSlopeThreshold": 112
       },
       "terrainTransition": {
-        "version": "registered-city-fabric-transition-r1",
-        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "version": "compact-component-city-transition-r2",
+        "source": "infrastructure-transition-atlas-alpha-r2",
         "underlayPoints": [
           [
             1911.11,
@@ -4669,10 +5244,18 @@
         ]
       },
       "conceptPosition": {
-        "x": 0.635,
-        "y": 0.73
+        "x": 0.6753520000000001,
+        "y": 0.547504
       },
-      "scaleClass": "standard"
+      "scaleClass": "standard",
+      "scaleAuthority": "individual-building-environment-proportion-r1",
+      "targetVisibleHeight": 147,
+      "scaleAudit": {
+        "authority": "career-world/capitals/ninjaone/city-building-environment-scale@r1",
+        "confidence": "low",
+        "hierarchyRole": "district-standard",
+        "explicitOutlierException": null
+      }
     },
     {
       "slotId": "skill-aws",
@@ -4689,15 +5272,15 @@
       "label": "AWS",
       "layoutDistrictId": "infrastructure-works",
       "localPosition": {
-        "x": 0.75,
-        "y": 0.745
+        "x": 0.6235520000000001,
+        "y": 0.509312
       },
       "supersededPlanningPosition": [
         0.61,
         0.75
       ],
       "elevationBand": 0,
-      "displayWidth": 159,
+      "displayWidth": 180,
       "slotDisplayScale": 1.0,
       "unscaledDisplayWidth": 185,
       "footprintFraction": {
@@ -4747,8 +5330,8 @@
         "buildableSlopeThreshold": 112
       },
       "terrainTransition": {
-        "version": "registered-city-fabric-transition-r1",
-        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "version": "compact-component-city-transition-r2",
+        "source": "infrastructure-transition-atlas-alpha-r2",
         "underlayPoints": [
           [
             1961.74,
@@ -4875,10 +5458,18 @@
         ]
       },
       "conceptPosition": {
-        "x": 0.75,
-        "y": 0.745
+        "x": 0.6235520000000001,
+        "y": 0.509312
       },
-      "scaleClass": "major"
+      "scaleClass": "major",
+      "scaleAuthority": "individual-building-environment-proportion-r1",
+      "targetVisibleHeight": 150,
+      "scaleAudit": {
+        "authority": "career-world/capitals/ninjaone/city-building-environment-scale@r1",
+        "confidence": "medium",
+        "hierarchyRole": "district-major",
+        "explicitOutlierException": null
+      }
     },
     {
       "slotId": "skill-databricks",
@@ -4895,15 +5486,15 @@
       "label": "Databricks",
       "layoutDistrictId": "infrastructure-works",
       "localPosition": {
-        "x": 0.588,
-        "y": 0.818
+        "x": 0.561672,
+        "y": 0.584632
       },
       "supersededPlanningPosition": [
         0.7,
         0.77
       ],
       "elevationBand": 0,
-      "displayWidth": 163,
+      "displayWidth": 158,
       "slotDisplayScale": 1.0,
       "unscaledDisplayWidth": 190,
       "footprintFraction": {
@@ -4953,8 +5544,8 @@
         "buildableSlopeThreshold": 112
       },
       "terrainTransition": {
-        "version": "registered-city-fabric-transition-r1",
-        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "version": "compact-component-city-transition-r2",
+        "source": "infrastructure-transition-atlas-alpha-r2",
         "underlayPoints": [
           [
             1648.17,
@@ -5081,10 +5672,18 @@
         ]
       },
       "conceptPosition": {
-        "x": 0.588,
-        "y": 0.818
+        "x": 0.561672,
+        "y": 0.584632
       },
-      "scaleClass": "standard"
+      "scaleClass": "standard",
+      "scaleAuthority": "individual-building-environment-proportion-r1",
+      "targetVisibleHeight": 143,
+      "scaleAudit": {
+        "authority": "career-world/capitals/ninjaone/city-building-environment-scale@r1",
+        "confidence": "low",
+        "hierarchyRole": "district-standard",
+        "explicitOutlierException": null
+      }
     },
     {
       "slotId": "skill-docker",
@@ -5101,15 +5700,15 @@
       "label": "Docker",
       "layoutDistrictId": "infrastructure-works",
       "localPosition": {
-        "x": 0.725,
-        "y": 0.815
+        "x": 0.6154320000000001,
+        "y": 0.6139760000000001
       },
       "supersededPlanningPosition": [
         0.83,
         0.8
       ],
       "elevationBand": 0,
-      "displayWidth": 159,
+      "displayWidth": 148,
       "slotDisplayScale": 1.0,
       "unscaledDisplayWidth": 185,
       "footprintFraction": {
@@ -5159,8 +5758,8 @@
         "buildableSlopeThreshold": 112
       },
       "terrainTransition": {
-        "version": "registered-city-fabric-transition-r1",
-        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "version": "compact-component-city-transition-r2",
+        "source": "infrastructure-transition-atlas-alpha-r2",
         "underlayPoints": [
           [
             1838.25,
@@ -5287,10 +5886,18 @@
         ]
       },
       "conceptPosition": {
-        "x": 0.725,
-        "y": 0.815
+        "x": 0.6154320000000001,
+        "y": 0.6139760000000001
       },
-      "scaleClass": "standard"
+      "scaleClass": "standard",
+      "scaleAuthority": "individual-building-environment-proportion-r1",
+      "targetVisibleHeight": 143,
+      "scaleAudit": {
+        "authority": "career-world/capitals/ninjaone/city-building-environment-scale@r1",
+        "confidence": "medium",
+        "hierarchyRole": "district-standard",
+        "explicitOutlierException": null
+      }
     },
     {
       "slotId": "skill-vmware",
@@ -5307,15 +5914,15 @@
       "label": "VMware",
       "layoutDistrictId": "infrastructure-works",
       "localPosition": {
-        "x": 0.716,
-        "y": 0.869
+        "x": 0.507128,
+        "y": 0.6119600000000001
       },
       "supersededPlanningPosition": [
         0.68,
         0.845
       ],
       "elevationBand": 0,
-      "displayWidth": 163,
+      "displayWidth": 158,
       "slotDisplayScale": 1.0,
       "unscaledDisplayWidth": 190,
       "footprintFraction": {
@@ -5365,8 +5972,8 @@
         "buildableSlopeThreshold": 112
       },
       "terrainTransition": {
-        "version": "registered-city-fabric-transition-r1",
-        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "version": "compact-component-city-transition-r2",
+        "source": "infrastructure-transition-atlas-alpha-r2",
         "underlayPoints": [
           [
             1524.47,
@@ -5493,10 +6100,18 @@
         ]
       },
       "conceptPosition": {
-        "x": 0.716,
-        "y": 0.869
+        "x": 0.507128,
+        "y": 0.6119600000000001
       },
-      "scaleClass": "standard"
+      "scaleClass": "standard",
+      "scaleAuthority": "individual-building-environment-proportion-r1",
+      "targetVisibleHeight": 153,
+      "scaleAudit": {
+        "authority": "career-world/capitals/ninjaone/city-building-environment-scale@r1",
+        "confidence": "low",
+        "hierarchyRole": "district-standard",
+        "explicitOutlierException": null
+      }
     },
     {
       "slotId": "skill-macstadium",
@@ -5513,15 +6128,15 @@
       "label": "MacStadium",
       "layoutDistrictId": "infrastructure-works",
       "localPosition": {
-        "x": 0.785,
-        "y": 0.885
+        "x": 0.39692000000000005,
+        "y": 0.500576
       },
       "supersededPlanningPosition": [
         0.78,
         0.9
       ],
       "elevationBand": 0,
-      "displayWidth": 167,
+      "displayWidth": 148,
       "slotDisplayScale": 1.0,
       "unscaledDisplayWidth": 195,
       "footprintFraction": {
@@ -5571,8 +6186,8 @@
         "buildableSlopeThreshold": 112
       },
       "terrainTransition": {
-        "version": "registered-city-fabric-transition-r1",
-        "source": "concept-derived-city-fabric-not-natural-terrain",
+        "version": "compact-component-city-transition-r2",
+        "source": "infrastructure-transition-atlas-alpha-r2",
         "underlayPoints": [
           [
             1794.84,
@@ -5699,16 +6314,23 @@
         ]
       },
       "conceptPosition": {
-        "x": 0.785,
-        "y": 0.885
+        "x": 0.39692000000000005,
+        "y": 0.500576
       },
-      "scaleClass": "standard"
+      "scaleClass": "standard",
+      "scaleAuthority": "individual-building-environment-proportion-r1",
+      "targetVisibleHeight": 145,
+      "scaleAudit": {
+        "authority": "career-world/capitals/ninjaone/city-building-environment-scale@r1",
+        "confidence": "low",
+        "hierarchyRole": "district-standard",
+        "explicitOutlierException": null
+      }
     }
   ],
   "knownBlockers": [
-    "territory-scale city visibility remains disabled pending a readable low-frequency silhouette",
-    "focused building aperture and contact-shadow require live multi-tier acceptance",
-    "inland-water continuity to the southeast lake requires a separate hydrology revision",
-    "train vehicle asset is not yet available for the centerline-bound production loop"
+    "train vehicle runtime animation remains to be bound to the recovered through-route",
+    "close-tier building contact polish remains after recovery acceptance",
+    "southeast river-to-lake hydrology extension remains a separate authority revision"
   ]
 }

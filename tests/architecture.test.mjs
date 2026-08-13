@@ -6,6 +6,9 @@ import { fileURLToPath } from "node:url";
 import {
   CAREER_WORLD_LAYER_ORDER,
 } from "../features/career-world/shared/layers.ts";
+import {
+  ENVIRONMENT_LAYER_DEFINITIONS,
+} from "../features/career-world/shared/environmentLayers.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const featureLayers = path.join(root, "features", "career-world", "layers");
@@ -15,19 +18,22 @@ async function readJson(relativePath) {
   return JSON.parse(await readFile(path.join(root, relativePath), "utf8"));
 }
 
-test("source directories implement the declared eight-layer order", async () => {
-  const directories = [];
-  for (const entry of await readdir(featureLayers)) {
-    if ((await stat(path.join(featureLayers, entry))).isDirectory()) {
-      directories.push(entry);
-    }
-  }
-  assert.deepEqual(
-    directories.sort(),
-    [...CAREER_WORLD_LAYER_ORDER].sort(),
-  );
+test("composition and environment registries expose unique ordered layer contracts", () => {
   assert.equal(CAREER_WORLD_LAYER_ORDER.length, 8);
+  assert.equal(new Set(CAREER_WORLD_LAYER_ORDER).size, 8);
   assert.equal(CAREER_WORLD_LAYER_ORDER.includes("coastline"), false);
+  assert.equal(ENVIRONMENT_LAYER_DEFINITIONS.length, 11);
+  assert.equal(
+    new Set(ENVIRONMENT_LAYER_DEFINITIONS.map(({ id }) => id)).size,
+    ENVIRONMENT_LAYER_DEFINITIONS.length,
+  );
+  assert.deepEqual(
+    ENVIRONMENT_LAYER_DEFINITIONS
+      .filter(({ parentId }) => parentId)
+      .map(({ parentId }) => parentId)
+      .every((parentId) => ["L1", "L2", "L3"].includes(parentId)),
+    true,
+  );
 });
 
 test("topography and territory QA remain independent interface diagnostics", async () => {

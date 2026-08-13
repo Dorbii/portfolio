@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "status": "concept-master-runtime-integration-preview",
+  "status": "production-component-recovery-baseline",
   "productionReady": false,
   "runtimeEligible": true,
   "manifestPath": "/career-world/capitals/ninjaone/manifests/city-node-composition-r1.json",
-  "manifestSha256": "d0a9b55fc6c97cfdbc6476aa73952d7fa45c0c2ad5257493a48c4a8e80240bcc",
+  "manifestSha256": "fc02cfb4c7068db9bf833a46e79100ebba81356bb8c91e5ea7ca139b0876ea92",
   "layoutPath": "art-source/career-world/ninjaone-capital/city-layer-r1/concept-master-layout-registration-r1.json",
   "layoutSha256": "07c0f89300ebd3579233fd23d0d209419035c5166115683e5840259ee599f80d",
   "skillSocketCount": 19,
@@ -13,61 +13,65 @@
   "stationMatchesConceptLandmark": true,
   "r3RuntimePaths": [],
   "runtimeRasterAssets": {
-    "overviewSettlement": {
-      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-capital-coherent-base-r1.png",
-      "sha256": "c5714b4699e569c745e92b38413e7c1ad126ebaf14b42554de76d71f2f622c82",
+    "circulation": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-production-circulation-r1.png",
+      "sha256": "3968ca25fc99b5872d9a48f2f07efad878a0e1ae0d8cf6ba545ebcb9ffb7d93b",
       "dimensions": [
         2571,
         1929
       ],
-      "lod": "capital-site-close-static-coherent-base",
       "runtimeVisible": true,
-      "role": "single-draw-city-only-composition-base",
-      "containsTransitionTerrainPixels": true,
-      "containsPopulation": false,
-      "containsRailPixels": false,
-      "containsWaterPixels": false,
-      "ownsBakedStation": false,
-      "ownsBakedCityRail": false,
-      "ownsBakedDistrictBuildings": true,
-      "visualOnly": true,
-      "affectsLandMask": false,
-      "affectsHeight": false,
-      "affectsSlope": false,
-      "affectsCollision": false,
-      "artboardCoverageRatio": 0.233354,
-      "edgeFeatherPixels": 30
-    },
-    "contactLayer": {
-      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-selected-environment-source-alpha-r1.png",
-      "sha256": "8d9e3d4726ae530ea57b46ec0aac61c8613e50f99b64bac69772c5047719b373",
-      "dimensions": [
-        2571,
-        1929
-      ],
-      "role": "source-evidence-only-rejected-terrain-bearing-composite",
-      "containsTerrainPixels": true,
-      "runtimeVisible": false,
-      "rejectionReason": "duplicates-frozen-production-terrain-and-baked-city",
-      "aperturePolicy": "source-proof-only",
-      "ownsBakedStation": true
-    },
-    "waterTransition": {
-      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-water-transition-foreground-r1.png",
-      "sha256": "0e4c2330971a6cd3ccc69986089ce0570849a74b295245796733d4b9e7161395",
-      "dimensions": [
-        2571,
-        1929
-      ],
-      "role": "four-isolated-registered-bridges-above-inland-water",
       "containsTerrainPixels": false,
+      "containsBakedBuildings": true,
+      "bakedBuildingScope": "generic-subordinate-urban-infill-only",
+      "containsBakedSkillBuildings": false,
+      "containsRailPixels": false,
+      "minimumDetailTier": "capital",
+      "source": "city-circulation-infill-alpha-r7-current-hydrology-aperture",
+      "proceduralPadsOrCorridors": false
+    },
+    "transition": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-production-transition-detail-r1.png",
+      "sha256": "d17e18aba8528c4d920bfa42939a8a8d1836f3b269711ef24bbafa3b81d50ad9",
+      "dimensions": [
+        2571,
+        1929
+      ],
       "runtimeVisible": true,
-      "shorelineTransitionStatus": "deferred-to-terrain-owned-detail-layer",
-      "visualOnly": true,
-      "affectsLandMask": false,
-      "affectsHeight": false,
-      "affectsSlope": false,
-      "affectsCollision": false
+      "containsTerrainPixels": false,
+      "containsBakedBuildings": false,
+      "containsWaterPixels": false,
+      "minimumDetailTier": "capital",
+      "source": "city-environment-transition-detail-r3-current-hydrology-aperture"
+    },
+    "bridgeTransition": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-production-bridge-transition-r2.png",
+      "sha256": "41843da3e862ab435cf68ec7f023ff788de7700db2a8796a0e4821293f777471",
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "runtimeVisible": true,
+      "containsTerrainPixels": false,
+      "containsBakedBuildings": false,
+      "containsWaterPixels": false,
+      "bridgeCount": 4,
+      "minimumDetailTier": "capital",
+      "source": "authored-circulation-water-contact-split-r3"
+    },
+    "bridges": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-production-bridges-r3.png",
+      "sha256": "94d3e8c0010aa8db274fd34b2a5b10a33c5495473c9e97f914915a4981380c10",
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "runtimeVisible": true,
+      "containsTerrainPixels": false,
+      "containsBakedBuildings": false,
+      "bridgeCount": "authored-network-crossings",
+      "minimumDetailTier": "capital",
+      "source": "authored-circulation-water-crossing-split-r3"
     }
   },
   "runtimeRailAssets": {
@@ -121,7 +125,9 @@
     }
   },
   "territoryOverviewVisible": false,
-  "capitalOverviewVisible": true,
+  "capitalOverviewVisible": false,
   "worldAndTerritoryCityVisibility": false,
-  "frozenTerrainGeometryUnchanged": true
+  "frozenTerrainGeometryUnchanged": true,
+  "conceptDerivedRuntimeRasterCount": 0,
+  "productionComponentLayersVisible": true
 }

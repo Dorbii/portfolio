@@ -733,7 +733,7 @@ test("the isolated capital preview mounts only the topology proof visual layers"
   );
   assert.match(
     scene,
-    /!environmentProof \? \(\s*<>\s*<InfrastructureLayer[\s\S]*<FoliageLayer/,
+    /!environmentProof && !focusIsDetailedNinjaOneCapital \? \(\s*<>\s*<InfrastructureLayer[\s\S]*<FoliageLayer/,
   );
   assert.match(proof, /data-topology-layer="base-road-network"/);
   assert.match(proof, /data-topology-layer="plot-labels"/);

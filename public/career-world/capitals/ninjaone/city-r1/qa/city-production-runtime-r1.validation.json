@@ -1,0 +1,973 @@
+{
+  "schemaVersion": 1,
+  "status": "production-component-recovery-baseline",
+  "productionReady": false,
+  "runtimeEligible": true,
+  "manifestPath": "/career-world/capitals/ninjaone/manifests/city-node-composition-r1.json",
+  "layoutReference": "career-world/ninjaone-capital/concept-master-layout-registration@r1",
+  "layoutReferenceIsRuntimeRaster": false,
+  "frozenTerrainSha256": "49142b55478362e85a02e14345859089a78bd01b49a3126d84ff1df7cb283b02",
+  "frozenTerrainGeometryUnchanged": true,
+  "waterAuthority": "career-world/capitals/ninjaone/inland-water-authority@r1",
+  "skillNodeCount": 19,
+  "stationDisplayWidth": 250,
+  "railInterchangeSocket": {
+    "id": "ninjaone-south-southeast-intercity-socket-r3",
+    "localPosition": {
+      "x": 0.84,
+      "y": 0.632
+    },
+    "tangent": {
+      "x": 0.757,
+      "y": 0.653
+    },
+    "gaugePixels": 14,
+    "travelDirections": [
+      "inbound",
+      "outbound"
+    ],
+    "connectionStatus": "reserved-for-future-city-network"
+  },
+  "railOrphanTrackCount": 0,
+  "railSupportDerivedFromCenterline": true,
+  "skillDisplayWidthRange": [
+    148,
+    290
+  ],
+  "runtimeLayers": {
+    "circulation": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-production-circulation-r1.png",
+      "sha256": "3968ca25fc99b5872d9a48f2f07efad878a0e1ae0d8cf6ba545ebcb9ffb7d93b",
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "runtimeVisible": true,
+      "containsTerrainPixels": false,
+      "containsBakedBuildings": true,
+      "bakedBuildingScope": "generic-subordinate-urban-infill-only",
+      "containsBakedSkillBuildings": false,
+      "containsRailPixels": false,
+      "minimumDetailTier": "capital",
+      "source": "city-circulation-infill-alpha-r7-current-hydrology-aperture",
+      "proceduralPadsOrCorridors": false
+    },
+    "transition": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-production-transition-detail-r1.png",
+      "sha256": "d17e18aba8528c4d920bfa42939a8a8d1836f3b269711ef24bbafa3b81d50ad9",
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "runtimeVisible": true,
+      "containsTerrainPixels": false,
+      "containsBakedBuildings": false,
+      "containsWaterPixels": false,
+      "minimumDetailTier": "capital",
+      "source": "city-environment-transition-detail-r3-current-hydrology-aperture"
+    },
+    "bridgeTransition": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-production-bridge-transition-r2.png",
+      "sha256": "41843da3e862ab435cf68ec7f023ff788de7700db2a8796a0e4821293f777471",
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "runtimeVisible": true,
+      "containsTerrainPixels": false,
+      "containsBakedBuildings": false,
+      "containsWaterPixels": false,
+      "bridgeCount": 4,
+      "minimumDetailTier": "capital",
+      "source": "authored-circulation-water-contact-split-r3"
+    },
+    "bridges": {
+      "path": "/career-world/capitals/ninjaone/city-r1/fabric/city-production-bridges-r3.png",
+      "sha256": "94d3e8c0010aa8db274fd34b2a5b10a33c5495473c9e97f914915a4981380c10",
+      "dimensions": [
+        2571,
+        1929
+      ],
+      "runtimeVisible": true,
+      "containsTerrainPixels": false,
+      "containsBakedBuildings": false,
+      "bridgeCount": "authored-network-crossings",
+      "minimumDetailTier": "capital",
+      "source": "authored-circulation-water-crossing-split-r3"
+    }
+  },
+  "placementRecords": [
+    {
+      "id": "compact-authored-city-circulation-r3",
+      "role": "connected-production-circulation-authority",
+      "sourceRepoPath": "art-source/career-world/ninjaone-capital/city-layer-r1/city-fabric/city-circulation-infill-alpha-r7.png",
+      "registeredOffset": [
+        0.19,
+        0.12
+      ],
+      "registeredScale": 0.56,
+      "containsBakedBuildings": true,
+      "bakedBuildingScope": "generic-subordinate-urban-infill-only",
+      "containsBakedSkillBuildings": false,
+      "containsTerrainPixels": false,
+      "currentHydrologyApertured": true
+    },
+    {
+      "id": "ai-agent-systems-socket",
+      "role": "authored-building-destination-socket",
+      "localPosition": {
+        "x": 0.43908800000000003,
+        "y": 0.183952
+      }
+    },
+    {
+      "id": "mcp-socket",
+      "role": "authored-building-destination-socket",
+      "localPosition": {
+        "x": 0.340808,
+        "y": 0.27008
+      }
+    },
+    {
+      "id": "openapi-swagger-socket",
+      "role": "authored-building-destination-socket",
+      "localPosition": {
+        "x": 0.509816,
+        "y": 0.272656
+      }
+    },
+    {
+      "id": "grpc-rest-socket",
+      "role": "authored-building-destination-socket",
+      "localPosition": {
+        "x": 0.302168,
+        "y": 0.329888
+      }
+    },
+    {
+      "id": "capability-contracts-socket",
+      "role": "authored-building-destination-socket",
+      "localPosition": {
+        "x": 0.466136,
+        "y": 0.321096
+      }
+    },
+    {
+      "id": "tool-generation-socket",
+      "role": "authored-building-destination-socket",
+      "localPosition": {
+        "x": 0.45415200000000006,
+        "y": 0.273664
+      }
+    },
+    {
+      "id": "typescript-socket",
+      "role": "authored-building-destination-socket",
+      "localPosition": {
+        "x": 0.36556,
+        "y": 0.36852799999999997
+      }
+    },
+    {
+      "id": "react-socket",
+      "role": "authored-building-destination-socket",
+      "localPosition": {
+        "x": 0.6246720000000001,
+        "y": 0.40257600000000004
+      }
+    },
+    {
+      "id": "tanstack-socket",
+      "role": "authored-building-destination-socket",
+      "localPosition": {
+        "x": 0.4994,
+        "y": 0.355144
+      }
+    },
+    {
+      "id": "golang-socket",
+      "role": "authored-building-destination-socket",
+      "localPosition": {
+        "x": 0.636712,
+        "y": 0.45829600000000004
+      }
+    },
+    {
+      "id": "csharp-socket",
+      "role": "authored-building-destination-socket",
+      "localPosition": {
+        "x": 0.251488,
+        "y": 0.395856
+      }
+    },
+    {
+      "id": "python-socket",
+      "role": "authored-building-destination-socket",
+      "localPosition": {
+        "x": 0.379504,
+        "y": 0.23088000000000003
+      }
+    },
+    {
+      "id": "postgresql-socket",
+      "role": "authored-building-destination-socket",
+      "localPosition": {
+        "x": 0.32804,
+        "y": 0.417528
+      }
+    },
+    {
+      "id": "redis-socket",
+      "role": "authored-building-destination-socket",
+      "localPosition": {
+        "x": 0.6753520000000001,
+        "y": 0.547504
+      }
+    },
+    {
+      "id": "aws-socket",
+      "role": "authored-building-destination-socket",
+      "localPosition": {
+        "x": 0.6235520000000001,
+        "y": 0.509312
+      }
+    },
+    {
+      "id": "databricks-socket",
+      "role": "authored-building-destination-socket",
+      "localPosition": {
+        "x": 0.561672,
+        "y": 0.584632
+      }
+    },
+    {
+      "id": "docker-socket",
+      "role": "authored-building-destination-socket",
+      "localPosition": {
+        "x": 0.6154320000000001,
+        "y": 0.6139760000000001
+      }
+    },
+    {
+      "id": "vmware-socket",
+      "role": "authored-building-destination-socket",
+      "localPosition": {
+        "x": 0.507128,
+        "y": 0.6119600000000001
+      }
+    },
+    {
+      "id": "macstadium-socket",
+      "role": "authored-building-destination-socket",
+      "localPosition": {
+        "x": 0.39692000000000005,
+        "y": 0.500576
+      }
+    },
+    {
+      "id": "intercity-station-socket",
+      "role": "authored-station-destination-socket",
+      "localPosition": {
+        "x": 0.42592800000000003,
+        "y": 0.38812800000000003
+      }
+    }
+  ],
+  "railRecovery": {
+    "renderMethod": "lod-stable-authored-isometric-through-route-r3",
+    "centerlineStatus": "single-continuous-station-to-south-southeast-route-r3",
+    "controlPoints": [
+      {
+        "x": 0.36,
+        "y": 0.347
+      },
+      {
+        "x": 0.384,
+        "y": 0.361
+      },
+      {
+        "x": 0.408,
+        "y": 0.375
+      },
+      {
+        "x": 0.432,
+        "y": 0.39
+      },
+      {
+        "x": 0.456,
+        "y": 0.404
+      },
+      {
+        "x": 0.48,
+        "y": 0.418
+      },
+      {
+        "x": 0.504,
+        "y": 0.433
+      },
+      {
+        "x": 0.528,
+        "y": 0.447
+      },
+      {
+        "x": 0.552,
+        "y": 0.461
+      },
+      {
+        "x": 0.576,
+        "y": 0.475
+      },
+      {
+        "x": 0.6,
+        "y": 0.49
+      },
+      {
+        "x": 0.624,
+        "y": 0.504
+      },
+      {
+        "x": 0.648,
+        "y": 0.518
+      },
+      {
+        "x": 0.672,
+        "y": 0.532
+      },
+      {
+        "x": 0.696,
+        "y": 0.547
+      },
+      {
+        "x": 0.72,
+        "y": 0.561
+      },
+      {
+        "x": 0.744,
+        "y": 0.575
+      },
+      {
+        "x": 0.768,
+        "y": 0.589
+      },
+      {
+        "x": 0.792,
+        "y": 0.604
+      },
+      {
+        "x": 0.816,
+        "y": 0.618
+      },
+      {
+        "x": 0.84,
+        "y": 0.632
+      }
+    ],
+    "maximumLocalTurnDegrees": 0.219,
+    "minimumCurveRadiusPixels": 150,
+    "orphanTrackCount": 0,
+    "supportDerivedFromCenterline": true,
+    "stationTangentContinuous": true,
+    "portalTangentContinuous": true,
+    "segmentCount": 21,
+    "segments": [
+      {
+        "id": "northwest-mountain-portal-run",
+        "chainIndex": 0,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.36,
+          0.347
+        ],
+        "displayWidth": 86,
+        "displayHeight": 62,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          883,
+          638,
+          969,
+          700
+        ]
+      },
+      {
+        "id": "continuous-route-01",
+        "chainIndex": 0,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.384,
+          0.361
+        ],
+        "displayWidth": 86,
+        "displayHeight": 62,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          944,
+          665,
+          1030,
+          727
+        ]
+      },
+      {
+        "id": "continuous-route-02",
+        "chainIndex": 0,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.408,
+          0.375
+        ],
+        "displayWidth": 86,
+        "displayHeight": 62,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1006,
+          692,
+          1092,
+          754
+        ]
+      },
+      {
+        "id": "station-through",
+        "chainIndex": 0,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.432,
+          0.39
+        ],
+        "displayWidth": 86,
+        "displayHeight": 62,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1068,
+          721,
+          1154,
+          783
+        ]
+      },
+      {
+        "id": "continuous-route-04",
+        "chainIndex": 0,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.456,
+          0.404
+        ],
+        "displayWidth": 86,
+        "displayHeight": 62,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1129,
+          748,
+          1215,
+          810
+        ]
+      },
+      {
+        "id": "continuous-route-05",
+        "chainIndex": 0,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.48,
+          0.418
+        ],
+        "displayWidth": 86,
+        "displayHeight": 62,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1191,
+          775,
+          1277,
+          837
+        ]
+      },
+      {
+        "id": "continuous-route-06",
+        "chainIndex": 0,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.504,
+          0.433
+        ],
+        "displayWidth": 86,
+        "displayHeight": 62,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1253,
+          804,
+          1339,
+          866
+        ]
+      },
+      {
+        "id": "continuous-route-07",
+        "chainIndex": 0,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.528,
+          0.447
+        ],
+        "displayWidth": 86,
+        "displayHeight": 62,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1314,
+          831,
+          1400,
+          893
+        ]
+      },
+      {
+        "id": "continuous-route-08",
+        "chainIndex": 0,
+        "sourceCell": [
+          1,
+          1
+        ],
+        "conceptCenter": [
+          0.552,
+          0.461
+        ],
+        "displayWidth": 90,
+        "displayHeight": 90,
+        "kind": "elevated-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1374,
+          844,
+          1464,
+          934
+        ]
+      },
+      {
+        "id": "continuous-route-09",
+        "chainIndex": 0,
+        "sourceCell": [
+          1,
+          1
+        ],
+        "conceptCenter": [
+          0.576,
+          0.475
+        ],
+        "displayWidth": 90,
+        "displayHeight": 90,
+        "kind": "elevated-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1436,
+          871,
+          1526,
+          961
+        ]
+      },
+      {
+        "id": "continuous-route-10",
+        "chainIndex": 0,
+        "sourceCell": [
+          1,
+          1
+        ],
+        "conceptCenter": [
+          0.6,
+          0.49
+        ],
+        "displayWidth": 90,
+        "displayHeight": 90,
+        "kind": "elevated-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1498,
+          900,
+          1588,
+          990
+        ]
+      },
+      {
+        "id": "continuous-route-11",
+        "chainIndex": 0,
+        "sourceCell": [
+          1,
+          1
+        ],
+        "conceptCenter": [
+          0.624,
+          0.504
+        ],
+        "displayWidth": 90,
+        "displayHeight": 90,
+        "kind": "elevated-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1559,
+          927,
+          1649,
+          1017
+        ]
+      },
+      {
+        "id": "continuous-route-12",
+        "chainIndex": 0,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.648,
+          0.518
+        ],
+        "displayWidth": 86,
+        "displayHeight": 62,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1623,
+          968,
+          1709,
+          1030
+        ]
+      },
+      {
+        "id": "continuous-route-13",
+        "chainIndex": 0,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.672,
+          0.532
+        ],
+        "displayWidth": 86,
+        "displayHeight": 62,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1685,
+          995,
+          1771,
+          1057
+        ]
+      },
+      {
+        "id": "continuous-route-14",
+        "chainIndex": 0,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.696,
+          0.547
+        ],
+        "displayWidth": 86,
+        "displayHeight": 62,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1746,
+          1024,
+          1832,
+          1086
+        ]
+      },
+      {
+        "id": "continuous-route-15",
+        "chainIndex": 0,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.72,
+          0.561
+        ],
+        "displayWidth": 86,
+        "displayHeight": 62,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1808,
+          1051,
+          1894,
+          1113
+        ]
+      },
+      {
+        "id": "continuous-route-16",
+        "chainIndex": 0,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.744,
+          0.575
+        ],
+        "displayWidth": 86,
+        "displayHeight": 62,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1870,
+          1078,
+          1956,
+          1140
+        ]
+      },
+      {
+        "id": "continuous-route-17",
+        "chainIndex": 0,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.768,
+          0.589
+        ],
+        "displayWidth": 86,
+        "displayHeight": 62,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1932,
+          1105,
+          2018,
+          1167
+        ]
+      },
+      {
+        "id": "continuous-route-18",
+        "chainIndex": 0,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.792,
+          0.604
+        ],
+        "displayWidth": 86,
+        "displayHeight": 62,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          1993,
+          1134,
+          2079,
+          1196
+        ]
+      },
+      {
+        "id": "continuous-route-19",
+        "chainIndex": 0,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.816,
+          0.618
+        ],
+        "displayWidth": 86,
+        "displayHeight": 62,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          2055,
+          1161,
+          2141,
+          1223
+        ]
+      },
+      {
+        "id": "south-southeast-exit",
+        "chainIndex": 0,
+        "sourceCell": [
+          0,
+          0
+        ],
+        "conceptCenter": [
+          0.84,
+          0.632
+        ],
+        "displayWidth": 86,
+        "displayHeight": 62,
+        "kind": "ground-straight-nw-se",
+        "rotationDegrees": 0,
+        "placedBounds": [
+          2117,
+          1188,
+          2203,
+          1250
+        ]
+      }
+    ],
+    "segmentJoins": [
+      {
+        "from": "northwest-mountain-portal-run",
+        "to": "continuous-route-01",
+        "alphaOverlapPixels": 114
+      },
+      {
+        "from": "continuous-route-01",
+        "to": "continuous-route-02",
+        "alphaOverlapPixels": 92
+      },
+      {
+        "from": "continuous-route-02",
+        "to": "station-through",
+        "alphaOverlapPixels": 136
+      },
+      {
+        "from": "station-through",
+        "to": "continuous-route-04",
+        "alphaOverlapPixels": 114
+      },
+      {
+        "from": "continuous-route-04",
+        "to": "continuous-route-05",
+        "alphaOverlapPixels": 92
+      },
+      {
+        "from": "continuous-route-05",
+        "to": "continuous-route-06",
+        "alphaOverlapPixels": 136
+      },
+      {
+        "from": "continuous-route-06",
+        "to": "continuous-route-07",
+        "alphaOverlapPixels": 114
+      },
+      {
+        "from": "continuous-route-07",
+        "to": "continuous-route-08",
+        "alphaOverlapPixels": 298
+      },
+      {
+        "from": "continuous-route-08",
+        "to": "continuous-route-09",
+        "alphaOverlapPixels": 642
+      },
+      {
+        "from": "continuous-route-09",
+        "to": "continuous-route-10",
+        "alphaOverlapPixels": 669
+      },
+      {
+        "from": "continuous-route-10",
+        "to": "continuous-route-11",
+        "alphaOverlapPixels": 683
+      },
+      {
+        "from": "continuous-route-11",
+        "to": "continuous-route-12",
+        "alphaOverlapPixels": 333
+      },
+      {
+        "from": "continuous-route-12",
+        "to": "continuous-route-13",
+        "alphaOverlapPixels": 92
+      },
+      {
+        "from": "continuous-route-13",
+        "to": "continuous-route-14",
+        "alphaOverlapPixels": 157
+      },
+      {
+        "from": "continuous-route-14",
+        "to": "continuous-route-15",
+        "alphaOverlapPixels": 92
+      },
+      {
+        "from": "continuous-route-15",
+        "to": "continuous-route-16",
+        "alphaOverlapPixels": 92
+      },
+      {
+        "from": "continuous-route-16",
+        "to": "continuous-route-17",
+        "alphaOverlapPixels": 92
+      },
+      {
+        "from": "continuous-route-17",
+        "to": "continuous-route-18",
+        "alphaOverlapPixels": 157
+      },
+      {
+        "from": "continuous-route-18",
+        "to": "continuous-route-19",
+        "alphaOverlapPixels": 92
+      },
+      {
+        "from": "continuous-route-19",
+        "to": "south-southeast-exit",
+        "alphaOverlapPixels": 92
+      }
+    ],
+    "runtimeScalePolicy": "one-precomposed-artboard-raster-all-visible-tiers",
+    "interchangeSocket": {
+      "id": "ninjaone-south-southeast-intercity-socket-r3",
+      "localPosition": {
+        "x": 0.84,
+        "y": 0.632
+      },
+      "tangent": {
+        "x": 0.757,
+        "y": 0.653
+      },
+      "gaugePixels": 14,
+      "travelDirections": [
+        "inbound",
+        "outbound"
+      ],
+      "connectionStatus": "reserved-for-future-city-network"
+    },
+    "portalRecords": [
+      {
+        "id": "northwest-mountain-portal",
+        "bounds": [
+          883,
+          611,
+          86,
+          85
+        ]
+      }
+    ]
+  },
+  "conceptDerivedRuntimeRasterCount": 0,
+  "qaProofPath": "/career-world/capitals/ninjaone/city-r1/qa/city-production-runtime-proof-r1.png",
+  "qaProofSha256": "05c448d7917d1deb1d354ba492ddee2704fd4c0ffdac562cf3ccf476d2c5a827",
+  "referenceComparisonPath": "/career-world/capitals/ninjaone/city-r1/qa/city-production-reference-comparison-r1.png",
+  "referenceComparisonSha256": "bf4b41c806e1842ac10c5e1955531c561d6591ccdecce97e297467b02cc76182"
+}

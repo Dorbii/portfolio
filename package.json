@@ -20,7 +20,8 @@
     "extract:ninjaone-foliage-isolation-crops": "node scripts/extract-ninjaone-foliage-isolation-crops.mjs",
     "typecheck": "tsc --noEmit --incremental false",
     "lint": "eslint .",
-    "test": "node --experimental-strip-types --test tests/index.test.mjs",
+    "test": "node --experimental-strip-types --test --test-concurrency=1 tests/index.test.mjs",
+    "test:intent": "node --experimental-strip-types --test tests/intent/index.test.mjs",
     "verify": "npm run typecheck && npm run lint && npm run test && npm run build",
     "verify:ninjaone-environment-mvp": "node scripts/verify-ninjaone-environment-mvp.mjs"
   },

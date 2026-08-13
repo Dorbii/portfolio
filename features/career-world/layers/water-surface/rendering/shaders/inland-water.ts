@@ -20,6 +20,8 @@ uniform vec2 u_regionSpan;
 uniform float u_territoryLod;
 uniform float u_capitalLod;
 uniform float u_siteLod;
+uniform float u_effectsEnabled;
+uniform float u_aquaticLifeEnabled;
 uniform vec3 u_lightDirection;
 uniform sampler2D u_inlandField;
 uniform sampler2D u_inlandOwnership;
@@ -373,7 +375,8 @@ void main() {
   vec2 aquaticUv = fract(localPx / vec2(92.0, 78.0)) - 0.5;
   float aquaticSeed = hash21(aquaticCell);
   float schoolWindow = step(0.84, aquaticSeed)
-    * smoothstep(0.56, 0.82, u_siteLod);
+    * smoothstep(0.56, 0.82, u_siteLod)
+    * u_aquaticLifeEnabled;
   float fishDirection = mix(-1.0, 1.0, step(0.5, aquaticSeed));
   float fishSwim = fract(
     aquaticUv.y + u_time * mix(0.018, 0.034, aquaticSeed) * fishDirection
@@ -518,7 +521,8 @@ void main() {
   float impactFoam = explicitImpact
     * (0.28 + eventBreakup * 0.72)
     * (1.0 - fall * 0.92)
-    * waterCoverage;
+    * waterCoverage
+    * u_effectsEnabled;
   float bankTurbulence = (1.0 - smoothstep(0.0, 8.5, signedDistance))
     * river * smoothstep(0.64, 0.90, fineFoam);
   float foam = saturate(
@@ -528,7 +532,7 @@ void main() {
     + fall * streamThread * 0.08
     + fallCrest * (0.12 + eventBreakup * 0.24)
     + eventFoam * 0.82
-  ) * waterCoverage;
+  ) * waterCoverage * u_effectsEnabled;
   vec3 foamColor = vec3(0.65, 0.76, 0.76);
   surface = mix(surface, foamColor, foam * mix(0.44, 0.56, fall));
   surface = mix(
@@ -589,7 +593,7 @@ void main() {
   float mist = max(
     smoothstep(0.08, 0.58, outsideMist) * (0.10 + mistTexture * 0.28),
     impactSpray
-  );
+  ) * u_effectsEnabled;
   vec3 mistColor = vec3(0.58, 0.68, 0.67);
 
   float fallOpacity = saturate(
@@ -607,7 +611,12 @@ void main() {
   );
   vec3 composed = mix(bankColor, surface, surfaceColorCoverage);
   composed = mix(composed, mistColor, mist * 0.52);
-  float alpha = max(baseAlpha, mist * 0.24) * inField;
+  // The authored terminal river reaches the south edge of the registered
+  // inland field, where the frozen terrain master already owns the same river
+  // channel. Feather only that final handoff so the animated layer dissolves
+  // into the painted continuation instead of exposing its rectangular crop.
+  float southHandoff = 1.0 - smoothstep(0.965, 1.0, fieldUv.y);
+  float alpha = max(baseAlpha, mist * 0.24) * inField * southHandoff;
   alpha *= step(1.0, u_resolution.x + u_resolution.y);
   outColor = vec4(composed, alpha);
 }

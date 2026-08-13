@@ -1,0 +1,1831 @@
+{
+  "authority": "individual-building-environment-proportion-data",
+  "id": "career-world/capitals/ninjaone/city-building-environment-scale@r1",
+  "nearestNeighborChecks": [
+    {
+      "anchorDistancePixels": 246.898,
+      "combinedFootprintWidthPixels": 188.32,
+      "nearestSkillId": "openapi-swagger",
+      "passes": true,
+      "separationRatio": 1.311,
+      "skillId": "ai-agent-systems"
+    },
+    {
+      "anchorDistancePixels": 138.338,
+      "combinedFootprintWidthPixels": 145.6,
+      "nearestSkillId": "grpc-rest",
+      "passes": true,
+      "separationRatio": 0.95,
+      "skillId": "mcp"
+    },
+    {
+      "anchorDistancePixels": 142.095,
+      "combinedFootprintWidthPixels": 145.08,
+      "nearestSkillId": "capability-contracts",
+      "passes": true,
+      "separationRatio": 0.979,
+      "skillId": "openapi-swagger"
+    },
+    {
+      "anchorDistancePixels": 138.338,
+      "combinedFootprintWidthPixels": 145.6,
+      "nearestSkillId": "mcp",
+      "passes": true,
+      "separationRatio": 0.95,
+      "skillId": "grpc-rest"
+    },
+    {
+      "anchorDistancePixels": 142.095,
+      "combinedFootprintWidthPixels": 145.08,
+      "nearestSkillId": "openapi-swagger",
+      "passes": true,
+      "separationRatio": 0.979,
+      "skillId": "capability-contracts"
+    },
+    {
+      "anchorDistancePixels": 165.513,
+      "combinedFootprintWidthPixels": 136.84,
+      "nearestSkillId": "tanstack",
+      "passes": true,
+      "separationRatio": 1.21,
+      "skillId": "tool-generation"
+    },
+    {
+      "anchorDistancePixels": 214.033,
+      "combinedFootprintWidthPixels": 143.8,
+      "nearestSkillId": "mcp",
+      "passes": true,
+      "separationRatio": 1.488,
+      "skillId": "typescript"
+    },
+    {
+      "anchorDistancePixels": 107.184,
+      "combinedFootprintWidthPixels": 148.42,
+      "nearestSkillId": "golang",
+      "passes": true,
+      "separationRatio": 0.722,
+      "skillId": "react"
+    },
+    {
+      "anchorDistancePixels": 132.081,
+      "combinedFootprintWidthPixels": 131.2,
+      "nearestSkillId": "python",
+      "passes": true,
+      "separationRatio": 1.007,
+      "skillId": "tanstack"
+    },
+    {
+      "anchorDistancePixels": 107.184,
+      "combinedFootprintWidthPixels": 148.42,
+      "nearestSkillId": "react",
+      "passes": true,
+      "separationRatio": 0.722,
+      "skillId": "golang"
+    },
+    {
+      "anchorDistancePixels": 109.929,
+      "combinedFootprintWidthPixels": 131.24,
+      "nearestSkillId": "postgresql",
+      "passes": true,
+      "separationRatio": 0.838,
+      "skillId": "csharp"
+    },
+    {
+      "anchorDistancePixels": 132.081,
+      "combinedFootprintWidthPixels": 131.2,
+      "nearestSkillId": "tanstack",
+      "passes": true,
+      "separationRatio": 1.007,
+      "skillId": "python"
+    },
+    {
+      "anchorDistancePixels": 109.929,
+      "combinedFootprintWidthPixels": 131.24,
+      "nearestSkillId": "csharp",
+      "passes": true,
+      "separationRatio": 0.838,
+      "skillId": "postgresql"
+    },
+    {
+      "anchorDistancePixels": 117.106,
+      "combinedFootprintWidthPixels": 128.52,
+      "nearestSkillId": "aws",
+      "passes": true,
+      "separationRatio": 0.911,
+      "skillId": "redis"
+    },
+    {
+      "anchorDistancePixels": 104.538,
+      "combinedFootprintWidthPixels": 135.96,
+      "nearestSkillId": "docker",
+      "passes": true,
+      "separationRatio": 0.769,
+      "skillId": "aws"
+    },
+    {
+      "anchorDistancePixels": 116.032,
+      "combinedFootprintWidthPixels": 132.72,
+      "nearestSkillId": "vmware",
+      "passes": true,
+      "separationRatio": 0.874,
+      "skillId": "databricks"
+    },
+    {
+      "anchorDistancePixels": 91.136,
+      "combinedFootprintWidthPixels": 125.8,
+      "nearestSkillId": "macstadium",
+      "passes": true,
+      "separationRatio": 0.724,
+      "skillId": "docker"
+    },
+    {
+      "anchorDistancePixels": 116.032,
+      "combinedFootprintWidthPixels": 132.72,
+      "nearestSkillId": "databricks",
+      "passes": true,
+      "separationRatio": 0.874,
+      "skillId": "vmware"
+    },
+    {
+      "anchorDistancePixels": 91.136,
+      "combinedFootprintWidthPixels": 125.8,
+      "nearestSkillId": "docker",
+      "passes": true,
+      "separationRatio": 0.724,
+      "skillId": "macstadium"
+    }
+  ],
+  "pairwiseChecks": {
+    "cliffCitadelNeighborhood": {
+      "citadelDisplayFootprintWidthPixels": 237.8,
+      "citadelSkillId": "ai-agent-systems",
+      "citadelToLargestNeighborRatio": 1.3,
+      "citadelVisibleHeightPixels": 234.279,
+      "largestNeighborVisibleHeightPixels": 180.262,
+      "neighborSkillIds": [
+        "mcp",
+        "openapi-swagger",
+        "grpc-rest",
+        "capability-contracts",
+        "tool-generation"
+      ],
+      "note": "The citadel remains the centerpiece without implying a different door/person architecture scale.",
+      "passes": true
+    },
+    "reactGolangPythonCluster": {
+      "maximumToMinimumRatio": 1.192,
+      "note": "Buildings remain non-uniform; the check only prevents incompatible architectural scale among immediate application-district neighbors.",
+      "passes": true,
+      "skillIds": [
+        "react",
+        "golang",
+        "python"
+      ],
+      "visibleHeightRangePixels": [
+        133.052,
+        158.619
+      ]
+    },
+    "requestedRustGoPythonCluster": {
+      "reason": "Rust is absent from the authoritative 19-skill program; no twentieth record is invented.",
+      "rustPresent": false,
+      "substitution": "react-golang-python"
+    }
+  },
+  "records": [
+    {
+      "alphaBounds": [
+        26,
+        17,
+        1354,
+        1127
+      ],
+      "conceptPosition": {
+        "x": 0.450176,
+        "y": 0.194872
+      },
+      "confidence": "medium",
+      "coordinatesChanged": false,
+      "displayFootprintPixels": {
+        "depth": 87.0,
+        "width": 237.8,
+        "widthToRoadWidth": 7.671
+      },
+      "displayHeight": 241.667,
+      "displayWidth": 290,
+      "districtId": "knowledge-api-citadel",
+      "evidence": [
+        {
+          "buildingVisibleHeightToRoadWidth": 7.557,
+          "kind": "road-width",
+          "note": "Road width is a shared city-scale cue; it is not treated as a building-width target.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildingVisibleHeightToHumanHeight": 7.557,
+          "kind": "population-height",
+          "note": "Temporary people are QA scale cues; no person is baked into the building asset.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildableCoverage": 0.996169,
+          "kind": "terrain-support",
+          "landCoverage": 1.0,
+          "meanLandHeight": 156.341,
+          "status": "measured"
+        },
+        {
+          "kind": "door-height",
+          "note": "The authored raster does not expose a machine-verifiable door mask; no precise door ratio is fabricated.",
+          "referencePixels": null,
+          "status": "not-independently-measurable"
+        }
+      ],
+      "explicitOutlierException": "The sole citadel is intentionally the visual centerpiece, but is reduced from 281px so its architectural modules share the common road and population scale.",
+      "footprintFraction": {
+        "depth": 0.3,
+        "width": 0.82
+      },
+      "hierarchyRole": "sole-city-centerpiece",
+      "measuredAlphaSize": [
+        1328,
+        1110
+      ],
+      "previousDisplayWidth": 252,
+      "rationale": "Retains sole-citadel dominance and cliff-top centerpiece status while reducing the previous oversized architectural module scale relative to roads and nearby major nodes.",
+      "scaleClass": "citadel",
+      "skillId": "ai-agent-systems",
+      "slotId": "skill-ai-agent-systems",
+      "sourceAsset": "/career-world/capitals/ninjaone/city-r1/skill-buildings/ai-agent-systems-static.png",
+      "sourceDimensions": [
+        1374,
+        1145
+      ],
+      "sourceSha256": "74bd0fc8e1d8bfd69f16c744be02f8027361bf98910cdf4bb37ab2dd980d56d5",
+      "terrainSupport": {
+        "buildableCoverage": 0.996169,
+        "buildableSlopeThreshold": 112,
+        "fabricCoverage": 1.0,
+        "landCoverage": 1.0,
+        "landThreshold": 128,
+        "meanLandHeight": 156.341,
+        "sampleCount": 261
+      },
+      "visibleDisplaySize": [
+        280.291,
+        234.279
+      ]
+    },
+    {
+      "alphaBounds": [
+        0,
+        0,
+        624,
+        627
+      ],
+      "conceptPosition": {
+        "x": 0.335096,
+        "y": 0.272488
+      },
+      "confidence": "low",
+      "coordinatesChanged": false,
+      "displayFootprintPixels": {
+        "depth": 51.52,
+        "width": 147.2,
+        "widthToRoadWidth": 4.748
+      },
+      "displayHeight": 184.0,
+      "displayWidth": 184,
+      "districtId": "knowledge-api-citadel",
+      "evidence": [
+        {
+          "buildingVisibleHeightToRoadWidth": 5.815,
+          "kind": "road-width",
+          "note": "Road width is a shared city-scale cue; it is not treated as a building-width target.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildingVisibleHeightToHumanHeight": 5.815,
+          "kind": "population-height",
+          "note": "Temporary people are QA scale cues; no person is baked into the building asset.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildableCoverage": 0.807229,
+          "kind": "terrain-support",
+          "landCoverage": 1.0,
+          "meanLandHeight": 156.446,
+          "status": "measured"
+        },
+        {
+          "kind": "door-height",
+          "note": "The authored raster does not expose a machine-verifiable door mask; no precise door ratio is fabricated.",
+          "referencePixels": null,
+          "status": "not-independently-measurable"
+        }
+      ],
+      "explicitOutlierException": null,
+      "footprintFraction": {
+        "depth": 0.28,
+        "width": 0.8
+      },
+      "hierarchyRole": "district-major",
+      "measuredAlphaSize": [
+        624,
+        627
+      ],
+      "previousDisplayWidth": 158,
+      "rationale": "Raised from 158px using visible alpha height, footprint, terrain support, road width, population height, and neighbor spacing; class remains hierarchy evidence rather than a global multiplier.",
+      "scaleClass": "major",
+      "skillId": "mcp",
+      "slotId": "skill-mcp",
+      "sourceAsset": "/career-world/capitals/ninjaone/city-r1/skill-buildings/mcp-r4.png",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "sourceSha256": "68f55b3297a2f65705694f4687dd8f6ec45af95ba89c5d59074daf075064b79a",
+      "terrainSupport": {
+        "buildableCoverage": 0.807229,
+        "buildableSlopeThreshold": 112,
+        "fabricCoverage": 1.0,
+        "landCoverage": 1.0,
+        "landThreshold": 128,
+        "meanLandHeight": 156.446,
+        "sampleCount": 83
+      },
+      "visibleDisplaySize": [
+        179.4,
+        180.262
+      ]
+    },
+    {
+      "alphaBounds": [
+        0,
+        0,
+        615,
+        618
+      ],
+      "conceptPosition": {
+        "x": 0.5220800000000001,
+        "y": 0.279712
+      },
+      "confidence": "low",
+      "coordinatesChanged": false,
+      "displayFootprintPixels": {
+        "depth": 49.84,
+        "width": 138.84,
+        "widthToRoadWidth": 4.479
+      },
+      "displayHeight": 178.0,
+      "displayWidth": 178,
+      "districtId": "knowledge-api-citadel",
+      "evidence": [
+        {
+          "buildingVisibleHeightToRoadWidth": 5.545,
+          "kind": "road-width",
+          "note": "Road width is a shared city-scale cue; it is not treated as a building-width target.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildingVisibleHeightToHumanHeight": 5.545,
+          "kind": "population-height",
+          "note": "Temporary people are QA scale cues; no person is baked into the building asset.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildableCoverage": 0.966292,
+          "kind": "terrain-support",
+          "landCoverage": 1.0,
+          "meanLandHeight": 115.371,
+          "status": "measured"
+        },
+        {
+          "kind": "door-height",
+          "note": "The authored raster does not expose a machine-verifiable door mask; no precise door ratio is fabricated.",
+          "referencePixels": null,
+          "status": "not-independently-measurable"
+        }
+      ],
+      "explicitOutlierException": null,
+      "footprintFraction": {
+        "depth": 0.28,
+        "width": 0.78
+      },
+      "hierarchyRole": "district-major",
+      "measuredAlphaSize": [
+        615,
+        618
+      ],
+      "previousDisplayWidth": 150,
+      "rationale": "Raised from 150px using visible alpha height, footprint, terrain support, road width, population height, and neighbor spacing; class remains hierarchy evidence rather than a global multiplier.",
+      "scaleClass": "major",
+      "skillId": "openapi-swagger",
+      "slotId": "skill-openapi-swagger",
+      "sourceAsset": "/career-world/capitals/ninjaone/city-r1/skill-buildings/openapi-swagger-r2.png",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "sourceSha256": "9a79f4f01c20128a8018bafcde5139d4c44fe7ce738808c9252b0cb12f663653",
+      "terrainSupport": {
+        "buildableCoverage": 0.966292,
+        "buildableSlopeThreshold": 112,
+        "fabricCoverage": 0.869358,
+        "landCoverage": 1.0,
+        "landThreshold": 128,
+        "meanLandHeight": 115.371,
+        "sampleCount": 89
+      },
+      "visibleDisplaySize": [
+        171.047,
+        171.881
+      ]
+    },
+    {
+      "alphaBounds": [
+        0,
+        0,
+        615,
+        618
+      ],
+      "conceptPosition": {
+        "x": 0.291696,
+        "y": 0.31488
+      },
+      "confidence": "low",
+      "coordinatesChanged": false,
+      "displayFootprintPixels": {
+        "depth": 50.4,
+        "width": 144.0,
+        "widthToRoadWidth": 4.645
+      },
+      "displayHeight": 180.0,
+      "displayWidth": 180,
+      "districtId": "knowledge-api-citadel",
+      "evidence": [
+        {
+          "buildingVisibleHeightToRoadWidth": 5.607,
+          "kind": "road-width",
+          "note": "Road width is a shared city-scale cue; it is not treated as a building-width target.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildingVisibleHeightToHumanHeight": 5.607,
+          "kind": "population-height",
+          "note": "Temporary people are QA scale cues; no person is baked into the building asset.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildableCoverage": 1.0,
+          "kind": "terrain-support",
+          "landCoverage": 1.0,
+          "meanLandHeight": 100.924,
+          "status": "measured"
+        },
+        {
+          "kind": "door-height",
+          "note": "The authored raster does not expose a machine-verifiable door mask; no precise door ratio is fabricated.",
+          "referencePixels": null,
+          "status": "not-independently-measurable"
+        }
+      ],
+      "explicitOutlierException": null,
+      "footprintFraction": {
+        "depth": 0.28,
+        "width": 0.8
+      },
+      "hierarchyRole": "district-major",
+      "measuredAlphaSize": [
+        615,
+        618
+      ],
+      "previousDisplayWidth": 154,
+      "rationale": "Raised from 154px using visible alpha height, footprint, terrain support, road width, population height, and neighbor spacing; class remains hierarchy evidence rather than a global multiplier.",
+      "scaleClass": "major",
+      "skillId": "grpc-rest",
+      "slotId": "skill-grpc-rest",
+      "sourceAsset": "/career-world/capitals/ninjaone/city-r1/skill-buildings/grpc-rest-r4.png",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "sourceSha256": "5a54484b1580b774d5e2fc6e00e10bccb90e057c6e7a38a8c2e744d39627d5eb",
+      "terrainSupport": {
+        "buildableCoverage": 1.0,
+        "buildableSlopeThreshold": 112,
+        "fabricCoverage": 0.988511,
+        "landCoverage": 1.0,
+        "landThreshold": 128,
+        "meanLandHeight": 100.924,
+        "sampleCount": 105
+      },
+      "visibleDisplaySize": [
+        172.969,
+        173.812
+      ]
+    },
+    {
+      "alphaBounds": [
+        0,
+        213,
+        615,
+        640
+      ],
+      "conceptPosition": {
+        "x": 0.47616,
+        "y": 0.320704
+      },
+      "confidence": "medium",
+      "coordinatesChanged": false,
+      "displayFootprintPixels": {
+        "depth": 54.32,
+        "width": 151.32,
+        "widthToRoadWidth": 4.881
+      },
+      "displayHeight": 194.0,
+      "displayWidth": 194,
+      "districtId": "knowledge-api-citadel",
+      "evidence": [
+        {
+          "buildingVisibleHeightToRoadWidth": 4.175,
+          "kind": "road-width",
+          "note": "Road width is a shared city-scale cue; it is not treated as a building-width target.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildingVisibleHeightToHumanHeight": 4.175,
+          "kind": "population-height",
+          "note": "Temporary people are QA scale cues; no person is baked into the building asset.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildableCoverage": 1.0,
+          "kind": "terrain-support",
+          "landCoverage": 1.0,
+          "meanLandHeight": 145.678,
+          "status": "measured"
+        },
+        {
+          "kind": "door-height",
+          "note": "The authored raster does not expose a machine-verifiable door mask; no precise door ratio is fabricated.",
+          "referencePixels": null,
+          "status": "not-independently-measurable"
+        }
+      ],
+      "explicitOutlierException": null,
+      "footprintFraction": {
+        "depth": 0.28,
+        "width": 0.78
+      },
+      "hierarchyRole": "district-major",
+      "measuredAlphaSize": [
+        615,
+        427
+      ],
+      "previousDisplayWidth": 166,
+      "rationale": "Raised from 166px using visible alpha height, footprint, terrain support, road width, population height, and neighbor spacing; class remains hierarchy evidence rather than a global multiplier.",
+      "scaleClass": "major",
+      "skillId": "capability-contracts",
+      "slotId": "skill-capability-contracts",
+      "sourceAsset": "/career-world/capitals/ninjaone/city-r1/skill-buildings/capability-contracts-r6.png",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "sourceSha256": "796b583b714338c3167f1f0f3e58bfdd960a41a9b710c6df6dcef1f3d0b84fbe",
+      "terrainSupport": {
+        "buildableCoverage": 1.0,
+        "buildableSlopeThreshold": 112,
+        "fabricCoverage": 0.928792,
+        "landCoverage": 1.0,
+        "landThreshold": 128,
+        "meanLandHeight": 145.678,
+        "sampleCount": 90
+      },
+      "visibleDisplaySize": [
+        186.422,
+        129.434
+      ]
+    },
+    {
+      "alphaBounds": [
+        11,
+        16,
+        1240,
+        1227
+      ],
+      "conceptPosition": {
+        "x": 0.572368,
+        "y": 0.34797600000000006
+      },
+      "confidence": "low",
+      "coordinatesChanged": false,
+      "displayFootprintPixels": {
+        "depth": 48.72,
+        "width": 139.2,
+        "widthToRoadWidth": 4.49
+      },
+      "displayHeight": 174.0,
+      "displayWidth": 174,
+      "districtId": "knowledge-api-citadel",
+      "evidence": [
+        {
+          "buildingVisibleHeightToRoadWidth": 5.42,
+          "kind": "road-width",
+          "note": "Road width is a shared city-scale cue; it is not treated as a building-width target.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildingVisibleHeightToHumanHeight": 5.42,
+          "kind": "population-height",
+          "note": "Temporary people are QA scale cues; no person is baked into the building asset.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildableCoverage": 0.929293,
+          "kind": "terrain-support",
+          "landCoverage": 1.0,
+          "meanLandHeight": 62.97,
+          "status": "measured"
+        },
+        {
+          "kind": "door-height",
+          "note": "The authored raster does not expose a machine-verifiable door mask; no precise door ratio is fabricated.",
+          "referencePixels": null,
+          "status": "not-independently-measurable"
+        }
+      ],
+      "explicitOutlierException": null,
+      "footprintFraction": {
+        "depth": 0.28,
+        "width": 0.8
+      },
+      "hierarchyRole": "district-major",
+      "measuredAlphaSize": [
+        1229,
+        1211
+      ],
+      "previousDisplayWidth": 146,
+      "rationale": "Raised from 146px using visible alpha height, footprint, terrain support, road width, population height, and neighbor spacing; class remains hierarchy evidence rather than a global multiplier.",
+      "scaleClass": "major",
+      "skillId": "tool-generation",
+      "slotId": "skill-tool-generation",
+      "sourceAsset": "/career-world/capitals/ninjaone/city-r1/skill-buildings/tool-generation-static.png",
+      "sourceDimensions": [
+        1254,
+        1254
+      ],
+      "sourceSha256": "fc2a2d6672413a80b97e8911737433d123fa0eca5608c0ee609f3760369e346a",
+      "terrainSupport": {
+        "buildableCoverage": 0.929293,
+        "buildableSlopeThreshold": 112,
+        "fabricCoverage": 0.812515,
+        "landCoverage": 1.0,
+        "landThreshold": 128,
+        "meanLandHeight": 62.97,
+        "sampleCount": 99
+      },
+      "visibleDisplaySize": [
+        170.531,
+        168.033
+      ]
+    },
+    {
+      "alphaBounds": [
+        0,
+        0,
+        615,
+        618
+      ],
+      "conceptPosition": {
+        "x": 0.370432,
+        "y": 0.372952
+      },
+      "confidence": "low",
+      "coordinatesChanged": false,
+      "displayFootprintPixels": {
+        "depth": 50.4,
+        "width": 140.4,
+        "widthToRoadWidth": 4.529
+      },
+      "displayHeight": 180.0,
+      "displayWidth": 180,
+      "districtId": "application-core",
+      "evidence": [
+        {
+          "buildingVisibleHeightToRoadWidth": 5.607,
+          "kind": "road-width",
+          "note": "Road width is a shared city-scale cue; it is not treated as a building-width target.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildingVisibleHeightToHumanHeight": 5.607,
+          "kind": "population-height",
+          "note": "Temporary people are QA scale cues; no person is baked into the building asset.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildableCoverage": 0.978022,
+          "kind": "terrain-support",
+          "landCoverage": 1.0,
+          "meanLandHeight": 181.099,
+          "status": "measured"
+        },
+        {
+          "kind": "door-height",
+          "note": "The authored raster does not expose a machine-verifiable door mask; no precise door ratio is fabricated.",
+          "referencePixels": null,
+          "status": "not-independently-measurable"
+        }
+      ],
+      "explicitOutlierException": null,
+      "footprintFraction": {
+        "depth": 0.28,
+        "width": 0.78
+      },
+      "hierarchyRole": "district-major",
+      "measuredAlphaSize": [
+        615,
+        618
+      ],
+      "previousDisplayWidth": 154,
+      "rationale": "Raised from 154px using visible alpha height, footprint, terrain support, road width, population height, and neighbor spacing; class remains hierarchy evidence rather than a global multiplier.",
+      "scaleClass": "major",
+      "skillId": "typescript",
+      "slotId": "skill-typescript",
+      "sourceAsset": "/career-world/capitals/ninjaone/city-r1/skill-buildings/typescript-r7.png",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "sourceSha256": "1cac0682a5b62d96bf4c1bb969bcd2591d5a83c8b15087fa05b4f3f07a33b6df",
+      "terrainSupport": {
+        "buildableCoverage": 0.978022,
+        "buildableSlopeThreshold": 112,
+        "fabricCoverage": 1.0,
+        "landCoverage": 1.0,
+        "landThreshold": 128,
+        "meanLandHeight": 181.099,
+        "sampleCount": 91
+      },
+      "visibleDisplaySize": [
+        172.969,
+        173.812
+      ]
+    },
+    {
+      "alphaBounds": [
+        54,
+        40,
+        1385,
+        1054
+      ],
+      "conceptPosition": {
+        "x": 0.6437680000000001,
+        "y": 0.39636000000000005
+      },
+      "confidence": "medium",
+      "coordinatesChanged": false,
+      "displayFootprintPixels": {
+        "depth": 57.0,
+        "width": 155.8,
+        "widthToRoadWidth": 5.026
+      },
+      "displayHeight": 142.5,
+      "displayWidth": 190,
+      "districtId": "application-core",
+      "evidence": [
+        {
+          "buildingVisibleHeightToRoadWidth": 4.292,
+          "kind": "road-width",
+          "note": "Road width is a shared city-scale cue; it is not treated as a building-width target.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildingVisibleHeightToHumanHeight": 4.292,
+          "kind": "population-height",
+          "note": "Temporary people are QA scale cues; no person is baked into the building asset.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildableCoverage": 0.977941,
+          "kind": "terrain-support",
+          "landCoverage": 1.0,
+          "meanLandHeight": 80.184,
+          "status": "measured"
+        },
+        {
+          "kind": "door-height",
+          "note": "The authored raster does not expose a machine-verifiable door mask; no precise door ratio is fabricated.",
+          "referencePixels": null,
+          "status": "not-independently-measurable"
+        }
+      ],
+      "explicitOutlierException": null,
+      "footprintFraction": {
+        "depth": 0.3,
+        "width": 0.82
+      },
+      "hierarchyRole": "district-major",
+      "measuredAlphaSize": [
+        1331,
+        1014
+      ],
+      "previousDisplayWidth": 178,
+      "rationale": "Calibrated as part of the React/Go/Python application cluster so neighboring workshops share one environmental scale without erasing their distinct footprints or hierarchy.",
+      "scaleClass": "major",
+      "skillId": "react",
+      "slotId": "skill-react",
+      "sourceAsset": "/career-world/capitals/ninjaone/city-r1/skill-buildings/react-static.png",
+      "sourceDimensions": [
+        1448,
+        1086
+      ],
+      "sourceSha256": "b5d7f0bd17b89d81fcdbba9ea97f5b9a2aad4850f91cf3ff43e21fcf54f9cafb",
+      "terrainSupport": {
+        "buildableCoverage": 0.977941,
+        "buildableSlopeThreshold": 112,
+        "fabricCoverage": 0.827365,
+        "landCoverage": 1.0,
+        "landThreshold": 128,
+        "meanLandHeight": 80.184,
+        "sampleCount": 136
+      },
+      "visibleDisplaySize": [
+        174.648,
+        133.052
+      ]
+    },
+    {
+      "alphaBounds": [
+        70,
+        35,
+        1386,
+        1063
+      ],
+      "conceptPosition": {
+        "x": 0.5713600000000001,
+        "y": 0.43376800000000004
+      },
+      "confidence": "medium",
+      "coordinatesChanged": false,
+      "displayFootprintPixels": {
+        "depth": 49.2,
+        "width": 134.48,
+        "widthToRoadWidth": 4.338
+      },
+      "displayHeight": 123.0,
+      "displayWidth": 164,
+      "districtId": "application-core",
+      "evidence": [
+        {
+          "buildingVisibleHeightToRoadWidth": 3.756,
+          "kind": "road-width",
+          "note": "Road width is a shared city-scale cue; it is not treated as a building-width target.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildingVisibleHeightToHumanHeight": 3.756,
+          "kind": "population-height",
+          "note": "Temporary people are QA scale cues; no person is baked into the building asset.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildableCoverage": 1.0,
+          "kind": "terrain-support",
+          "landCoverage": 1.0,
+          "meanLandHeight": 79.912,
+          "status": "measured"
+        },
+        {
+          "kind": "door-height",
+          "note": "The authored raster does not expose a machine-verifiable door mask; no precise door ratio is fabricated.",
+          "referencePixels": null,
+          "status": "not-independently-measurable"
+        }
+      ],
+      "explicitOutlierException": null,
+      "footprintFraction": {
+        "depth": 0.3,
+        "width": 0.82
+      },
+      "hierarchyRole": "district-standard",
+      "measuredAlphaSize": [
+        1316,
+        1028
+      ],
+      "previousDisplayWidth": 148,
+      "rationale": "Raised from 148px using visible alpha height, footprint, terrain support, road width, population height, and neighbor spacing; class remains hierarchy evidence rather than a global multiplier.",
+      "scaleClass": "standard",
+      "skillId": "tanstack",
+      "slotId": "skill-tanstack",
+      "sourceAsset": "/career-world/capitals/ninjaone/city-r1/skill-buildings/tanstack-static.png",
+      "sourceDimensions": [
+        1448,
+        1086
+      ],
+      "sourceSha256": "5455fe5d7038d8b39ef9c60a74a0a480c661af1d21156eacf83e0a9c27685967",
+      "terrainSupport": {
+        "buildableCoverage": 1.0,
+        "buildableSlopeThreshold": 112,
+        "fabricCoverage": 1.0,
+        "landCoverage": 1.0,
+        "landThreshold": 128,
+        "meanLandHeight": 79.912,
+        "sampleCount": 136
+      },
+      "visibleDisplaySize": [
+        149.05,
+        116.431
+      ]
+    },
+    {
+      "alphaBounds": [
+        8,
+        28,
+        637,
+        647
+      ],
+      "conceptPosition": {
+        "x": 0.660288,
+        "y": 0.44737600000000005
+      },
+      "confidence": "medium",
+      "coordinatesChanged": false,
+      "displayFootprintPixels": {
+        "depth": 52.48,
+        "width": 141.04,
+        "widthToRoadWidth": 4.55
+      },
+      "displayHeight": 171.175,
+      "displayWidth": 164,
+      "districtId": "application-core",
+      "evidence": [
+        {
+          "buildingVisibleHeightToRoadWidth": 5.117,
+          "kind": "road-width",
+          "note": "Road width is a shared city-scale cue; it is not treated as a building-width target.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildingVisibleHeightToHumanHeight": 5.117,
+          "kind": "population-height",
+          "note": "Temporary people are QA scale cues; no person is baked into the building asset.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildableCoverage": 1.0,
+          "kind": "terrain-support",
+          "landCoverage": 1.0,
+          "meanLandHeight": 80.809,
+          "status": "measured"
+        },
+        {
+          "kind": "door-height",
+          "note": "The authored raster does not expose a machine-verifiable door mask; no precise door ratio is fabricated.",
+          "referencePixels": null,
+          "status": "not-independently-measurable"
+        }
+      ],
+      "explicitOutlierException": null,
+      "footprintFraction": {
+        "depth": 0.32,
+        "width": 0.86
+      },
+      "hierarchyRole": "district-major",
+      "measuredAlphaSize": [
+        629,
+        619
+      ],
+      "previousDisplayWidth": 150,
+      "rationale": "Calibrated as part of the React/Go/Python application cluster so neighboring workshops share one environmental scale without erasing their distinct footprints or hierarchy.",
+      "scaleClass": "major",
+      "skillId": "golang",
+      "slotId": "skill-golang",
+      "sourceAsset": "/career-world/capitals/ninjaone/city-r1/skill-buildings/golang-layers/golang-building-static-alpha-r3.png",
+      "sourceDimensions": [
+        640,
+        668
+      ],
+      "sourceSha256": "b7da5c8a08b3c6a81aa583d63b567f07f0846a6d14c2c84c1a5edfe513c9058f",
+      "terrainSupport": {
+        "buildableCoverage": 1.0,
+        "buildableSlopeThreshold": 112,
+        "fabricCoverage": 0.722948,
+        "landCoverage": 1.0,
+        "landThreshold": 128,
+        "meanLandHeight": 80.809,
+        "sampleCount": 152
+      },
+      "visibleDisplaySize": [
+        161.181,
+        158.619
+      ]
+    },
+    {
+      "alphaBounds": [
+        0,
+        0,
+        617,
+        546
+      ],
+      "conceptPosition": {
+        "x": 0.29276,
+        "y": 0.477504
+      },
+      "confidence": "low",
+      "coordinatesChanged": false,
+      "displayFootprintPixels": {
+        "depth": 45.36,
+        "width": 126.36,
+        "widthToRoadWidth": 4.076
+      },
+      "displayHeight": 162.0,
+      "displayWidth": 162,
+      "districtId": "application-core",
+      "evidence": [
+        {
+          "buildingVisibleHeightToRoadWidth": 4.458,
+          "kind": "road-width",
+          "note": "Road width is a shared city-scale cue; it is not treated as a building-width target.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildingVisibleHeightToHumanHeight": 4.458,
+          "kind": "population-height",
+          "note": "Temporary people are QA scale cues; no person is baked into the building asset.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildableCoverage": 1.0,
+          "kind": "terrain-support",
+          "landCoverage": 1.0,
+          "meanLandHeight": 89.337,
+          "status": "measured"
+        },
+        {
+          "kind": "door-height",
+          "note": "The authored raster does not expose a machine-verifiable door mask; no precise door ratio is fabricated.",
+          "referencePixels": null,
+          "status": "not-independently-measurable"
+        }
+      ],
+      "explicitOutlierException": null,
+      "footprintFraction": {
+        "depth": 0.28,
+        "width": 0.78
+      },
+      "hierarchyRole": "district-standard",
+      "measuredAlphaSize": [
+        617,
+        546
+      ],
+      "previousDisplayWidth": 146,
+      "rationale": "Raised from 146px using visible alpha height, footprint, terrain support, road width, population height, and neighbor spacing; class remains hierarchy evidence rather than a global multiplier.",
+      "scaleClass": "standard",
+      "skillId": "csharp",
+      "slotId": "skill-csharp",
+      "sourceAsset": "/career-world/capitals/ninjaone/city-r1/skill-buildings/csharp-r2.png",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "sourceSha256": "94af1b69b5cd271680f709494cf5acb7a14f386944ad2077449ad22b606ab6e8",
+      "terrainSupport": {
+        "buildableCoverage": 1.0,
+        "buildableSlopeThreshold": 112,
+        "fabricCoverage": 0.833143,
+        "landCoverage": 1.0,
+        "landThreshold": 128,
+        "meanLandHeight": 89.337,
+        "sampleCount": 89
+      },
+      "visibleDisplaySize": [
+        156.178,
+        138.206
+      ]
+    },
+    {
+      "alphaBounds": [
+        0,
+        0,
+        637,
+        600
+      ],
+      "conceptPosition": {
+        "x": 0.54168,
+        "y": 0.48965600000000004
+      },
+      "confidence": "medium",
+      "coordinatesChanged": false,
+      "displayFootprintPixels": {
+        "depth": 45.92,
+        "width": 127.92,
+        "widthToRoadWidth": 4.126
+      },
+      "displayHeight": 164.0,
+      "displayWidth": 164,
+      "districtId": "application-core",
+      "evidence": [
+        {
+          "buildingVisibleHeightToRoadWidth": 4.96,
+          "kind": "road-width",
+          "note": "Road width is a shared city-scale cue; it is not treated as a building-width target.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildingVisibleHeightToHumanHeight": 4.96,
+          "kind": "population-height",
+          "note": "Temporary people are QA scale cues; no person is baked into the building asset.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildableCoverage": 1.0,
+          "kind": "terrain-support",
+          "landCoverage": 1.0,
+          "meanLandHeight": 125.152,
+          "status": "measured"
+        },
+        {
+          "kind": "door-height",
+          "note": "The authored raster does not expose a machine-verifiable door mask; no precise door ratio is fabricated.",
+          "referencePixels": null,
+          "status": "not-independently-measurable"
+        }
+      ],
+      "explicitOutlierException": null,
+      "footprintFraction": {
+        "depth": 0.28,
+        "width": 0.78
+      },
+      "hierarchyRole": "district-standard",
+      "measuredAlphaSize": [
+        637,
+        600
+      ],
+      "previousDisplayWidth": 150,
+      "rationale": "Calibrated as part of the React/Go/Python application cluster so neighboring workshops share one environmental scale without erasing their distinct footprints or hierarchy.",
+      "scaleClass": "standard",
+      "skillId": "python",
+      "slotId": "skill-python",
+      "sourceAsset": "/career-world/capitals/ninjaone/city-r1/skill-buildings/python-r2.png",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "sourceSha256": "42194a2974542d5b1e3788d57f12442135fa9cc28613385e1688c7426283574e",
+      "terrainSupport": {
+        "buildableCoverage": 1.0,
+        "buildableSlopeThreshold": 112,
+        "fabricCoverage": 0.983361,
+        "landCoverage": 1.0,
+        "landThreshold": 128,
+        "meanLandHeight": 125.152,
+        "sampleCount": 99
+      },
+      "visibleDisplaySize": [
+        163.231,
+        153.75
+      ]
+    },
+    {
+      "alphaBounds": [
+        0,
+        0,
+        615,
+        618
+      ],
+      "conceptPosition": {
+        "x": 0.3328,
+        "y": 0.49749600000000005
+      },
+      "confidence": "low",
+      "coordinatesChanged": false,
+      "displayFootprintPixels": {
+        "depth": 49.8,
+        "width": 136.12,
+        "widthToRoadWidth": 4.391
+      },
+      "displayHeight": 166.0,
+      "displayWidth": 166,
+      "districtId": "application-core",
+      "evidence": [
+        {
+          "buildingVisibleHeightToRoadWidth": 5.171,
+          "kind": "road-width",
+          "note": "Road width is a shared city-scale cue; it is not treated as a building-width target.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildingVisibleHeightToHumanHeight": 5.171,
+          "kind": "population-height",
+          "note": "Temporary people are QA scale cues; no person is baked into the building asset.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildableCoverage": 1.0,
+          "kind": "terrain-support",
+          "landCoverage": 1.0,
+          "meanLandHeight": 106.952,
+          "status": "measured"
+        },
+        {
+          "kind": "door-height",
+          "note": "The authored raster does not expose a machine-verifiable door mask; no precise door ratio is fabricated.",
+          "referencePixels": null,
+          "status": "not-independently-measurable"
+        }
+      ],
+      "explicitOutlierException": null,
+      "footprintFraction": {
+        "depth": 0.3,
+        "width": 0.82
+      },
+      "hierarchyRole": "district-standard",
+      "measuredAlphaSize": [
+        615,
+        618
+      ],
+      "previousDisplayWidth": 150,
+      "rationale": "Raised from 150px using visible alpha height, footprint, terrain support, road width, population height, and neighbor spacing; class remains hierarchy evidence rather than a global multiplier.",
+      "scaleClass": "standard",
+      "skillId": "postgresql",
+      "slotId": "skill-postgresql",
+      "sourceAsset": "/career-world/capitals/ninjaone/city-r1/skill-buildings/postgresql-r4.png",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "sourceSha256": "85ec84e26668ce55d0d8006b34c553af273449786d713d1e58d5f542621f8389",
+      "terrainSupport": {
+        "buildableCoverage": 1.0,
+        "buildableSlopeThreshold": 112,
+        "fabricCoverage": 1.0,
+        "landCoverage": 1.0,
+        "landThreshold": 128,
+        "meanLandHeight": 106.952,
+        "sampleCount": 124
+      },
+      "visibleDisplaySize": [
+        159.516,
+        160.294
+      ]
+    },
+    {
+      "alphaBounds": [
+        0,
+        0,
+        530,
+        618
+      ],
+      "conceptPosition": {
+        "x": 0.6933280000000002,
+        "y": 0.5195040000000001
+      },
+      "confidence": "low",
+      "coordinatesChanged": false,
+      "displayFootprintPixels": {
+        "depth": 39.52,
+        "width": 109.44,
+        "widthToRoadWidth": 3.53
+      },
+      "displayHeight": 152.0,
+      "displayWidth": 152,
+      "districtId": "application-core",
+      "evidence": [
+        {
+          "buildingVisibleHeightToRoadWidth": 4.735,
+          "kind": "road-width",
+          "note": "Road width is a shared city-scale cue; it is not treated as a building-width target.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildingVisibleHeightToHumanHeight": 4.735,
+          "kind": "population-height",
+          "note": "Temporary people are QA scale cues; no person is baked into the building asset.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildableCoverage": 1.0,
+          "kind": "terrain-support",
+          "landCoverage": 1.0,
+          "meanLandHeight": 79.5,
+          "status": "measured"
+        },
+        {
+          "kind": "door-height",
+          "note": "The authored raster does not expose a machine-verifiable door mask; no precise door ratio is fabricated.",
+          "referencePixels": null,
+          "status": "not-independently-measurable"
+        }
+      ],
+      "explicitOutlierException": null,
+      "footprintFraction": {
+        "depth": 0.26,
+        "width": 0.72
+      },
+      "hierarchyRole": "district-standard",
+      "measuredAlphaSize": [
+        530,
+        618
+      ],
+      "previousDisplayWidth": 136,
+      "rationale": "Raised from 136px using visible alpha height, footprint, terrain support, road width, population height, and neighbor spacing; class remains hierarchy evidence rather than a global multiplier.",
+      "scaleClass": "standard",
+      "skillId": "redis",
+      "slotId": "skill-redis",
+      "sourceAsset": "/career-world/capitals/ninjaone/city-r1/skill-buildings/redis-r2.png",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "sourceSha256": "c12ada9ea632d64bf56e02c4437639890024c84f84060b8675780e75c3dc98b5",
+      "terrainSupport": {
+        "buildableCoverage": 1.0,
+        "buildableSlopeThreshold": 112,
+        "fabricCoverage": 1.0,
+        "landCoverage": 1.0,
+        "landThreshold": 128,
+        "meanLandHeight": 79.5,
+        "sampleCount": 62
+      },
+      "visibleDisplaySize": [
+        125.875,
+        146.775
+      ]
+    },
+    {
+      "alphaBounds": [
+        0,
+        0,
+        623,
+        534
+      ],
+      "conceptPosition": {
+        "x": 0.654688,
+        "y": 0.5516480000000001
+      },
+      "confidence": "medium",
+      "coordinatesChanged": false,
+      "displayFootprintPixels": {
+        "depth": 54.0,
+        "width": 147.6,
+        "widthToRoadWidth": 4.761
+      },
+      "displayHeight": 180.0,
+      "displayWidth": 180,
+      "districtId": "infrastructure-works",
+      "evidence": [
+        {
+          "buildingVisibleHeightToRoadWidth": 4.845,
+          "kind": "road-width",
+          "note": "Road width is a shared city-scale cue; it is not treated as a building-width target.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildingVisibleHeightToHumanHeight": 4.845,
+          "kind": "population-height",
+          "note": "Temporary people are QA scale cues; no person is baked into the building asset.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildableCoverage": 1.0,
+          "kind": "terrain-support",
+          "landCoverage": 1.0,
+          "meanLandHeight": 77.172,
+          "status": "measured"
+        },
+        {
+          "kind": "door-height",
+          "note": "The authored raster does not expose a machine-verifiable door mask; no precise door ratio is fabricated.",
+          "referencePixels": null,
+          "status": "not-independently-measurable"
+        }
+      ],
+      "explicitOutlierException": null,
+      "footprintFraction": {
+        "depth": 0.3,
+        "width": 0.82
+      },
+      "hierarchyRole": "district-major",
+      "measuredAlphaSize": [
+        623,
+        534
+      ],
+      "previousDisplayWidth": 172,
+      "rationale": "Raised from 172px using visible alpha height, footprint, terrain support, road width, population height, and neighbor spacing; class remains hierarchy evidence rather than a global multiplier.",
+      "scaleClass": "major",
+      "skillId": "aws",
+      "slotId": "skill-aws",
+      "sourceAsset": "/career-world/capitals/ninjaone/city-r1/skill-buildings/aws-r1.png",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "sourceSha256": "1ce7edbeb339a61499d1e61debb36396b2044e998a8aae9204a54ab1a6c674d5",
+      "terrainSupport": {
+        "buildableCoverage": 1.0,
+        "buildableSlopeThreshold": 112,
+        "fabricCoverage": 0.757276,
+        "landCoverage": 1.0,
+        "landThreshold": 128,
+        "meanLandHeight": 77.172,
+        "sampleCount": 128
+      },
+      "visibleDisplaySize": [
+        175.219,
+        150.188
+      ]
+    },
+    {
+      "alphaBounds": [
+        0,
+        0,
+        631,
+        579
+      ],
+      "conceptPosition": {
+        "x": 0.565536,
+        "y": 0.568336
+      },
+      "confidence": "low",
+      "coordinatesChanged": false,
+      "displayFootprintPixels": {
+        "depth": 47.4,
+        "width": 132.72,
+        "widthToRoadWidth": 4.281
+      },
+      "displayHeight": 158.0,
+      "displayWidth": 158,
+      "districtId": "infrastructure-works",
+      "evidence": [
+        {
+          "buildingVisibleHeightToRoadWidth": 4.611,
+          "kind": "road-width",
+          "note": "Road width is a shared city-scale cue; it is not treated as a building-width target.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildingVisibleHeightToHumanHeight": 4.611,
+          "kind": "population-height",
+          "note": "Temporary people are QA scale cues; no person is baked into the building asset.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildableCoverage": 0.817518,
+          "kind": "terrain-support",
+          "landCoverage": 1.0,
+          "meanLandHeight": 107.336,
+          "status": "measured"
+        },
+        {
+          "kind": "door-height",
+          "note": "The authored raster does not expose a machine-verifiable door mask; no precise door ratio is fabricated.",
+          "referencePixels": null,
+          "status": "not-independently-measurable"
+        }
+      ],
+      "explicitOutlierException": null,
+      "footprintFraction": {
+        "depth": 0.3,
+        "width": 0.84
+      },
+      "hierarchyRole": "district-standard",
+      "measuredAlphaSize": [
+        631,
+        579
+      ],
+      "previousDisplayWidth": 144,
+      "rationale": "Raised from 144px using visible alpha height, footprint, terrain support, road width, population height, and neighbor spacing; class remains hierarchy evidence rather than a global multiplier.",
+      "scaleClass": "standard",
+      "skillId": "databricks",
+      "slotId": "skill-databricks",
+      "sourceAsset": "/career-world/capitals/ninjaone/city-r1/skill-buildings/databricks-r3.png",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "sourceSha256": "a8362591df59a2ca52d4946f4b6ab8f457b1ddfd18080aeccfd86b2fe3c378eb",
+      "terrainSupport": {
+        "buildableCoverage": 0.817518,
+        "buildableSlopeThreshold": 112,
+        "fabricCoverage": 0.911557,
+        "landCoverage": 1.0,
+        "landThreshold": 128,
+        "meanLandHeight": 107.336,
+        "sampleCount": 137
+      },
+      "visibleDisplaySize": [
+        155.778,
+        142.941
+      ]
+    },
+    {
+      "alphaBounds": [
+        0,
+        0,
+        615,
+        618
+      ],
+      "conceptPosition": {
+        "x": 0.6195760000000001,
+        "y": 0.578976
+      },
+      "confidence": "medium",
+      "coordinatesChanged": false,
+      "displayFootprintPixels": {
+        "depth": 44.4,
+        "width": 124.32,
+        "widthToRoadWidth": 4.01
+      },
+      "displayHeight": 148.0,
+      "displayWidth": 148,
+      "districtId": "infrastructure-works",
+      "evidence": [
+        {
+          "buildingVisibleHeightToRoadWidth": 4.61,
+          "kind": "road-width",
+          "note": "Road width is a shared city-scale cue; it is not treated as a building-width target.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildingVisibleHeightToHumanHeight": 4.61,
+          "kind": "population-height",
+          "note": "Temporary people are QA scale cues; no person is baked into the building asset.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildableCoverage": 1.0,
+          "kind": "terrain-support",
+          "landCoverage": 1.0,
+          "meanLandHeight": 86.07,
+          "status": "measured"
+        },
+        {
+          "kind": "door-height",
+          "note": "The authored raster does not expose a machine-verifiable door mask; no precise door ratio is fabricated.",
+          "referencePixels": null,
+          "status": "not-independently-measurable"
+        }
+      ],
+      "explicitOutlierException": null,
+      "footprintFraction": {
+        "depth": 0.3,
+        "width": 0.84
+      },
+      "hierarchyRole": "district-standard",
+      "measuredAlphaSize": [
+        615,
+        618
+      ],
+      "previousDisplayWidth": 158,
+      "rationale": "Reduced from 158px using visible alpha height, footprint, terrain support, road width, population height, and neighbor spacing; class remains hierarchy evidence rather than a global multiplier.",
+      "scaleClass": "standard",
+      "skillId": "docker",
+      "slotId": "skill-docker",
+      "sourceAsset": "/career-world/capitals/ninjaone/city-r1/skill-buildings/docker-r4.png",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "sourceSha256": "18aff84b4489a126ff056fe488c0b42a34e78cce5e011e7b50591fb1fdad9a0a",
+      "terrainSupport": {
+        "buildableCoverage": 1.0,
+        "buildableSlopeThreshold": 112,
+        "fabricCoverage": 0.965491,
+        "landCoverage": 1.0,
+        "landThreshold": 128,
+        "meanLandHeight": 86.07,
+        "sampleCount": 129
+      },
+      "visibleDisplaySize": [
+        142.219,
+        142.912
+      ]
+    },
+    {
+      "alphaBounds": [
+        0,
+        0,
+        632,
+        619
+      ],
+      "conceptPosition": {
+        "x": 0.5329440000000001,
+        "y": 0.609944
+      },
+      "confidence": "low",
+      "coordinatesChanged": false,
+      "displayFootprintPixels": {
+        "depth": 47.4,
+        "width": 132.72,
+        "widthToRoadWidth": 4.281
+      },
+      "displayHeight": 158.0,
+      "displayWidth": 158,
+      "districtId": "infrastructure-works",
+      "evidence": [
+        {
+          "buildingVisibleHeightToRoadWidth": 4.93,
+          "kind": "road-width",
+          "note": "Road width is a shared city-scale cue; it is not treated as a building-width target.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildingVisibleHeightToHumanHeight": 4.93,
+          "kind": "population-height",
+          "note": "Temporary people are QA scale cues; no person is baked into the building asset.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildableCoverage": 0.828571,
+          "kind": "terrain-support",
+          "landCoverage": 1.0,
+          "meanLandHeight": 182.979,
+          "status": "measured"
+        },
+        {
+          "kind": "door-height",
+          "note": "The authored raster does not expose a machine-verifiable door mask; no precise door ratio is fabricated.",
+          "referencePixels": null,
+          "status": "not-independently-measurable"
+        }
+      ],
+      "explicitOutlierException": null,
+      "footprintFraction": {
+        "depth": 0.3,
+        "width": 0.84
+      },
+      "hierarchyRole": "district-standard",
+      "measuredAlphaSize": [
+        632,
+        619
+      ],
+      "previousDisplayWidth": 142,
+      "rationale": "Raised from 142px using visible alpha height, footprint, terrain support, road width, population height, and neighbor spacing; class remains hierarchy evidence rather than a global multiplier.",
+      "scaleClass": "standard",
+      "skillId": "vmware",
+      "slotId": "skill-vmware",
+      "sourceAsset": "/career-world/capitals/ninjaone/city-r1/skill-buildings/vmware-r2.png",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "sourceSha256": "dafe3455b2c1c9cd7b66f7a9bbada2cfdc1ddd2df9c2db47f8148020706dd2ba",
+      "terrainSupport": {
+        "buildableCoverage": 0.828571,
+        "buildableSlopeThreshold": 112,
+        "fabricCoverage": 0.944363,
+        "landCoverage": 1.0,
+        "landThreshold": 128,
+        "meanLandHeight": 182.979,
+        "sampleCount": 140
+      },
+      "visibleDisplaySize": [
+        156.025,
+        152.816
+      ]
+    },
+    {
+      "alphaBounds": [
+        0,
+        0,
+        640,
+        627
+      ],
+      "conceptPosition": {
+        "x": 0.6051839999999999,
+        "y": 0.622152
+      },
+      "confidence": "low",
+      "coordinatesChanged": false,
+      "displayFootprintPixels": {
+        "depth": 47.36,
+        "width": 127.28,
+        "widthToRoadWidth": 4.106
+      },
+      "displayHeight": 148.0,
+      "displayWidth": 148,
+      "districtId": "infrastructure-works",
+      "evidence": [
+        {
+          "buildingVisibleHeightToRoadWidth": 4.677,
+          "kind": "road-width",
+          "note": "Road width is a shared city-scale cue; it is not treated as a building-width target.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildingVisibleHeightToHumanHeight": 4.677,
+          "kind": "population-height",
+          "note": "Temporary people are QA scale cues; no person is baked into the building asset.",
+          "referencePixels": 31,
+          "status": "credible-shared-reference"
+        },
+        {
+          "buildableCoverage": 0.981818,
+          "kind": "terrain-support",
+          "landCoverage": 1.0,
+          "meanLandHeight": 86.152,
+          "status": "measured"
+        },
+        {
+          "kind": "door-height",
+          "note": "The authored raster does not expose a machine-verifiable door mask; no precise door ratio is fabricated.",
+          "referencePixels": null,
+          "status": "not-independently-measurable"
+        }
+      ],
+      "explicitOutlierException": null,
+      "footprintFraction": {
+        "depth": 0.32,
+        "width": 0.86
+      },
+      "hierarchyRole": "district-standard",
+      "measuredAlphaSize": [
+        640,
+        627
+      ],
+      "previousDisplayWidth": 146,
+      "rationale": "Raised from 146px using visible alpha height, footprint, terrain support, road width, population height, and neighbor spacing; class remains hierarchy evidence rather than a global multiplier.",
+      "scaleClass": "standard",
+      "skillId": "macstadium",
+      "slotId": "skill-macstadium",
+      "sourceAsset": "/career-world/capitals/ninjaone/city-r1/skill-buildings/macstadium-r3.png",
+      "sourceDimensions": [
+        640,
+        640
+      ],
+      "sourceSha256": "cb9c3b3c416af0847a0d8f66a802a5119b6e1563746ba26f0f2cb6ea0eda521b",
+      "terrainSupport": {
+        "buildableCoverage": 0.981818,
+        "buildableSlopeThreshold": 112,
+        "fabricCoverage": 0.874661,
+        "landCoverage": 1.0,
+        "landThreshold": 128,
+        "meanLandHeight": 86.152,
+        "sampleCount": 165
+      },
+      "visibleDisplaySize": [
+        148.0,
+        144.994
+      ]
+    }
+  ],
+  "runtimeIntegrated": false,
+  "schemaVersion": 1,
+  "sharedReferences": {
+    "artboardDimensions": [
+      2571,
+      1929
+    ],
+    "doorEvidencePolicy": "low confidence unless independently measurable; no fabricated doorway precision",
+    "referenceHumanHeightPixels": 31,
+    "roadWidthPixels": 31
+  },
+  "sourceManifest": "public/career-world/capitals/ninjaone/manifests/city-node-composition-r1.json",
+  "sourceManifestSha256": "17e800e1fbcadbe8d75ce4b923d25cd36d622a0e475ba056497753aca8139c49",
+  "status": "qa-data-ready-for-runtime-integration",
+  "terrainAuthority": {
+    "coordinatesChanged": false,
+    "repoPath": "art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r2.png",
+    "sha256": "49142b55478362e85a02e14345859089a78bd01b49a3126d84ff1df7cb283b02"
+  }
+}

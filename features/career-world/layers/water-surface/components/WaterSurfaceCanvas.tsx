@@ -108,7 +108,9 @@ export function WaterSurfaceCanvas({
     <canvas
       aria-label="Animated dark-fantasy ocean surface"
       className="career-world__water-canvas"
+      data-authority-layer="L1"
       data-layer="water-surface"
+      data-motion-layer="L1_1"
       data-active={active}
       data-capital-lod={detailState.territoryToCapital.toFixed(3)}
       data-lod-tier={detailState.tier.id}

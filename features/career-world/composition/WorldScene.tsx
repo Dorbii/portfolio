@@ -10,15 +10,12 @@ import {
   type WheelEvent,
 } from "react";
 import { WorldBackdrop } from "../layers/world-backdrop";
-import {
-  NinjaOneInlandWaterCanvas,
-  WaterSurfaceCanvas,
-  type WaterRenderState,
-} from "../layers/water-surface";
+import { WaterSurfaceCanvas, type WaterRenderState } from "../layers/ocean";
+import { NinjaOneInlandWaterCanvas } from "../layers/inland-water";
 import {
   TERRITORIES,
-  TerritoryLandform,
 } from "../layers/territory-landform";
+import { TerritoryLandform } from "../layers/terrain";
 import { InfrastructureLayer } from "../layers/infrastructure";
 import {
   EnvironmentLayer,
@@ -46,6 +43,9 @@ import {
 } from "../layers/interface";
 import {
   DevelopmentOverlay,
+  EnvironmentLayerInspector,
+  NINJAONE_CAPITAL_CITY_WORLD_ORIGIN,
+  NINJAONE_CAPITAL_CITY_WORLD_SPAN,
   NINJAONE_CAPITAL_MVP_CAMERA,
   NINJAONE_CAPITAL_TOPOLOGY_PROOF_CAMERA,
   NINJAONE_CAPITAL_TOPOLOGY_REGISTRATION_ID,
@@ -67,9 +67,15 @@ import {
 import { DETAIL_POLICY, resolveDetailState } from "../shared/lod";
 import { WORLD_LIGHT } from "../shared/lighting";
 import { resolveTownPresentationAnchor } from "../shared/townPresentation";
+import {
+  DEFAULT_ENVIRONMENT_LAYER_VISIBILITY,
+  isEnvironmentLayerEffectivelyVisible,
+  type EnvironmentLayerId,
+} from "../shared/environmentLayers";
 
 interface WorldSceneProps {
   readonly enableDevelopmentTools: boolean;
+  readonly enablePerformanceProbe: boolean;
   readonly environmentProof: boolean;
   readonly initialView: "world" | "ninjaone-capital";
   readonly topologyProof: boolean;
@@ -84,7 +90,10 @@ interface DragState {
 const FOCUS_DURATION_MS = 680;
 const MAX_WHEEL_ZOOM_SCALE = 1.28;
 const MIN_WHEEL_ZOOM_SCALE = 1 / MAX_WHEEL_ZOOM_SCALE;
-const NINJAONE_CAPITAL_INTERACTIVE_MINIMUM_SPAN = 0.06;
+// The authored capital circulation source is 1448x1086. Zooming beyond this
+// bound enlarges the road/terrace pixels past an honest presentation scale and
+// makes sharp independent buildings appear pasted onto a blurred substrate.
+const NINJAONE_CAPITAL_INTERACTIVE_MINIMUM_SPAN = 0.075;
 const LIVE_PROJECT_STRUCTURES = Object.freeze(
   PROJECT_STRUCTURES.filter(({ id }) => id !== KAIZEN_NEIGHBORHOOD_OWNER_ID),
 );
@@ -113,11 +122,11 @@ function interactiveCameraMinimumSpan(camera: CameraView): number {
   const center = camera.origin.map(
     (value, index) => value + camera.span[index] * 0.5,
   );
-  const capitalMaximum = NINJAONE_CAPITAL_MVP_CAMERA.origin.map(
-    (value, index) => value + NINJAONE_CAPITAL_MVP_CAMERA.span[index],
+  const capitalMaximum = NINJAONE_CAPITAL_CITY_WORLD_ORIGIN.map(
+    (value, index) => value + NINJAONE_CAPITAL_CITY_WORLD_SPAN[index],
   );
   const centeredOnCapital = center.every((value, index) => (
-    value >= NINJAONE_CAPITAL_MVP_CAMERA.origin[index]
+    value >= NINJAONE_CAPITAL_CITY_WORLD_ORIGIN[index]
     && value <= capitalMaximum[index]
   ));
   return centeredOnCapital
@@ -243,16 +252,19 @@ const INTERACTIVE_TARGET_SELECTOR = [
   "input",
   "select",
   "textarea",
+  "[data-layer-inspector]",
   "[role='button']",
   "[data-semantic-structure][data-interactive='true']",
 ].join(",");
 
 export function WorldScene({
   enableDevelopmentTools,
+  enablePerformanceProbe,
   environmentProof,
   initialView,
   topologyProof,
 }: WorldSceneProps) {
+  const capitalRecoveryBaseline = initialView === "ninjaone-capital";
   const showNinjaOneCapital = !topologyProof && !environmentProof;
   const initialCamera = environmentProof
     ? NINJAONE_ENVIRONMENT_CAMERA
@@ -288,12 +300,40 @@ export function WorldScene({
   const [showGrid, setShowGrid] = useState(topologyProof);
   const [showLandmarkLabels, setShowLandmarkLabels] = useState(false);
   const [isPageVisible, setIsPageVisible] = useState(true);
+  const [environmentLayerVisibility, setEnvironmentLayerVisibility] = useState(
+    DEFAULT_ENVIRONMENT_LAYER_VISIBILITY,
+  );
   const detailState = resolveDetailState(camera);
+  const focusIsDetailedNinjaOneCapital = (
+    showNinjaOneCapital
+    && detailState.tier.id !== "world"
+    && detailState.tier.id !== "territory"
+  );
   const showNinjaOneInlandWater = (
     !topologyProof
     && detailState.tier.id !== "world"
     && detailState.tier.id !== "territory"
   );
+  const environmentLayerVisible = (id: EnvironmentLayerId) => (
+    !capitalRecoveryBaseline
+    || isEnvironmentLayerEffectivelyVisible(environmentLayerVisibility, id)
+  );
+  const oceanAuthorityVisible = environmentLayerVisible("L1");
+  const oceanMotionVisible = environmentLayerVisible("L1_1");
+  const terrainAuthorityVisible = environmentLayerVisible("L2");
+  const terrainDetailVisible = environmentLayerVisible("L2_1");
+  const terrainWildlifeVisible = environmentLayerVisible("L2_2");
+  const inlandWaterAuthorityVisible = environmentLayerVisible("L3");
+  const inlandWaterMotionVisible = environmentLayerVisible("L3_1");
+  const inlandWaterEffectsVisible = environmentLayerVisible("L3_2");
+  const aquaticLifeVisible = environmentLayerVisible("L3_3");
+
+  const handleEnvironmentLayerToggle = useCallback((id: EnvironmentLayerId) => {
+    setEnvironmentLayerVisibility((current) => Object.freeze({
+      ...current,
+      [id]: !current[id],
+    }));
+  }, []);
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -520,6 +560,18 @@ export function WorldScene({
       data-camera-minimum-span={interactiveCameraMinimumSpan(camera)}
       data-page-visible={isPageVisible}
       data-capital-lod={detailState.territoryToCapital.toFixed(3)}
+      data-capital-recovery-baseline={capitalRecoveryBaseline}
+      data-layer-l1={oceanAuthorityVisible}
+      data-layer-l1-1={oceanMotionVisible}
+      data-layer-l1-2={environmentLayerVisible("L1_2")}
+      data-layer-l2={terrainAuthorityVisible}
+      data-layer-l2-1={terrainDetailVisible}
+      data-layer-l2-2={terrainWildlifeVisible}
+      data-layer-l2-3={environmentLayerVisible("L2_3")}
+      data-layer-l3={inlandWaterAuthorityVisible}
+      data-layer-l3-1={inlandWaterMotionVisible}
+      data-layer-l3-2={inlandWaterEffectsVisible}
+      data-layer-l3-3={aquaticLifeVisible}
       data-close-lod={detailState.siteToClose.toFixed(3)}
       data-detail-tier={detailState.tier.id}
       data-environment-proof={environmentProof
@@ -543,26 +595,32 @@ export function WorldScene({
       tabIndex={0}
     >
       <WorldBackdrop light={WORLD_LIGHT} />
-      <WaterSurfaceCanvas
-        active={isPageVisible}
-        camera={camera}
-        detailState={detailState}
-        light={WORLD_LIGHT}
-        onRenderStateChange={setRenderState}
-      />
-      <TerritoryLandform
-        camera={camera}
-        detailState={detailState}
-      />
-      {showNinjaOneInlandWater ? (
-        <NinjaOneInlandWaterCanvas
-          active={isPageVisible}
+      {oceanAuthorityVisible ? (
+        <WaterSurfaceCanvas
+          active={isPageVisible && oceanMotionVisible}
           camera={camera}
           detailState={detailState}
           light={WORLD_LIGHT}
+          onRenderStateChange={setRenderState}
         />
       ) : null}
-      {showNinjaOneCapital ? (
+      {terrainAuthorityVisible ? (
+        <TerritoryLandform
+          camera={camera}
+          detailState={detailState}
+        />
+      ) : null}
+      {showNinjaOneInlandWater && inlandWaterAuthorityVisible ? (
+        <NinjaOneInlandWaterCanvas
+          active={isPageVisible && inlandWaterMotionVisible}
+          aquaticLifeEnabled={aquaticLifeVisible}
+          camera={camera}
+          detailState={detailState}
+          effectsEnabled={inlandWaterEffectsVisible}
+          light={WORLD_LIGHT}
+        />
+      ) : null}
+      {showNinjaOneCapital && !capitalRecoveryBaseline ? (
         <NinjaOneCapitalMvp
           camera={camera}
           detailState={detailState}
@@ -573,13 +631,17 @@ export function WorldScene({
         <NinjaOneCapitalTopologyProof camera={camera} />
       ) : (
         <>
-          <NinjaOneEnvironmentProof
-            active={isPageVisible}
-            camera={camera}
-            detailState={detailState}
-            proofMode={environmentProof}
-          />
-          {!environmentProof ? (
+          {!capitalRecoveryBaseline || terrainAuthorityVisible ? (
+            <NinjaOneEnvironmentProof
+              active={isPageVisible}
+              camera={camera}
+              detailState={detailState}
+              proofMode={environmentProof}
+              showSupplementalDetail={terrainDetailVisible}
+              showWildlife={terrainWildlifeVisible}
+            />
+          ) : null}
+          {!environmentProof && !focusIsDetailedNinjaOneCapital ? (
             <>
               <InfrastructureLayer
                 camera={camera}
@@ -645,7 +707,13 @@ export function WorldScene({
           territories={TERRITORIES}
         />
       ) : null}
-      <PerformanceProbe enabled={enableDevelopmentTools} />
+      {capitalRecoveryBaseline ? (
+        <EnvironmentLayerInspector
+          onToggle={handleEnvironmentLayerToggle}
+          visibility={environmentLayerVisibility}
+        />
+      ) : null}
+      <PerformanceProbe enabled={enableDevelopmentTools || enablePerformanceProbe} />
     </div>
   );
 }

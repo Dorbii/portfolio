@@ -417,5 +417,14 @@
     ]
   },
   "productionReady": false,
-  "runtimeEligible": false
+  "runtimeEligible": false,
+  "nodeScaleAuthority": "individual-building-environment-proportion-r1",
+  "scaleClassControlsDisplayWidth": false,
+  "skillDisplayWidthRange": [
+    148,
+    290
+  ],
+  "stationDisplayWidth": 250,
+  "individualScaleAuditPath": "/career-world/capitals/ninjaone/city-r1/qa/city-building-environment-scale-r1.json",
+  "individualScaleAuditPasses": true
 }

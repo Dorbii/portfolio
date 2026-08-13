@@ -8,9 +8,12 @@ export default defineConfig([
   globalIgnores([
     ".next/**",
     ".vinext/**",
+    ".codex-run/**",
+    ".codex-tmp/**",
+    ".tmp/**",
     "dist/**",
     "next-env.d.ts",
-    "public/**"
+    "public/**",
+    "tmp/**"
   ])
 ]);
-

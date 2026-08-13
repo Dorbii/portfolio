@@ -33,6 +33,8 @@ interface NinjaOneEnvironmentProofProps {
   readonly camera: CameraView;
   readonly detailState: DetailState;
   readonly proofMode?: boolean;
+  readonly showSupplementalDetail?: boolean;
+  readonly showWildlife?: boolean;
 }
 
 const TIER_SUMMARIES = Object.freeze({
@@ -110,6 +112,8 @@ export function NinjaOneEnvironmentProof({
   camera,
   detailState,
   proofMode = false,
+  showSupplementalDetail = true,
+  showWildlife = true,
 }: NinjaOneEnvironmentProofProps) {
   const worldX = NINJAONE_ENVIRONMENT_WORLD_ORIGIN[0] * WORLD_PLANE.width;
   const worldY = NINJAONE_ENVIRONMENT_WORLD_ORIGIN[1] * WORLD_PLANE.height;
@@ -124,30 +128,33 @@ export function NinjaOneEnvironmentProof({
   const geologySource = plateTier && visibleLayers.includes("terrain-geology")
     ? NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES[plateTier]
     : null;
-  const staticFoliageSource = plateTier && visibleLayers.includes("static-foliage")
+  const staticFoliageSource = showSupplementalDetail
+    && plateTier && visibleLayers.includes("static-foliage")
     ? NINJAONE_ENVIRONMENT_STATIC_FOLIAGE_SOURCES[plateTier]
     : null;
-  const secondaryReliefSource = plateTier
+  const secondaryReliefSource = showSupplementalDetail && plateTier
     && visibleLayers.includes("secondary-relief")
     ? NINJAONE_ENVIRONMENT_SECONDARY_RELIEF_SOURCES[plateTier]
     : null;
-  const tertiaryReliefSource = plateTier
+  const tertiaryReliefSource = showSupplementalDetail && plateTier
     && visibleLayers.includes("tertiary-relief")
     ? NINJAONE_ENVIRONMENT_TERTIARY_RELIEF_SOURCES[plateTier]
     : null;
-  const trailSource = plateTier && visibleLayers.includes("trails")
+  const trailSource = showSupplementalDetail
+    && plateTier && visibleLayers.includes("trails")
     ? NINJAONE_ENVIRONMENT_TRAIL_SOURCES[plateTier]
     : null;
-  const surfaceEcologySource = plateTier
+  const surfaceEcologySource = showSupplementalDetail && plateTier
     && visibleLayers.includes("surface-ecology")
     ? NINJAONE_ENVIRONMENT_SURFACE_ECOLOGY_SOURCES[plateTier]
     : null;
-  const visibleRocks = visibleLayers.includes("shared-rocks")
+  const visibleRocks = showSupplementalDetail
+    && visibleLayers.includes("shared-rocks")
     ? NINJAONE_ENVIRONMENT_ROCK_INSTANCES.filter(
       (instance) => visibleAtTier(instance, detailState),
     )
     : [];
-  const visibleWildlife = visibleLayers.includes("wildlife")
+  const visibleWildlife = showWildlife && visibleLayers.includes("wildlife")
     ? NINJAONE_ENVIRONMENT_WILDLIFE_INSTANCES.filter(
       (instance) => visibleAtTier(instance, detailState),
     )
@@ -174,8 +181,10 @@ export function NinjaOneEnvironmentProof({
           ? NINJAONE_ENVIRONMENT_PROOF_ID
           : undefined}
         data-environment-role={proofMode ? "isolated-proof" : "production-layer"}
+        data-environment-supplemental-detail={showSupplementalDetail}
         data-environment-semantic-summary={TIER_SUMMARIES[detailState.tier.id]}
         data-environment-shared-node-count={sharedNodeCount}
+        data-environment-wildlife={showWildlife}
         data-lod-tier={detailState.tier.id}
         preserveAspectRatio="none"
         role="img"
@@ -266,7 +275,8 @@ export function NinjaOneEnvironmentProof({
                 active={active}
                 camera={camera}
                 detailState={detailState}
-                showFoliage={visibleLayers.includes("shared-animated-foliage")}
+                showFoliage={showSupplementalDetail
+                  && visibleLayers.includes("shared-animated-foliage")}
               />
             {secondaryReliefSource ? (
               <PlateImage layer="secondary-relief" source={secondaryReliefSource} />

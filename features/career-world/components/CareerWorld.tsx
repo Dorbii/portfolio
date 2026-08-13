@@ -3,6 +3,7 @@ import "../styles/career-world.css";
 
 interface CareerWorldProps {
   readonly enableDevelopmentTools?: boolean;
+  readonly enablePerformanceProbe?: boolean;
   readonly environmentProof?: boolean;
   readonly initialView?: "world" | "ninjaone-capital";
   readonly topologyProof?: boolean;
@@ -10,6 +11,7 @@ interface CareerWorldProps {
 
 export function CareerWorld({
   enableDevelopmentTools = false,
+  enablePerformanceProbe = false,
   environmentProof = false,
   initialView = "world",
   topologyProof = false,
@@ -28,13 +30,11 @@ export function CareerWorld({
       </header>
       <WorldScene
         enableDevelopmentTools={enableDevelopmentTools}
+        enablePerformanceProbe={enablePerformanceProbe}
         environmentProof={environmentProof}
         initialView={initialView}
         topologyProof={topologyProof}
       />
-      <footer className="career-world__footer">
-        Phase 6 · capital-core and coastline validation review
-      </footer>
     </main>
   );
 }

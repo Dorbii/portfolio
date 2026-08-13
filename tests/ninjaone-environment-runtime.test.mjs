@@ -12,7 +12,6 @@ import {
   NINJAONE_ENVIRONMENT_NATIVE_MAX_MOUNTED_VOID_MASKS,
   NINJAONE_ENVIRONMENT_NATIVE_TILES,
   NINJAONE_ENVIRONMENT_NATIVE_VOID_MASKS,
-  selectNinjaOneEnvironmentNativeTiles,
 } from "../features/career-world/development/model/ninjaOneEnvironmentNativeDetail.ts";
 import {
   NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES,
@@ -25,7 +24,6 @@ import {
 } from "../features/career-world/development/model/ninjaOneEnvironmentFoliage.ts";
 import {
   NINJAONE_ENVIRONMENT_SEAM_INTEGRATION_RESOURCES,
-  ninjaOneEnvironmentSeamSelectionKey,
   selectNinjaOneEnvironmentSeamIntegration,
 } from "../features/career-world/development/model/ninjaOneEnvironmentSeamIntegration.ts";
 import {
@@ -42,6 +40,7 @@ import {
   recordNinjaOneEnvironmentFoliageNodeLoadEvent,
   recordNinjaOneEnvironmentNativeDecodeEvent,
   recordNinjaOneEnvironmentRequiredPresentationEvent,
+  NINJAONE_ENVIRONMENT_NATIVE_RELEASE_SPAN,
   resolveNinjaOneEnvironmentNativeDemand,
   resolveNinjaOneEnvironmentFoliageResidency,
   resolveNinjaOneEnvironmentOptionalGroupCapacity,
@@ -100,11 +99,11 @@ function decodedTerrainKeys(plan) {
   return new Set(plan.terrainTiles.map(ninjaOneEnvironmentNativeTileKey));
 }
 
-test("world and territory keep native sources absent while site preloads close detail", () => {
+test("world and territory keep native sources absent while the configured close preload admits detail", () => {
   const world = centeredCamera([0.5, 0.5], 1);
   const territory = centeredCamera([0.25, 0.2], 0.3);
-  const siteBeforePreload = centeredCamera([0.3125, 0.25], 0.09);
-  const sitePreload = centeredCamera([0.3125, 0.25], 0.06);
+  const siteBeforePreload = centeredCamera([0.3125, 0.25], 0.101);
+  const sitePreload = centeredCamera([0.3125, 0.25], 0.1);
   const close = FIXED_CAMERAS.C2;
 
   for (const camera of [world, territory, siteBeforePreload]) {
@@ -121,8 +120,11 @@ test("world and territory keep native sources absent while site preloads close d
 test("close residency uses zoom hysteresis and survives rapid reverse zoom", () => {
   const center = [0.3125, 0.25];
   const close = centeredCamera(center, 0.04);
-  const hysteresisBand = centeredCamera(center, 0.08);
-  const releasedSite = centeredCamera(center, 0.09);
+  const hysteresisBand = centeredCamera(center, NINJAONE_ENVIRONMENT_NATIVE_RELEASE_SPAN);
+  const releasedSite = centeredCamera(
+    center,
+    NINJAONE_ENVIRONMENT_NATIVE_RELEASE_SPAN + 0.001,
+  );
 
   const entered = demandFor(close);
   assert.equal(entered, true);
