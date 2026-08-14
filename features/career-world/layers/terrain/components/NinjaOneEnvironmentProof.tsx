@@ -126,7 +126,16 @@ export function NinjaOneEnvironmentProof({
   const plateTier = detailState.tier.id === "world"
     ? null
     : detailState.tier.id as NinjaOneEnvironmentPlateTier;
-  const geologySource = plateTier && visibleLayers.includes("terrain-geology")
+  // Capital-scale geology is already owned by TerritoryLandform. The authored
+  // 4:3 plate is retained for isolated proof and close-detail continuity, but
+  // mounting it at the default capital camera duplicates the land authority
+  // and exposes the plate's rectangular registration boundary.
+  const geologyPlateAdmitted = proofMode
+    || plateTier === "site"
+    || plateTier === "close";
+  const geologySource = plateTier
+    && geologyPlateAdmitted
+    && visibleLayers.includes("terrain-geology")
     ? NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES[plateTier]
     : null;
   const staticFoliageSource = showSupplementalDetail

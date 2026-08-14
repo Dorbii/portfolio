@@ -430,6 +430,11 @@ test("the root-selectable environment proof renders semantic terrain and suppres
     scene,
     /<NinjaOneEnvironmentProof[\s\S]*?proofMode=\{environmentProof\}/,
   );
+  assert.match(
+    renderer,
+    /const geologyPlateAdmitted = proofMode[\s\S]*?plateTier === "site"[\s\S]*?plateTier === "close"/,
+    "production capital LOD must not mount the duplicate 4:3 geology plate",
+  );
   for (const layer of [
     "terrain-geology",
     "secondary-relief",
