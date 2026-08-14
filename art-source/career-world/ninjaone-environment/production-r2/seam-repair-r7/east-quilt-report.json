@@ -1,0 +1,42 @@
+{
+  "source": "art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r2.png",
+  "sourceSha256": "49142B55478362E85A02E14345859089A78BD01B49A3126D84FF1DF7CB283B02",
+  "output": ".codex-tmp/seam-r8-feature/east.png",
+  "outputSha256": "AE4FDDB45F731AF7D7A23B60F10A87A58F3BAEA259493C489C9DF907359FD94A",
+  "generated": "art-source/career-world/ninjaone-environment/production-r2/seam-repair-r7/contexts/east/generated/south-full.png",
+  "generatedSha256": "EF56DE96A1B97A543EAEF7A61ECB50856BEE4B49BCF21FD5EF46425376640BEA",
+  "contextId": "south-full",
+  "contact": "south",
+  "sourceBox": [
+    1344,
+    1648,
+    2880,
+    2672
+  ],
+  "entryBand": [
+    96,
+    288
+  ],
+  "leaveBand": [
+    640,
+    896
+  ],
+  "exitBand": [
+    1488,
+    1536
+  ],
+  "boundaryAnchorRadius": 16,
+  "boundarySampleRadius": 3,
+  "localFrequencyRadius": 0.0,
+  "detailGain": 1.0,
+  "anchor": 96,
+  "edgePenalty": 12.0,
+  "featurePenalty": 160.0,
+  "featureRadius": 14,
+  "maxStep": 3,
+  "smoothness": 6.0,
+  "maskMode": "minimum-error-hard-cut",
+  "changedPixels": 804559,
+  "alphaPreserved": true,
+  "projectionChanged": false
+}

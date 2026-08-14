@@ -1,0 +1,24 @@
+{
+  "left": ".codex-tmp/seam-r8-feature/west.png",
+  "leftSha256": "48132970E35C7AEBA9AB76171FFD289CA8F9FC78D1CE039D95F7587F4149EED7",
+  "right": ".codex-tmp/seam-r8-feature/east.png",
+  "rightSha256": "AE4FDDB45F731AF7D7A23B60F10A87A58F3BAEA259493C489C9DF907359FD94A",
+  "output": ".codex-tmp/seam-r8-feature/horizontal.png",
+  "outputSha256": "AC956AE9E5E088FCC5AAC0941368D6C1B7F4A391559F35F585DCDEE043C21C12",
+  "overlap": [
+    1344,
+    1536
+  ],
+  "edgePenalty": 12.0,
+  "featurePenalty": 160.0,
+  "featureRadius": 14,
+  "maxStep": 2,
+  "smoothness": 8.0,
+  "seamColumnRange": [
+    1344,
+    1535
+  ],
+  "alphaPreserved": true,
+  "projectionChanged": false,
+  "maskMode": "minimum-error-hard-cut"
+}

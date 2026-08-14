@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import argparse
 from pathlib import Path
 
 from PIL import Image
@@ -63,22 +64,38 @@ def replace(source: Path, target: Path) -> None:
 
 
 def main() -> None:
-    report = json.loads(INTEGRATION_REPORT.read_text(encoding="utf-8"))
-    expected_output = str(SOURCE.relative_to(ROOT)).replace("\\", "/")
+    parser = argparse.ArgumentParser(
+        description="Promote a verified terrain contact repair into one LOD cohort.",
+    )
+    parser.add_argument("--source", type=Path, default=SOURCE)
+    parser.add_argument("--report", type=Path, default=INTEGRATION_REPORT)
+    parser.add_argument("--revision", type=int, default=4)
+    arguments = parser.parse_args()
+
+    source_path = arguments.source.resolve()
+    report_path = arguments.report.resolve()
+    revision = arguments.revision
+    if ROOT not in source_path.parents or ROOT not in report_path.parents:
+        raise RuntimeError("Source and report must remain inside the repository.")
+    if revision <= 0:
+        raise RuntimeError("Revision must be positive.")
+
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    expected_output = str(source_path.relative_to(ROOT)).replace("\\", "/")
     if report.get("output") != expected_output:
         raise RuntimeError("Integration report does not describe the promoted source.")
-    if report.get("outputSha256") != sha256(SOURCE):
+    if report.get("outputSha256") != sha256(source_path):
         raise RuntimeError("Promoted source does not match the integration report hash.")
     if report.get("alphaPreserved") is not True:
         raise RuntimeError("Promotion requires byte-identical terrain alpha.")
     if report.get("projectionChanged") is not False:
         raise RuntimeError("Promotion refuses a terrain repair with projection drift.")
 
-    with Image.open(SOURCE) as source_image:
+    with Image.open(source_path) as source_image:
         source = source_image.convert("RGBA")
     outputs: dict[str, dict[str, object]] = {}
     for tier, dimensions in TIERS.items():
-        target = OUTPUT_ROOT / f"ninjaone-environment-geology-{tier}-r4.webp"
+        target = OUTPUT_ROOT / f"ninjaone-environment-geology-{tier}-r{revision}.webp"
         resized = source.resize(dimensions, Image.Resampling.LANCZOS)
         temporary = target.with_suffix(".next.webp")
         resized.save(temporary, "WEBP", quality=90, method=6, exact=True)
@@ -98,25 +115,28 @@ def main() -> None:
         "and geography; open water remains owned by the global water layer"
     )
     geology["sourcePath"] = (
-        "/art-source/career-world/ninjaone-environment/production-r2/"
-        "ninjaone-environment-terrain-master-detail-r4.png"
+        f"/{str(source_path.relative_to(ROOT)).replace(chr(92), '/')}"
     )
-    geology["sourceSha256"] = sha256(SOURCE)
+    geology["sourceSha256"] = sha256(source_path)
     geology["sources"] = outputs
     geology["contactRepair"] = {
         "method": "neighbor-context-outpaint-narrow-band-composite",
         "reportPath": (
-            "/art-source/career-world/ninjaone-environment/production-r2/"
-            "seam-repair-r4/integration-report.json"
+            f"/{str(report_path.relative_to(ROOT)).replace(chr(92), '/')}"
         ),
         "alphaPreserved": True,
         "projectionChanged": False,
-        "contacts": ["B1-B2", "B1-C1"],
+        "contacts": [
+            contact
+            for contact, orientation in (("B1-B2", "east"), ("B1-C1", "south"))
+            if orientation in report.get("contacts", ("east", "south"))
+        ],
         "core": report["core"],
         "feather": report["feather"],
         "windowFeather": report["windowFeather"],
         "colorFieldRadius": report["colorFieldRadius"],
         "colorFieldMethod": report["colorFieldMethod"],
+        "contactMethods": report.get("contactMethods"),
     }
     temporary_manifest = MANIFEST.with_suffix(".next.json")
     temporary_manifest.write_text(
@@ -124,7 +144,7 @@ def main() -> None:
         encoding="utf-8",
     )
     replace(temporary_manifest, MANIFEST)
-    print(json.dumps({"sourceSha256": sha256(SOURCE), "outputs": outputs}, indent=2))
+    print(json.dumps({"sourceSha256": sha256(source_path), "outputs": outputs}, indent=2))
 
 
 if __name__ == "__main__":

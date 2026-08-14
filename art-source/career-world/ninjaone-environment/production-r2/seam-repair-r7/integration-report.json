@@ -1,0 +1,104 @@
+{
+  "source": "art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r2.png",
+  "sourceSha256": "49142B55478362E85A02E14345859089A78BD01B49A3126D84FF1DF7CB283B02",
+  "output": "art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r7.png",
+  "outputSha256": "C2DE4A7C711F1512E021B388495E8B4F59058EF81B1D94ABC16B2C36EFDF1670",
+  "dimensions": [
+    5760,
+    4320
+  ],
+  "alphaPreserved": true,
+  "projectionChanged": false,
+  "core": 520,
+  "feather": 240,
+  "windowFeather": 96,
+  "colorFieldRadius": 48,
+  "colorFieldMethod": "feature-protected minimum-error hard cut plus generated-anchored vertical contact",
+  "contactMethods": {
+    "south": "two-sided generated overlap with feature-protected minimum-error hard cuts",
+      "east": "generated-anchored retained vertical contact"
+  },
+  "contacts": [
+    "south",
+    "east"
+  ],
+  "applied": [
+    {
+      "id": "south-west",
+      "generatedPath": "art-source/career-world/ninjaone-environment/production-r2/seam-repair-r7/contexts/west/generated/south-full.png",
+      "generatedSha256": "57459032CC785826B81DA0869DB439103715DB638F5BD8E2FFC71CF3371BA97C",
+      "sourceBox": [
+        0,
+        1648,
+        1536,
+        2672
+      ],
+      "entryBand": [
+        96,
+        288
+      ],
+      "leaveBand": [
+        640,
+        896
+      ],
+      "exitBand": [
+        1488,
+        1536
+      ],
+      "featurePenalty": 160,
+      "featureRadius": 14
+    },
+    {
+      "id": "south-east",
+      "generatedPath": "art-source/career-world/ninjaone-environment/production-r2/seam-repair-r7/contexts/east/generated/south-full.png",
+      "generatedSha256": "EF56DE96A1B97A543EAEF7A61ECB50856BEE4B49BCF21FD5EF46425376640BEA",
+      "sourceBox": [
+        1344,
+        1648,
+        2880,
+        2672
+      ],
+      "entryBand": [
+        96,
+        288
+      ],
+      "leaveBand": [
+        640,
+        896
+      ],
+      "exitBand": [
+        1488,
+        1536
+      ],
+      "featurePenalty": 160,
+      "featureRadius": 14
+    },
+    {
+      "id": "east-full-retained",
+      "generatedPath": "art-source/career-world/ninjaone-environment/production-r2/seam-repair-r7/contexts/vertical/generated/east-full.png",
+      "generatedSha256": "ED159F8A4F266186EF880B4688EA7793E3F1B3E37CAF7242820C7DA8F2475372",
+      "sourceBox": [
+        2368,
+        624,
+        3392,
+        2160
+      ]
+    }
+  ],
+  "stitch": {
+    "overlap": [
+      1344,
+      1536
+    ],
+    "edgePenalty": 12,
+    "featurePenalty": 160,
+    "featureRadius": 14,
+    "maxStep": 2,
+    "smoothness": 8,
+    "maskMode": "feature-protected-minimum-error-hard-cut"
+  },
+  "qa": {
+    "contact": "art-source/career-world/ninjaone-environment/production-r2/seam-repair-r7/qa/b1-b2-full-contact-r7.webp",
+    "overview": "art-source/career-world/ninjaone-environment/production-r2/seam-repair-r7/qa/terrain-overview-r7.webp"
+  }
+}

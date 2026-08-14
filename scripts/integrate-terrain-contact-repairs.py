@@ -69,17 +69,74 @@ def main() -> None:
     parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
     parser.add_argument("--contexts", type=Path, default=DEFAULT_CONTEXTS)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument(
+        "--report",
+        type=Path,
+        help=(
+            "Optional report path. The canonical default output writes beside the "
+            "retained contexts; diagnostic outputs write beside themselves."
+        ),
+    )
     parser.add_argument("--core", type=int, default=96)
     parser.add_argument("--feather", type=int, default=96)
     parser.add_argument("--window-feather", type=int, default=96)
     parser.add_argument("--color-field-radius", type=int, default=48)
+    parser.add_argument(
+        "--mask-mode",
+        choices=("centered-feather", "target-hard"),
+        default="centered-feather",
+        help=(
+            "target-hard inserts only the manifest targetBox at full weight. "
+            "Use it for edge-constrained forward outpainting."
+        ),
+    )
+    parser.add_argument(
+        "--color-field-method",
+        choices=(
+            "source-low-plus-generated-high",
+            "generated-anchored",
+            "generated-direct",
+        ),
+        default="source-low-plus-generated-high",
+        help=(
+            "Use source-low-plus-generated-high for detail-only repairs, or "
+            "generated-anchored when the predecessor's low-frequency field contains "
+            "the defect being repaired, or generated-direct for diagnostic use."
+        ),
+    )
+    parser.add_argument(
+        "--contact",
+        choices=("east", "south"),
+        action="append",
+        help="Limit integration to one or more contact orientations.",
+    )
+    parser.add_argument(
+        "--anchored-contact",
+        choices=("east", "south"),
+        action="append",
+        help=(
+            "Use generated-anchored for the selected contact while retaining the "
+            "global color-field method for other contacts."
+        ),
+    )
     arguments = parser.parse_args()
 
     source_path = arguments.source.resolve()
     contexts_path = arguments.contexts.resolve()
     output_path = arguments.output.resolve()
+    report_path = (
+        arguments.report.resolve()
+        if arguments.report
+        else (
+            contexts_path.parent / "integration-report.json"
+            if output_path == DEFAULT_OUTPUT.resolve()
+            else output_path.with_suffix(".integration-report.json")
+        )
+    )
     if ROOT not in output_path.parents:
         raise RuntimeError(f"Output must remain inside the repository: {output_path}")
+    if ROOT not in report_path.parents:
+        raise RuntimeError(f"Report must remain inside the repository: {report_path}")
 
     manifest = json.loads((contexts_path / "manifest.json").read_text(encoding="utf-8"))
     with Image.open(source_path) as image:
@@ -89,6 +146,8 @@ def main() -> None:
     applied: list[dict[str, object]] = []
 
     for record in manifest["contexts"]:
+        if arguments.contact and record["contact"] not in arguments.contact:
+            continue
         generated_path = contexts_path / "generated" / f"{record['id']}.png"
         if not generated_path.exists():
             continue
@@ -113,19 +172,67 @@ def main() -> None:
             generated.filter(ImageFilter.GaussianBlur(arguments.color_field_radius)),
             dtype=np.float32,
         )
-        generated_array = np.clip(
-            source_low + (generated_array - generated_low),
-            0,
-            255,
+        record_method = (
+            "generated-anchored"
+            if record["contact"] in (arguments.anchored_contact or ())
+            else arguments.color_field_method
         )
-        along_x = edge_weight(width, arguments.window_feather)
-        along_y = edge_weight(height, arguments.window_feather)
-        if record["contact"] == "east":
-            across = center_weight(width, arguments.core, arguments.feather)
-            mask = along_y[:, None] * across[None, :]
+        if record_method == "source-low-plus-generated-high":
+            generated_array = np.clip(
+                source_low + (generated_array - generated_low),
+                0,
+                255,
+            )
+        elif record_method == "generated-anchored":
+            anchor = max(16, min(arguments.window_feather, width // 4, height // 4))
+            if record["contact"] == "east":
+                start_delta = np.median(
+                    source_array[top:bottom, left:left + anchor, :3]
+                    - generated_array[:, :anchor, :],
+                    axis=(0, 1),
+                )
+                end_delta = np.median(
+                    source_array[top:bottom, right - anchor:right, :3]
+                    - generated_array[:, -anchor:, :],
+                    axis=(0, 1),
+                )
+                interpolation = np.linspace(0.0, 1.0, width, dtype=np.float32)
+                correction = (
+                    start_delta[None, None, :] * (1.0 - interpolation[None, :, None])
+                    + end_delta[None, None, :] * interpolation[None, :, None]
+                )
+            else:
+                start_delta = np.median(
+                    source_array[top:top + anchor, left:right, :3]
+                    - generated_array[:anchor, :, :],
+                    axis=(0, 1),
+                )
+                end_delta = np.median(
+                    source_array[bottom - anchor:bottom, left:right, :3]
+                    - generated_array[-anchor:, :, :],
+                    axis=(0, 1),
+                )
+                interpolation = np.linspace(0.0, 1.0, height, dtype=np.float32)
+                correction = (
+                    start_delta[None, None, :] * (1.0 - interpolation[:, None, None])
+                    + end_delta[None, None, :] * interpolation[:, None, None]
+                )
+            generated_array = np.clip(generated_array + correction, 0, 255)
+        if arguments.mask_mode == "target-hard":
+            if "targetBox" not in record:
+                raise RuntimeError("target-hard requires targetBox in every context.")
+            target_left, target_top, target_right, target_bottom = record["targetBox"]
+            mask = np.zeros((height, width), dtype=np.float32)
+            mask[target_top:target_bottom, target_left:target_right] = 1.0
         else:
-            across = center_weight(height, arguments.core, arguments.feather)
-            mask = across[:, None] * along_x[None, :]
+            along_x = edge_weight(width, arguments.window_feather)
+            along_y = edge_weight(height, arguments.window_feather)
+            if record["contact"] == "east":
+                across = center_weight(width, arguments.core, arguments.feather)
+                mask = along_y[:, None] * across[None, :]
+            else:
+                across = center_weight(height, arguments.core, arguments.feather)
+                mask = across[:, None] * along_x[None, :]
         local_alpha = source_array[top:bottom, left:right, 3] / 255.0
         mask *= local_alpha
         local = output_rgb[top:bottom, left:right]
@@ -139,6 +246,7 @@ def main() -> None:
                 "generatedPath": str(generated_path.relative_to(ROOT)).replace("\\", "/"),
                 "generatedSha256": sha256(generated_path),
                 "sourceBox": record["sourceBox"],
+                "colorFieldMethod": record_method,
             }
         )
 
@@ -173,10 +281,24 @@ def main() -> None:
         "feather": arguments.feather,
         "windowFeather": arguments.window_feather,
         "colorFieldRadius": arguments.color_field_radius,
-        "colorFieldMethod": "source-low-frequency-plus-generated-high-frequency",
+        "maskMode": arguments.mask_mode,
+        "colorFieldMethod": (
+            "mixed-by-contact"
+            if arguments.anchored_contact
+            else arguments.color_field_method
+        ),
+        "contactMethods": {
+            contact: (
+                "generated-anchored"
+                if contact in (arguments.anchored_contact or ())
+                else arguments.color_field_method
+            )
+            for contact in sorted(set(arguments.contact or ("east", "south")))
+        },
+        "contacts": sorted(set(arguments.contact or ("east", "south"))),
         "applied": applied,
     }
-    report_path = contexts_path.parent / "integration-report.json"
+    report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2))
 

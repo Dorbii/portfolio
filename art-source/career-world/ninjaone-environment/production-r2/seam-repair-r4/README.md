@@ -22,6 +22,19 @@ This directory contains the accepted inputs and proof for repairing visible cont
 
    The checked-in defaults match r4: 96 px core, 96 px contact feather, 96 px context-window feather, and 48 px color-field radius. The compositor retains the source low-frequency color field and admits only generated high-frequency detail through a narrow feathered band. Source alpha is copied byte-for-byte.
 
+   If the predecessor's low-frequency field is itself the visible defect, use
+   `--color-field-method generated-anchored` with `--contact east` or
+   `--contact south`. This admits the selected semantic repair through the same
+   bounded feather, while anchoring its color to both predecessor sides and
+   interpolating that correction across the contact. It avoids reconstructing
+   the rejected predecessor seam. `generated-direct` is retained for diagnosis,
+   not normal promotion.
+
+   Use `--anchored-contact south` when one operation needs the anchored method
+   but the other contact should keep the default detail-only method. Rebuild
+   both from the same clean predecessor in one run. Do not stack a second repair
+   over a rejected candidate; that preserves the old feather boundary underneath.
+
 4. Inspect the exact registered camera at close zoom with `L2_1` terrain detail and `L2_2` wildlife disabled. Reject the candidate if any contact cuts a tree or rock, changes terrain orientation, becomes softer than adjacent cells, or reveals a horizontal/vertical material boundary.
 
 5. Promote only after visual acceptance:

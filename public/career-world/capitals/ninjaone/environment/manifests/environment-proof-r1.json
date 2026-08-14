@@ -43,40 +43,40 @@
   "layers": {
     "geology": {
       "ownership": "canonical-mask-registered B1 B2 C1 C2 regional detail; semantic contact repairs use neighbor-context outpainting while preserving canonical alpha and geography; open water remains owned by the global water layer",
-      "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r4.png",
-      "sourceSha256": "DAFD44FF8016CE5EA2439F0566EE364B5F9AE7E43BB56C81E366DD0808FFFA63",
+      "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r7.png",
+      "sourceSha256": "C2DE4A7C711F1512E021B388495E8B4F59058EF81B1D94ABC16B2C36EFDF1670",
       "sources": {
         "territory": {
-          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-territory-r4.webp?v=463020703502",
+          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-territory-r7.webp?v=676ebddf391a",
           "dimensions": [
             720,
             540
           ],
-          "sha256": "463020703502C1F677C78856E14A293AEA27294CC203240833D5AF9897279F19"
+          "sha256": "676EBDDF391A85835D2B8F4A0A80B6E8841DC4F65C3337F426234A5F662DD84D"
         },
         "capital": {
-          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-capital-r4.webp?v=b6b13e994438",
+          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-capital-r7.webp?v=da25af4a7f5e",
           "dimensions": [
             1440,
             1080
           ],
-          "sha256": "B6B13E9944384C43AA631E1EC79B24F4F336504D96A6C65529E8D32D6CA82E06"
+          "sha256": "DA25AF4A7F5E36FC8298F0ACA6455185A9DD77E63BC4383DE5D6DD68737C8441"
         },
         "site": {
-          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-site-r4.webp?v=37d0dee2c949",
+          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-site-r7.webp?v=47c0130bace2",
           "dimensions": [
             2880,
             2160
           ],
-          "sha256": "37D0DEE2C949FF91DBF4E9D956C2E9C74CB90CB57A331101CB8E1BC41D81DB11"
+          "sha256": "47C0130BACE2F3D3FF64563EAA65791CE756E50F1A128CBDFD1B8FEF5E881403"
         },
         "close": {
-          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-close-r4.webp?v=b8a5b16ea575",
+          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-close-r7.webp?v=5d733a414dc9",
           "dimensions": [
             5760,
             4320
           ],
-          "sha256": "B8A5B16EA575A01BF67263CBC97D4862E46324773CE56B876A4CF5534653E698"
+          "sha256": "5D733A414DC92C26B8203D9ED8DA8980ACC30FD1352BC167D395418CF124C8B6"
         }
       },
       "contactMask": {
@@ -96,18 +96,22 @@
       },
       "contactRepair": {
         "method": "neighbor-context-outpaint-narrow-band-composite",
-        "reportPath": "/art-source/career-world/ninjaone-environment/production-r2/seam-repair-r4/integration-report.json",
+        "reportPath": "/art-source/career-world/ninjaone-environment/production-r2/seam-repair-r7/integration-report.json",
         "alphaPreserved": true,
         "projectionChanged": false,
         "contacts": [
           "B1-B2",
           "B1-C1"
         ],
-        "core": 96,
-        "feather": 96,
+        "core": 520,
+        "feather": 240,
         "windowFeather": 96,
         "colorFieldRadius": 48,
-        "colorFieldMethod": "source-low-frequency-plus-generated-high-frequency"
+        "colorFieldMethod": "feature-protected minimum-error hard cut plus generated-anchored vertical contact",
+        "contactMethods": {
+          "south": "two-sided generated overlap with feature-protected minimum-error hard cuts",
+          "east": "generated-anchored accepted r5 contact"
+        }
       }
     },
     "secondaryRelief": {

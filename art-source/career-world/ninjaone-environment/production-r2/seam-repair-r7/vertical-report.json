@@ -1,0 +1,38 @@
+{
+  "source": ".codex-tmp/seam-r8-feature/horizontal.png",
+  "sourceSha256": "AC956AE9E5E088FCC5AAC0941368D6C1B7F4A391559F35F585DCDEE043C21C12",
+  "output": "art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r7.png",
+  "outputSha256": "C2DE4A7C711F1512E021B388495E8B4F59058EF81B1D94ABC16B2C36EFDF1670",
+  "dimensions": [
+    5760,
+    4320
+  ],
+  "alphaPreserved": true,
+  "projectionChanged": false,
+  "core": 520,
+  "feather": 240,
+  "windowFeather": 96,
+  "colorFieldRadius": 48,
+  "maskMode": "centered-feather",
+  "colorFieldMethod": "generated-anchored",
+  "contactMethods": {
+    "east": "generated-anchored"
+  },
+  "contacts": [
+    "east"
+  ],
+  "applied": [
+    {
+      "id": "east-full",
+      "generatedPath": "art-source/career-world/ninjaone-environment/production-r2/seam-repair-r7/contexts/vertical/generated/east-full.png",
+      "generatedSha256": "ED159F8A4F266186EF880B4688EA7793E3F1B3E37CAF7242820C7DA8F2475372",
+      "sourceBox": [
+        2368,
+        624,
+        3392,
+        2160
+      ],
+      "colorFieldMethod": "generated-anchored"
+    }
+  ]
+}

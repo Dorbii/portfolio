@@ -1,0 +1,44 @@
+{
+  "source": "art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r4.png",
+  "cohortLayout": [
+    2,
+    2
+  ],
+  "targetCell": [
+    0,
+    0
+  ],
+  "targetDimensions": [
+    2880,
+    2160
+  ],
+  "window": 1024,
+  "overlap": 256,
+  "outpaintBand": 640,
+  "selectedContacts": [
+    "east"
+  ],
+  "continuousContacts": [
+    "east"
+  ],
+  "continuousOffset": 624,
+  "continuousLength": 1536,
+  "projectionChanged": false,
+  "contexts": [
+    {
+      "id": "east-full",
+      "contact": "east",
+      "sourceBox": [
+        2368,
+        624,
+        3392,
+        2160
+      ],
+      "dimensions": [
+        1024,
+        1536
+      ],
+      "generatedPath": "art-source/career-world/ninjaone-environment/production-r2/seam-repair-r7/contexts/vertical/generated/east-full.png"
+    }
+  ]
+}

@@ -53,6 +53,44 @@ def main() -> None:
     parser.add_argument("--window", type=int, default=1024)
     parser.add_argument("--overlap", type=int, default=256)
     parser.add_argument("--outpaint-band", type=int, default=256)
+    parser.add_argument(
+        "--outpaint-mode",
+        choices=("center-band", "forward-band"),
+        default="center-band",
+        help=(
+            "center-band repairs both sides of a contact; forward-band preserves "
+            "the source-side edge and generates only into the neighboring cell."
+        ),
+    )
+    parser.add_argument(
+        "--contact",
+        choices=("east", "south"),
+        action="append",
+        help="Contact to extract. Repeat to select both; defaults to both.",
+    )
+    parser.add_argument(
+        "--continuous-contact",
+        choices=("east", "south"),
+        action="append",
+        help=(
+            "Emit one complete rectangular context for the selected contact "
+            "instead of overlapping square windows."
+        ),
+    )
+    parser.add_argument(
+        "--continuous-offset",
+        type=int,
+        default=0,
+        help="Offset along a continuous contact before extracting its context.",
+    )
+    parser.add_argument(
+        "--continuous-length",
+        type=int,
+        help=(
+            "Optional length along a continuous contact. Defaults to the full "
+            "contact after --continuous-offset."
+        ),
+    )
     arguments = parser.parse_args()
 
     source_path = arguments.source.resolve()
@@ -61,6 +99,12 @@ def main() -> None:
         raise RuntimeError(f"Output must remain inside the repository: {output_path}")
     if arguments.window <= 0 or arguments.overlap < 0:
         raise RuntimeError("Window must be positive and overlap cannot be negative.")
+    if not 0 < arguments.outpaint_band <= arguments.window:
+        raise RuntimeError("Outpaint band must be positive and no wider than the window.")
+    if arguments.continuous_offset < 0:
+        raise RuntimeError("Continuous contact offset cannot be negative.")
+    if arguments.continuous_length is not None and arguments.continuous_length <= 0:
+        raise RuntimeError("Continuous contact length must be positive when provided.")
     stride = arguments.window - arguments.overlap
     if stride <= 0:
         raise RuntimeError("Overlap must be smaller than the window.")
@@ -79,6 +123,17 @@ def main() -> None:
 
     output_path.mkdir(parents=True, exist_ok=True)
     records: list[dict[str, object]] = []
+    selected_contacts = set(arguments.contact or ("east", "south"))
+
+    def continuous_span(contact_length: int) -> tuple[int, int]:
+        start = arguments.continuous_offset
+        if start >= contact_length:
+            raise RuntimeError("Continuous contact offset is outside the contact.")
+        length = arguments.continuous_length or (contact_length - start)
+        end = start + length
+        if end > contact_length:
+            raise RuntimeError("Continuous contact span exceeds the contact length.")
+        return start, end
 
     def write_context(name: str, box: tuple[int, int, int, int], contact: str) -> None:
         path = output_path / f"{name}.png"
@@ -86,12 +141,33 @@ def main() -> None:
         context.save(path, compress_level=6)
         outpaint = context.copy()
         alpha = outpaint.getchannel("A")
-        center = arguments.window // 2
-        half_band = arguments.outpaint_band // 2
         if contact == "east":
-            alpha.paste(0, (center - half_band, 0, center + half_band, arguments.window))
+            center = context.width // 2
+            if arguments.outpaint_mode == "forward-band":
+                target_box = (center, 0, center + arguments.outpaint_band, context.height)
+            else:
+                half_band = arguments.outpaint_band // 2
+                target_box = (
+                    center - half_band,
+                    0,
+                    center + half_band,
+                    context.height,
+                )
         else:
-            alpha.paste(0, (0, center - half_band, arguments.window, center + half_band))
+            center = context.height // 2
+            if arguments.outpaint_mode == "forward-band":
+                target_box = (0, center, context.width, center + arguments.outpaint_band)
+            else:
+                half_band = arguments.outpaint_band // 2
+                target_box = (
+                    0,
+                    center - half_band,
+                    context.width,
+                    center + half_band,
+                )
+        if target_box[2] > context.width or target_box[3] > context.height:
+            raise RuntimeError("Outpaint target exceeds the extracted context.")
+        alpha.paste(0, target_box)
         outpaint.putalpha(alpha)
         outpaint_path = output_path / f"{name}-outpaint.png"
         outpaint.save(outpaint_path, compress_level=6)
@@ -101,40 +177,67 @@ def main() -> None:
                 "contact": contact,
                 "sourceBox": list(box),
                 "dimensions": [box[2] - box[0], box[3] - box[1]],
+                "targetBox": list(target_box),
                 "path": str(path.relative_to(ROOT)).replace("\\", "/"),
                 "outpaintPath": str(outpaint_path.relative_to(ROOT)).replace("\\", "/"),
             }
         )
 
-    if column + 1 < arguments.columns:
+    if "east" in selected_contacts and column + 1 < arguments.columns:
         seam_x = (column + 1) * cell_width
         start_y = row * cell_height
-        for index, offset in enumerate(
-            centered_starts(cell_height, arguments.window, stride),
-        ):
-            top = start_y + offset
-            box = (
-                seam_x - arguments.window // 2,
-                top,
-                seam_x + arguments.window // 2,
-                top + arguments.window,
+        if "east" in (arguments.continuous_contact or ()):
+            span_start, span_end = continuous_span(cell_height)
+            write_context(
+                "east-full",
+                (
+                    seam_x - arguments.window // 2,
+                    start_y + span_start,
+                    seam_x + arguments.window // 2,
+                    start_y + span_end,
+                ),
+                "east",
             )
-            write_context(f"east-{index:02d}", box, "east")
+        else:
+            for index, offset in enumerate(
+                centered_starts(cell_height, arguments.window, stride),
+            ):
+                top = start_y + offset
+                box = (
+                    seam_x - arguments.window // 2,
+                    top,
+                    seam_x + arguments.window // 2,
+                    top + arguments.window,
+                )
+                write_context(f"east-{index:02d}", box, "east")
 
-    if row + 1 < arguments.rows:
+    if "south" in selected_contacts and row + 1 < arguments.rows:
         seam_y = (row + 1) * cell_height
         start_x = column * cell_width
-        for index, offset in enumerate(
-            centered_starts(cell_width, arguments.window, stride),
-        ):
-            left = start_x + offset
-            box = (
-                left,
-                seam_y - arguments.window // 2,
-                left + arguments.window,
-                seam_y + arguments.window // 2,
+        if "south" in (arguments.continuous_contact or ()):
+            span_start, span_end = continuous_span(cell_width)
+            write_context(
+                "south-full",
+                (
+                    start_x + span_start,
+                    seam_y - arguments.window // 2,
+                    start_x + span_end,
+                    seam_y + arguments.window // 2,
+                ),
+                "south",
             )
-            write_context(f"south-{index:02d}", box, "south")
+        else:
+            for index, offset in enumerate(
+                centered_starts(cell_width, arguments.window, stride),
+            ):
+                left = start_x + offset
+                box = (
+                    left,
+                    seam_y - arguments.window // 2,
+                    left + arguments.window,
+                    seam_y + arguments.window // 2,
+                )
+                write_context(f"south-{index:02d}", box, "south")
 
     manifest = {
         "source": str(source_path.relative_to(ROOT)).replace("\\", "/"),
@@ -144,6 +247,11 @@ def main() -> None:
         "window": arguments.window,
         "overlap": arguments.overlap,
         "outpaintBand": arguments.outpaint_band,
+        "outpaintMode": arguments.outpaint_mode,
+        "selectedContacts": sorted(selected_contacts),
+        "continuousContacts": sorted(set(arguments.continuous_contact or ())),
+        "continuousOffset": arguments.continuous_offset,
+        "continuousLength": arguments.continuous_length,
         "projectionChanged": False,
         "contexts": records,
     }
