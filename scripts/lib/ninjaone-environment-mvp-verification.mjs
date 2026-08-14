@@ -87,7 +87,6 @@ export const NINJAONE_MVP_RESIDENCY_VISUAL_ISOLATION = Object.freeze({
   interface: "display:none!important",
   seam: "required-presentation-preserved",
   water: "visibility:hidden!important",
-  wildlife: "display:none!important",
 });
 const ENVIRONMENT_ORIGIN = Object.freeze([0.125, 0]);
 const ENVIRONMENT_SPAN = Object.freeze([0.25, 1 / 3]);
@@ -1243,7 +1242,6 @@ export async function auditFoliageIsolationEvidence({
     || proof?.isolation?.terrain !== "preserved"
     || !proof?.isolation?.hud?.includes("header/footer visibility:hidden")
     || proof?.isolation?.water !== "visibility:hidden!important"
-    || proof?.isolation?.wildlife !== "display:none!important"
     || proof?.isolation?.seams !== "visibility:hidden!important"
   ) failures.push("foliage_isolation.state_not_explicit");
 

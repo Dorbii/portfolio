@@ -168,8 +168,8 @@ if (
   || manifest.registration.gridCell.worldBounds.origin.join(",") !== `0.25,${1 / 6}`
   || manifest.registration.gridCell.worldBounds.span.join(",") !== `0.125,${1 / 6}`
   || manifest.registration.nativeTileDimensions.join(",") !== "1448,1086"
-  || manifest.eligibility.maxDetailEnterSpan !== 0.05
-  || manifest.eligibility.maxDetailRetainSpan !== 0.06
+  || manifest.eligibility.maxDetailEnterSpan !== 0.075
+  || manifest.eligibility.maxDetailRetainSpan !== 0.09
   || manifest.eligibility.maxDetailRetainSpan
     <= manifest.eligibility.maxDetailEnterSpan
   || manifest.budgets.maximumSupplementalNodes !== 6

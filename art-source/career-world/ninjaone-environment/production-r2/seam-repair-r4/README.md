@@ -35,7 +35,7 @@ This directory contains the accepted inputs and proof for repairing visible cont
    both from the same clean predecessor in one run. Do not stack a second repair
    over a rejected candidate; that preserves the old feather boundary underneath.
 
-4. Inspect the exact registered camera at close zoom with `L2_1` terrain detail and `L2_2` wildlife disabled. Reject the candidate if any contact cuts a tree or rock, changes terrain orientation, becomes softer than adjacent cells, or reveals a horizontal/vertical material boundary.
+4. Inspect the exact registered camera at close zoom with `L2_1` terrain detail and `L2_2` foliage motion disabled. Reject the candidate if any contact cuts a tree or rock, changes terrain orientation, becomes softer than adjacent cells, or reveals a horizontal/vertical material boundary.
 
 5. Promote only after visual acceptance:
 

@@ -2,7 +2,6 @@ export const TERRAIN_DETAIL_LAYER_ID = "L2_1" as const;
 
 export { NinjaOneEnvironmentNativeDetail } from "./components/NinjaOneEnvironmentNativeDetail";
 export { TerrainDetailLayer } from "./components/TerrainDetailLayer";
-export { FoliageLayer } from "./components/FoliageLayer";
 export {
   ACTIVITY_PROP_INSTANCES,
   ACTIVITY_PROP_KINDS,

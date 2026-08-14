@@ -63,6 +63,28 @@ def replace(source: Path, target: Path) -> None:
     os.replace(source, target)
 
 
+def repair_c1_c2_lod_contact(image: Image.Image) -> Image.Image:
+    repaired = image.convert("RGBA")
+    pixels = repaired.load()
+    width, height = repaired.size
+    contact_y = height // 2
+    for x in range(width // 2, width):
+        current = pixels[x, contact_y]
+        lower_near = pixels[x, contact_y + 1]
+        lower_far = pixels[x, contact_y + 2]
+        if current[3] == 0 or lower_near[3] == 0 or lower_far[3] == 0:
+            continue
+        corrected_channels = []
+        for channel in range(3):
+            extrapolated = max(
+                0,
+                min(255, lower_near[channel] * 2 - lower_far[channel]),
+            )
+            corrected_channels.append(round(current[channel] * 0.35 + extrapolated * 0.65))
+        pixels[x, contact_y] = (*corrected_channels, current[3])
+    return repaired
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Promote a verified terrain contact repair into one LOD cohort.",
@@ -97,6 +119,8 @@ def main() -> None:
     for tier, dimensions in TIERS.items():
         target = OUTPUT_ROOT / f"ninjaone-environment-geology-{tier}-r{revision}.webp"
         resized = source.resize(dimensions, Image.Resampling.LANCZOS)
+        if "C1-C2" in report.get("contactIds", ()):
+            resized = repair_c1_c2_lod_contact(resized)
         temporary = target.with_suffix(".next.webp")
         resized.save(temporary, "WEBP", quality=90, method=6, exact=True)
         replace(temporary, target)
@@ -109,7 +133,7 @@ def main() -> None:
 
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     geology = manifest["layers"]["geology"]
-    geology["ownership"] = (
+    geology["ownership"] = report.get("ownership") or (
         "canonical-mask-registered B1 B2 C1 C2 regional detail; semantic contact "
         "repairs use neighbor-context outpainting while preserving canonical alpha "
         "and geography; open water remains owned by the global water layer"
@@ -120,13 +144,16 @@ def main() -> None:
     geology["sourceSha256"] = sha256(source_path)
     geology["sources"] = outputs
     geology["contactRepair"] = {
-        "method": "neighbor-context-outpaint-narrow-band-composite",
+        "method": report.get(
+            "method",
+            "neighbor-context-outpaint-narrow-band-composite",
+        ),
         "reportPath": (
             f"/{str(report_path.relative_to(ROOT)).replace(chr(92), '/')}"
         ),
         "alphaPreserved": True,
         "projectionChanged": False,
-        "contacts": [
+        "contacts": report.get("contactIds") or [
             contact
             for contact, orientation in (("B1-B2", "east"), ("B1-C1", "south"))
             if orientation in report.get("contacts", ("east", "south"))

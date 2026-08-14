@@ -364,6 +364,8 @@ test("territory renderer consumes cohort epochs and retains outgoing sources", a
     /detailPlateDecodedAtRef\.current !== null[\s\S]*resolveLodSourceOpacity\(detailPlateDecodedAtRef\.current, now\)/,
     "a late territory plate must fade in instead of appearing at full semantic weight",
   );
+  assert.match(source, /const pixelRatio = settledPixelRatio;/);
+  assert.doesNotMatch(source, /Math\.min\(window\.devicePixelRatio \|\| 1, 1\.25\)/);
   assert.match(
     source,
     /const crossfadeTargets = resolveLodCrossfadeTargets\([\s\S]*let capitalTarget = crossfadeTargets\.lower;[\s\S]*let siteTarget = crossfadeTargets\.upper;/,

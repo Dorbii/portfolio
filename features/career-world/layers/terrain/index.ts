@@ -15,11 +15,10 @@ export { TERRITORIES } from "./model/territories";
 export type { TerrainSiteTile } from "./model/siteTiles";
 export type { Territory } from "./model/territories";
 export {
-  FoliageLayer,
   TERRAIN_DETAIL_LAYER_ID,
   TerrainDetailLayer,
 } from "./detail";
-export { TERRAIN_WILDLIFE_LAYER_ID } from "./wildlife";
+export { FoliageLayer, TERRAIN_FOLIAGE_LAYER_ID } from "./foliage";
 export { TERRAIN_DYNAMIC_SHADOWS_LAYER_ID } from "./dynamic-shadows";
 
 export const TERRAIN_LAYER: LayerDescriptor = Object.freeze({

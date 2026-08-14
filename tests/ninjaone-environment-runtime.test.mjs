@@ -135,7 +135,7 @@ test("close residency uses zoom hysteresis and survives rapid reverse zoom", () 
   assert.equal(demandFor(close, released), true);
 });
 
-test("animated foliage uses independent max-detail hysteresis and exits before .074", () => {
+test("animated foliage enters at the reachable close floor and retains through .09", () => {
   const cameraAtSpan = (span) => centeredCamera([0.3125, 0.25], span);
   const eligible = (span, previousEligible) => (
     resolveNinjaOneEnvironmentFoliageEligibility({
@@ -146,17 +146,16 @@ test("animated foliage uses independent max-detail hysteresis and exits before .
       showFoliage: true,
     })
   );
-  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_ENTER_SPAN, 0.05);
-  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_RETAIN_SPAN, 0.06);
+  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_ENTER_SPAN, 0.075);
+  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_RETAIN_SPAN, 0.09);
   assert.equal(eligible(0.04, false), true);
-  assert.equal(eligible(0.05, false), true);
-  assert.equal(eligible(0.055, false), false);
-  assert.equal(eligible(0.055, true), true);
-  assert.equal(eligible(0.06, true), true);
-  assert.equal(eligible(0.061, true), false);
-  assert.equal(eligible(0.074, true), false);
+  assert.equal(eligible(0.075, false), true);
+  assert.equal(eligible(0.08, false), false);
+  assert.equal(eligible(0.08, true), true);
+  assert.equal(eligible(0.09, true), true);
+  assert.equal(eligible(0.091, true), false);
   assert.deepEqual(selectNinjaOneEnvironmentFoliageInstances(
-    cameraAtSpan(0.074),
+    cameraAtSpan(0.091),
     true,
   ), []);
 });

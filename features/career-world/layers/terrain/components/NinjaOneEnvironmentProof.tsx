@@ -19,7 +19,6 @@ import {
   NINJAONE_ENVIRONMENT_SURFACE_ECOLOGY_SOURCES,
   NINJAONE_ENVIRONMENT_TERTIARY_RELIEF_SOURCES,
   NINJAONE_ENVIRONMENT_TRAIL_SOURCES,
-  NINJAONE_ENVIRONMENT_WILDLIFE_INSTANCES,
   NINJAONE_ENVIRONMENT_WORLD_ORIGIN,
   NINJAONE_ENVIRONMENT_WORLD_SPAN,
   type NinjaOneEnvironmentLayerId,
@@ -33,8 +32,8 @@ interface NinjaOneEnvironmentProofProps {
   readonly camera: CameraView;
   readonly detailState: DetailState;
   readonly proofMode?: boolean;
+  readonly showFoliage?: boolean;
   readonly showSupplementalDetail?: boolean;
-  readonly showWildlife?: boolean;
 }
 
 const TIER_SUMMARIES = Object.freeze({
@@ -45,9 +44,9 @@ const TIER_SUMMARIES = Object.freeze({
   close: "Rock strata / scree / wet banks / individual flora",
 });
 
-const INLAND_WATER_FIELD_PATH =
-  "/career-world/layers/inland-water/authority/fields/ninjaone-inland-water-field-r1.png";
-const INLAND_WATER_FIELD_CROP = Object.freeze([480, 168, 576, 912] as const);
+const INLAND_TERRAIN_ERASE_MASK_PATH =
+  "/career-world/layers/inland-water/authority/masks/ninjaone-inland-terrain-erase-r1.png";
+const INLAND_TERRAIN_ERASE_MASK_CROP = Object.freeze([480, 168, 576, 912] as const);
 const TERRAIN_CONTACT_MASK_PATH =
   "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-contact-r3.png";
 
@@ -79,7 +78,7 @@ function SharedAsset({
 }: {
   readonly className?: string;
   readonly instance: NinjaOneEnvironmentSharedInstance;
-  readonly layer: "rock" | "wildlife";
+  readonly layer: "rock";
 }) {
   const height = instance.width
     * instance.resource.dimensions[1] / instance.resource.dimensions[0];
@@ -114,8 +113,8 @@ export function NinjaOneEnvironmentProof({
   camera,
   detailState,
   proofMode = false,
+  showFoliage = true,
   showSupplementalDetail = true,
-  showWildlife = true,
 }: NinjaOneEnvironmentProofProps) {
   const worldX = NINJAONE_ENVIRONMENT_WORLD_ORIGIN[0] * WORLD_PLANE.width;
   const worldY = NINJAONE_ENVIRONMENT_WORLD_ORIGIN[1] * WORLD_PLANE.height;
@@ -156,12 +155,7 @@ export function NinjaOneEnvironmentProof({
       (instance) => visibleAtTier(instance, detailState),
     )
     : [];
-  const visibleWildlife = showWildlife && visibleLayers.includes("wildlife")
-    ? NINJAONE_ENVIRONMENT_WILDLIFE_INSTANCES.filter(
-      (instance) => visibleAtTier(instance, detailState),
-    )
-    : [];
-  const sharedNodeCount = visibleRocks.length + visibleWildlife.length;
+  const sharedNodeCount = visibleRocks.length;
   const environmentOpacity = detailState.tier.id === "capital"
     ? Math.max(0, Math.min(1, (detailState.territoryToCapital - 0.35) / 0.65))
     : detailState.tier.id === "world" || detailState.tier.id === "territory"
@@ -186,7 +180,6 @@ export function NinjaOneEnvironmentProof({
         data-environment-supplemental-detail={showSupplementalDetail}
         data-environment-semantic-summary={TIER_SUMMARIES[detailState.tier.id]}
         data-environment-shared-node-count={sharedNodeCount}
-        data-environment-wildlife={showWildlife}
         data-lod-tier={detailState.tier.id}
         preserveAspectRatio="none"
         role="img"
@@ -202,7 +195,7 @@ export function NinjaOneEnvironmentProof({
               <filter
                 colorInterpolationFilters="sRGB"
                 height="100%"
-                id="ninjaone-environment-water-cutout-filter"
+                id="ninjaone-environment-terrain-erase-filter"
                 width="100%"
                 x="0"
                 y="0"
@@ -210,9 +203,9 @@ export function NinjaOneEnvironmentProof({
                 <feColorMatrix
                   type="matrix"
                   values={[
-                    "-12 0 0 0 6.5",
-                    "-12 0 0 0 6.5",
-                    "-12 0 0 0 6.5",
+                    "0 0 0 0 0",
+                    "0 0 0 0 0",
+                    "0 0 0 0 0",
                     "0 0 0 0 1",
                   ].join(" ")}
                 />
@@ -268,13 +261,13 @@ export function NinjaOneEnvironmentProof({
                   y="0"
                 />
                 <image
-                  filter="url(#ninjaone-environment-water-cutout-filter)"
-                  height={INLAND_WATER_FIELD_CROP[3]}
-                  href={INLAND_WATER_FIELD_PATH}
+                  filter="url(#ninjaone-environment-terrain-erase-filter)"
+                  height={INLAND_TERRAIN_ERASE_MASK_CROP[3]}
+                  href={INLAND_TERRAIN_ERASE_MASK_PATH}
                   preserveAspectRatio="none"
-                  width={INLAND_WATER_FIELD_CROP[2]}
-                  x={INLAND_WATER_FIELD_CROP[0]}
-                  y={INLAND_WATER_FIELD_CROP[1]}
+                  width={INLAND_TERRAIN_ERASE_MASK_CROP[2]}
+                  x={INLAND_TERRAIN_ERASE_MASK_CROP[0]}
+                  y={INLAND_TERRAIN_ERASE_MASK_CROP[1]}
                 />
               </mask>
             </defs>
@@ -297,7 +290,7 @@ export function NinjaOneEnvironmentProof({
                 active={active}
                 camera={camera}
                 detailState={detailState}
-                showFoliage={showSupplementalDetail
+                showFoliage={showFoliage
                   && visibleLayers.includes("shared-animated-foliage")}
               />
             {secondaryReliefSource ? (
@@ -320,20 +313,6 @@ export function NinjaOneEnvironmentProof({
             {surfaceEcologySource ? (
               <PlateImage layer="surface-ecology" source={surfaceEcologySource} />
             ) : null}
-              {visibleWildlife.length > 0 ? (
-                <g data-environment-layer="wildlife">
-                  {visibleWildlife.map((instance) => (
-                    <SharedAsset
-                      className={instance.resource.id === "ravens"
-                        ? "ninjaone-environment-proof__wildlife-flight"
-                        : undefined}
-                      instance={instance}
-                      key={instance.id}
-                      layer="wildlife"
-                    />
-                  ))}
-                </g>
-              ) : null}
                 </g>
               </g>
           </g>

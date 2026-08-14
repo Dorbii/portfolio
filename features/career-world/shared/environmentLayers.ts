@@ -48,7 +48,7 @@ export const ENVIRONMENT_LAYER_DEFINITIONS: readonly EnvironmentLayerDefinition[
     Object.freeze({
       available: true,
       id: "L2",
-      label: "NinjaOne terrain authority",
+      label: "Land authority",
       owns: "frozen registered r2 terrain master",
     }),
     Object.freeze({
@@ -61,8 +61,8 @@ export const ENVIRONMENT_LAYER_DEFINITIONS: readonly EnvironmentLayerDefinition[
     Object.freeze({
       available: true,
       id: "L2_2",
-      label: "Terrain wildlife",
-      owns: "LOD-gated habitat-registered wildlife accents",
+      label: "Tree and foliage motion",
+      owns: "LOD-gated pooled canopy and foliage animation",
       parentId: "L2",
     }),
     Object.freeze({

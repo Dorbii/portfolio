@@ -619,7 +619,6 @@ async function captureFoliageIsolationProof({
       + '.ninjaone-environment-proof__hud { display: none !important; } '
       + '.career-world__interface { display: none !important; } '
       + '.career-world__header, .career-world__footer { visibility: hidden !important; } '
-      + '[data-environment-layer="wildlife"] { display: none !important; } '
       + '[data-environment-seam-integration-state] { visibility: hidden !important; } '
       + 'canvas[data-layer="ocean"] { visibility: hidden !important; }';
     document.head.append(style);
@@ -764,7 +763,6 @@ async function captureFoliageIsolationProof({
       seams: "visibility:hidden!important",
       terrain: "preserved",
       water: "visibility:hidden!important",
-      wildlife: "display:none!important",
     }),
     maskPath: relativePath(outputDirectory, maskFile),
     normalFrames: Object.freeze(normalFrames.map((file) => (

@@ -48,7 +48,11 @@ test("unavailable layers cannot become effectively visible", () => {
   assert.equal(isEnvironmentLayerEffectivelyVisible(forced, "L2_3"), false);
 });
 
-test("admitted terrain detail and wildlife are independently toggleable", () => {
+test("terrain detail and foliage motion are independently toggleable", () => {
+  const landAuthority = ENVIRONMENT_LAYER_DEFINITIONS.find(({ id }) => id === "L2");
+  const foliage = ENVIRONMENT_LAYER_DEFINITIONS.find(({ id }) => id === "L2_2");
+  assert.equal(landAuthority?.label, "Land authority");
+  assert.equal(foliage?.label, "Tree and foliage motion");
   assert.equal(
     isEnvironmentLayerEffectivelyVisible(
       DEFAULT_ENVIRONMENT_LAYER_VISIBILITY,

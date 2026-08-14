@@ -37,46 +37,45 @@
     "shared-rocks",
     "shared-animated-foliage",
     "surface-ecology",
-    "wildlife",
     "dynamic-shadows"
   ],
   "layers": {
     "geology": {
-      "ownership": "canonical-mask-registered B1 B2 C1 C2 regional detail; semantic contact repairs use neighbor-context outpainting while preserving canonical alpha and geography; open water remains owned by the global water layer",
-      "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r7.png",
-      "sourceSha256": "C2DE4A7C711F1512E021B388495E8B4F59058EF81B1D94ABC16B2C36EFDF1670",
+      "ownership": "canonical-mask-registered B1 B2 C1 C2 regional detail; retained r7 neighbor-context repairs plus deterministic C1-C2 source and LOD contact correction preserve canonical alpha and geography; registered inland-water erase authority removes frozen channel residue",
+      "sourcePath": "/art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r8.png",
+      "sourceSha256": "E14C7783A841801E265108766F875EFDB8C59A3772FBF13BFEE805AAA5A3D113",
       "sources": {
         "territory": {
-          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-territory-r7.webp?v=676ebddf391a",
+          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-territory-r8.webp?v=c03648858fa5",
           "dimensions": [
             720,
             540
           ],
-          "sha256": "676EBDDF391A85835D2B8F4A0A80B6E8841DC4F65C3337F426234A5F662DD84D"
+          "sha256": "C03648858FA55A26987D9FBA0ECB4BE9C1474486223047CEA905EF324CE10B30"
         },
         "capital": {
-          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-capital-r7.webp?v=da25af4a7f5e",
+          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-capital-r8.webp?v=9ee89038f333",
           "dimensions": [
             1440,
             1080
           ],
-          "sha256": "DA25AF4A7F5E36FC8298F0ACA6455185A9DD77E63BC4383DE5D6DD68737C8441"
+          "sha256": "9EE89038F3337D20379E7DA99DE1E92752838ED224C69E16DF941800C39B51D1"
         },
         "site": {
-          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-site-r7.webp?v=47c0130bace2",
+          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-site-r8.webp?v=bbd13e38c905",
           "dimensions": [
             2880,
             2160
           ],
-          "sha256": "47C0130BACE2F3D3FF64563EAA65791CE756E50F1A128CBDFD1B8FEF5E881403"
+          "sha256": "BBD13E38C90519F9E8E4058D1CB578EF28604364856ED1F405AD15EDE0EE409A"
         },
         "close": {
-          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-close-r7.webp?v=5d733a414dc9",
+          "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-close-r8.webp?v=2cfb5e15a7b9",
           "dimensions": [
             5760,
             4320
           ],
-          "sha256": "5D733A414DC92C26B8203D9ED8DA8980ACC30FD1352BC167D395418CF124C8B6"
+          "sha256": "2CFB5E15A7B97E059191FF2F79E63661BE49917BA71BA6E607DC8E67379ECAB8"
         }
       },
       "contactMask": {
@@ -95,22 +94,24 @@
         "shape": "deterministic-multiscale-irregular"
       },
       "contactRepair": {
-        "method": "neighbor-context-outpaint-narrow-band-composite",
-        "reportPath": "/art-source/career-world/ninjaone-environment/production-r2/seam-repair-r7/integration-report.json",
+        "method": "deterministic-source-and-lod-contact-row-repair",
+        "reportPath": "/art-source/career-world/ninjaone-environment/production-r2/seam-repair-r8/integration-report.json",
         "alphaPreserved": true,
         "projectionChanged": false,
         "contacts": [
           "B1-B2",
-          "B1-C1"
+          "B1-C1",
+          "C1-C2"
         ],
-        "core": 520,
-        "feather": 240,
-        "windowFeather": 96,
-        "colorFieldRadius": 48,
-        "colorFieldMethod": "feature-protected minimum-error hard cut plus generated-anchored vertical contact",
+        "core": 1,
+        "feather": 0,
+        "windowFeather": 0,
+        "colorFieldRadius": 0,
+        "colorFieldMethod": "one-row lower-neighbor gradient extrapolation",
         "contactMethods": {
-          "south": "two-sided generated overlap with feature-protected minimum-error hard cuts",
-          "east": "generated-anchored accepted r5 contact"
+          "south": "retained r7 feature-protected hard cuts",
+          "east": "retained r7 generated-anchored contact",
+          "C1-C2": "one-row lower-neighbor gradient extrapolation"
         }
       }
     },
@@ -422,127 +423,6 @@
           "sha256": "5AF16C5B29680EDEAB0F44806B1FEC54F8E51BFADCAEB95A4A4CF0E800A2ECFF"
         }
       }
-    },
-    "wildlife": {
-      "ownership": "close-only shared wildlife groups placed by habitat",
-      "resources": [
-        {
-          "id": "mountain-goats",
-          "path": "/career-world/capitals/ninjaone/environment/shared/wildlife/mountain-goats-r1.png",
-          "dimensions": [
-            314,
-            340
-          ],
-          "sha256": "82A5C33DFBDD41AE4F0CB576BE0CA7E66977D9FFFC08A28741EBE5532C496378"
-        },
-        {
-          "id": "red-deer",
-          "path": "/career-world/capitals/ninjaone/environment/shared/wildlife/red-deer-r1.png",
-          "dimensions": [
-            333,
-            334
-          ],
-          "sha256": "575C4132C399A3F3B05462ADFE7B7B5C3E344CD88E02C2E408E3ED9B2F473D83"
-        },
-        {
-          "id": "ravens",
-          "path": "/career-world/capitals/ninjaone/environment/shared/wildlife/ravens-r1.png",
-          "dimensions": [
-            330,
-            313
-          ],
-          "sha256": "D0D43D58565561D0D976ABAC685AE2E812EBC1D0AE19DA1815C595A5FA63692C"
-        },
-        {
-          "id": "red-fox",
-          "path": "/career-world/capitals/ninjaone/environment/shared/wildlife/red-fox-r1.png",
-          "dimensions": [
-            310,
-            272
-          ],
-          "sha256": "7A095A5B36B29043C7030AEFD079B6ABD0E4813618A651335222397858240A2A"
-        },
-        {
-          "id": "coastal-seabirds",
-          "path": "/career-world/capitals/ninjaone/environment/shared/wildlife/coastal-seabirds-r1.png",
-          "dimensions": [
-            285,
-            295
-          ],
-          "sha256": "D9EFA40FA6C33F29FD9662DE979B9B0040CD1D406FFA7D789F31EEB4F834FE91"
-        },
-        {
-          "id": "meadow-rabbits",
-          "path": "/career-world/capitals/ninjaone/environment/shared/wildlife/meadow-rabbits-r1.png",
-          "dimensions": [
-            344,
-            258
-          ],
-          "sha256": "1A6078603CF7A1DFA89FDA5E374B1B8CBD79C0C0ECC86BEF3528525AAA50D6FF"
-        }
-      ],
-      "instances": [
-        {
-          "id": "wildlife-b2-goats",
-          "resourceId": "mountain-goats",
-          "anchor": [
-            286,
-            746
-          ],
-          "width": 16,
-          "minimumTier": "close"
-        },
-        {
-          "id": "wildlife-c1-ravens",
-          "resourceId": "ravens",
-          "anchor": [
-            1128,
-            226
-          ],
-          "width": 15,
-          "minimumTier": "close"
-        },
-        {
-          "id": "wildlife-c1-seabirds",
-          "resourceId": "coastal-seabirds",
-          "anchor": [
-            1338,
-            382
-          ],
-          "width": 14,
-          "minimumTier": "close"
-        },
-        {
-          "id": "wildlife-c2-deer",
-          "resourceId": "red-deer",
-          "anchor": [
-            918,
-            920
-          ],
-          "width": 16,
-          "minimumTier": "close"
-        },
-        {
-          "id": "wildlife-c2-fox",
-          "resourceId": "red-fox",
-          "anchor": [
-            1188,
-            718
-          ],
-          "width": 15,
-          "minimumTier": "close"
-        },
-        {
-          "id": "wildlife-c2-rabbits",
-          "resourceId": "meadow-rabbits",
-          "anchor": [
-            1316,
-            966
-          ],
-          "width": 13,
-          "minimumTier": "close"
-        }
-      ]
     },
     "dynamicShadows": {
       "ownership": "future world-light-driven shadows only",

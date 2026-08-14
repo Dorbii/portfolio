@@ -171,8 +171,8 @@ test("r3 foliage uses only the twelve native originals and mounts a four-node pa
   assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS, 2);
   assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_NODES_PER_GROUP, 2);
   assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_MOUNTED_NODES, 6);
-  assert.equal(manifest.eligibility.maxDetailEnterSpan, 0.05);
-  assert.equal(manifest.eligibility.maxDetailRetainSpan, 0.06);
+  assert.equal(manifest.eligibility.maxDetailEnterSpan, 0.075);
+  assert.equal(manifest.eligibility.maxDetailRetainSpan, 0.09);
   assert.equal(manifest.budgets.mountedFoliageNodes, 4);
   assert.equal(manifest.budgets.futureSupplementalNodeHeadroom, 2);
   assert.equal(manifest.budgets.terrainDecodedBytes, 4 * 1448 * 1086 * 4);
@@ -413,7 +413,7 @@ test("actual fixed C2 cameras select both varied low-pivot groups and old B2 sel
   }
 });
 
-test("max-detail foliage eligibility enters at .05 retains through .06 and exits by .074", () => {
+test("close-detail foliage enters at the reachable .075 camera floor and retains through .09", () => {
   const cameraAtSpan = (span) => ({
     origin: [0.3125 - span / 2, 0.25 - span / 2],
     span: [span, span],
@@ -428,22 +428,23 @@ test("max-detail foliage eligibility enters at .05 retains through .06 and exits
     })
   );
 
-  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_ENTER_SPAN, 0.05);
-  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_RETAIN_SPAN, 0.06);
+  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_ENTER_SPAN, 0.075);
+  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_RETAIN_SPAN, 0.09);
   assert.equal(eligibility(0.04, false), true);
-  assert.equal(eligibility(0.05, false), true);
-  assert.equal(eligibility(0.055, false), false);
-  assert.equal(eligibility(0.055, true), true);
-  assert.equal(eligibility(0.06, true), true);
-  assert.equal(eligibility(0.074, true), false);
+  assert.equal(eligibility(0.075, false), true);
+  assert.equal(eligibility(0.08, false), false);
+  assert.equal(eligibility(0.08, true), true);
+  assert.equal(eligibility(0.09, true), true);
+  assert.equal(eligibility(0.091, true), false);
   assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.04)).length, 2);
   assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.04), true, 2).length, 2);
   assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.04), true, 1).length, 1);
   assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.04), true, 0).length, 0);
   assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.04), true, 1.5).length, 0);
-  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.055)).length, 0);
-  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.055), true).length, 2);
-  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.074), true).length, 0);
+  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.075)).length, 2);
+  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.08)).length, 0);
+  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.08), true).length, 2);
+  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.091), true).length, 0);
   assert.equal(resolveNinjaOneEnvironmentFoliageEligibility({
     active: false,
     camera: cameraAtSpan(0.04),

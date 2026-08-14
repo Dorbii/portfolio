@@ -13,7 +13,7 @@ substitutes a separately authored city canvas.
 | --- | --- | --- | --- |
 | 1 | `world-backdrop` | Atmosphere behind the world | Water or land color |
 | 2 | `ocean` | Open-water authority, surface motion, and coastal ambience | Land pixels or inland-water geometry |
-| 3 | `terrain` | Geography, elevation, slope, relief, detail, wildlife, and territory masks | Foam, wet contact, or moving water |
+| 3 | `terrain` | Geography, elevation, slope, relief, detail, foliage, and territory masks | Foam, wet contact, or moving water |
 | 4 | `infrastructure` | Roads, trails, docks, bridges, plazas | Terrain or buildings |
 | 5 | `structures` | Employer, project, skill, and landmark structures | Evidence UI |
 | 6 | `actors-effects` | Actors, weather, particles, authored crash/foam accents | Base shoreline response |
@@ -28,8 +28,8 @@ toggleable sublayers instead of a generic `environment` bucket:
 | L1_1 | `ocean/surface-motion` | Time-varying open-water surface |
 | L1_2 | `ocean/coastal-ambience` | Isolated swash, spray, and marine accents |
 | L2 | `terrain/authority` | Frozen geography and registered terrain assets |
-| L2_1 | `terrain/detail` | Relief, trails, rocks, foliage, and ecology |
-| L2_2 | `terrain/wildlife` | LOD-gated habitat accents |
+| L2_1 | `terrain/detail` | Relief, trails, rocks, and static ecology |
+| L2_2 | `terrain/foliage` | LOD-gated pooled canopy and foliage animation |
 | L2_3 | `terrain/dynamic-shadows` | Future supplemental relighting |
 | L3 | `inland-water/authority` | Rivers, lakes, rapids, and waterfall geometry |
 | L3_1 | `inland-water/surface-motion` | Currents, ripples, flow, and reflections |

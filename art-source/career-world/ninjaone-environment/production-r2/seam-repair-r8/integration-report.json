@@ -1,0 +1,53 @@
+{
+  "source": "art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r7.png",
+  "sourceSha256": "C2DE4A7C711F1512E021B388495E8B4F59058EF81B1D94ABC16B2C36EFDF1670",
+  "output": "art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r8.png",
+  "outputSha256": "E14C7783A841801E265108766F875EFDB8C59A3772FBF13BFEE805AAA5A3D113",
+  "dimensions": [
+    5760,
+    4320
+  ],
+  "alphaPreserved": true,
+  "projectionChanged": false,
+  "method": "deterministic-source-and-lod-contact-row-repair",
+  "ownership": "canonical-mask-registered B1 B2 C1 C2 regional detail; retained r7 neighbor-context repairs plus deterministic C1-C2 source and LOD contact correction preserve canonical alpha and geography; registered inland-water erase authority removes frozen channel residue",
+  "core": 1,
+  "feather": 0,
+  "windowFeather": 0,
+  "colorFieldRadius": 0,
+  "colorFieldMethod": "one-row lower-neighbor gradient extrapolation",
+  "contactMethods": {
+    "south": "retained r7 feature-protected hard cuts",
+    "east": "retained r7 generated-anchored contact",
+    "C1-C2": "one-row lower-neighbor gradient extrapolation"
+  },
+  "contacts": [
+    "south",
+    "east",
+    "C1-C2"
+  ],
+  "contactIds": [
+    "B1-B2",
+    "B1-C1",
+    "C1-C2"
+  ],
+  "lodContactRepair": "apply a bounded 65-percent lower-neighbor gradient correction after each LOD resize",
+  "repairFence": {
+    "x": [
+      2880,
+      5760
+    ],
+    "y": [
+      2160,
+      2161
+    ],
+    "channels": "RGB only where current and two lower source pixels are opaque"
+  },
+  "changedPixels": 2836,
+  "changedBytes": 7945,
+  "qa": {
+    "beforeAdjacentRowMae": 0.662372,
+    "afterAdjacentRowMae": 8.383821,
+    "nearbyMedianAdjacentRowMae": 9.522052
+  }
+}

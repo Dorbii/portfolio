@@ -323,7 +323,7 @@ export function WorldScene({
   const oceanMotionVisible = environmentLayerVisible("L1_1");
   const terrainAuthorityVisible = environmentLayerVisible("L2");
   const terrainDetailVisible = environmentLayerVisible("L2_1");
-  const terrainWildlifeVisible = environmentLayerVisible("L2_2");
+  const terrainFoliageVisible = environmentLayerVisible("L2_2");
   const inlandWaterAuthorityVisible = environmentLayerVisible("L3");
   const inlandWaterMotionVisible = environmentLayerVisible("L3_1");
   const inlandWaterEffectsVisible = environmentLayerVisible("L3_2");
@@ -567,7 +567,7 @@ export function WorldScene({
       data-layer-l1-2={environmentLayerVisible("L1_2")}
       data-layer-l2={terrainAuthorityVisible}
       data-layer-l2-1={terrainDetailVisible}
-      data-layer-l2-2={terrainWildlifeVisible}
+      data-layer-l2-2={terrainFoliageVisible}
       data-layer-l2-3={environmentLayerVisible("L2_3")}
       data-layer-l3={inlandWaterAuthorityVisible}
       data-layer-l3-1={inlandWaterMotionVisible}
@@ -644,8 +644,8 @@ export function WorldScene({
               camera={camera}
               detailState={detailState}
               proofMode={environmentProof}
+              showFoliage={terrainFoliageVisible}
               showSupplementalDetail={terrainDetailVisible}
-              showWildlife={terrainWildlifeVisible}
             />
           ) : null}
           {!environmentProof && !focusIsDetailedNinjaOneCapital ? (
@@ -673,7 +673,7 @@ export function WorldScene({
                 light={WORLD_LIGHT}
                 onKaizenVisualReadyChange={setKaizenVisualReady}
               />
-              {terrainDetailVisible ? (
+              {terrainFoliageVisible ? (
                 <FoliageLayer
                   camera={camera}
                   detailState={detailState}

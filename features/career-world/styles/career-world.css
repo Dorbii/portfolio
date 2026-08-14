@@ -457,7 +457,13 @@
 .career-world__foliage-canopy {
   transform-box: fill-box;
   transform-origin: 50% 100%;
-  animation: none;
+  animation:
+    career-world-foliage-breeze
+    var(--foliage-breeze-duration, 6.4s)
+    cubic-bezier(0.42, 0.08, 0.58, 0.92)
+    infinite;
+  animation-delay: var(--foliage-breeze-phase, 0s);
+  will-change: transform;
 }
 
 @keyframes career-world-foliage-breeze {
@@ -1733,10 +1739,6 @@ g[data-owner-id="project-kaizen-agent"].ambient-structure {
   filter: saturate(0.58) brightness(0.72) contrast(1.12);
 }
 
-.ninjaone-environment-proof [data-environment-resource-kind="wildlife"] {
-  filter: saturate(0.72) brightness(0.82) contrast(1.08);
-}
-
 .ninjaone-environment-proof__shared-foliage {
   transform-box: fill-box;
   transform-origin: 50% 100%;
@@ -1812,23 +1814,6 @@ g[data-owner-id="project-kaizen-agent"].ambient-structure {
   }
 }
 
-.ninjaone-environment-proof__wildlife-flight {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: ninjaone-environment-wildlife-flight 7.8s ease-in-out infinite;
-}
-
-@keyframes ninjaone-environment-wildlife-flight {
-  0%,
-  100% {
-    transform: translate(-1.2px, 0.7px);
-  }
-
-  50% {
-    transform: translate(1.4px, -0.8px);
-  }
-}
-
 .ninjaone-environment-proof__hud {
   position: absolute;
   z-index: 12;
@@ -1877,9 +1862,6 @@ g[data-owner-id="project-kaizen-agent"].ambient-structure {
     animation: none;
   }
 
-  .ninjaone-environment-proof__wildlife-flight {
-    animation: none;
-  }
 }
 
 @media (max-width: 700px) {

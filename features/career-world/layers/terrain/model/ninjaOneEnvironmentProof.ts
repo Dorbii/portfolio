@@ -11,7 +11,6 @@ export type NinjaOneEnvironmentLayerId =
   | "shared-rocks"
   | "shared-animated-foliage"
   | "surface-ecology"
-  | "wildlife"
   | "dynamic-shadows";
 
 export type NinjaOneEnvironmentPlateTier = Exclude<DetailTierId, "world">;
@@ -55,7 +54,6 @@ const EXPECTED_LAYER_ORDER: readonly NinjaOneEnvironmentLayerId[] = Object.freez
   "shared-rocks",
   "shared-animated-foliage",
   "surface-ecology",
-  "wildlife",
   "dynamic-shadows",
 ]);
 const PLATE_TIERS: readonly NinjaOneEnvironmentPlateTier[] = Object.freeze([
@@ -271,12 +269,6 @@ const rockResources = sharedResources(
   "/career-world/capitals/ninjaone/environment/shared/rocks/",
   "layers.sharedRocks.resources",
 );
-const wildlifeResources = sharedResources(
-  manifest.layers.wildlife.resources,
-  "/career-world/capitals/ninjaone/environment/shared/wildlife/",
-  "layers.wildlife.resources",
-);
-
 export const NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES = Object.freeze(
   [...foliageResources.values()],
 );
@@ -305,12 +297,4 @@ export const NINJAONE_ENVIRONMENT_ROCK_INSTANCES = sharedInstances(
   manifest.layers.sharedRocks.instances,
   rockResources,
   "layers.sharedRocks.instances",
-);
-export const NINJAONE_ENVIRONMENT_WILDLIFE_RESOURCES = Object.freeze(
-  [...wildlifeResources.values()],
-);
-export const NINJAONE_ENVIRONMENT_WILDLIFE_INSTANCES = sharedInstances(
-  manifest.layers.wildlife.instances,
-  wildlifeResources,
-  "layers.wildlife.instances",
 );

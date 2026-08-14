@@ -241,8 +241,8 @@
     }
   ],
   "eligibility": {
-    "maxDetailEnterSpan": 0.05,
-    "maxDetailRetainSpan": 0.06
+    "maxDetailEnterSpan": 0.075,
+    "maxDetailRetainSpan": 0.09
   },
   "registration": {
     "artboard": [

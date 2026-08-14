@@ -22,8 +22,6 @@ import {
   NINJAONE_ENVIRONMENT_SURFACE_ECOLOGY_SOURCES,
   NINJAONE_ENVIRONMENT_TERTIARY_RELIEF_SOURCES,
   NINJAONE_ENVIRONMENT_TRAIL_SOURCES,
-  NINJAONE_ENVIRONMENT_WILDLIFE_INSTANCES,
-  NINJAONE_ENVIRONMENT_WILDLIFE_RESOURCES,
   NINJAONE_ENVIRONMENT_WORLD_ORIGIN,
   NINJAONE_ENVIRONMENT_WORLD_SPAN,
 } from "../features/career-world/layers/terrain/model/ninjaOneEnvironmentProof.ts";
@@ -78,7 +76,6 @@ test("environment proof owns a semantic city-free B1 B2 C1 C2 stack", async () =
     "shared-rocks",
     "shared-animated-foliage",
     "surface-ecology",
-    "wildlife",
     "dynamic-shadows",
   ]);
   assert.equal(manifest.layers.dynamicShadows.enabled, false);
@@ -160,7 +157,10 @@ test("regional terrain detail uses one coherent cohort and a registered contact 
   }
   assert.equal(manifest.layers.geology.contactRepair.alphaPreserved, true);
   assert.equal(manifest.layers.geology.contactRepair.projectionChanged, false);
-  assert.deepEqual(manifest.layers.geology.contactRepair.contacts, ["B1-B2", "B1-C1"]);
+  assert.deepEqual(
+    manifest.layers.geology.contactRepair.contacts,
+    ["B1-B2", "B1-C1", "C1-C2"],
+  );
   assert.deepEqual(contactMask.dimensions, [1440, 1080]);
   assert.deepEqual(contactMask.contactEdges, ["left", "right", "bottom"]);
   assert.equal(contactMask.shape, "deterministic-multiscale-irregular");
@@ -189,12 +189,9 @@ test("environment density uses bounded shared resource pools", async () => {
   assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.length, 0);
   assert.equal(NINJAONE_ENVIRONMENT_ROCK_RESOURCES.length, 6);
   assert.equal(NINJAONE_ENVIRONMENT_ROCK_INSTANCES.length, 12);
-  assert.equal(NINJAONE_ENVIRONMENT_WILDLIFE_RESOURCES.length, 6);
-  assert.equal(NINJAONE_ENVIRONMENT_WILDLIFE_INSTANCES.length, 6);
   const allResources = [
     ...NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES,
     ...NINJAONE_ENVIRONMENT_ROCK_RESOURCES,
-    ...NINJAONE_ENVIRONMENT_WILDLIFE_RESOURCES,
   ];
   for (const resource of allResources) {
     const metadata = await readImageMetadata(resource.path);
@@ -204,7 +201,6 @@ test("environment density uses bounded shared resource pools", async () => {
   assert.ok([
     ...NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES,
     ...NINJAONE_ENVIRONMENT_ROCK_INSTANCES,
-    ...NINJAONE_ENVIRONMENT_WILDLIFE_INSTANCES,
   ].every(({ minimumTier }) => minimumTier === "site" || minimumTier === "close"));
 });
 
@@ -443,11 +439,16 @@ test("the root-selectable environment proof renders semantic terrain and suppres
     "shared-rocks",
     "shared-animated-foliage",
     "surface-ecology",
-    "wildlife",
   ]) {
     assert.ok(renderer.includes(`"${layer}"`), `${layer} is not rendered`);
   }
   assert.match(scene, /<WaterSurfaceCanvas[\s\S]*?active=\{isPageVisible\}/);
+  assert.match(scene, /showFoliage=\{terrainFoliageVisible\}/);
+  assert.match(scene, /terrainFoliageVisible \? \([\s\S]*?<FoliageLayer/);
+  assert.match(renderer, /ninjaone-inland-terrain-erase-r1\.png/);
+  assert.match(renderer, /ninjaone-environment-terrain-erase-filter/);
+  assert.doesNotMatch(renderer, /ninjaone-inland-water-field-r1\.png/);
+  assert.doesNotMatch(renderer, /wildlife/i);
   assert.doesNotMatch(renderer, /terrain-microdetail/);
   assert.doesNotMatch(renderer, /<InfrastructureLayer|<StructuresLayer|<NinjaOneCapitalMvp/);
   assert.match(nativeBuilder, /SOURCE_TILE_ROOT/);

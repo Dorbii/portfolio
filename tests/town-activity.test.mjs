@@ -673,6 +673,10 @@ test("Kaizen foliage reuses authored city and forest groups with pooled wind", a
   assert.match(styles, /@keyframes career-world-foliage-breeze/);
   assert.match(
     styles,
+    /\.career-world__foliage-canopy\s*\{[\s\S]*animation:[\s\S]*career-world-foliage-breeze[\s\S]*infinite/,
+  );
+  assert.match(
+    styles,
     /prefers-reduced-motion: reduce[\s\S]*\.career-world__foliage-canopy[\s\S]*animation: none/,
   );
   for (const source of [component, foliageModel]) {

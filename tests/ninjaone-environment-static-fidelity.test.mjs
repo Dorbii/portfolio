@@ -967,13 +967,28 @@ test("native registration and baked masks remain inside the decoded budget", asy
   })}`);
 });
 
-intentTest("rendered B1 and C1 remain continuous at every authored LOD", async (t) => {
-  function opaqueAdjacentMean(data, width, limit, firstX, secondX) {
+intentTest("active authored LODs retain B1-C1 and C1-C2 contact continuity", async (t) => {
+  function opaqueVerticalAdjacentMean(data, width, limit, firstX, secondX) {
     let samples = 0;
     let total = 0;
     for (let y = 0; y < limit; y += 1) {
       const first = ((y * width) + firstX) * 4;
       const second = ((y * width) + secondX) * 4;
+      if (data[first + 3] < 192 || data[second + 3] < 192) continue;
+      for (let channel = 0; channel < 3; channel += 1) {
+        total += Math.abs(data[first + channel] - data[second + channel]);
+        samples += 1;
+      }
+    }
+    return Object.freeze({ mean: total / samples, samples });
+  }
+
+  function opaqueHorizontalAdjacentMean(data, width, firstY, secondY) {
+    let samples = 0;
+    let total = 0;
+    for (let x = width / 2; x < width; x += 1) {
+      const first = ((firstY * width) + x) * 4;
+      const second = ((secondY * width) + x) * 4;
       if (data[first + 3] < 192 || data[second + 3] < 192) continue;
       for (let channel = 0; channel < 3; channel += 1) {
         total += Math.abs(data[first + channel] - data[second + channel]);
@@ -989,47 +1004,92 @@ intentTest("rendered B1 and C1 remain continuous at every authored LOD", async (
     site: Object.freeze([2880, 2160]),
     close: Object.freeze([5760, 4320]),
   });
+  const manifest = await readJson(
+    "public/career-world/capitals/ninjaone/environment/manifests/environment-proof-r1.json",
+  );
+  assert.deepEqual(
+    manifest.layers.geology.contactRepair.contacts,
+    ["B1-B2", "B1-C1", "C1-C2"],
+  );
   const seamMetrics = {};
   for (const [tier, dimensions] of Object.entries(tiers)) {
-    const output = path.join(
-      root,
-      `public/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-${tier}-r3.webp`,
-    );
+    const output = assetFile(manifest.layers.geology.sources[tier].path);
     const { data, info } = await sharp(output)
       .ensureAlpha()
       .raw()
       .toBuffer({ resolveWithObject: true });
     assert.deepEqual([info.width, info.height], dimensions, tier);
-    const seam = info.width / 2;
+    const verticalSeam = info.width / 2;
+    const horizontalSeam = info.height / 2;
     const controlDistance = Math.max(2, Math.round(info.width / 360));
-    const boundary = opaqueAdjacentMean(data, info.width, info.height / 2, seam - 1, seam);
-    const leftControl = opaqueAdjacentMean(
+    const verticalBoundary = opaqueVerticalAdjacentMean(
       data,
       info.width,
       info.height / 2,
-      seam - controlDistance - 1,
-      seam - controlDistance,
+      verticalSeam - 1,
+      verticalSeam,
     );
-    const rightControl = opaqueAdjacentMean(
+    const leftControl = opaqueVerticalAdjacentMean(
       data,
       info.width,
       info.height / 2,
-      seam + controlDistance - 1,
-      seam + controlDistance,
+      verticalSeam - controlDistance - 1,
+      verticalSeam - controlDistance,
     );
-    const controlMean = (leftControl.mean + rightControl.mean) / 2;
-    const discontinuityRatio = boundary.mean / controlMean;
-    assert.ok(boundary.samples >= 400, `${tier} opaque B1-C1 seam sample count`);
+    const rightControl = opaqueVerticalAdjacentMean(
+      data,
+      info.width,
+      info.height / 2,
+      verticalSeam + controlDistance - 1,
+      verticalSeam + controlDistance,
+    );
+    const verticalControlMean = (leftControl.mean + rightControl.mean) / 2;
+    const verticalRatio = verticalBoundary.mean / verticalControlMean;
+    assert.ok(verticalBoundary.samples >= 400, `${tier} opaque B1-C1 seam sample count`);
     assert.ok(
-      discontinuityRatio <= 1.05,
-      `${tier} B1-C1 discontinuity ${discontinuityRatio} exceeds local detail`,
+      verticalRatio >= 0.75 && verticalRatio <= 1.15,
+      `${tier} B1-C1 ratio ${verticalRatio} is outside local detail`,
+    );
+
+    const horizontalBoundary = opaqueHorizontalAdjacentMean(
+      data,
+      info.width,
+      horizontalSeam - 1,
+      horizontalSeam,
+    );
+    const upperControl = opaqueHorizontalAdjacentMean(
+      data,
+      info.width,
+      horizontalSeam - controlDistance - 1,
+      horizontalSeam - controlDistance,
+    );
+    const lowerControl = opaqueHorizontalAdjacentMean(
+      data,
+      info.width,
+      horizontalSeam + controlDistance - 1,
+      horizontalSeam + controlDistance,
+    );
+    const horizontalControlMean = (upperControl.mean + lowerControl.mean) / 2;
+    const horizontalRatio = horizontalBoundary.mean / horizontalControlMean;
+    assert.ok(horizontalBoundary.samples >= 1_000, `${tier} opaque C1-C2 seam sample count`);
+    assert.ok(
+      horizontalRatio >= 0.75 && horizontalRatio <= 1.15,
+      `${tier} C1-C2 ratio ${horizontalRatio} is outside local detail`,
     );
     seamMetrics[tier] = Object.freeze({
-      boundaryMean: boundary.mean,
-      controlMean,
-      discontinuityRatio,
-      samples: boundary.samples,
+      horizontal: Object.freeze({
+        boundaryMean: horizontalBoundary.mean,
+        controlMean: horizontalControlMean,
+        ratio: horizontalRatio,
+        samples: horizontalBoundary.samples,
+      }),
+      vertical: Object.freeze({
+        boundaryMean: verticalBoundary.mean,
+        controlMean: verticalControlMean,
+        ratio: verticalRatio,
+        samples: verticalBoundary.samples,
+      }),
     });
   }
-  t.diagnostic(`STATIC_B1_C1_SEAM ${JSON.stringify(seamMetrics)}`);
+  t.diagnostic(`STATIC_ACTIVE_CONTACTS ${JSON.stringify(seamMetrics)}`);
 });

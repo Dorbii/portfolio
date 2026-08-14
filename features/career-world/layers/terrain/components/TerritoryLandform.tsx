@@ -435,9 +435,11 @@ export function TerritoryLandform({
       (window.devicePixelRatio || 1) * detailState.renderScale,
       DETAIL_POLICY.renderScale.maximumDevicePixelRatio,
     );
-    const pixelRatio = cameraSettled
-      ? settledPixelRatio
-      : Math.min(window.devicePixelRatio || 1, 1.25);
+    // Keep the backing store stable while the camera moves. Downshifting it
+    // during input made the entire authority visibly soften for 180 ms and
+    // forced a second full-canvas allocation when the camera settled. The
+    // existing stream-tier suppression still bounds moving-camera work.
+    const pixelRatio = settledPixelRatio;
     const width = Math.max(1, Math.round(bounds.width * pixelRatio));
     const height = Math.max(1, Math.round(bounds.height * pixelRatio));
     if (canvas.width !== width || canvas.height !== height) {
