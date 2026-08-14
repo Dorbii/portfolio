@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
@@ -265,6 +265,18 @@ test("production inland-habitat sprites are compact verified alpha derivatives",
     "bank-reed-tuft": "9aae13b2b3c280dcde92055af76e44a906c67126fcdf341bdf1566cfc02e7424",
     "submerged-grass-clump": "3a397f55c3f46aaf4310a1f3b00eafec95f95763125b6a624d485b626a8c6271",
   };
+
+  const spriteDirectory = path.join(
+    root,
+    "public/career-world/layers/inland-water/habitat-detail/sprites",
+  );
+  assert.deepEqual(
+    (await readdir(spriteDirectory)).sort(),
+    Object.values(NINJAONE_INLAND_HABITAT_ASSETS)
+      .map(({ path: publicPath }) => path.basename(publicPath))
+      .sort(),
+    "production habitat sprite directory must not contain unreachable assets",
+  );
 
   for (const [assetId, asset] of Object.entries(NINJAONE_INLAND_HABITAT_ASSETS)) {
     const bytes = await readFile(runtimeAssetFile(asset.path));
