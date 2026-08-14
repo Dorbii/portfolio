@@ -128,7 +128,7 @@ test("non-water field pixels encode neutral flow", async () => {
   );
 });
 
-test("aquatic life stays visible by capital LOD without reading as black blobs", async () => {
+test("aquatic life forms readable habitat-registered fish schools", async () => {
   const shader = await readFile(path.join(
     root,
     "features/career-world/layers/inland-water/rendering/shaders/inland-water.ts",
@@ -140,25 +140,34 @@ test("aquatic life stays visible by capital LOD without reading as black blobs",
   );
   assert.match(
     shader,
-    /vec2 aquaticScale = mix\(\s*vec2\(3\.6, 3\.1\),\s*vec2\(2\.2, 1\.9\),/,
+    /vec2 aquaticScale = mix\(\s*vec2\(2\.7, 2\.2\),\s*vec2\(1\.65, 1\.35\),/,
   );
   const habitatAnchors = [...shader.matchAll(
-    /localPx - vec2\(([\d.]+), ([\d.]+)\) - aquaticDrift[A-D]/g,
+    /localPx, vec2\(([\d.]+), ([\d.]+)\), vec2\(([-\d.]+), ([-\d.]+)\)/g,
   )].map((match) => [Number(match[1]), Number(match[2])]);
   assert.deepEqual(
     habitatAnchors,
-    [[942, 326], [934, 468], [888, 502], [796, 666]],
+    [
+      [592, 596], [628, 604], [560, 612], [616, 636],
+      [900, 490], [882, 504], [866, 512], [850, 526], [842, 540],
+      [836, 576], [814, 592], [796, 668], [744, 772],
+    ],
     "aquatic silhouettes must stay registered to verified deep-water anchors",
   );
   assert.match(
     shader,
-    /float aquaticHabitat = smoothstep\(0\.18, 0\.56, depth\) \* waterCoverage;/,
+    /float aquaticHabitat = smoothstep\(0\.06, 0\.24, depth\) \* waterCoverage;/,
   );
-  assert.match(shader, /float tailWidth = mix\(0\.20, 2\.45, tailProgress\);/);
+  assert.match(shader, /float peduncle = 1\.0 - smoothstep\(/);
+  assert.match(shader, /float tailLeft = 1\.0 - smoothstep\(/);
+  assert.match(shader, /float tailRight = 1\.0 - smoothstep\(/);
+  assert.match(shader, /float tailNotch = 1\.0 - smoothstep\(/);
+  assert.match(shader, /float forkedTail = saturate\(/);
+  assert.match(shader, /float tailFlex = 1\.0 - smoothstep\(-4\.0, -1\.4, point\.y\);/);
   assert.match(shader, /float aquaticPresence = pow\(/);
   assert.match(
     shader,
-    /vec3\(0\.28, 0\.32, 0\.24\),\s*vec3\(0\.58, 0\.52, 0\.26\),/,
+    /vec3\(0\.076, 0\.090, 0\.072\),\s*vec3\(0\.210, 0\.148, 0\.088\),/,
   );
   assert.doesNotMatch(shader, /vec3\(1\.0, 0\.0, 0\.6\)/);
 

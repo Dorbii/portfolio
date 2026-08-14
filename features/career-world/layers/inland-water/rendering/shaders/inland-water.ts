@@ -47,20 +47,50 @@ float hash21(vec2 point) {
 
 float fishSilhouette(vec2 point) {
   float body = 1.0 - smoothstep(
-    1.05,
-    1.82,
-    length(vec2(point.x, point.y * 0.42))
+    0.90,
+    1.08,
+    length(vec2(point.x / 1.32, (point.y - 0.30) / 3.85))
   );
-  float tailEnvelope = smoothstep(-5.8, -5.0, point.y)
-    * (1.0 - smoothstep(-1.8, -1.0, point.y));
-  float tailProgress = saturate((-point.y - 1.0) / 4.8);
-  float tailWidth = mix(0.20, 2.45, tailProgress);
-  float tail = (1.0 - smoothstep(
-    max(0.0, tailWidth - 0.32),
-    tailWidth + 0.28,
-    abs(point.x)
-  )) * tailEnvelope;
-  return saturate(max(body, tail));
+  float peduncle = 1.0 - smoothstep(
+    0.82,
+    1.12,
+    length(vec2(point.x / 0.30, (point.y + 4.05) / 0.82))
+  );
+  float tailLeft = 1.0 - smoothstep(
+    0.78,
+    1.08,
+    length(vec2((point.x + 0.55) / 0.78, (point.y + 5.20) / 0.90))
+  );
+  float tailRight = 1.0 - smoothstep(
+    0.78,
+    1.08,
+    length(vec2((point.x - 0.55) / 0.78, (point.y + 5.20) / 0.90))
+  );
+  float tailNotch = 1.0 - smoothstep(
+    0.22,
+    0.58,
+    length(vec2(point.x / 0.28, (point.y + 5.72) / 0.55))
+  );
+  float forkedTail = saturate(max(tailLeft, tailRight) - tailNotch * 0.88);
+  return saturate(max(max(body, peduncle), forkedTail));
+}
+
+float swimmingFish(
+  vec2 localPx,
+  vec2 anchor,
+  vec2 heading,
+  float phase,
+  vec2 scale
+) {
+  vec2 axis = normalize(heading);
+  vec2 normal = vec2(-axis.y, axis.x);
+  vec2 drift = axis * sin(u_time * 0.24 + phase) * 1.4
+    + normal * sin(u_time * 0.41 + phase * 1.7) * 0.55;
+  vec2 offset = localPx - anchor - drift;
+  vec2 point = vec2(dot(offset, normal), dot(offset, axis)) / scale;
+  float tailFlex = 1.0 - smoothstep(-4.0, -1.4, point.y);
+  point.x += sin(u_time * 1.35 + phase * 2.1) * tailFlex * 0.22;
+  return fishSilhouette(point);
 }
 
 vec4 sampleFlowDetail(
@@ -374,54 +404,68 @@ void main() {
   float aquaticLod = smoothstep(0.55, 0.95, u_capitalLod)
     * u_aquaticLifeEnabled;
   vec2 aquaticScale = mix(
-    vec2(3.6, 3.1),
-    vec2(2.2, 1.9),
+    vec2(2.7, 2.2),
+    vec2(1.65, 1.35),
     saturate(u_siteLod)
   );
-  vec2 aquaticDriftA = vec2(
-    sin(u_time * 0.37) * 2.4,
-    cos(u_time * 0.29) * 1.3
+  float lakeSchool = swimmingFish(
+    localPx, vec2(592.0, 596.0), vec2(0.34, 0.94), 0.0, aquaticScale * 1.04
   );
-  vec2 aquaticDriftB = vec2(
-    sin(u_time * 0.31 + 1.7) * 2.0,
-    cos(u_time * 0.27 + 0.8) * 1.5
+  lakeSchool += swimmingFish(
+    localPx, vec2(628.0, 604.0), vec2(-0.22, 0.98), 1.4, aquaticScale * 0.92
+  ) * 0.88;
+  lakeSchool += swimmingFish(
+    localPx, vec2(560.0, 612.0), vec2(0.75, 0.66), 2.7, aquaticScale * 0.96
+  ) * 0.82;
+  lakeSchool += swimmingFish(
+    localPx, vec2(616.0, 636.0), vec2(-0.55, 0.84), 4.1, aquaticScale * 0.86
+  ) * 0.78;
+  float riverSchool = swimmingFish(
+    localPx, vec2(900.0, 490.0), vec2(-0.89, 0.45), 0.5, aquaticScale * 0.88
   );
-  vec2 aquaticDriftC = vec2(
-    sin(u_time * 0.34 + 3.1) * 2.2,
-    cos(u_time * 0.25 + 2.3) * 1.4
-  );
-  vec2 aquaticDriftD = vec2(
-    sin(u_time * 0.28 + 4.4) * 1.8,
-    cos(u_time * 0.32 + 3.6) * 1.2
-  );
-  float aquaticSchool = fishSilhouette(
-    (localPx - vec2(942.0, 326.0) - aquaticDriftA) / aquaticScale
-  );
-  aquaticSchool += fishSilhouette(
-    (localPx - vec2(934.0, 468.0) - aquaticDriftB) / aquaticScale
-  );
-  aquaticSchool += fishSilhouette(
-    (localPx - vec2(888.0, 502.0) - aquaticDriftC) / aquaticScale
-  );
-  aquaticSchool += fishSilhouette(
-    (localPx - vec2(796.0, 666.0) - aquaticDriftD) / aquaticScale
-  );
-  float aquaticHabitat = smoothstep(0.18, 0.56, depth) * waterCoverage;
+  riverSchool += swimmingFish(
+    localPx, vec2(882.0, 504.0), vec2(-0.89, 0.45), 1.3, aquaticScale
+  ) * 0.92;
+  riverSchool += swimmingFish(
+    localPx, vec2(866.0, 512.0), vec2(-0.16, 0.99), 2.1, aquaticScale * 0.94
+  ) * 0.88;
+  riverSchool += swimmingFish(
+    localPx, vec2(850.0, 526.0), vec2(-0.16, 0.99), 2.9, aquaticScale * 0.84
+  ) * 0.82;
+  riverSchool += swimmingFish(
+    localPx, vec2(842.0, 540.0), vec2(-0.16, 0.99), 3.7, aquaticScale * 0.92
+  ) * 0.86;
+  riverSchool += swimmingFish(
+    localPx, vec2(836.0, 576.0), vec2(-0.71, 0.71), 4.5, aquaticScale * 0.86
+  ) * 0.80;
+  riverSchool += swimmingFish(
+    localPx, vec2(814.0, 592.0), vec2(-0.71, 0.71), 5.3, aquaticScale * 0.82
+  ) * 0.76;
+  riverSchool += swimmingFish(
+    localPx, vec2(796.0, 668.0), vec2(-0.61, 0.80), 6.1, aquaticScale * 0.90
+  ) * 0.78;
+  riverSchool += swimmingFish(
+    localPx, vec2(744.0, 772.0), vec2(0.05, 1.0), 6.9, aquaticScale * 0.80
+  ) * 0.70;
+  float aquaticSchool = saturate(lakeSchool + riverSchool);
+  float aquaticHabitat = smoothstep(0.06, 0.24, depth) * waterCoverage;
   float aquaticPresence = pow(
     saturate(aquaticSchool * aquaticHabitat * aquaticLod),
-    1.08
+    1.06
   );
   vec3 aquaticBody = mix(
-    vec3(0.28, 0.32, 0.24),
-    vec3(0.58, 0.52, 0.26),
-    0.35 + depth * 0.20
+    vec3(0.076, 0.090, 0.072),
+    vec3(0.210, 0.148, 0.088),
+    saturate(depth * 0.72)
   );
   surface = mix(surface, aquaticBody, aquaticPresence * 0.88);
-  float aquaticShadow = aquaticPresence * mix(0.14, 0.28, depth);
+  float aquaticEdge = saturate(aquaticPresence - pow(aquaticPresence, 1.55));
+  surface += vec3(0.070, 0.090, 0.078) * aquaticEdge * 0.18;
+  float aquaticShadow = aquaticPresence * mix(0.08, 0.18, depth);
   surface *= vec3(
-    1.0 - aquaticShadow * 0.88,
-    1.0 - aquaticShadow * 0.62,
-    1.0 - aquaticShadow * 0.42
+    1.0 - aquaticShadow * 0.76,
+    1.0 - aquaticShadow * 0.64,
+    1.0 - aquaticShadow * 0.54
   );
   surface += vec3(0.025, 0.041, 0.040)
     * aquaticPresence * (1.0 - depth) * 0.025;
