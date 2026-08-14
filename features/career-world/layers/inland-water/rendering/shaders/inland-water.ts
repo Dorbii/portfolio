@@ -374,7 +374,7 @@ void main() {
   vec2 aquaticCell = floor(localPx / vec2(92.0, 78.0));
   vec2 aquaticUv = fract(localPx / vec2(92.0, 78.0)) - 0.5;
   float aquaticSeed = hash21(aquaticCell);
-  float schoolWindow = step(0.84, aquaticSeed)
+  float schoolWindow = step(0.89, aquaticSeed)
     * smoothstep(0.56, 0.82, u_siteLod)
     * u_aquaticLifeEnabled;
   float fishDirection = mix(-1.0, 1.0, step(0.5, aquaticSeed));
@@ -382,8 +382,8 @@ void main() {
     aquaticUv.y + u_time * mix(0.018, 0.034, aquaticSeed) * fishDirection
   ) - 0.5;
   vec2 fishPoint = vec2(
-    (aquaticUv.x + (hash21(aquaticCell + 7.0) - 0.5) * 0.34) * 23.0,
-    fishSwim * 24.0
+    (aquaticUv.x + (hash21(aquaticCell + 7.0) - 0.5) * 0.34) * 30.0,
+    fishSwim * 34.0
   );
   fishPoint.x += sin(u_time * 1.15 + aquaticSeed * 17.0) * 0.42;
   float fish = fishSilhouette(fishPoint)
@@ -397,11 +397,18 @@ void main() {
   ) * schoolWindow * smoothstep(0.93, 0.985, aquaticSeed)
     * smoothstep(0.34, 0.72, depth)
     * lake * waterCoverage;
-  surface = mix(
-    surface,
-    surface * vec3(0.36, 0.43, 0.37),
-    saturate(fish * 0.38 + companionFish * 0.26)
+  float aquaticPresence = pow(
+    saturate(fish * 0.68 + companionFish * 0.44),
+    1.35
   );
+  float aquaticShadow = aquaticPresence * mix(0.055, 0.11, depth);
+  surface *= vec3(
+    1.0 - aquaticShadow * 0.62,
+    1.0 - aquaticShadow * 0.40,
+    1.0 - aquaticShadow * 0.26
+  );
+  surface += vec3(0.025, 0.041, 0.040)
+    * aquaticPresence * (1.0 - depth) * 0.025;
   vec3 fallRibbonSample = texture(
     u_surfaceAlbedo,
     waterfallAtlasUv(

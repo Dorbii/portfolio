@@ -127,3 +127,25 @@ test("non-water field pixels encode neutral flow", async () => {
     "land and mist support texels must not decode as high-speed water",
   );
 });
+
+test("aquatic life stays sparse and translucent instead of reading as black blobs", async () => {
+  const shader = await readFile(path.join(
+    root,
+    "features/career-world/layers/inland-water/rendering/shaders/inland-water.ts",
+  ), "utf8");
+
+  assert.match(shader, /float schoolWindow = step\(0\.89, aquaticSeed\)/);
+  assert.match(shader, /\) \* 30\.0,\s*fishSwim \* 34\.0/);
+  assert.match(shader, /\* u_aquaticLifeEnabled/);
+  assert.match(shader, /float aquaticPresence = pow\(/);
+
+  const shadowRange = shader.match(
+    /float aquaticShadow = aquaticPresence \* mix\(([\d.]+), ([\d.]+), depth\);/,
+  );
+  assert.ok(shadowRange, "aquatic silhouettes must own a bounded depth-aware shadow");
+  const shallowShadow = Number(shadowRange[1]);
+  const deepShadow = Number(shadowRange[2]);
+  assert.ok(shallowShadow > 0 && shallowShadow < deepShadow);
+  assert.ok(deepShadow <= 0.12, "aquatic silhouettes must remain translucent");
+  assert.doesNotMatch(shader, /surface \* vec3\(0\.36, 0\.43, 0\.37\)/);
+});
