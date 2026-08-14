@@ -29,6 +29,10 @@ test("composition and environment registries expose unique ordered layer contrac
   assert.equal(CAREER_WORLD_LAYER_ORDER.includes("environment"), false);
   assert.equal(ENVIRONMENT_LAYER_DEFINITIONS.length, 11);
   assert.equal(
+    ENVIRONMENT_LAYER_DEFINITIONS.some(({ id }) => id === "L3_3"),
+    false,
+  );
+  assert.equal(
     new Set(ENVIRONMENT_LAYER_DEFINITIONS.map(({ id }) => id)).size,
     ENVIRONMENT_LAYER_DEFINITIONS.length,
   );

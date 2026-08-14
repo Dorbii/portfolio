@@ -9,7 +9,7 @@ export type EnvironmentLayerId =
   | "L3"
   | "L3_1"
   | "L3_2"
-  | "L3_3";
+  | "L3_4";
 
 export interface EnvironmentLayerDefinition {
   readonly available: boolean;
@@ -94,9 +94,9 @@ export const ENVIRONMENT_LAYER_DEFINITIONS: readonly EnvironmentLayerDefinition[
     }),
     Object.freeze({
       available: true,
-      id: "L3_3",
-      label: "Aquatic life",
-      owns: "LOD-gated procedural fish silhouettes",
+      id: "L3_4",
+      label: "Inland habitat detail",
+      owns: "deterministic submerged stones, wood, reeds, and aquatic vegetation",
       parentId: "L3",
     }),
   ]);
@@ -113,7 +113,7 @@ export const DEFAULT_ENVIRONMENT_LAYER_VISIBILITY: EnvironmentLayerVisibility =
     L3: true,
     L3_1: true,
     L3_2: true,
-    L3_3: true,
+    L3_4: true,
   });
 
 const ENVIRONMENT_LAYER_BY_ID = new Map(

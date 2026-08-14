@@ -28,7 +28,7 @@ test("authority visibility cascades without erasing child selections", () => {
   assert.equal(inlandDisabled.L3_1, true);
   assert.equal(isEnvironmentLayerEffectivelyVisible(inlandDisabled, "L3_1"), false);
   assert.equal(isEnvironmentLayerEffectivelyVisible(inlandDisabled, "L3_2"), false);
-  assert.equal(isEnvironmentLayerEffectivelyVisible(inlandDisabled, "L3_3"), false);
+  assert.equal(isEnvironmentLayerEffectivelyVisible(inlandDisabled, "L3_4"), false);
   assert.equal(
     isEnvironmentLayerEffectivelyVisible(
       DEFAULT_ENVIRONMENT_LAYER_VISIBILITY,

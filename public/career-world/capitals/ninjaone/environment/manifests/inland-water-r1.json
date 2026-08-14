@@ -40,7 +40,7 @@
     ],
     "artboardScale": 3,
     "decodedBytes": 18911232,
-    "sha256": "4C3CADF39E29E47EE956FCCFBAA774C9351F0F4EE9FEDF82837243B369F6AF80",
+    "sha256": "305BFC21E552BAD4E6A3BBEFAA4E582B3E65D354354652575554A1567C654F7F",
     "channels": {
       "r": "signed bank distance over +/-24 artboard pixels; 0.5 is the water edge",
       "g": "downstream velocity x encoded as 0.5 + value * 0.5",
@@ -108,7 +108,7 @@
       912
     ],
     "decodedBytes": 2101248,
-    "sha256": "378F8D5FE3EB249735DF6A878B00939671795C778E31A274D8067042D44A7C18",
+    "sha256": "4667A357373C94D36B9A8F07552CE38C38347A2E4DFB2ACA74ABDDCC6F9BB7B2",
     "artboardCrop": [
       480,
       168,
@@ -772,57 +772,91 @@
   ],
   "terrainErasePatches": [
     {
-      "id": "c1-ocean-handoff-seam-artifact",
-      "center": [
-        909,
-        268
-      ],
-      "radius": [
-        16,
-        11
-      ]
-    }
-  ],
-  "obstacles": [
-    {
-      "id": "b2-outlet-boulder",
-      "center": [
-        629,
-        652
-      ],
-      "radius": 6.5,
-      "wakeExtent": 28,
-      "wakeWidth": 11,
-      "flowDirection": [
-        0.212,
-        0.9773
-      ],
-      "intensity": 0.75
-    },
-    {
-      "id": "b2-channel-split-rock",
+      "id": "b2-channel-split-frozen-land-cleanup",
       "center": [
         655,
         675
       ],
-      "radius": 3.5,
-      "wakeExtent": 17,
-      "wakeWidth": 7,
-      "flowDirection": [
-        0.4301,
-        0.9028
+      "radius": [
+        7,
+        15
+      ]
+    },
+    {
+      "id": "c2-gorge-frozen-land-cleanup-head",
+      "center": [
+        724,
+        751
       ],
-      "intensity": 0.48,
-      "carve": false
+      "radius": [
+        13,
+        24
+      ]
+    },
+    {
+      "id": "c2-gorge-frozen-land-cleanup-upstream",
+      "center": [
+        752,
+        795
+      ],
+      "radius": [
+        11,
+        18
+      ]
+    },
+    {
+      "id": "c2-gorge-frozen-land-cleanup-a",
+      "center": [
+        757,
+        822
+      ],
+      "radius": [
+        14,
+        16
+      ]
+    },
+    {
+      "id": "c2-gorge-frozen-land-cleanup-b",
+      "center": [
+        765,
+        838
+      ],
+      "radius": [
+        14,
+        18
+      ]
+    },
+    {
+      "id": "c2-gorge-frozen-land-cleanup-c",
+      "center": [
+        773,
+        853
+      ],
+      "radius": [
+        16,
+        17
+      ]
+    },
+    {
+      "id": "c2-gorge-frozen-land-cleanup-downstream",
+      "center": [
+        789,
+        853
+      ],
+      "radius": [
+        11,
+        17
+      ]
     }
   ],
+  "obstacles": [],
   "metrics": {
-    "occupiedPixels": 347797,
+    "occupiedPixels": 347846,
     "cascadeImpactPixels": 23563,
     "maximumCascadeImpact": 1,
     "meanFlowVector": [
-      0.029759262136951185,
-      0.2379851627531411
+      0.029792348847328034,
+      0.23798475609673375
     ],
     "maximumDecodedBytes": 25206784
   },

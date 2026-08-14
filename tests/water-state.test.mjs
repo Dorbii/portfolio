@@ -167,6 +167,13 @@ test("animated water resizes only when its observer or LOD requests it", async (
     assert.match(controller, /new ResizeObserver\(\(\) => \{\s*this\.renderer\.requestResize\(\);\s*if \(!this\.resizeFrameRequest\) \{/);
     assert.match(controller, /this\.resizeFrameRequest = requestAnimationFrame\(\(\) => \{\s*this\.resizeFrameRequest = 0;\s*this\.renderOnce\(\);/);
   }
+  assert.match(inlandController, /INLAND_WATER_FRAME_INTERVAL_MS = 1000 \/ 30/);
+  assert.match(
+    inlandController,
+    /timestamp - this\.lastTimestamp[\s\S]*?< INLAND_WATER_FRAME_INTERVAL_MS - FRAME_INTERVAL_TOLERANCE_MS/,
+  );
+  assert.match(inlandController, /dataset\.frameIntervalP95Ms/);
+  assert.match(inlandController, /dataset\.renderP95Ms/);
 });
 
 test("live foliage does not trigger full-page layout on every animation frame", async () => {

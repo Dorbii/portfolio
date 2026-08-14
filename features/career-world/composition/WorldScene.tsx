@@ -11,7 +11,10 @@ import {
 } from "react";
 import { WorldBackdrop } from "../layers/world-backdrop";
 import { WaterSurfaceCanvas, type WaterRenderState } from "../layers/ocean";
-import { NinjaOneInlandWaterCanvas } from "../layers/inland-water";
+import {
+  NinjaOneInlandHabitatCanvas,
+  NinjaOneInlandWaterCanvas,
+} from "../layers/inland-water";
 import {
   NINJAONE_ENVIRONMENT_CAMERA,
   NINJAONE_ENVIRONMENT_PROOF_ID,
@@ -324,7 +327,7 @@ export function WorldScene({
   const inlandWaterAuthorityVisible = environmentLayerVisible("L3");
   const inlandWaterMotionVisible = environmentLayerVisible("L3_1");
   const inlandWaterEffectsVisible = environmentLayerVisible("L3_2");
-  const aquaticLifeVisible = environmentLayerVisible("L3_3");
+  const inlandHabitatVisible = environmentLayerVisible("L3_4");
 
   const handleEnvironmentLayerToggle = useCallback((id: EnvironmentLayerId) => {
     setEnvironmentLayerVisibility((current) => Object.freeze({
@@ -569,7 +572,6 @@ export function WorldScene({
       data-layer-l3={inlandWaterAuthorityVisible}
       data-layer-l3-1={inlandWaterMotionVisible}
       data-layer-l3-2={inlandWaterEffectsVisible}
-      data-layer-l3-3={aquaticLifeVisible}
       data-close-lod={detailState.siteToClose.toFixed(3)}
       data-detail-tier={detailState.tier.id}
       data-environment-proof={environmentProof
@@ -611,13 +613,20 @@ export function WorldScene({
       {showNinjaOneInlandWater && inlandWaterAuthorityVisible ? (
         <NinjaOneInlandWaterCanvas
           active={isPageVisible && inlandWaterMotionVisible}
-          aquaticLifeEnabled={aquaticLifeVisible}
           camera={camera}
           detailState={detailState}
           effectsEnabled={inlandWaterEffectsVisible}
           light={WORLD_LIGHT}
         />
       ) : null}
+      {showNinjaOneInlandWater
+        && inlandWaterAuthorityVisible
+        && inlandHabitatVisible ? (
+          <NinjaOneInlandHabitatCanvas
+            camera={camera}
+            detailState={detailState}
+          />
+        ) : null}
       {showNinjaOneCapital && !capitalRecoveryBaseline ? (
         <NinjaOneCapitalMvp
           camera={camera}

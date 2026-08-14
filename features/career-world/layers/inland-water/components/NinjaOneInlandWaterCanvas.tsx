@@ -9,7 +9,6 @@ import { NinjaOneInlandWaterRenderer } from "../rendering/NinjaOneInlandWaterRen
 
 interface NinjaOneInlandWaterCanvasProps {
   readonly active: boolean;
-  readonly aquaticLifeEnabled: boolean;
   readonly camera: CameraView;
   readonly detailState: DetailState;
   readonly effectsEnabled: boolean;
@@ -18,7 +17,6 @@ interface NinjaOneInlandWaterCanvasProps {
 
 export function NinjaOneInlandWaterCanvas({
   active,
-  aquaticLifeEnabled,
   camera,
   detailState,
   effectsEnabled,
@@ -28,7 +26,6 @@ export function NinjaOneInlandWaterCanvas({
   const controllerRef = useRef<NinjaOneInlandWaterController | null>(null);
   const sceneRef = useRef({
     active,
-    aquaticLifeEnabled,
     camera,
     detailState,
     effectsEnabled,
@@ -38,13 +35,12 @@ export function NinjaOneInlandWaterCanvas({
   useEffect(() => {
     sceneRef.current = {
       active,
-      aquaticLifeEnabled,
       camera,
       detailState,
       effectsEnabled,
       light,
     };
-  }, [active, aquaticLifeEnabled, camera, detailState, effectsEnabled, light]);
+  }, [active, camera, detailState, effectsEnabled, light]);
 
   useEffect(() => {
     controllerRef.current?.setActive(active);
@@ -61,10 +57,6 @@ export function NinjaOneInlandWaterCanvas({
   useEffect(() => {
     controllerRef.current?.setEffectsEnabled(effectsEnabled);
   }, [effectsEnabled]);
-
-  useEffect(() => {
-    controllerRef.current?.setAquaticLifeEnabled(aquaticLifeEnabled);
-  }, [aquaticLifeEnabled]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -87,7 +79,6 @@ export function NinjaOneInlandWaterCanvas({
         localController.setView(scene.camera, scene.detailState);
         localController.setLight(scene.light);
         localController.setEffectsEnabled(scene.effectsEnabled);
-        localController.setAquaticLifeEnabled(scene.aquaticLifeEnabled);
         localController.setActive(scene.active);
         canvas.dataset.renderState = "ready";
         delete canvas.dataset.renderError;
@@ -116,14 +107,17 @@ export function NinjaOneInlandWaterCanvas({
       data-active={active}
       data-authority="ninjaone-inland-water-r1"
       data-authority-layer="L3"
-      data-aquatic-life-enabled={aquaticLifeEnabled}
-      data-aquatic-life-layer="L3_3"
       data-effects-enabled={effectsEnabled}
       data-effects-layer="L3_2"
+      data-effects-model="localized-curl-compression-cascade-r2"
+      data-frame-rate-cap="30"
+      data-fragment-culling="field-and-impact-support-r1"
       data-layer="ninjaone-inland-water"
       data-lod-tier={detailState.tier.id}
+      data-motion-model="flow-field-advected-multiscale-surface-r2"
       data-motion-layer="L3_1"
       data-render-state="loading"
+      data-shadow-model="water-only-bank-occlusion-r1"
       ref={canvasRef}
       role="img"
     />

@@ -4,6 +4,8 @@ import type { WorldLight } from "../../../shared/lighting";
 import { NinjaOneInlandWaterRenderer } from "./NinjaOneInlandWaterRenderer";
 
 const CAMERA_SETTLE_DURATION_MS = 180;
+const INLAND_WATER_FRAME_INTERVAL_MS = 1000 / 30;
+const FRAME_INTERVAL_TOLERANCE_MS = 2;
 
 export class NinjaOneInlandWaterController {
   private readonly renderer: NinjaOneInlandWaterRenderer;
@@ -15,6 +17,9 @@ export class NinjaOneInlandWaterController {
   private running = false;
   private elapsedSeconds = 0;
   private lastTimestamp = 0;
+  private renderSequence = 0;
+  private readonly frameIntervalsMs: number[] = [];
+  private readonly renderTimingsMs: number[] = [];
 
   constructor(
     renderer: NinjaOneInlandWaterRenderer,
@@ -53,11 +58,6 @@ export class NinjaOneInlandWaterController {
     this.renderOnce();
   }
 
-  setAquaticLifeEnabled(enabled: boolean): void {
-    this.renderer.setAquaticLifeEnabled(enabled);
-    this.renderOnce();
-  }
-
   setActive(active: boolean): void {
     if (active) {
       this.start();
@@ -85,14 +85,30 @@ export class NinjaOneInlandWaterController {
   private readonly tick = (timestamp: number): void => {
     this.frameRequest = 0;
     if (!this.running || document.hidden) return;
-    if (this.lastTimestamp > 0) {
+    if (
+      this.lastTimestamp > 0
+      && timestamp - this.lastTimestamp
+        < INLAND_WATER_FRAME_INTERVAL_MS - FRAME_INTERVAL_TOLERANCE_MS
+    ) {
+      this.schedule();
+      return;
+    }
+    const frameIntervalMs = this.lastTimestamp > 0
+      ? timestamp - this.lastTimestamp
+      : 0;
+    if (frameIntervalMs > 0) {
       this.elapsedSeconds += Math.min(
         0.05,
-        Math.max(0, (timestamp - this.lastTimestamp) / 1000),
+        Math.max(0, frameIntervalMs / 1000),
       );
     }
     this.lastTimestamp = timestamp;
+    const renderStartedAt = performance.now();
     this.renderer.render(this.elapsedSeconds);
+    this.recordPerformanceSample(
+      performance.now() - renderStartedAt,
+      frameIntervalMs,
+    );
     this.schedule();
   };
 
@@ -143,5 +159,37 @@ export class NinjaOneInlandWaterController {
 
   private renderOnce(): void {
     this.renderer.render(this.elapsedSeconds);
+  }
+
+  private recordPerformanceSample(
+    renderDurationMs: number,
+    frameIntervalMs: number,
+  ): void {
+    this.renderSequence += 1;
+    this.renderTimingsMs.push(renderDurationMs);
+    if (frameIntervalMs > 0) this.frameIntervalsMs.push(frameIntervalMs);
+    if (this.renderTimingsMs.length > 120) this.renderTimingsMs.shift();
+    if (this.frameIntervalsMs.length > 120) this.frameIntervalsMs.shift();
+    if (this.renderSequence % 30 !== 0) return;
+
+    const percentile95 = (samples: readonly number[]): number => {
+      if (samples.length === 0) return 0;
+      const ordered = [...samples].sort((left, right) => left - right);
+      return ordered[Math.min(
+        ordered.length - 1,
+        Math.floor(ordered.length * 0.95),
+      )];
+    };
+    const averageRender = this.renderTimingsMs.reduce(
+      (sum, value) => sum + value,
+      0,
+    ) / this.renderTimingsMs.length;
+    this.renderer.canvas.dataset.renderAverageMs = averageRender.toFixed(2);
+    this.renderer.canvas.dataset.renderP95Ms = percentile95(
+      this.renderTimingsMs,
+    ).toFixed(2);
+    this.renderer.canvas.dataset.frameIntervalP95Ms = percentile95(
+      this.frameIntervalsMs,
+    ).toFixed(2);
   }
 }

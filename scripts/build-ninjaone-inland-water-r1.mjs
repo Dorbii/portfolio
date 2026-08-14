@@ -817,6 +817,10 @@ export async function buildNinjaOneInlandWaterR1() {
         continue;
       }
       if (terrainEraseOnly[pixel]) {
+        // A forced terrain cleanup is still inland-water-owned geometry.
+        // Without ownership the terrain is erased but the L3 material is
+        // suppressed, exposing the unrelated ocean layer as a flat blue lobe.
+        renderOwnership[pixel] = 1;
         field[offset + 1] = Math.round(128 + 0.03 * 127);
         field[offset + 2] = Math.round(128 + 0.21 * 127);
         field[offset + 3] = EXTERNAL_WATER_ALPHA;

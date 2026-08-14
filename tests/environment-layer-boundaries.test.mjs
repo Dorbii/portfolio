@@ -7,7 +7,7 @@ const read = (path) => readFile(path, "utf8");
 test("L1 L2 and L3 expose authority roots and explicit child modules", async () => {
   const [scene, ocean, oceanAuthority, oceanMotion, oceanAmbience,
     terrain, terrainAuthority, terrainDetail, terrainWildlife, terrainShadows,
-    inland, inlandAuthority, inlandMotion, inlandEffects, inlandLife] =
+    inland, inlandAuthority, inlandMotion, inlandEffects, inlandHabitat] =
     await Promise.all([
       read("features/career-world/composition/WorldScene.tsx"),
       read("features/career-world/layers/ocean/index.ts"),
@@ -23,7 +23,7 @@ test("L1 L2 and L3 expose authority roots and explicit child modules", async () 
       read("features/career-world/layers/inland-water/authority/index.ts"),
       read("features/career-world/layers/inland-water/surface-motion/index.ts"),
       read("features/career-world/layers/inland-water/effects/index.ts"),
-      read("features/career-world/layers/inland-water/aquatic-life/index.ts"),
+      read("features/career-world/layers/inland-water/habitat-detail/index.ts"),
     ]);
 
   assert.match(scene, /from "\.\.\/layers\/ocean"/);
@@ -42,7 +42,7 @@ test("L1 L2 and L3 expose authority roots and explicit child modules", async () 
   assert.match(inlandAuthority, /INLAND_WATER_AUTHORITY_LAYER_ID = "L3"/);
   assert.match(inlandMotion, /INLAND_WATER_SURFACE_MOTION_LAYER_ID = "L3_1"/);
   assert.match(inlandEffects, /INLAND_WATER_EFFECTS_LAYER_ID = "L3_2"/);
-  assert.match(inlandLife, /INLAND_WATER_AQUATIC_LIFE_LAYER_ID = "L3_3"/);
+  assert.match(inlandHabitat, /INLAND_WATER_HABITAT_DETAIL_LAYER_ID = "L3_4"/);
   assert.doesNotMatch(oceanAuthority, /water-surface/);
   assert.doesNotMatch(terrainAuthority, /territory-landform/);
   assert.doesNotMatch(inlandAuthority, /water-surface/);

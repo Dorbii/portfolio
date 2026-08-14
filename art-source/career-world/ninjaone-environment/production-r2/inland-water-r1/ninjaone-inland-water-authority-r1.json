@@ -177,10 +177,83 @@
     {"id": "c2-gorge-drop", "crest": [[749, 830], [760, 822]], "impact": [771, 850], "direction": [0.5547, 0.8321], "mistRadius": 15}
   ],
   "terrainErasePatches": [
-    {"id": "c1-ocean-handoff-seam-artifact", "center": [909, 268], "radius": [16, 11]}
+    {
+      "id": "b2-channel-split-frozen-land-cleanup",
+      "center": [
+        655,
+        675
+      ],
+      "radius": [
+        7,
+        15
+      ]
+    },
+    {
+      "id": "c2-gorge-frozen-land-cleanup-head",
+      "center": [
+        724,
+        751
+      ],
+      "radius": [
+        13,
+        24
+      ]
+    },
+    {
+      "id": "c2-gorge-frozen-land-cleanup-upstream",
+      "center": [
+        752,
+        795
+      ],
+      "radius": [
+        11,
+        18
+      ]
+    },
+    {
+      "id": "c2-gorge-frozen-land-cleanup-a",
+      "center": [
+        757,
+        822
+      ],
+      "radius": [
+        14,
+        16
+      ]
+    },
+    {
+      "id": "c2-gorge-frozen-land-cleanup-b",
+      "center": [
+        765,
+        838
+      ],
+      "radius": [
+        14,
+        18
+      ]
+    },
+    {
+      "id": "c2-gorge-frozen-land-cleanup-c",
+      "center": [
+        773,
+        853
+      ],
+      "radius": [
+        16,
+        17
+      ]
+    },
+    {
+      "id": "c2-gorge-frozen-land-cleanup-downstream",
+      "center": [
+        789,
+        853
+      ],
+      "radius": [
+        11,
+        17
+      ]
+    }
   ],
-  "obstacles": [
-    {"id": "b2-outlet-boulder", "center": [629, 652], "radius": 6.5, "wakeExtent": 28, "wakeWidth": 11, "flowDirection": [0.212, 0.9773], "intensity": 0.75},
-    {"id": "b2-channel-split-rock", "center": [655, 675], "radius": 3.5, "wakeExtent": 17, "wakeWidth": 7, "flowDirection": [0.4301, 0.9028], "intensity": 0.48, "carve": false}
-  ]
+  "obstacles": []
 }

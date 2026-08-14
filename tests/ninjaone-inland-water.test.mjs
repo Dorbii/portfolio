@@ -1,9 +1,15 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
+
+import {
+  NINJAONE_INLAND_HABITAT_ASSETS,
+  NINJAONE_INLAND_HABITAT_PLACEMENTS,
+} from "../features/career-world/layers/inland-water/habitat-detail/model.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -13,6 +19,22 @@ async function readJson(relativePath) {
 
 function runtimeAssetFile(publicPath) {
   return path.join(root, "public", publicPath.replace(/^\//, ""));
+}
+
+function pointInPolygon(point, polygon) {
+  let inside = false;
+  for (let index = 0, previous = polygon.length - 1;
+    index < polygon.length;
+    previous = index, index += 1) {
+    const [x, y] = polygon[index];
+    const [previousX, previousY] = polygon[previous];
+    const crosses = (y > point[1]) !== (previousY > point[1])
+      && point[0] < (
+        (previousX - x) * (point[1] - y) / (previousY - y) + x
+      );
+    if (crosses) inside = !inside;
+  }
+  return inside;
 }
 
 test("B2 authority retains the terrain-supported two-stage waterfall", async () => {
@@ -40,6 +62,24 @@ test("B2 authority retains the terrain-supported two-stage waterfall", async () 
       ["b2-upper-drop", [656, 665]],
       ["b2-lower-drop", [658, 699]],
     ],
+  );
+  assert.deepEqual(
+    authority.terrainErasePatches.map(({ id }) => id),
+    [
+      "b2-channel-split-frozen-land-cleanup",
+      "c2-gorge-frozen-land-cleanup-head",
+      "c2-gorge-frozen-land-cleanup-upstream",
+      "c2-gorge-frozen-land-cleanup-a",
+      "c2-gorge-frozen-land-cleanup-b",
+      "c2-gorge-frozen-land-cleanup-c",
+      "c2-gorge-frozen-land-cleanup-downstream",
+    ],
+    "L3 owns only the reviewed terrain cleanup patches",
+  );
+  assert.deepEqual(
+    authority.obstacles,
+    [],
+    "the removed B2 split-rock obstacle and synthetic wake must stay absent",
   );
 });
 
@@ -101,6 +141,36 @@ test("inland ownership texture localizes waterfall impact energy", async () => {
   }
 });
 
+test("inland effects preserve terrain ownership and break up cascade spray", async () => {
+  const shader = await readFile(path.join(
+    root,
+    "features/career-world/layers/inland-water/rendering/shaders/inland-water.ts",
+  ), "utf8");
+
+  assert.doesNotMatch(shader, /bankBand|bankAlpha|authoredBank/);
+  assert.match(shader, /float baseAlpha = waterAlpha/);
+  assert.match(shader, /float fall = smoothstep\(0\.62, 0\.84, fallVelocity\) \* fallSupport/);
+  assert.match(shader, /float impactSpray = impactCore[\s\S]*?\* eventBreakup/);
+  assert.match(shader, /1\.0 - waterCoverage \* 0\.72/);
+  assert.match(shader, /max\(baseAlpha, mist \* 0\.15\)/);
+  assert.match(shader, /float bankShadow =/);
+  assert.match(shader, /float flowCurl = abs/);
+  assert.match(shader, /float impactRingCoordinate = fract/);
+  assert.match(shader, /float fallRibbonCoverage = smoothstep/);
+  assert.match(shader, /float impactChannelGate = smoothstep/);
+  assert.match(shader, /float impactBankGate = 1\.0 - smoothstep/);
+  assert.match(shader, /float tarnAuthority =/);
+  assert.match(shader, /1\.0 - tarnAuthority \* 0\.96/);
+  assert.match(shader, /float northHandoff = smoothstep/);
+  assert.match(shader, /inField \* northHandoff \* southHandoff/);
+  assert.match(shader, /float wetBankApron = smoothstep/);
+  assert.match(
+    shader,
+    /if \([\s\S]*?inField < 0\.5[\s\S]*?wetBankApron < 0\.001[\s\S]*?discard/,
+  );
+  assert.doesNotMatch(shader, /broadWaveTrain|crossingWaveTrain|\bsin\(/);
+});
+
 test("non-water field pixels encode neutral flow", async () => {
   const manifest = await readJson(
     "public/career-world/capitals/ninjaone/environment/manifests/inland-water-r1.json",
@@ -128,57 +198,111 @@ test("non-water field pixels encode neutral flow", async () => {
   );
 });
 
-test("aquatic life forms readable habitat-registered fish schools", async () => {
-  const shader = await readFile(path.join(
-    root,
-    "features/career-world/layers/inland-water/rendering/shaders/inland-water.ts",
-  ), "utf8");
+test("inland habitat separates submerged bed detail from bank contact detail", async () => {
+  const [scene, canvas, renderer] = await Promise.all([
+    readFile(path.join(
+      root,
+      "features/career-world/composition/WorldScene.tsx",
+    ), "utf8"),
+    readFile(path.join(
+      root,
+      "features/career-world/layers/inland-water/habitat-detail/NinjaOneInlandHabitatCanvas.tsx",
+    ), "utf8"),
+    readFile(path.join(
+      root,
+      "features/career-world/layers/inland-water/habitat-detail/NinjaOneInlandHabitatRenderer.ts",
+    ), "utf8"),
+  ]);
 
   assert.match(
-    shader,
-    /float aquaticLod = smoothstep\(0\.55, 0\.95, u_capitalLod\)\s*\* u_aquaticLifeEnabled;/,
+    scene,
+    /<NinjaOneInlandWaterCanvas[\s\S]*?<NinjaOneInlandHabitatCanvas/,
   );
-  assert.match(
-    shader,
-    /vec2 aquaticScale = mix\(\s*vec2\(2\.7, 2\.2\),\s*vec2\(1\.65, 1\.35\),/,
-  );
-  const habitatAnchors = [...shader.matchAll(
-    /localPx, vec2\(([\d.]+), ([\d.]+)\), vec2\(([-\d.]+), ([-\d.]+)\)/g,
-  )].map((match) => [Number(match[1]), Number(match[2])]);
+  assert.match(canvas, /data-authority-layer="L3_4"/);
+  assert.match(canvas, /data-placement-model="deterministic-habitat-clusters-r2"/);
+  assert.match(canvas, /data-shadow-pass="depth-and-lod-aware-bed-contact-r2"/);
+  assert.match(renderer, /NINJAONE_INLAND_TERRAIN_ERASE_MASK/);
+  assert.match(renderer, /destination-in/);
+  assert.match(renderer, /bankPlacements/);
+  assert.match(renderer, /isBankContactAsset/);
+  assert.match(renderer, /DETAIL_TIER_DEPTH/);
+  assert.match(renderer, /visiblePropCount/);
+  assert.match(renderer, /brightness\(0\) saturate\(0\) blur/);
+  assert.doesNotMatch(renderer, /context\.ellipse/);
+
   assert.deepEqual(
-    habitatAnchors,
+    Object.keys(NINJAONE_INLAND_HABITAT_ASSETS).sort(),
     [
-      [592, 596], [628, 604], [560, 612], [616, 636],
-      [900, 490], [882, 504], [866, 512], [850, 526], [842, 540],
-      [836, 576], [814, 592], [796, 668], [744, 772],
+      "bank-reed-tuft",
+      "submerged-grass-clump",
+      "submerged-woody-cover",
     ],
-    "aquatic silhouettes must stay registered to verified deep-water anchors",
   );
-  assert.match(
-    shader,
-    /float aquaticHabitat = smoothstep\(0\.06, 0\.24, depth\) \* waterCoverage;/,
+  assert.equal(new Set(
+    NINJAONE_INLAND_HABITAT_PLACEMENTS.map(({ id }) => id),
+  ).size, NINJAONE_INLAND_HABITAT_PLACEMENTS.length);
+  assert.equal(NINJAONE_INLAND_HABITAT_PLACEMENTS.length, 27);
+  assert.equal(NINJAONE_INLAND_HABITAT_PLACEMENTS.filter(
+    ({ id }) => id.startsWith("pond-"),
+  ).length, 12);
+  assert.equal(
+    NINJAONE_INLAND_HABITAT_PLACEMENTS.some(
+      ({ id }) => id === "pond-branch-center",
+    ),
+    false,
   );
-  assert.match(shader, /float peduncle = 1\.0 - smoothstep\(/);
-  assert.match(shader, /float tailLeft = 1\.0 - smoothstep\(/);
-  assert.match(shader, /float tailRight = 1\.0 - smoothstep\(/);
-  assert.match(shader, /float tailNotch = 1\.0 - smoothstep\(/);
-  assert.match(shader, /float forkedTail = saturate\(/);
-  assert.match(shader, /float tailFlex = 1\.0 - smoothstep\(-4\.0, -1\.4, point\.y\);/);
-  assert.match(shader, /float aquaticPresence = pow\(/);
-  assert.match(
-    shader,
-    /vec3\(0\.076, 0\.090, 0\.072\),\s*vec3\(0\.210, 0\.148, 0\.088\),/,
-  );
-  assert.doesNotMatch(shader, /vec3\(1\.0, 0\.0, 0\.6\)/);
+  for (const placement of NINJAONE_INLAND_HABITAT_PLACEMENTS) {
+    assert.ok(NINJAONE_INLAND_HABITAT_ASSETS[placement.assetId]);
+    assert.ok(placement.localPosition[0] >= 0 && placement.localPosition[0] <= 1440);
+    assert.ok(placement.localPosition[1] >= 0 && placement.localPosition[1] <= 1080);
+    assert.ok(placement.screenWidthCapPx >= 16 && placement.screenWidthCapPx <= 48);
+  }
+});
 
-  const shadowRange = shader.match(
-    /float aquaticShadow = aquaticPresence \* mix\(([\d.]+), ([\d.]+), depth\);/,
+test("production inland-habitat sprites are compact verified alpha derivatives", async () => {
+  const expectedHashes = {
+    "submerged-woody-cover": "f80412edb783203fa275cbf144caa28219011cd1d6b05295ebc641c122b51b0b",
+    "bank-reed-tuft": "9aae13b2b3c280dcde92055af76e44a906c67126fcdf341bdf1566cfc02e7424",
+    "submerged-grass-clump": "3a397f55c3f46aaf4310a1f3b00eafec95f95763125b6a624d485b626a8c6271",
+  };
+
+  for (const [assetId, asset] of Object.entries(NINJAONE_INLAND_HABITAT_ASSETS)) {
+    const bytes = await readFile(runtimeAssetFile(asset.path));
+    assert.equal(
+      createHash("sha256").update(bytes).digest("hex"),
+      expectedHashes[assetId],
+    );
+    const { data, info } = await sharp(bytes)
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    assert.deepEqual(
+      [info.width, info.height, info.channels],
+      [...asset.dimensions, 4],
+    );
+    const cornerAlpha = [
+      data[3],
+      data[(info.width - 1) * 4 + 3],
+      data[(info.height - 1) * info.width * 4 + 3],
+      data[(info.width * info.height - 1) * 4 + 3],
+    ];
+    assert.deepEqual(cornerAlpha, [0, 0, 0, 0]);
+  }
+});
+
+test("pond habitat stays inside the registered B2 tarn authority", async () => {
+  const manifest = await readJson(
+    "public/career-world/capitals/ninjaone/environment/manifests/inland-water-r1.json",
   );
-  assert.ok(shadowRange, "aquatic silhouettes must own a bounded depth-aware shadow");
-  const shallowShadow = Number(shadowRange[1]);
-  const deepShadow = Number(shadowRange[2]);
-  assert.ok(shallowShadow > 0 && shallowShadow < deepShadow);
-  assert.ok(deepShadow >= 0.14, "aquatic silhouettes must remain visibly legible");
-  assert.ok(deepShadow <= 0.30, "aquatic silhouettes must remain translucent");
-  assert.doesNotMatch(shader, /surface \* vec3\(0\.36, 0\.43, 0\.37\)/);
+  const tarn = manifest.segments.find(({ id }) => id === "b2-tarn");
+  assert.ok(tarn);
+  for (const placement of NINJAONE_INLAND_HABITAT_PLACEMENTS.filter(
+    ({ id }) => id.startsWith("pond-"),
+  )) {
+    assert.equal(
+      pointInPolygon(placement.localPosition, tarn.polygon),
+      true,
+      `${placement.id} must stay inside the B2 tarn authority`,
+    );
+  }
 });

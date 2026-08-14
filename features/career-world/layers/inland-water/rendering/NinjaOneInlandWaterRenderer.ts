@@ -42,7 +42,6 @@ const UNIFORM_NAMES = [
   "u_capitalLod",
   "u_siteLod",
   "u_effectsEnabled",
-  "u_aquaticLifeEnabled",
   "u_lightDirection",
   "u_inlandField",
   "u_inlandOwnership",
@@ -179,7 +178,6 @@ export class NinjaOneInlandWaterRenderer {
   private renderScale = 1;
   private resizePending = true;
   private effectsEnabled = true;
-  private aquaticLifeEnabled = true;
 
   private constructor(
     canvas: HTMLCanvasElement,
@@ -256,10 +254,6 @@ export class NinjaOneInlandWaterRenderer {
     this.effectsEnabled = enabled;
   }
 
-  setAquaticLifeEnabled(enabled: boolean): void {
-    this.aquaticLifeEnabled = enabled;
-  }
-
   render(elapsedSeconds: number): void {
     const detailState = this.detailState;
     if (!detailState) {
@@ -298,10 +292,6 @@ export class NinjaOneInlandWaterRenderer {
     gl.uniform1f(this.uniforms.u_capitalLod, detailState.territoryToCapital);
     gl.uniform1f(this.uniforms.u_siteLod, detailState.capitalToSite);
     gl.uniform1f(this.uniforms.u_effectsEnabled, this.effectsEnabled ? 1 : 0);
-    gl.uniform1f(
-      this.uniforms.u_aquaticLifeEnabled,
-      this.aquaticLifeEnabled ? 1 : 0,
-    );
     gl.uniform3fv(this.uniforms.u_lightDirection, this.lightDirection);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }

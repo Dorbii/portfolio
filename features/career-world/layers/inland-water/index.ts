@@ -5,4 +5,7 @@ export {
 } from "./authority";
 export { INLAND_WATER_SURFACE_MOTION_LAYER_ID } from "./surface-motion";
 export { INLAND_WATER_EFFECTS_LAYER_ID } from "./effects";
-export { INLAND_WATER_AQUATIC_LIFE_LAYER_ID } from "./aquatic-life";
+export {
+  INLAND_WATER_HABITAT_DETAIL_LAYER_ID,
+  NinjaOneInlandHabitatCanvas,
+} from "./habitat-detail";

@@ -34,7 +34,7 @@ toggleable sublayers instead of a generic `environment` bucket:
 | L3 | `inland-water/authority` | Rivers, lakes, rapids, and waterfall geometry |
 | L3_1 | `inland-water/surface-motion` | Currents, ripples, flow, and reflections |
 | L3_2 | `inland-water/effects` | Foam, impact rings, mist, and spray |
-| L3_3 | `inland-water/aquatic-life` | LOD-gated fish silhouettes |
+| L3_4 | `inland-water/habitat-detail` | Deterministic submerged stones, wood, reeds, and aquatic vegetation clipped to L3 geometry |
 
 Coastline is an interface between land geometry and water behavior, not a ninth
 scene layer. Land publishes the mask, elevation, and slope. Water derives

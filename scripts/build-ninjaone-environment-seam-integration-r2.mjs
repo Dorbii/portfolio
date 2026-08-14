@@ -1608,9 +1608,19 @@ async function pngRgba(data, width, height) {
     .toBuffer();
 }
 
+async function writeFileIfChanged(file, bytes) {
+  try {
+    const current = await readFile(file);
+    if (current.equals(bytes)) return;
+  } catch (error) {
+    if (error?.code !== "ENOENT") throw error;
+  }
+  await writeFile(file, bytes);
+}
+
 async function writeRgb(file, data, width, height) {
   const bytes = await pngRgb(data, width, height);
-  await writeFile(file, bytes);
+  await writeFileIfChanged(file, bytes);
   return bytes;
 }
 
@@ -2096,7 +2106,7 @@ export async function buildNinjaOneEnvironmentSeamIntegration() {
       context.width,
       context.height,
     );
-    await writeFile(outputFile, overlayBytes);
+    await writeFileIfChanged(outputFile, overlayBytes);
     const digest = sha256(overlayBytes);
     const contextDigest = sha256(contextBytes);
     const strips = sourceStripRecords(definition, sources);
