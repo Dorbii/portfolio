@@ -51,10 +51,10 @@ float fishSilhouette(vec2 point) {
     1.82,
     length(vec2(point.x, point.y * 0.42))
   );
-  float tailEnvelope = smoothstep(-4.8, -3.9, point.y)
-    * (1.0 - smoothstep(-1.7, -0.9, point.y));
-  float tailProgress = saturate((-point.y - 0.9) / 3.9);
-  float tailWidth = mix(0.18, 1.55, tailProgress);
+  float tailEnvelope = smoothstep(-5.8, -5.0, point.y)
+    * (1.0 - smoothstep(-1.8, -1.0, point.y));
+  float tailProgress = saturate((-point.y - 1.0) / 4.8);
+  float tailWidth = mix(0.20, 2.45, tailProgress);
   float tail = (1.0 - smoothstep(
     max(0.0, tailWidth - 0.32),
     tailWidth + 0.28,
@@ -371,41 +371,57 @@ void main() {
   float shallowCaustic = smoothstep(0.68, 0.91, fineFoam + waveEnergy * 0.18)
     * shallow * (1.0 - depth) * detail;
   surface += vec3(0.12, 0.16, 0.13) * shallowCaustic * 0.11;
-  vec2 aquaticCell = floor(localPx / vec2(92.0, 78.0));
-  vec2 aquaticUv = fract(localPx / vec2(92.0, 78.0)) - 0.5;
-  float aquaticSeed = hash21(aquaticCell);
-  float schoolWindow = step(0.89, aquaticSeed)
-    * smoothstep(0.56, 0.82, u_siteLod)
+  float aquaticLod = smoothstep(0.55, 0.95, u_capitalLod)
     * u_aquaticLifeEnabled;
-  float fishDirection = mix(-1.0, 1.0, step(0.5, aquaticSeed));
-  float fishSwim = fract(
-    aquaticUv.y + u_time * mix(0.018, 0.034, aquaticSeed) * fishDirection
-  ) - 0.5;
-  vec2 fishPoint = vec2(
-    (aquaticUv.x + (hash21(aquaticCell + 7.0) - 0.5) * 0.34) * 30.0,
-    fishSwim * 34.0
+  vec2 aquaticScale = mix(
+    vec2(3.6, 3.1),
+    vec2(2.2, 1.9),
+    saturate(u_siteLod)
   );
-  fishPoint.x += sin(u_time * 1.15 + aquaticSeed * 17.0) * 0.42;
-  float fish = fishSilhouette(fishPoint)
-    * schoolWindow
-    * smoothstep(0.34, 0.72, depth)
-    * (lake * 0.82 + river * 0.38)
-    * (1.0 - smoothstep(0.48, 0.78, materialSpeed))
-    * waterCoverage;
-  float companionFish = fishSilhouette(
-    vec2(fishPoint.x + 2.7, fishPoint.y + 5.2)
-  ) * schoolWindow * smoothstep(0.93, 0.985, aquaticSeed)
-    * smoothstep(0.34, 0.72, depth)
-    * lake * waterCoverage;
+  vec2 aquaticDriftA = vec2(
+    sin(u_time * 0.37) * 2.4,
+    cos(u_time * 0.29) * 1.3
+  );
+  vec2 aquaticDriftB = vec2(
+    sin(u_time * 0.31 + 1.7) * 2.0,
+    cos(u_time * 0.27 + 0.8) * 1.5
+  );
+  vec2 aquaticDriftC = vec2(
+    sin(u_time * 0.34 + 3.1) * 2.2,
+    cos(u_time * 0.25 + 2.3) * 1.4
+  );
+  vec2 aquaticDriftD = vec2(
+    sin(u_time * 0.28 + 4.4) * 1.8,
+    cos(u_time * 0.32 + 3.6) * 1.2
+  );
+  float aquaticSchool = fishSilhouette(
+    (localPx - vec2(942.0, 326.0) - aquaticDriftA) / aquaticScale
+  );
+  aquaticSchool += fishSilhouette(
+    (localPx - vec2(934.0, 468.0) - aquaticDriftB) / aquaticScale
+  );
+  aquaticSchool += fishSilhouette(
+    (localPx - vec2(888.0, 502.0) - aquaticDriftC) / aquaticScale
+  );
+  aquaticSchool += fishSilhouette(
+    (localPx - vec2(796.0, 666.0) - aquaticDriftD) / aquaticScale
+  );
+  float aquaticHabitat = smoothstep(0.18, 0.56, depth) * waterCoverage;
   float aquaticPresence = pow(
-    saturate(fish * 0.68 + companionFish * 0.44),
-    1.35
+    saturate(aquaticSchool * aquaticHabitat * aquaticLod),
+    1.08
   );
-  float aquaticShadow = aquaticPresence * mix(0.055, 0.11, depth);
+  vec3 aquaticBody = mix(
+    vec3(0.28, 0.32, 0.24),
+    vec3(0.58, 0.52, 0.26),
+    0.35 + depth * 0.20
+  );
+  surface = mix(surface, aquaticBody, aquaticPresence * 0.88);
+  float aquaticShadow = aquaticPresence * mix(0.14, 0.28, depth);
   surface *= vec3(
+    1.0 - aquaticShadow * 0.88,
     1.0 - aquaticShadow * 0.62,
-    1.0 - aquaticShadow * 0.40,
-    1.0 - aquaticShadow * 0.26
+    1.0 - aquaticShadow * 0.42
   );
   surface += vec3(0.025, 0.041, 0.040)
     * aquaticPresence * (1.0 - depth) * 0.025;

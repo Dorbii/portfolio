@@ -128,16 +128,39 @@ test("non-water field pixels encode neutral flow", async () => {
   );
 });
 
-test("aquatic life stays sparse and translucent instead of reading as black blobs", async () => {
+test("aquatic life stays visible by capital LOD without reading as black blobs", async () => {
   const shader = await readFile(path.join(
     root,
     "features/career-world/layers/inland-water/rendering/shaders/inland-water.ts",
   ), "utf8");
 
-  assert.match(shader, /float schoolWindow = step\(0\.89, aquaticSeed\)/);
-  assert.match(shader, /\) \* 30\.0,\s*fishSwim \* 34\.0/);
-  assert.match(shader, /\* u_aquaticLifeEnabled/);
+  assert.match(
+    shader,
+    /float aquaticLod = smoothstep\(0\.55, 0\.95, u_capitalLod\)\s*\* u_aquaticLifeEnabled;/,
+  );
+  assert.match(
+    shader,
+    /vec2 aquaticScale = mix\(\s*vec2\(3\.6, 3\.1\),\s*vec2\(2\.2, 1\.9\),/,
+  );
+  const habitatAnchors = [...shader.matchAll(
+    /localPx - vec2\(([\d.]+), ([\d.]+)\) - aquaticDrift[A-D]/g,
+  )].map((match) => [Number(match[1]), Number(match[2])]);
+  assert.deepEqual(
+    habitatAnchors,
+    [[942, 326], [934, 468], [888, 502], [796, 666]],
+    "aquatic silhouettes must stay registered to verified deep-water anchors",
+  );
+  assert.match(
+    shader,
+    /float aquaticHabitat = smoothstep\(0\.18, 0\.56, depth\) \* waterCoverage;/,
+  );
+  assert.match(shader, /float tailWidth = mix\(0\.20, 2\.45, tailProgress\);/);
   assert.match(shader, /float aquaticPresence = pow\(/);
+  assert.match(
+    shader,
+    /vec3\(0\.28, 0\.32, 0\.24\),\s*vec3\(0\.58, 0\.52, 0\.26\),/,
+  );
+  assert.doesNotMatch(shader, /vec3\(1\.0, 0\.0, 0\.6\)/);
 
   const shadowRange = shader.match(
     /float aquaticShadow = aquaticPresence \* mix\(([\d.]+), ([\d.]+), depth\);/,
@@ -146,6 +169,7 @@ test("aquatic life stays sparse and translucent instead of reading as black blob
   const shallowShadow = Number(shadowRange[1]);
   const deepShadow = Number(shadowRange[2]);
   assert.ok(shallowShadow > 0 && shallowShadow < deepShadow);
-  assert.ok(deepShadow <= 0.12, "aquatic silhouettes must remain translucent");
+  assert.ok(deepShadow >= 0.14, "aquatic silhouettes must remain visibly legible");
+  assert.ok(deepShadow <= 0.30, "aquatic silhouettes must remain translucent");
   assert.doesNotMatch(shader, /surface \* vec3\(0\.36, 0\.43, 0\.37\)/);
 });
