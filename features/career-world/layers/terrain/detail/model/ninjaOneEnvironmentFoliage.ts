@@ -1,7 +1,24 @@
 import manifest from "../../../../../../public/career-world/capitals/ninjaone/environment/manifests/foliage-native-r4.json" with { type: "json" };
 import type { CameraView, Pair } from "../../../../shared/camera";
 
-export type NinjaOneEnvironmentFoliageResourceKind = "paired-foliage-atlas";
+export type NinjaOneEnvironmentFoliageResourceKind = "pooled-foliage-atlas";
+export type NinjaOneEnvironmentFoliageComposition =
+  | "registered-replacement"
+  | "additive";
+export type NinjaOneEnvironmentFoliageSpecies =
+  | "native-conifer"
+  | "russet-fantasy-tree"
+  | "silver-aspen"
+  | "alpine-shrub"
+  | "wildflower-heather";
+
+const VALID_FOLIAGE_SPECIES = new Set<NinjaOneEnvironmentFoliageSpecies>([
+  "native-conifer",
+  "russet-fantasy-tree",
+  "silver-aspen",
+  "alpine-shrub",
+  "wildflower-heather",
+]);
 export type NinjaOneEnvironmentFoliageAtlasRect = readonly [
   number,
   number,
@@ -29,19 +46,21 @@ export interface NinjaOneEnvironmentFoliageInstance {
   /** Compatibility alias for resource-accounting callers. */
   readonly canopyResource: NinjaOneEnvironmentFoliageResource;
   readonly checkpoint: string;
+  readonly composition: NinjaOneEnvironmentFoliageComposition;
   readonly durationSeconds: number;
   readonly gridCell: "B1" | "B2" | "C1" | "C2";
   readonly id: string;
   readonly lagDegrees: number;
-  readonly neutralizationAtlasRect: NinjaOneEnvironmentFoliageAtlasRect;
+  readonly neutralizationAtlasRect: NinjaOneEnvironmentFoliageAtlasRect | null;
   /** Compatibility alias for resource-accounting callers. */
   readonly neutralizationResource: NinjaOneEnvironmentFoliageResource;
-  readonly paintedNodeCount: 2;
+  readonly paintedNodeCount: 1 | 2;
   readonly phaseSeconds: number;
   readonly pivotYPercent: number;
   readonly resource: NinjaOneEnvironmentFoliageResource;
   readonly resources: readonly NinjaOneEnvironmentFoliageResource[];
   readonly sourceMasterId: string;
+  readonly species: NinjaOneEnvironmentFoliageSpecies;
   readonly sourceTargetRect: NinjaOneEnvironmentFoliageAtlasRect;
 }
 
@@ -76,19 +95,21 @@ interface RawInstance {
   readonly bendDegrees: number;
   readonly canopyAtlasRect: readonly number[];
   readonly checkpoint: string;
+  readonly composition: string;
   readonly durationSeconds: number;
   readonly gridCell: string;
   readonly id: string;
   readonly lagDegrees: number;
-  readonly neutralizationAtlasRect: readonly number[];
+  readonly neutralizationAtlasRect: readonly number[] | null;
   readonly paintedNodeCount: number;
   readonly phaseSeconds: number;
   readonly pivotYPercent: number;
   readonly sourceMasterId: string;
+  readonly species: string;
   readonly sourceTargetRect: readonly number[];
 }
 
-const EXPECTED_ID = "career-world/capitals/ninjaone/foliage-native@r5";
+const EXPECTED_ID = "career-world/capitals/ninjaone/foliage@r6";
 const EXPECTED_SOURCE_MASTER_ID = "terrain-master-detail-r8";
 const EXPECTED_SOURCE_MASTER_PATH =
   "/art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r8.png";
@@ -140,9 +161,9 @@ const registrationArtboard = finitePair(
   "registration.artboard",
 );
 if (
-  manifest.schemaVersion !== 4
+  manifest.schemaVersion !== 5
   || manifest.id !== EXPECTED_ID
-  || manifest.status !== "active-r8-native-conifer-pool-with-neutralization"
+  || manifest.status !== "active-r8-native-and-additive-foliage"
   || manifest.sourceMaster.authority !== "active-r8-geology-master"
   || manifest.sourceMaster.id !== EXPECTED_SOURCE_MASTER_ID
   || manifest.sourceMaster.path !== EXPECTED_SOURCE_MASTER_PATH
@@ -164,7 +185,8 @@ if (
   || manifest.budgets.maximumTerrainTiles !== 4
   || manifest.resources.length !== 1
   || manifest.quality.atRestChangedPixels !== 0
-  || manifest.quality.registeredConifers !== manifest.instances.length
+  || manifest.quality.registeredConifers + manifest.quality.supplementalInstances
+    !== manifest.instances.length
   || manifest.quality.registeredConifers < manifest.quality.minimumRegisteredConifers
 ) throw new TypeError("NinjaOne pooled foliage registration contract is invalid.");
 
@@ -173,20 +195,20 @@ for (const value of manifest.resources as readonly RawResource[]) {
   const dimensions = finitePair(value.dimensions, `resources.${value.id}.dimensions`);
   if (
     resourceMap.has(value.id)
-    || value.kind !== "paired-foliage-atlas"
+    || value.kind !== "pooled-foliage-atlas"
     || !value.path.startsWith(RESOURCE_PATH_PREFIX)
     || value.sha256.length !== 64
     || value.sourceMasterId !== EXPECTED_SOURCE_MASTER_ID
     || !Number.isSafeInteger(value.decodedBytes)
     || value.decodedBytes !== dimensions[0] * dimensions[1] * 4
-    || value.frameCount !== manifest.instances.length * 2
+    || value.frameCount !== manifest.budgets.atlasFrameCount
   ) throw new TypeError(`resources.${value.id} is invalid.`);
   resourceMap.set(value.id, Object.freeze({
     decodedBytes: value.decodedBytes,
     dimensions,
     frameCount: value.frameCount,
     id: value.id,
-    kind: "paired-foliage-atlas" as const,
+    kind: "pooled-foliage-atlas" as const,
     path: value.path,
     sha256: value.sha256,
     sourceMasterId: value.sourceMasterId,
@@ -201,10 +223,12 @@ export const NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES = Object.freeze(
       value.canopyAtlasRect,
       `instances.${value.id}.canopyAtlasRect`,
     );
-    const neutralizationAtlasRect = finiteIntegerRect(
-      value.neutralizationAtlasRect,
-      `instances.${value.id}.neutralizationAtlasRect`,
-    );
+    const neutralizationAtlasRect = value.neutralizationAtlasRect === null
+      ? null
+      : finiteIntegerRect(
+          value.neutralizationAtlasRect,
+          `instances.${value.id}.neutralizationAtlasRect`,
+        );
     const sourceTargetRect = finiteIntegerRect(
       value.sourceTargetRect,
       `instances.${value.id}.sourceTargetRect`,
@@ -221,28 +245,46 @@ export const NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES = Object.freeze(
       || value.sourceMasterId !== EXPECTED_SOURCE_MASTER_ID
       || !value.checkpoint.startsWith(gridCell.toLowerCase())
       || !rectFits(canopyAtlasRect, atlasResource.dimensions)
-      || !rectFits(neutralizationAtlasRect, atlasResource.dimensions)
+      || (neutralizationAtlasRect !== null
+        && !rectFits(neutralizationAtlasRect, atlasResource.dimensions))
       || !rectFits(sourceTargetRect, RUNTIME_TARGET_DIMENSIONS)
-      || canopyAtlasRect[2] !== neutralizationAtlasRect[2]
-      || canopyAtlasRect[3] !== neutralizationAtlasRect[3]
-      || canopyAtlasRect[2] !== sourceTargetRect[2]
-      || canopyAtlasRect[3] !== sourceTargetRect[3]
       || artboardBounds.origin[0] !== sourceTargetRect[0] / 2
       || artboardBounds.origin[1] !== sourceTargetRect[1] / 2
       || artboardBounds.span[0] !== sourceTargetRect[2] / 2
       || artboardBounds.span[1] !== sourceTargetRect[3] / 2
-      || value.durationSeconds < 6
-      || value.durationSeconds > 10
-      || value.bendDegrees < 0.6
+      || value.durationSeconds < 5
+      || value.durationSeconds > 12
+      || value.bendDegrees < 0.15
       || value.bendDegrees > 1.25
-      || value.lagDegrees < 0.03
+      || value.lagDegrees < 0.01
       || value.lagDegrees > 0.1
-      || value.paintedNodeCount !== manifest.budgets.nodesPerGroup
       || value.phaseSeconds > 0
-      || value.phaseSeconds < -10
-      || value.pivotYPercent < 94
+      || value.phaseSeconds < -12
+      || value.pivotYPercent < 88
       || value.pivotYPercent > 98
     ) throw new TypeError(`instances.${value.id} is invalid.`);
+    const composition = value.composition as NinjaOneEnvironmentFoliageComposition;
+    const species = value.species as NinjaOneEnvironmentFoliageSpecies;
+    const replacement = composition === "registered-replacement";
+    const additive = composition === "additive";
+    if (
+      (!replacement && !additive)
+      || !VALID_FOLIAGE_SPECIES.has(species)
+      || (replacement && (
+        species !== "native-conifer"
+        || neutralizationAtlasRect === null
+        || neutralizationAtlasRect[2] !== canopyAtlasRect[2]
+        || neutralizationAtlasRect[3] !== canopyAtlasRect[3]
+        || canopyAtlasRect[2] !== sourceTargetRect[2]
+        || canopyAtlasRect[3] !== sourceTargetRect[3]
+        || value.paintedNodeCount !== 2
+      ))
+      || (additive && (
+        species === "native-conifer"
+        || neutralizationAtlasRect !== null
+        || value.paintedNodeCount !== 1
+      ))
+    ) throw new TypeError(`instances.${value.id} composition is invalid.`);
     return Object.freeze({
       animation: "canopy-bend" as const,
       artboardBounds,
@@ -251,18 +293,20 @@ export const NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES = Object.freeze(
       canopyAtlasRect,
       canopyResource: atlasResource,
       checkpoint: value.checkpoint,
+      composition,
       durationSeconds: value.durationSeconds,
       gridCell,
       id: value.id,
       lagDegrees: value.lagDegrees,
       neutralizationAtlasRect,
       neutralizationResource: atlasResource,
-      paintedNodeCount: 2 as const,
+      paintedNodeCount: value.paintedNodeCount as 1 | 2,
       phaseSeconds: value.phaseSeconds,
       pivotYPercent: value.pivotYPercent,
       resource: atlasResource,
       resources: Object.freeze([atlasResource]),
       sourceMasterId: value.sourceMasterId,
+      species,
       sourceTargetRect,
     });
   }),
@@ -375,6 +419,10 @@ function overscanned(view: CameraView): CameraView {
   });
 }
 
+function foliageDepth(instance: NinjaOneEnvironmentFoliageInstance): number {
+  return instance.artboardBounds.origin[1] + instance.artboardBounds.span[1];
+}
+
 export function ninjaOneEnvironmentFoliageInstanceIntersectsCamera(
   camera: CameraView,
   instance: NinjaOneEnvironmentFoliageInstance,
@@ -398,11 +446,15 @@ export function selectNinjaOneEnvironmentFoliageInstances(
   ) return Object.freeze([]);
   const artboardView = environmentFoliageCameraArtboardView(camera);
   const admissionView = overscanned(artboardView);
-  return Object.freeze(NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES
+  const selected = NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES
     .filter((instance) => intersects(admissionView, instance.artboardBounds))
     .sort((left, right) => (
       distanceFromViewCenter(artboardView, left)
       - distanceFromViewCenter(artboardView, right)
     ))
-    .slice(0, admittedGroups));
+    .slice(0, admittedGroups)
+    .sort((left, right) => (
+      foliageDepth(left) - foliageDepth(right) || left.id.localeCompare(right.id)
+    ));
+  return Object.freeze(selected);
 }

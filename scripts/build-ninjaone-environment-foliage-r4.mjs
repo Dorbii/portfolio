@@ -26,6 +26,10 @@ const MANIFEST_PATH = path.join(
   ROOT,
   "public/career-world/capitals/ninjaone/environment/manifests/foliage-native-r4.json",
 );
+const INLAND_WATER_MANIFEST_PATH = path.join(
+  ROOT,
+  "public/career-world/capitals/ninjaone/environment/manifests/inland-water-r1.json",
+);
 const PROOF_ROOT = path.join(
   ROOT,
   ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/artifacts/foliage-r4/source-composites",
@@ -78,6 +82,69 @@ const CELLS = Object.freeze([
     ]),
   }),
 ]);
+
+const SUPPLEMENTAL_SOURCES = Object.freeze([
+  ...[1, 2, 3].map((variant) => Object.freeze({
+    family: "russet-fantasy-tree",
+    fileName: `russet-fantasy-tree-${String(variant).padStart(2, "0")}.png`,
+    frameDimensions: Object.freeze([72, 104]),
+    id: `russet-fantasy-tree-${String(variant).padStart(2, "0")}`,
+    species: "russet-fantasy-tree",
+  })),
+  ...[1, 2].map((variant) => Object.freeze({
+    family: "silver-aspen",
+    fileName: `silver-aspen-tree-${String(variant).padStart(2, "0")}.png`,
+    frameDimensions: Object.freeze([66, 96]),
+    id: `silver-aspen-tree-${String(variant).padStart(2, "0")}`,
+    species: "silver-aspen",
+  })),
+  ...[1, 2, 3].map((variant) => Object.freeze({
+    family: "alpine-shrub",
+    fileName: `alpine-shrub-${String(variant).padStart(2, "0")}.png`,
+    frameDimensions: Object.freeze([56, 38]),
+    id: `alpine-shrub-${String(variant).padStart(2, "0")}`,
+    species: "alpine-shrub",
+  })),
+  ...[1, 2, 3].map((variant) => Object.freeze({
+    family: "wildflower-heather",
+    fileName: `wildflower-heather-${String(variant).padStart(2, "0")}.png`,
+    frameDimensions: Object.freeze([48, 28]),
+    id: `wildflower-heather-${String(variant).padStart(2, "0")}`,
+    species: "wildflower-heather",
+  })),
+]);
+
+const SUPPLEMENTAL_PLACEMENTS = Object.freeze([
+  ["russet-fantasy-tree-02", 720, 328, 1],
+  ["russet-fantasy-tree-01", 1110, 445, 0.9],
+  ["russet-fantasy-tree-03", 286, 845, 0.92],
+  ["russet-fantasy-tree-01", 1225, 660, 0.82],
+  ["russet-fantasy-tree-02", 585, 735, 0.84],
+  ["silver-aspen-tree-02", 635, 500, 0.9],
+  ["silver-aspen-tree-02", 1025, 825, 0.88],
+  ["silver-aspen-tree-01", 500, 690, 0.78],
+  ["silver-aspen-tree-02", 1180, 585, 0.76],
+  ["alpine-shrub-01", 690, 565, 0.82],
+  ["alpine-shrub-02", 735, 610, 0.76],
+  ["alpine-shrub-03", 1015, 555, 0.88],
+  ["alpine-shrub-01", 360, 715, 0.74],
+  ["alpine-shrub-02", 885, 865, 0.78],
+  ["alpine-shrub-03", 1210, 760, 0.8],
+  ["wildflower-heather-01", 745, 455, 0.78],
+  ["wildflower-heather-02", 1050, 520, 0.72],
+  ["wildflower-heather-03", 420, 735, 0.74],
+  ["wildflower-heather-01", 705, 590, 0.68],
+  ["wildflower-heather-02", 1120, 700, 0.7],
+  ["wildflower-heather-03", 320, 895, 0.72],
+  ["wildflower-heather-01", 900, 925, 0.66],
+  ["wildflower-heather-02", 1260, 835, 0.68],
+  ["wildflower-heather-03", 540, 295, 0.64],
+].map(([sourceId, anchorX, anchorY, scale], index) => Object.freeze({
+  anchor: Object.freeze([anchorX, anchorY]),
+  id: `supplemental-foliage-${String(index + 1).padStart(2, "0")}`,
+  scale,
+  sourceId,
+})));
 
 function sha256(bytes) {
   return createHash("sha256").update(bytes).digest("hex").toUpperCase();
@@ -248,6 +315,149 @@ function deterministicMotion(index, gridCell) {
   });
 }
 
+function supplementalMotion(species, index) {
+  const profiles = {
+    "russet-fantasy-tree": [0.58, 0.19, 8.2, 0.05, 94],
+    "silver-aspen": [0.5, 0.16, 7.6, 0.045, 95],
+    "alpine-shrub": [0.28, 0.1, 6.8, 0.025, 90],
+    "wildflower-heather": [0.16, 0.06, 5.8, 0.012, 88],
+  };
+  const [bend, bendVariance, duration, lag, pivotYPercent] = profiles[species];
+  return Object.freeze({
+    bendDegrees: Number((bend + (index % 4) * bendVariance / 3).toFixed(2)),
+    durationSeconds: Number((duration + (index % 5) * 0.33).toFixed(1)),
+    lagDegrees: Number((lag + (index % 3) * 0.008).toFixed(3)),
+    phaseSeconds: Number((-(index * 1.37 % 9.5)).toFixed(1)),
+    pivotYPercent,
+  });
+}
+
+function pointInPolygon([x, y], polygon) {
+  let inside = false;
+  for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index++) {
+    const [currentX, currentY] = polygon[index];
+    const [previousX, previousY] = polygon[previous];
+    if (
+      (currentY > y) !== (previousY > y)
+      && x < (previousX - currentX) * (y - currentY)
+        / (previousY - currentY) + currentX
+    ) inside = !inside;
+  }
+  return inside;
+}
+
+function pointToSegmentDistance([x, y], [startX, startY], [endX, endY]) {
+  const deltaX = endX - startX;
+  const deltaY = endY - startY;
+  const lengthSquared = deltaX ** 2 + deltaY ** 2;
+  const projection = lengthSquared === 0
+    ? 0
+    : Math.max(0, Math.min(1, ((x - startX) * deltaX + (y - startY) * deltaY) / lengthSquared));
+  return Math.hypot(x - (startX + deltaX * projection), y - (startY + deltaY * projection));
+}
+
+function pointInsideInlandWater(point, waterManifest) {
+  return waterManifest.segments.some((segment) => {
+    if (segment.polygon && pointInPolygon(point, segment.polygon)) return true;
+    if (!segment.points) return false;
+    for (let index = 1; index < segment.points.length; index += 1) {
+      if (pointToSegmentDistance(point, segment.points[index - 1], segment.points[index]) <= segment.radius) {
+        return true;
+      }
+    }
+    return false;
+  });
+}
+
+function assertTransparentArtwork(rgba, width, height, label) {
+  let alphaPixels = 0;
+  let magentaPixels = 0;
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const offset = (y * width + x) * 4;
+      const alpha = rgba[offset + 3];
+      if ((x === 0 || y === 0 || x === width - 1 || y === height - 1) && alpha !== 0) {
+        throw new RangeError(`${label} touches its outer alpha edge.`);
+      }
+      if (alpha < 16) continue;
+      alphaPixels += 1;
+      const keyDistance = Math.hypot(
+        255 - rgba[offset],
+        rgba[offset + 1],
+        255 - rgba[offset + 2],
+      );
+      if (keyDistance <= 70) {
+        magentaPixels += 1;
+      }
+    }
+  }
+  if (alphaPixels < 32 || magentaPixels > 0) {
+    throw new RangeError(`${label} failed alpha or chroma validation.`);
+  }
+  return alphaPixels;
+}
+
+async function loadSupplementalArtwork(expectedOutputNames) {
+  const artwork = new Map();
+  const sources = [];
+  for (const definition of SUPPLEMENTAL_SOURCES) {
+    const filePath = path.join(OUTPUT_ROOT, definition.fileName);
+    const bytes = await readFile(filePath);
+    const metadata = await sharp(bytes).metadata();
+    if (!metadata.width || !metadata.height || metadata.format !== "png" || metadata.hasAlpha !== true) {
+      throw new RangeError(`${definition.id} is not transparent PNG artwork.`);
+    }
+    const sourceRgba = await sharp(bytes).ensureAlpha().raw().toBuffer();
+    const sourceAlphaPixels = assertTransparentArtwork(
+      sourceRgba,
+      metadata.width,
+      metadata.height,
+      definition.id,
+    );
+    const [frameWidth, frameHeight] = definition.frameDimensions;
+    const rgba = await sharp(bytes)
+      .trim({
+        background: { alpha: 0, b: 0, g: 0, r: 0 },
+        threshold: 2,
+      })
+      .resize(frameWidth - 4, frameHeight - 4, {
+        background: { alpha: 0, b: 0, g: 0, r: 0 },
+        fit: "contain",
+        kernel: "lanczos3",
+        position: "bottom",
+      })
+      .extend({
+        background: { alpha: 0, b: 0, g: 0, r: 0 },
+        bottom: 2,
+        left: 2,
+        right: 2,
+        top: 2,
+      })
+      .ensureAlpha()
+      .raw()
+      .toBuffer();
+    assertTransparentArtwork(rgba, frameWidth, frameHeight, `${definition.id} runtime frame`);
+    expectedOutputNames.add(definition.fileName);
+    artwork.set(definition.id, Object.freeze({
+      ...definition,
+      rgba,
+      sourceAlphaPixels,
+    }));
+    sources.push(Object.freeze({
+      dimensions: Object.freeze([metadata.width, metadata.height]),
+      family: definition.family,
+      id: definition.id,
+      inputRole: "additive-original-foliage-artwork",
+      path: versionedPublicPath(filePath, sha256(bytes)),
+      provider: "built-in-imagegen",
+      sha256: sha256(bytes),
+      species: definition.species,
+      usage: "build input only; one pooled runtime frame is reused by multiple registered placements",
+    }));
+  }
+  return Object.freeze({ artwork, sources: Object.freeze(sources) });
+}
+
 function dilateAlpha(alpha, width, height, radius) {
   const output = Buffer.alloc(alpha.length);
   for (let pixel = 0; pixel < alpha.length; pixel += 1) {
@@ -382,7 +592,11 @@ function blitRgba(target, targetWidth, source, sourceWidth, sourceHeight, x, y) 
 }
 
 async function build() {
-  const sourceBytes = await readFile(MASTER_SOURCE_PATH);
+  const [sourceBytes, waterManifestBytes] = await Promise.all([
+    readFile(MASTER_SOURCE_PATH),
+    readFile(INLAND_WATER_MANIFEST_PATH),
+  ]);
+  const waterManifest = JSON.parse(waterManifestBytes);
   const sourceMetadata = await sharp(sourceBytes).metadata();
   if (
     sourceMetadata.width !== MASTER_SOURCE_DIMENSIONS[0]
@@ -558,27 +772,82 @@ async function build() {
     }));
   }
 
-  const atlasEntries = groups.flatMap((group) => [
-    Object.freeze({
-      height: group.spriteHeight,
-      id: `${group.id}:neutralization`,
-      rgba: group.neutralization,
-      width: group.spriteWidth,
-    }),
-    Object.freeze({
-      height: group.spriteHeight,
-      id: `${group.id}:canopy`,
-      rgba: group.canopy,
-      width: group.spriteWidth,
-    }),
-  ]);
+  const supplemental = await loadSupplementalArtwork(expectedOutputNames);
+  const supplementalGroups = SUPPLEMENTAL_PLACEMENTS.map((placement, index) => {
+    const artwork = supplemental.artwork.get(placement.sourceId);
+    if (!artwork) throw new TypeError(`Unknown supplemental source ${placement.sourceId}.`);
+    const [frameWidth, frameHeight] = artwork.frameDimensions;
+    const targetWidth = Math.max(1, Math.round(frameWidth * placement.scale));
+    const targetHeight = Math.max(1, Math.round(frameHeight * placement.scale));
+    const targetLeft = Math.round(placement.anchor[0] * 2 - targetWidth * 0.5);
+    const targetTop = Math.round(placement.anchor[1] * 2 - targetHeight);
+    const sourceTargetRect = Object.freeze([
+      targetLeft,
+      targetTop,
+      targetWidth,
+      targetHeight,
+    ]);
+    if (
+      targetLeft < 0
+      || targetTop < 0
+      || targetLeft + targetWidth > TARGET_MASTER_DIMENSIONS[0]
+      || targetTop + targetHeight > TARGET_MASTER_DIMENSIONS[1]
+    ) throw new RangeError(`${placement.id} falls outside the terrain registration.`);
+    const anchorPixelX = Math.round(placement.anchor[0] * 2);
+    const anchorPixelY = Math.round(placement.anchor[1] * 2);
+    const anchorAlpha = source[(anchorPixelY * TARGET_MASTER_DIMENSIONS[0] + anchorPixelX) * 4 + 3];
+    if (anchorAlpha < 240 || pointInsideInlandWater(placement.anchor, waterManifest)) {
+      throw new RangeError(`${placement.id} is not rooted on accepted dry terrain.`);
+    }
+    const centerX = targetLeft + targetWidth * 0.5;
+    const centerY = targetTop + targetHeight * 0.5;
+    const gridCell = `${centerX < TARGET_MASTER_DIMENSIONS[0] * 0.5 ? "B" : "C"}${
+      centerY < TARGET_MASTER_DIMENSIONS[1] * 0.5 ? "1" : "2"
+    }`;
+    return Object.freeze({
+      artboardBounds: Object.freeze({
+        origin: Object.freeze([targetLeft / 2, targetTop / 2]),
+        span: Object.freeze([targetWidth / 2, targetHeight / 2]),
+      }),
+      checkpoint: `${gridCell.toLowerCase()}-${placement.id}`,
+      gridCell,
+      id: placement.id,
+      motion: supplementalMotion(artwork.species, index),
+      sourceId: artwork.id,
+      sourceTargetRect,
+      species: artwork.species,
+    });
+  });
+
+  const atlasEntries = [
+    ...groups.flatMap((group) => [
+      Object.freeze({
+        height: group.spriteHeight,
+        id: `${group.id}:neutralization`,
+        rgba: group.neutralization,
+        width: group.spriteWidth,
+      }),
+      Object.freeze({
+        height: group.spriteHeight,
+        id: `${group.id}:canopy`,
+        rgba: group.canopy,
+        width: group.spriteWidth,
+      }),
+    ]),
+    ...[...supplemental.artwork.values()].map((artwork) => Object.freeze({
+      height: artwork.frameDimensions[1],
+      id: `supplemental:${artwork.id}`,
+      rgba: artwork.rgba,
+      width: artwork.frameDimensions[0],
+    })),
+  ];
   const atlasPlacement = createAtlasPlacement(atlasEntries);
   const atlas = Buffer.alloc(ATLAS_WIDTH * atlasPlacement.height * 4);
   for (const entry of atlasEntries) {
     const [x, y] = atlasPlacement.placements.get(entry.id);
     blitRgba(atlas, ATLAS_WIDTH, entry.rgba, entry.width, entry.height, x, y);
   }
-  const atlasName = "ninjaone-native-conifer-pool-atlas-r5.png";
+  const atlasName = "ninjaone-pooled-foliage-atlas-r6.png";
   const atlasPath = path.join(OUTPUT_ROOT, atlasName);
   const atlasBytes = await sharp(atlas, {
     raw: { channels: 4, height: atlasPlacement.height, width: ATLAS_WIDTH },
@@ -591,19 +860,20 @@ async function build() {
     decodedBytes: atlasDecodedBytes,
     dimensions: Object.freeze([ATLAS_WIDTH, atlasPlacement.height]),
     frameCount: atlasEntries.length,
-    id: "native-conifer-pool-atlas",
-    kind: "paired-foliage-atlas",
+    id: "pooled-foliage-atlas",
+    kind: "pooled-foliage-atlas",
     path: versionedPublicPath(atlasPath, atlasDigest),
     sha256: atlasDigest,
     sourceMasterId: MASTER_SOURCE_ID,
   });
-  const instances = groups.map((group) => Object.freeze({
+  const nativeInstances = groups.map((group) => Object.freeze({
     animation: "canopy-bend",
     artboardBounds: group.artboardBounds,
     atlasResourceId: atlasResource.id,
     bendDegrees: group.motion.bendDegrees,
     canopyAtlasRect: atlasPlacement.placements.get(`${group.id}:canopy`),
     checkpoint: group.checkpoint,
+    composition: "registered-replacement",
     durationSeconds: group.motion.durationSeconds,
     gridCell: group.gridCell,
     id: `${group.id}-instance`,
@@ -613,8 +883,30 @@ async function build() {
     phaseSeconds: group.motion.phaseSeconds,
     pivotYPercent: 96,
     sourceMasterId: MASTER_SOURCE_ID,
+    species: "native-conifer",
     sourceTargetRect: group.sourceTargetRect,
   }));
+  const supplementalInstances = supplementalGroups.map((group) => Object.freeze({
+    animation: "canopy-bend",
+    artboardBounds: group.artboardBounds,
+    atlasResourceId: atlasResource.id,
+    bendDegrees: group.motion.bendDegrees,
+    canopyAtlasRect: atlasPlacement.placements.get(`supplemental:${group.sourceId}`),
+    checkpoint: group.checkpoint,
+    composition: "additive",
+    durationSeconds: group.motion.durationSeconds,
+    gridCell: group.gridCell,
+    id: `${group.id}-instance`,
+    lagDegrees: group.motion.lagDegrees,
+    neutralizationAtlasRect: null,
+    paintedNodeCount: 1,
+    phaseSeconds: group.motion.phaseSeconds,
+    pivotYPercent: group.motion.pivotYPercent,
+    sourceMasterId: MASTER_SOURCE_ID,
+    species: group.species,
+    sourceTargetRect: group.sourceTargetRect,
+  }));
+  const instances = Object.freeze([...nativeInstances, ...supplementalInstances]);
 
   for (const existing of await readdir(OUTPUT_ROOT)) {
     if (existing.endsWith(".png") && !expectedOutputNames.has(existing)) {
@@ -639,9 +931,9 @@ async function build() {
     })}`);
   }
   const manifest = {
-    schemaVersion: 4,
-    id: "career-world/capitals/ninjaone/foliage-native@r5",
-    status: "active-r8-native-conifer-pool-with-neutralization",
+    schemaVersion: 5,
+    id: "career-world/capitals/ninjaone/foliage@r6",
+    status: "active-r8-native-and-additive-foliage",
     sourceMaster: {
       authority: "active-r8-geology-master",
       dimensions: MASTER_SOURCE_DIMENSIONS,
@@ -651,6 +943,7 @@ async function build() {
     },
     segmentationSources,
     neutralizationSources,
+    supplementalSources: supplemental.sources,
     eligibility: {
       maxDetailEnterSpan: MAX_DETAIL_ENTER_SPAN,
       maxDetailRetainSpan: MAX_DETAIL_RETAIN_SPAN,
@@ -668,12 +961,14 @@ async function build() {
       sourcePixelsPerArtboardUnit: 4,
       runtimeAtlasPixelsPerArtboardUnit: 2,
     },
-    ownership: "L2_2 owns the registered conifer alpha, paired neutralization frames, pooled atlas, viewport admission, and root-pivoted animation; every canopy frame uses active-r8 RGB and every at-rest pair reproduces the authority plate exactly",
+    ownership: "L2_2 owns registered conifer replacements plus sparse additive fantasy foliage in one pooled atlas and one root-pivoted viewport renderer; existing conifers reproduce active-r8 exactly at rest, while additive placements never erase or replace accepted terrain art",
     quality: {
       atRestChangedPixels,
       minimumRegisteredConifers: 120,
-      registeredConifers: instances.length,
+      registeredConifers: nativeInstances.length,
+      supplementalInstances: supplementalInstances.length,
       totalCanopyPixels,
+      uniqueSupplementalFrames: supplemental.artwork.size,
       visibleRgbAuthority: MASTER_SOURCE_ID,
     },
     budgets: {
@@ -700,7 +995,7 @@ async function build() {
   await mkdir(path.dirname(MANIFEST_PATH), { recursive: true });
   await writeJsonAtomically(MANIFEST_PATH, manifest);
   process.stdout.write(
-    `Built ${instances.length} registered conifers in one ${ATLAS_WIDTH}x${atlasPlacement.height} atlas (${mountedFoliageNodes} maximum mounted nodes; ${combinedDecodedBytes} conservative decoded bytes).\n`,
+    `Built ${nativeInstances.length} registered conifers and ${supplementalInstances.length} additive foliage placements in one ${ATLAS_WIDTH}x${atlasPlacement.height} atlas (${mountedFoliageNodes} maximum mounted nodes; ${combinedDecodedBytes} conservative decoded bytes).\n`,
   );
 }
 

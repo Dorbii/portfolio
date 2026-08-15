@@ -1,7 +1,7 @@
 {
-  "schemaVersion": 4,
-  "id": "career-world/capitals/ninjaone/foliage-native@r5",
-  "status": "active-r8-native-conifer-pool-with-neutralization",
+  "schemaVersion": 5,
+  "id": "career-world/capitals/ninjaone/foliage@r6",
+  "status": "active-r8-native-and-additive-foliage",
   "sourceMaster": {
     "authority": "active-r8-geology-master",
     "dimensions": [
@@ -120,6 +120,162 @@
       "usage": "RGB is consumed only beneath accepted conifer masks; every unmasked pixel remains authority RGB"
     }
   ],
+  "supplementalSources": [
+    {
+      "dimensions": [
+        744,
+        463
+      ],
+      "family": "russet-fantasy-tree",
+      "id": "russet-fantasy-tree-01",
+      "inputRole": "additive-original-foliage-artwork",
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/russet-fantasy-tree-01.png?v=191135c300a6",
+      "provider": "built-in-imagegen",
+      "sha256": "191135C300A60A99607DF606517029DB95509E36080BB2D0479E152F4E55C917",
+      "species": "russet-fantasy-tree",
+      "usage": "build input only; one pooled runtime frame is reused by multiple registered placements"
+    },
+    {
+      "dimensions": [
+        744,
+        630
+      ],
+      "family": "russet-fantasy-tree",
+      "id": "russet-fantasy-tree-02",
+      "inputRole": "additive-original-foliage-artwork",
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/russet-fantasy-tree-02.png?v=97a4246b204e",
+      "provider": "built-in-imagegen",
+      "sha256": "97A4246B204EEE23C9D06ACCDDA5BEC5E5268EA26DD0C1A647C208679930A5B3",
+      "species": "russet-fantasy-tree",
+      "usage": "build input only; one pooled runtime frame is reused by multiple registered placements"
+    },
+    {
+      "dimensions": [
+        744,
+        596
+      ],
+      "family": "russet-fantasy-tree",
+      "id": "russet-fantasy-tree-03",
+      "inputRole": "additive-original-foliage-artwork",
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/russet-fantasy-tree-03.png?v=70840939cfb9",
+      "provider": "built-in-imagegen",
+      "sha256": "70840939CFB93006884A5185A35684AE34B9220CFD206441D3855C6D13655D45",
+      "species": "russet-fantasy-tree",
+      "usage": "build input only; one pooled runtime frame is reused by multiple registered placements"
+    },
+    {
+      "dimensions": [
+        684,
+        600
+      ],
+      "family": "silver-aspen",
+      "id": "silver-aspen-tree-01",
+      "inputRole": "additive-original-foliage-artwork",
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/silver-aspen-tree-01.png?v=3750f783c9e6",
+      "provider": "built-in-imagegen",
+      "sha256": "3750F783C9E64321A0EBA5CF25103D9498B7203D267F86A49C6C9F37B43AC413",
+      "species": "silver-aspen",
+      "usage": "build input only; one pooled runtime frame is reused by multiple registered placements"
+    },
+    {
+      "dimensions": [
+        684,
+        541
+      ],
+      "family": "silver-aspen",
+      "id": "silver-aspen-tree-02",
+      "inputRole": "additive-original-foliage-artwork",
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/silver-aspen-tree-02.png?v=b1cbf5d4e51e",
+      "provider": "built-in-imagegen",
+      "sha256": "B1CBF5D4E51EF90572AA4E2B26900CACE99BB7591F06FF103EF0A185DB7F11E9",
+      "species": "silver-aspen",
+      "usage": "build input only; one pooled runtime frame is reused by multiple registered placements"
+    },
+    {
+      "dimensions": [
+        635,
+        424
+      ],
+      "family": "alpine-shrub",
+      "id": "alpine-shrub-01",
+      "inputRole": "additive-original-foliage-artwork",
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/alpine-shrub-01.png?v=5a97b469a655",
+      "provider": "built-in-imagegen",
+      "sha256": "5A97B469A655B99932FBA31475922DDF0D5CF2B9F020D439ABACDF0B2D06925A",
+      "species": "alpine-shrub",
+      "usage": "build input only; one pooled runtime frame is reused by multiple registered placements"
+    },
+    {
+      "dimensions": [
+        611,
+        424
+      ],
+      "family": "alpine-shrub",
+      "id": "alpine-shrub-02",
+      "inputRole": "additive-original-foliage-artwork",
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/alpine-shrub-02.png?v=344be1ce7e09",
+      "provider": "built-in-imagegen",
+      "sha256": "344BE1CE7E092E253545493F1C4D06F84414277ADEE5BD26FA8DE3D14B9B415F",
+      "species": "alpine-shrub",
+      "usage": "build input only; one pooled runtime frame is reused by multiple registered placements"
+    },
+    {
+      "dimensions": [
+        379,
+        424
+      ],
+      "family": "alpine-shrub",
+      "id": "alpine-shrub-03",
+      "inputRole": "additive-original-foliage-artwork",
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/alpine-shrub-03.png?v=a45b6840f5c6",
+      "provider": "built-in-imagegen",
+      "sha256": "A45B6840F5C6A6617428981818A32617A055CABBC7CAAF7DFB6FD0AFA187E17A",
+      "species": "alpine-shrub",
+      "usage": "build input only; one pooled runtime frame is reused by multiple registered placements"
+    },
+    {
+      "dimensions": [
+        521,
+        308
+      ],
+      "family": "wildflower-heather",
+      "id": "wildflower-heather-01",
+      "inputRole": "additive-original-foliage-artwork",
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/wildflower-heather-01.png?v=e84463121b3a",
+      "provider": "built-in-imagegen",
+      "sha256": "E84463121B3AD515D95099B61C26A5C234B08A1FE4824E3B6C629EDD15DD6194",
+      "species": "wildflower-heather",
+      "usage": "build input only; one pooled runtime frame is reused by multiple registered placements"
+    },
+    {
+      "dimensions": [
+        454,
+        308
+      ],
+      "family": "wildflower-heather",
+      "id": "wildflower-heather-02",
+      "inputRole": "additive-original-foliage-artwork",
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/wildflower-heather-02.png?v=addcfa2827c7",
+      "provider": "built-in-imagegen",
+      "sha256": "ADDCFA2827C77FF40823954E6746047D342D427291A33B5176ED3186CEB425AE",
+      "species": "wildflower-heather",
+      "usage": "build input only; one pooled runtime frame is reused by multiple registered placements"
+    },
+    {
+      "dimensions": [
+        256,
+        308
+      ],
+      "family": "wildflower-heather",
+      "id": "wildflower-heather-03",
+      "inputRole": "additive-original-foliage-artwork",
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/wildflower-heather-03.png?v=ac8e325a68fb",
+      "provider": "built-in-imagegen",
+      "sha256": "AC8E325A68FB699ADE0247902E63E47A9755403CEF8E8B327C236030C825346F",
+      "species": "wildflower-heather",
+      "usage": "build input only; one pooled runtime frame is reused by multiple registered placements"
+    }
+  ],
   "eligibility": {
     "maxDetailEnterSpan": 0.12,
     "maxDetailRetainSpan": 0.14,
@@ -157,20 +313,22 @@
     "sourcePixelsPerArtboardUnit": 4,
     "runtimeAtlasPixelsPerArtboardUnit": 2
   },
-  "ownership": "L2_2 owns the registered conifer alpha, paired neutralization frames, pooled atlas, viewport admission, and root-pivoted animation; every canopy frame uses active-r8 RGB and every at-rest pair reproduces the authority plate exactly",
+  "ownership": "L2_2 owns registered conifer replacements plus sparse additive fantasy foliage in one pooled atlas and one root-pivoted viewport renderer; existing conifers reproduce active-r8 exactly at rest, while additive placements never erase or replace accepted terrain art",
   "quality": {
     "atRestChangedPixels": 0,
     "minimumRegisteredConifers": 120,
     "registeredConifers": 175,
+    "supplementalInstances": 24,
     "totalCanopyPixels": 331882,
+    "uniqueSupplementalFrames": 11,
     "visibleRgbAuthority": "terrain-master-detail-r8"
   },
   "budgets": {
-    "atlasDecodedBytes": 7929856,
-    "atlasFrameCount": 350,
-    "combinedDecodedBytes": 33090304,
-    "conservativeDecodedBytes": 33090304,
-    "foliageDecodedBytes": 7929856,
+    "atlasDecodedBytes": 8110080,
+    "atlasFrameCount": 361,
+    "combinedDecodedBytes": 33270528,
+    "conservativeDecodedBytes": 33270528,
+    "foliageDecodedBytes": 8110080,
     "futureSupplementalNodeHeadroom": 0,
     "maximumDecodedBytes": 33554432,
     "maximumSelectedGroups": 32,
@@ -179,22 +337,22 @@
     "mountedFoliageNodes": 64,
     "mountedGroups": 32,
     "nodesPerGroup": 2,
-    "poolGroups": 175,
+    "poolGroups": 199,
     "terrainDecodedBytes": 25160448,
     "uniqueTextureResources": 1
   },
   "resources": [
     {
-      "decodedBytes": 7929856,
+      "decodedBytes": 8110080,
       "dimensions": [
         1024,
-        1936
+        1980
       ],
-      "frameCount": 350,
-      "id": "native-conifer-pool-atlas",
-      "kind": "paired-foliage-atlas",
-      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/ninjaone-native-conifer-pool-atlas-r5.png?v=332453a8f480",
-      "sha256": "332453A8F480231CE1D200325351BED40BB11CA9B07572BD606EB32E9447F848",
+      "frameCount": 361,
+      "id": "pooled-foliage-atlas",
+      "kind": "pooled-foliage-atlas",
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/ninjaone-pooled-foliage-atlas-r6.png?v=c470de93cd5d",
+      "sha256": "C470DE93CD5D5667369AB79B94F016FAB2508DA254EE6387E0368F7FBF65E607",
       "sourceMasterId": "terrain-master-detail-r8"
     }
   ],
@@ -211,7 +369,7 @@
           68.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.92,
       "canopyAtlasRect": [
         277,
@@ -220,6 +378,7 @@
         137
       ],
       "checkpoint": "b1-native-conifer-001",
+      "composition": "registered-replacement",
       "durationSeconds": 7.3,
       "gridCell": "B1",
       "id": "b1-native-conifer-001-instance",
@@ -234,6 +393,7 @@
       "phaseSeconds": -4.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         230,
         49,
@@ -253,7 +413,7 @@
           56.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.93,
       "canopyAtlasRect": [
         155,
@@ -262,6 +422,7 @@
         113
       ],
       "checkpoint": "b1-native-conifer-002",
+      "composition": "registered-replacement",
       "durationSeconds": 7.3,
       "gridCell": "B1",
       "id": "b1-native-conifer-002-instance",
@@ -276,6 +437,7 @@
       "phaseSeconds": -4.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         176,
         81,
@@ -295,7 +457,7 @@
           65
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.94,
       "canopyAtlasRect": [
         1,
@@ -304,6 +466,7 @@
         130
       ],
       "checkpoint": "b1-native-conifer-003",
+      "composition": "registered-replacement",
       "durationSeconds": 7.3,
       "gridCell": "B1",
       "id": "b1-native-conifer-003-instance",
@@ -318,6 +481,7 @@
       "phaseSeconds": -4.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         736,
         100,
@@ -337,22 +501,23 @@
           45.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.95,
       "canopyAtlasRect": [
-        521,
-        1188,
+        905,
+        1189,
         47,
         91
       ],
       "checkpoint": "b1-native-conifer-004",
+      "composition": "registered-replacement",
       "durationSeconds": 7.3,
       "gridCell": "B1",
       "id": "b1-native-conifer-004-instance",
       "lagDegrees": 0.076,
       "neutralizationAtlasRect": [
-        569,
-        1188,
+        953,
+        1189,
         47,
         91
       ],
@@ -360,6 +525,7 @@
       "phaseSeconds": -4.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1056,
         115,
@@ -379,7 +545,7 @@
           61
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.96,
       "canopyAtlasRect": [
         1,
@@ -388,6 +554,7 @@
         122
       ],
       "checkpoint": "b1-native-conifer-005",
+      "composition": "registered-replacement",
       "durationSeconds": 7.3,
       "gridCell": "B1",
       "id": "b1-native-conifer-005-instance",
@@ -402,6 +569,7 @@
       "phaseSeconds": -4.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         669,
         180,
@@ -421,22 +589,23 @@
           35.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.74,
       "canopyAtlasRect": [
-        677,
-        1539,
+        42,
+        1624,
         49,
         71
       ],
       "checkpoint": "c1-native-conifer-006",
+      "composition": "registered-replacement",
       "durationSeconds": 8.6,
       "gridCell": "C1",
       "id": "c1-native-conifer-006-instance",
       "lagDegrees": 0.05,
       "neutralizationAtlasRect": [
-        727,
-        1539,
+        92,
+        1624,
         49,
         71
       ],
@@ -444,6 +613,7 @@
       "phaseSeconds": -4.9,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2576,
         233,
@@ -463,22 +633,23 @@
           35.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.75,
       "canopyAtlasRect": [
-        777,
-        1539,
+        142,
+        1624,
         53,
         71
       ],
       "checkpoint": "c1-native-conifer-007",
+      "composition": "registered-replacement",
       "durationSeconds": 8.6,
       "gridCell": "C1",
       "id": "c1-native-conifer-007-instance",
       "lagDegrees": 0.05,
       "neutralizationAtlasRect": [
-        831,
-        1539,
+        196,
+        1624,
         53,
         71
       ],
@@ -486,6 +657,7 @@
       "phaseSeconds": -4.9,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2682,
         236,
@@ -505,22 +677,23 @@
           33.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.76,
       "canopyAtlasRect": [
-        940,
-        1616,
+        293,
+        1696,
         40,
         67
       ],
       "checkpoint": "c1-native-conifer-008",
+      "composition": "registered-replacement",
       "durationSeconds": 8.6,
       "gridCell": "C1",
       "id": "c1-native-conifer-008-instance",
       "lagDegrees": 0.05,
       "neutralizationAtlasRect": [
-        981,
-        1616,
+        334,
+        1696,
         40,
         67
       ],
@@ -528,6 +701,7 @@
       "phaseSeconds": -4.9,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2621,
         264,
@@ -547,7 +721,7 @@
           71
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1,
       "canopyAtlasRect": [
         761,
@@ -556,6 +730,7 @@
         142
       ],
       "checkpoint": "b1-native-conifer-009",
+      "composition": "registered-replacement",
       "durationSeconds": 7.3,
       "gridCell": "B1",
       "id": "b1-native-conifer-009-instance",
@@ -570,6 +745,7 @@
       "phaseSeconds": -4.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1133,
         266,
@@ -589,7 +765,7 @@
           52.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.78,
       "canopyAtlasRect": [
         1,
@@ -598,6 +774,7 @@
         105
       ],
       "checkpoint": "c1-native-conifer-010",
+      "composition": "registered-replacement",
       "durationSeconds": 8.6,
       "gridCell": "C1",
       "id": "c1-native-conifer-010-instance",
@@ -612,6 +789,7 @@
       "phaseSeconds": -4.9,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2539,
         273,
@@ -631,22 +809,23 @@
           30
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.18,
       "canopyAtlasRect": [
-        793,
-        1755,
+        157,
+        1832,
         36,
         60
       ],
       "checkpoint": "c1-native-conifer-011",
+      "composition": "registered-replacement",
       "durationSeconds": 9.7,
       "gridCell": "C1",
       "id": "c1-native-conifer-011-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        830,
-        1755,
+        194,
+        1832,
         36,
         60
       ],
@@ -654,6 +833,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1529,
         302,
@@ -673,22 +853,23 @@
           45
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.19,
       "canopyAtlasRect": [
-        805,
-        1188,
+        189,
+        1285,
         56,
         90
       ],
       "checkpoint": "c1-native-conifer-012",
+      "composition": "registered-replacement",
       "durationSeconds": 9.7,
       "gridCell": "C1",
       "id": "c1-native-conifer-012-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        862,
-        1188,
+        246,
+        1285,
         56,
         90
       ],
@@ -696,6 +877,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2487,
         305,
@@ -715,22 +897,23 @@
           25.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.62,
       "canopyAtlasRect": [
-        65,
-        1880,
+        450,
+        1894,
         35,
         51
       ],
       "checkpoint": "c1-native-conifer-013",
+      "composition": "registered-replacement",
       "durationSeconds": 9.7,
       "gridCell": "C1",
       "id": "c1-native-conifer-013-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        101,
-        1880,
+        486,
+        1894,
         35,
         51
       ],
@@ -738,6 +921,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1504,
         340,
@@ -757,22 +941,23 @@
           50.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.68,
       "canopyAtlasRect": [
-        743,
-        981,
+        1,
+        1087,
         62,
         101
       ],
       "checkpoint": "b1-native-conifer-014",
+      "composition": "registered-replacement",
       "durationSeconds": 7.4,
       "gridCell": "B1",
       "id": "b1-native-conifer-014-instance",
       "lagDegrees": 0.093,
       "neutralizationAtlasRect": [
-        806,
-        981,
+        64,
+        1087,
         62,
         101
       ],
@@ -780,6 +965,7 @@
       "phaseSeconds": -7.7,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1207,
         354,
@@ -799,7 +985,7 @@
           93
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.69,
       "canopyAtlasRect": [
         175,
@@ -808,6 +994,7 @@
         186
       ],
       "checkpoint": "b1-native-conifer-015",
+      "composition": "registered-replacement",
       "durationSeconds": 7.4,
       "gridCell": "B1",
       "id": "b1-native-conifer-015-instance",
@@ -822,6 +1009,7 @@
       "phaseSeconds": -7.7,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         953,
         386,
@@ -841,7 +1029,7 @@
           81
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.7,
       "canopyAtlasRect": [
         877,
@@ -850,6 +1038,7 @@
         162
       ],
       "checkpoint": "b1-native-conifer-016",
+      "composition": "registered-replacement",
       "durationSeconds": 7.4,
       "gridCell": "B1",
       "id": "b1-native-conifer-016-instance",
@@ -864,6 +1053,7 @@
       "phaseSeconds": -7.7,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         271,
         393,
@@ -883,22 +1073,23 @@
           40.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.66,
       "canopyAtlasRect": [
-        745,
-        1372,
+        181,
+        1463,
         55,
         81
       ],
       "checkpoint": "c1-native-conifer-017",
+      "composition": "registered-replacement",
       "durationSeconds": 9.7,
       "gridCell": "C1",
       "id": "c1-native-conifer-017-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        801,
-        1372,
+        237,
+        1463,
         55,
         81
       ],
@@ -906,6 +1097,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2522,
         395,
@@ -925,22 +1117,23 @@
           34
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.67,
       "canopyAtlasRect": [
-        760,
-        1616,
+        113,
+        1696,
         44,
         68
       ],
       "checkpoint": "c1-native-conifer-018",
+      "composition": "registered-replacement",
       "durationSeconds": 9.7,
       "gridCell": "C1",
       "id": "c1-native-conifer-018-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        805,
-        1616,
+        158,
+        1696,
         44,
         68
       ],
@@ -948,6 +1141,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2297,
         461,
@@ -967,7 +1161,7 @@
           55
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.73,
       "canopyAtlasRect": [
         613,
@@ -976,6 +1170,7 @@
         110
       ],
       "checkpoint": "b1-native-conifer-019",
+      "composition": "registered-replacement",
       "durationSeconds": 7.4,
       "gridCell": "B1",
       "id": "b1-native-conifer-019-instance",
@@ -990,6 +1185,7 @@
       "phaseSeconds": -7.7,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         212,
         473,
@@ -1009,7 +1205,7 @@
           59
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.74,
       "canopyAtlasRect": [
         447,
@@ -1018,6 +1214,7 @@
         118
       ],
       "checkpoint": "b1-native-conifer-020",
+      "composition": "registered-replacement",
       "durationSeconds": 7.4,
       "gridCell": "B1",
       "id": "b1-native-conifer-020-instance",
@@ -1032,6 +1229,7 @@
       "phaseSeconds": -7.7,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         658,
         501,
@@ -1051,7 +1249,7 @@
           70.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.98,
       "canopyAtlasRect": [
         909,
@@ -1060,6 +1258,7 @@
         141
       ],
       "checkpoint": "b1-native-conifer-021",
+      "composition": "registered-replacement",
       "durationSeconds": 7.5,
       "gridCell": "B1",
       "id": "b1-native-conifer-021-instance",
@@ -1074,6 +1273,7 @@
       "phaseSeconds": -7.7,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         901,
         503,
@@ -1093,22 +1293,23 @@
           47
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.94,
       "canopyAtlasRect": [
-        919,
-        1087,
+        285,
+        1189,
         49,
         94
       ],
       "checkpoint": "c1-native-conifer-022",
+      "composition": "registered-replacement",
       "durationSeconds": 9.8,
       "gridCell": "C1",
       "id": "c1-native-conifer-022-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        969,
-        1087,
+        335,
+        1189,
         49,
         94
       ],
@@ -1116,6 +1317,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2353,
         511,
@@ -1135,22 +1337,23 @@
           47
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1,
       "canopyAtlasRect": [
-        693,
-        1087,
+        59,
+        1189,
         58,
         94
       ],
       "checkpoint": "b1-native-conifer-023",
+      "composition": "registered-replacement",
       "durationSeconds": 7.5,
       "gridCell": "B1",
       "id": "b1-native-conifer-023-instance",
       "lagDegrees": 0.093,
       "neutralizationAtlasRect": [
-        752,
-        1087,
+        118,
+        1189,
         58,
         94
       ],
@@ -1158,6 +1361,7 @@
       "phaseSeconds": -7.7,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         533,
         514,
@@ -1177,22 +1381,23 @@
           28.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.96,
       "canopyAtlasRect": [
-        347,
-        1819,
+        719,
+        1832,
         41,
         57
       ],
       "checkpoint": "c1-native-conifer-024",
+      "composition": "registered-replacement",
       "durationSeconds": 9.8,
       "gridCell": "C1",
       "id": "c1-native-conifer-024-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        389,
-        1819,
+        761,
+        1832,
         41,
         57
       ],
@@ -1200,6 +1405,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2278,
         521,
@@ -1219,22 +1425,23 @@
           44.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.97,
       "canopyAtlasRect": [
-        1,
-        1282,
+        407,
+        1285,
         62,
         89
       ],
       "checkpoint": "c1-native-conifer-025",
+      "composition": "registered-replacement",
       "durationSeconds": 9.8,
       "gridCell": "C1",
       "id": "c1-native-conifer-025-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        64,
-        1282,
+        470,
+        1285,
         62,
         89
       ],
@@ -1242,6 +1449,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1567,
         529,
@@ -1261,7 +1469,7 @@
           54.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.03,
       "canopyAtlasRect": [
         953,
@@ -1270,6 +1478,7 @@
         109
       ],
       "checkpoint": "b1-native-conifer-026",
+      "composition": "registered-replacement",
       "durationSeconds": 7.5,
       "gridCell": "B1",
       "id": "b1-native-conifer-026-instance",
@@ -1284,6 +1493,7 @@
       "phaseSeconds": -7.7,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         63,
         536,
@@ -1303,22 +1513,23 @@
           39
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.99,
       "canopyAtlasRect": [
-        485,
-        1457,
+        885,
+        1463,
         48,
         78
       ],
       "checkpoint": "c1-native-conifer-027",
+      "composition": "registered-replacement",
       "durationSeconds": 9.8,
       "gridCell": "C1",
       "id": "c1-native-conifer-027-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        534,
-        1457,
+        934,
+        1463,
         48,
         78
       ],
@@ -1326,6 +1537,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2415,
         540,
@@ -1345,22 +1557,23 @@
           33
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1,
       "canopyAtlasRect": [
-        277,
-        1687,
+        651,
+        1696,
         48,
         66
       ],
       "checkpoint": "c1-native-conifer-028",
+      "composition": "registered-replacement",
       "durationSeconds": 9.8,
       "gridCell": "C1",
       "id": "c1-native-conifer-028-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        326,
-        1687,
+        700,
+        1696,
         48,
         66
       ],
@@ -1368,6 +1581,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1509,
         546,
@@ -1387,22 +1601,23 @@
           46
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.01,
       "canopyAtlasRect": [
-        107,
-        1188,
+        491,
+        1189,
         49,
         92
       ],
       "checkpoint": "c1-native-conifer-029",
+      "composition": "registered-replacement",
       "durationSeconds": 9.8,
       "gridCell": "C1",
       "id": "c1-native-conifer-029-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        157,
-        1188,
+        541,
+        1189,
         49,
         92
       ],
@@ -1410,6 +1625,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2206,
         551,
@@ -1429,7 +1645,7 @@
           57
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.07,
       "canopyAtlasRect": [
         895,
@@ -1438,6 +1654,7 @@
         114
       ],
       "checkpoint": "b1-native-conifer-030",
+      "composition": "registered-replacement",
       "durationSeconds": 7.5,
       "gridCell": "B1",
       "id": "b1-native-conifer-030-instance",
@@ -1452,6 +1669,7 @@
       "phaseSeconds": -7.7,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1143,
         570,
@@ -1471,22 +1689,23 @@
           28.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.68,
       "canopyAtlasRect": [
-        431,
-        1819,
+        803,
+        1832,
         42,
         57
       ],
       "checkpoint": "c1-native-conifer-031",
+      "composition": "registered-replacement",
       "durationSeconds": 6.2,
       "gridCell": "C1",
       "id": "c1-native-conifer-031-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        474,
-        1819,
+        846,
+        1832,
         42,
         57
       ],
@@ -1494,6 +1713,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1466,
         584,
@@ -1513,7 +1733,7 @@
           58
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.74,
       "canopyAtlasRect": [
         587,
@@ -1522,6 +1742,7 @@
         116
       ],
       "checkpoint": "b1-native-conifer-032",
+      "composition": "registered-replacement",
       "durationSeconds": 7.6,
       "gridCell": "B1",
       "id": "b1-native-conifer-032-instance",
@@ -1536,6 +1757,7 @@
       "phaseSeconds": -7.7,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         749,
         594,
@@ -1555,22 +1777,23 @@
           44.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.75,
       "canopyAtlasRect": [
-        919,
-        1188,
+        303,
+        1285,
         51,
         89
       ],
       "checkpoint": "b1-native-conifer-033",
+      "composition": "registered-replacement",
       "durationSeconds": 7.6,
       "gridCell": "B1",
       "id": "b1-native-conifer-033-instance",
       "lagDegrees": 0.093,
       "neutralizationAtlasRect": [
-        971,
-        1188,
+        355,
+        1285,
         51,
         89
       ],
@@ -1578,6 +1801,7 @@
       "phaseSeconds": -7.7,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         707,
         606,
@@ -1597,22 +1821,23 @@
           28.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.71,
       "canopyAtlasRect": [
-        517,
-        1819,
+        889,
+        1832,
         41,
         57
       ],
       "checkpoint": "c1-native-conifer-034",
+      "composition": "registered-replacement",
       "durationSeconds": 6.2,
       "gridCell": "C1",
       "id": "c1-native-conifer-034-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        559,
-        1819,
+        931,
+        1832,
         41,
         57
       ],
@@ -1620,6 +1845,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1737,
         620,
@@ -1639,22 +1865,23 @@
           40.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.72,
       "canopyAtlasRect": [
-        857,
-        1372,
+        293,
+        1463,
         53,
         81
       ],
       "checkpoint": "c1-native-conifer-035",
+      "composition": "registered-replacement",
       "durationSeconds": 6.2,
       "gridCell": "C1",
       "id": "c1-native-conifer-035-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        911,
-        1372,
+        347,
+        1463,
         53,
         81
       ],
@@ -1662,6 +1889,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2540,
         622,
@@ -1681,22 +1909,23 @@
           43.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.73,
       "canopyAtlasRect": [
-        313,
-        1282,
+        719,
+        1285,
         50,
         87
       ],
       "checkpoint": "c1-native-conifer-036",
+      "composition": "registered-replacement",
       "durationSeconds": 6.2,
       "gridCell": "C1",
       "id": "c1-native-conifer-036-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        364,
-        1282,
+        770,
+        1285,
         50,
         87
       ],
@@ -1704,6 +1933,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2291,
         624,
@@ -1723,22 +1953,23 @@
           28
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.74,
       "canopyAtlasRect": [
-        671,
-        1819,
+        36,
+        1894,
         35,
         56
       ],
       "checkpoint": "c1-native-conifer-037",
+      "composition": "registered-replacement",
       "durationSeconds": 6.2,
       "gridCell": "C1",
       "id": "c1-native-conifer-037-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        707,
-        1819,
+        72,
+        1894,
         35,
         56
       ],
@@ -1746,6 +1977,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2478,
         649,
@@ -1765,7 +1997,7 @@
           53.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.8,
       "canopyAtlasRect": [
         269,
@@ -1774,6 +2006,7 @@
         107
       ],
       "checkpoint": "b1-native-conifer-038",
+      "composition": "registered-replacement",
       "durationSeconds": 7.6,
       "gridCell": "B1",
       "id": "b1-native-conifer-038-instance",
@@ -1788,6 +2021,7 @@
       "phaseSeconds": -7.7,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1223,
         651,
@@ -1807,7 +2041,7 @@
           65
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.76,
       "canopyAtlasRect": [
         133,
@@ -1816,6 +2050,7 @@
         130
       ],
       "checkpoint": "c1-native-conifer-039",
+      "composition": "registered-replacement",
       "durationSeconds": 6.2,
       "gridCell": "C1",
       "id": "c1-native-conifer-039-instance",
@@ -1830,6 +2065,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2399,
         653,
@@ -1849,22 +2085,23 @@
           29.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.77,
       "canopyAtlasRect": [
-        39,
-        1819,
+        411,
+        1832,
         32,
         59
       ],
       "checkpoint": "c1-native-conifer-040",
+      "composition": "registered-replacement",
       "durationSeconds": 6.2,
       "gridCell": "C1",
       "id": "c1-native-conifer-040-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        72,
-        1819,
+        444,
+        1832,
         32,
         59
       ],
@@ -1872,6 +2109,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2238,
         663,
@@ -1891,22 +2129,23 @@
           31.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.01,
       "canopyAtlasRect": [
-        915,
-        1687,
+        291,
+        1765,
         37,
         63
       ],
       "checkpoint": "c1-native-conifer-041",
+      "composition": "registered-replacement",
       "durationSeconds": 6.3,
       "gridCell": "C1",
       "id": "c1-native-conifer-041-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        953,
-        1687,
+        329,
+        1765,
         37,
         63
       ],
@@ -1914,6 +2153,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2023,
         664,
@@ -1933,7 +2173,7 @@
           63.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.02,
       "canopyAtlasRect": [
         393,
@@ -1942,6 +2182,7 @@
         127
       ],
       "checkpoint": "c1-native-conifer-042",
+      "composition": "registered-replacement",
       "durationSeconds": 6.3,
       "gridCell": "C1",
       "id": "c1-native-conifer-042-instance",
@@ -1956,6 +2197,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2019,
         681,
@@ -1975,22 +2217,23 @@
           36
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.03,
       "canopyAtlasRect": [
-        513,
-        1539,
+        888,
+        1546,
         40,
         72
       ],
       "checkpoint": "c1-native-conifer-043",
+      "composition": "registered-replacement",
       "durationSeconds": 6.3,
       "gridCell": "C1",
       "id": "c1-native-conifer-043-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        554,
-        1539,
+        929,
+        1546,
         40,
         72
       ],
@@ -1998,6 +2241,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2083,
         683,
@@ -2017,22 +2261,23 @@
           33
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.04,
       "canopyAtlasRect": [
-        375,
-        1687,
+        749,
+        1696,
         42,
         66
       ],
       "checkpoint": "c1-native-conifer-044",
+      "composition": "registered-replacement",
       "durationSeconds": 6.3,
       "gridCell": "C1",
       "id": "c1-native-conifer-044-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        418,
-        1687,
+        792,
+        1696,
         42,
         66
       ],
@@ -2040,6 +2285,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1560,
         686,
@@ -2059,22 +2305,23 @@
           35
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.05,
       "canopyAtlasRect": [
-        124,
-        1616,
+        478,
+        1624,
         51,
         70
       ],
       "checkpoint": "c1-native-conifer-045",
+      "composition": "registered-replacement",
       "durationSeconds": 6.3,
       "gridCell": "C1",
       "id": "c1-native-conifer-045-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        176,
-        1616,
+        530,
+        1624,
         51,
         70
       ],
@@ -2082,6 +2329,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1979,
         693,
@@ -2101,22 +2349,23 @@
           40.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.06,
       "canopyAtlasRect": [
-        1,
-        1457,
+        401,
+        1463,
         60,
         81
       ],
       "checkpoint": "c1-native-conifer-046",
+      "composition": "registered-replacement",
       "durationSeconds": 6.3,
       "gridCell": "C1",
       "id": "c1-native-conifer-046-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        62,
-        1457,
+        462,
+        1463,
         60,
         81
       ],
@@ -2124,6 +2373,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1929,
         710,
@@ -2143,7 +2393,7 @@
           97.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.12,
       "canopyAtlasRect": [
         1,
@@ -2152,6 +2402,7 @@
         195
       ],
       "checkpoint": "b1-native-conifer-047",
+      "composition": "registered-replacement",
       "durationSeconds": 7.7,
       "gridCell": "B1",
       "id": "b1-native-conifer-047-instance",
@@ -2166,6 +2417,7 @@
       "phaseSeconds": -7.7,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1085,
         713,
@@ -2185,7 +2437,7 @@
           70
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.13,
       "canopyAtlasRect": [
         77,
@@ -2194,6 +2446,7 @@
         140
       ],
       "checkpoint": "b1-native-conifer-048",
+      "composition": "registered-replacement",
       "durationSeconds": 7.7,
       "gridCell": "B1",
       "id": "b1-native-conifer-048-instance",
@@ -2208,6 +2461,7 @@
       "phaseSeconds": -7.7,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         39,
         727,
@@ -2227,7 +2481,7 @@
           61.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.14,
       "canopyAtlasRect": [
         789,
@@ -2236,6 +2490,7 @@
         123
       ],
       "checkpoint": "b1-native-conifer-049",
+      "composition": "registered-replacement",
       "durationSeconds": 7.7,
       "gridCell": "B1",
       "id": "b1-native-conifer-049-instance",
@@ -2250,6 +2505,7 @@
       "phaseSeconds": -7.7,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         300,
         748,
@@ -2269,7 +2525,7 @@
           80
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.1,
       "canopyAtlasRect": [
         127,
@@ -2278,6 +2534,7 @@
         160
       ],
       "checkpoint": "c1-native-conifer-050",
+      "composition": "registered-replacement",
       "durationSeconds": 6.4,
       "gridCell": "C1",
       "id": "c1-native-conifer-050-instance",
@@ -2292,6 +2549,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2298,
         756,
@@ -2311,22 +2569,23 @@
           42
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.76,
       "canopyAtlasRect": [
-        953,
-        1282,
+        349,
+        1377,
         59,
         84
       ],
       "checkpoint": "c1-native-conifer-051",
+      "composition": "registered-replacement",
       "durationSeconds": 6.4,
       "gridCell": "C1",
       "id": "c1-native-conifer-051-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        1,
-        1372,
+        409,
+        1377,
         59,
         84
       ],
@@ -2334,6 +2593,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2155,
         762,
@@ -2353,22 +2613,23 @@
           46
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.77,
       "canopyAtlasRect": [
-        207,
-        1188,
+        591,
+        1189,
         54,
         92
       ],
       "checkpoint": "c1-native-conifer-052",
+      "composition": "registered-replacement",
       "durationSeconds": 6.4,
       "gridCell": "C1",
       "id": "c1-native-conifer-052-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        262,
-        1188,
+        646,
+        1189,
         54,
         92
       ],
@@ -2376,6 +2637,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2625,
         764,
@@ -2395,22 +2657,23 @@
           30.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.78,
       "canopyAtlasRect": [
-        549,
-        1755,
+        915,
+        1765,
         43,
         61
       ],
       "checkpoint": "c1-native-conifer-053",
+      "composition": "registered-replacement",
       "durationSeconds": 6.4,
       "gridCell": "C1",
       "id": "c1-native-conifer-053-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        593,
-        1755,
+        959,
+        1765,
         43,
         61
       ],
@@ -2418,6 +2681,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1976,
         776,
@@ -2437,22 +2701,23 @@
           33
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.79,
       "canopyAtlasRect": [
-        461,
-        1687,
+        835,
+        1696,
         38,
         66
       ],
       "checkpoint": "c1-native-conifer-054",
+      "composition": "registered-replacement",
       "durationSeconds": 6.4,
       "gridCell": "C1",
       "id": "c1-native-conifer-054-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        500,
-        1687,
+        874,
+        1696,
         38,
         66
       ],
@@ -2460,6 +2725,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1527,
         812,
@@ -2479,7 +2745,7 @@
           52.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.85,
       "canopyAtlasRect": [
         671,
@@ -2488,6 +2754,7 @@
         105
       ],
       "checkpoint": "b1-native-conifer-055",
+      "composition": "registered-replacement",
       "durationSeconds": 7.8,
       "gridCell": "B1",
       "id": "b1-native-conifer-055-instance",
@@ -2502,6 +2769,7 @@
       "phaseSeconds": -7.7,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         728,
         825,
@@ -2521,7 +2789,7 @@
           62.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.86,
       "canopyAtlasRect": [
         633,
@@ -2530,6 +2798,7 @@
         125
       ],
       "checkpoint": "b1-native-conifer-056",
+      "composition": "registered-replacement",
       "durationSeconds": 7.8,
       "gridCell": "B1",
       "id": "b1-native-conifer-056-instance",
@@ -2544,6 +2813,7 @@
       "phaseSeconds": -7.7,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         254,
         829,
@@ -2563,22 +2833,23 @@
           34.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.82,
       "canopyAtlasRect": [
-        504,
-        1616,
+        858,
+        1624,
         52,
         69
       ],
       "checkpoint": "c1-native-conifer-057",
+      "composition": "registered-replacement",
       "durationSeconds": 6.4,
       "gridCell": "C1",
       "id": "c1-native-conifer-057-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        557,
-        1616,
+        911,
+        1624,
         52,
         69
       ],
@@ -2586,6 +2857,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2584,
         832,
@@ -2605,7 +2877,7 @@
           55.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.88,
       "canopyAtlasRect": [
         349,
@@ -2614,6 +2886,7 @@
         111
       ],
       "checkpoint": "b1-native-conifer-058",
+      "composition": "registered-replacement",
       "durationSeconds": 7.8,
       "gridCell": "B1",
       "id": "b1-native-conifer-058-instance",
@@ -2628,6 +2901,7 @@
       "phaseSeconds": -7.7,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         180,
         871,
@@ -2647,22 +2921,23 @@
           31
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.84,
       "canopyAtlasRect": [
-        229,
-        1755,
+        595,
+        1765,
         35,
         62
       ],
       "checkpoint": "c1-native-conifer-059",
+      "composition": "registered-replacement",
       "durationSeconds": 6.5,
       "gridCell": "C1",
       "id": "c1-native-conifer-059-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        265,
-        1755,
+        631,
+        1765,
         35,
         62
       ],
@@ -2670,6 +2945,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1521,
         875,
@@ -2689,7 +2965,7 @@
           55.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.85,
       "canopyAtlasRect": [
         491,
@@ -2698,6 +2974,7 @@
         111
       ],
       "checkpoint": "c1-native-conifer-060",
+      "composition": "registered-replacement",
       "durationSeconds": 6.5,
       "gridCell": "C1",
       "id": "c1-native-conifer-060-instance",
@@ -2712,6 +2989,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2464,
         882,
@@ -2731,21 +3009,22 @@
           47.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.09,
       "canopyAtlasRect": [
-        469,
+        851,
         1087,
         53,
         95
       ],
       "checkpoint": "c1-native-conifer-061",
+      "composition": "registered-replacement",
       "durationSeconds": 6.5,
       "gridCell": "C1",
       "id": "c1-native-conifer-061-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        523,
+        905,
         1087,
         53,
         95
@@ -2754,6 +3033,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2530,
         884,
@@ -2773,22 +3053,23 @@
           33.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.1,
       "canopyAtlasRect": [
-        1,
-        1687,
+        375,
+        1696,
         50,
         67
       ],
       "checkpoint": "c1-native-conifer-062",
+      "composition": "registered-replacement",
       "durationSeconds": 6.5,
       "gridCell": "C1",
       "id": "c1-native-conifer-062-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        52,
-        1687,
+        426,
+        1696,
         50,
         67
       ],
@@ -2796,6 +3077,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2088,
         895,
@@ -2815,22 +3097,23 @@
           31.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.11,
       "canopyAtlasRect": [
-        1,
-        1755,
+        367,
+        1765,
         35,
         63
       ],
       "checkpoint": "c1-native-conifer-063",
+      "composition": "registered-replacement",
       "durationSeconds": 6.5,
       "gridCell": "C1",
       "id": "c1-native-conifer-063-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        37,
-        1755,
+        403,
+        1765,
         35,
         63
       ],
@@ -2838,6 +3121,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1501,
         906,
@@ -2857,22 +3141,23 @@
           30
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.12,
       "canopyAtlasRect": [
-        867,
-        1755,
+        231,
+        1832,
         51,
         60
       ],
       "checkpoint": "c1-native-conifer-064",
+      "composition": "registered-replacement",
       "durationSeconds": 6.5,
       "gridCell": "C1",
       "id": "c1-native-conifer-064-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        919,
-        1755,
+        283,
+        1832,
         51,
         60
       ],
@@ -2880,6 +3165,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1972,
         932,
@@ -2899,22 +3185,23 @@
           41
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.13,
       "canopyAtlasRect": [
-        617,
-        1372,
+        53,
+        1463,
         63,
         82
       ],
       "checkpoint": "c1-native-conifer-065",
+      "composition": "registered-replacement",
       "durationSeconds": 6.5,
       "gridCell": "C1",
       "id": "c1-native-conifer-065-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        681,
-        1372,
+        117,
+        1463,
         63,
         82
       ],
@@ -2922,6 +3209,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2735,
         956,
@@ -2941,22 +3229,23 @@
           33
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.14,
       "canopyAtlasRect": [
-        539,
-        1687,
+        913,
+        1696,
         42,
         66
       ],
       "checkpoint": "c1-native-conifer-066",
+      "composition": "registered-replacement",
       "durationSeconds": 6.5,
       "gridCell": "C1",
       "id": "c1-native-conifer-066-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        582,
-        1687,
+        956,
+        1696,
         42,
         66
       ],
@@ -2964,6 +3253,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2374,
         979,
@@ -2983,22 +3273,23 @@
           35
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.15,
       "canopyAtlasRect": [
-        228,
-        1616,
+        582,
+        1624,
         57,
         70
       ],
       "checkpoint": "c1-native-conifer-067",
+      "composition": "registered-replacement",
       "durationSeconds": 6.5,
       "gridCell": "C1",
       "id": "c1-native-conifer-067-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        286,
-        1616,
+        640,
+        1624,
         57,
         70
       ],
@@ -3006,6 +3297,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1821,
         1009,
@@ -3025,22 +3317,23 @@
           29
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.16,
       "canopyAtlasRect": [
-        105,
-        1819,
+        477,
+        1832,
         39,
         58
       ],
       "checkpoint": "c1-native-conifer-068",
+      "composition": "registered-replacement",
       "durationSeconds": 6.6,
       "gridCell": "C1",
       "id": "c1-native-conifer-068-instance",
       "lagDegrees": 0.092,
       "neutralizationAtlasRect": [
-        145,
-        1819,
+        517,
+        1832,
         39,
         58
       ],
@@ -3048,6 +3341,7 @@
       "phaseSeconds": -2.2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1885,
         1024,
@@ -3067,21 +3361,22 @@
           48
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.99,
       "canopyAtlasRect": [
-        383,
+        631,
         1087,
         42,
         96
       ],
       "checkpoint": "b2-native-conifer-069",
+      "composition": "registered-replacement",
       "durationSeconds": 9.3,
       "gridCell": "B2",
       "id": "b2-native-conifer-069-instance",
       "lagDegrees": 0.067,
       "neutralizationAtlasRect": [
-        426,
+        674,
         1087,
         42,
         96
@@ -3090,6 +3385,7 @@
       "phaseSeconds": -7.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         49,
         1081,
@@ -3109,22 +3405,23 @@
           41.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1,
       "canopyAtlasRect": [
-        155,
-        1372,
+        563,
+        1377,
         43,
         83
       ],
       "checkpoint": "b2-native-conifer-070",
+      "composition": "registered-replacement",
       "durationSeconds": 9.3,
       "gridCell": "B2",
       "id": "b2-native-conifer-070-instance",
       "lagDegrees": 0.067,
       "neutralizationAtlasRect": [
-        199,
-        1372,
+        607,
+        1377,
         43,
         83
       ],
@@ -3132,6 +3429,7 @@
       "phaseSeconds": -7.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         931,
         1086,
@@ -3151,22 +3449,23 @@
           38.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.19,
       "canopyAtlasRect": [
-        829,
-        1457,
+        212,
+        1546,
         46,
         77
       ],
       "checkpoint": "c2-native-conifer-071",
+      "composition": "registered-replacement",
       "durationSeconds": 7.9,
       "gridCell": "C2",
       "id": "c2-native-conifer-071-instance",
       "lagDegrees": 0.066,
       "neutralizationAtlasRect": [
-        876,
-        1457,
+        259,
+        1546,
         46,
         77
       ],
@@ -3174,6 +3473,7 @@
       "phaseSeconds": -2.3,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1725,
         1113,
@@ -3193,7 +3493,7 @@
           52
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.62,
       "canopyAtlasRect": [
         407,
@@ -3202,6 +3502,7 @@
         104
       ],
       "checkpoint": "c2-native-conifer-072",
+      "composition": "registered-replacement",
       "durationSeconds": 7.9,
       "gridCell": "C2",
       "id": "c2-native-conifer-072-instance",
@@ -3216,6 +3517,7 @@
       "phaseSeconds": -2.3,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1674,
         1117,
@@ -3235,22 +3537,23 @@
           36
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.68,
       "canopyAtlasRect": [
-        423,
-        1539,
+        798,
+        1546,
         44,
         72
       ],
       "checkpoint": "b2-native-conifer-073",
+      "composition": "registered-replacement",
       "durationSeconds": 9.3,
       "gridCell": "B2",
       "id": "b2-native-conifer-073-instance",
       "lagDegrees": 0.067,
       "neutralizationAtlasRect": [
-        468,
-        1539,
+        843,
+        1546,
         44,
         72
       ],
@@ -3258,6 +3561,7 @@
       "phaseSeconds": -7.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1357,
         1121,
@@ -3277,7 +3581,7 @@
           66.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.64,
       "canopyAtlasRect": [
         889,
@@ -3286,6 +3590,7 @@
         133
       ],
       "checkpoint": "c2-native-conifer-074",
+      "composition": "registered-replacement",
       "durationSeconds": 7.9,
       "gridCell": "C2",
       "id": "c2-native-conifer-074-instance",
@@ -3300,6 +3605,7 @@
       "phaseSeconds": -2.3,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2811,
         1134,
@@ -3319,7 +3625,7 @@
           63
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.7,
       "canopyAtlasRect": [
         537,
@@ -3328,6 +3634,7 @@
         126
       ],
       "checkpoint": "b2-native-conifer-075",
+      "composition": "registered-replacement",
       "durationSeconds": 9.3,
       "gridCell": "B2",
       "id": "b2-native-conifer-075-instance",
@@ -3342,6 +3649,7 @@
       "phaseSeconds": -7.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         315,
         1142,
@@ -3361,22 +3669,23 @@
           35.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.66,
       "canopyAtlasRect": [
-        885,
-        1539,
+        250,
+        1624,
         32,
         71
       ],
       "checkpoint": "c2-native-conifer-076",
+      "composition": "registered-replacement",
       "durationSeconds": 8,
       "gridCell": "C2",
       "id": "c2-native-conifer-076-instance",
       "lagDegrees": 0.066,
       "neutralizationAtlasRect": [
-        918,
-        1539,
+        283,
+        1624,
         32,
         71
       ],
@@ -3384,6 +3693,7 @@
       "phaseSeconds": -2.3,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1570,
         1149,
@@ -3403,7 +3713,7 @@
           72.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.67,
       "canopyAtlasRect": [
         619,
@@ -3412,6 +3722,7 @@
         145
       ],
       "checkpoint": "c2-native-conifer-077",
+      "composition": "registered-replacement",
       "durationSeconds": 8,
       "gridCell": "C2",
       "id": "c2-native-conifer-077-instance",
@@ -3426,6 +3737,7 @@
       "phaseSeconds": -2.3,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2709,
         1153,
@@ -3445,7 +3757,7 @@
           52
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.73,
       "canopyAtlasRect": [
         307,
@@ -3454,6 +3766,7 @@
         104
       ],
       "checkpoint": "b2-native-conifer-078",
+      "composition": "registered-replacement",
       "durationSeconds": 9.4,
       "gridCell": "B2",
       "id": "b2-native-conifer-078-instance",
@@ -3468,6 +3781,7 @@
       "phaseSeconds": -7.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         122,
         1193,
@@ -3487,7 +3801,7 @@
           55
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.74,
       "canopyAtlasRect": [
         745,
@@ -3496,6 +3810,7 @@
         110
       ],
       "checkpoint": "b2-native-conifer-079",
+      "composition": "registered-replacement",
       "durationSeconds": 9.4,
       "gridCell": "B2",
       "id": "b2-native-conifer-079-instance",
@@ -3510,6 +3825,7 @@
       "phaseSeconds": -7.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1059,
         1224,
@@ -3529,22 +3845,23 @@
           40.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.7,
       "canopyAtlasRect": [
-        123,
-        1457,
+        523,
+        1463,
         48,
         81
       ],
       "checkpoint": "c2-native-conifer-080",
+      "composition": "registered-replacement",
       "durationSeconds": 8,
       "gridCell": "C2",
       "id": "c2-native-conifer-080-instance",
       "lagDegrees": 0.066,
       "neutralizationAtlasRect": [
-        172,
-        1457,
+        572,
+        1463,
         48,
         81
       ],
@@ -3552,6 +3869,7 @@
       "phaseSeconds": -2.3,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1733,
         1232,
@@ -3571,22 +3889,23 @@
           42.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.99,
       "canopyAtlasRect": [
-        415,
-        1282,
+        821,
+        1285,
         49,
         85
       ],
       "checkpoint": "b2-native-conifer-081",
+      "composition": "registered-replacement",
       "durationSeconds": 9.4,
       "gridCell": "B2",
       "id": "b2-native-conifer-081-instance",
       "lagDegrees": 0.067,
       "neutralizationAtlasRect": [
-        465,
-        1282,
+        871,
+        1285,
         49,
         85
       ],
@@ -3594,6 +3913,7 @@
       "phaseSeconds": -7.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         702,
         1234,
@@ -3613,7 +3933,7 @@
           53.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.95,
       "canopyAtlasRect": [
         561,
@@ -3622,6 +3942,7 @@
         107
       ],
       "checkpoint": "c2-native-conifer-082",
+      "composition": "registered-replacement",
       "durationSeconds": 8,
       "gridCell": "C2",
       "id": "c2-native-conifer-082-instance",
@@ -3636,6 +3957,7 @@
       "phaseSeconds": -2.3,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1509,
         1236,
@@ -3655,22 +3977,23 @@
           30
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.96,
       "canopyAtlasRect": [
-        971,
-        1755,
+        335,
+        1832,
         37,
         60
       ],
       "checkpoint": "c2-native-conifer-083",
+      "composition": "registered-replacement",
       "durationSeconds": 8,
       "gridCell": "C2",
       "id": "c2-native-conifer-083-instance",
       "lagDegrees": 0.066,
       "neutralizationAtlasRect": [
-        1,
-        1819,
+        373,
+        1832,
         37,
         60
       ],
@@ -3678,6 +4001,7 @@
       "phaseSeconds": -2.3,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1546,
         1245,
@@ -3697,7 +4021,7 @@
           81.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.97,
       "canopyAtlasRect": [
         563,
@@ -3706,6 +4030,7 @@
         163
       ],
       "checkpoint": "c2-native-conifer-084",
+      "composition": "registered-replacement",
       "durationSeconds": 8,
       "gridCell": "C2",
       "id": "c2-native-conifer-084-instance",
@@ -3720,6 +4045,7 @@
       "phaseSeconds": -2.3,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2751,
         1256,
@@ -3739,22 +4065,23 @@
           33
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.98,
       "canopyAtlasRect": [
-        625,
-        1687,
+        1,
+        1765,
         40,
         66
       ],
       "checkpoint": "c2-native-conifer-085",
+      "composition": "registered-replacement",
       "durationSeconds": 8.1,
       "gridCell": "C2",
       "id": "c2-native-conifer-085-instance",
       "lagDegrees": 0.066,
       "neutralizationAtlasRect": [
-        666,
-        1687,
+        42,
+        1765,
         40,
         66
       ],
@@ -3762,6 +4089,7 @@
       "phaseSeconds": -2.3,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1921,
         1265,
@@ -3781,22 +4109,23 @@
           41.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.99,
       "canopyAtlasRect": [
-        315,
-        1372,
+        723,
+        1377,
         47,
         83
       ],
       "checkpoint": "c2-native-conifer-086",
+      "composition": "registered-replacement",
       "durationSeconds": 8.1,
       "gridCell": "C2",
       "id": "c2-native-conifer-086-instance",
       "lagDegrees": 0.066,
       "neutralizationAtlasRect": [
-        363,
-        1372,
+        771,
+        1377,
         47,
         83
       ],
@@ -3804,6 +4133,7 @@
       "phaseSeconds": -2.3,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2623,
         1275,
@@ -3823,22 +4153,23 @@
           33
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1,
       "canopyAtlasRect": [
-        707,
-        1687,
+        83,
+        1765,
         36,
         66
       ],
       "checkpoint": "c2-native-conifer-087",
+      "composition": "registered-replacement",
       "durationSeconds": 8.1,
       "gridCell": "C2",
       "id": "c2-native-conifer-087-instance",
       "lagDegrees": 0.066,
       "neutralizationAtlasRect": [
-        744,
-        1687,
+        120,
+        1765,
         36,
         66
       ],
@@ -3846,6 +4177,7 @@
       "phaseSeconds": -2.3,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2816,
         1304,
@@ -3865,22 +4197,23 @@
           42
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.06,
       "canopyAtlasRect": [
-        709,
-        1282,
+        105,
+        1377,
         38,
         84
       ],
       "checkpoint": "b2-native-conifer-088",
+      "composition": "registered-replacement",
       "durationSeconds": 9.5,
       "gridCell": "B2",
       "id": "b2-native-conifer-088-instance",
       "lagDegrees": 0.067,
       "neutralizationAtlasRect": [
-        748,
-        1282,
+        144,
+        1377,
         38,
         84
       ],
@@ -3888,6 +4221,7 @@
       "phaseSeconds": -7.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         412,
         1305,
@@ -3907,22 +4241,23 @@
           26.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.07,
       "canopyAtlasRect": [
-        885,
-        1819,
+        250,
+        1894,
         36,
         53
       ],
       "checkpoint": "b2-native-conifer-089",
+      "composition": "registered-replacement",
       "durationSeconds": 9.5,
       "gridCell": "B2",
       "id": "b2-native-conifer-089-instance",
       "lagDegrees": 0.067,
       "neutralizationAtlasRect": [
-        922,
-        1819,
+        287,
+        1894,
         36,
         53
       ],
@@ -3930,6 +4265,7 @@
       "phaseSeconds": -7.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         638,
         1305,
@@ -3949,22 +4285,23 @@
           42
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.03,
       "canopyAtlasRect": [
-        61,
-        1372,
+        469,
+        1377,
         46,
         84
       ],
       "checkpoint": "c2-native-conifer-090",
+      "composition": "registered-replacement",
       "durationSeconds": 8.1,
       "gridCell": "C2",
       "id": "c2-native-conifer-090-instance",
       "lagDegrees": 0.066,
       "neutralizationAtlasRect": [
-        108,
-        1372,
+        516,
+        1377,
         46,
         84
       ],
@@ -3972,6 +4309,7 @@
       "phaseSeconds": -2.3,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2283,
         1323,
@@ -3991,22 +4329,23 @@
           35.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.74,
       "canopyAtlasRect": [
-        595,
-        1539,
+        970,
+        1546,
         40,
         71
       ],
       "checkpoint": "b2-native-conifer-091",
+      "composition": "registered-replacement",
       "durationSeconds": 9.5,
       "gridCell": "B2",
       "id": "b2-native-conifer-091-instance",
       "lagDegrees": 0.067,
       "neutralizationAtlasRect": [
-        636,
-        1539,
+        1,
+        1624,
         40,
         71
       ],
@@ -4014,6 +4353,7 @@
       "phaseSeconds": -7.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         764,
         1336,
@@ -4033,22 +4373,23 @@
           40
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.75,
       "canopyAtlasRect": [
-        315,
-        1457,
+        715,
+        1463,
         36,
         80
       ],
       "checkpoint": "b2-native-conifer-092",
+      "composition": "registered-replacement",
       "durationSeconds": 9.5,
       "gridCell": "B2",
       "id": "b2-native-conifer-092-instance",
       "lagDegrees": 0.067,
       "neutralizationAtlasRect": [
-        352,
-        1457,
+        752,
+        1463,
         36,
         80
       ],
@@ -4056,6 +4397,7 @@
       "phaseSeconds": -7.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1327,
         1341,
@@ -4075,22 +4417,23 @@
           44
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.76,
       "canopyAtlasRect": [
-        127,
-        1282,
+        533,
+        1285,
         46,
         88
       ],
       "checkpoint": "b2-native-conifer-093",
+      "composition": "registered-replacement",
       "durationSeconds": 9.5,
       "gridCell": "B2",
       "id": "b2-native-conifer-093-instance",
       "lagDegrees": 0.067,
       "neutralizationAtlasRect": [
-        174,
-        1282,
+        580,
+        1285,
         46,
         88
       ],
@@ -4098,6 +4441,7 @@
       "phaseSeconds": -7.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         318,
         1349,
@@ -4117,22 +4461,23 @@
           41.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.77,
       "canopyAtlasRect": [
-        243,
-        1372,
+        651,
+        1377,
         35,
         83
       ],
       "checkpoint": "b2-native-conifer-094",
+      "composition": "registered-replacement",
       "durationSeconds": 9.5,
       "gridCell": "B2",
       "id": "b2-native-conifer-094-instance",
       "lagDegrees": 0.067,
       "neutralizationAtlasRect": [
-        279,
-        1372,
+        687,
+        1377,
         35,
         83
       ],
@@ -4140,6 +4485,7 @@
       "phaseSeconds": -7.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1361,
         1351,
@@ -4159,22 +4505,23 @@
           30.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.73,
       "canopyAtlasRect": [
-        637,
-        1755,
+        1,
+        1832,
         39,
         61
       ],
       "checkpoint": "c2-native-conifer-095",
+      "composition": "registered-replacement",
       "durationSeconds": 8.2,
       "gridCell": "C2",
       "id": "c2-native-conifer-095-instance",
       "lagDegrees": 0.066,
       "neutralizationAtlasRect": [
-        677,
-        1755,
+        41,
+        1832,
         39,
         61
       ],
@@ -4182,6 +4529,7 @@
       "phaseSeconds": -2.3,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1544,
         1364,
@@ -4201,7 +4549,7 @@
           79
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.79,
       "canopyAtlasRect": [
         449,
@@ -4210,6 +4558,7 @@
         158
       ],
       "checkpoint": "b2-native-conifer-096",
+      "composition": "registered-replacement",
       "durationSeconds": 9.6,
       "gridCell": "B2",
       "id": "b2-native-conifer-096-instance",
@@ -4224,6 +4573,7 @@
       "phaseSeconds": -7.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         467,
         1379,
@@ -4243,22 +4593,23 @@
           38.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.8,
       "canopyAtlasRect": [
-        583,
-        1457,
+        983,
+        1463,
         34,
         77
       ],
       "checkpoint": "b2-native-conifer-097",
+      "composition": "registered-replacement",
       "durationSeconds": 9.6,
       "gridCell": "B2",
       "id": "b2-native-conifer-097-instance",
       "lagDegrees": 0.067,
       "neutralizationAtlasRect": [
-        618,
-        1457,
+        1,
+        1546,
         34,
         77
       ],
@@ -4266,6 +4617,7 @@
       "phaseSeconds": -7.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1122,
         1383,
@@ -4285,7 +4637,7 @@
           79.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.76,
       "canopyAtlasRect": [
         269,
@@ -4294,6 +4646,7 @@
         159
       ],
       "checkpoint": "c2-native-conifer-098",
+      "composition": "registered-replacement",
       "durationSeconds": 8.2,
       "gridCell": "C2",
       "id": "c2-native-conifer-098-instance",
@@ -4308,6 +4661,7 @@
       "phaseSeconds": -2.3,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2480,
         1392,
@@ -4327,7 +4681,7 @@
           52.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.82,
       "canopyAtlasRect": [
         799,
@@ -4336,6 +4690,7 @@
         105
       ],
       "checkpoint": "b2-native-conifer-099",
+      "composition": "registered-replacement",
       "durationSeconds": 9.6,
       "gridCell": "B2",
       "id": "b2-native-conifer-099-instance",
@@ -4350,6 +4705,7 @@
       "phaseSeconds": -7.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         52,
         1404,
@@ -4369,21 +4725,22 @@
           50
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.78,
       "canopyAtlasRect": [
-        1,
+        249,
         1087,
         65,
         100
       ],
       "checkpoint": "c2-native-conifer-100",
+      "composition": "registered-replacement",
       "durationSeconds": 8.2,
       "gridCell": "C2",
       "id": "c2-native-conifer-100-instance",
       "lagDegrees": 0.066,
       "neutralizationAtlasRect": [
-        67,
+        315,
         1087,
         65,
         100
@@ -4392,6 +4749,7 @@
       "phaseSeconds": -2.3,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1558,
         1427,
@@ -4411,7 +4769,7 @@
           68
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.81,
       "canopyAtlasRect": [
         451,
@@ -4420,6 +4778,7 @@
         136
       ],
       "checkpoint": "c2-native-conifer-101",
+      "composition": "registered-replacement",
       "durationSeconds": 7.2,
       "gridCell": "C2",
       "id": "c2-native-conifer-101-instance",
@@ -4434,6 +4793,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1671,
         1434,
@@ -4453,22 +4813,23 @@
           40.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.82,
       "canopyAtlasRect": [
-        221,
-        1457,
+        621,
+        1463,
         46,
         81
       ],
       "checkpoint": "c2-native-conifer-102",
+      "composition": "registered-replacement",
       "durationSeconds": 7.2,
       "gridCell": "C2",
       "id": "c2-native-conifer-102-instance",
       "lagDegrees": 0.094,
       "neutralizationAtlasRect": [
-        268,
-        1457,
+        668,
+        1463,
         46,
         81
       ],
@@ -4476,6 +4837,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1897,
         1454,
@@ -4495,7 +4857,7 @@
           56
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.74,
       "canopyAtlasRect": [
         267,
@@ -4504,6 +4866,7 @@
         112
       ],
       "checkpoint": "b2-native-conifer-103",
+      "composition": "registered-replacement",
       "durationSeconds": 8.9,
       "gridCell": "B2",
       "id": "b2-native-conifer-103-instance",
@@ -4518,6 +4881,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1277,
         1470,
@@ -4537,7 +4901,7 @@
           67
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.84,
       "canopyAtlasRect": [
         759,
@@ -4546,6 +4910,7 @@
         134
       ],
       "checkpoint": "c2-native-conifer-104",
+      "composition": "registered-replacement",
       "durationSeconds": 7.2,
       "gridCell": "C2",
       "id": "c2-native-conifer-104-instance",
@@ -4560,6 +4925,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2334,
         1471,
@@ -4579,7 +4945,7 @@
           55
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.76,
       "canopyAtlasRect": [
         849,
@@ -4588,6 +4954,7 @@
         110
       ],
       "checkpoint": "b2-native-conifer-105",
+      "composition": "registered-replacement",
       "durationSeconds": 8.9,
       "gridCell": "B2",
       "id": "b2-native-conifer-105-instance",
@@ -4602,6 +4969,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         116,
         1472,
@@ -4621,7 +4989,7 @@
           67.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.86,
       "canopyAtlasRect": [
         605,
@@ -4630,6 +4998,7 @@
         135
       ],
       "checkpoint": "c2-native-conifer-106",
+      "composition": "registered-replacement",
       "durationSeconds": 7.2,
       "gridCell": "C2",
       "id": "c2-native-conifer-106-instance",
@@ -4644,6 +5013,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2206,
         1482,
@@ -4663,22 +5033,23 @@
           42.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.78,
       "canopyAtlasRect": [
-        515,
-        1282,
+        921,
+        1285,
         44,
         85
       ],
       "checkpoint": "b2-native-conifer-107",
+      "composition": "registered-replacement",
       "durationSeconds": 8.9,
       "gridCell": "B2",
       "id": "b2-native-conifer-107-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        560,
-        1282,
+        966,
+        1285,
         44,
         85
       ],
@@ -4686,6 +5057,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         799,
         1488,
@@ -4705,22 +5077,23 @@
           38
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.79,
       "canopyAtlasRect": [
-        923,
-        1457,
+        306,
+        1546,
         34,
         76
       ],
       "checkpoint": "b2-native-conifer-108",
+      "composition": "registered-replacement",
       "durationSeconds": 8.9,
       "gridCell": "B2",
       "id": "b2-native-conifer-108-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        958,
-        1457,
+        341,
+        1546,
         34,
         76
       ],
@@ -4728,6 +5101,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1346,
         1493,
@@ -4747,7 +5121,7 @@
           52.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.89,
       "canopyAtlasRect": [
         77,
@@ -4756,6 +5130,7 @@
         105
       ],
       "checkpoint": "c2-native-conifer-109",
+      "composition": "registered-replacement",
       "durationSeconds": 7.2,
       "gridCell": "C2",
       "id": "c2-native-conifer-109-instance",
@@ -4770,6 +5145,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2006,
         1494,
@@ -4789,22 +5165,23 @@
           46
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.9,
       "canopyAtlasRect": [
-        317,
-        1188,
+        701,
+        1189,
         54,
         92
       ],
       "checkpoint": "c2-native-conifer-110",
+      "composition": "registered-replacement",
       "durationSeconds": 7.2,
       "gridCell": "C2",
       "id": "c2-native-conifer-110-instance",
       "lagDegrees": 0.094,
       "neutralizationAtlasRect": [
-        372,
-        1188,
+        756,
+        1189,
         54,
         92
       ],
@@ -4812,6 +5189,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2583,
         1513,
@@ -4831,22 +5209,23 @@
           32
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.05,
       "canopyAtlasRect": [
-        781,
-        1687,
+        157,
+        1765,
         28,
         64
       ],
       "checkpoint": "b2-native-conifer-111",
+      "composition": "registered-replacement",
       "durationSeconds": 9,
       "gridCell": "B2",
       "id": "b2-native-conifer-111-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        810,
-        1687,
+        186,
+        1765,
         28,
         64
       ],
@@ -4854,6 +5233,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1375,
         1523,
@@ -4873,7 +5253,7 @@
           64.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.15,
       "canopyAtlasRect": [
         249,
@@ -4882,6 +5262,7 @@
         129
       ],
       "checkpoint": "c2-native-conifer-112",
+      "composition": "registered-replacement",
       "durationSeconds": 7.3,
       "gridCell": "C2",
       "id": "c2-native-conifer-112-instance",
@@ -4896,6 +5277,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2069,
         1529,
@@ -4915,7 +5297,7 @@
           61
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.07,
       "canopyAtlasRect": [
         145,
@@ -4924,6 +5306,7 @@
         122
       ],
       "checkpoint": "b2-native-conifer-113",
+      "composition": "registered-replacement",
       "durationSeconds": 9,
       "gridCell": "B2",
       "id": "b2-native-conifer-113-instance",
@@ -4938,6 +5321,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1325,
         1552,
@@ -4957,22 +5341,23 @@
           45.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.17,
       "canopyAtlasRect": [
-        617,
-        1188,
+        1,
+        1285,
         45,
         91
       ],
       "checkpoint": "c2-native-conifer-114",
+      "composition": "registered-replacement",
       "durationSeconds": 7.3,
       "gridCell": "C2",
       "id": "c2-native-conifer-114-instance",
       "lagDegrees": 0.094,
       "neutralizationAtlasRect": [
-        663,
-        1188,
+        47,
+        1285,
         45,
         91
       ],
@@ -4980,6 +5365,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1814,
         1569,
@@ -4999,22 +5385,23 @@
           50.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.18,
       "canopyAtlasRect": [
-        869,
-        981,
+        127,
+        1087,
         60,
         101
       ],
       "checkpoint": "c2-native-conifer-115",
+      "composition": "registered-replacement",
       "durationSeconds": 7.3,
       "gridCell": "C2",
       "id": "c2-native-conifer-115-instance",
       "lagDegrees": 0.094,
       "neutralizationAtlasRect": [
-        930,
-        981,
+        188,
+        1087,
         60,
         101
       ],
@@ -5022,6 +5409,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2727,
         1569,
@@ -5041,22 +5429,23 @@
           38
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.19,
       "canopyAtlasRect": [
-        71,
-        1539,
+        446,
+        1546,
         50,
         76
       ],
       "checkpoint": "c2-native-conifer-116",
+      "composition": "registered-replacement",
       "durationSeconds": 7.3,
       "gridCell": "C2",
       "id": "c2-native-conifer-116-instance",
       "lagDegrees": 0.094,
       "neutralizationAtlasRect": [
-        122,
-        1539,
+        497,
+        1546,
         50,
         76
       ],
@@ -5064,6 +5453,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1582,
         1585,
@@ -5083,7 +5473,7 @@
           52
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.62,
       "canopyAtlasRect": [
         527,
@@ -5092,6 +5482,7 @@
         104
       ],
       "checkpoint": "c2-native-conifer-117",
+      "composition": "registered-replacement",
       "durationSeconds": 7.3,
       "gridCell": "C2",
       "id": "c2-native-conifer-117-instance",
@@ -5106,6 +5497,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2155,
         1593,
@@ -5125,22 +5517,23 @@
           41.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.63,
       "canopyAtlasRect": [
-        411,
-        1372,
+        819,
+        1377,
         50,
         83
       ],
       "checkpoint": "c2-native-conifer-118",
+      "composition": "registered-replacement",
       "durationSeconds": 7.3,
       "gridCell": "C2",
       "id": "c2-native-conifer-118-instance",
       "lagDegrees": 0.094,
       "neutralizationAtlasRect": [
-        462,
-        1372,
+        870,
+        1377,
         50,
         83
       ],
@@ -5148,6 +5541,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2409,
         1600,
@@ -5167,22 +5561,23 @@
           31
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.64,
       "canopyAtlasRect": [
-        301,
-        1755,
+        667,
+        1765,
         44,
         62
       ],
       "checkpoint": "c2-native-conifer-119",
+      "composition": "registered-replacement",
       "durationSeconds": 7.3,
       "gridCell": "C2",
       "id": "c2-native-conifer-119-instance",
       "lagDegrees": 0.094,
       "neutralizationAtlasRect": [
-        346,
-        1755,
+        712,
+        1765,
         44,
         62
       ],
@@ -5190,6 +5585,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1866,
         1618,
@@ -5209,22 +5605,23 @@
           29
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.65,
       "canopyAtlasRect": [
-        185,
-        1819,
+        557,
+        1832,
         39,
         58
       ],
       "checkpoint": "c2-native-conifer-120",
+      "composition": "registered-replacement",
       "durationSeconds": 7.3,
       "gridCell": "C2",
       "id": "c2-native-conifer-120-instance",
       "lagDegrees": 0.094,
       "neutralizationAtlasRect": [
-        225,
-        1819,
+        597,
+        1832,
         39,
         58
       ],
@@ -5232,6 +5629,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2648,
         1619,
@@ -5251,22 +5649,23 @@
           38
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.8,
       "canopyAtlasRect": [
-        1,
-        1539,
+        376,
+        1546,
         34,
         76
       ],
       "checkpoint": "b2-native-conifer-121",
+      "composition": "registered-replacement",
       "durationSeconds": 9.1,
       "gridCell": "B2",
       "id": "b2-native-conifer-121-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        36,
-        1539,
+        411,
+        1546,
         34,
         76
       ],
@@ -5274,6 +5673,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1274,
         1633,
@@ -5293,22 +5693,23 @@
           37
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.81,
       "canopyAtlasRect": [
-        173,
-        1539,
+        548,
+        1546,
         30,
         74
       ],
       "checkpoint": "b2-native-conifer-122",
+      "composition": "registered-replacement",
       "durationSeconds": 9.1,
       "gridCell": "B2",
       "id": "b2-native-conifer-122-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        204,
-        1539,
+        579,
+        1546,
         30,
         74
       ],
@@ -5316,6 +5717,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         25,
         1655,
@@ -5335,22 +5737,23 @@
           33.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.91,
       "canopyAtlasRect": [
-        103,
-        1687,
+        477,
+        1696,
         44,
         67
       ],
       "checkpoint": "c2-native-conifer-123",
+      "composition": "registered-replacement",
       "durationSeconds": 7.4,
       "gridCell": "C2",
       "id": "c2-native-conifer-123-instance",
       "lagDegrees": 0.094,
       "neutralizationAtlasRect": [
-        148,
-        1687,
+        522,
+        1696,
         44,
         67
       ],
@@ -5358,6 +5761,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2772,
         1657,
@@ -5377,22 +5781,23 @@
           34
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.83,
       "canopyAtlasRect": [
-        610,
-        1616,
+        964,
+        1624,
         37,
         68
       ],
       "checkpoint": "b2-native-conifer-124",
+      "composition": "registered-replacement",
       "durationSeconds": 9.1,
       "gridCell": "B2",
       "id": "b2-native-conifer-124-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        648,
-        1616,
+        1,
+        1696,
         37,
         68
       ],
@@ -5400,6 +5805,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         233,
         1664,
@@ -5419,22 +5825,23 @@
           38.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.84,
       "canopyAtlasRect": [
-        653,
-        1457,
+        36,
+        1546,
         46,
         77
       ],
       "checkpoint": "b2-native-conifer-125",
+      "composition": "registered-replacement",
       "durationSeconds": 9.1,
       "gridCell": "B2",
       "id": "b2-native-conifer-125-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        700,
-        1457,
+        83,
+        1546,
         46,
         77
       ],
@@ -5442,6 +5849,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         202,
         1676,
@@ -5461,22 +5869,23 @@
           31.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.94,
       "canopyAtlasRect": [
-        73,
-        1755,
+        439,
+        1765,
         38,
         63
       ],
       "checkpoint": "c2-native-conifer-126",
+      "composition": "registered-replacement",
       "durationSeconds": 7.4,
       "gridCell": "C2",
       "id": "c2-native-conifer-126-instance",
       "lagDegrees": 0.094,
       "neutralizationAtlasRect": [
-        112,
-        1755,
+        478,
+        1765,
         38,
         63
       ],
@@ -5484,6 +5893,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2554,
         1684,
@@ -5503,7 +5913,7 @@
           54.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.95,
       "canopyAtlasRect": [
         63,
@@ -5512,6 +5922,7 @@
         109
       ],
       "checkpoint": "c2-native-conifer-127",
+      "composition": "registered-replacement",
       "durationSeconds": 7.4,
       "gridCell": "C2",
       "id": "c2-native-conifer-127-instance",
@@ -5526,6 +5937,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1543,
         1695,
@@ -5545,21 +5957,22 @@
           49.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.96,
       "canopyAtlasRect": [
-        239,
+        487,
         1087,
         71,
         99
       ],
       "checkpoint": "c2-native-conifer-128",
+      "composition": "registered-replacement",
       "durationSeconds": 7.4,
       "gridCell": "C2",
       "id": "c2-native-conifer-128-instance",
       "lagDegrees": 0.094,
       "neutralizationAtlasRect": [
-        311,
+        559,
         1087,
         71,
         99
@@ -5568,6 +5981,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2239,
         1698,
@@ -5587,22 +6001,23 @@
           27
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.88,
       "canopyAtlasRect": [
-        743,
-        1819,
+        108,
+        1894,
         34,
         54
       ],
       "checkpoint": "b2-native-conifer-129",
+      "composition": "registered-replacement",
       "durationSeconds": 9.1,
       "gridCell": "B2",
       "id": "b2-native-conifer-129-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        778,
-        1819,
+        143,
+        1894,
         34,
         54
       ],
@@ -5610,6 +6025,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         448,
         1708,
@@ -5629,22 +6045,23 @@
           26.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.98,
       "canopyAtlasRect": [
-        1,
-        1880,
+        386,
+        1894,
         31,
         53
       ],
       "checkpoint": "c2-native-conifer-130",
+      "composition": "registered-replacement",
       "durationSeconds": 7.4,
       "gridCell": "C2",
       "id": "c2-native-conifer-130-instance",
       "lagDegrees": 0.094,
       "neutralizationAtlasRect": [
-        33,
-        1880,
+        418,
+        1894,
         31,
         53
       ],
@@ -5652,6 +6069,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2746,
         1715,
@@ -5671,22 +6089,23 @@
           36.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.13,
       "canopyAtlasRect": [
-        327,
-        1539,
+        702,
+        1546,
         47,
         73
       ],
       "checkpoint": "b2-native-conifer-131",
+      "composition": "registered-replacement",
       "durationSeconds": 9.2,
       "gridCell": "B2",
       "id": "b2-native-conifer-131-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        375,
-        1539,
+        750,
+        1546,
         47,
         73
       ],
@@ -5694,6 +6113,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         683,
         1734,
@@ -5713,7 +6133,7 @@
           52.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.14,
       "canopyAtlasRect": [
         915,
@@ -5722,6 +6142,7 @@
         105
       ],
       "checkpoint": "b2-native-conifer-132",
+      "composition": "registered-replacement",
       "durationSeconds": 9.2,
       "gridCell": "B2",
       "id": "b2-native-conifer-132-instance",
@@ -5736,6 +6157,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1122,
         1740,
@@ -5755,22 +6177,23 @@
           34
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.15,
       "canopyAtlasRect": [
-        686,
-        1616,
+        39,
+        1696,
         36,
         68
       ],
       "checkpoint": "b2-native-conifer-133",
+      "composition": "registered-replacement",
       "durationSeconds": 9.2,
       "gridCell": "B2",
       "id": "b2-native-conifer-133-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        723,
-        1616,
+        76,
+        1696,
         36,
         68
       ],
@@ -5778,6 +6201,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1358,
         1743,
@@ -5797,22 +6221,23 @@
           26.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.16,
       "canopyAtlasRect": [
-        959,
-        1819,
+        324,
+        1894,
         30,
         53
       ],
       "checkpoint": "b2-native-conifer-134",
+      "composition": "registered-replacement",
       "durationSeconds": 9.2,
       "gridCell": "B2",
       "id": "b2-native-conifer-134-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        990,
-        1819,
+        355,
+        1894,
         30,
         53
       ],
@@ -5820,6 +6245,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1329,
         1759,
@@ -5839,22 +6265,23 @@
           24.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.68,
       "canopyAtlasRect": [
-        207,
-        1880,
+        592,
+        1894,
         29,
         49
       ],
       "checkpoint": "c2-native-conifer-135",
+      "composition": "registered-replacement",
       "durationSeconds": 7.5,
       "gridCell": "C2",
       "id": "c2-native-conifer-135-instance",
       "lagDegrees": 0.094,
       "neutralizationAtlasRect": [
-        237,
-        1880,
+        622,
+        1894,
         29,
         49
       ],
@@ -5862,6 +6289,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2047,
         1766,
@@ -5881,22 +6309,23 @@
           30.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.18,
       "canopyAtlasRect": [
-        467,
-        1755,
+        833,
+        1765,
         40,
         61
       ],
       "checkpoint": "b2-native-conifer-136",
+      "composition": "registered-replacement",
       "durationSeconds": 9.2,
       "gridCell": "B2",
       "id": "b2-native-conifer-136-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        508,
-        1755,
+        874,
+        1765,
         40,
         61
       ],
@@ -5904,6 +6333,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         237,
         1781,
@@ -5923,22 +6353,23 @@
           35
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.7,
       "canopyAtlasRect": [
-        344,
-        1616,
+        698,
+        1624,
         38,
         70
       ],
       "checkpoint": "c2-native-conifer-137",
+      "composition": "registered-replacement",
       "durationSeconds": 7.5,
       "gridCell": "C2",
       "id": "c2-native-conifer-137-instance",
       "lagDegrees": 0.094,
       "neutralizationAtlasRect": [
-        383,
-        1616,
+        737,
+        1624,
         38,
         70
       ],
@@ -5946,6 +6377,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1591,
         1781,
@@ -5965,22 +6397,23 @@
           27
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.62,
       "canopyAtlasRect": [
-        813,
-        1819,
+        178,
+        1894,
         35,
         54
       ],
       "checkpoint": "b2-native-conifer-138",
+      "composition": "registered-replacement",
       "durationSeconds": 9.2,
       "gridCell": "B2",
       "id": "b2-native-conifer-138-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        849,
-        1819,
+        214,
+        1894,
         35,
         54
       ],
@@ -5988,6 +6421,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         851,
         1784,
@@ -6007,7 +6441,7 @@
           81.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.72,
       "canopyAtlasRect": [
         711,
@@ -6016,6 +6450,7 @@
         163
       ],
       "checkpoint": "c2-native-conifer-139",
+      "composition": "registered-replacement",
       "durationSeconds": 7.5,
       "gridCell": "C2",
       "id": "c2-native-conifer-139-instance",
@@ -6030,6 +6465,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2501,
         1788,
@@ -6049,7 +6485,7 @@
           60
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.64,
       "canopyAtlasRect": [
         339,
@@ -6058,6 +6494,7 @@
         120
       ],
       "checkpoint": "b2-native-conifer-140",
+      "composition": "registered-replacement",
       "durationSeconds": 9.2,
       "gridCell": "B2",
       "id": "b2-native-conifer-140-instance",
@@ -6072,6 +6509,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1280,
         1793,
@@ -6091,7 +6529,7 @@
           53.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.88,
       "canopyAtlasRect": [
         399,
@@ -6100,6 +6538,7 @@
         107
       ],
       "checkpoint": "b2-native-conifer-141",
+      "composition": "registered-replacement",
       "durationSeconds": 9.3,
       "gridCell": "B2",
       "id": "b2-native-conifer-141-instance",
@@ -6114,6 +6553,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         436,
         1795,
@@ -6133,22 +6573,23 @@
           46
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.98,
       "canopyAtlasRect": [
-        427,
-        1188,
+        811,
+        1189,
         46,
         92
       ],
       "checkpoint": "c2-native-conifer-142",
+      "composition": "registered-replacement",
       "durationSeconds": 7.6,
       "gridCell": "C2",
       "id": "c2-native-conifer-142-instance",
       "lagDegrees": 0.094,
       "neutralizationAtlasRect": [
-        474,
-        1188,
+        858,
+        1189,
         46,
         92
       ],
@@ -6156,6 +6597,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2383,
         1796,
@@ -6175,7 +6617,7 @@
           52.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.99,
       "canopyAtlasRect": [
         189,
@@ -6184,6 +6626,7 @@
         105
       ],
       "checkpoint": "c2-native-conifer-143",
+      "composition": "registered-replacement",
       "durationSeconds": 7.6,
       "gridCell": "C2",
       "id": "c2-native-conifer-143-instance",
@@ -6198,6 +6641,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2185,
         1804,
@@ -6217,22 +6661,23 @@
           24
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.91,
       "canopyAtlasRect": [
-        267,
-        1880,
+        652,
+        1894,
         33,
         48
       ],
       "checkpoint": "b2-native-conifer-144",
+      "composition": "registered-replacement",
       "durationSeconds": 9.3,
       "gridCell": "B2",
       "id": "b2-native-conifer-144-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        301,
-        1880,
+        686,
+        1894,
         33,
         48
       ],
@@ -6240,6 +6685,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         962,
         1813,
@@ -6259,7 +6705,7 @@
           58
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.92,
       "canopyAtlasRect": [
         733,
@@ -6268,6 +6714,7 @@
         116
       ],
       "checkpoint": "b2-native-conifer-145",
+      "composition": "registered-replacement",
       "durationSeconds": 9.3,
       "gridCell": "B2",
       "id": "b2-native-conifer-145-instance",
@@ -6282,6 +6729,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         156,
         1814,
@@ -6301,22 +6749,23 @@
           28
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.93,
       "canopyAtlasRect": [
-        601,
-        1819,
+        973,
+        1832,
         34,
         56
       ],
       "checkpoint": "b2-native-conifer-146",
+      "composition": "registered-replacement",
       "durationSeconds": 9.3,
       "gridCell": "B2",
       "id": "b2-native-conifer-146-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        636,
-        1819,
+        1,
+        1894,
         34,
         56
       ],
@@ -6324,6 +6773,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         776,
         1824,
@@ -6343,22 +6793,23 @@
           33.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.03,
       "canopyAtlasRect": [
-        193,
-        1687,
+        567,
+        1696,
         41,
         67
       ],
       "checkpoint": "c2-native-conifer-147",
+      "composition": "registered-replacement",
       "durationSeconds": 7.6,
       "gridCell": "C2",
       "id": "c2-native-conifer-147-instance",
       "lagDegrees": 0.094,
       "neutralizationAtlasRect": [
-        235,
-        1687,
+        609,
+        1696,
         41,
         67
       ],
@@ -6366,6 +6817,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2590,
         1832,
@@ -6385,22 +6837,23 @@
           34.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.95,
       "canopyAtlasRect": [
-        422,
-        1616,
+        776,
+        1624,
         40,
         69
       ],
       "checkpoint": "b2-native-conifer-148",
+      "composition": "registered-replacement",
       "durationSeconds": 9.3,
       "gridCell": "B2",
       "id": "b2-native-conifer-148-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        463,
-        1616,
+        817,
+        1624,
         40,
         69
       ],
@@ -6408,6 +6861,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         503,
         1840,
@@ -6427,22 +6881,23 @@
           37
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.05,
       "canopyAtlasRect": [
-        235,
-        1539,
+        610,
+        1546,
         45,
         74
       ],
       "checkpoint": "c2-native-conifer-149",
+      "composition": "registered-replacement",
       "durationSeconds": 7.6,
       "gridCell": "C2",
       "id": "c2-native-conifer-149-instance",
       "lagDegrees": 0.094,
       "neutralizationAtlasRect": [
-        281,
-        1539,
+        656,
+        1546,
         45,
         74
       ],
@@ -6450,6 +6905,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1701,
         1856,
@@ -6469,22 +6925,23 @@
           42
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.97,
       "canopyAtlasRect": [
-        787,
-        1282,
+        183,
+        1377,
         40,
         84
       ],
       "checkpoint": "b2-native-conifer-150",
+      "composition": "registered-replacement",
       "durationSeconds": 9.3,
       "gridCell": "B2",
       "id": "b2-native-conifer-150-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        828,
-        1282,
+        224,
+        1377,
         40,
         84
       ],
@@ -6492,6 +6949,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1370,
         1864,
@@ -6511,7 +6969,7 @@
           60.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.72,
       "canopyAtlasRect": [
         233,
@@ -6520,6 +6978,7 @@
         121
       ],
       "checkpoint": "c2-native-conifer-151",
+      "composition": "registered-replacement",
       "durationSeconds": 7.7,
       "gridCell": "C2",
       "id": "c2-native-conifer-151-instance",
@@ -6534,6 +6993,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1748,
         1869,
@@ -6553,7 +7013,7 @@
           54
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.73,
       "canopyAtlasRect": [
         169,
@@ -6562,6 +7022,7 @@
         108
       ],
       "checkpoint": "c2-native-conifer-152",
+      "composition": "registered-replacement",
       "durationSeconds": 7.7,
       "gridCell": "C2",
       "id": "c2-native-conifer-152-instance",
@@ -6576,6 +7037,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2016,
         1870,
@@ -6595,22 +7057,23 @@
           39
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.65,
       "canopyAtlasRect": [
-        389,
-        1457,
+        789,
+        1463,
         47,
         78
       ],
       "checkpoint": "b2-native-conifer-153",
+      "composition": "registered-replacement",
       "durationSeconds": 9.4,
       "gridCell": "B2",
       "id": "b2-native-conifer-153-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        437,
-        1457,
+        837,
+        1463,
         47,
         78
       ],
@@ -6618,6 +7081,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         609,
         1890,
@@ -6637,7 +7101,7 @@
           85
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.75,
       "canopyAtlasRect": [
         383,
@@ -6646,6 +7110,7 @@
         170
       ],
       "checkpoint": "c2-native-conifer-154",
+      "composition": "registered-replacement",
       "durationSeconds": 7.7,
       "gridCell": "C2",
       "id": "c2-native-conifer-154-instance",
@@ -6660,6 +7125,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2060,
         1908,
@@ -6679,22 +7145,23 @@
           25
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.67,
       "canopyAtlasRect": [
-        137,
-        1880,
+        522,
+        1894,
         34,
         50
       ],
       "checkpoint": "b2-native-conifer-155",
+      "composition": "registered-replacement",
       "durationSeconds": 9.4,
       "gridCell": "B2",
       "id": "b2-native-conifer-155-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        172,
-        1880,
+        557,
+        1894,
         34,
         50
       ],
@@ -6702,6 +7169,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         335,
         1935,
@@ -6721,22 +7189,23 @@
           42.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.68,
       "canopyAtlasRect": [
-        605,
-        1282,
+        1,
+        1377,
         51,
         85
       ],
       "checkpoint": "b2-native-conifer-156",
+      "composition": "registered-replacement",
       "durationSeconds": 9.4,
       "gridCell": "B2",
       "id": "b2-native-conifer-156-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        657,
-        1282,
+        53,
+        1377,
         51,
         85
       ],
@@ -6744,6 +7213,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         576,
         1936,
@@ -6763,21 +7233,22 @@
           51.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.69,
       "canopyAtlasRect": [
-        645,
+        864,
         981,
         48,
         103
       ],
       "checkpoint": "b2-native-conifer-157",
+      "composition": "registered-replacement",
       "durationSeconds": 9.4,
       "gridCell": "B2",
       "id": "b2-native-conifer-157-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        694,
+        913,
         981,
         48,
         103
@@ -6786,6 +7257,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1330,
         1936,
@@ -6805,22 +7277,23 @@
           38.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.7,
       "canopyAtlasRect": [
-        747,
-        1457,
+        130,
+        1546,
         40,
         77
       ],
       "checkpoint": "b2-native-conifer-158",
+      "composition": "registered-replacement",
       "durationSeconds": 9.4,
       "gridCell": "B2",
       "id": "b2-native-conifer-158-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        788,
-        1457,
+        171,
+        1546,
         40,
         77
       ],
@@ -6828,6 +7301,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1061,
         1939,
@@ -6847,22 +7321,23 @@
           35
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.71,
       "canopyAtlasRect": [
-        951,
-        1539,
+        316,
+        1624,
         38,
         70
       ],
       "checkpoint": "b2-native-conifer-159",
+      "composition": "registered-replacement",
       "durationSeconds": 9.4,
       "gridCell": "B2",
       "id": "b2-native-conifer-159-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        1,
-        1616,
+        355,
+        1624,
         38,
         70
       ],
@@ -6870,6 +7345,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         888,
         1943,
@@ -6889,22 +7365,23 @@
           28.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.72,
       "canopyAtlasRect": [
-        265,
-        1819,
+        637,
+        1832,
         40,
         57
       ],
       "checkpoint": "b2-native-conifer-160",
+      "composition": "registered-replacement",
       "durationSeconds": 9.4,
       "gridCell": "B2",
       "id": "b2-native-conifer-160-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        306,
-        1819,
+        678,
+        1832,
         40,
         57
       ],
@@ -6912,6 +7389,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         301,
         1944,
@@ -6931,22 +7409,23 @@
           31.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.05,
       "canopyAtlasRect": [
-        151,
-        1755,
+        517,
+        1765,
         38,
         63
       ],
       "checkpoint": "c2-native-conifer-161",
+      "composition": "registered-replacement",
       "durationSeconds": 7.8,
       "gridCell": "C2",
       "id": "c2-native-conifer-161-instance",
       "lagDegrees": 0.094,
       "neutralizationAtlasRect": [
-        190,
-        1755,
+        556,
+        1765,
         38,
         63
       ],
@@ -6954,6 +7433,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2139,
         1947,
@@ -6973,22 +7453,23 @@
           35
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.97,
       "canopyAtlasRect": [
-        40,
-        1616,
+        394,
+        1624,
         41,
         70
       ],
       "checkpoint": "b2-native-conifer-162",
+      "composition": "registered-replacement",
       "durationSeconds": 9.5,
       "gridCell": "B2",
       "id": "b2-native-conifer-162-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        82,
-        1616,
+        436,
+        1624,
         41,
         70
       ],
@@ -6996,6 +7477,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         763,
         1950,
@@ -7015,22 +7497,23 @@
           47.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.07,
       "canopyAtlasRect": [
-        577,
+        959,
         1087,
         57,
         95
       ],
       "checkpoint": "c2-native-conifer-163",
+      "composition": "registered-replacement",
       "durationSeconds": 7.8,
       "gridCell": "C2",
       "id": "c2-native-conifer-163-instance",
       "lagDegrees": 0.094,
       "neutralizationAtlasRect": [
-        635,
-        1087,
+        1,
+        1189,
         57,
         95
       ],
@@ -7038,6 +7521,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2768,
         1965,
@@ -7057,22 +7541,23 @@
           45.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.08,
       "canopyAtlasRect": [
-        709,
-        1188,
+        93,
+        1285,
         47,
         91
       ],
       "checkpoint": "c2-native-conifer-164",
+      "composition": "registered-replacement",
       "durationSeconds": 7.8,
       "gridCell": "C2",
       "id": "c2-native-conifer-164-instance",
       "lagDegrees": 0.094,
       "neutralizationAtlasRect": [
-        757,
-        1188,
+        141,
+        1285,
         47,
         91
       ],
@@ -7080,6 +7565,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1474,
         1980,
@@ -7099,22 +7585,23 @@
           30.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.09,
       "canopyAtlasRect": [
-        717,
-        1755,
+        81,
+        1832,
         37,
         61
       ],
       "checkpoint": "c2-native-conifer-165",
+      "composition": "registered-replacement",
       "durationSeconds": 7.8,
       "gridCell": "C2",
       "id": "c2-native-conifer-165-instance",
       "lagDegrees": 0.094,
       "neutralizationAtlasRect": [
-        755,
-        1755,
+        119,
+        1832,
         37,
         61
       ],
@@ -7122,6 +7609,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1823,
         1983,
@@ -7141,22 +7629,23 @@
           31
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.1,
       "canopyAtlasRect": [
-        391,
-        1755,
+        757,
+        1765,
         37,
         62
       ],
       "checkpoint": "c2-native-conifer-166",
+      "composition": "registered-replacement",
       "durationSeconds": 7.8,
       "gridCell": "C2",
       "id": "c2-native-conifer-166-instance",
       "lagDegrees": 0.094,
       "neutralizationAtlasRect": [
-        429,
-        1755,
+        795,
+        1765,
         37,
         62
       ],
@@ -7164,6 +7653,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2337,
         1994,
@@ -7183,22 +7673,23 @@
           34
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.11,
       "canopyAtlasRect": [
-        850,
-        1616,
+        203,
+        1696,
         44,
         68
       ],
       "checkpoint": "c2-native-conifer-167",
+      "composition": "registered-replacement",
       "durationSeconds": 7.8,
       "gridCell": "C2",
       "id": "c2-native-conifer-167-instance",
       "lagDegrees": 0.094,
       "neutralizationAtlasRect": [
-        895,
-        1616,
+        248,
+        1696,
         44,
         68
       ],
@@ -7206,6 +7697,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2225,
         1995,
@@ -7225,22 +7717,23 @@
           46.5
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.12,
       "canopyAtlasRect": [
-        1,
-        1188,
+        385,
+        1189,
         52,
         93
       ],
       "checkpoint": "c2-native-conifer-168",
+      "composition": "registered-replacement",
       "durationSeconds": 7.8,
       "gridCell": "C2",
       "id": "c2-native-conifer-168-instance",
       "lagDegrees": 0.094,
       "neutralizationAtlasRect": [
-        54,
-        1188,
+        438,
+        1189,
         52,
         93
       ],
@@ -7248,6 +7741,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         2715,
         2014,
@@ -7267,22 +7761,23 @@
           41
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.04,
       "canopyAtlasRect": [
-        513,
-        1372,
+        921,
+        1377,
         51,
         82
       ],
       "checkpoint": "b2-native-conifer-169",
+      "composition": "registered-replacement",
       "durationSeconds": 9.5,
       "gridCell": "B2",
       "id": "b2-native-conifer-169-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        565,
-        1372,
+        1,
+        1463,
         51,
         82
       ],
@@ -7290,6 +7785,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         147,
         2018,
@@ -7309,22 +7805,23 @@
           42
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 1.05,
       "canopyAtlasRect": [
-        869,
-        1282,
+        265,
+        1377,
         41,
         84
       ],
       "checkpoint": "b2-native-conifer-170",
+      "composition": "registered-replacement",
       "durationSeconds": 9.5,
       "gridCell": "B2",
       "id": "b2-native-conifer-170-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        911,
-        1282,
+        307,
+        1377,
         41,
         84
       ],
@@ -7332,6 +7829,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1216,
         2018,
@@ -7351,7 +7849,7 @@
           57
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.71,
       "canopyAtlasRect": [
         75,
@@ -7360,6 +7858,7 @@
         114
       ],
       "checkpoint": "b2-native-conifer-171",
+      "composition": "registered-replacement",
       "durationSeconds": 9.6,
       "gridCell": "B2",
       "id": "b2-native-conifer-171-instance",
@@ -7374,6 +7873,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1394,
         2021,
@@ -7393,22 +7893,23 @@
           44
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.72,
       "canopyAtlasRect": [
-        221,
-        1282,
+        627,
+        1285,
         45,
         88
       ],
       "checkpoint": "b2-native-conifer-172",
+      "composition": "registered-replacement",
       "durationSeconds": 9.6,
       "gridCell": "B2",
       "id": "b2-native-conifer-172-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        267,
-        1282,
+        673,
+        1285,
         45,
         88
       ],
@@ -7416,6 +7917,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1312,
         2025,
@@ -7435,22 +7937,23 @@
           47
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.73,
       "canopyAtlasRect": [
-        811,
-        1087,
+        177,
+        1189,
         53,
         94
       ],
       "checkpoint": "b2-native-conifer-173",
+      "composition": "registered-replacement",
       "durationSeconds": 9.6,
       "gridCell": "B2",
       "id": "b2-native-conifer-173-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        865,
-        1087,
+        231,
+        1189,
         53,
         94
       ],
@@ -7458,6 +7961,7 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1173,
         2031,
@@ -7477,21 +7981,22 @@
           50
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.83,
       "canopyAtlasRect": [
-        133,
+        381,
         1087,
         52,
         100
       ],
       "checkpoint": "c2-native-conifer-174",
+      "composition": "registered-replacement",
       "durationSeconds": 7.9,
       "gridCell": "C2",
       "id": "c2-native-conifer-174-instance",
       "lagDegrees": 0.094,
       "neutralizationAtlasRect": [
-        186,
+        434,
         1087,
         52,
         100
@@ -7500,6 +8005,7 @@
       "phaseSeconds": -2,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         1747,
         2035,
@@ -7519,22 +8025,23 @@
           32
         ]
       },
-      "atlasResourceId": "native-conifer-pool-atlas",
+      "atlasResourceId": "pooled-foliage-atlas",
       "bendDegrees": 0.75,
       "canopyAtlasRect": [
-        839,
-        1687,
+        215,
+        1765,
         37,
         64
       ],
       "checkpoint": "b2-native-conifer-175",
+      "composition": "registered-replacement",
       "durationSeconds": 9.6,
       "gridCell": "B2",
       "id": "b2-native-conifer-175-instance",
       "lagDegrees": 0.062,
       "neutralizationAtlasRect": [
-        877,
-        1687,
+        253,
+        1765,
         37,
         64
       ],
@@ -7542,11 +8049,948 @@
       "phaseSeconds": -0.8,
       "pivotYPercent": 96,
       "sourceMasterId": "terrain-master-detail-r8",
+      "species": "native-conifer",
       "sourceTargetRect": [
         722,
         2071,
         37,
         64
+      ]
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          702,
+          276
+        ],
+        "span": [
+          36,
+          52
+        ]
+      },
+      "atlasResourceId": "pooled-foliage-atlas",
+      "bendDegrees": 0.58,
+      "canopyAtlasRect": [
+        718,
+        981,
+        72,
+        104
+      ],
+      "checkpoint": "c1-supplemental-foliage-01",
+      "composition": "additive",
+      "durationSeconds": 8.2,
+      "gridCell": "C1",
+      "id": "supplemental-foliage-01-instance",
+      "lagDegrees": 0.05,
+      "neutralizationAtlasRect": null,
+      "paintedNodeCount": 1,
+      "phaseSeconds": 0,
+      "pivotYPercent": 94,
+      "sourceMasterId": "terrain-master-detail-r8",
+      "species": "russet-fantasy-tree",
+      "sourceTargetRect": [
+        1404,
+        552,
+        72,
+        104
+      ]
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          1094,
+          398
+        ],
+        "span": [
+          32.5,
+          47
+        ]
+      },
+      "atlasResourceId": "pooled-foliage-atlas",
+      "bendDegrees": 0.64,
+      "canopyAtlasRect": [
+        645,
+        981,
+        72,
+        104
+      ],
+      "checkpoint": "c1-supplemental-foliage-02",
+      "composition": "additive",
+      "durationSeconds": 8.5,
+      "gridCell": "C1",
+      "id": "supplemental-foliage-02-instance",
+      "lagDegrees": 0.058,
+      "neutralizationAtlasRect": null,
+      "paintedNodeCount": 1,
+      "phaseSeconds": -1.4,
+      "pivotYPercent": 94,
+      "sourceMasterId": "terrain-master-detail-r8",
+      "species": "russet-fantasy-tree",
+      "sourceTargetRect": [
+        2188,
+        796,
+        65,
+        94
+      ]
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          269.5,
+          797
+        ],
+        "span": [
+          33,
+          48
+        ]
+      },
+      "atlasResourceId": "pooled-foliage-atlas",
+      "bendDegrees": 0.71,
+      "canopyAtlasRect": [
+        791,
+        981,
+        72,
+        104
+      ],
+      "checkpoint": "b2-supplemental-foliage-03",
+      "composition": "additive",
+      "durationSeconds": 8.9,
+      "gridCell": "B2",
+      "id": "supplemental-foliage-03-instance",
+      "lagDegrees": 0.066,
+      "neutralizationAtlasRect": null,
+      "paintedNodeCount": 1,
+      "phaseSeconds": -2.7,
+      "pivotYPercent": 94,
+      "sourceMasterId": "terrain-master-detail-r8",
+      "species": "russet-fantasy-tree",
+      "sourceTargetRect": [
+        539,
+        1594,
+        66,
+        96
+      ]
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          1210.5,
+          617.5
+        ],
+        "span": [
+          29.5,
+          42.5
+        ]
+      },
+      "atlasResourceId": "pooled-foliage-atlas",
+      "bendDegrees": 0.77,
+      "canopyAtlasRect": [
+        645,
+        981,
+        72,
+        104
+      ],
+      "checkpoint": "c2-supplemental-foliage-04",
+      "composition": "additive",
+      "durationSeconds": 9.2,
+      "gridCell": "C2",
+      "id": "supplemental-foliage-04-instance",
+      "lagDegrees": 0.05,
+      "neutralizationAtlasRect": null,
+      "paintedNodeCount": 1,
+      "phaseSeconds": -4.1,
+      "pivotYPercent": 94,
+      "sourceMasterId": "terrain-master-detail-r8",
+      "species": "russet-fantasy-tree",
+      "sourceTargetRect": [
+        2421,
+        1235,
+        59,
+        85
+      ]
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          570,
+          691.5
+        ],
+        "span": [
+          30,
+          43.5
+        ]
+      },
+      "atlasResourceId": "pooled-foliage-atlas",
+      "bendDegrees": 0.58,
+      "canopyAtlasRect": [
+        718,
+        981,
+        72,
+        104
+      ],
+      "checkpoint": "b2-supplemental-foliage-05",
+      "composition": "additive",
+      "durationSeconds": 9.5,
+      "gridCell": "B2",
+      "id": "supplemental-foliage-05-instance",
+      "lagDegrees": 0.058,
+      "neutralizationAtlasRect": null,
+      "paintedNodeCount": 1,
+      "phaseSeconds": -5.5,
+      "pivotYPercent": 94,
+      "sourceMasterId": "terrain-master-detail-r8",
+      "species": "russet-fantasy-tree",
+      "sourceTargetRect": [
+        1140,
+        1383,
+        60,
+        87
+      ]
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          620.5,
+          457
+        ],
+        "span": [
+          29.5,
+          43
+        ]
+      },
+      "atlasResourceId": "pooled-foliage-atlas",
+      "bendDegrees": 0.55,
+      "canopyAtlasRect": [
+        784,
+        1087,
+        66,
+        96
+      ],
+      "checkpoint": "b1-supplemental-foliage-06",
+      "composition": "additive",
+      "durationSeconds": 7.6,
+      "gridCell": "B1",
+      "id": "supplemental-foliage-06-instance",
+      "lagDegrees": 0.061,
+      "neutralizationAtlasRect": null,
+      "paintedNodeCount": 1,
+      "phaseSeconds": -6.9,
+      "pivotYPercent": 95,
+      "sourceMasterId": "terrain-master-detail-r8",
+      "species": "silver-aspen",
+      "sourceTargetRect": [
+        1241,
+        914,
+        59,
+        86
+      ]
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          1010.5,
+          783
+        ],
+        "span": [
+          29,
+          42
+        ]
+      },
+      "atlasResourceId": "pooled-foliage-atlas",
+      "bendDegrees": 0.61,
+      "canopyAtlasRect": [
+        784,
+        1087,
+        66,
+        96
+      ],
+      "checkpoint": "c2-supplemental-foliage-07",
+      "composition": "additive",
+      "durationSeconds": 7.9,
+      "gridCell": "C2",
+      "id": "supplemental-foliage-07-instance",
+      "lagDegrees": 0.045,
+      "neutralizationAtlasRect": null,
+      "paintedNodeCount": 1,
+      "phaseSeconds": -8.2,
+      "pivotYPercent": 95,
+      "sourceMasterId": "terrain-master-detail-r8",
+      "species": "silver-aspen",
+      "sourceTargetRect": [
+        2021,
+        1566,
+        58,
+        84
+      ]
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          487.5,
+          652.5
+        ],
+        "span": [
+          25.5,
+          37.5
+        ]
+      },
+      "atlasResourceId": "pooled-foliage-atlas",
+      "bendDegrees": 0.66,
+      "canopyAtlasRect": [
+        717,
+        1087,
+        66,
+        96
+      ],
+      "checkpoint": "b2-supplemental-foliage-08",
+      "composition": "additive",
+      "durationSeconds": 8.3,
+      "gridCell": "B2",
+      "id": "supplemental-foliage-08-instance",
+      "lagDegrees": 0.053,
+      "neutralizationAtlasRect": null,
+      "paintedNodeCount": 1,
+      "phaseSeconds": -0.1,
+      "pivotYPercent": 95,
+      "sourceMasterId": "terrain-master-detail-r8",
+      "species": "silver-aspen",
+      "sourceTargetRect": [
+        975,
+        1305,
+        51,
+        75
+      ]
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          1167.5,
+          548.5
+        ],
+        "span": [
+          25,
+          36.5
+        ]
+      },
+      "atlasResourceId": "pooled-foliage-atlas",
+      "bendDegrees": 0.5,
+      "canopyAtlasRect": [
+        784,
+        1087,
+        66,
+        96
+      ],
+      "checkpoint": "c2-supplemental-foliage-09",
+      "composition": "additive",
+      "durationSeconds": 8.6,
+      "gridCell": "C2",
+      "id": "supplemental-foliage-09-instance",
+      "lagDegrees": 0.061,
+      "neutralizationAtlasRect": null,
+      "paintedNodeCount": 1,
+      "phaseSeconds": -1.5,
+      "pivotYPercent": 95,
+      "sourceMasterId": "terrain-master-detail-r8",
+      "species": "silver-aspen",
+      "sourceTargetRect": [
+        2335,
+        1097,
+        50,
+        73
+      ]
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          678.5,
+          549.5
+        ],
+        "span": [
+          23,
+          15.5
+        ]
+      },
+      "atlasResourceId": "pooled-foliage-atlas",
+      "bendDegrees": 0.31,
+      "canopyAtlasRect": [
+        720,
+        1894,
+        56,
+        38
+      ],
+      "checkpoint": "b2-supplemental-foliage-10",
+      "composition": "additive",
+      "durationSeconds": 8.1,
+      "gridCell": "B2",
+      "id": "supplemental-foliage-10-instance",
+      "lagDegrees": 0.025,
+      "neutralizationAtlasRect": null,
+      "paintedNodeCount": 1,
+      "phaseSeconds": -2.8,
+      "pivotYPercent": 90,
+      "sourceMasterId": "terrain-master-detail-r8",
+      "species": "alpine-shrub",
+      "sourceTargetRect": [
+        1357,
+        1099,
+        46,
+        31
+      ]
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          724.5,
+          595.5
+        ],
+        "span": [
+          21.5,
+          14.5
+        ]
+      },
+      "atlasResourceId": "pooled-foliage-atlas",
+      "bendDegrees": 0.35,
+      "canopyAtlasRect": [
+        777,
+        1894,
+        56,
+        38
+      ],
+      "checkpoint": "c2-supplemental-foliage-11",
+      "composition": "additive",
+      "durationSeconds": 6.8,
+      "gridCell": "C2",
+      "id": "supplemental-foliage-11-instance",
+      "lagDegrees": 0.033,
+      "neutralizationAtlasRect": null,
+      "paintedNodeCount": 1,
+      "phaseSeconds": -4.2,
+      "pivotYPercent": 90,
+      "sourceMasterId": "terrain-master-detail-r8",
+      "species": "alpine-shrub",
+      "sourceTargetRect": [
+        1449,
+        1191,
+        43,
+        29
+      ]
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          1003,
+          538.5
+        ],
+        "span": [
+          24.5,
+          16.5
+        ]
+      },
+      "atlasResourceId": "pooled-foliage-atlas",
+      "bendDegrees": 0.38,
+      "canopyAtlasRect": [
+        834,
+        1894,
+        56,
+        38
+      ],
+      "checkpoint": "c2-supplemental-foliage-12",
+      "composition": "additive",
+      "durationSeconds": 7.1,
+      "gridCell": "C2",
+      "id": "supplemental-foliage-12-instance",
+      "lagDegrees": 0.041,
+      "neutralizationAtlasRect": null,
+      "paintedNodeCount": 1,
+      "phaseSeconds": -5.6,
+      "pivotYPercent": 90,
+      "sourceMasterId": "terrain-master-detail-r8",
+      "species": "alpine-shrub",
+      "sourceTargetRect": [
+        2006,
+        1077,
+        49,
+        33
+      ]
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          350,
+          701
+        ],
+        "span": [
+          20.5,
+          14
+        ]
+      },
+      "atlasResourceId": "pooled-foliage-atlas",
+      "bendDegrees": 0.28,
+      "canopyAtlasRect": [
+        720,
+        1894,
+        56,
+        38
+      ],
+      "checkpoint": "b2-supplemental-foliage-13",
+      "composition": "additive",
+      "durationSeconds": 7.5,
+      "gridCell": "B2",
+      "id": "supplemental-foliage-13-instance",
+      "lagDegrees": 0.025,
+      "neutralizationAtlasRect": null,
+      "paintedNodeCount": 1,
+      "phaseSeconds": -6.9,
+      "pivotYPercent": 90,
+      "sourceMasterId": "terrain-master-detail-r8",
+      "species": "alpine-shrub",
+      "sourceTargetRect": [
+        700,
+        1402,
+        41,
+        28
+      ]
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          874,
+          850
+        ],
+        "span": [
+          22,
+          15
+        ]
+      },
+      "atlasResourceId": "pooled-foliage-atlas",
+      "bendDegrees": 0.31,
+      "canopyAtlasRect": [
+        777,
+        1894,
+        56,
+        38
+      ],
+      "checkpoint": "c2-supplemental-foliage-14",
+      "composition": "additive",
+      "durationSeconds": 7.8,
+      "gridCell": "C2",
+      "id": "supplemental-foliage-14-instance",
+      "lagDegrees": 0.033,
+      "neutralizationAtlasRect": null,
+      "paintedNodeCount": 1,
+      "phaseSeconds": -8.3,
+      "pivotYPercent": 90,
+      "sourceMasterId": "terrain-master-detail-r8",
+      "species": "alpine-shrub",
+      "sourceTargetRect": [
+        1748,
+        1700,
+        44,
+        30
+      ]
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          1199,
+          745
+        ],
+        "span": [
+          22.5,
+          15
+        ]
+      },
+      "atlasResourceId": "pooled-foliage-atlas",
+      "bendDegrees": 0.35,
+      "canopyAtlasRect": [
+        834,
+        1894,
+        56,
+        38
+      ],
+      "checkpoint": "c2-supplemental-foliage-15",
+      "composition": "additive",
+      "durationSeconds": 8.1,
+      "gridCell": "C2",
+      "id": "supplemental-foliage-15-instance",
+      "lagDegrees": 0.041,
+      "neutralizationAtlasRect": null,
+      "paintedNodeCount": 1,
+      "phaseSeconds": -0.2,
+      "pivotYPercent": 90,
+      "sourceMasterId": "terrain-master-detail-r8",
+      "species": "alpine-shrub",
+      "sourceTargetRect": [
+        2398,
+        1490,
+        45,
+        30
+      ]
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          736,
+          444
+        ],
+        "span": [
+          18.5,
+          11
+        ]
+      },
+      "atlasResourceId": "pooled-foliage-atlas",
+      "bendDegrees": 0.22,
+      "canopyAtlasRect": [
+        891,
+        1894,
+        48,
+        28
+      ],
+      "checkpoint": "c1-supplemental-foliage-16",
+      "composition": "additive",
+      "durationSeconds": 5.8,
+      "gridCell": "C1",
+      "id": "supplemental-foliage-16-instance",
+      "lagDegrees": 0.012,
+      "neutralizationAtlasRect": null,
+      "paintedNodeCount": 1,
+      "phaseSeconds": -1.6,
+      "pivotYPercent": 88,
+      "sourceMasterId": "terrain-master-detail-r8",
+      "species": "wildflower-heather",
+      "sourceTargetRect": [
+        1472,
+        888,
+        37,
+        22
+      ]
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          1041.5,
+          510
+        ],
+        "span": [
+          17.5,
+          10
+        ]
+      },
+      "atlasResourceId": "pooled-foliage-atlas",
+      "bendDegrees": 0.16,
+      "canopyAtlasRect": [
+        940,
+        1894,
+        48,
+        28
+      ],
+      "checkpoint": "c1-supplemental-foliage-17",
+      "composition": "additive",
+      "durationSeconds": 6.1,
+      "gridCell": "C1",
+      "id": "supplemental-foliage-17-instance",
+      "lagDegrees": 0.02,
+      "neutralizationAtlasRect": null,
+      "paintedNodeCount": 1,
+      "phaseSeconds": -2.9,
+      "pivotYPercent": 88,
+      "sourceMasterId": "terrain-master-detail-r8",
+      "species": "wildflower-heather",
+      "sourceTargetRect": [
+        2083,
+        1020,
+        35,
+        20
+      ]
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          411,
+          724.5
+        ],
+        "span": [
+          18,
+          10.5
+        ]
+      },
+      "atlasResourceId": "pooled-foliage-atlas",
+      "bendDegrees": 0.18,
+      "canopyAtlasRect": [
+        1,
+        1951,
+        48,
+        28
+      ],
+      "checkpoint": "b2-supplemental-foliage-18",
+      "composition": "additive",
+      "durationSeconds": 6.5,
+      "gridCell": "B2",
+      "id": "supplemental-foliage-18-instance",
+      "lagDegrees": 0.028,
+      "neutralizationAtlasRect": null,
+      "paintedNodeCount": 1,
+      "phaseSeconds": -4.3,
+      "pivotYPercent": 88,
+      "sourceMasterId": "terrain-master-detail-r8",
+      "species": "wildflower-heather",
+      "sourceTargetRect": [
+        822,
+        1449,
+        36,
+        21
+      ]
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          697,
+          580.5
+        ],
+        "span": [
+          16.5,
+          9.5
+        ]
+      },
+      "atlasResourceId": "pooled-foliage-atlas",
+      "bendDegrees": 0.2,
+      "canopyAtlasRect": [
+        891,
+        1894,
+        48,
+        28
+      ],
+      "checkpoint": "b2-supplemental-foliage-19",
+      "composition": "additive",
+      "durationSeconds": 6.8,
+      "gridCell": "B2",
+      "id": "supplemental-foliage-19-instance",
+      "lagDegrees": 0.012,
+      "neutralizationAtlasRect": null,
+      "paintedNodeCount": 1,
+      "phaseSeconds": -5.7,
+      "pivotYPercent": 88,
+      "sourceMasterId": "terrain-master-detail-r8",
+      "species": "wildflower-heather",
+      "sourceTargetRect": [
+        1394,
+        1161,
+        33,
+        19
+      ]
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          1111.5,
+          690
+        ],
+        "span": [
+          17,
+          10
+        ]
+      },
+      "atlasResourceId": "pooled-foliage-atlas",
+      "bendDegrees": 0.22,
+      "canopyAtlasRect": [
+        940,
+        1894,
+        48,
+        28
+      ],
+      "checkpoint": "c2-supplemental-foliage-20",
+      "composition": "additive",
+      "durationSeconds": 7.1,
+      "gridCell": "C2",
+      "id": "supplemental-foliage-20-instance",
+      "lagDegrees": 0.02,
+      "neutralizationAtlasRect": null,
+      "paintedNodeCount": 1,
+      "phaseSeconds": -7,
+      "pivotYPercent": 88,
+      "sourceMasterId": "terrain-master-detail-r8",
+      "species": "wildflower-heather",
+      "sourceTargetRect": [
+        2223,
+        1380,
+        34,
+        20
+      ]
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          311.5,
+          885
+        ],
+        "span": [
+          17.5,
+          10
+        ]
+      },
+      "atlasResourceId": "pooled-foliage-atlas",
+      "bendDegrees": 0.16,
+      "canopyAtlasRect": [
+        1,
+        1951,
+        48,
+        28
+      ],
+      "checkpoint": "b2-supplemental-foliage-21",
+      "composition": "additive",
+      "durationSeconds": 5.8,
+      "gridCell": "B2",
+      "id": "supplemental-foliage-21-instance",
+      "lagDegrees": 0.028,
+      "neutralizationAtlasRect": null,
+      "paintedNodeCount": 1,
+      "phaseSeconds": -8.4,
+      "pivotYPercent": 88,
+      "sourceMasterId": "terrain-master-detail-r8",
+      "species": "wildflower-heather",
+      "sourceTargetRect": [
+        623,
+        1770,
+        35,
+        20
+      ]
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          892,
+          916
+        ],
+        "span": [
+          16,
+          9
+        ]
+      },
+      "atlasResourceId": "pooled-foliage-atlas",
+      "bendDegrees": 0.18,
+      "canopyAtlasRect": [
+        891,
+        1894,
+        48,
+        28
+      ],
+      "checkpoint": "c2-supplemental-foliage-22",
+      "composition": "additive",
+      "durationSeconds": 6.1,
+      "gridCell": "C2",
+      "id": "supplemental-foliage-22-instance",
+      "lagDegrees": 0.012,
+      "neutralizationAtlasRect": null,
+      "paintedNodeCount": 1,
+      "phaseSeconds": -0.3,
+      "pivotYPercent": 88,
+      "sourceMasterId": "terrain-master-detail-r8",
+      "species": "wildflower-heather",
+      "sourceTargetRect": [
+        1784,
+        1832,
+        32,
+        18
+      ]
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          1252,
+          825.5
+        ],
+        "span": [
+          16.5,
+          9.5
+        ]
+      },
+      "atlasResourceId": "pooled-foliage-atlas",
+      "bendDegrees": 0.2,
+      "canopyAtlasRect": [
+        940,
+        1894,
+        48,
+        28
+      ],
+      "checkpoint": "c2-supplemental-foliage-23",
+      "composition": "additive",
+      "durationSeconds": 6.5,
+      "gridCell": "C2",
+      "id": "supplemental-foliage-23-instance",
+      "lagDegrees": 0.02,
+      "neutralizationAtlasRect": null,
+      "paintedNodeCount": 1,
+      "phaseSeconds": -1.6,
+      "pivotYPercent": 88,
+      "sourceMasterId": "terrain-master-detail-r8",
+      "species": "wildflower-heather",
+      "sourceTargetRect": [
+        2504,
+        1651,
+        33,
+        19
+      ]
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          532.5,
+          286
+        ],
+        "span": [
+          15.5,
+          9
+        ]
+      },
+      "atlasResourceId": "pooled-foliage-atlas",
+      "bendDegrees": 0.22,
+      "canopyAtlasRect": [
+        1,
+        1951,
+        48,
+        28
+      ],
+      "checkpoint": "b1-supplemental-foliage-24",
+      "composition": "additive",
+      "durationSeconds": 6.8,
+      "gridCell": "B1",
+      "id": "supplemental-foliage-24-instance",
+      "lagDegrees": 0.028,
+      "neutralizationAtlasRect": null,
+      "paintedNodeCount": 1,
+      "phaseSeconds": -3,
+      "pivotYPercent": 88,
+      "sourceMasterId": "terrain-master-detail-r8",
+      "species": "wildflower-heather",
+      "sourceTargetRect": [
+        1065,
+        572,
+        31,
+        18
       ]
     }
   ]

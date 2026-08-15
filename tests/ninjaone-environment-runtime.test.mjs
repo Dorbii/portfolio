@@ -460,7 +460,7 @@ test("native terrain uses only 1448x1086 originals and baked masks consume no ru
   }
 });
 
-test("close detail has one r5 foliage pool and no legacy shared-foliage mapping", async () => {
+test("close detail has one pooled foliage renderer and no legacy shared-foliage mapping", async () => {
   const [proofSource, nativeDetailSource, worldSceneSource] = await Promise.all([
     readFile(path.join(
       root,

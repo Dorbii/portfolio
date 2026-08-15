@@ -715,7 +715,7 @@ async function captureFoliageIsolationProof({
     readCamera(connection, sessionId),
     evaluate(connection, sessionId, `(() => {
        const native = document.querySelector('.ninjaone-environment-native-detail');
-       const foliage = document.querySelector('.ninjaone-environment-foliage-r5');
+       const foliage = document.querySelector('.ninjaone-environment-foliage-r6');
        const foliageCanvas = foliage?.querySelector(
          '.ninjaone-environment-native-detail__foliage-canvas'
        );
@@ -726,10 +726,22 @@ async function captureFoliageIsolationProof({
       const csv = (value) => value ? value.split(',').filter(Boolean) : [];
       const number = (value) => Number.isFinite(Number(value)) ? Number(value) : -1;
        const foliageNodes = [...foliage.querySelectorAll('image[data-shared-resource]')];
+       const foliageGroups = [...foliage.querySelectorAll('[data-environment-foliage-group]')];
+       const foliageSpeciesCounts = Object.fromEntries([...new Set(
+         foliageGroups.map((group) => group.dataset.environmentFoliageSpecies)
+       )].filter(Boolean).sort().map((species) => [
+         species,
+         foliageGroups.filter(
+           (group) => group.dataset.environmentFoliageSpecies === species
+         ).length,
+       ]));
        return {
         cohortEpoch: number(foliage.dataset.environmentFoliageCohortEpoch),
         cohortKey: foliage.dataset.environmentFoliageCohortKey,
-        foliageInstanceCount: number(foliage.dataset.environmentFoliageInstanceCount),
+         foliageInstanceCount: number(foliage.dataset.environmentFoliageInstanceCount),
+         foliageAdditiveInstanceCount: foliageGroups.filter(
+           (group) => group.dataset.environmentFoliageComposition === 'additive'
+         ).length,
         foliageAnimationRunning:
           foliageCanvas.dataset.environmentFoliageAnimationRunning === 'true',
         foliageCanvasHeight: foliageCanvas.height,
@@ -747,9 +759,10 @@ async function captureFoliageIsolationProof({
         foliageSelectedNodeCount: number(
           foliage.dataset.environmentFoliageSelectedImageNodeCount
         ),
-        foliageSelectedResourceIds: csv(
-          foliage.dataset.environmentFoliageSelectedResourceIds
-        ).sort(),
+         foliageSelectedResourceIds: csv(
+           foliage.dataset.environmentFoliageSelectedResourceIds
+         ).sort(),
+         foliageSpeciesCounts,
         foliageRenderer: foliageCanvas.dataset.environmentFoliageRenderer,
         foliageState: foliage.dataset.environmentFoliageState,
         foliageVisible: foliage.dataset.environmentFoliageVisible === 'true',

@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { CameraView } from "../../../../shared/camera";
 import type { DetailState } from "../../../../shared/lod";
 import {
-  NINJAONE_ENVIRONMENT_FOLIAGE_NODES_PER_GROUP,
   environmentFoliageCameraArtboardView,
   selectNinjaOneEnvironmentFoliageInstances,
   type NinjaOneEnvironmentFoliageAtlasRect,
@@ -83,19 +82,21 @@ function FoliageGroup({
   return (
     <g
       data-environment-foliage-checkpoint={instance.checkpoint}
+      data-environment-foliage-composition={instance.composition}
       data-environment-foliage-grid-cell={instance.gridCell}
       data-environment-foliage-group={instance.id}
-      data-environment-foliage-group-node-count={
-        NINJAONE_ENVIRONMENT_FOLIAGE_NODES_PER_GROUP
-      }
+      data-environment-foliage-group-node-count={instance.paintedNodeCount}
+      data-environment-foliage-species={instance.species}
     >
-      <FoliageAtlasFrame
-        atlasImageId={atlasImageId}
-        frame={instance.neutralizationAtlasRect}
-        instance={instance}
-        kind="neutralization-underlay"
-        paint
-      />
+      {instance.neutralizationAtlasRect ? (
+        <FoliageAtlasFrame
+          atlasImageId={atlasImageId}
+          frame={instance.neutralizationAtlasRect}
+          instance={instance}
+          kind="neutralization-underlay"
+          paint
+        />
+      ) : null}
       <FoliageAtlasFrame
         atlasImageId={atlasImageId}
         frame={instance.canopyAtlasRect}
@@ -169,11 +170,11 @@ export function NinjaOneEnvironmentFoliage({
     && residency.loadStatus === "ready";
   const selectedImageNodeCount = residency.selectedResources.length;
   const atlas = residency.selectedResources[0];
-  const atlasImageId = "ninjaone-native-conifer-pool-atlas-r5-image";
+  const atlasImageId = "ninjaone-pooled-foliage-atlas-r6-image";
 
   return (
     <g
-      className="ninjaone-environment-foliage-r5"
+      className="ninjaone-environment-foliage-r6"
       ref={groupRef}
       data-environment-foliage-cohort-epoch={residency.cohortEpoch}
       data-environment-foliage-cohort-key={residency.cohortKey}

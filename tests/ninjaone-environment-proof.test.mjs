@@ -296,7 +296,7 @@ test("native terrain delegates foliage to a separate production manifest", async
     readJson("public/career-world/capitals/ninjaone/environment/manifests/foliage-native-r4.json"),
   ]);
   assert.deepEqual(Object.keys(native.layers), ["dynamicShadows"]);
-  assert.equal(foliage.id, "career-world/capitals/ninjaone/foliage-native@r5");
+  assert.equal(foliage.id, "career-world/capitals/ninjaone/foliage@r6");
   assert.ok(foliage.resources.length > 0);
   assert.equal(foliage.instances.length, foliage.budgets.poolGroups);
   assert.ok(
