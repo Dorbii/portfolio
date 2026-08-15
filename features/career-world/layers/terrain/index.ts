@@ -6,6 +6,7 @@ export {
 } from "./authority";
 export { NinjaOneEnvironmentProof } from "./components/NinjaOneEnvironmentProof";
 export {
+  NINJAONE_ENVIRONMENT_ARTBOARD,
   NINJAONE_ENVIRONMENT_CAMERA,
   NINJAONE_ENVIRONMENT_PROOF_ID,
   NINJAONE_ENVIRONMENT_WORLD_ORIGIN,

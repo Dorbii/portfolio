@@ -92,6 +92,14 @@ function cropRgba(source, sourceWidth, rect) {
   return output;
 }
 
+function opaquePixelCount(rgba) {
+  let opaquePixels = 0;
+  for (let offset = 3; offset < rgba.length; offset += 4) {
+    if (rgba[offset] > 0) opaquePixels += 1;
+  }
+  return opaquePixels;
+}
+
 function exactAtRestCrop(atlas, atlasWidth, source, sourceWidth, instance) {
   const [sourceX, sourceY, width, height] = instance.sourceTargetRect;
   const sourceCrop = cropRgba(source, sourceWidth, [sourceX, sourceY, width, height]);
@@ -105,9 +113,10 @@ function exactAtRestCrop(atlas, atlasWidth, source, sourceWidth, instance) {
   );
 }
 
-test("r6 foliage preserves r8 conifers and adds one bounded pooled accent layer", async () => {
+test("r6 foliage is a native-conifer replacement layer with no supplemental sources", async () => {
   assert.equal(manifest.schemaVersion, 5);
   assert.equal(manifest.id, "career-world/capitals/ninjaone/foliage@r6");
+  assert.equal(manifest.status, "active-r8-native-foliage-paged");
   assert.equal(manifest.sourceMaster.authority, "active-r8-geology-master");
   assert.deepEqual(manifest.sourceMaster.dimensions, [5760, 4320]);
   assert.equal(manifest.quality.visibleRgbAuthority, "terrain-master-detail-r8");
@@ -115,33 +124,33 @@ test("r6 foliage preserves r8 conifers and adds one bounded pooled accent layer"
   const registered = manifest.instances.filter(({ composition }) => composition === "registered-replacement");
   const additive = manifest.instances.filter(({ composition }) => composition === "additive");
   assert.equal(manifest.quality.registeredConifers, registered.length);
-  assert.equal(manifest.quality.supplementalInstances, additive.length);
-  assert.equal(registered.length + additive.length, manifest.instances.length);
+  assert.equal(manifest.quality.supplementalInstances, 0);
+  assert.equal(manifest.quality.uniqueSupplementalFrames, 0);
+  assert.equal(additive.length, 0);
+  assert.equal(registered.length, manifest.instances.length);
   assert.ok(manifest.quality.registeredConifers >= manifest.quality.minimumRegisteredConifers);
   assert.ok(manifest.quality.registeredConifers >= 120);
   assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.length, manifest.instances.length);
-  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES.length, 1);
+  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES.length, 9);
   assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS, 32);
   assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_NODES_PER_GROUP, 2);
   assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_MOUNTED_NODES, 64);
-  assert.equal(manifest.budgets.uniqueTextureResources, 1);
-  assert.equal(
-    manifest.budgets.atlasFrameCount,
-    registered.length * 2 + manifest.quality.uniqueSupplementalFrames,
-  );
+  assert.equal(manifest.registration.runtimeAtlasPixelsPerArtboardUnit, 4);
+  assert.deepEqual(manifest.registration.runtimeAtlasPageGrid, [3, 3]);
+  assert.equal(manifest.budgets.uniqueTextureResources, 9);
+  assert.equal(manifest.budgets.atlasFrameCount, registered.length * 2);
   assert.equal(manifest.budgets.maximumSupplementalNodes, 64);
   assert.equal(manifest.budgets.foliageDecodedBytes, NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES);
   assert.equal(manifest.budgets.combinedDecodedBytes, NINJAONE_ENVIRONMENT_FOLIAGE_COMBINED_DECODED_BYTES);
-  assert.ok(NINJAONE_ENVIRONMENT_FOLIAGE_COMBINED_DECODED_BYTES <= 32 * 1024 * 1024);
+  assert.ok(NINJAONE_ENVIRONMENT_FOLIAGE_COMBINED_DECODED_BYTES <= 64 * 1024 * 1024);
 
   const mountedPaths = new Set(manifest.resources.map((resource) => resource.path));
   assert.equal(manifest.segmentationSources.length, 4);
   assert.equal(manifest.neutralizationSources.length, 4);
-  assert.equal(manifest.supplementalSources.length, 11);
+  assert.equal(manifest.supplementalSources.length, 0);
   for (const source of [
     ...manifest.segmentationSources,
     ...manifest.neutralizationSources,
-    ...manifest.supplementalSources,
   ]) {
     assert.equal(mountedPaths.has(source.path), false, `${source.id} is build input, not runtime texture`);
     const bytes = await readFile(repoFile(source.path));
@@ -149,43 +158,66 @@ test("r6 foliage preserves r8 conifers and adds one bounded pooled accent layer"
   }
 });
 
-test("the shared atlas is valid, tightly packed, and every replacement tree is exact at rest", async () => {
-  const [resource] = manifest.resources;
-  const atlasPath = repoFile(resource.path);
-  const atlasBytes = await readFile(atlasPath);
-  const atlasMetadata = await sharp(atlasBytes).metadata();
-  assert.equal(sha256(atlasBytes), resource.sha256);
-  assert.deepEqual([atlasMetadata.width, atlasMetadata.height], resource.dimensions);
-  assert.equal(resource.decodedBytes, resource.dimensions[0] * resource.dimensions[1] * 4);
-  assert.equal(resource.frameCount, manifest.budgets.atlasFrameCount);
-
-  const frames = [...new Map(manifest.instances.flatMap((instance) => [
-    instance.canopyAtlasRect,
-    instance.neutralizationAtlasRect,
-  ]).filter(Boolean).map((frame) => [frame.join(","), frame])).values()];
-  for (const frame of frames) {
-    assert.ok(frame[0] + frame[2] <= resource.dimensions[0]);
-    assert.ok(frame[1] + frame[3] <= resource.dimensions[1]);
-  }
-  for (let left = 0; left < frames.length; left += 1) {
-    for (let right = left + 1; right < frames.length; right += 1) {
-      assert.equal(rectanglesOverlap(frames[left], frames[right]), false, `atlas frames ${left}/${right} overlap`);
+test("spatially paged atlases preserve full source resolution and every replacement tree is exact at rest", async () => {
+  const atlasByResourceId = new Map();
+  for (const resource of manifest.resources) {
+    const atlasPath = repoFile(resource.path);
+    const atlasBytes = await readFile(atlasPath);
+    const atlasMetadata = await sharp(atlasBytes).metadata();
+    assert.equal(sha256(atlasBytes), resource.sha256);
+    assert.deepEqual([atlasMetadata.width, atlasMetadata.height], resource.dimensions);
+    assert.equal(resource.decodedBytes, resource.dimensions[0] * resource.dimensions[1] * 4);
+    const resourceInstances = manifest.instances.filter(
+      ({ atlasResourceId }) => atlasResourceId === resource.id,
+    );
+    const frames = [...new Map(resourceInstances.flatMap((instance) => [
+      instance.canopyAtlasRect,
+      instance.neutralizationAtlasRect,
+    ]).filter(Boolean).map((frame) => [frame.join(","), frame])).values()];
+    assert.equal(frames.length, resource.frameCount);
+    for (const frame of frames) {
+      assert.ok(frame[0] + frame[2] <= resource.dimensions[0]);
+      assert.ok(frame[1] + frame[3] <= resource.dimensions[1]);
     }
+    for (let left = 0; left < frames.length; left += 1) {
+      for (let right = left + 1; right < frames.length; right += 1) {
+        assert.equal(rectanglesOverlap(frames[left], frames[right]), false, `${resource.id} frames ${left}/${right} overlap`);
+      }
+    }
+    atlasByResourceId.set(resource.id, {
+      data: await sharp(atlasPath).ensureAlpha().raw().toBuffer(),
+      width: resource.dimensions[0],
+    });
   }
+  assert.equal(
+    manifest.resources.reduce((total, resource) => total + resource.frameCount, 0),
+    manifest.budgets.atlasFrameCount,
+  );
 
-  const source = await sharp(repoFile(manifest.sourceMaster.path)).resize(2880, 2160, {
-    fit: "fill",
-    kernel: sharp.kernel.lanczos3,
-  }).ensureAlpha().raw().toBuffer();
-  const atlas = await sharp(atlasPath).ensureAlpha().raw().toBuffer();
+  const source = await sharp(repoFile(manifest.sourceMaster.path)).ensureAlpha().raw().toBuffer();
+  let canopyPixels = 0;
+  let neutralizationPixels = 0;
   for (const instance of manifest.instances.filter(
     ({ composition }) => composition === "registered-replacement",
   )) {
-    exactAtRestCrop(atlas, resource.dimensions[0], source, 2880, instance);
+    const atlas = atlasByResourceId.get(instance.atlasResourceId);
+    assert.ok(atlas, `${instance.id} references a missing atlas`);
+    exactAtRestCrop(atlas.data, atlas.width, source, 5760, instance);
+    canopyPixels += opaquePixelCount(cropRgba(
+      atlas.data,
+      atlas.width,
+      instance.canopyAtlasRect,
+    ));
+    neutralizationPixels += opaquePixelCount(cropRgba(
+      atlas.data,
+      atlas.width,
+      instance.neutralizationAtlasRect,
+    ));
   }
+  assert.ok(neutralizationPixels / canopyPixels < 0.45);
 });
 
-test("registered conifers and additive accents retain terrain coordinates and restrained motion", () => {
+test("registered conifers retain terrain coordinates and restrained motion", () => {
   assert.deepEqual(
     [...new Set(NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.map(({ gridCell }) => gridCell))].sort(),
     ["B1", "B2", "C1", "C2"],
@@ -194,8 +226,8 @@ test("registered conifers and additive accents retain terrain coordinates and re
   assert.ok(new Set(NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.map(({ phaseSeconds }) => phaseSeconds)).size >= 8);
   for (const instance of NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES) {
     const [x, y, width, height] = instance.sourceTargetRect;
-    assert.deepEqual(instance.artboardBounds.origin, [x / 2, y / 2]);
-    assert.deepEqual(instance.artboardBounds.span, [width / 2, height / 2]);
+    assert.deepEqual(instance.artboardBounds.origin, [x / 4, y / 4]);
+    assert.deepEqual(instance.artboardBounds.span, [width / 4, height / 4]);
     assert.strictEqual(instance.canopyResource, instance.neutralizationResource);
     assert.strictEqual(instance.canopyResource, instance.atlasResource);
     assert.deepEqual(instance.resources, [instance.atlasResource]);
@@ -203,29 +235,22 @@ test("registered conifers and additive accents retain terrain coordinates and re
     assert.ok(instance.bendDegrees >= 0.15 && instance.bendDegrees <= 1.25);
     assert.ok(instance.durationSeconds >= 5 && instance.durationSeconds <= 12);
     assert.ok(instance.pivotYPercent >= 88 && instance.pivotYPercent <= 98);
-    if (instance.composition === "registered-replacement") {
-      assert.equal(instance.species, "native-conifer");
-      assert.ok(instance.neutralizationAtlasRect);
-      assert.equal(instance.paintedNodeCount, 2);
-    } else {
-      assert.notEqual(instance.species, "native-conifer");
-      assert.equal(instance.neutralizationAtlasRect, null);
-      assert.equal(instance.paintedNodeCount, 1);
-    }
+    assert.equal(instance.composition, "registered-replacement");
+    assert.equal(instance.species, "native-conifer");
+    assert.ok(instance.neutralizationAtlasRect);
+    assert.equal(instance.paintedNodeCount, 2);
   }
 });
 
-test("supplemental foliage reuses a small family pool without replacing existing art", () => {
-  const additive = NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.filter(
-    ({ composition }) => composition === "additive",
-  );
-  assert.equal(additive.length, 24);
-  assert.deepEqual(
-    [...new Set(additive.map(({ species }) => species))].sort(),
-    ["alpine-shrub", "russet-fantasy-tree", "silver-aspen", "wildflower-heather"],
-  );
-  assert.ok(new Set(additive.map(({ canopyAtlasRect }) => canopyAtlasRect.join(","))).size < additive.length);
-  assert.ok(additive.every(({ neutralizationAtlasRect }) => neutralizationAtlasRect === null));
+test("native foliage ownership rejects experimental additive families", () => {
+  assert.equal(manifest.supplementalSources.length, 0);
+  assert.equal(manifest.quality.supplementalInstances, 0);
+  assert.ok(NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.every((instance) => (
+    instance.composition === "registered-replacement"
+      && instance.species === "native-conifer"
+      && instance.neutralizationAtlasRect !== null
+      && instance.paintedNodeCount === 2
+  )));
 });
 
 test("the reported lower-ridge camera mounts native trees and gates motion to the actual viewport", () => {
@@ -241,7 +266,7 @@ test("the reported lower-ridge camera mounts native trees and gates motion to th
   assert.ok(moving.length > 0, "at least one registered canopy must intersect the reported camera");
   assert.ok(moving.length <= selected.length);
   assert.ok(selected.length <= NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS);
-  assert.equal(environmentFoliageResourceCohort(NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES).split("\n").length, 1);
+  assert.equal(environmentFoliageResourceCohort(NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES).split("\n").length, 9);
 
   const artboardView = environmentFoliageCameraArtboardView(camera);
   assert.ok(artboardView.span[0] > 0 && artboardView.span[1] > 0);
@@ -272,17 +297,18 @@ test("foliage LoD uses hysteresis and cannot mount outside close detail", () => 
   ), []);
 });
 
-test("the renderer crops one shared atlas and animates the buffered cohort with rooted deformation", async () => {
+test("one renderer batches spatial atlas pages and animates the buffered cohort with rooted deformation", async () => {
   const [component, canvas, webgl, css] = await Promise.all([
     readFile(COMPONENT_PATH, "utf8"),
     readFile(CANVAS_PATH, "utf8"),
     readFile(WEBGL_PATH, "utf8"),
     readFile(CSS_PATH, "utf8"),
   ]);
-  assert.match(component, /data-shared-resource=\{atlas\.id\}/);
+  assert.match(component, /data-shared-resource=\{atlasResource\.id\}/);
   assert.match(component, /<use href=\{`#\$\{atlasImageId\}`\} \/>/);
   assert.match(component, /viewBox=\{`\$\{frameX\} \$\{frameY\} \$\{frameWidth\} \$\{frameHeight\}`\}/);
   assert.match(component, /instances=\{instances\}/);
+  assert.match(component, /atlases=\{atlases\}/);
   assert.match(component, /matchMedia\("\(prefers-reduced-motion: reduce\)"\)/);
   assert.match(component, /ninjaone-environment-foliage-r6/);
   assert.match(component, /instance\.neutralizationAtlasRect \?/);
@@ -292,19 +318,40 @@ test("the renderer crops one shared atlas and animates the buffered cohort with 
   assert.match(canvas, /document\.visibilityState === "visible"/);
   assert.match(canvas, /window\.requestAnimationFrame\(draw\)/);
   assert.match(canvas, /window\.cancelAnimationFrame\(frame\)/);
+  assert.match(canvas, /loadNinjaOneEnvironmentFoliageAtlases/);
+  assert.match(canvas, /data-environment-foliage-canvas-resource-count=\{atlases\.length\}/);
   assert.match(canvas, /data-environment-foliage-renderer=\{ready \? "webgl2-ready" : "static-fallback"\}/);
-  assert.match(webgl, /float rootLock = smoothstep\(0\.1, 0\.34, height\)/);
-  assert.match(webgl, /float mainWeight = rootLock \* rootLock/);
-  assert.match(webgl, /float detailWave = sin/);
+  assert.equal((canvas.match(/renderer\.setCamera\(/g) ?? []).length, 3);
+  assert.equal((canvas.match(/renderer\.setScene\(/g) ?? []).length, 3);
+  assert.doesNotMatch(canvas, /renderer\.setScene\([^)]*camera/);
+  assert.match(webgl, /uniform vec2 u_cameraOrigin/);
+  assert.match(webgl, /uniform vec2 u_cameraSpan/);
+  assert.match(webgl, /setCamera\(camera: CameraView\)/);
+  assert.match(webgl, /if \(!sceneChanged\) return/);
+  assert.match(webgl, /const rebuildIndices = instances\.length !== this\.#indexInstanceCount/);
+  assert.match(webgl, /batch\.indexCount \+= INDICES_PER_INSTANCE/);
+  assert.match(webgl, /vertices\.push\(\s*worldX,\s*worldY,/);
+  assert.match(webgl, /float mainAmplitude = a_mainAmplitude \/ u_cameraSpan\.x \* 2\.0/);
+  assert.match(webgl, /const mainAmplitude = spanX \* \(0\.05 \+ instance\.bendDegrees \* 0\.012\)/);
+  assert.doesNotMatch(webgl, /const clip[XY]/);
+  assert.match(webgl, /float rootLock = smoothstep\(0\.18, 0\.52, height\)/);
+  assert.match(webgl, /float trunkFlex = rootLock \* rootLock \* crown \* crown \* 0\.12/);
+  assert.match(webgl, /float branchPulse = 0\.5 \+ 0\.5 \* sin/);
+  assert.doesNotMatch(webgl, /in float a_detailAmplitude/);
+  assert.doesNotMatch(webgl, /position\.y \+= a_detailAmplitude/);
   assert.match(webgl, /u_shadowPass/);
   assert.match(webgl, /gl\.TEXTURE_MIN_FILTER, gl\.LINEAR/);
+  assert.match(webgl, /readonly #textures = new Map<string, WebGLTexture>/);
+  assert.match(webgl, /for \(const batch of this\.#drawBatches\)/);
+  assert.match(webgl, /const foliageAtlasLoadCache = new Map/);
+  assert.match(webgl, /if \(existing\) continue/);
   assert.doesNotMatch(webgl, /generateMipmap/);
   assert.match(css, /__foliage-canvas/);
   assert.doesNotMatch(css, /__canopy-segment/);
 });
 
 test("the foliage build is deterministic", async () => {
-  const tracked = [MANIFEST_PATH, repoFile(manifest.resources[0].path)];
+  const tracked = [MANIFEST_PATH, ...manifest.resources.map(({ path: resourcePath }) => repoFile(resourcePath))];
   const before = await Promise.all(tracked.map(async (file) => sha256(await readFile(file))));
   await execFileAsync(process.execPath, [BUILDER_PATH], { cwd: ROOT });
   const after = await Promise.all(tracked.map(async (file) => sha256(await readFile(file))));

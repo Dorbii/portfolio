@@ -227,7 +227,8 @@ test("inland habitat separates submerged bed detail from bank contact detail", a
   assert.match(renderer, /isBankContactAsset/);
   assert.match(renderer, /DETAIL_TIER_DEPTH/);
   assert.match(renderer, /visiblePropCount/);
-  assert.match(renderer, /brightness\(0\) saturate\(0\) blur/);
+  assert.match(renderer, /brightness\(0\) saturate\(0\)/);
+  assert.doesNotMatch(renderer, /blur\(/);
   assert.doesNotMatch(renderer, /context\.ellipse/);
 
   assert.deepEqual(

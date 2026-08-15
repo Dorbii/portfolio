@@ -62,7 +62,6 @@ function IndependentStation() {
         cx={station.anchor[0]}
         cy={station.anchor[1] + 2}
         fill="rgba(5, 9, 9, 0.28)"
-        filter="url(#ninjaone-capital-contact-soften)"
         rx={displayWidth * 0.4}
         ry={Math.max(7, displayWidth * 0.065)}
       />
@@ -133,15 +132,6 @@ export function NinjaOneCapitalMvp({
         role="img"
         viewBox={cameraViewBox(camera, [WORLD_PLANE.width, WORLD_PLANE.height])}
       >
-        <defs>
-          <filter height="180%" id="ninjaone-capital-shadow-soften" width="180%" x="-40%" y="-40%">
-            <feGaussianBlur stdDeviation="8" />
-          </filter>
-          <filter height="180%" id="ninjaone-capital-contact-soften" width="180%" x="-40%" y="-40%">
-            <feGaussianBlur stdDeviation="3" />
-          </filter>
-        </defs>
-
         {cityVisible ? (
           <g transform={`translate(${worldX} ${worldY}) scale(${scaleX} ${scaleY})`}>
             {detailedCityVisible ? (

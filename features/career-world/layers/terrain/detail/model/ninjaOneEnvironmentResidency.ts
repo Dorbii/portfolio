@@ -129,6 +129,28 @@ export const NINJAONE_ENVIRONMENT_NATIVE_RESIDENCY_LIMITS = Object.freeze({
   maximumTerrainTiles: NINJAONE_ENVIRONMENT_NATIVE_MAX_MOUNTED_TILES,
 } satisfies NinjaOneEnvironmentNativeResidencyLimits);
 
+/**
+ * Leaves room inside the 32 MiB native-detail ceiling for texture transitions
+ * and decoder/driver variance. The 2 MiB value is the last measured point
+ * before paged foliage coverage drops sharply or cameras lose all admission.
+ */
+export const NINJAONE_ENVIRONMENT_FOLIAGE_TRANSITION_HEADROOM_BYTES =
+  2 * 1024 * 1024;
+
+export function resolveNinjaOneEnvironmentFoliageDecodedBudget(
+  terrainDecodedBytes: number,
+): number {
+  if (!Number.isSafeInteger(terrainDecodedBytes) || terrainDecodedBytes < 0) {
+    throw new TypeError("Native terrain decoded bytes are invalid.");
+  }
+  return Math.max(
+    0,
+    NINJAONE_ENVIRONMENT_NATIVE_MAX_DECODED_BYTES
+      - terrainDecodedBytes
+      - NINJAONE_ENVIRONMENT_FOLIAGE_TRANSITION_HEADROOM_BYTES,
+  );
+}
+
 export function resolveNinjaOneEnvironmentOptionalGroupCapacity({
   maximumGroups,
   maximumSupplementalNodes,

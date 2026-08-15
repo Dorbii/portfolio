@@ -20,6 +20,7 @@ export interface NinjaOneEnvironmentFoliageProps {
   readonly camera: CameraView;
   readonly detailState: DetailState;
   readonly maxDetailEligible: boolean;
+  readonly maximumDecodedBytes: number;
   readonly maximumGroups: number;
   readonly onResidencyStateChange?: (
     state: NinjaOneEnvironmentFoliageResidencyState,
@@ -30,6 +31,10 @@ export interface NinjaOneEnvironmentFoliageProps {
 
 function resourceKey(resource: NinjaOneEnvironmentFoliageResource): string {
   return `${resource.id}\t${resource.path}#sha256=${resource.sha256}`;
+}
+
+function foliageAtlasImageId(resource: NinjaOneEnvironmentFoliageResource): string {
+  return `ninjaone-pooled-foliage-${resource.id.replaceAll(/[^a-z0-9_-]/gi, "-")}`;
 }
 
 function FoliageAtlasFrame({
@@ -71,14 +76,13 @@ function FoliageAtlasFrame({
 }
 
 function FoliageGroup({
-  atlasImageId,
   instance,
   showCanopyFallback,
 }: {
-  readonly atlasImageId: string;
   readonly instance: NinjaOneEnvironmentFoliageInstance;
   readonly showCanopyFallback: boolean;
 }) {
+  const atlasImageId = foliageAtlasImageId(instance.atlasResource);
   return (
     <g
       data-environment-foliage-checkpoint={instance.checkpoint}
@@ -125,6 +129,7 @@ export function NinjaOneEnvironmentFoliage({
   camera,
   detailState,
   maxDetailEligible,
+  maximumDecodedBytes,
   maximumGroups,
   onResidencyStateChange,
   residencyEpoch,
@@ -139,6 +144,7 @@ export function NinjaOneEnvironmentFoliage({
           camera,
           maxDetailEligible,
           maximumGroups,
+          maximumDecodedBytes,
         )
       : [],
     [
@@ -146,6 +152,7 @@ export function NinjaOneEnvironmentFoliage({
       camera,
       detailState.shouldLoadSiteAssets,
       maxDetailEligible,
+      maximumDecodedBytes,
       maximumGroups,
       showFoliage,
     ],
@@ -169,8 +176,7 @@ export function NinjaOneEnvironmentFoliage({
     && maxDetailEligible
     && residency.loadStatus === "ready";
   const selectedImageNodeCount = residency.selectedResources.length;
-  const atlas = residency.selectedResources[0];
-  const atlasImageId = "ninjaone-pooled-foliage-atlas-r6-image";
+  const atlases = residency.selectedResources;
 
   return (
     <g
@@ -181,6 +187,7 @@ export function NinjaOneEnvironmentFoliage({
       data-environment-foliage-hidden-painted-frames={residency.hiddenPaintedFrames}
       data-environment-foliage-instance-count={instances.length}
       data-environment-foliage-max-detail-eligible={maxDetailEligible}
+      data-environment-foliage-maximum-decoded-bytes={maximumDecodedBytes}
       data-environment-foliage-maximum-groups={maximumGroups}
       data-environment-foliage-mounted-decoded-bytes={
         residency.cohortMounted ? residency.selectedDecodedBytes : 0
@@ -198,35 +205,37 @@ export function NinjaOneEnvironmentFoliage({
       data-environment-foliage-visible={visible}
       opacity={visible ? 1 : 0}
     >
-      {residency.cohortMounted && atlas ? (
+      {residency.cohortMounted && atlases.length > 0 ? (
         <defs>
-          <image
-            data-shared-resource={atlas.id}
-            height={atlas.dimensions[1]}
-            href={atlas.path}
-            id={atlasImageId}
-            onError={() => residency.recordResourceError(
-              residency.cohortEpoch,
-              resourceKey(atlas),
-            )}
-            onLoad={() => residency.recordResourceLoad(
-              residency.cohortEpoch,
-              resourceKey(atlas),
-            )}
-            preserveAspectRatio="none"
-            width={atlas.dimensions[0]}
-          />
+          {atlases.map((atlasResource) => (
+            <image
+              data-shared-resource={atlasResource.id}
+              height={atlasResource.dimensions[1]}
+              href={atlasResource.path}
+              id={foliageAtlasImageId(atlasResource)}
+              key={atlasResource.id}
+              onError={() => residency.recordResourceError(
+                residency.cohortEpoch,
+                resourceKey(atlasResource),
+              )}
+              onLoad={() => residency.recordResourceLoad(
+                residency.cohortEpoch,
+                resourceKey(atlasResource),
+              )}
+              preserveAspectRatio="none"
+              width={atlasResource.dimensions[0]}
+            />
+          ))}
         </defs>
       ) : null}
       {residency.cohortMounted ? instances.map((instance) => (
         <FoliageGroup
-          atlasImageId={atlasImageId}
           instance={instance}
           key={`${residency.cohortEpoch}:${instance.id}`}
           showCanopyFallback={!canvasReady}
         />
       )) : null}
-      {residency.cohortMounted && atlas ? (
+      {residency.cohortMounted && atlases.length > 0 ? (
         <foreignObject
           className="ninjaone-environment-native-detail__foliage-viewport"
           height={artboardCamera.span[1]}
@@ -236,7 +245,7 @@ export function NinjaOneEnvironmentFoliage({
           y={artboardCamera.origin[1]}
         >
           <NinjaOneEnvironmentFoliageCanvas
-            atlas={atlas}
+            atlases={atlases}
             camera={artboardCamera}
             instances={instances}
             motionEnabled={visible && !reduceMotion}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { CameraView } from "../../../../shared/camera";
 import type { DetailState } from "../../../../shared/lod";
 import { NinjaOneEnvironmentFoliage } from "./NinjaOneEnvironmentFoliage";
@@ -6,6 +6,10 @@ import {
   NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS,
   resolveNinjaOneEnvironmentFoliageEligibility,
 } from "../model/ninjaOneEnvironmentFoliage";
+import {
+  planNinjaOneEnvironmentNativeResidency,
+  resolveNinjaOneEnvironmentFoliageDecodedBudget,
+} from "../model/ninjaOneEnvironmentResidency";
 
 interface NinjaOneEnvironmentNativeDetailProps {
   readonly active: boolean;
@@ -33,6 +37,14 @@ export function NinjaOneEnvironmentNativeDetail({
 }: NinjaOneEnvironmentNativeDetailProps) {
   const siteOrCloser = detailState.tier.id === "site"
     || detailState.tier.id === "close";
+  const maximumFoliageDecodedBytes = useMemo(() => {
+    const terrainPlan = planNinjaOneEnvironmentNativeResidency({
+      camera,
+      demand: true,
+      supplementalCandidates: [],
+    });
+    return resolveNinjaOneEnvironmentFoliageDecodedBudget(terrainPlan.decodedBytes);
+  }, [camera]);
 
   const publicationIdentity = cameraIdentity(camera);
   const [publication, setPublication] = useState(() => ({
@@ -74,6 +86,7 @@ export function NinjaOneEnvironmentNativeDetail({
         camera={camera}
         detailState={detailState}
         maxDetailEligible={foliageEligible}
+        maximumDecodedBytes={maximumFoliageDecodedBytes}
         maximumGroups={NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS}
         residencyEpoch={admissionEpoch}
         showFoliage={showFoliage}

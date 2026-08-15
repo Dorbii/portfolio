@@ -174,7 +174,6 @@
   font-family: Consolas, "Courier New", monospace;
   font-size: 0.66rem;
   pointer-events: auto;
-  backdrop-filter: blur(10px);
 }
 
 .career-world__layer-inspector > summary {
@@ -496,7 +495,6 @@
 
 .structure-sprite__grounding {
   fill: rgb(20 20 16 / 30%);
-  filter: blur(1.1px);
   mix-blend-mode: multiply;
 }
 
@@ -780,7 +778,6 @@ g[data-owner-id="project-kaizen-agent"].ambient-structure {
   border: 1px solid rgb(110 132 114 / 52%);
   background: var(--world-panel);
   box-shadow: 0 0.6rem 1.8rem rgb(0 0 0 / 28%);
-  backdrop-filter: blur(9px);
 }
 
 .career-world__status-panel strong {
@@ -833,7 +830,6 @@ g[data-owner-id="project-kaizen-agent"].ambient-structure {
   font-family: Consolas, "Courier New", monospace;
   font-size: clamp(0.56rem, 0.77vw, 0.7rem);
   letter-spacing: 0.025em;
-  backdrop-filter: blur(9px);
 }
 
 .career-world__controls button:hover,

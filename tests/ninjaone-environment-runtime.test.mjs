@@ -34,6 +34,7 @@ import {
   createNinjaOneEnvironmentFoliageNodeLoadCohort,
   createNinjaOneEnvironmentNativeDecodeCohort,
   createNinjaOneEnvironmentRequiredPresentationCohort,
+  NINJAONE_ENVIRONMENT_FOLIAGE_TRANSITION_HEADROOM_BYTES,
   ninjaOneEnvironmentRequiredPresentationKey,
   ninjaOneEnvironmentNativeTileKey,
   observeNinjaOneEnvironmentFoliageDomResidency,
@@ -42,6 +43,7 @@ import {
   recordNinjaOneEnvironmentNativeDecodeEvent,
   recordNinjaOneEnvironmentRequiredPresentationEvent,
   NINJAONE_ENVIRONMENT_NATIVE_RELEASE_SPAN,
+  resolveNinjaOneEnvironmentFoliageDecodedBudget,
   resolveNinjaOneEnvironmentNativeDemand,
   resolveNinjaOneEnvironmentFoliageResidency,
   resolveNinjaOneEnvironmentOptionalGroupCapacity,
@@ -55,6 +57,7 @@ import {
   resolveDetailState,
 } from "../features/career-world/shared/lod/policy.ts";
 import {
+  NINJAONE_MVP_FOLIAGE_CAMERA,
   NINJAONE_MVP_FIXED_CAMERAS,
   NINJAONE_MVP_LIMITS,
   auditCameraDecodedBudgets,
@@ -898,12 +901,23 @@ test("terrain and supplemental residency stay under the 4 6 32 MiB ceilings", ()
   );
   assert.ok(admitted.decodedBytes <= NINJAONE_ENVIRONMENT_NATIVE_MAX_DECODED_BYTES);
 
-  const activeFoliage = selectNinjaOneEnvironmentFoliageInstances({
-    origin: [0.2125, 0.0875],
-    span: [0.075, 0.075],
-  });
+  const foliageCamera = {
+    origin: NINJAONE_MVP_FOLIAGE_CAMERA.origin,
+    span: NINJAONE_MVP_FOLIAGE_CAMERA.span,
+  };
+  const foliageTerrainPlan = planFor(foliageCamera);
+  const activeFoliage = selectNinjaOneEnvironmentFoliageInstances(
+    foliageCamera,
+    true,
+    NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS,
+    resolveNinjaOneEnvironmentFoliageDecodedBudget(foliageTerrainPlan.decodedBytes),
+  );
   assert.ok(activeFoliage.length <= NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS);
-  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES.length, 1);
+  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES.length, 9);
+  assert.equal(
+    new Set(NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES.map(({ id }) => id)).size,
+    NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES.length,
+  );
   assert.equal(
     NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES,
     NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES.reduce(
@@ -911,11 +925,74 @@ test("terrain and supplemental residency stay under the 4 6 32 MiB ceilings", ()
       0,
     ),
   );
-  assert.ok(
-    planFor(FIXED_CAMERAS.C2).decodedBytes
-      + NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES
-      <= NINJAONE_ENVIRONMENT_NATIVE_MAX_DECODED_BYTES,
+  const activeFoliageResources = new Map(activeFoliage.flatMap(
+    ({ resources }) => resources.map((resource) => [resource.id, resource]),
+  ));
+  const activeFoliageDecodedBytes = [...activeFoliageResources.values()].reduce(
+    (total, resource) => total + resource.decodedBytes,
+    0,
   );
+  assert.ok(
+    foliageTerrainPlan.decodedBytes
+      + activeFoliageDecodedBytes
+      <= NINJAONE_ENVIRONMENT_NATIVE_MAX_DECODED_BYTES
+        - NINJAONE_ENVIRONMENT_FOLIAGE_TRANSITION_HEADROOM_BYTES,
+  );
+});
+
+test("paged foliage runtime selection preserves transition headroom at every camera", () => {
+  const spans = [0.04, 0.05, 0.055, 0.06, 0.061, 0.074, 0.075, 0.08, 0.0875];
+  let samples = 0;
+  let camerasWithCandidatesButNoAdmission = 0;
+  let minimumObservedHeadroomBytes = Number.POSITIVE_INFINITY;
+  for (const span of spans) {
+    for (let centerY = 0.04; centerY <= 0.300001; centerY += 0.00625) {
+      for (let centerX = 0.16; centerX <= 0.360001; centerX += 0.00625) {
+        const camera = {
+          origin: [centerX - span * 0.5, centerY - span * 0.5],
+          span: [span, span],
+        };
+        const terrainPlan = planFor(camera);
+        const candidates = selectNinjaOneEnvironmentFoliageInstances(
+          camera,
+          true,
+          NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS,
+          Number.MAX_SAFE_INTEGER,
+        );
+        const selected = selectNinjaOneEnvironmentFoliageInstances(
+          camera,
+          true,
+          NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS,
+          resolveNinjaOneEnvironmentFoliageDecodedBudget(terrainPlan.decodedBytes),
+        );
+        const selectedResources = new Map(selected.flatMap(
+          ({ resources }) => resources.map((resource) => [resource.id, resource]),
+        ));
+        const foliageDecodedBytes = [...selectedResources.values()].reduce(
+          (total, resource) => total + resource.decodedBytes,
+          0,
+        );
+        const combinedDecodedBytes = terrainPlan.decodedBytes + foliageDecodedBytes;
+        const observedHeadroomBytes = NINJAONE_ENVIRONMENT_NATIVE_MAX_DECODED_BYTES
+          - combinedDecodedBytes;
+        assert.ok(
+          observedHeadroomBytes
+            >= NINJAONE_ENVIRONMENT_FOLIAGE_TRANSITION_HEADROOM_BYTES,
+        );
+        minimumObservedHeadroomBytes = Math.min(
+          minimumObservedHeadroomBytes,
+          observedHeadroomBytes,
+        );
+        if (candidates.length > 0 && selected.length === 0) {
+          camerasWithCandidatesButNoAdmission += 1;
+        }
+        samples += 1;
+      }
+    }
+  }
+  assert.equal(samples, 12_474);
+  assert.equal(camerasWithCandidatesButNoAdmission, 0);
+  assert.equal(minimumObservedHeadroomBytes, 2_101_184);
 });
 
 test("automated camera sweep counts foliage and seams in the 32 MiB union", () => {

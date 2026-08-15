@@ -2,23 +2,8 @@ import manifest from "../../../../../../public/career-world/capitals/ninjaone/en
 import type { CameraView, Pair } from "../../../../shared/camera";
 
 export type NinjaOneEnvironmentFoliageResourceKind = "pooled-foliage-atlas";
-export type NinjaOneEnvironmentFoliageComposition =
-  | "registered-replacement"
-  | "additive";
-export type NinjaOneEnvironmentFoliageSpecies =
-  | "native-conifer"
-  | "russet-fantasy-tree"
-  | "silver-aspen"
-  | "alpine-shrub"
-  | "wildflower-heather";
-
-const VALID_FOLIAGE_SPECIES = new Set<NinjaOneEnvironmentFoliageSpecies>([
-  "native-conifer",
-  "russet-fantasy-tree",
-  "silver-aspen",
-  "alpine-shrub",
-  "wildflower-heather",
-]);
+export type NinjaOneEnvironmentFoliageComposition = "registered-replacement";
+export type NinjaOneEnvironmentFoliageSpecies = "native-conifer";
 export type NinjaOneEnvironmentFoliageAtlasRect = readonly [
   number,
   number,
@@ -51,10 +36,10 @@ export interface NinjaOneEnvironmentFoliageInstance {
   readonly gridCell: "B1" | "B2" | "C1" | "C2";
   readonly id: string;
   readonly lagDegrees: number;
-  readonly neutralizationAtlasRect: NinjaOneEnvironmentFoliageAtlasRect | null;
+  readonly neutralizationAtlasRect: NinjaOneEnvironmentFoliageAtlasRect;
   /** Compatibility alias for resource-accounting callers. */
   readonly neutralizationResource: NinjaOneEnvironmentFoliageResource;
-  readonly paintedNodeCount: 1 | 2;
+  readonly paintedNodeCount: 2;
   readonly phaseSeconds: number;
   readonly pivotYPercent: number;
   readonly resource: NinjaOneEnvironmentFoliageResource;
@@ -117,7 +102,7 @@ const RESOURCE_PATH_PREFIX =
   "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/";
 const ENVIRONMENT_WORLD_ORIGIN = Object.freeze([0.125, 0] as Pair);
 const ENVIRONMENT_WORLD_SPAN = Object.freeze([0.25, 1 / 3] as Pair);
-const RUNTIME_TARGET_DIMENSIONS = Object.freeze([2880, 2160] as Pair);
+const RUNTIME_TARGET_DIMENSIONS = Object.freeze([5760, 4320] as Pair);
 
 function finitePair(values: readonly number[], label: string): Pair {
   if (values.length !== 2 || values.some((value) => !Number.isFinite(value))) {
@@ -163,7 +148,7 @@ const registrationArtboard = finitePair(
 if (
   manifest.schemaVersion !== 5
   || manifest.id !== EXPECTED_ID
-  || manifest.status !== "active-r8-native-and-additive-foliage"
+  || manifest.status !== "active-r8-native-foliage-paged"
   || manifest.sourceMaster.authority !== "active-r8-geology-master"
   || manifest.sourceMaster.id !== EXPECTED_SOURCE_MASTER_ID
   || manifest.sourceMaster.path !== EXPECTED_SOURCE_MASTER_PATH
@@ -173,20 +158,23 @@ if (
   || manifest.registration.boundingWorldView.origin.join(",") !== "0.125,0"
   || manifest.registration.boundingWorldView.span.join(",") !== `0.25,${1 / 3}`
   || manifest.registration.masterDimensions.join(",") !== "5760,4320"
+  || manifest.registration.runtimeAtlasPageGrid.join(",") !== "3,3"
   || manifest.registration.sourcePixelsPerArtboardUnit !== 4
-  || manifest.registration.runtimeAtlasPixelsPerArtboardUnit !== 2
+  || manifest.registration.runtimeAtlasPixelsPerArtboardUnit !== 4
   || manifest.eligibility.maxDetailEnterSpan !== 0.12
   || manifest.eligibility.maxDetailRetainSpan !== 0.14
   || manifest.eligibility.viewportOverscanRatio !== 0.25
   || manifest.budgets.maximumSelectedGroups !== 32
   || manifest.budgets.maximumSupplementalNodes !== 64
   || manifest.budgets.nodesPerGroup !== 2
-  || manifest.budgets.uniqueTextureResources !== 1
+  || manifest.budgets.uniqueTextureResources !== 9
   || manifest.budgets.maximumTerrainTiles !== 4
-  || manifest.resources.length !== 1
+  || manifest.resources.length !== 9
   || manifest.quality.atRestChangedPixels !== 0
-  || manifest.quality.registeredConifers + manifest.quality.supplementalInstances
-    !== manifest.instances.length
+  || manifest.quality.supplementalInstances !== 0
+  || manifest.quality.uniqueSupplementalFrames !== 0
+  || manifest.supplementalSources.length !== 0
+  || manifest.quality.registeredConifers !== manifest.instances.length
   || manifest.quality.registeredConifers < manifest.quality.minimumRegisteredConifers
 ) throw new TypeError("NinjaOne pooled foliage registration contract is invalid.");
 
@@ -201,7 +189,8 @@ for (const value of manifest.resources as readonly RawResource[]) {
     || value.sourceMasterId !== EXPECTED_SOURCE_MASTER_ID
     || !Number.isSafeInteger(value.decodedBytes)
     || value.decodedBytes !== dimensions[0] * dimensions[1] * 4
-    || value.frameCount !== manifest.budgets.atlasFrameCount
+    || !Number.isSafeInteger(value.frameCount)
+    || value.frameCount <= 0
   ) throw new TypeError(`resources.${value.id} is invalid.`);
   resourceMap.set(value.id, Object.freeze({
     decodedBytes: value.decodedBytes,
@@ -248,10 +237,10 @@ export const NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES = Object.freeze(
       || (neutralizationAtlasRect !== null
         && !rectFits(neutralizationAtlasRect, atlasResource.dimensions))
       || !rectFits(sourceTargetRect, RUNTIME_TARGET_DIMENSIONS)
-      || artboardBounds.origin[0] !== sourceTargetRect[0] / 2
-      || artboardBounds.origin[1] !== sourceTargetRect[1] / 2
-      || artboardBounds.span[0] !== sourceTargetRect[2] / 2
-      || artboardBounds.span[1] !== sourceTargetRect[3] / 2
+      || artboardBounds.origin[0] !== sourceTargetRect[0] / 4
+      || artboardBounds.origin[1] !== sourceTargetRect[1] / 4
+      || artboardBounds.span[0] !== sourceTargetRect[2] / 4
+      || artboardBounds.span[1] !== sourceTargetRect[3] / 4
       || value.durationSeconds < 5
       || value.durationSeconds > 12
       || value.bendDegrees < 0.15
@@ -265,25 +254,15 @@ export const NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES = Object.freeze(
     ) throw new TypeError(`instances.${value.id} is invalid.`);
     const composition = value.composition as NinjaOneEnvironmentFoliageComposition;
     const species = value.species as NinjaOneEnvironmentFoliageSpecies;
-    const replacement = composition === "registered-replacement";
-    const additive = composition === "additive";
     if (
-      (!replacement && !additive)
-      || !VALID_FOLIAGE_SPECIES.has(species)
-      || (replacement && (
-        species !== "native-conifer"
-        || neutralizationAtlasRect === null
-        || neutralizationAtlasRect[2] !== canopyAtlasRect[2]
-        || neutralizationAtlasRect[3] !== canopyAtlasRect[3]
-        || canopyAtlasRect[2] !== sourceTargetRect[2]
-        || canopyAtlasRect[3] !== sourceTargetRect[3]
-        || value.paintedNodeCount !== 2
-      ))
-      || (additive && (
-        species === "native-conifer"
-        || neutralizationAtlasRect !== null
-        || value.paintedNodeCount !== 1
-      ))
+      composition !== "registered-replacement"
+      || species !== "native-conifer"
+      || neutralizationAtlasRect === null
+      || neutralizationAtlasRect[2] !== canopyAtlasRect[2]
+      || neutralizationAtlasRect[3] !== canopyAtlasRect[3]
+      || canopyAtlasRect[2] !== sourceTargetRect[2]
+      || canopyAtlasRect[3] !== sourceTargetRect[3]
+      || value.paintedNodeCount !== 2
     ) throw new TypeError(`instances.${value.id} composition is invalid.`);
     return Object.freeze({
       animation: "canopy-bend" as const,
@@ -300,7 +279,7 @@ export const NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES = Object.freeze(
       lagDegrees: value.lagDegrees,
       neutralizationAtlasRect,
       neutralizationResource: atlasResource,
-      paintedNodeCount: value.paintedNodeCount as 1 | 2,
+      paintedNodeCount: 2 as const,
       phaseSeconds: value.phaseSeconds,
       pivotYPercent: value.pivotYPercent,
       resource: atlasResource,
@@ -316,9 +295,14 @@ const decodedBytes = [...resourceMap.values()].reduce(
   (total, resource) => total + resource.decodedBytes,
   0,
 );
+const atlasFrameCount = [...resourceMap.values()].reduce(
+  (total, resource) => total + resource.frameCount,
+  0,
+);
 if (
   decodedBytes !== manifest.budgets.foliageDecodedBytes
   || decodedBytes !== manifest.budgets.atlasDecodedBytes
+  || atlasFrameCount !== manifest.budgets.atlasFrameCount
   || manifest.budgets.combinedDecodedBytes
     !== decodedBytes + manifest.budgets.terrainDecodedBytes
   || manifest.budgets.combinedDecodedBytes > manifest.budgets.maximumDecodedBytes
@@ -435,26 +419,47 @@ export function selectNinjaOneEnvironmentFoliageInstances(
   maxDetailEligible = Math.max(...camera.span)
     <= NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_ENTER_SPAN,
   maximumGroups = NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS,
+  maximumDecodedBytes = NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES,
 ): readonly NinjaOneEnvironmentFoliageInstance[] {
   const admittedGroups = Number.isInteger(maximumGroups)
     ? Math.max(0, Math.min(maximumGroups, NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS))
     : 0;
+  const admittedDecodedBytes = Number.isSafeInteger(maximumDecodedBytes)
+    ? Math.max(0, maximumDecodedBytes)
+    : 0;
   if (
     !maxDetailEligible
     || admittedGroups === 0
+    || admittedDecodedBytes === 0
     || Math.max(...camera.span) > NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_RETAIN_SPAN
   ) return Object.freeze([]);
   const artboardView = environmentFoliageCameraArtboardView(camera);
   const admissionView = overscanned(artboardView);
-  const selected = NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES
+  const candidates = NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES
     .filter((instance) => intersects(admissionView, instance.artboardBounds))
     .sort((left, right) => (
       distanceFromViewCenter(artboardView, left)
       - distanceFromViewCenter(artboardView, right)
-    ))
-    .slice(0, admittedGroups)
-    .sort((left, right) => (
-      foliageDepth(left) - foliageDepth(right) || left.id.localeCompare(right.id)
     ));
+  const selected: NinjaOneEnvironmentFoliageInstance[] = [];
+  const selectedResources = new Set<string>();
+  let selectedDecodedBytes = 0;
+  for (const instance of candidates) {
+    if (selected.length >= admittedGroups) break;
+    const newResources = instance.resources.filter(({ id }) => (
+      !selectedResources.has(id)
+    ));
+    const incrementalDecodedBytes = newResources.reduce(
+      (total, resource) => total + resource.decodedBytes,
+      0,
+    );
+    if (selectedDecodedBytes + incrementalDecodedBytes > admittedDecodedBytes) continue;
+    selected.push(instance);
+    selectedDecodedBytes += incrementalDecodedBytes;
+    for (const { id } of newResources) selectedResources.add(id);
+  }
+  selected.sort((left, right) => (
+    foliageDepth(left) - foliageDepth(right) || left.id.localeCompare(right.id)
+  ));
   return Object.freeze(selected);
 }

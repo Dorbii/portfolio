@@ -69,12 +69,26 @@ export function useNinjaOneEnvironmentFoliageResidency({
   const [loadState, setLoadState] = useState<NinjaOneEnvironmentFoliageNodeLoadCohort>(
     createNinjaOneEnvironmentFoliageNodeLoadCohort,
   );
+  const [decodedResourceKeys, setDecodedResourceKeys] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
   let currentLoadState = loadState;
   if (loadState.key !== cohortKey) {
     currentLoadState = retargetNinjaOneEnvironmentFoliageNodeLoadCohort(
       loadState,
       cohortKey,
     );
+    for (const resourceKey of exactResourceKeys) {
+      if (!decodedResourceKeys.has(resourceKey)) continue;
+      currentLoadState = recordNinjaOneEnvironmentFoliageNodeLoadEvent({
+        cohort: currentLoadState,
+        epoch: currentLoadState.epoch,
+        event: "load",
+        key: cohortKey,
+        resourceKey,
+        resourceKeys: exactResourceKeys,
+      });
+    }
     setLoadState(currentLoadState);
   }
   const expectedResourceCount = selectedResources.length;
@@ -163,6 +177,11 @@ export function useNinjaOneEnvironmentFoliageResidency({
     event: "error" | "load",
     key: string,
   ) => {
+    if (event === "load") {
+      setDecodedResourceKeys((previous) => previous.has(key)
+        ? previous
+        : new Set([...previous, key]));
+    }
     setLoadState((previous) => recordNinjaOneEnvironmentFoliageNodeLoadEvent({
       cohort: previous,
       epoch: cohortEpoch,

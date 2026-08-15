@@ -211,9 +211,7 @@ export class NinjaOneInlandHabitatRenderer {
     context.globalAlpha = isFoliage
       ? 0.055 + placement.depthFraction * 0.045
       : 0.075 + placement.depthFraction * 0.075;
-    context.filter = `brightness(0) saturate(0) blur(${(
-      0.65 + waterColumn * 1.35
-    ) * this.pixelRatio}px)`;
+    context.filter = "brightness(0) saturate(0)";
     context.drawImage(image, -width * 0.5, -height * 0.5, width, height);
     context.restore();
 
@@ -233,9 +231,7 @@ export class NinjaOneInlandHabitatRenderer {
         ? 0.86 + waterColumn * 0.09
         : 0.80 + waterColumn * 0.10;
     const contrast = bankContact ? 1.12 : 1.04;
-    context.filter = `saturate(${saturation}) brightness(${brightness}) contrast(${contrast}) blur(${(
-      placement.depthFraction * (bankContact ? 0.10 : 0.26)
-    ) * this.pixelRatio}px)`;
+    context.filter = `saturate(${saturation}) brightness(${brightness}) contrast(${contrast})`;
     context.drawImage(image, -width * 0.5, -height * 0.5, width, height);
     context.restore();
     return true;

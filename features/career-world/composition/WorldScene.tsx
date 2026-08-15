@@ -453,6 +453,13 @@ export function WorldScene({
   }, [animateTo]);
 
   const handleWheel = useCallback((event: WheelEvent<HTMLDivElement>) => {
+    const target = event.target;
+    if (
+      target instanceof Element
+      && target.closest(INTERACTIVE_TARGET_SELECTOR)
+    ) {
+      return;
+    }
     event.preventDefault();
     cancelFocusAnimation();
     const bounds = event.currentTarget.getBoundingClientRect();

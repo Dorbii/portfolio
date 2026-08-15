@@ -10,12 +10,12 @@ import type {
   NinjaOneEnvironmentFoliageResource,
 } from "../model/ninjaOneEnvironmentFoliage";
 import {
-  loadNinjaOneEnvironmentFoliageAtlas,
+  loadNinjaOneEnvironmentFoliageAtlases,
   NinjaOneEnvironmentFoliageWebGl,
 } from "./ninjaOneEnvironmentFoliageWebGl";
 
 interface NinjaOneEnvironmentFoliageCanvasProps {
-  readonly atlas: NinjaOneEnvironmentFoliageResource;
+  readonly atlases: readonly NinjaOneEnvironmentFoliageResource[];
   readonly camera: CameraView;
   readonly instances: readonly NinjaOneEnvironmentFoliageInstance[];
   readonly motionEnabled: boolean;
@@ -23,7 +23,7 @@ interface NinjaOneEnvironmentFoliageCanvasProps {
 }
 
 export function NinjaOneEnvironmentFoliageCanvas({
-  atlas,
+  atlases,
   camera,
   instances,
   motionEnabled,
@@ -31,11 +31,18 @@ export function NinjaOneEnvironmentFoliageCanvas({
 }: NinjaOneEnvironmentFoliageCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<NinjaOneEnvironmentFoliageWebGl | null>(null);
-  const sceneRef = useRef({ atlas, camera, instances });
+  const atlasRef = useRef(atlases);
+  const atlasesReadyRef = useRef(false);
+  const sceneRef = useRef({ camera, instances });
   const motionEnabledRef = useRef(motionEnabled);
   const [ready, setReady] = useState(false);
   const [inDocumentViewport, setInDocumentViewport] = useState(false);
   const [pageVisible, setPageVisible] = useState(true);
+  const atlasKey = atlases.map(({ id, sha256 }) => `${id}:${sha256}`).join("|");
+
+  useEffect(() => {
+    atlasRef.current = atlases;
+  }, [atlases]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -66,13 +73,12 @@ export function NinjaOneEnvironmentFoliageCanvas({
       return undefined;
     }
     rendererRef.current = renderer;
-    let cancelled = false;
-    let atlasReady = false;
     const resize = () => {
       if (!renderer.resize()) return;
-      if (!atlasReady) return;
+      if (!atlasesReadyRef.current) return;
       const scene = sceneRef.current;
-      renderer.setScene(scene.camera, scene.instances, scene.atlas);
+      renderer.setCamera(scene.camera);
+      renderer.setScene(scene.instances);
       renderer.draw(performance.now() / 1000, false);
     };
     const resizeObserver = new ResizeObserver(resize);
@@ -80,39 +86,54 @@ export function NinjaOneEnvironmentFoliageCanvas({
     const ownerSvg = canvas.closest("svg");
     if (ownerSvg instanceof SVGSVGElement) resizeObserver.observe(ownerSvg);
     window.addEventListener("resize", resize);
-    loadNinjaOneEnvironmentFoliageAtlas(atlas).then((image) => {
-      if (cancelled) return;
-      renderer.setAtlas(image);
-      atlasReady = true;
-      renderer.resize();
-      const scene = sceneRef.current;
-      renderer.setScene(scene.camera, scene.instances, scene.atlas);
-      renderer.draw(performance.now() / 1000, motionEnabledRef.current);
-      setReady(true);
-      onReadyChange(true);
-    }).catch(() => {
-      if (cancelled) return;
-      setReady(false);
-      onReadyChange(false);
-    });
+    renderer.resize();
     return () => {
-      cancelled = true;
       resizeObserver.disconnect();
       window.removeEventListener("resize", resize);
       renderer.destroy();
       rendererRef.current = null;
     };
-  }, [atlas, onReadyChange]);
+  }, [onReadyChange]);
+
+  useEffect(() => {
+    const renderer = rendererRef.current;
+    if (!renderer) return undefined;
+    let cancelled = false;
+    atlasesReadyRef.current = false;
+    setReady(false);
+    onReadyChange(false);
+    loadNinjaOneEnvironmentFoliageAtlases(atlasRef.current).then((loadedAtlases) => {
+      if (cancelled) return;
+      renderer.setAtlases(loadedAtlases);
+      atlasesReadyRef.current = true;
+      renderer.resize();
+      const scene = sceneRef.current;
+      renderer.setCamera(scene.camera);
+      renderer.setScene(scene.instances);
+      renderer.draw(performance.now() / 1000, motionEnabledRef.current);
+      setReady(true);
+      onReadyChange(true);
+    }).catch(() => {
+      if (cancelled) return;
+      atlasesReadyRef.current = false;
+      setReady(false);
+      onReadyChange(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [atlasKey, onReadyChange]);
 
   useLayoutEffect(() => {
-    sceneRef.current = { atlas, camera, instances };
+    sceneRef.current = { camera, instances };
     motionEnabledRef.current = motionEnabled;
     const renderer = rendererRef.current;
     if (!renderer || !ready) return;
     renderer.resize();
-    renderer.setScene(camera, instances, atlas);
+    renderer.setCamera(camera);
+    renderer.setScene(instances);
     renderer.draw(performance.now() / 1000, motionEnabled);
-  }, [atlas, camera, instances, motionEnabled, ready]);
+  }, [camera, instances, motionEnabled, ready]);
 
   const animationRunning = ready
     && motionEnabled
@@ -142,6 +163,7 @@ export function NinjaOneEnvironmentFoliageCanvas({
       className="ninjaone-environment-native-detail__foliage-canvas"
       data-environment-foliage-animation-running={animationRunning}
       data-environment-foliage-canvas-instance-count={instances.length}
+      data-environment-foliage-canvas-resource-count={atlases.length}
       data-environment-foliage-renderer={ready ? "webgl2-ready" : "static-fallback"}
       ref={canvasRef}
     />
