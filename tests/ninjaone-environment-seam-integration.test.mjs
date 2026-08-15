@@ -308,7 +308,7 @@ test("full native sweep fails closed on all four unselected inter-cell segments"
 test("maximum seam union keeps the accepted internal cohort within its declared budget", () => {
   const breakdown = manifest.budgets.unionBreakdown;
   assert.equal(breakdown.terrainDecodedBytes, 4 * 1448 * 1086 * 4);
-  assert.equal(breakdown.foliageDecodedBytes, 527_600);
+  assert.equal(breakdown.foliageDecodedBytes, 0);
   assert.equal(breakdown.seamDecodedBytes, 1_297_408);
   assert.equal(manifest.budgets.rejectedIntercellDecodedBytes, 0);
   assert.equal(manifest.budgets.fixedC2SeamDecodedBytes, 1_297_408);
@@ -324,12 +324,12 @@ test("maximum seam union keeps the accepted internal cohort within its declared 
   );
   assert.equal(
     NINJAONE_ENVIRONMENT_SEAM_INTEGRATION_MAX_APPLICATION_OWNED_UNION,
-    26_985_456,
+    26_457_856,
   );
   assert.ok(NINJAONE_ENVIRONMENT_SEAM_INTEGRATION_MAX_APPLICATION_OWNED_UNION < 32 * 1024 * 1024);
   assert.equal(
     32 * 1024 * 1024 - NINJAONE_ENVIRONMENT_SEAM_INTEGRATION_MAX_APPLICATION_OWNED_UNION,
-    6_568_976,
+    7_096_576,
   );
   assert.deepEqual(manifest.budgets.unionSupplementalNodeBreakdown, {
     foliage: 0,
@@ -466,7 +466,7 @@ test("r2 generator is deterministic and idempotent without mutating native sourc
     const output = JSON.parse(result.stdout);
     assert.deepEqual(output.resourceIds, manifest.resources.map(({ id }) => id));
     assert.equal(output.seamDecodedBytes, 1_297_408);
-    assert.equal(output.decodedUnion, 26_985_456);
+    assert.equal(output.decodedUnion, 26_457_856);
   }
   assert.deepEqual(await hashes(productionFiles), beforeProduction);
   assert.deepEqual(await hashes(sourceFiles), beforeSources);

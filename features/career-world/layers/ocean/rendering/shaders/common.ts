@@ -19,6 +19,7 @@ uniform float u_waveDensity;
 uniform float u_weather;
 uniform float u_opacity;
 uniform float u_detailScale;
+uniform float u_coastalAmbience;
 uniform float u_territoryLod;
 uniform float u_capitalLod;
 uniform float u_siteLod;

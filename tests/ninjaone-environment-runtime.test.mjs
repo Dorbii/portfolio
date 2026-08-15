@@ -135,8 +135,8 @@ test("close residency uses zoom hysteresis and survives rapid reverse zoom", () 
   assert.equal(demandFor(close, released), true);
 });
 
-test("animated foliage enters at the reachable close floor and retains through .09", () => {
-  const cameraAtSpan = (span) => centeredCamera([0.3125, 0.25], span);
+test("animated foliage enters through .12 and retains through .14", () => {
+  const cameraAtSpan = (span) => centeredCamera([0.23, 0.11], span);
   const eligible = (span, previousEligible) => (
     resolveNinjaOneEnvironmentFoliageEligibility({
       active: true,
@@ -146,24 +146,25 @@ test("animated foliage enters at the reachable close floor and retains through .
       showFoliage: true,
     })
   );
-  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_ENTER_SPAN, 0.075);
-  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_RETAIN_SPAN, 0.09);
+  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_ENTER_SPAN, 0.12);
+  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_RETAIN_SPAN, 0.14);
   assert.equal(eligible(0.04, false), true);
-  assert.equal(eligible(0.075, false), true);
-  assert.equal(eligible(0.08, false), false);
-  assert.equal(eligible(0.08, true), true);
-  assert.equal(eligible(0.09, true), true);
-  assert.equal(eligible(0.091, true), false);
+  assert.equal(eligible(0.12, false), true);
+  assert.equal(eligible(0.13, false), false);
+  assert.equal(eligible(0.13, true), true);
+  assert.equal(eligible(0.14, true), true);
+  assert.equal(eligible(0.141, true), false);
   assert.deepEqual(selectNinjaOneEnvironmentFoliageInstances(
-    cameraAtSpan(0.091),
+    cameraAtSpan(0.141),
     true,
   ), []);
 });
 
 test("required seam nodes take priority before atomic two-node foliage groups", () => {
+  const westFoliageCamera = { origin: [0.2125, 0.0875], span: [0.075, 0.075] };
   const groupCapacity = (requiredSupplementalNodes) => (
     resolveNinjaOneEnvironmentOptionalGroupCapacity({
-      maximumGroups: 2,
+      maximumGroups: 3,
       maximumSupplementalNodes: 6,
       nodesPerGroup: 2,
       requiredSupplementalNodes,
@@ -171,18 +172,18 @@ test("required seam nodes take priority before atomic two-node foliage groups", 
   );
   assert.deepEqual(
     [0, 2, 3, 4, 5, 6].map(groupCapacity),
-    [2, 2, 1, 1, 0, 0],
+    [3, 2, 1, 1, 0, 0],
   );
   assert.equal(
-    selectNinjaOneEnvironmentFoliageInstances(FIXED_CAMERAS.C2, true, 2).length,
+    selectNinjaOneEnvironmentFoliageInstances(westFoliageCamera, true, 2).length,
     2,
   );
   assert.equal(
-    selectNinjaOneEnvironmentFoliageInstances(FIXED_CAMERAS.C2, true, 1).length,
+    selectNinjaOneEnvironmentFoliageInstances(westFoliageCamera, true, 1).length,
     1,
   );
   assert.deepEqual(
-    selectNinjaOneEnvironmentFoliageInstances(FIXED_CAMERAS.C2, true, 0),
+    selectNinjaOneEnvironmentFoliageInstances(westFoliageCamera, true, 0),
     [],
   );
 });
@@ -457,7 +458,7 @@ test("native terrain uses only 1448x1086 originals and baked masks consume no ru
   }
 });
 
-test("close detail has one r3 foliage pool and no legacy shared-foliage mapping", async () => {
+test("close detail has one r4 foliage pool and no legacy shared-foliage mapping", async () => {
   const [proofSource, nativeDetailSource, worldSceneSource] = await Promise.all([
     readFile(path.join(
       root,
@@ -895,9 +896,12 @@ test("terrain and supplemental residency stay under the 4 6 32 MiB ceilings", ()
   );
   assert.ok(admitted.decodedBytes <= NINJAONE_ENVIRONMENT_NATIVE_MAX_DECODED_BYTES);
 
-  const c2Foliage = selectNinjaOneEnvironmentFoliageInstances(FIXED_CAMERAS.C2);
-  assert.ok(c2Foliage.length <= NINJAONE_ENVIRONMENT_NATIVE_MAX_ANIMATED_NODES);
-  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES.length, 4);
+  const activeFoliage = selectNinjaOneEnvironmentFoliageInstances({
+    origin: [0.2125, 0.0875],
+    span: [0.075, 0.075],
+  });
+  assert.ok(activeFoliage.length <= NINJAONE_ENVIRONMENT_NATIVE_MAX_ANIMATED_NODES);
+  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES.length, 8);
   assert.equal(
     NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES,
     NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES.reduce(
@@ -983,8 +987,17 @@ test("exhaustive budget admission drops whole foliage groups behind required sea
         tonalTransition: { paintedNodeCount: 1 },
       },
     }));
+  const syntheticC2Foliage = NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES
+    .slice(0, 2)
+    .map((instance, index) => ({
+      ...instance,
+      artboardBounds: {
+        origin: [1072 + index * 4, 800 + index * 4],
+        span: [48, 80],
+      },
+    }));
   const audit = auditCameraDecodedBudgets({
-    foliageInstances: NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES,
+    foliageInstances: syntheticC2Foliage,
     foliageMaximumSpan: NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_RETAIN_SPAN,
     nativeManifest: { tiles: NINJAONE_ENVIRONMENT_NATIVE_TILES },
     seamInstances: syntheticRequiredSeams,
@@ -995,7 +1008,13 @@ test("exhaustive budget admission drops whole foliage groups behind required sea
   assert.equal(c2.foliageGroupCount, 1);
   assert.equal(c2.supplementalNodeCount, 6);
   assert.ok(c2.decodedBytes <= NINJAONE_ENVIRONMENT_NATIVE_MAX_DECODED_BYTES);
-  assert.equal(c2.resourceIds.filter((id) => id.includes("canopy-native")).length, 2);
+  const syntheticFoliageResourceIds = new Set(
+    syntheticC2Foliage.flatMap(({ resources }) => resources.map(({ id }) => id)),
+  );
+  assert.equal(
+    c2.resourceIds.filter((id) => syntheticFoliageResourceIds.has(id)).length,
+    2,
+  );
 });
 
 test("package commands resolve to visible deterministic builders and verifier fails closed", async () => {
@@ -1006,7 +1025,7 @@ test("package commands resolve to visible deterministic builders and verifier fa
     "build:environment-native":
       "node scripts/build-ninjaone-environment-native-detail.mjs --static-only",
     "build:ninjaone-environment-foliage":
-      "node scripts/build-ninjaone-environment-foliage-r3.mjs",
+      "node scripts/build-ninjaone-environment-foliage-r4.mjs",
     "build:ninjaone-environment-seams":
       "node scripts/build-ninjaone-environment-seam-integration-r2.mjs",
     "capture:ninjaone-environment-mvp":

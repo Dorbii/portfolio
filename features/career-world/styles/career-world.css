@@ -1700,8 +1700,8 @@ g[data-owner-id="project-kaizen-agent"].ambient-structure {
   }
 }
 
+.ninjaone-environment-geology,
 .ninjaone-environment-proof {
-  z-index: 7;
   width: 100%;
   height: 100%;
   overflow: visible;
@@ -1709,16 +1709,21 @@ g[data-owner-id="project-kaizen-agent"].ambient-structure {
   shape-rendering: geometricPrecision;
 }
 
+.ninjaone-environment-geology {
+  z-index: 3;
+}
+
+.ninjaone-environment-proof {
+  z-index: 7;
+}
+
 .ninjaone-environment-proof [data-environment-layer] {
   image-rendering: auto;
 }
 
+.ninjaone-environment-geology mask,
 .ninjaone-environment-proof mask {
   mask-type: alpha;
-}
-
-.ninjaone-environment-proof [data-environment-layer="terrain-geology"] {
-  filter: contrast(1.035) saturate(0.96);
 }
 
 .ninjaone-environment-proof [data-environment-layer="secondary-relief"] {
@@ -1774,9 +1779,7 @@ g[data-owner-id="project-kaizen-agent"].ambient-structure {
 @keyframes ninjaone-native-canopy-sway {
   0%,
   100% {
-    transform:
-      rotate(var(--ninjaone-foliage-bend-start, -0.16deg))
-      skewX(var(--ninjaone-foliage-lag-start, -0.04deg));
+    transform: none;
   }
 
   37% {

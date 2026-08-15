@@ -15,7 +15,7 @@ void main() {
   float waterVisibility = 1.0 - smoother(0.02, 0.98, coast.landMask);
   outColor = vec4(
     coast.color,
-    u_opacity * max(waterVisibility, coast.overlayAlpha)
+    u_opacity * max(waterVisibility, coast.overlayAlpha * u_coastalAmbience)
   );
 }
 `;

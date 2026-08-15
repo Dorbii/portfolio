@@ -51,6 +51,11 @@ export class WaterSurfaceController {
     this.renderIfIdle();
   }
 
+  setCoastalAmbience(visible: boolean): void {
+    this.renderer.setCoastalAmbience(visible);
+    this.renderIfIdle();
+  }
+
   setState(state: Partial<WaterSurfaceState>): void {
     this.renderer.setState(state);
     this.renderIfIdle();

@@ -1,7 +1,6 @@
 import manifest from "@/public/career-world/layers/terrain/authority/manifests/terrain-stream-runtime-r4.json";
 import type { CameraView, Pair } from "../../../shared/camera";
 import type { DetailTierId } from "../../../shared/lod";
-import { KAIZEN_CITY_OCCLUDED_TERRAIN_TILE_IDS } from "../../../shared/kaizenCityRegistration.ts";
 import type { TerrainResidencyPolicy } from "./residency";
 
 export type TerrainStreamSourceTier = Extract<
@@ -109,7 +108,6 @@ const registeredTileIds = new Set<string>();
 
 export const TERRAIN_STREAM_TILES: readonly TerrainStreamTile[] = Object.freeze(
   manifest.tiles
-  .filter(({ id }) => !KAIZEN_CITY_OCCLUDED_TERRAIN_TILE_IDS.has(id))
   .map((tile) => {
     if (registeredTileIds.has(tile.id)) {
       throw new TypeError(`Duplicate terrain stream tile ${tile.id}.`);

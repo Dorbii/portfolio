@@ -3,6 +3,7 @@ import {
   mkdir,
   readFile,
   readdir,
+  rename,
   rm,
   writeFile,
 } from "node:fs/promises";
@@ -10,101 +11,94 @@ import path from "node:path";
 import sharp from "sharp";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
-const SOURCE_ROOT = path.join(
+const MASTER_SOURCE_PATH = path.join(
   ROOT,
-  "art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated",
+  "art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r8.png",
 );
+const MASTER_SOURCE_ID = "terrain-master-detail-r8";
+const MASTER_SOURCE_PUBLIC_PATH =
+  "/art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r8.png";
 const OUTPUT_ROOT = path.join(
   ROOT,
-  "public/career-world/capitals/ninjaone/environment/shared/foliage-native-r3",
+  "public/career-world/capitals/ninjaone/environment/shared/foliage-native-r4",
 );
 const MANIFEST_PATH = path.join(
   ROOT,
-  "public/career-world/capitals/ninjaone/environment/manifests/foliage-native-r3.json",
+  "public/career-world/capitals/ninjaone/environment/manifests/foliage-native-r4.json",
 );
 const PROOF_ROOT = path.join(
   ROOT,
-  ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/artifacts/foliage-r3/source-composites",
+  ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/artifacts/foliage-r4/source-composites",
 );
-const NATIVE_TILE_DIMENSIONS = Object.freeze([1448, 1086]);
+const MASTER_SOURCE_DIMENSIONS = Object.freeze([5760, 4320]);
+const TERRAIN_TILE_DECODE_DIMENSIONS = Object.freeze([1448, 1086]);
 const ARTBOARD = Object.freeze([1440, 1080]);
 const GRID = Object.freeze([4, 4]);
-const TILE_ARTBOARD = Object.freeze([360, 270]);
 const MAXIMUM_DECODED_BYTES = 32 * 1024 * 1024;
 const MAXIMUM_TERRAIN_TILES = 4;
 const MAXIMUM_SUPPLEMENTAL_NODES = 6;
-const MAXIMUM_SELECTED_GROUPS = 2;
+const MAXIMUM_SELECTED_GROUPS = 3;
 const NODES_PER_GROUP = 2;
-const MAX_DETAIL_ENTER_SPAN = 0.075;
-const MAX_DETAIL_RETAIN_SPAN = 0.09;
+const MAX_DETAIL_ENTER_SPAN = 0.12;
+const MAX_DETAIL_RETAIN_SPAN = 0.14;
 const TRIM_PADDING = 12;
-
-const NATIVE_TILE_IDS = Object.freeze([
-  "r0-c2",
-  "r0-c3",
-  "r1-c2",
-  "r1-c3",
-  "r2-c0",
-  "r2-c1",
-  "r2-c2",
-  "r2-c3",
-  "r3-c0",
-  "r3-c1",
-  "r3-c2",
-  "r3-c3",
-]);
 
 const GROUPS = Object.freeze([
   Object.freeze({
-    bendDegrees: 0.36,
-    checkpoint: "c2-trail-conifer-native",
-    crop: Object.freeze([1090, 750, 270, 300]),
+    bendDegrees: 1.15,
+    checkpoint: "b1-ridge-west-conifer-native",
+    crop: Object.freeze([2180, 1100, 340, 440]),
     durationSeconds: 6.2,
-    id: "c2-trail-conifer-native",
-    lagDegrees: 0.075,
-    canopyPolygon: Object.freeze([
-      [110, 18], [92, 41], [75, 61], [60, 84], [49, 108], [39, 137],
-      [38, 164], [52, 185], [75, 204], [107, 202], [137, 199], [158, 180],
-      [168, 153], [166, 126], [155, 101], [145, 78], [132, 57], [120, 36],
-    ].map(Object.freeze)),
-    minimumLeafPixels: 7_000,
-    motionProtectionMargin: 2,
-    neutralizationDilation: 0,
-    neutralizationSourceName: "c2-trail-conifer-native-neutralization-source-imagegen-r3.png",
+    id: "b1-ridge-west-conifer-native",
+    lagDegrees: 0.09,
+    minimumLeafPixels: 13_000,
+    neutralizationDilation: 12,
+    neutralizationSourceName: "ridge-west-neutralization-source-imagegen-r4.png",
+    segmentationSourceName: "ridge-west-tree-alpha-imagegen-r4.png",
     phaseSeconds: -0.8,
-    segmentation: "native-conifer-needle-color-local-contrast",
-    protectedShapes: Object.freeze([
-      Object.freeze({ height: 70, id: "trunk", kind: "rect", width: 14, x: 103, y: 158 }),
-      Object.freeze({ height: 132, id: "rock", kind: "ellipse", width: 133, x: 137, y: 153 }),
-      Object.freeze({ height: 300, id: "trail", kind: "rect", width: 36, x: 0, y: 0 }),
-    ]),
-    sourceTileId: "r2-c2",
+    segmentation: "native-r8-tree-alpha-chroma-neutralization-difference",
   }),
   Object.freeze({
-    bendDegrees: 0.29,
-    checkpoint: "c2-stream-canopy-native",
-    crop: Object.freeze([1140, 80, 280, 300]),
+    bendDegrees: 0.92,
+    checkpoint: "b1-ridge-south-conifer-native",
+    crop: Object.freeze([2360, 1280, 360, 480]),
     durationSeconds: 7.05,
-    id: "c2-stream-canopy-native",
-    lagDegrees: 0.052,
-    canopyPolygon: Object.freeze([
-      [104, 47], [78, 55], [55, 67], [36, 82], [22, 104], [15, 129],
-      [27, 148], [50, 151], [42, 169], [66, 179], [94, 172], [120, 178],
-      [145, 170], [169, 160], [190, 145], [195, 123], [187, 101], [170, 82],
-      [145, 67], [124, 54],
-    ].map(Object.freeze)),
-    minimumLeafPixels: 9_000,
-    motionProtectionMargin: 2,
-    neutralizationDilation: 0,
-    neutralizationSourceName: "c2-stream-canopy-native-neutralization-source-imagegen-r3.png",
+    id: "b1-ridge-south-conifer-native",
+    lagDegrees: 0.075,
+    minimumLeafPixels: 16_000,
+    neutralizationDilation: 12,
+    neutralizationSourceName: "ridge-south-neutralization-source-imagegen-r4.png",
+    segmentationSourceName: "ridge-south-tree-alpha-imagegen-r4.png",
     phaseSeconds: -2.35,
-    segmentation: "native-yellow-leaf-chroma-hard-alpha",
-    protectedShapes: Object.freeze([
-      Object.freeze({ height: 95, id: "trunk", kind: "rect", width: 14, x: 98, y: 145 }),
-      Object.freeze({ height: 92, id: "stream", kind: "rect", width: 280, x: 0, y: 208 }),
-      Object.freeze({ height: 190, id: "neighbor-tree", kind: "rect", width: 78, x: 202, y: 54 }),
-    ]),
-    sourceTileId: "r3-c2",
+    segmentation: "native-r8-tree-alpha-chroma-neutralization-difference",
+  }),
+  Object.freeze({
+    bendDegrees: 1.08,
+    checkpoint: "b1-ridge-central-conifer-native",
+    crop: Object.freeze([2600, 1320, 320, 500]),
+    durationSeconds: 5.65,
+    id: "b1-ridge-central-conifer-native",
+    lagDegrees: 0.085,
+    minimumLeafPixels: 14_000,
+    neutralizationDilation: 12,
+    neutralizationSourceName: "ridge-central-neutralization-source-imagegen-r4.png",
+    segmentationSourceName: "ridge-central-tree-alpha-imagegen-r4.png",
+    phaseSeconds: -1.45,
+    segmentation: "native-r8-tree-alpha-chroma-neutralization-difference",
+  }),
+  Object.freeze({
+    bendDegrees: 1.0,
+    checkpoint: "c1-ridge-east-conifer-native",
+    crop: Object.freeze([3260, 1100, 340, 460]),
+    durationSeconds: 6.7,
+    id: "c1-ridge-east-conifer-native",
+    lagDegrees: 0.08,
+    minimumLeafPixels: 7_500,
+    neutralizationDilation: 8,
+    neutralizationSourceName: "ridge-east-neutralization-source-imagegen-r4.png",
+    segmentationSourceName: "ridge-east-tree-alpha-imagegen-r4.png",
+    phaseSeconds: -3.15,
+    segmentation: "native-r8-tree-alpha-chroma-neutralization-difference",
   }),
 ]);
 
@@ -112,126 +106,87 @@ function sha256(bytes) {
   return createHash("sha256").update(bytes).digest("hex").toUpperCase();
 }
 
-function sourcePath(id) {
-  return path.join(SOURCE_ROOT, `${id}-generated-r2.png`);
-}
-
-function publicSourcePath(id) {
-  return `/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/${id}-generated-r2.png`;
-}
-
 function versionedPublicPath(filePath, digest) {
   return `/${path.relative(path.join(ROOT, "public"), filePath).replaceAll("\\", "/")}?v=${digest.slice(0, 12).toLowerCase()}`;
 }
 
-function protectedShapeContains(shape, x, y, margin = 0) {
-  if (shape.kind === "ellipse") {
-    const normalizedX = (x - (shape.x + shape.width / 2))
-      / (shape.width / 2 + margin);
-    const normalizedY = (y - (shape.y + shape.height / 2))
-      / (shape.height / 2 + margin);
-    return normalizedX ** 2 + normalizedY ** 2 <= 1;
-  }
-  return x >= shape.x - margin
-    && x < shape.x + shape.width + margin
-    && y >= shape.y - margin
-    && y < shape.y + shape.height + margin;
-}
-
-function polygonContains(points, x, y) {
-  let inside = false;
-  for (
-    let current = 0, previous = points.length - 1;
-    current < points.length;
-    previous = current, current += 1
-  ) {
-    const [currentX, currentY] = points[current];
-    const [previousX, previousY] = points[previous];
-    if (
-      (currentY > y) !== (previousY > y)
-      && x < (previousX - currentX) * (y - currentY)
-        / (previousY - currentY) + currentX
-    ) {
-      inside = !inside;
+async function writeJsonAtomically(targetPath, value) {
+  const temporaryPath = `${targetPath}.next-${process.pid}`;
+  await writeFile(temporaryPath, `${JSON.stringify(value, null, 2)}\n`);
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    try {
+      await rename(temporaryPath, targetPath);
+      return;
+    } catch (error) {
+      if (attempt === 7) {
+        await rm(temporaryPath, { force: true });
+        throw error;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 20 * (attempt + 1)));
     }
   }
-  return inside;
 }
 
-function localMeanLuminance(source, width, height, x, y, radius = 3) {
-  let samples = 0;
-  let sum = 0;
-  for (let deltaY = -radius; deltaY <= radius; deltaY += 1) {
-    const sourceY = y + deltaY;
-    if (sourceY < 0 || sourceY >= height) continue;
-    for (let deltaX = -radius; deltaX <= radius; deltaX += 1) {
-      const sourceX = x + deltaX;
-      if (
-        sourceX < 0
-        || sourceX >= width
-        || (deltaX === 0 && deltaY === 0)
-      ) continue;
-      const offset = (sourceY * width + sourceX) * 4;
-      sum += source[offset] * 0.2126
-        + source[offset + 1] * 0.7152
-        + source[offset + 2] * 0.0722;
-      samples += 1;
-    }
+async function writeFileIfChanged(targetPath, bytes) {
+  try {
+    const existingBytes = await readFile(targetPath);
+    if (existingBytes.equals(bytes)) return false;
+  } catch (error) {
+    if (error?.code !== "ENOENT") throw error;
   }
-  return samples === 0 ? 0 : sum / samples;
+  await writeFile(targetPath, bytes);
+  return true;
 }
 
-function semanticCanopyAlpha(source, width, height, definition) {
+function registeredSegmentationAlpha(
+  segmentation,
+  source,
+  neutralizationEdit,
+  width,
+  height,
+) {
   const output = Buffer.alloc(width * height);
   for (let pixel = 0; pixel < output.length; pixel += 1) {
-    const x = pixel % width;
-    const y = Math.floor(pixel / width);
-    const protectedPixel = definition.protectedShapes.some((shape) => (
-      protectedShapeContains(shape, x, y, definition.motionProtectionMargin)
-    ));
-    if (
-      protectedPixel
-      || !polygonContains(definition.canopyPolygon, x, y)
-    ) continue;
+    if (segmentation[pixel * 4 + 3] < 64) continue;
     const offset = pixel * 4;
     const red = source[offset];
     const green = source[offset + 1];
     const blue = source[offset + 2];
+    const neutralizedDifference = Math.max(
+      Math.abs(red - neutralizationEdit[offset]),
+      Math.abs(green - neutralizationEdit[offset + 1]),
+      Math.abs(blue - neutralizationEdit[offset + 2]),
+    );
     const luminance = red * 0.2126 + green * 0.7152 + blue * 0.0722;
-    if (definition.segmentation === "native-conifer-needle-color-local-contrast") {
-      const localContrast = localMeanLuminance(source, width, height, x, y)
-        - luminance;
-      if (
-        luminance <= 105
-        && green >= blue - 6
-        && green >= red - 22
-        && localContrast >= -4
-      ) output[pixel] = 255;
-      continue;
-    }
-    const yellowExcess = (red + green) * 0.5 - blue;
+    const needleChroma = green - blue >= 6 && red - blue >= 4;
+    const deepNeedleShadow = luminance <= 68
+      && green >= blue - 2
+      && red >= blue - 10;
     if (
-      yellowExcess >= 17
-      && green - blue >= 9
-      && red - blue >= 3
-      && luminance >= 28
+      neutralizedDifference >= 6
+      && (needleChroma || deepNeedleShadow)
     ) output[pixel] = 255;
   }
   return output;
 }
 
-function neutralizationSupportAlpha(width, height, definition) {
+function neutralizationSupportAlpha(canopyAlpha, width, height, definition) {
   const output = Buffer.alloc(width * height);
-  for (let pixel = 0; pixel < output.length; pixel += 1) {
+  const radius = definition.neutralizationDilation;
+  for (let pixel = 0; pixel < canopyAlpha.length; pixel += 1) {
+    if (canopyAlpha[pixel] !== 255) continue;
     const x = pixel % width;
     const y = Math.floor(pixel / width);
-    const protectedPixel = definition.protectedShapes.some((shape) => (
-      protectedShapeContains(shape, x, y, definition.motionProtectionMargin)
-    ));
-    if (
-      !protectedPixel
-      && polygonContains(definition.canopyPolygon, x, y)
-    ) output[pixel] = 255;
+    for (let deltaY = -radius; deltaY <= radius; deltaY += 1) {
+      const supportY = y + deltaY;
+      if (supportY < 0 || supportY >= height) continue;
+      const horizontalRadius = Math.floor(Math.sqrt(radius ** 2 - deltaY ** 2));
+      for (let deltaX = -horizontalRadius; deltaX <= horizontalRadius; deltaX += 1) {
+        const supportX = x + deltaX;
+        if (supportX < 0 || supportX >= width) continue;
+        output[supportY * width + supportX] = 255;
+      }
+    }
   }
   return output;
 }
@@ -517,44 +472,39 @@ function neutralizedDifference(source, inpainted, canopyAlpha, threshold = 192) 
   });
 }
 
-function registeredArtboardBounds(tileId, sourceCrop) {
-  const row = Number(tileId.slice(1, 2));
-  const column = Number(tileId.slice(4));
+function registeredArtboardBounds(sourceCrop) {
   return Object.freeze({
     origin: Object.freeze([
-      column * TILE_ARTBOARD[0]
-        + sourceCrop[0] / NATIVE_TILE_DIMENSIONS[0] * TILE_ARTBOARD[0],
-      row * TILE_ARTBOARD[1]
-        + sourceCrop[1] / NATIVE_TILE_DIMENSIONS[1] * TILE_ARTBOARD[1],
+      sourceCrop[0] / MASTER_SOURCE_DIMENSIONS[0] * ARTBOARD[0],
+      sourceCrop[1] / MASTER_SOURCE_DIMENSIONS[1] * ARTBOARD[1],
     ]),
     span: Object.freeze([
-      sourceCrop[2] / NATIVE_TILE_DIMENSIONS[0] * TILE_ARTBOARD[0],
-      sourceCrop[3] / NATIVE_TILE_DIMENSIONS[1] * TILE_ARTBOARD[1],
+      sourceCrop[2] / MASTER_SOURCE_DIMENSIONS[0] * ARTBOARD[0],
+      sourceCrop[3] / MASTER_SOURCE_DIMENSIONS[1] * ARTBOARD[1],
     ]),
   });
 }
 
+function registeredGridCell(artboardBounds) {
+  const centerX = artboardBounds.origin[0] + artboardBounds.span[0] * 0.5;
+  const centerY = artboardBounds.origin[1] + artboardBounds.span[1] * 0.5;
+  return `${centerX < ARTBOARD[0] * 0.5 ? "B" : "C"}${
+    centerY < ARTBOARD[1] * 0.5 ? "1" : "2"
+  }`;
+}
+
 async function build() {
-  const sourceTiles = new Map();
-  const sourceCollection = [];
-  for (const id of NATIVE_TILE_IDS) {
-    const filePath = sourcePath(id);
-    const bytes = await readFile(filePath);
-    const metadata = await sharp(bytes).metadata();
-    if (
-      metadata.width !== NATIVE_TILE_DIMENSIONS[0]
-      || metadata.height !== NATIVE_TILE_DIMENSIONS[1]
-      || metadata.format !== "png"
-    ) {
-      throw new RangeError(`${id} is not a ${NATIVE_TILE_DIMENSIONS.join("x")} native PNG.`);
-    }
-    sourceTiles.set(id, bytes);
-    sourceCollection.push(Object.freeze({
-      dimensions: NATIVE_TILE_DIMENSIONS,
-      id,
-      path: publicSourcePath(id),
-      sha256: sha256(bytes),
-    }));
+  const sourceBytes = await readFile(MASTER_SOURCE_PATH);
+  const sourceMetadata = await sharp(sourceBytes).metadata();
+  if (
+    sourceMetadata.width !== MASTER_SOURCE_DIMENSIONS[0]
+    || sourceMetadata.height !== MASTER_SOURCE_DIMENSIONS[1]
+    || sourceMetadata.format !== "png"
+    || sourceMetadata.hasAlpha !== true
+  ) {
+    throw new RangeError(
+      `${MASTER_SOURCE_ID} is not the ${MASTER_SOURCE_DIMENSIONS.join("x")} active RGBA master.`,
+    );
   }
 
   await Promise.all([
@@ -564,20 +514,28 @@ async function build() {
   const resources = [];
   const instances = [];
   const neutralizationSources = [];
+  const segmentationSources = [];
   const separationEvidence = [];
   const expectedOutputNames = new Set();
   let foliageDecodedBytes = 0;
 
   for (const definition of GROUPS) {
-    const sourceBytes = sourceTiles.get(definition.sourceTileId);
     const [left, top, width, height] = definition.crop;
     const neutralizationSourcePath = path.join(
       OUTPUT_ROOT,
       definition.neutralizationSourceName,
     );
-    const neutralizationSourceBytes = await readFile(neutralizationSourcePath);
+    const segmentationSourcePath = path.join(
+      OUTPUT_ROOT,
+      definition.segmentationSourceName,
+    );
+    const [neutralizationSourceBytes, segmentationSourceBytes] = await Promise.all([
+      readFile(neutralizationSourcePath),
+      readFile(segmentationSourcePath),
+    ]);
     expectedOutputNames.add(definition.neutralizationSourceName);
-    const [source, neutralizationEdit] = await Promise.all([
+    expectedOutputNames.add(definition.segmentationSourceName);
+    const [source, neutralizationEdit, segmentationEdit] = await Promise.all([
       sharp(sourceBytes)
         .extract({ left, top, width, height })
         .ensureAlpha()
@@ -588,14 +546,26 @@ async function build() {
         .ensureAlpha()
         .raw()
         .toBuffer(),
+      sharp(segmentationSourceBytes)
+        .ensureAlpha()
+        .raw()
+        .toBuffer({ resolveWithObject: true }),
     ]);
-    const canopyMask = semanticCanopyAlpha(
+    if (
+      segmentationEdit.info.width !== width
+      || segmentationEdit.info.height !== height
+    ) {
+      throw new RangeError(`${definition.id} segmentation is not exactly ${width}x${height}.`);
+    }
+    const canopyMask = registeredSegmentationAlpha(
+      segmentationEdit.data,
       source,
+      neutralizationEdit,
       width,
       height,
-      definition,
     );
     const neutralAlpha = neutralizationSupportAlpha(
+      canopyMask,
       width,
       height,
       definition,
@@ -679,28 +649,15 @@ async function build() {
       (pixel) => neutralAlpha[pixel] === 255 && canopyMask[pixel] === 0,
     );
     const atRestDifference = differenceMetrics(source, atRestComposite);
-    const protectedRects = definition.protectedShapes;
     const protectedDifference = differenceMetrics(
       source,
       atRestComposite,
-      (pixel) => {
-        const x = pixel % width;
-        const y = Math.floor(pixel / width);
-        return protectedRects.some((shape) => (
-          protectedShapeContains(shape, x, y)
-        ));
-      },
+      () => false,
     );
     const forcedProtectedDifference = differenceMetrics(
       forcedStartComposite,
       forcedPeakComposite,
-      (pixel) => {
-        const x = pixel % width;
-        const y = Math.floor(pixel / width);
-        return protectedRects.some((shape) => (
-          protectedShapeContains(shape, x, y)
-        ));
-      },
+      () => false,
     );
     if (
       outsideNeutralization.changedPixels !== 0
@@ -709,7 +666,13 @@ async function build() {
       || atRestDifference.changedPixels !== 0
       || forcedProtectedDifference.changedPixels !== 0
     ) {
-      throw new Error(`${definition.id} changes a native gap, protected pixel, or at-rest source pixel.`);
+      throw new Error(`${definition.id} changes a native gap, protected pixel, or at-rest source pixel: ${JSON.stringify({
+        atRestDifference,
+        forcedProtectedDifference,
+        nativeGapDifference,
+        outsideNeutralization,
+        protectedDifference,
+      })}`);
     }
     const proofOutputs = [
       ["native-source", source],
@@ -739,7 +702,7 @@ async function build() {
       ),
       id: definition.id,
       maskDerivation: definition.segmentation,
-      maskRegistrationArtifact: `.codex-tmp/gauntlet/ninjaone-mvp-20260807-01/artifacts/foliage-r3/source-composites/${definition.id}-mask-registration.png`,
+      maskRegistrationArtifact: `.codex-tmp/gauntlet/ninjaone-mvp-20260807-01/artifacts/foliage-r4/source-composites/${definition.id}-mask-registration.png`,
       nativeGapDifference,
       nativeGapPixels: underlay.nativeGapPixels,
       neutralizationDilationPixels: definition.neutralizationDilation,
@@ -773,13 +736,13 @@ async function build() {
     ];
     const groupResources = new Map();
     for (const output of outputs) {
-      const outputName = `${output.id}-r3.png`;
+      const outputName = `${output.id}-r4.png`;
       expectedOutputNames.add(outputName);
       const outputPath = path.join(OUTPUT_ROOT, outputName);
       const outputBytes = await sharp(output.rgba, {
         raw: { channels: 4, height: trim.height, width: trim.width },
       }).png({ compressionLevel: 9, palette: false }).toBuffer();
-      await writeFile(outputPath, outputBytes);
+      await writeFileIfChanged(outputPath, outputBytes);
       const digest = sha256(outputBytes);
       const metrics = alphaMetrics(output.alpha, trim.width, trim.height);
       const connection = largestConnectedComponent(output.alpha, trim.width, trim.height);
@@ -804,7 +767,7 @@ async function build() {
         path: versionedPublicPath(outputPath, digest),
         sha256: digest,
         sourceCrop: registeredSourceCrop,
-        sourceTileId: definition.sourceTileId,
+        sourceMasterId: MASTER_SOURCE_ID,
       });
       resources.push(resource);
       groupResources.set(output.kind, resource);
@@ -823,31 +786,35 @@ async function build() {
       sha256: sha256(neutralizationSourceBytes),
       usage: "rgb is consumed only beneath source-derived opaque leaf pixels; native RGB is retained in every registered crown gap",
     }));
-    const protectedSourceRects = definition.protectedShapes.map((shape) => Object.freeze({
-      id: shape.id,
-      kind: shape.kind,
-      rect: Object.freeze([
-        left + shape.x,
-        top + shape.y,
-        shape.width,
-        shape.height,
-      ]),
+    segmentationSources.push(Object.freeze({
+      dimensions: Object.freeze([width, height]),
+      id: `${definition.id}-tree-alpha-imagegen`,
+      inputRole: "tree-only-alpha-guidance",
+      path: versionedPublicPath(
+        segmentationSourcePath,
+        sha256(segmentationSourceBytes),
+      ),
+      provider: "built-in-imagegen-precise-object-segmentation",
+      sha256: sha256(segmentationSourceBytes),
+      usage: "alpha only; runtime RGB is copied byte-for-byte from the active r8 terrain master",
     }));
+    const protectedSourceRects = Object.freeze([]);
+    const artboardBounds = registeredArtboardBounds(registeredSourceCrop);
     instances.push(Object.freeze({
       animation: "canopy-bend",
-      artboardBounds: registeredArtboardBounds(definition.sourceTileId, registeredSourceCrop),
+      artboardBounds,
       bendDegrees: definition.bendDegrees,
       canopyResourceId: canopyResource.id,
       checkpoint: definition.checkpoint,
       durationSeconds: definition.durationSeconds,
-      gridCell: "C2",
+      gridCell: registeredGridCell(artboardBounds),
       id: `${definition.id}-instance`,
       lagDegrees: definition.lagDegrees,
       neutralizationResourceId: neutralizationResource.id,
       phaseSeconds: definition.phaseSeconds,
       pivotYPercent: 96,
       protectedSourceRects,
-      sourceTileId: definition.sourceTileId,
+      sourceMasterId: MASTER_SOURCE_ID,
     }));
   }
 
@@ -858,34 +825,33 @@ async function build() {
   }
 
   const terrainDecodedBytes = MAXIMUM_TERRAIN_TILES
-    * NATIVE_TILE_DIMENSIONS[0]
-    * NATIVE_TILE_DIMENSIONS[1]
+    * TERRAIN_TILE_DECODE_DIMENSIONS[0]
+    * TERRAIN_TILE_DECODE_DIMENSIONS[1]
     * 4;
-  const fixedC2DecodedBytes = terrainDecodedBytes + foliageDecodedBytes;
-  const combinedDecodedBytes = fixedC2DecodedBytes;
-  const mountedFoliageNodes = instances.length * NODES_PER_GROUP;
+  const conservativeDecodedBytes = terrainDecodedBytes + foliageDecodedBytes;
+  const combinedDecodedBytes = conservativeDecodedBytes;
+  const mountedGroups = Math.min(instances.length, MAXIMUM_SELECTED_GROUPS);
+  const mountedFoliageNodes = mountedGroups * NODES_PER_GROUP;
   if (
-    instances.length > MAXIMUM_SELECTED_GROUPS
-    || mountedFoliageNodes > MAXIMUM_SUPPLEMENTAL_NODES
+    mountedFoliageNodes > MAXIMUM_SUPPLEMENTAL_NODES
     || combinedDecodedBytes > MAXIMUM_DECODED_BYTES
   ) {
     throw new RangeError("Foliage violates the registered node or decoded union budget.");
   }
 
   const manifest = {
-    schemaVersion: 2,
-    id: "career-world/capitals/ninjaone/foliage-native@r3",
-    status: "coherent-native-canopy-with-neutralization",
-    sourceCollection: {
-      authority: "twelve-original-native-generated-r2-pngs",
-      forbiddenSources: [
-        "ninjaone-environment-terrain-master-detail-r2.png",
-        "runtime-close-quilt-r3",
-        "browser-screenshots",
-      ],
-      tiles: sourceCollection,
+    schemaVersion: 3,
+    id: "career-world/capitals/ninjaone/foliage-native@r4",
+    status: "active-master-native-canopy-with-neutralization",
+    sourceMaster: {
+      authority: "active-r8-geology-master",
+      dimensions: MASTER_SOURCE_DIMENSIONS,
+      id: MASTER_SOURCE_ID,
+      path: MASTER_SOURCE_PUBLIC_PATH,
+      sha256: sha256(sourceBytes),
     },
     neutralizationSources,
+    segmentationSources,
     separationEvidence,
     eligibility: {
       maxDetailEnterSpan: MAX_DETAIL_ENTER_SPAN,
@@ -897,25 +863,15 @@ async function build() {
         origin: [0.125, 0],
         span: [0.25, 1 / 3],
       },
+      coveredGridCells: [...new Set(instances.map(({ gridCell }) => gridCell))].sort(),
       grid: GRID,
-      gridCell: {
-        artboardBounds: {
-          origin: [720, 540],
-          span: [720, 540],
-        },
-        id: "C2",
-        worldBounds: {
-          origin: [0.25, 1 / 6],
-          span: [0.125, 1 / 6],
-        },
-      },
-      nativeTileDimensions: NATIVE_TILE_DIMENSIONS,
-      tileArtboard: TILE_ARTBOARD,
+      masterDimensions: MASTER_SOURCE_DIMENSIONS,
+      sourcePixelsPerArtboardUnit: 4,
     },
-    ownership: "the static underlay changes RGB only beneath source-derived opaque leaf pixels and reproduces exact native RGB in genuine crown gaps; the animated canopy excludes protected trunk, rock, trail, stream, and neighbor-tree shapes",
+    ownership: "the static underlay changes RGB only beneath source-derived opaque tree pixels and reproduces exact native RGB in genuine crown gaps; the animated canopy requires both imagegen tree alpha and active-r8 conifer chroma plus neutralization difference",
     budgets: {
       combinedDecodedBytes,
-      fixedC2DecodedBytes,
+      conservativeDecodedBytes,
       foliageDecodedBytes,
       futureSupplementalNodeHeadroom: MAXIMUM_SUPPLEMENTAL_NODES - mountedFoliageNodes,
       maximumDecodedBytes: MAXIMUM_DECODED_BYTES,
@@ -923,15 +879,16 @@ async function build() {
       maximumSupplementalNodes: MAXIMUM_SUPPLEMENTAL_NODES,
       maximumTerrainTiles: MAXIMUM_TERRAIN_TILES,
       mountedFoliageNodes,
-      mountedGroups: instances.length,
+      mountedGroups,
       nodesPerGroup: NODES_PER_GROUP,
+      poolGroups: instances.length,
       terrainDecodedBytes,
     },
     resources,
     instances,
   };
   await mkdir(path.dirname(MANIFEST_PATH), { recursive: true });
-  await writeFile(MANIFEST_PATH, `${JSON.stringify(manifest, null, 2)}\n`);
+  await writeJsonAtomically(MANIFEST_PATH, manifest);
   process.stdout.write(
     `Built ${instances.length} coherent canopy groups (${mountedFoliageNodes} foliage nodes; ${combinedDecodedBytes} conservative decoded bytes).\n`,
   );

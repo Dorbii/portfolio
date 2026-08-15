@@ -11,7 +11,7 @@
     "build": "vinext build",
     "start": "vinext start",
     "build:environment-native": "node scripts/build-ninjaone-environment-native-detail.mjs --static-only",
-    "build:ninjaone-environment-foliage": "node scripts/build-ninjaone-environment-foliage-r3.mjs",
+    "build:ninjaone-environment-foliage": "node scripts/build-ninjaone-environment-foliage-r4.mjs",
     "build:ninjaone-environment-seams": "node scripts/build-ninjaone-environment-seam-integration-r2.mjs",
     "build:ninjaone-inland-water": "node scripts/build-ninjaone-inland-water-r1.mjs",
     "capture:ninjaone-environment-mvp": "node scripts/capture-ninjaone-environment-mvp.mjs",

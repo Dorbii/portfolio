@@ -38,13 +38,13 @@ test("authority visibility cascades without erasing child selections", () => {
   );
 });
 
-test("unavailable layers cannot become effectively visible", () => {
+test("coastal ambience is independently live while future terrain shadows stay gated", () => {
   const forced = Object.freeze({
     ...DEFAULT_ENVIRONMENT_LAYER_VISIBILITY,
     L1_2: true,
     L2_3: true,
   });
-  assert.equal(isEnvironmentLayerEffectivelyVisible(forced, "L1_2"), false);
+  assert.equal(isEnvironmentLayerEffectivelyVisible(forced, "L1_2"), true);
   assert.equal(isEnvironmentLayerEffectivelyVisible(forced, "L2_3"), false);
 });
 

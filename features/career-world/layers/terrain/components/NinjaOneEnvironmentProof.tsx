@@ -5,9 +5,9 @@ import {
 } from "../../../shared/lod";
 import { WORLD_PLANE } from "../../../shared/world";
 import { NinjaOneEnvironmentNativeDetail } from "../detail/components/NinjaOneEnvironmentNativeDetail";
+import { NinjaOneEnvironmentGeology } from "./NinjaOneEnvironmentGeology";
 import {
   NINJAONE_ENVIRONMENT_ARTBOARD,
-  NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES,
   NINJAONE_ENVIRONMENT_GRID_CELLS,
   NINJAONE_ENVIRONMENT_LAYER_ORDER,
   NINJAONE_ENVIRONMENT_LOD_LAYERS,
@@ -31,6 +31,7 @@ interface NinjaOneEnvironmentProofProps {
   readonly active: boolean;
   readonly camera: CameraView;
   readonly detailState: DetailState;
+  readonly onGeologyReadyChange?: (ready: boolean) => void;
   readonly proofMode?: boolean;
   readonly showFoliage?: boolean;
   readonly showSupplementalDetail?: boolean;
@@ -43,12 +44,6 @@ const TIER_SUMMARIES = Object.freeze({
   site: "Ravines / tarn / cascades / trails / groves",
   close: "Rock strata / scree / wet banks / individual flora",
 });
-
-const INLAND_TERRAIN_ERASE_MASK_PATH =
-  "/career-world/layers/inland-water/authority/masks/ninjaone-inland-terrain-erase-r1.png";
-const INLAND_TERRAIN_ERASE_MASK_CROP = Object.freeze([480, 168, 576, 912] as const);
-const TERRAIN_CONTACT_MASK_PATH =
-  "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-contact-r3.png";
 
 function PlateImage({
   layer,
@@ -112,6 +107,7 @@ export function NinjaOneEnvironmentProof({
   active,
   camera,
   detailState,
+  onGeologyReadyChange,
   proofMode = false,
   showFoliage = true,
   showSupplementalDetail = true,
@@ -126,18 +122,6 @@ export function NinjaOneEnvironmentProof({
   const plateTier = detailState.tier.id === "world"
     ? null
     : detailState.tier.id as NinjaOneEnvironmentPlateTier;
-  // Capital-scale geology is already owned by TerritoryLandform. The authored
-  // 4:3 plate is retained for isolated proof and close-detail continuity, but
-  // mounting it at the default capital camera duplicates the land authority
-  // and exposes the plate's rectangular registration boundary.
-  const geologyPlateAdmitted = proofMode
-    || plateTier === "site"
-    || plateTier === "close";
-  const geologySource = plateTier
-    && geologyPlateAdmitted
-    && visibleLayers.includes("terrain-geology")
-    ? NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES[plateTier]
-    : null;
   const staticFoliageSource = showSupplementalDetail
     && plateTier && visibleLayers.includes("static-foliage")
     ? NINJAONE_ENVIRONMENT_STATIC_FOLIAGE_SOURCES[plateTier]
@@ -165,14 +149,16 @@ export function NinjaOneEnvironmentProof({
     )
     : [];
   const sharedNodeCount = visibleRocks.length;
-  const environmentOpacity = detailState.tier.id === "capital"
-    ? Math.max(0, Math.min(1, (detailState.territoryToCapital - 0.35) / 0.65))
-    : detailState.tier.id === "world" || detailState.tier.id === "territory"
-      ? 0
-      : 1;
+  const environmentOpacity = plateTier ? 1 : 0;
 
   return (
     <>
+      <NinjaOneEnvironmentGeology
+        camera={camera}
+        detailState={detailState}
+        onReadyChange={onGeologyReadyChange}
+        proofMode={proofMode}
+      />
       <svg
         aria-label={proofMode
           ? "City-free NinjaOne B2 C1 C2 natural environment proof"
@@ -199,102 +185,6 @@ export function NinjaOneEnvironmentProof({
           opacity={environmentOpacity}
           transform={`translate(${worldX} ${worldY}) scale(${scaleX} ${scaleY})`}
         >
-          {geologySource ? (
-            <defs>
-              <filter
-                colorInterpolationFilters="sRGB"
-                height="100%"
-                id="ninjaone-environment-terrain-erase-filter"
-                width="100%"
-                x="0"
-                y="0"
-              >
-                <feColorMatrix
-                  type="matrix"
-                  values={[
-                    "0 0 0 0 0",
-                    "0 0 0 0 0",
-                    "0 0 0 0 0",
-                    "0 0 0 0 1",
-                  ].join(" ")}
-                />
-              </filter>
-              <mask
-                height={NINJAONE_ENVIRONMENT_ARTBOARD[1]}
-                id="ninjaone-environment-terrain-contact"
-                maskUnits="userSpaceOnUse"
-                style={{ maskType: "luminance" }}
-                width={NINJAONE_ENVIRONMENT_ARTBOARD[0]}
-                x="0"
-                y="0"
-              >
-                <image
-                  href={TERRAIN_CONTACT_MASK_PATH}
-                  height={NINJAONE_ENVIRONMENT_ARTBOARD[1]}
-                  width={NINJAONE_ENVIRONMENT_ARTBOARD[0]}
-                  x="0"
-                  y="0"
-                />
-              </mask>
-              <mask
-                height={NINJAONE_ENVIRONMENT_ARTBOARD[1]}
-                id="ninjaone-environment-proof-alpha"
-                maskUnits="userSpaceOnUse"
-                width={NINJAONE_ENVIRONMENT_ARTBOARD[0]}
-                x="0"
-                y="0"
-              >
-                <image
-                  height={NINJAONE_ENVIRONMENT_ARTBOARD[1]}
-                  href={geologySource.path}
-                  preserveAspectRatio="none"
-                  width={NINJAONE_ENVIRONMENT_ARTBOARD[0]}
-                  x="0"
-                  y="0"
-                />
-              </mask>
-              <mask
-                height={NINJAONE_ENVIRONMENT_ARTBOARD[1]}
-                id="ninjaone-environment-water-cutout"
-                maskUnits="userSpaceOnUse"
-                style={{ maskType: "luminance" }}
-                width={NINJAONE_ENVIRONMENT_ARTBOARD[0]}
-                x="0"
-                y="0"
-              >
-                <rect
-                  fill="white"
-                  height={NINJAONE_ENVIRONMENT_ARTBOARD[1]}
-                  width={NINJAONE_ENVIRONMENT_ARTBOARD[0]}
-                  x="0"
-                  y="0"
-                />
-                <image
-                  filter="url(#ninjaone-environment-terrain-erase-filter)"
-                  height={INLAND_TERRAIN_ERASE_MASK_CROP[3]}
-                  href={INLAND_TERRAIN_ERASE_MASK_PATH}
-                  preserveAspectRatio="none"
-                  width={INLAND_TERRAIN_ERASE_MASK_CROP[2]}
-                  x={INLAND_TERRAIN_ERASE_MASK_CROP[0]}
-                  y={INLAND_TERRAIN_ERASE_MASK_CROP[1]}
-                />
-              </mask>
-            </defs>
-          ) : null}
-          <g mask={geologySource
-            ? "url(#ninjaone-environment-terrain-contact)"
-            : undefined}>
-              {geologySource ? (
-                <g mask="url(#ninjaone-environment-water-cutout)">
-                  <PlateImage layer="terrain-geology" source={geologySource} />
-                </g>
-              ) : null}
-              <g mask={geologySource
-                ? "url(#ninjaone-environment-water-cutout)"
-                : undefined}>
-                <g mask={geologySource
-                  ? "url(#ninjaone-environment-proof-alpha)"
-                  : undefined}>
               <NinjaOneEnvironmentNativeDetail
                 active={active}
                 camera={camera}
@@ -322,9 +212,6 @@ export function NinjaOneEnvironmentProof({
             {surfaceEcologySource ? (
               <PlateImage layer="surface-ecology" source={surfaceEcologySource} />
             ) : null}
-                </g>
-              </g>
-          </g>
         </g>
       </svg>
 

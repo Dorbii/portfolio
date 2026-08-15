@@ -1,4 +1,4 @@
-import manifest from "../../../../../../public/career-world/capitals/ninjaone/environment/manifests/foliage-native-r3.json" with { type: "json" };
+import manifest from "../../../../../../public/career-world/capitals/ninjaone/environment/manifests/foliage-native-r4.json" with { type: "json" };
 import type { CameraView, Pair } from "../../../../shared/camera";
 
 export type NinjaOneEnvironmentFoliageResourceKind =
@@ -19,7 +19,7 @@ export interface NinjaOneEnvironmentFoliageResource {
   readonly path: string;
   readonly sha256: string;
   readonly sourceCrop: readonly [number, number, number, number];
-  readonly sourceTileId: string;
+  readonly sourceMasterId: string;
 }
 
 export interface NinjaOneEnvironmentFoliageInstance {
@@ -29,7 +29,7 @@ export interface NinjaOneEnvironmentFoliageInstance {
   readonly canopyResource: NinjaOneEnvironmentFoliageResource;
   readonly checkpoint: string;
   readonly durationSeconds: number;
-  readonly gridCell: "C2";
+  readonly gridCell: "B1" | "B2" | "C1" | "C2";
   readonly id: string;
   readonly lagDegrees: number;
   readonly neutralizationResource: NinjaOneEnvironmentFoliageResource;
@@ -38,7 +38,7 @@ export interface NinjaOneEnvironmentFoliageInstance {
   /** Compatibility alias for callers that account the animated canopy only. */
   readonly resource: NinjaOneEnvironmentFoliageResource;
   readonly resources: readonly NinjaOneEnvironmentFoliageResource[];
-  readonly sourceTileId: string;
+  readonly sourceMasterId: string;
 }
 
 export interface NinjaOneEnvironmentFoliageEligibilityInput {
@@ -68,7 +68,7 @@ interface RawResource {
   readonly path: string;
   readonly sha256: string;
   readonly sourceCrop: readonly number[];
-  readonly sourceTileId: string;
+  readonly sourceMasterId: string;
 }
 
 interface RawInstance {
@@ -84,28 +84,16 @@ interface RawInstance {
   readonly neutralizationResourceId: string;
   readonly phaseSeconds: number;
   readonly pivotYPercent: number;
-  readonly sourceTileId: string;
+  readonly sourceMasterId: string;
 }
 
-const EXPECTED_ID = "career-world/capitals/ninjaone/foliage-native@r3";
-const RESOURCE_PATH_PREFIX = "/career-world/capitals/ninjaone/environment/shared/foliage-native-r3/";
-const NATIVE_SOURCE_PATH_PREFIX = "/art-source/career-world/ninjaone-environment/production-r2/detail-tiles-r2/generated/";
+const EXPECTED_ID = "career-world/capitals/ninjaone/foliage-native@r4";
+const EXPECTED_SOURCE_MASTER_ID = "terrain-master-detail-r8";
+const EXPECTED_SOURCE_MASTER_PATH =
+  "/art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r8.png";
+const RESOURCE_PATH_PREFIX = "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/";
 const ENVIRONMENT_WORLD_ORIGIN = Object.freeze([0.125, 0] as Pair);
 const ENVIRONMENT_WORLD_SPAN = Object.freeze([0.25, 1 / 3] as Pair);
-const EXPECTED_NATIVE_TILE_IDS = Object.freeze([
-  "r0-c2",
-  "r0-c3",
-  "r1-c2",
-  "r1-c3",
-  "r2-c0",
-  "r2-c1",
-  "r2-c2",
-  "r2-c3",
-  "r3-c0",
-  "r3-c1",
-  "r3-c2",
-  "r3-c3",
-]);
 
 function finitePair(values: readonly number[], label: string): Pair {
   if (values.length !== 2 || values.some((value) => !Number.isFinite(value))) {
@@ -137,53 +125,39 @@ const registrationArtboard = finitePair(
   manifest.registration.artboard,
   "registration.artboard",
 );
-const c2ArtboardBounds = bounds(
-  manifest.registration.gridCell.artboardBounds,
-  "registration.gridCell.artboardBounds",
-);
-const sourceTileIds = manifest.sourceCollection.tiles.map(({ id }) => id);
-const sourceCollectionValid = sourceTileIds.join(",") === EXPECTED_NATIVE_TILE_IDS.join(",")
-  && manifest.sourceCollection.tiles.every((tile) => (
-    tile.path.startsWith(NATIVE_SOURCE_PATH_PREFIX)
-    && tile.path.endsWith(`/${tile.id}-generated-r2.png`)
-    && tile.dimensions.join(",") === "1448,1086"
-    && tile.sha256.length === 64
-    && !manifest.sourceCollection.forbiddenSources.some((forbidden) => (
-      tile.path.includes(forbidden)
-    ))
-  ));
 
 if (
-  manifest.schemaVersion !== 2
+  manifest.schemaVersion !== 3
   || manifest.id !== EXPECTED_ID
-  || manifest.status !== "coherent-native-canopy-with-neutralization"
-  || manifest.sourceCollection.authority !== "twelve-original-native-generated-r2-pngs"
-  || !sourceCollectionValid
+  || manifest.status !== "active-master-native-canopy-with-neutralization"
+  || manifest.sourceMaster.authority !== "active-r8-geology-master"
+  || manifest.sourceMaster.id !== EXPECTED_SOURCE_MASTER_ID
+  || manifest.sourceMaster.path !== EXPECTED_SOURCE_MASTER_PATH
+  || manifest.sourceMaster.dimensions.join(",") !== "5760,4320"
+  || manifest.sourceMaster.sha256.length !== 64
   || registrationArtboard.join(",") !== "1440,1080"
   || manifest.registration.boundingWorldView.origin.join(",") !== "0.125,0"
   || manifest.registration.boundingWorldView.span.join(",") !== `0.25,${1 / 3}`
-  || manifest.registration.gridCell.id !== "C2"
-  || c2ArtboardBounds.origin.join(",") !== "720,540"
-  || c2ArtboardBounds.span.join(",") !== "720,540"
-  || manifest.registration.gridCell.worldBounds.origin.join(",") !== `0.25,${1 / 6}`
-  || manifest.registration.gridCell.worldBounds.span.join(",") !== `0.125,${1 / 6}`
-  || manifest.registration.nativeTileDimensions.join(",") !== "1448,1086"
-  || manifest.eligibility.maxDetailEnterSpan !== 0.075
-  || manifest.eligibility.maxDetailRetainSpan !== 0.09
+  || manifest.registration.masterDimensions.join(",") !== "5760,4320"
+  || manifest.registration.sourcePixelsPerArtboardUnit !== 4
+  || manifest.eligibility.maxDetailEnterSpan !== 0.12
+  || manifest.eligibility.maxDetailRetainSpan !== 0.14
   || manifest.eligibility.maxDetailRetainSpan
     <= manifest.eligibility.maxDetailEnterSpan
   || manifest.budgets.maximumSupplementalNodes !== 6
-  || manifest.budgets.maximumSelectedGroups !== 2
+  || manifest.budgets.maximumSelectedGroups !== 3
   || manifest.budgets.nodesPerGroup !== 2
   || manifest.budgets.maximumDecodedBytes !== 32 * 1024 * 1024
   || manifest.budgets.maximumTerrainTiles !== 4
   || manifest.budgets.terrainDecodedBytes !== 4 * 1448 * 1086 * 4
-  || manifest.budgets.mountedGroups !== manifest.instances.length
+  || manifest.budgets.poolGroups !== manifest.instances.length
+  || manifest.budgets.mountedGroups
+    !== Math.min(manifest.instances.length, manifest.budgets.maximumSelectedGroups)
   || manifest.budgets.mountedFoliageNodes
-    !== manifest.instances.length * manifest.budgets.nodesPerGroup
+    !== manifest.budgets.mountedGroups * manifest.budgets.nodesPerGroup
   || manifest.budgets.mountedFoliageNodes > manifest.budgets.maximumSupplementalNodes
 ) {
-  throw new TypeError("NinjaOne r3 foliage registration contract is invalid.");
+  throw new TypeError("NinjaOne r4 foliage registration contract is invalid.");
 }
 
 const resourceMap = new Map<string, NinjaOneEnvironmentFoliageResource>();
@@ -200,7 +174,7 @@ for (const value of manifest.resources as readonly RawResource[]) {
     || resourceMap.has(value.id)
     || !value.path.startsWith(RESOURCE_PATH_PREFIX)
     || value.sha256.length !== 64
-    || !EXPECTED_NATIVE_TILE_IDS.includes(value.sourceTileId)
+    || value.sourceMasterId !== EXPECTED_SOURCE_MASTER_ID
     || !Number.isInteger(value.decodedBytes)
     || value.decodedBytes !== dimensions[0] * dimensions[1] * 4
     || !Number.isInteger(value.opaquePixels)
@@ -218,8 +192,8 @@ for (const value of manifest.resources as readonly RawResource[]) {
       && value.largestConnectedComponentRatio < 0.9)
     || sourceCrop[0] < 0
     || sourceCrop[1] < 0
-    || sourceCrop[0] + sourceCrop[2] > 1448
-    || sourceCrop[1] + sourceCrop[3] > 1086
+    || sourceCrop[0] + sourceCrop[2] > 5760
+    || sourceCrop[1] + sourceCrop[3] > 4320
     || alphaBounds[0] < 0
     || alphaBounds[1] < 0
     || alphaBounds[2] >= dimensions[0]
@@ -241,7 +215,7 @@ for (const value of manifest.resources as readonly RawResource[]) {
     path: value.path,
     sha256: value.sha256,
     sourceCrop,
-    sourceTileId: value.sourceTileId,
+    sourceMasterId: value.sourceMasterId,
   }));
 }
 
@@ -253,35 +227,44 @@ export const NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES = Object.freeze(
       value.artboardBounds,
       `instances.${value.id}.artboardBounds`,
     );
+    const gridCell = `${
+      artboardBounds.origin[0] + artboardBounds.span[0] * 0.5 < registrationArtboard[0] * 0.5
+        ? "B"
+        : "C"
+    }${
+      artboardBounds.origin[1] + artboardBounds.span[1] * 0.5 < registrationArtboard[1] * 0.5
+        ? "1"
+        : "2"
+    }` as NinjaOneEnvironmentFoliageInstance["gridCell"];
     if (
       !canopyResource
       || canopyResource.kind !== "coherent-canopy"
       || !neutralizationResource
       || neutralizationResource.kind !== "neutralization-underlay"
-      || canopyResource.sourceTileId !== value.sourceTileId
-      || neutralizationResource.sourceTileId !== value.sourceTileId
+      || canopyResource.sourceMasterId !== value.sourceMasterId
+      || neutralizationResource.sourceMasterId !== value.sourceMasterId
       || canopyResource.sourceCrop.join(",") !== neutralizationResource.sourceCrop.join(",")
       || value.animation !== "canopy-bend"
-      || value.gridCell !== "C2"
-      || !value.checkpoint.startsWith("c2-")
+      || value.gridCell !== gridCell
+      || !value.checkpoint.startsWith(`${gridCell.toLowerCase()}-`)
       || !Number.isFinite(value.phaseSeconds)
       || !Number.isFinite(value.durationSeconds)
       || value.durationSeconds < 5
       || value.durationSeconds > 8
       || !Number.isFinite(value.bendDegrees)
       || value.bendDegrees <= 0
-      || value.bendDegrees > 0.5
+      || value.bendDegrees > 2.5
       || !Number.isFinite(value.lagDegrees)
       || value.lagDegrees < 0
       || value.lagDegrees > 0.15
       || value.pivotYPercent < 92
       || value.pivotYPercent > 98
-      || artboardBounds.origin[0] < c2ArtboardBounds.origin[0]
-      || artboardBounds.origin[1] < c2ArtboardBounds.origin[1]
+      || artboardBounds.origin[0] < 0
+      || artboardBounds.origin[1] < 0
       || artboardBounds.origin[0] + artboardBounds.span[0]
-        > c2ArtboardBounds.origin[0] + c2ArtboardBounds.span[0]
+        > registrationArtboard[0]
       || artboardBounds.origin[1] + artboardBounds.span[1]
-        > c2ArtboardBounds.origin[1] + c2ArtboardBounds.span[1]
+        > registrationArtboard[1]
     ) {
       throw new TypeError(`instances.${value.id} is invalid.`);
     }
@@ -293,7 +276,7 @@ export const NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES = Object.freeze(
       canopyResource,
       checkpoint: value.checkpoint,
       durationSeconds: value.durationSeconds,
-      gridCell: "C2" as const,
+      gridCell,
       id: value.id,
       lagDegrees: value.lagDegrees,
       neutralizationResource,
@@ -301,7 +284,7 @@ export const NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES = Object.freeze(
       pivotYPercent: value.pivotYPercent,
       resource: canopyResource,
       resources,
-      sourceTileId: value.sourceTileId,
+      sourceMasterId: value.sourceMasterId,
     });
   }),
 );
@@ -316,12 +299,16 @@ if (
     !== decodedBytes
       + manifest.budgets.terrainDecodedBytes
   || manifest.budgets.combinedDecodedBytes > manifest.budgets.maximumDecodedBytes
+  || manifest.registration.coveredGridCells.join(",")
+    !== [...new Set(NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.map(({ gridCell }) => gridCell))]
+      .sort()
+      .join(",")
   || new Set(NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.map(({ phaseSeconds }) => phaseSeconds)).size
     !== NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.length
   || new Set(NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.map(({ durationSeconds }) => durationSeconds)).size
     !== NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.length
 ) {
-  throw new TypeError("NinjaOne r3 foliage budget or phase contract is invalid.");
+  throw new TypeError("NinjaOne r4 foliage budget or phase contract is invalid.");
 }
 
 export const NINJAONE_ENVIRONMENT_FOLIAGE_ID = EXPECTED_ID;

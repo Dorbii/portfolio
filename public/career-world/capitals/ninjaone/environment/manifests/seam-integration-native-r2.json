@@ -151,9 +151,9 @@
     "topologyOperation": "none"
   },
   "budgets": {
-    "fixedC2DecodedUnion": 26985456,
+    "fixedC2DecodedUnion": 26457856,
     "fixedC2SeamDecodedBytes": 1297408,
-    "maximumApplicationOwnedDecodedUnion": 26985456,
+    "maximumApplicationOwnedDecodedUnion": 26457856,
     "maximumCohortId": "fixedB2Internal",
     "maximumDecodedBytes": 33554432,
     "maximumMountedResources": 2,
@@ -163,7 +163,7 @@
     "seamDecodedBytes": 1297408,
     "totalAuthoredDecodedBytes": 2594816,
     "unionBreakdown": {
-      "foliageDecodedBytes": 527600,
+      "foliageDecodedBytes": 0,
       "seamDecodedBytes": 1297408,
       "terrainDecodedBytes": 25160448
     },

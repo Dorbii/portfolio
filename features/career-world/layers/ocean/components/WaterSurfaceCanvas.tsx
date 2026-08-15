@@ -12,6 +12,7 @@ export type WaterRenderState = "loading" | "ready" | "fallback";
 interface WaterSurfaceCanvasProps {
   readonly active: boolean;
   readonly camera: CameraView;
+  readonly coastalAmbience: boolean;
   readonly detailState: DetailState;
   readonly light: WorldLight;
   readonly onRenderStateChange?: (state: WaterRenderState) => void;
@@ -20,6 +21,7 @@ interface WaterSurfaceCanvasProps {
 export function WaterSurfaceCanvas({
   active,
   camera,
+  coastalAmbience,
   detailState,
   light,
   onRenderStateChange,
@@ -27,19 +29,23 @@ export function WaterSurfaceCanvas({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const controllerRef = useRef<WaterSurfaceController | null>(null);
   const statusCallbackRef = useRef(onRenderStateChange);
-  const sceneRef = useRef({ active, camera, detailState, light });
+  const sceneRef = useRef({ active, camera, coastalAmbience, detailState, light });
 
   useEffect(() => {
     statusCallbackRef.current = onRenderStateChange;
   }, [onRenderStateChange]);
 
   useEffect(() => {
-    sceneRef.current = { active, camera, detailState, light };
-  }, [active, camera, detailState, light]);
+    sceneRef.current = { active, camera, coastalAmbience, detailState, light };
+  }, [active, camera, coastalAmbience, detailState, light]);
 
   useEffect(() => {
     controllerRef.current?.setActive(active);
   }, [active]);
+
+  useEffect(() => {
+    controllerRef.current?.setCoastalAmbience(coastalAmbience);
+  }, [coastalAmbience]);
 
   useLayoutEffect(() => {
     controllerRef.current?.setView(camera, detailState);
@@ -77,6 +83,7 @@ export function WaterSurfaceCanvas({
         const scene = sceneRef.current;
         localController.setView(scene.camera, scene.detailState);
         localController.setLight(scene.light);
+        localController.setCoastalAmbience(scene.coastalAmbience);
         localController.setActive(scene.active);
         canvas.dataset.renderState = "ready";
         delete canvas.dataset.renderError;
@@ -111,6 +118,8 @@ export function WaterSurfaceCanvas({
       data-authority-layer="L1"
       data-layer="ocean"
       data-motion-layer="L1_1"
+      data-coastal-ambience-layer="L1_2"
+      data-coastal-ambience={coastalAmbience}
       data-active={active}
       data-capital-lod={detailState.territoryToCapital.toFixed(3)}
       data-lod-tier={detailState.tier.id}

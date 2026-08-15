@@ -66,11 +66,13 @@ function foliageStyle(
     "--ninjaone-foliage-bend-lag": `${(-instance.bendDegrees * 0.18).toFixed(3)}deg`,
     "--ninjaone-foliage-bend-peak": `${instance.bendDegrees.toFixed(3)}deg`,
     "--ninjaone-foliage-bend-return": `${(instance.bendDegrees * 0.22).toFixed(3)}deg`,
-    "--ninjaone-foliage-bend-start": `${(-instance.bendDegrees * 0.52).toFixed(3)}deg`,
     "--ninjaone-foliage-duration": `${instance.durationSeconds}s`,
     "--ninjaone-foliage-lag-peak": `${instance.lagDegrees.toFixed(3)}deg`,
     "--ninjaone-foliage-lag-start": `${(-instance.lagDegrees * 0.55).toFixed(3)}deg`,
-    "--ninjaone-foliage-phase": `${instance.phaseSeconds}s`,
+    "--ninjaone-foliage-phase": `${Math.min(
+      Math.abs(instance.phaseSeconds) * 0.14,
+      0.6,
+    ).toFixed(3)}s`,
     "--ninjaone-foliage-pivot-y": `${instance.pivotYPercent}%`,
   } as CSSProperties;
 }
@@ -327,7 +329,7 @@ export function NinjaOneEnvironmentFoliage({
 
   return (
     <g
-      className="ninjaone-environment-foliage-r3"
+      className="ninjaone-environment-foliage-r4"
       ref={groupRef}
       data-environment-foliage-cohort-epoch={currentLoadState.epoch}
       data-environment-foliage-cohort-key={exactCohortKey}

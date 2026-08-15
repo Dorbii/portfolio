@@ -293,10 +293,10 @@ test("native detail selection never mounts an unbounded tile or supplemental set
 test("native terrain delegates foliage to a separate production manifest", async () => {
   const [native, foliage] = await Promise.all([
     readJson("public/career-world/capitals/ninjaone/environment/manifests/native-detail-r2.json"),
-    readJson("public/career-world/capitals/ninjaone/environment/manifests/foliage-native-r3.json"),
+    readJson("public/career-world/capitals/ninjaone/environment/manifests/foliage-native-r4.json"),
   ]);
   assert.deepEqual(Object.keys(native.layers), ["dynamicShadows"]);
-  assert.equal(foliage.id, "career-world/capitals/ninjaone/foliage-native@r3");
+  assert.equal(foliage.id, "career-world/capitals/ninjaone/foliage-native@r4");
   assert.ok(foliage.resources.length > 0);
   assert.ok(foliage.instances.length <= NINJAONE_ENVIRONMENT_NATIVE_MAX_ANIMATED_NODES);
 });
@@ -393,6 +393,10 @@ test("the root-selectable environment proof renders semantic terrain and suppres
     page,
     scene,
     renderer,
+    geologyRenderer,
+    landRenderer,
+    streamTiles,
+    styles,
     nativeBuilder,
     waterRenderer,
   ] = await Promise.all([
@@ -407,6 +411,22 @@ test("the root-selectable environment proof renders semantic terrain and suppres
     readFile(path.join(
       root,
       "features/career-world/layers/terrain/components/NinjaOneEnvironmentProof.tsx",
+    ), "utf8"),
+    readFile(path.join(
+      root,
+      "features/career-world/layers/terrain/components/NinjaOneEnvironmentGeology.tsx",
+    ), "utf8"),
+    readFile(path.join(
+      root,
+      "features/career-world/layers/terrain/components/TerritoryLandform.tsx",
+    ), "utf8"),
+    readFile(path.join(
+      root,
+      "features/career-world/layers/terrain/model/streamTiles.ts",
+    ), "utf8"),
+    readFile(path.join(
+      root,
+      "features/career-world/styles/career-world.css",
     ), "utf8"),
     readFile(path.join(root, "scripts/build-ninjaone-environment-native-detail.mjs"), "utf8"),
     readFile(path.join(
@@ -432,9 +452,38 @@ test("the root-selectable environment proof renders semantic terrain and suppres
   );
   assert.match(
     renderer,
-    /const geologyPlateAdmitted = proofMode[\s\S]*?plateTier === "site"[\s\S]*?plateTier === "close"/,
-    "production capital LOD must not mount the duplicate 4:3 geology plate",
+    /<NinjaOneEnvironmentGeology[\s\S]*?onReadyChange=\{onGeologyReadyChange\}/,
+    "the authored geology replacement must publish paint readiness",
   );
+  assert.match(
+    geologyRenderer,
+    /className="career-world__layer ninjaone-environment-geology"[\s\S]*?data-environment-authority="L2"/,
+    "authored geology must be mounted at terrain authority depth",
+  );
+  assert.match(
+    geologyRenderer,
+    /data-environment-layer="terrain-geology"[\s\S]*?href=\{source\.path\}/,
+    "the accepted authored geology must remain visible in production",
+  );
+  assert.match(
+    scene,
+    /ninjaOneGeologyReady[\s\S]*?suppressDetailedStreaming=\{ninjaOneEnvironmentOwnsCamera\}/,
+    "global detail sources may retire only after the authored replacement is ready",
+  );
+  assert.match(
+    landRenderer,
+    /!detailState\.shouldLoadTerritoryAssets[\s\S]*?\|\| suppressDetailedStreaming[\s\S]*?\|\| detailPlateRetired/,
+    "the redundant full-world detail plate must not decode under a ready replacement",
+  );
+  assert.doesNotMatch(
+    streamTiles,
+    /KAIZEN_CITY_OCCLUDED_TERRAIN_TILE_IDS|\.filter\(\(\{ id \}\)/,
+    "terrain registration must not infer that an optional city plate is mounted",
+  );
+  assert.match(styles, /\.ninjaone-environment-geology \{\s*z-index: 3;/);
+  assert.match(styles, /\.ninjaone-environment-proof \{\s*z-index: 7;/);
+  assert.doesNotMatch(renderer, /ninjaone-environment-proof-alpha/);
+  const terrainRenderers = `${renderer}\n${geologyRenderer}`;
   for (const layer of [
     "terrain-geology",
     "secondary-relief",
@@ -445,13 +494,34 @@ test("the root-selectable environment proof renders semantic terrain and suppres
     "shared-animated-foliage",
     "surface-ecology",
   ]) {
-    assert.ok(renderer.includes(`"${layer}"`), `${layer} is not rendered`);
+    assert.ok(terrainRenderers.includes(`"${layer}"`), `${layer} is not rendered`);
   }
   assert.match(scene, /<WaterSurfaceCanvas[\s\S]*?active=\{isPageVisible\}/);
   assert.match(scene, /showFoliage=\{terrainFoliageVisible\}/);
   assert.match(scene, /terrainFoliageVisible \? \([\s\S]*?<FoliageLayer/);
-  assert.match(renderer, /ninjaone-inland-terrain-erase-r1\.png/);
-  assert.match(renderer, /ninjaone-environment-terrain-erase-filter/);
+  assert.match(geologyRenderer, /ninjaone-inland-terrain-erase-r1\.png/);
+  assert.match(geologyRenderer, /ninjaone-environment-geology-terrain-erase-filter/);
+  assert.match(
+    geologyRenderer,
+    /"0 0 0 1 0"/,
+    "the terrain cutout must preserve source alpha instead of erasing its full bounding box",
+  );
+  assert.doesNotMatch(geologyRenderer, /"0 0 0 0 1"/);
+  assert.match(
+    geologyRenderer,
+    /id="ninjaone-environment-geology-source-alpha"[\s\S]*?<feFuncA intercept="0" slope="32" type="linear"/,
+    "authored terrain alpha must be hardened without blurring or recoloring its RGB master",
+  );
+  assert.doesNotMatch(
+    styles,
+    /ninjaone-environment-geology[^}]*filter:/,
+    "the accepted authored terrain master must not be recolored by runtime CSS",
+  );
+  assert.doesNotMatch(
+    geologyRenderer,
+    /territoryToCapital|opacity=\{opacity\}/,
+    "the authored land authority must replace the lower tier atomically instead of blurring through it",
+  );
   assert.doesNotMatch(renderer, /ninjaone-inland-water-field-r1\.png/);
   assert.doesNotMatch(renderer, /wildlife/i);
   assert.doesNotMatch(renderer, /terrain-microdetail/);

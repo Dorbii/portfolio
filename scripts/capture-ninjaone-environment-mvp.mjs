@@ -11,7 +11,7 @@ import sharp from "sharp";
 
 import {
   NINJAONE_MVP_CAPTURE_PRODUCER_PATH,
-  NINJAONE_MVP_FIXED_CAMERAS,
+  NINJAONE_MVP_FOLIAGE_CAMERA,
   createNinjaOneEnvironmentFoliageIsolationBindings,
 } from "./lib/ninjaone-environment-mvp-verification.mjs";
 
@@ -609,7 +609,7 @@ async function captureFoliageIsolationProof({
   if (viewport.width !== 1440 || viewport.height !== 900) {
     throw new Error("Foliage isolation proof requires the fixed 1440x900 viewport.");
   }
-  await setCamera(connection, sessionId, NINJAONE_MVP_FIXED_CAMERAS.C2);
+  await setCamera(connection, sessionId, NINJAONE_MVP_FOLIAGE_CAMERA);
   await waitForNativeReady(connection, sessionId);
   await evaluate(connection, sessionId, `(() => {
     const style = document.createElement('style');
@@ -689,7 +689,7 @@ async function captureFoliageIsolationProof({
     readCamera(connection, sessionId),
     evaluate(connection, sessionId, `(() => {
        const native = document.querySelector('.ninjaone-environment-native-detail');
-       const foliage = document.querySelector('.ninjaone-environment-foliage-r3');
+       const foliage = document.querySelector('.ninjaone-environment-foliage-r4');
        const seams = document.querySelector('[data-environment-seam-integration-state]');
        if (!native || !foliage || !seams) return null;
       const csv = (value) => value ? value.split(',').filter(Boolean) : [];

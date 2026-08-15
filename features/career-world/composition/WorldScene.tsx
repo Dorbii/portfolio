@@ -18,6 +18,8 @@ import {
 import {
   NINJAONE_ENVIRONMENT_CAMERA,
   NINJAONE_ENVIRONMENT_PROOF_ID,
+  NINJAONE_ENVIRONMENT_WORLD_ORIGIN,
+  NINJAONE_ENVIRONMENT_WORLD_SPAN,
   FoliageLayer,
   NinjaOneEnvironmentProof,
   TERRITORIES,
@@ -294,6 +296,7 @@ export function WorldScene({
         : "world",
   );
   const [kaizenVisualReady, setKaizenVisualReady] = useState(false);
+  const [ninjaOneGeologyReady, setNinjaOneGeologyReady] = useState(false);
   const [renderState, setRenderState] =
     useState<WaterRenderState>("loading");
   const [showTopography, setShowTopography] = useState(topologyProof);
@@ -321,6 +324,7 @@ export function WorldScene({
   );
   const oceanAuthorityVisible = environmentLayerVisible("L1");
   const oceanMotionVisible = environmentLayerVisible("L1_1");
+  const coastalAmbienceVisible = environmentLayerVisible("L1_2");
   const terrainAuthorityVisible = environmentLayerVisible("L2");
   const terrainDetailVisible = environmentLayerVisible("L2_1");
   const terrainFoliageVisible = environmentLayerVisible("L2_2");
@@ -328,6 +332,17 @@ export function WorldScene({
   const inlandWaterMotionVisible = environmentLayerVisible("L3_1");
   const inlandWaterEffectsVisible = environmentLayerVisible("L3_2");
   const inlandHabitatVisible = environmentLayerVisible("L3_4");
+  const ninjaOneEnvironmentOwnsCamera = (
+    ninjaOneGeologyReady
+    && detailState.tier.id !== "world"
+    && detailState.tier.id !== "territory"
+    && camera.origin[0] >= NINJAONE_ENVIRONMENT_WORLD_ORIGIN[0]
+    && camera.origin[1] >= NINJAONE_ENVIRONMENT_WORLD_ORIGIN[1]
+    && camera.origin[0] + camera.span[0]
+      <= NINJAONE_ENVIRONMENT_WORLD_ORIGIN[0] + NINJAONE_ENVIRONMENT_WORLD_SPAN[0]
+    && camera.origin[1] + camera.span[1]
+      <= NINJAONE_ENVIRONMENT_WORLD_ORIGIN[1] + NINJAONE_ENVIRONMENT_WORLD_SPAN[1]
+  );
 
   const handleEnvironmentLayerToggle = useCallback((id: EnvironmentLayerId) => {
     setEnvironmentLayerVisibility((current) => Object.freeze({
@@ -572,6 +587,7 @@ export function WorldScene({
       data-layer-l3={inlandWaterAuthorityVisible}
       data-layer-l3-1={inlandWaterMotionVisible}
       data-layer-l3-2={inlandWaterEffectsVisible}
+      data-ninjaone-geology-ready={ninjaOneGeologyReady}
       data-close-lod={detailState.siteToClose.toFixed(3)}
       data-detail-tier={detailState.tier.id}
       data-environment-proof={environmentProof
@@ -599,6 +615,7 @@ export function WorldScene({
         <WaterSurfaceCanvas
           active={isPageVisible && oceanMotionVisible}
           camera={camera}
+          coastalAmbience={coastalAmbienceVisible}
           detailState={detailState}
           light={WORLD_LIGHT}
           onRenderStateChange={setRenderState}
@@ -608,6 +625,7 @@ export function WorldScene({
         <TerritoryLandform
           camera={camera}
           detailState={detailState}
+          suppressDetailedStreaming={ninjaOneEnvironmentOwnsCamera}
         />
       ) : null}
       {showNinjaOneInlandWater && inlandWaterAuthorityVisible ? (
@@ -638,11 +656,12 @@ export function WorldScene({
         <NinjaOneCapitalTopologyProof camera={camera} />
       ) : (
         <>
-          {!capitalRecoveryBaseline || terrainAuthorityVisible ? (
+          {terrainAuthorityVisible ? (
             <NinjaOneEnvironmentProof
               active={isPageVisible}
               camera={camera}
               detailState={detailState}
+              onGeologyReadyChange={setNinjaOneGeologyReady}
               proofMode={environmentProof}
               showFoliage={terrainFoliageVisible}
               showSupplementalDetail={terrainDetailVisible}

@@ -959,6 +959,7 @@ export function TerritoryLandform({
   useEffect(() => {
     if (
       !detailState.shouldLoadTerritoryAssets
+      || suppressDetailedStreaming
       || detailPlateRetired
     ) {
       return;
@@ -1040,6 +1041,7 @@ export function TerritoryLandform({
     detailPlateRetired,
     detailState.shouldLoadTerritoryAssets,
     queueRender,
+    suppressDetailedStreaming,
   ]);
 
   useEffect(() => {

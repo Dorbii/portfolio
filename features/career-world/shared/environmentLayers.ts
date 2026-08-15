@@ -39,10 +39,10 @@ export const ENVIRONMENT_LAYER_DEFINITIONS: readonly EnvironmentLayerDefinition[
       parentId: "L1",
     }),
     Object.freeze({
-      available: false,
+      available: true,
       id: "L1_2",
       label: "Coastal ambience",
-      owns: "future isolated foam, spray, and marine accents",
+      owns: "wet shoreline contact, swash, breakers, and foam",
       parentId: "L1",
     }),
     Object.freeze({
@@ -105,7 +105,7 @@ export const DEFAULT_ENVIRONMENT_LAYER_VISIBILITY: EnvironmentLayerVisibility =
   Object.freeze({
     L1: true,
     L1_1: true,
-    L1_2: false,
+    L1_2: true,
     L2: true,
     L2_1: true,
     L2_2: true,

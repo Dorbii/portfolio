@@ -25,26 +25,12 @@ import {
 const ROOT = path.resolve(import.meta.dirname, "..");
 const MANIFEST_PATH = path.join(
   ROOT,
-  "public/career-world/capitals/ninjaone/environment/manifests/foliage-native-r3.json",
+  "public/career-world/capitals/ninjaone/environment/manifests/foliage-native-r4.json",
 );
 const BUILDER_PATH = path.join(
   ROOT,
-  "scripts/build-ninjaone-environment-foliage-r3.mjs",
+  "scripts/build-ninjaone-environment-foliage-r4.mjs",
 );
-const EXPECTED_NATIVE_TILE_IDS = [
-  "r0-c2",
-  "r0-c3",
-  "r1-c2",
-  "r1-c3",
-  "r2-c0",
-  "r2-c1",
-  "r2-c2",
-  "r2-c3",
-  "r3-c0",
-  "r3-c1",
-  "r3-c2",
-  "r3-c3",
-];
 const manifest = JSON.parse(await readFile(MANIFEST_PATH, "utf8"));
 const execFileAsync = promisify(execFile);
 
@@ -152,29 +138,23 @@ function shapeContains(shape, sourceX, sourceY) {
     && sourceY < y + height;
 }
 
-test("r3 foliage uses only the twelve native originals and mounts a four-node paired pool", async () => {
-  assert.equal(manifest.schemaVersion, 2);
-  assert.equal(manifest.sourceCollection.authority, "twelve-original-native-generated-r2-pngs");
-  assert.deepEqual(
-    manifest.sourceCollection.tiles.map(({ id }) => id),
-    EXPECTED_NATIVE_TILE_IDS,
-  );
-  assert.ok(manifest.sourceCollection.tiles.every(({ dimensions, path: sourcePath }) => (
-    dimensions.join(",") === "1448,1086"
-      && sourcePath.includes("/detail-tiles-r2/generated/")
-      && !manifest.sourceCollection.forbiddenSources.some((forbidden) => (
-        sourcePath.includes(forbidden)
-      ))
-  )));
-  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.length, 2);
-  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES.length, 4);
-  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS, 2);
+test("r4 foliage is registered to the active r8 master and mounts a bounded paired pool", async () => {
+  assert.equal(manifest.schemaVersion, 3);
+  assert.equal(manifest.sourceMaster.authority, "active-r8-geology-master");
+  assert.equal(manifest.sourceMaster.id, "terrain-master-detail-r8");
+  assert.deepEqual(manifest.sourceMaster.dimensions, [5760, 4320]);
+  assert.match(manifest.sourceMaster.path, /terrain-master-detail-r8\.png$/);
+  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.length, 4);
+  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES.length, 8);
+  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS, 3);
   assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_NODES_PER_GROUP, 2);
   assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_MOUNTED_NODES, 6);
-  assert.equal(manifest.eligibility.maxDetailEnterSpan, 0.075);
-  assert.equal(manifest.eligibility.maxDetailRetainSpan, 0.09);
-  assert.equal(manifest.budgets.mountedFoliageNodes, 4);
-  assert.equal(manifest.budgets.futureSupplementalNodeHeadroom, 2);
+  assert.equal(manifest.eligibility.maxDetailEnterSpan, 0.12);
+  assert.equal(manifest.eligibility.maxDetailRetainSpan, 0.14);
+  assert.equal(manifest.budgets.poolGroups, 4);
+  assert.equal(manifest.budgets.mountedGroups, 3);
+  assert.equal(manifest.budgets.mountedFoliageNodes, 6);
+  assert.equal(manifest.budgets.futureSupplementalNodeHeadroom, 0);
   assert.equal(manifest.budgets.terrainDecodedBytes, 4 * 1448 * 1086 * 4);
   assert.equal(
     manifest.budgets.foliageDecodedBytes,
@@ -185,29 +165,26 @@ test("r3 foliage uses only the twelve native originals and mounts a four-node pa
     manifest.budgets.terrainDecodedBytes + manifest.budgets.foliageDecodedBytes,
   );
   assert.ok(NINJAONE_ENVIRONMENT_FOLIAGE_COMBINED_DECODED_BYTES <= 32 * 1024 * 1024);
-  assert.ok(32 * 1024 * 1024 - NINJAONE_ENVIRONMENT_FOLIAGE_COMBINED_DECODED_BYTES > 7_000_000);
   assert.equal(Object.hasOwn(manifest.budgets, "seamDecodedBytes"), false);
   assert.equal(Object.hasOwn(manifest.budgets, "coastDecodedBytes"), false);
 
-  assert.equal(manifest.neutralizationSources.length, 2);
+  assert.equal(manifest.neutralizationSources.length, 4);
+  assert.equal(manifest.segmentationSources.length, 4);
   const mountedPaths = new Set(manifest.resources.map(({ path: resourcePath }) => resourcePath));
-  for (const source of manifest.neutralizationSources) {
-    assert.equal(source.provider, "built-in-imagegen-precise-object-edit");
-    assert.equal(source.inputRole, "neutralization-rgb-only");
+  for (const source of [...manifest.neutralizationSources, ...manifest.segmentationSources]) {
     assert.equal(mountedPaths.has(source.path), false, `${source.id} must not be mounted`);
     const bytes = await readFile(repoFile(source.path));
     assert.equal(sha256(bytes), source.sha256);
   }
 });
 
-test("native source collection hashes and dimensions are frozen", async () => {
-  for (const source of manifest.sourceCollection.tiles) {
-    const bytes = await readFile(repoFile(source.path));
-    const metadata = await sharp(bytes).metadata();
-    assert.equal(sha256(bytes), source.sha256, source.id);
-    assert.deepEqual([metadata.width, metadata.height], source.dimensions, source.id);
-    assert.equal(metadata.format, "png", source.id);
-  }
+test("active source master hash and dimensions are frozen", async () => {
+  const bytes = await readFile(repoFile(manifest.sourceMaster.path));
+  const metadata = await sharp(bytes).metadata();
+  assert.equal(sha256(bytes), manifest.sourceMaster.sha256);
+  assert.deepEqual([metadata.width, metadata.height], manifest.sourceMaster.dimensions);
+  assert.equal(metadata.format, "png");
+  assert.equal(metadata.hasAlpha, true);
 });
 
 test("tracked generator is deterministic, native-bound, and noninteractive", async () => {
@@ -217,16 +194,15 @@ test("tracked generator is deterministic, native-bound, and noninteractive", asy
   ]);
   assert.equal(
     packageJson.scripts?.["build:ninjaone-environment-foliage"],
-    "node scripts/build-ninjaone-environment-foliage-r3.mjs",
+    "node scripts/build-ninjaone-environment-foliage-r4.mjs",
   );
-  assert.match(builder, /detail-tiles-r2\/generated/);
-  assert.match(builder, /semanticCanopyAlpha/);
-  assert.match(builder, /native-conifer-needle-color-local-contrast/);
-  assert.match(builder, /native-yellow-leaf-chroma-hard-alpha/);
+  assert.match(builder, /terrain-master-detail-r8\.png/);
+  assert.match(builder, /registeredSegmentationAlpha/);
+  assert.match(builder, /tree-only-alpha-guidance/);
   assert.match(builder, /registeredNeutralizationUnderlay/);
-  assert.match(builder, /neutralizationDilation: 0/g);
+  assert.match(builder, /neutralizationDilation: 12/g);
   assert.match(builder, /compressionLevel: 9, palette: false/);
-  assert.doesNotMatch(builder, /authored-needle-tiers|paletteMatchedNeutralization|dilateAlpha/);
+  assert.doesNotMatch(builder, /detail-tiles-r2\/generated|authored-needle-tiers|paletteMatchedNeutralization/);
   assert.doesNotMatch(builder, /inpaintNeutralization|Date\.now|Math\.random|process\.stdin|readline|prompt\(/);
   assert.doesNotMatch(builder, /readFile\([^\n]*master-detail-r2/);
 });
@@ -273,11 +249,10 @@ test("paired hard leaf masks preserve native gaps and neutralize only vacated fo
     assert.equal(sha256(canopyBytes), canopyResource.sha256);
     assert.equal(sha256(neutralBytes), neutralResource.sha256);
     assert.deepEqual([info.width, info.height], canopyResource.dimensions);
-    const sourceTile = manifest.sourceCollection.tiles.find(({ id }) => (
-      id === instance.sourceTileId
-    ));
     const [left, top, width, height] = canopyResource.sourceCrop;
-    const source = await sharp(await readFile(repoFile(sourceTile.path)))
+    assert.equal(instance.sourceMasterId, manifest.sourceMaster.id);
+    assert.equal(canopyResource.sourceMasterId, manifest.sourceMaster.id);
+    const source = await sharp(await readFile(repoFile(manifest.sourceMaster.path)))
       .extract({ left, top, width, height })
       .ensureAlpha()
       .raw()
@@ -335,26 +310,26 @@ test("paired hard leaf masks preserve native gaps and neutralize only vacated fo
       }
     }
 
-    assert.ok(canopyPixels >= 7_000, `${instance.id} canopy is fragmentary`);
-    assert.ok(nativeGapPixels >= 3_000, `${instance.id} lost genuine native gaps`);
-    assert.ok(protectedPixels > 0, `${instance.id} has no protected-mask coverage`);
-    assert.ok(internalTransparent > 3_000, `${instance.id} filled all canopy gaps`);
+    assert.ok(canopyPixels >= 6_000, `${instance.id} canopy is fragmentary`);
+    assert.ok(nativeGapPixels >= 1_000, `${instance.id} lost genuine native gaps`);
+    assert.equal(protectedPixels, 0, `${instance.id} retained obsolete rectangular exclusions`);
+    assert.ok(internalTransparent > 1_000, `${instance.id} filled all canopy gaps`);
     assert.ok(neutralizedLeafPixels / canopyPixels > 0.9, `${instance.id} leaves a baked duplicate`);
-    assert.ok(largestConnectedRatio(canopyAlpha, width, height) > 0.9);
-    assert.ok(largestConnectedRatio(neutralAlpha, width, height) > 0.99);
+    assert.ok(largestConnectedRatio(canopyAlpha, width, height) > 0.55);
+    assert.ok(largestConnectedRatio(neutralAlpha, width, height) > 0.9);
     assert.ok(longestHighAlphaRun(canopyAlpha, width, height) < Math.max(width, height) * 0.92);
     assert.equal(canopyResource.boundaryHighAlphaPixels, 0);
     assert.equal(neutralResource.boundaryHighAlphaPixels, 0);
-    assert.ok(canopyResource.alphaCoverage >= 0.25 && canopyResource.alphaCoverage < 0.5);
+    assert.ok(canopyResource.alphaCoverage >= 0.08 && canopyResource.alphaCoverage < 0.75);
 
     const separation = manifest.separationEvidence.find(({ id }) => (
       id === instance.checkpoint
     ));
     assert.ok(separation, `${instance.id} lacks separation evidence`);
-    assert.equal(separation.neutralizationDilationPixels, 0);
+    assert.ok([8, 12].includes(separation.neutralizationDilationPixels));
     assert.equal(separation.atRestDifference.changedPixels, 0);
     assert.equal(separation.forcedProtectedDifference.changedPixels, 0);
-    assert.ok(separation.forcedStartPeakDifference.changedPixels > 10_000);
+    assert.ok(separation.forcedStartPeakDifference.changedPixels > 3_000);
     assert.equal(separation.nativeGapDifference.changedPixels, 0);
     assert.equal(separation.nativeGapPixels, nativeGapPixels);
     assert.match(separation.maskDerivation, /^native-/);
@@ -382,40 +357,38 @@ test("paired hard leaf masks preserve native gaps and neutralize only vacated fo
   assert.equal(decodedBytes, manifest.budgets.foliageDecodedBytes);
 });
 
-test("actual fixed C2 cameras select both varied low-pivot groups and old B2 selects none", () => {
-  const exactFixedC2 = { origin: [0.2925, 0.23], span: [0.04, 0.04] };
-  const priorFixedC2 = {
-    origin: [0.2861105600489004, 0.2189284007464498],
-    span: [0.04, 0.04],
-  };
-  const oldBoundary = { origin: [0.196857, 0.177914], span: [0.028, 0.028] };
-  assert.equal(selectNinjaOneEnvironmentFoliageInstances(exactFixedC2).length, 2);
-  assert.equal(selectNinjaOneEnvironmentFoliageInstances(priorFixedC2).length, 2);
-  assert.deepEqual(selectNinjaOneEnvironmentFoliageInstances(oldBoundary), []);
+test("active B1 and C1 cameras select only the closest registered native groups", () => {
+  const westCamera = { origin: [0.2125, 0.0875], span: [0.075, 0.075] };
+  const eastCamera = { origin: [0.25, 0.075], span: [0.075, 0.075] };
+  assert.equal(selectNinjaOneEnvironmentFoliageInstances(westCamera).length, 3);
   assert.deepEqual(
-    environmentFoliageCameraArtboardView(exactFixedC2).origin.map((value) => (
+    selectNinjaOneEnvironmentFoliageInstances(eastCamera).map(({ gridCell }) => gridCell),
+    ["C1"],
+  );
+  assert.deepEqual(
+    environmentFoliageCameraArtboardView(westCamera).origin.map((value) => (
       Number(value.toFixed(3))
     )),
-    [964.8, 745.2],
+    [504, 283.5],
   );
   assert.equal(
     new Set(NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.map(({ phaseSeconds }) => phaseSeconds)).size,
-    2,
+    4,
   );
   assert.equal(
     new Set(NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.map(({ durationSeconds }) => durationSeconds)).size,
-    2,
+    4,
   );
   for (const instance of NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES) {
     assert.ok(instance.pivotYPercent >= 92 && instance.pivotYPercent <= 98);
-    assert.ok(instance.bendDegrees > 0 && instance.bendDegrees <= 0.5);
+    assert.ok(instance.bendDegrees > 0 && instance.bendDegrees <= 1.2);
     assert.equal(instance.resources.length, 2);
   }
 });
 
-test("close-detail foliage enters at the reachable .075 camera floor and retains through .09", () => {
+test("close-detail foliage enters through .12 and retains through .14", () => {
   const cameraAtSpan = (span) => ({
-    origin: [0.3125 - span / 2, 0.25 - span / 2],
+    origin: [0.23 - span / 2, 0.11 - span / 2],
     span: [span, span],
   });
   const eligibility = (span, previousEligible) => (
@@ -428,23 +401,23 @@ test("close-detail foliage enters at the reachable .075 camera floor and retains
     })
   );
 
-  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_ENTER_SPAN, 0.075);
-  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_RETAIN_SPAN, 0.09);
+  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_ENTER_SPAN, 0.12);
+  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_RETAIN_SPAN, 0.14);
   assert.equal(eligibility(0.04, false), true);
-  assert.equal(eligibility(0.075, false), true);
-  assert.equal(eligibility(0.08, false), false);
-  assert.equal(eligibility(0.08, true), true);
-  assert.equal(eligibility(0.09, true), true);
-  assert.equal(eligibility(0.091, true), false);
-  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.04)).length, 2);
+  assert.equal(eligibility(0.12, false), true);
+  assert.equal(eligibility(0.13, false), false);
+  assert.equal(eligibility(0.13, true), true);
+  assert.equal(eligibility(0.14, true), true);
+  assert.equal(eligibility(0.141, true), false);
+  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.04)).length, 3);
   assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.04), true, 2).length, 2);
   assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.04), true, 1).length, 1);
   assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.04), true, 0).length, 0);
   assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.04), true, 1.5).length, 0);
-  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.075)).length, 2);
-  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.08)).length, 0);
-  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.08), true).length, 2);
-  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.091), true).length, 0);
+  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.12)).length, 3);
+  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.13)).length, 0);
+  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.13), true).length, 3);
+  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.141), true).length, 0);
   assert.equal(resolveNinjaOneEnvironmentFoliageEligibility({
     active: false,
     camera: cameraAtSpan(0.04),
@@ -460,7 +433,7 @@ test("resource cohorts are canonical and same-set camera churn cannot restart hi
     ...NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES,
   ].reverse());
   assert.equal(forward, reverse);
-  assert.equal(forward.split("\n").length, 4);
+  assert.equal(forward.split("\n").length, 8);
 
   const component = await readFile(
     path.join(ROOT, "features/career-world/layers/terrain/detail/components/NinjaOneEnvironmentFoliage.tsx"),

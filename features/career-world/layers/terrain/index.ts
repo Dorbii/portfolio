@@ -8,6 +8,8 @@ export { NinjaOneEnvironmentProof } from "./components/NinjaOneEnvironmentProof"
 export {
   NINJAONE_ENVIRONMENT_CAMERA,
   NINJAONE_ENVIRONMENT_PROOF_ID,
+  NINJAONE_ENVIRONMENT_WORLD_ORIGIN,
+  NINJAONE_ENVIRONMENT_WORLD_SPAN,
 } from "./model/ninjaOneEnvironmentProof";
 export { LAND_ASSETS } from "./model/assets";
 export { TERRAIN_SITE_TILES } from "./model/siteTiles";

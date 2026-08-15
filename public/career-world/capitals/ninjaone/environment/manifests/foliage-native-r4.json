@@ -1,0 +1,706 @@
+{
+  "schemaVersion": 3,
+  "id": "career-world/capitals/ninjaone/foliage-native@r4",
+  "status": "active-master-native-canopy-with-neutralization",
+  "sourceMaster": {
+    "authority": "active-r8-geology-master",
+    "dimensions": [
+      5760,
+      4320
+    ],
+    "id": "terrain-master-detail-r8",
+    "path": "/art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r8.png",
+    "sha256": "E14C7783A841801E265108766F875EFDB8C59A3772FBF13BFEE805AAA5A3D113"
+  },
+  "neutralizationSources": [
+    {
+      "dimensions": [
+        340,
+        440
+      ],
+      "id": "b1-ridge-west-conifer-native-neutralization-source-imagegen",
+      "inputRole": "neutralization-rgb-only",
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/ridge-west-neutralization-source-imagegen-r4.png?v=05e83ea52d4e",
+      "provider": "built-in-imagegen-precise-object-edit",
+      "sha256": "05E83EA52D4E50A3FE50C0388E3B13CBE7368C31EC4B648436A814440158FB52",
+      "usage": "rgb is consumed only beneath source-derived opaque leaf pixels; native RGB is retained in every registered crown gap"
+    },
+    {
+      "dimensions": [
+        360,
+        480
+      ],
+      "id": "b1-ridge-south-conifer-native-neutralization-source-imagegen",
+      "inputRole": "neutralization-rgb-only",
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/ridge-south-neutralization-source-imagegen-r4.png?v=59df0282b869",
+      "provider": "built-in-imagegen-precise-object-edit",
+      "sha256": "59DF0282B869AA200355789A56A481456CE95BF6EC1D5ECA05C2EC1A986810C7",
+      "usage": "rgb is consumed only beneath source-derived opaque leaf pixels; native RGB is retained in every registered crown gap"
+    },
+    {
+      "dimensions": [
+        320,
+        500
+      ],
+      "id": "b1-ridge-central-conifer-native-neutralization-source-imagegen",
+      "inputRole": "neutralization-rgb-only",
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/ridge-central-neutralization-source-imagegen-r4.png?v=35a062eaa6b7",
+      "provider": "built-in-imagegen-precise-object-edit",
+      "sha256": "35A062EAA6B77DDFF36A6A54F3D768D993FD2C37CD0C30E9A1DFE511D75981B5",
+      "usage": "rgb is consumed only beneath source-derived opaque leaf pixels; native RGB is retained in every registered crown gap"
+    },
+    {
+      "dimensions": [
+        340,
+        460
+      ],
+      "id": "c1-ridge-east-conifer-native-neutralization-source-imagegen",
+      "inputRole": "neutralization-rgb-only",
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/ridge-east-neutralization-source-imagegen-r4.png?v=0dfcb395887c",
+      "provider": "built-in-imagegen-precise-object-edit",
+      "sha256": "0DFCB395887C824B22EAFB7364A20B85E46EFC64FC30DBC8F1486DB8D7794490",
+      "usage": "rgb is consumed only beneath source-derived opaque leaf pixels; native RGB is retained in every registered crown gap"
+    }
+  ],
+  "segmentationSources": [
+    {
+      "dimensions": [
+        340,
+        440
+      ],
+      "id": "b1-ridge-west-conifer-native-tree-alpha-imagegen",
+      "inputRole": "tree-only-alpha-guidance",
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/ridge-west-tree-alpha-imagegen-r4.png?v=202952864a42",
+      "provider": "built-in-imagegen-precise-object-segmentation",
+      "sha256": "202952864A4209E2CC6DB17108FAB7FB78D533C0057505056E98F125B2539B95",
+      "usage": "alpha only; runtime RGB is copied byte-for-byte from the active r8 terrain master"
+    },
+    {
+      "dimensions": [
+        360,
+        480
+      ],
+      "id": "b1-ridge-south-conifer-native-tree-alpha-imagegen",
+      "inputRole": "tree-only-alpha-guidance",
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/ridge-south-tree-alpha-imagegen-r4.png?v=23fb1926489d",
+      "provider": "built-in-imagegen-precise-object-segmentation",
+      "sha256": "23FB1926489DD6DD2F109708CEBDD0595FA5ED7107C55CA81A1D85A3CD292A89",
+      "usage": "alpha only; runtime RGB is copied byte-for-byte from the active r8 terrain master"
+    },
+    {
+      "dimensions": [
+        320,
+        500
+      ],
+      "id": "b1-ridge-central-conifer-native-tree-alpha-imagegen",
+      "inputRole": "tree-only-alpha-guidance",
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/ridge-central-tree-alpha-imagegen-r4.png?v=76d3531ec4c2",
+      "provider": "built-in-imagegen-precise-object-segmentation",
+      "sha256": "76D3531EC4C278EB66885148725DCEC8B414965E2210437B5AA842AFD292F517",
+      "usage": "alpha only; runtime RGB is copied byte-for-byte from the active r8 terrain master"
+    },
+    {
+      "dimensions": [
+        340,
+        460
+      ],
+      "id": "c1-ridge-east-conifer-native-tree-alpha-imagegen",
+      "inputRole": "tree-only-alpha-guidance",
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/ridge-east-tree-alpha-imagegen-r4.png?v=84939d1a5830",
+      "provider": "built-in-imagegen-precise-object-segmentation",
+      "sha256": "84939D1A5830F6AAB148C585ED9502F33375D5D1DD89500A4BACCD77B56B07E2",
+      "usage": "alpha only; runtime RGB is copied byte-for-byte from the active r8 terrain master"
+    }
+  ],
+  "separationEvidence": [
+    {
+      "atRestDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 149600,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      },
+      "canopyHighAlphaPixels": 17652,
+      "canopyLargestConnectedComponentRatio": 0.962271,
+      "forcedProtectedDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 0,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      },
+      "forcedStartPeakDifference": {
+        "changedPixels": 22832,
+        "comparedPixels": 149600,
+        "maximumChannelDifference": 190,
+        "meanMaximumChannelDifference": 2.38119
+      },
+      "id": "b1-ridge-west-conifer-native",
+      "maskDerivation": "native-r8-tree-alpha-chroma-neutralization-difference",
+      "maskRegistrationArtifact": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/artifacts/foliage-r4/source-composites/b1-ridge-west-conifer-native-mask-registration.png",
+      "nativeGapDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 16545,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      },
+      "nativeGapPixels": 16545,
+      "neutralizationDilationPixels": 12,
+      "neutralizedCanopyDifferenceRatio": 1,
+      "outsideNeutralizationDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 115403,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      },
+      "protectedDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 0,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      }
+    },
+    {
+      "atRestDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 172800,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      },
+      "canopyHighAlphaPixels": 17657,
+      "canopyLargestConnectedComponentRatio": 0.96534,
+      "forcedProtectedDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 0,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      },
+      "forcedStartPeakDifference": {
+        "changedPixels": 21789,
+        "comparedPixels": 172800,
+        "maximumChannelDifference": 188,
+        "meanMaximumChannelDifference": 1.79136
+      },
+      "id": "b1-ridge-south-conifer-native",
+      "maskDerivation": "native-r8-tree-alpha-chroma-neutralization-difference",
+      "maskRegistrationArtifact": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/artifacts/foliage-r4/source-composites/b1-ridge-south-conifer-native-mask-registration.png",
+      "nativeGapDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 16810,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      },
+      "nativeGapPixels": 16810,
+      "neutralizationDilationPixels": 12,
+      "neutralizedCanopyDifferenceRatio": 1,
+      "outsideNeutralizationDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 138333,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      },
+      "protectedDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 0,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      }
+    },
+    {
+      "atRestDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 160000,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      },
+      "canopyHighAlphaPixels": 14075,
+      "canopyLargestConnectedComponentRatio": 0.941528,
+      "forcedProtectedDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 0,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      },
+      "forcedStartPeakDifference": {
+        "changedPixels": 18292,
+        "comparedPixels": 160000,
+        "maximumChannelDifference": 181,
+        "meanMaximumChannelDifference": 1.606194
+      },
+      "id": "b1-ridge-central-conifer-native",
+      "maskDerivation": "native-r8-tree-alpha-chroma-neutralization-difference",
+      "maskRegistrationArtifact": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/artifacts/foliage-r4/source-composites/b1-ridge-central-conifer-native-mask-registration.png",
+      "nativeGapDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 14484,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      },
+      "nativeGapPixels": 14484,
+      "neutralizationDilationPixels": 12,
+      "neutralizedCanopyDifferenceRatio": 1,
+      "outsideNeutralizationDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 131441,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      },
+      "protectedDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 0,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      }
+    },
+    {
+      "atRestDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 156400,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      },
+      "canopyHighAlphaPixels": 11188,
+      "canopyLargestConnectedComponentRatio": 0.942796,
+      "forcedProtectedDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 0,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      },
+      "forcedStartPeakDifference": {
+        "changedPixels": 15728,
+        "comparedPixels": 156400,
+        "maximumChannelDifference": 134,
+        "meanMaximumChannelDifference": 1.431509
+      },
+      "id": "c1-ridge-east-conifer-native",
+      "maskDerivation": "native-r8-tree-alpha-chroma-neutralization-difference",
+      "maskRegistrationArtifact": ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/artifacts/foliage-r4/source-composites/c1-ridge-east-conifer-native-mask-registration.png",
+      "nativeGapDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 11784,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      },
+      "nativeGapPixels": 11784,
+      "neutralizationDilationPixels": 8,
+      "neutralizedCanopyDifferenceRatio": 1,
+      "outsideNeutralizationDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 133428,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      },
+      "protectedDifference": {
+        "changedPixels": 0,
+        "comparedPixels": 0,
+        "maximumChannelDifference": 0,
+        "meanMaximumChannelDifference": 0
+      }
+    }
+  ],
+  "eligibility": {
+    "maxDetailEnterSpan": 0.12,
+    "maxDetailRetainSpan": 0.14
+  },
+  "registration": {
+    "artboard": [
+      1440,
+      1080
+    ],
+    "boundingWorldView": {
+      "origin": [
+        0.125,
+        0
+      ],
+      "span": [
+        0.25,
+        0.3333333333333333
+      ]
+    },
+    "coveredGridCells": [
+      "B1",
+      "C1"
+    ],
+    "grid": [
+      4,
+      4
+    ],
+    "masterDimensions": [
+      5760,
+      4320
+    ],
+    "sourcePixelsPerArtboardUnit": 4
+  },
+  "ownership": "the static underlay changes RGB only beneath source-derived opaque tree pixels and reproduces exact native RGB in genuine crown gaps; the animated canopy requires both imagegen tree alpha and active-r8 conifer chroma plus neutralization difference",
+  "budgets": {
+    "combinedDecodedBytes": 27033720,
+    "conservativeDecodedBytes": 27033720,
+    "foliageDecodedBytes": 1873272,
+    "futureSupplementalNodeHeadroom": 0,
+    "maximumDecodedBytes": 33554432,
+    "maximumSelectedGroups": 3,
+    "maximumSupplementalNodes": 6,
+    "maximumTerrainTiles": 4,
+    "mountedFoliageNodes": 6,
+    "mountedGroups": 3,
+    "nodesPerGroup": 2,
+    "poolGroups": 4,
+    "terrainDecodedBytes": 25160448
+  },
+  "resources": [
+    {
+      "alphaBounds": [
+        12,
+        12,
+        205,
+        298
+      ],
+      "alphaCoverage": 0.504395,
+      "alphaSum": 8720235,
+      "boundaryHighAlphaPixels": 0,
+      "decodedBytes": 271192,
+      "dimensions": [
+        218,
+        311
+      ],
+      "highAlphaPixels": 34197,
+      "id": "b1-ridge-west-conifer-native-neutralization",
+      "kind": "neutralization-underlay",
+      "largestConnectedComponentPixels": 34197,
+      "largestConnectedComponentRatio": 1,
+      "neutralizedCanopyDifferenceRatio": 1,
+      "opaquePixels": 34197,
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/b1-ridge-west-conifer-native-neutralization-r4.png?v=155d9e261fa4",
+      "sha256": "155D9E261FA47416216ACD31C63B2866BB9250CB26317600CD2FF9BCE880D26A",
+      "sourceCrop": [
+        2254,
+        1112,
+        218,
+        311
+      ],
+      "sourceMasterId": "terrain-master-detail-r8"
+    },
+    {
+      "alphaBounds": [
+        24,
+        24,
+        193,
+        286
+      ],
+      "alphaCoverage": 0.260362,
+      "alphaSum": 4501260,
+      "boundaryHighAlphaPixels": 0,
+      "decodedBytes": 271192,
+      "dimensions": [
+        218,
+        311
+      ],
+      "highAlphaPixels": 17652,
+      "id": "b1-ridge-west-conifer-native-canopy",
+      "kind": "coherent-canopy",
+      "largestConnectedComponentPixels": 16986,
+      "largestConnectedComponentRatio": 0.962271,
+      "opaquePixels": 17652,
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/b1-ridge-west-conifer-native-canopy-r4.png?v=c6c2819ffdc6",
+      "sha256": "C6C2819FFDC677D1D33A4491300B3405A8B9801727EE7A8DD924F66192313D82",
+      "sourceCrop": [
+        2254,
+        1112,
+        218,
+        311
+      ],
+      "sourceMasterId": "terrain-master-detail-r8"
+    },
+    {
+      "alphaBounds": [
+        12,
+        12,
+        171,
+        330
+      ],
+      "alphaCoverage": 0.546124,
+      "alphaSum": 8789085,
+      "boundaryHighAlphaPixels": 0,
+      "decodedBytes": 252448,
+      "dimensions": [
+        184,
+        343
+      ],
+      "highAlphaPixels": 34467,
+      "id": "b1-ridge-south-conifer-native-neutralization",
+      "kind": "neutralization-underlay",
+      "largestConnectedComponentPixels": 34467,
+      "largestConnectedComponentRatio": 1,
+      "neutralizedCanopyDifferenceRatio": 1,
+      "opaquePixels": 34467,
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/b1-ridge-south-conifer-native-neutralization-r4.png?v=9b18fcf98958",
+      "sha256": "9B18FCF989586619E10887CD0E45FD32BC85AB67A8989CE9523FD84ABA39AA4D",
+      "sourceCrop": [
+        2421,
+        1331,
+        184,
+        343
+      ],
+      "sourceMasterId": "terrain-master-detail-r8"
+    },
+    {
+      "alphaBounds": [
+        24,
+        24,
+        159,
+        318
+      ],
+      "alphaCoverage": 0.279772,
+      "alphaSum": 4502535,
+      "boundaryHighAlphaPixels": 0,
+      "decodedBytes": 252448,
+      "dimensions": [
+        184,
+        343
+      ],
+      "highAlphaPixels": 17657,
+      "id": "b1-ridge-south-conifer-native-canopy",
+      "kind": "coherent-canopy",
+      "largestConnectedComponentPixels": 17045,
+      "largestConnectedComponentRatio": 0.96534,
+      "opaquePixels": 17657,
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/b1-ridge-south-conifer-native-canopy-r4.png?v=08b3593d5691",
+      "sha256": "08B3593D5691F048E9BBCECDC02B0C5487B9C19B8ABCAAB3AAF8B3CA1129584D",
+      "sourceCrop": [
+        2421,
+        1331,
+        184,
+        343
+      ],
+      "sourceMasterId": "terrain-master-detail-r8"
+    },
+    {
+      "alphaBounds": [
+        12,
+        12,
+        190,
+        269
+      ],
+      "alphaCoverage": 0.498882,
+      "alphaSum": 7282545,
+      "boundaryHighAlphaPixels": 0,
+      "decodedBytes": 228984,
+      "dimensions": [
+        203,
+        282
+      ],
+      "highAlphaPixels": 28559,
+      "id": "b1-ridge-central-conifer-native-neutralization",
+      "kind": "neutralization-underlay",
+      "largestConnectedComponentPixels": 28559,
+      "largestConnectedComponentRatio": 1,
+      "neutralizedCanopyDifferenceRatio": 1,
+      "opaquePixels": 28559,
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/b1-ridge-central-conifer-native-neutralization-r4.png?v=ea2920606631",
+      "sha256": "EA292060663156F9378891D3A3FA0F2144419B228898720629CF286E13E3C66E",
+      "sourceCrop": [
+        2661,
+        1372,
+        203,
+        282
+      ],
+      "sourceMasterId": "terrain-master-detail-r8"
+    },
+    {
+      "alphaBounds": [
+        24,
+        24,
+        178,
+        257
+      ],
+      "alphaCoverage": 0.245869,
+      "alphaSum": 3589125,
+      "boundaryHighAlphaPixels": 0,
+      "decodedBytes": 228984,
+      "dimensions": [
+        203,
+        282
+      ],
+      "highAlphaPixels": 14075,
+      "id": "b1-ridge-central-conifer-native-canopy",
+      "kind": "coherent-canopy",
+      "largestConnectedComponentPixels": 13252,
+      "largestConnectedComponentRatio": 0.941528,
+      "opaquePixels": 14075,
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/b1-ridge-central-conifer-native-canopy-r4.png?v=83db3e84d2ff",
+      "sha256": "83DB3E84D2FFACD4EFBB14334C5A654A70368DC22E31FD5701578D6C6663CF7B",
+      "sourceCrop": [
+        2661,
+        1372,
+        203,
+        282
+      ],
+      "sourceMasterId": "terrain-master-detail-r8"
+    },
+    {
+      "alphaBounds": [
+        12,
+        12,
+        174,
+        244
+      ],
+      "alphaCoverage": 0.499359,
+      "alphaSum": 5857860,
+      "boundaryHighAlphaPixels": 0,
+      "decodedBytes": 184012,
+      "dimensions": [
+        179,
+        257
+      ],
+      "highAlphaPixels": 22972,
+      "id": "c1-ridge-east-conifer-native-neutralization",
+      "kind": "neutralization-underlay",
+      "largestConnectedComponentPixels": 22972,
+      "largestConnectedComponentRatio": 1,
+      "neutralizedCanopyDifferenceRatio": 1,
+      "opaquePixels": 22972,
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/c1-ridge-east-conifer-native-neutralization-r4.png?v=d4b0d729b21b",
+      "sha256": "D4B0D729B21BF78E4788A56D60E6B2E0D09BDE4993AC19E17FC035FCBAEBD714",
+      "sourceCrop": [
+        3421,
+        1248,
+        179,
+        257
+      ],
+      "sourceMasterId": "terrain-master-detail-r8"
+    },
+    {
+      "alphaBounds": [
+        20,
+        20,
+        166,
+        236
+      ],
+      "alphaCoverage": 0.243202,
+      "alphaSum": 2852940,
+      "boundaryHighAlphaPixels": 0,
+      "decodedBytes": 184012,
+      "dimensions": [
+        179,
+        257
+      ],
+      "highAlphaPixels": 11188,
+      "id": "c1-ridge-east-conifer-native-canopy",
+      "kind": "coherent-canopy",
+      "largestConnectedComponentPixels": 10548,
+      "largestConnectedComponentRatio": 0.942796,
+      "opaquePixels": 11188,
+      "path": "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/c1-ridge-east-conifer-native-canopy-r4.png?v=e45497e1d536",
+      "sha256": "E45497E1D536D8A4BE5799F844C7499B7872357AC3F37EA7CF8362F7C72066AA",
+      "sourceCrop": [
+        3421,
+        1248,
+        179,
+        257
+      ],
+      "sourceMasterId": "terrain-master-detail-r8"
+    }
+  ],
+  "instances": [
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          563.5,
+          278
+        ],
+        "span": [
+          54.49999999999999,
+          77.75
+        ]
+      },
+      "bendDegrees": 1.15,
+      "canopyResourceId": "b1-ridge-west-conifer-native-canopy",
+      "checkpoint": "b1-ridge-west-conifer-native",
+      "durationSeconds": 6.2,
+      "gridCell": "B1",
+      "id": "b1-ridge-west-conifer-native-instance",
+      "lagDegrees": 0.09,
+      "neutralizationResourceId": "b1-ridge-west-conifer-native-neutralization",
+      "phaseSeconds": -0.8,
+      "pivotYPercent": 96,
+      "protectedSourceRects": [],
+      "sourceMasterId": "terrain-master-detail-r8"
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          605.25,
+          332.75
+        ],
+        "span": [
+          46,
+          85.75
+        ]
+      },
+      "bendDegrees": 0.92,
+      "canopyResourceId": "b1-ridge-south-conifer-native-canopy",
+      "checkpoint": "b1-ridge-south-conifer-native",
+      "durationSeconds": 7.05,
+      "gridCell": "B1",
+      "id": "b1-ridge-south-conifer-native-instance",
+      "lagDegrees": 0.075,
+      "neutralizationResourceId": "b1-ridge-south-conifer-native-neutralization",
+      "phaseSeconds": -2.35,
+      "pivotYPercent": 96,
+      "protectedSourceRects": [],
+      "sourceMasterId": "terrain-master-detail-r8"
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          665.25,
+          343
+        ],
+        "span": [
+          50.75,
+          70.5
+        ]
+      },
+      "bendDegrees": 1.08,
+      "canopyResourceId": "b1-ridge-central-conifer-native-canopy",
+      "checkpoint": "b1-ridge-central-conifer-native",
+      "durationSeconds": 5.65,
+      "gridCell": "B1",
+      "id": "b1-ridge-central-conifer-native-instance",
+      "lagDegrees": 0.085,
+      "neutralizationResourceId": "b1-ridge-central-conifer-native-neutralization",
+      "phaseSeconds": -1.45,
+      "pivotYPercent": 96,
+      "protectedSourceRects": [],
+      "sourceMasterId": "terrain-master-detail-r8"
+    },
+    {
+      "animation": "canopy-bend",
+      "artboardBounds": {
+        "origin": [
+          855.25,
+          311.99999999999994
+        ],
+        "span": [
+          44.75,
+          64.25
+        ]
+      },
+      "bendDegrees": 1,
+      "canopyResourceId": "c1-ridge-east-conifer-native-canopy",
+      "checkpoint": "c1-ridge-east-conifer-native",
+      "durationSeconds": 6.7,
+      "gridCell": "C1",
+      "id": "c1-ridge-east-conifer-native-instance",
+      "lagDegrees": 0.08,
+      "neutralizationResourceId": "c1-ridge-east-conifer-native-neutralization",
+      "phaseSeconds": -3.15,
+      "pivotYPercent": 96,
+      "protectedSourceRects": [],
+      "sourceMasterId": "terrain-master-detail-r8"
+    }
+  ]
+}

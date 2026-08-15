@@ -76,6 +76,7 @@ const UNIFORM_NAMES = [
   "u_weather",
   "u_opacity",
   "u_detailScale",
+  "u_coastalAmbience",
   "u_territoryLod",
   "u_capitalLod",
   "u_siteLod",
@@ -170,6 +171,7 @@ export class WaterSurfaceRenderer {
   };
   private state: WaterSurfaceState = normalizeWaterSurfaceState();
   private detailState: DetailState | null = null;
+  private coastalAmbience = true;
   private lightDirection: readonly [number, number, number];
   private pixelRatio = 1;
   private renderScale = 1;
@@ -247,6 +249,10 @@ export class WaterSurfaceRenderer {
     this.lightDirection = normalize3(light.direction);
   }
 
+  setCoastalAmbience(visible: boolean): void {
+    this.coastalAmbience = visible;
+  }
+
   setState(state: Partial<WaterSurfaceState>): void {
     this.state = normalizeWaterSurfaceState({
       ...this.state,
@@ -303,6 +309,7 @@ export class WaterSurfaceRenderer {
     gl.uniform1f(this.uniforms.u_weather, this.state.weather);
     gl.uniform1f(this.uniforms.u_opacity, this.state.opacity);
     gl.uniform1f(this.uniforms.u_detailScale, this.state.detailScale);
+    gl.uniform1f(this.uniforms.u_coastalAmbience, this.coastalAmbience ? 1 : 0);
     gl.uniform1f(
       this.uniforms.u_territoryLod,
       detailState.worldToTerritory,

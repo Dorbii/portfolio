@@ -341,7 +341,7 @@ CoastSample applyCoast(
   color = mix(
     color,
     u_foamColor,
-    contactFoam * mix(0.72, 0.94, zoom)
+    contactFoam * u_coastalAmbience * mix(0.86, 1.08, zoom)
   );
 
   float wetContact =
@@ -390,8 +390,10 @@ CoastSample applyCoast(
     land
   );
   float overlayAlpha =
-    wetContact * mix(0.12, 0.2, zoom)
-    + landWash * mix(0.28, 0.48, zoom);
+    (
+      wetContact * mix(0.2, 0.34, zoom)
+      + landWash * mix(0.42, 0.68, zoom)
+    ) * u_coastalAmbience;
 
   CoastSample result;
   vec2 inlandOverride = inlandWaterOverrideAt(worldUv);

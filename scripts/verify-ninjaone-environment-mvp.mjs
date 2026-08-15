@@ -20,7 +20,7 @@ import {
 const DEFAULT_NATIVE_MANIFEST =
   "public/career-world/capitals/ninjaone/environment/manifests/native-detail-r2.json";
 const DEFAULT_FOLIAGE_MANIFEST =
-  "public/career-world/capitals/ninjaone/environment/manifests/foliage-native-r3.json";
+  "public/career-world/capitals/ninjaone/environment/manifests/foliage-native-r4.json";
 const DEFAULT_COAST_MANIFEST =
   "public/career-world/capitals/ninjaone/environment/manifests/coast-transition-native-r2.json";
 const DEFAULT_SEAM_MANIFEST =
