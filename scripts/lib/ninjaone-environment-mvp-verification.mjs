@@ -11,7 +11,7 @@ export const NINJAONE_MVP_CAPTURE_PRODUCER_PATH =
 export const NINJAONE_MVP_VERIFICATION_LIBRARY_PATH =
   "scripts/lib/ninjaone-environment-mvp-verification.mjs";
 export const NINJAONE_MVP_FOLIAGE_ISOLATION_PRODUCER_ID =
-  "ninjaone-environment-foliage-isolation-browser-capture-r1";
+  "ninjaone-environment-foliage-isolation-browser-capture-r2";
 export const NINJAONE_MVP_FOLIAGE_ISOLATION_BINDING_PATHS = Object.freeze([
   NINJAONE_MVP_CAPTURE_PRODUCER_PATH,
   NINJAONE_MVP_VERIFICATION_LIBRARY_PATH,
@@ -20,20 +20,26 @@ export const NINJAONE_MVP_FOLIAGE_ISOLATION_BINDING_PATHS = Object.freeze([
   "features/career-world/shared/lod/policy.ts",
   "features/career-world/composition/WorldScene.tsx",
   "features/career-world/layers/terrain/components/NinjaOneEnvironmentProof.tsx",
+  "features/career-world/layers/terrain/components/NinjaOneEnvironmentGeology.tsx",
   "features/career-world/layers/terrain/detail/components/NinjaOneEnvironmentNativeDetail.tsx",
   "features/career-world/layers/terrain/detail/components/NinjaOneEnvironmentFoliage.tsx",
+  "features/career-world/layers/terrain/detail/components/NinjaOneEnvironmentFoliageCanvas.tsx",
+  "features/career-world/layers/terrain/detail/components/ninjaOneEnvironmentFoliageWebGl.ts",
   "features/career-world/layers/terrain/detail/model/ninjaOneEnvironmentFoliage.ts",
+  "features/career-world/layers/terrain/detail/model/useNinjaOneEnvironmentFoliageResidency.ts",
+  "features/career-world/layers/terrain/model/ninjaOneEnvironmentProof.ts",
   "features/career-world/styles/career-world.css",
   "scripts/build-ninjaone-environment-foliage-r4.mjs",
   "public/career-world/capitals/ninjaone/environment/manifests/foliage-native-r4.json",
-  "public/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/b1-ridge-west-conifer-native-neutralization-r4.png",
-  "public/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/b1-ridge-west-conifer-native-canopy-r4.png",
-  "public/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/b1-ridge-south-conifer-native-neutralization-r4.png",
-  "public/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/b1-ridge-south-conifer-native-canopy-r4.png",
-  "public/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/b1-ridge-central-conifer-native-neutralization-r4.png",
-  "public/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/b1-ridge-central-conifer-native-canopy-r4.png",
-  "public/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/c1-ridge-east-conifer-native-neutralization-r4.png",
-  "public/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/c1-ridge-east-conifer-native-canopy-r4.png",
+  "public/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/b1-conifer-neutralization-imagegen-r5.png",
+  "public/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/b1-conifer-occupancy-alpha-imagegen-r5.png",
+  "public/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/b2-conifer-neutralization-imagegen-r5.png",
+  "public/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/b2-conifer-occupancy-alpha-imagegen-r5.png",
+  "public/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/c1-conifer-neutralization-imagegen-r5.png",
+  "public/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/c1-conifer-occupancy-alpha-imagegen-r5.png",
+  "public/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/c2-conifer-neutralization-imagegen-r5.png",
+  "public/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/c2-conifer-occupancy-alpha-imagegen-r5.png",
+  "public/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/ninjaone-native-conifer-pool-atlas-r5.png",
   "art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r8.png",
 ]);
 export const NINJAONE_MVP_BANNED_FIDELITY_SOURCES = Object.freeze([
@@ -42,7 +48,7 @@ export const NINJAONE_MVP_BANNED_FIDELITY_SOURCES = Object.freeze([
 ]);
 export const NINJAONE_MVP_LIMITS = Object.freeze({
   maximumDecodedBytes: 32 * 1024 * 1024,
-  maximumSupplementalNodes: 6,
+  maximumSupplementalNodes: 64,
   maximumTerrainTiles: 4,
 });
 export const NINJAONE_MVP_CLOSE_ASSET_PRELOAD_MAXIMUM_CAMERA_SPAN = 0.075;
@@ -96,9 +102,50 @@ const ARTBOARD = Object.freeze([1440, 1080]);
 const TILE_DIMENSIONS = Object.freeze([1448, 1086]);
 const ALPHA_PRESENT = 16;
 const FRAME_DIFF_THRESHOLD = 6;
+const MAX_MOTION_MASK_COVERAGE = 0.25;
 const NATIVE_BUDGET_SWEEP_SPANS = Object.freeze([
   0.04, 0.05, 0.055, 0.06, 0.061, 0.074, 0.075, 0.08, 0.0875, 0.09,
 ]);
+
+function foliageArtboardView(camera) {
+  return {
+    origin: camera.origin.map((value, index) => (
+      (value - ENVIRONMENT_ORIGIN[index]) / ENVIRONMENT_SPAN[index] * ARTBOARD[index]
+    )),
+    span: camera.span.map((value, index) => (
+      value / ENVIRONMENT_SPAN[index] * ARTBOARD[index]
+    )),
+  };
+}
+
+function rectanglesIntersect(first, second) {
+  return first.origin[0] < second.origin[0] + second.span[0]
+    && first.origin[0] + first.span[0] > second.origin[0]
+    && first.origin[1] < second.origin[1] + second.span[1]
+    && first.origin[1] + first.span[1] > second.origin[1];
+}
+
+function selectManifestFoliageInstances(camera, manifest) {
+  const view = foliageArtboardView(camera);
+  const ratio = manifest?.eligibility?.viewportOverscanRatio ?? 0;
+  const admissionView = {
+    origin: view.origin.map((value, index) => value - view.span[index] * ratio),
+    span: view.span.map((value) => value * (1 + ratio * 2)),
+  };
+  const center = view.origin.map((value, index) => value + view.span[index] * 0.5);
+  const distance = (instance) => instance.artboardBounds.origin.reduce(
+    (total, value, index) => {
+      const instanceCenter = value + instance.artboardBounds.span[index] * 0.5;
+      return total + (center[index] - instanceCenter) ** 2;
+    },
+    0,
+  );
+  return (manifest?.instances ?? [])
+    .filter((instance) => rectanglesIntersect(admissionView, instance.artboardBounds))
+    .sort((left, right) => distance(left) - distance(right))
+    .slice(0, manifest?.budgets?.maximumSelectedGroups ?? 0);
+}
+
 function round(value, digits = 4) {
   if (!Number.isFinite(value)) return null;
   const scale = 10 ** digits;
@@ -150,7 +197,7 @@ export async function createNinjaOneEnvironmentFoliageIsolationBindings(root) {
     ".ninjaone-environment-native-detail__canopy-neutralization",
   );
   const end = css.indexOf(
-    "\n\n@keyframes ninjaone-environment-foliage-breeze",
+    "\n\n.ninjaone-environment-proof__hud",
     start,
   );
   if (start < 0 || end < 0) throw new Error("Frozen foliage CSS block is missing.");
@@ -1153,21 +1200,11 @@ async function registeredMaskedDifference(firstPath, secondPath, maskPath) {
   });
 }
 
-function parsedFoliageTransform(value) {
-  const match = /^rotate\((-?[\d.]+)deg\) skewX\((-?[\d.]+)deg\)$/.exec(
-    value ?? "",
-  );
-  return match ? [Number(match[1]), Number(match[2])] : null;
-}
-
 export async function auditFoliageIsolationEvidence({
-  coastManifest = null,
   evidence,
   evidencePath,
   foliageManifest,
-  nativeManifest,
   referenceRoot = path.dirname(evidencePath),
-  seamManifest,
 }) {
   const failures = [];
   const evidenceDirectory = path.dirname(evidencePath);
@@ -1190,7 +1227,7 @@ export async function auditFoliageIsolationEvidence({
     || producerUrl.protocol !== "http:"
     || !new Set(["localhost", "127.0.0.1", "[::1]"]).has(producerUrl.hostname)
     || producerUrl.pathname !== "/"
-    || producerUrl.searchParams.get("view") !== "ninjaone-environment"
+    || producerUrl.searchParams.get("view") !== "ninjaone-capital-mvp"
     || !Number.isFinite(Date.parse(evidence?.producer?.capturedAt ?? ""))
   ) failures.push("foliage_isolation.producer_contract");
   try {
@@ -1208,9 +1245,7 @@ export async function auditFoliageIsolationEvidence({
         Object.keys(bindings.files),
       )
       || evidence?.bindings?.cssBlock?.sha256 !== bindings.cssBlock.sha256
-      || evidence?.bindings?.cssBlock?.bytes !== 975
-      || bindings.cssBlock.sha256
-        !== "A10527FCD34A222FD8C679D15ECB8A6412BE1B12B18DD8D11B97E86721D28C02"
+      || evidence?.bindings?.cssBlock?.bytes !== bindings.cssBlock.bytes
     ) failures.push("foliage_isolation.binding_contract");
     for (const [relativeFile, expectedSha256] of Object.entries(bindings.files)) {
       if (evidence?.bindings?.files?.[relativeFile] !== expectedSha256) {
@@ -1244,18 +1279,22 @@ export async function auditFoliageIsolationEvidence({
     || proof?.isolation?.terrain !== "preserved"
     || !proof?.isolation?.hud?.includes("header/footer visibility:hidden")
     || proof?.isolation?.water !== "visibility:hidden!important"
-    || proof?.isolation?.seams !== "visibility:hidden!important"
+    || proof?.isolation?.seams !== "native additive layer contains zero seam nodes"
   ) failures.push("foliage_isolation.state_not_explicit");
 
-  const expectedInstances = (foliageManifest?.instances ?? [])
-    .filter(({ gridCell }) => gridCell === "B1")
-    .slice()
-    .sort((left, right) => left.id.localeCompare(right.id));
-  const expectedInstanceIds = expectedInstances.map(({ id }) => id);
-  const expectedResourceIds = expectedInstances.flatMap((instance) => [
-    instance.neutralizationResourceId,
-    instance.canopyResourceId,
-  ]).sort();
+  const expectedInstances = selectManifestFoliageInstances(expectedCamera, foliageManifest);
+  const selectedInstanceIds = new Set(expectedInstances.map(({ id }) => id));
+  const expectedInstanceIds = (proof?.rectangles ?? [])
+    .map(({ id }) => id)
+    .sort();
+  if (
+    expectedInstanceIds.length === 0
+    || new Set(expectedInstanceIds).size !== expectedInstanceIds.length
+    || expectedInstanceIds.some((id) => !selectedInstanceIds.has(id))
+  ) failures.push("foliage_isolation.rectangle_registration");
+  const expectedResourceIds = [...new Set(expectedInstances.map(
+    ({ atlasResourceId }) => atlasResourceId,
+  ))].sort();
   const foliageResourceMap = new Map(
     (foliageManifest?.resources ?? []).map((resource) => [resource.id, resource]),
   );
@@ -1266,83 +1305,38 @@ export async function auditFoliageIsolationEvidence({
   const poolFoliageBytes = (foliageManifest?.resources ?? [])
     .reduce((total, resource) => total + resource.decodedBytes, 0);
   const runtime = proof?.runtime;
-  const isolationCatalog = createNinjaOneEnvironmentMvpResourceCatalog({
-    nativeManifest,
-    supplementalManifests: [foliageManifest, seamManifest, coastManifest].filter(Boolean),
-  });
-  const expectedTerrainIds = expectedTerrainResourceIds(expectedCamera, isolationCatalog);
-  const expectedTerrainBytes = catalogBytes(
-    expectedTerrainIds,
-    isolationCatalog,
-    failures,
-    "foliage_isolation.terrain",
-  );
-  const expectedSupplementalIds = expectedSupplementalResourceIds(
-    expectedCamera,
-    isolationCatalog,
-    {
-      terrainDecodedBytes: expectedTerrainBytes,
-    },
-  );
-  const expectedApplicationOwnedIds = [
-    ...expectedTerrainIds,
-    ...expectedSupplementalIds,
-  ];
-  const expectedApplicationOwnedBytes = catalogBytes(
-    expectedApplicationOwnedIds,
-    isolationCatalog,
-    failures,
-    "foliage_isolation.application_owned",
-  );
-  const seamResourceIds = new Set((seamManifest?.resources ?? []).map(({ id }) => id));
-  const expectedSeamIds = expectedSupplementalIds.filter((id) => seamResourceIds.has(id));
-  const expectedSeamBytes = catalogBytes(
-    expectedSeamIds,
-    isolationCatalog,
-    failures,
-    "foliage_isolation.seams",
-  );
-  const expectedSeamNodeCount = expectedSeamIds.reduce(
-    (total, id) => total + isolationCatalog[id].paintedNodeCount,
-    0,
-  );
   if (
-    expectedInstances.length !== 3
-    || expectedResourceIds.length !== 6
+    expectedInstances.length === 0
+    || expectedInstances.length > foliageManifest?.budgets?.maximumSelectedGroups
+    || expectedResourceIds.length !== foliageManifest?.budgets?.uniqueTextureResources
     || poolFoliageBytes !== foliageManifest?.budgets?.foliageDecodedBytes
-    || foliageManifest?.budgets?.combinedDecodedBytes
-      !== expectedTerrainBytes + poolFoliageBytes
-    || runtime?.nativeState !== "ready"
-    || runtime?.nativeVisible !== true
-    || runtime?.terrainNodeCount !== 4
-    || runtime?.terrainDecodedBytes !== 25_160_448
-    || !sameStringSet(runtime?.terrainIds ?? [], expectedTerrainIds)
+    || runtime?.nativeRenderMode !== "additive-only"
+    || runtime?.terrainNodeCount !== 0
+    || runtime?.seamNodeCount !== 0
+    || runtime?.geologyNodeCount !== 1
+    || !/^\/career-world\/capitals\/ninjaone\/environment\/plates\/geology\/ninjaone-environment-geology-close-r8\.webp\?v=[a-f0-9]+$/u.test(
+      runtime?.geologySource ?? "",
+    )
     || runtime?.foliageState !== "ready"
     || runtime?.foliageVisible !== true
-    || runtime?.foliageInstanceCount !== 3
-    || runtime?.foliageMountedNodeCount !== 6
-    || runtime?.foliageSelectedNodeCount !== 6
+    || runtime?.foliageInstanceCount !== expectedInstances.length
+    || runtime?.foliageCanvasInstanceCount !== expectedInstances.length
+    || runtime?.foliageMountedNodeCount !== expectedResourceIds.length
+    || runtime?.foliageSelectedNodeCount !== expectedResourceIds.length
     || runtime?.foliageSelectedDecodedBytes !== expectedFoliageBytes
+    || runtime?.foliageRenderer !== "webgl2-ready"
+    || runtime?.foliageAnimationRunning !== true
+    || !Number.isSafeInteger(runtime?.foliageCanvasWidth)
+    || runtime.foliageCanvasWidth <= 0
+    || !Number.isSafeInteger(runtime?.foliageCanvasHeight)
+    || runtime.foliageCanvasHeight <= 0
     || !sameStringSet(runtime?.foliageMountedResourceIds ?? [], expectedResourceIds)
     || !sameStringSet(runtime?.foliageSelectedResourceIds ?? [], expectedResourceIds)
     || runtime?.legacyFoliageNodeCount !== 0
-    || !sameStringSet(
-      runtime?.applicationOwnedResourceIds ?? [],
-      expectedApplicationOwnedIds,
-    )
-    || !sameStringSet(
-      runtime?.selectedSupplementalResourceIds ?? [],
-      expectedSupplementalIds,
-    )
-    || runtime?.seamDecodedBytes !== expectedSeamBytes
-    || runtime?.seamNodeCount !== expectedSeamNodeCount
-    || !sameStringSet(runtime?.seamResourceIds ?? [], expectedSeamIds)
     || !Number.isSafeInteger(runtime?.cohortEpoch)
     || runtime.cohortEpoch < 1
     || typeof runtime?.cohortKey !== "string"
     || runtime.cohortKey.length === 0
-    || runtime?.applicationOwnedDecodedBytes !== expectedApplicationOwnedBytes
-    || runtime.applicationOwnedDecodedBytes > NINJAONE_MVP_LIMITS.maximumDecodedBytes
   ) failures.push("foliage_isolation.runtime_contract");
 
   const normalFramePaths = Array.isArray(proof?.normalFrames)
@@ -1403,53 +1397,34 @@ export async function auditFoliageIsolationEvidence({
   if (!Array.isArray(proof?.normalStates) || proof.normalStates.length !== 3) {
     failures.push("foliage_isolation.normal_state_sequence");
   } else {
-    for (const [index, states] of proof.normalStates.entries()) {
+    for (const [index, state] of proof.normalStates.entries()) {
       if (
-        !Array.isArray(states)
-        || !sameStringSet(states.map(({ instanceId }) => instanceId), expectedInstanceIds)
-        || states.some((state) => (
-          state.animation !== "ninjaone-native-canopy-sway"
-          || state.opacity !== "1"
-          || state.transform === "none"
-        ))
+        state?.renderer !== "webgl2-ready"
+        || state?.animationRunning !== true
+        || state?.captureTimeSeconds !== null
+        || state?.instanceCount !== expectedInstances.length
+        || state?.width !== runtime?.foliageCanvasWidth
+        || state?.height !== runtime?.foliageCanvasHeight
       ) failures.push(`foliage_isolation.normal_state.${index}`);
     }
   }
   if (
     forcedStates.length !== 2
-    || !sameStringSet(forcedStates.map(({ progress }) => String(progress)), ["0", "0.37"])
+    || !sameStringSet(
+      forcedStates.map(({ timeSeconds }) => String(timeSeconds)),
+      ["0", "2.37"],
+    )
   ) failures.push("foliage_isolation.forced_state_sequence");
   for (const state of forcedStates) {
-    const progress = state.progress;
-    const nodes = Array.isArray(state.nodeStates) ? state.nodeStates : [];
-    if (!sameStringSet(nodes.map(({ instanceId }) => instanceId), expectedInstanceIds)) {
-      failures.push(`foliage_isolation.forced_${progress}.instances`);
-      continue;
-    }
-    for (const node of nodes) {
-      const instance = expectedInstances.find(({ id }) => id === node.instanceId);
-      const expected = progress === 0
-        ? [
-            Number((-instance.bendDegrees * 0.52).toFixed(3)),
-            Number((-instance.lagDegrees * 0.55).toFixed(3)),
-          ]
-        : [
-            Number(instance.bendDegrees.toFixed(3)),
-            Number(instance.lagDegrees.toFixed(3)),
-          ];
-      const declared = parsedFoliageTransform(node.expectedTransform);
-      const applied = parsedFoliageTransform(node.appliedTransform);
-      if (
-        node.progress !== progress
-        || node.animation !== "none"
-        || node.opacity !== "1"
-        || !/^matrix\(/.test(node.transform ?? "")
-        || !declared
-        || !applied
-        || declared.some((value, axis) => Math.abs(value - expected[axis]) > 1e-6)
-        || applied.some((value, axis) => Math.abs(value - expected[axis]) > 1e-6)
-      ) failures.push(`foliage_isolation.forced_${progress}.${node.instanceId}`);
-    }
+    const renderer = state.rendererState;
+    if (
+      renderer?.renderer !== "webgl2-ready"
+      || renderer?.animationRunning !== true
+      || renderer?.captureTimeSeconds !== state.timeSeconds
+      || renderer?.instanceCount !== expectedInstances.length
+      || renderer?.width !== runtime?.foliageCanvasWidth
+      || renderer?.height !== runtime?.foliageCanvasHeight
+    ) failures.push(`foliage_isolation.forced_${state.timeSeconds}`);
   }
 
   const expectedFrameIds = [
@@ -1509,7 +1484,7 @@ export async function auditFoliageIsolationSceneCrops({
   const companionDirectory = path.dirname(companionPath);
   const expectedClip = Object.freeze({ height: 193, left: 209, top: 112, width: 265 });
   const expectedFrameIds = [
-    "normal-1", "normal-2", "normal-3", "forced-0", "forced-37",
+    "normal-1", "normal-2", "normal-3", "forced-000", "forced-2370",
   ];
   const extractionScriptPath = "scripts/extract-ninjaone-foliage-isolation-crops.mjs";
   if (
@@ -1751,14 +1726,21 @@ export function auditCameraDecodedBudgets({
           || left.id.localeCompare(right.id)
         ))
       : [];
-    const nodesFor = (instances) => instances.flatMap((instance) => (
-      (instance.resources ?? [instance.resource]).flatMap((resource, resourceIndex) => (
+    const nodesFor = (instances) => instances.flatMap((instance) => {
+      const resources = instance.resources ?? [instance.resource];
+      if (Number.isInteger(instance.paintedNodeCount)) {
+        return Array.from({ length: instance.paintedNodeCount }, (_, paintedIndex) => ({
+          id: `${instance.id}:shared:${resources[0].id}:${paintedIndex}`,
+          resource: resources[paintedIndex % resources.length],
+        }));
+      }
+      return resources.flatMap((resource, resourceIndex) => (
         Array.from({ length: resourcePaintedNodeCount(resource) }, (_, paintedIndex) => ({
           id: `${instance.id}:${resourceIndex}:${resource.id}:${paintedIndex}`,
           resource,
         }))
-      ))
-    ));
+      ));
+    });
     const requiredSupplementalNodes = nodesFor(orderedRequiredSupplements);
     const coastSupplementalNodes = nodesFor(orderedCoastSupplements);
     const seamSupplementalNodes = nodesFor(orderedSeamSupplements);

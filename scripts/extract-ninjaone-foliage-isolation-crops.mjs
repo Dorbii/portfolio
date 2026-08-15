@@ -47,8 +47,8 @@ export async function extractNinjaOneFoliageIsolationCrops(options) {
       id: `normal-${index + 1}`,
       imagePath,
     })),
-    ...(evidence.foliageProof?.forcedStates ?? []).map(({ imagePath, progress }) => ({
-      id: `forced-${Math.round(progress * 100)}`,
+    ...(evidence.foliageProof?.forcedStates ?? []).map(({ imagePath, timeSeconds }) => ({
+      id: `forced-${String(Math.round(timeSeconds * 1000)).padStart(3, "0")}`,
       imagePath,
     })),
   ];

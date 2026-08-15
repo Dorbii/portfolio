@@ -12,17 +12,16 @@ import sharp from "sharp";
 import {
   NINJAONE_MVP_CAPTURE_PRODUCER_PATH,
   NINJAONE_MVP_FOLIAGE_CAMERA,
+  NINJAONE_MVP_FOLIAGE_ISOLATION_PRODUCER_ID,
   createNinjaOneEnvironmentFoliageIsolationBindings,
 } from "./lib/ninjaone-environment-mvp-verification.mjs";
 
 const DEFAULT_URL =
-  "http://127.0.0.1:4173/?view=ninjaone-environment";
+  "http://127.0.0.1:4173/?view=ninjaone-capital-mvp";
 const DEFAULT_OUTPUT =
   ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/runtime-capture-r1/evidence.json";
 const DEFAULT_VIEWPORT = Object.freeze({ height: 900, width: 1440 });
 const CAMERA_TOLERANCE = 1e-8;
-const FOLIAGE_ISOLATION_PRODUCER_ID =
-  "ninjaone-environment-foliage-isolation-browser-capture-r1";
 
 function usage() {
   return [
@@ -267,11 +266,9 @@ const RUNTIME_SAMPLE_EXPRESSION = `(() => {
   const water = document.querySelector('canvas[data-layer="ocean"]');
   if (!native || !water) return null;
   return {
-    cohortPhase: native.dataset.environmentNativeCohortPhase,
-    nativeState: native.dataset.environmentNativeState,
-    nativeVisible: native.dataset.environmentNativeVisible === 'true',
-    supplementalState: native.dataset.environmentNativeSupplementalState,
-    terrainTileCount: Number(native.dataset.environmentNativeTileCount ?? 0),
+    nativeRenderMode: native.dataset.environmentNativeRenderMode,
+    seamNodeCount: Number(native.dataset.environmentNativeSeamNodeCount ?? -1),
+    terrainNodeCount: Number(native.dataset.environmentNativeTerrainNodeCount ?? -1),
     waterRenderState: water.dataset.renderState,
   };
 })()`;
@@ -406,18 +403,23 @@ async function runtimeSample(connection, sessionId) {
   return sample;
 }
 
-async function waitForNativeReady(connection, sessionId, expectedTerrainTileCount = 4) {
-  return waitFor(connection, sessionId, async () => {
-    const sample = await runtimeSample(connection, sessionId);
-    return sample.nativeState === "ready"
-      && sample.nativeVisible === true
-      && sample.cohortPhase === "active"
-      && sample.terrainTileCount === expectedTerrainTileCount
-      && sample.waterRenderState === "ready"
-      && (sample.supplementalState === "ready" || sample.supplementalState === "idle")
-      ? sample
-      : null;
-  }, "ready native cohort", 30_000);
+async function waitForNativeReady(connection, sessionId) {
+  let lastSample = null;
+  try {
+    return await waitFor(connection, sessionId, async () => {
+      lastSample = await runtimeSample(connection, sessionId);
+      return lastSample.nativeRenderMode === "additive-only"
+        && lastSample.terrainNodeCount === 0
+        && lastSample.seamNodeCount === 0
+        && lastSample.waterRenderState === "ready"
+        ? lastSample
+        : null;
+    }, "ready native cohort", 30_000);
+  } catch (error) {
+    throw new Error(
+      `${error instanceof Error ? error.message : String(error)} sample=${JSON.stringify(lastSample)}`,
+    );
+  }
 }
 
 async function screenshot(connection, sessionId, file, clip) {
@@ -441,15 +443,37 @@ async function navigate(connection, sessionId, url) {
   ), "environment preview DOM", 30_000);
   await waitFor(connection, sessionId, async () => {
     const sample = await runtimeSample(connection, sessionId);
-    return sample.waterTextureBudgetBytes > 0 ? sample : null;
+    return sample.waterRenderState === "ready" ? sample : null;
   }, "water telemetry", 30_000);
 }
 
 async function foliageRects(connection, sessionId, clip) {
   return evaluate(connection, sessionId, `(() => {
     const clip = ${JSON.stringify(clip)};
-    return [...document.querySelectorAll('[data-environment-foliage-group]')]
-      .map((node) => ({ id: node.dataset.environmentFoliageGroup, rect: node.getBoundingClientRect() }))
+    return [...document.querySelectorAll('[data-environment-foliage-instance]')]
+      .map((node) => {
+        const frame = node.dataset.environmentFoliageFrame.split(',').map(Number);
+        const matrix = node.getScreenCTM();
+        if (!matrix || frame.length !== 4 || frame.some((value) => !Number.isFinite(value))) {
+          return null;
+        }
+        const [x, y, width, height] = frame;
+        const points = [
+          new DOMPoint(x, y),
+          new DOMPoint(x + width, y),
+          new DOMPoint(x, y + height),
+          new DOMPoint(x + width, y + height),
+        ].map((point) => point.matrixTransform(matrix));
+        const left = Math.min(...points.map((point) => point.x));
+        const right = Math.max(...points.map((point) => point.x));
+        const top = Math.min(...points.map((point) => point.y));
+        const bottom = Math.max(...points.map((point) => point.y));
+        return {
+          id: node.dataset.environmentFoliageInstance,
+          rect: { height: bottom - top, width: right - left, x: left, y: top },
+        };
+      })
+      .filter(Boolean)
       .map(({ id, rect }) => {
         const x = Math.max(0, Math.floor(rect.x - clip.x - 10));
         const y = Math.max(0, Math.floor(rect.y - clip.y - 10));
@@ -549,53 +573,43 @@ async function maskedDiffMetrics(firstFile, secondFile, maskFile) {
   });
 }
 
-async function forceFoliageProgress(connection, sessionId, progress) {
+async function forceFoliageTime(connection, sessionId, timeSeconds) {
   return evaluate(connection, sessionId, `(() => {
-    const progress = ${progress};
-    const nodes = [...document.querySelectorAll(
-      '.ninjaone-environment-native-detail__canopy-sway'
-    )];
-    for (const node of nodes) {
-      const style = getComputedStyle(node);
-      const bend = style.getPropertyValue(
-        progress === 0 ? '--ninjaone-foliage-bend-start' : '--ninjaone-foliage-bend-peak'
-      ).trim();
-      const lag = style.getPropertyValue(
-        progress === 0 ? '--ninjaone-foliage-lag-start' : '--ninjaone-foliage-lag-peak'
-      ).trim();
-      node.dataset.ninjaoneCaptureExpectedTransform = 'rotate(' + bend + ') skewX(' + lag + ')';
-      node.style.setProperty('animation', 'none', 'important');
-      node.style.setProperty(
-        'transform', node.dataset.ninjaoneCaptureExpectedTransform, 'important'
-      );
-    }
+    const canvas = document.querySelector(
+      '.ninjaone-environment-native-detail__foliage-canvas'
+    );
+    if (!canvas) return null;
+    canvas.dataset.environmentFoliageCaptureTime = String(${timeSeconds});
     void document.documentElement.getBoundingClientRect();
     return new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => {
-      resolve(nodes.map((node) => ({
-        animation: getComputedStyle(node).animationName,
-        appliedTransform: node.style.getPropertyValue('transform'),
-        instanceId: node.dataset.environmentFoliageInstance,
-        opacity: getComputedStyle(node).opacity,
-        progress,
-        transform: getComputedStyle(node).transform,
-        transformOrigin: getComputedStyle(node).transformOrigin,
-        expectedTransform: node.dataset.ninjaoneCaptureExpectedTransform,
-      })));
+      resolve({
+        animationRunning: canvas.dataset.environmentFoliageAnimationRunning === 'true',
+        captureTimeSeconds: Number(canvas.dataset.environmentFoliageCaptureTime),
+        height: canvas.height,
+        instanceCount: Number(canvas.dataset.environmentFoliageCanvasInstanceCount),
+        renderer: canvas.dataset.environmentFoliageRenderer,
+        width: canvas.width,
+      });
     })));
   })()`);
 }
 
-async function readFoliageNodeStates(connection, sessionId) {
-  return evaluate(connection, sessionId, `(() => (
-    [...document.querySelectorAll('.ninjaone-environment-native-detail__canopy-sway')]
-      .map((node) => ({
-        animation: getComputedStyle(node).animationName,
-        instanceId: node.dataset.environmentFoliageInstance,
-        opacity: getComputedStyle(node).opacity,
-        transform: getComputedStyle(node).transform,
-        transformOrigin: getComputedStyle(node).transformOrigin,
-      }))
-  ))()`);
+async function readFoliageRendererState(connection, sessionId) {
+  return evaluate(connection, sessionId, `(() => {
+    const canvas = document.querySelector(
+      '.ninjaone-environment-native-detail__foliage-canvas'
+    );
+    if (!canvas) return null;
+    delete canvas.dataset.environmentFoliageCaptureTime;
+    return {
+      animationRunning: canvas.dataset.environmentFoliageAnimationRunning === 'true',
+      captureTimeSeconds: null,
+      height: canvas.height,
+      instanceCount: Number(canvas.dataset.environmentFoliageCanvasInstanceCount),
+      renderer: canvas.dataset.environmentFoliageRenderer,
+      width: canvas.width,
+    };
+  })()`);
 }
 
 async function captureFoliageIsolationProof({
@@ -611,16 +625,27 @@ async function captureFoliageIsolationProof({
   }
   await setCamera(connection, sessionId, NINJAONE_MVP_FOLIAGE_CAMERA);
   await waitForNativeReady(connection, sessionId);
+  await waitFor(connection, sessionId, async () => evaluate(
+    connection,
+    sessionId,
+    `(() => {
+      const canvas = document.querySelector(
+        '.ninjaone-environment-native-detail__foliage-canvas'
+      );
+      return canvas?.dataset.environmentFoliageRenderer === 'webgl2-ready'
+        && canvas.dataset.environmentFoliageAnimationRunning === 'true';
+    })()`,
+  ), "ready WebGL foliage renderer", 30_000);
   await evaluate(connection, sessionId, `(() => {
     const style = document.createElement('style');
     style.dataset.ninjaoneFoliageIsolation = 'true';
     style.textContent = '* { animation-play-state: paused !important; } '
-      + '.ninjaone-environment-native-detail__canopy-sway { animation-play-state: running !important; } '
       + '.ninjaone-environment-proof__hud { display: none !important; } '
       + '.career-world__interface { display: none !important; } '
       + '.career-world__header, .career-world__footer { visibility: hidden !important; } '
       + '[data-environment-seam-integration-state] { visibility: hidden !important; } '
-      + 'canvas[data-layer="ocean"] { visibility: hidden !important; }';
+      + 'canvas:not(.ninjaone-environment-native-detail__foliage-canvas) '
+      + '{ visibility: hidden !important; }';
     document.head.append(style);
   })()`);
   const clip = Object.freeze({
@@ -640,7 +665,7 @@ async function captureFoliageIsolationProof({
     );
     await screenshot(connection, sessionId, file, clip);
     normalFrames.push(file);
-    normalStates.push(await readFoliageNodeStates(connection, sessionId));
+    normalStates.push(await readFoliageRendererState(connection, sessionId));
   }
   const rectangles = await foliageRects(connection, sessionId, clip);
   const maskFile = path.join(
@@ -652,8 +677,9 @@ async function captureFoliageIsolationProof({
     normalFrames[0], normalFrames[2], maskFile,
   );
   const forcedStates = [];
-  for (const [id, progress] of [["0", 0], ["37", 0.37]]) {
-    const nodeStates = await forceFoliageProgress(connection, sessionId, progress);
+  for (const [id, timeSeconds] of [["000", 0], ["2370", 2.37]]) {
+    const rendererState = await forceFoliageTime(connection, sessionId, timeSeconds);
+    if (!rendererState) throw new Error("Foliage renderer disappeared during capture.");
     const file = path.join(
       proofDirectory,
       `${artifactPrefix}-forced-${id}.png`,
@@ -661,8 +687,8 @@ async function captureFoliageIsolationProof({
     await screenshot(connection, sessionId, file, clip);
     forcedStates.push(Object.freeze({
       imagePath: relativePath(outputDirectory, file),
-      nodeStates: Object.freeze(nodeStates),
-      progress,
+      rendererState: Object.freeze(rendererState),
+      timeSeconds,
     }));
   }
   const forcedDiff = await maskedDiffMetrics(
@@ -678,7 +704,7 @@ async function captureFoliageIsolationProof({
       })),
       ...forcedStates.map((state) => ({
         file: path.resolve(outputDirectory, state.imagePath),
-        id: `${artifactPrefix}-forced-${Math.round(state.progress * 100)}`,
+        id: path.basename(state.imagePath, ".png"),
       })),
     ],
     outputDirectory,
@@ -689,27 +715,28 @@ async function captureFoliageIsolationProof({
     readCamera(connection, sessionId),
     evaluate(connection, sessionId, `(() => {
        const native = document.querySelector('.ninjaone-environment-native-detail');
-       const foliage = document.querySelector('.ninjaone-environment-foliage-r4');
-       const seams = document.querySelector('[data-environment-seam-integration-state]');
-       if (!native || !foliage || !seams) return null;
+       const foliage = document.querySelector('.ninjaone-environment-foliage-r5');
+       const foliageCanvas = foliage?.querySelector(
+         '.ninjaone-environment-native-detail__foliage-canvas'
+       );
+       const geology = document.querySelector(
+         '.ninjaone-environment-geology image[data-environment-layer="terrain-geology"]'
+       );
+       if (!native || !foliage || !foliageCanvas || !geology) return null;
       const csv = (value) => value ? value.split(',').filter(Boolean) : [];
       const number = (value) => Number.isFinite(Number(value)) ? Number(value) : -1;
-       const terrainNodes = [...native.querySelectorAll('image[data-environment-native-tile]')];
        const foliageNodes = [...foliage.querySelectorAll('image[data-shared-resource]')];
-       const seamNodes = [
-         ...seams.querySelectorAll('image[data-environment-seam-integration-resource]'),
-         ...seams.querySelectorAll('path[data-environment-seam-integration-tonal-resource]'),
-       ];
        return {
-         applicationOwnedDecodedBytes: number(
-           native.dataset.environmentNativeApplicationOwnedDecodedBytes
-         ),
-         applicationOwnedResourceIds: csv(
-           native.dataset.environmentNativeApplicationOwnedResourceIds
-         ).sort(),
         cohortEpoch: number(foliage.dataset.environmentFoliageCohortEpoch),
         cohortKey: foliage.dataset.environmentFoliageCohortKey,
         foliageInstanceCount: number(foliage.dataset.environmentFoliageInstanceCount),
+        foliageAnimationRunning:
+          foliageCanvas.dataset.environmentFoliageAnimationRunning === 'true',
+        foliageCanvasHeight: foliageCanvas.height,
+        foliageCanvasInstanceCount: number(
+          foliageCanvas.dataset.environmentFoliageCanvasInstanceCount
+        ),
+        foliageCanvasWidth: foliageCanvas.width,
         foliageMountedNodeCount: foliageNodes.length,
         foliageMountedResourceIds: [...new Set(
           foliageNodes.map((node) => node.dataset.sharedResource)
@@ -723,29 +750,19 @@ async function captureFoliageIsolationProof({
         foliageSelectedResourceIds: csv(
           foliage.dataset.environmentFoliageSelectedResourceIds
         ).sort(),
+        foliageRenderer: foliageCanvas.dataset.environmentFoliageRenderer,
         foliageState: foliage.dataset.environmentFoliageState,
         foliageVisible: foliage.dataset.environmentFoliageVisible === 'true',
+        geologyNodeCount: document.querySelectorAll(
+          '.ninjaone-environment-geology image[data-environment-layer="terrain-geology"]'
+        ).length,
+        geologySource: geology.dataset.environmentSource,
         legacyFoliageNodeCount: document.querySelectorAll(
           '[data-environment-layer="shared-animated-foliage"], .ninjaone-environment-proof__shared-foliage'
         ).length,
-         nativeState: native.dataset.environmentNativeState,
-         nativeVisible: native.dataset.environmentNativeVisible === 'true',
-         seamDecodedBytes: number(native.dataset.environmentNativeSeamDecodedBytes),
-         seamNodeCount: seamNodes.length,
-         seamResourceIds: [...new Set(seamNodes.map((node) => (
-           node.dataset.environmentSeamIntegrationResource
-             ?? node.dataset.environmentSeamIntegrationTonalResource
-         )))].sort(),
-         selectedSupplementalResourceIds: csv(
-           native.dataset.environmentNativeSupplementalResourceIds
-         ).sort(),
-        terrainDecodedBytes: number(
-          native.dataset.environmentNativeTerrainMountedDecodedBytes
-        ),
-        terrainIds: terrainNodes.map(
-          (node) => node.dataset.environmentNativeTile
-        ).sort(),
-        terrainNodeCount: terrainNodes.length,
+        nativeRenderMode: native.dataset.environmentNativeRenderMode,
+        seamNodeCount: number(native.dataset.environmentNativeSeamNodeCount),
+        terrainNodeCount: number(native.dataset.environmentNativeTerrainNodeCount),
       };
     })()`),
   ]);
@@ -757,10 +774,10 @@ async function captureFoliageIsolationProof({
     forcedDiff,
     forcedStates: Object.freeze(forcedStates),
     isolation: Object.freeze({
-      animation: "all paused except canopy sway during normal trio; disabled during forced states",
+      animation: "CSS animation paused; WebGL wind active during normal trio and fixed-time during forced states",
       cameraPreserved: true,
       hud: "proof HUD and world interface display:none; page header/footer visibility:hidden",
-      seams: "visibility:hidden!important",
+      seams: "native additive layer contains zero seam nodes",
       terrain: "preserved",
       water: "visibility:hidden!important",
     }),
@@ -890,7 +907,7 @@ export async function captureNinjaOneEnvironmentMvp(options = {}) {
           automation: "browser-dom-screenshot",
           automationDiagnostics: Object.freeze(automationDiagnostics),
           capturedAt: new Date().toISOString(),
-          id: FOLIAGE_ISOLATION_PRODUCER_ID,
+          id: NINJAONE_MVP_FOLIAGE_ISOLATION_PRODUCER_ID,
           mode,
           scriptPath: NINJAONE_MVP_CAPTURE_PRODUCER_PATH,
           scriptSha256: await sha256(path.join(

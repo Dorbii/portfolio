@@ -18,6 +18,7 @@ import {
   NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES,
   NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_ENTER_SPAN,
   NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_RETAIN_SPAN,
+  NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS,
   NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES,
   resolveNinjaOneEnvironmentFoliageEligibility,
   selectNinjaOneEnvironmentFoliageInstances,
@@ -55,6 +56,7 @@ import {
 } from "../features/career-world/shared/lod/policy.ts";
 import {
   NINJAONE_MVP_FIXED_CAMERAS,
+  NINJAONE_MVP_LIMITS,
   auditCameraDecodedBudgets,
   auditNativeSeamCoverage,
 } from "../scripts/lib/ninjaone-environment-mvp-verification.mjs";
@@ -458,7 +460,7 @@ test("native terrain uses only 1448x1086 originals and baked masks consume no ru
   }
 });
 
-test("close detail has one r4 foliage pool and no legacy shared-foliage mapping", async () => {
+test("close detail has one r5 foliage pool and no legacy shared-foliage mapping", async () => {
   const [proofSource, nativeDetailSource, worldSceneSource] = await Promise.all([
     readFile(path.join(
       root,
@@ -900,8 +902,8 @@ test("terrain and supplemental residency stay under the 4 6 32 MiB ceilings", ()
     origin: [0.2125, 0.0875],
     span: [0.075, 0.075],
   });
-  assert.ok(activeFoliage.length <= NINJAONE_ENVIRONMENT_NATIVE_MAX_ANIMATED_NODES);
-  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES.length, 8);
+  assert.ok(activeFoliage.length <= NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS);
+  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES.length, 1);
   assert.equal(
     NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES,
     NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES.reduce(
@@ -955,7 +957,7 @@ test("automated camera sweep counts foliage and seams in the 32 MiB union", () =
     );
     assert.ok(
       checkpoint.supplementalNodeCount
-        <= NINJAONE_ENVIRONMENT_NATIVE_MAX_ANIMATED_NODES,
+        <= NINJAONE_MVP_LIMITS.maximumSupplementalNodes,
     );
     assert.equal(
       checkpoint.resourceIds.length,
@@ -968,7 +970,7 @@ test("automated camera sweep counts foliage and seams in the 32 MiB union", () =
   );
   assert.ok(
     audit.maximum.supplementalNodeCount
-      <= NINJAONE_ENVIRONMENT_NATIVE_MAX_ANIMATED_NODES,
+      <= NINJAONE_MVP_LIMITS.maximumSupplementalNodes,
   );
 });
 
@@ -1005,15 +1007,15 @@ test("exhaustive budget admission drops whole foliage groups behind required sea
   assert.equal(audit.pass, true);
   const c2 = audit.checkpoints.find(({ id }) => id === "checkpoint-C2");
   assert.equal(c2.requiredSupplementalNodeCount, 4);
-  assert.equal(c2.foliageGroupCount, 1);
-  assert.equal(c2.supplementalNodeCount, 6);
+  assert.equal(c2.foliageGroupCount, 2);
+  assert.equal(c2.supplementalNodeCount, 8);
   assert.ok(c2.decodedBytes <= NINJAONE_ENVIRONMENT_NATIVE_MAX_DECODED_BYTES);
   const syntheticFoliageResourceIds = new Set(
     syntheticC2Foliage.flatMap(({ resources }) => resources.map(({ id }) => id)),
   );
   assert.equal(
     c2.resourceIds.filter((id) => syntheticFoliageResourceIds.has(id)).length,
-    2,
+    1,
   );
 });
 

@@ -32,7 +32,7 @@ function usage() {
     "",
     "Options:",
     "  --coast-manifest <file> Override native-original coast supplement manifest.",
-    "  --foliage-captures <file> Fixed C2 foliage-isolation evidence JSON.",
+    "  --foliage-captures <file> Fixed-camera foliage-isolation evidence JSON.",
     "  --foliage-manifest <file> Override foliage manifest.",
     "  --foliage-scene-crops <file> Exact trail-conifer crop companion JSON.",
     "  --native-manifest <file>  Override native detail manifest.",
@@ -80,6 +80,8 @@ function manifestInstances(manifest) {
   return manifest.instances.map((instance) => {
     const resourceIds = Array.isArray(instance.resourceIds)
       ? instance.resourceIds
+      : instance.atlasResourceId
+        ? [instance.atlasResourceId]
       : instance.neutralizationResourceId && instance.canopyResourceId
         ? [instance.neutralizationResourceId, instance.canopyResourceId]
         : [instance.resourceId];

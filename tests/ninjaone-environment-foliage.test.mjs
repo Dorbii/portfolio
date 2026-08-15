@@ -18,6 +18,7 @@ import {
   NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES,
   environmentFoliageCameraArtboardView,
   environmentFoliageResourceCohort,
+  ninjaOneEnvironmentFoliageInstanceIntersectsCamera,
   resolveNinjaOneEnvironmentFoliageEligibility,
   selectNinjaOneEnvironmentFoliageInstances,
 } from "../features/career-world/layers/terrain/detail/model/ninjaOneEnvironmentFoliage.ts";
@@ -31,6 +32,19 @@ const BUILDER_PATH = path.join(
   ROOT,
   "scripts/build-ninjaone-environment-foliage-r4.mjs",
 );
+const COMPONENT_PATH = path.join(
+  ROOT,
+  "features/career-world/layers/terrain/detail/components/NinjaOneEnvironmentFoliage.tsx",
+);
+const CANVAS_PATH = path.join(
+  ROOT,
+  "features/career-world/layers/terrain/detail/components/NinjaOneEnvironmentFoliageCanvas.tsx",
+);
+const WEBGL_PATH = path.join(
+  ROOT,
+  "features/career-world/layers/terrain/detail/components/ninjaOneEnvironmentFoliageWebGl.ts",
+);
+const CSS_PATH = path.join(ROOT, "features/career-world/styles/career-world.css");
 const manifest = JSON.parse(await readFile(MANIFEST_PATH, "utf8"));
 const execFileAsync = promisify(execFile);
 
@@ -45,79 +59,22 @@ function repoFile(publicOrRepoPath) {
     : path.join(ROOT, unversioned);
 }
 
-async function rawPng(filePath) {
-  return sharp(await readFile(filePath))
-    .ensureAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
+function rectanglesOverlap(left, right) {
+  return left[0] < right[0] + right[2]
+    && left[0] + left[2] > right[0]
+    && left[1] < right[1] + right[3]
+    && left[1] + left[3] > right[1];
 }
 
-function alphaChannel(rgba) {
-  const alpha = Buffer.alloc(rgba.length / 4);
-  for (let pixel = 0; pixel < alpha.length; pixel += 1) {
-    alpha[pixel] = rgba[pixel * 4 + 3];
-  }
-  return alpha;
-}
-
-function largestConnectedRatio(alpha, width, height, threshold = 192) {
-  const visited = new Uint8Array(alpha.length);
-  let selected = 0;
-  let largest = 0;
-  for (let pixel = 0; pixel < alpha.length; pixel += 1) {
-    if (alpha[pixel] < threshold) continue;
-    selected += 1;
-    if (visited[pixel]) continue;
-    const queue = [pixel];
-    visited[pixel] = 1;
-    for (let cursor = 0; cursor < queue.length; cursor += 1) {
-      const current = queue[cursor];
-      const x = current % width;
-      const y = Math.floor(current / width);
-      for (const neighbor of [
-        x > 0 ? current - 1 : -1,
-        x + 1 < width ? current + 1 : -1,
-        y > 0 ? current - width : -1,
-        y + 1 < height ? current + width : -1,
-      ]) {
-        if (neighbor < 0 || visited[neighbor] || alpha[neighbor] < threshold) continue;
-        visited[neighbor] = 1;
-        queue.push(neighbor);
-      }
-    }
-    largest = Math.max(largest, queue.length);
-  }
-  return selected === 0 ? 0 : largest / selected;
-}
-
-function longestHighAlphaRun(alpha, width, height, threshold = 192) {
-  let longest = 0;
-  for (let y = 0; y < height; y += 1) {
-    let run = 0;
-    for (let x = 0; x < width; x += 1) {
-      run = alpha[y * width + x] >= threshold ? run + 1 : 0;
-      longest = Math.max(longest, run);
-    }
-  }
-  for (let x = 0; x < width; x += 1) {
-    let run = 0;
-    for (let y = 0; y < height; y += 1) {
-      run = alpha[y * width + x] >= threshold ? run + 1 : 0;
-      longest = Math.max(longest, run);
-    }
-  }
-  return longest;
-}
-
-function composite(base, layer) {
+function compositeRgba(base, layer) {
   const output = Buffer.from(base);
   for (let pixel = 0; pixel < base.length / 4; pixel += 1) {
     const offset = pixel * 4;
     const alpha = layer[offset + 3] / 255;
+    if (alpha === 0) continue;
     for (let channel = 0; channel < 3; channel += 1) {
       output[offset + channel] = Math.round(
-        layer[offset + channel] * alpha
-          + base[offset + channel] * (1 - alpha),
+        layer[offset + channel] * alpha + base[offset + channel] * (1 - alpha),
       );
     }
     output[offset + 3] = 255;
@@ -125,371 +82,193 @@ function composite(base, layer) {
   return output;
 }
 
-function shapeContains(shape, sourceX, sourceY) {
-  const [x, y, width, height] = shape.rect;
-  if (shape.kind === "ellipse") {
-    const dx = (sourceX - (x + width / 2)) / (width / 2);
-    const dy = (sourceY - (y + height / 2)) / (height / 2);
-    return dx ** 2 + dy ** 2 <= 1;
+function cropRgba(source, sourceWidth, rect) {
+  const [left, top, width, height] = rect;
+  const output = Buffer.alloc(width * height * 4);
+  for (let y = 0; y < height; y += 1) {
+    const sourceOffset = ((top + y) * sourceWidth + left) * 4;
+    source.copy(output, y * width * 4, sourceOffset, sourceOffset + width * 4);
   }
-  return sourceX >= x
-    && sourceX < x + width
-    && sourceY >= y
-    && sourceY < y + height;
+  return output;
 }
 
-test("r4 foliage is registered to the active r8 master and mounts a bounded paired pool", async () => {
-  assert.equal(manifest.schemaVersion, 3);
-  assert.equal(manifest.sourceMaster.authority, "active-r8-geology-master");
-  assert.equal(manifest.sourceMaster.id, "terrain-master-detail-r8");
-  assert.deepEqual(manifest.sourceMaster.dimensions, [5760, 4320]);
-  assert.match(manifest.sourceMaster.path, /terrain-master-detail-r8\.png$/);
-  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.length, 4);
-  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES.length, 8);
-  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS, 3);
-  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_NODES_PER_GROUP, 2);
-  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_MOUNTED_NODES, 6);
-  assert.equal(manifest.eligibility.maxDetailEnterSpan, 0.12);
-  assert.equal(manifest.eligibility.maxDetailRetainSpan, 0.14);
-  assert.equal(manifest.budgets.poolGroups, 4);
-  assert.equal(manifest.budgets.mountedGroups, 3);
-  assert.equal(manifest.budgets.mountedFoliageNodes, 6);
-  assert.equal(manifest.budgets.futureSupplementalNodeHeadroom, 0);
-  assert.equal(manifest.budgets.terrainDecodedBytes, 4 * 1448 * 1086 * 4);
+function exactAtRestCrop(atlas, atlasWidth, source, sourceWidth, instance) {
+  const [sourceX, sourceY, width, height] = instance.sourceTargetRect;
+  const sourceCrop = cropRgba(source, sourceWidth, [sourceX, sourceY, width, height]);
+  const neutral = cropRgba(atlas, atlasWidth, instance.neutralizationAtlasRect);
+  const canopy = cropRgba(atlas, atlasWidth, instance.canopyAtlasRect);
+  const reconstructed = compositeRgba(compositeRgba(sourceCrop, neutral), canopy);
   assert.equal(
-    manifest.budgets.foliageDecodedBytes,
-    NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES,
+    Buffer.compare(reconstructed, sourceCrop),
+    0,
+    `${instance.id} changes the accepted plate at rest`,
   );
-  assert.equal(
-    NINJAONE_ENVIRONMENT_FOLIAGE_COMBINED_DECODED_BYTES,
-    manifest.budgets.terrainDecodedBytes + manifest.budgets.foliageDecodedBytes,
-  );
-  assert.ok(NINJAONE_ENVIRONMENT_FOLIAGE_COMBINED_DECODED_BYTES <= 32 * 1024 * 1024);
-  assert.equal(Object.hasOwn(manifest.budgets, "seamDecodedBytes"), false);
-  assert.equal(Object.hasOwn(manifest.budgets, "coastDecodedBytes"), false);
+}
 
-  assert.equal(manifest.neutralizationSources.length, 4);
+test("r5 foliage preserves the r8 plate through one bounded pooled atlas", async () => {
+  assert.equal(manifest.schemaVersion, 4);
+  assert.equal(manifest.id, "career-world/capitals/ninjaone/foliage-native@r5");
+  assert.equal(manifest.sourceMaster.authority, "active-r8-geology-master");
+  assert.deepEqual(manifest.sourceMaster.dimensions, [5760, 4320]);
+  assert.equal(manifest.quality.visibleRgbAuthority, "terrain-master-detail-r8");
+  assert.equal(manifest.quality.atRestChangedPixels, 0);
+  assert.equal(manifest.quality.registeredConifers, manifest.instances.length);
+  assert.ok(manifest.quality.registeredConifers >= manifest.quality.minimumRegisteredConifers);
+  assert.ok(manifest.quality.registeredConifers >= 120);
+  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.length, manifest.instances.length);
+  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES.length, 1);
+  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS, 32);
+  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_NODES_PER_GROUP, 2);
+  assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_MOUNTED_NODES, 64);
+  assert.equal(manifest.budgets.uniqueTextureResources, 1);
+  assert.equal(manifest.budgets.atlasFrameCount, manifest.instances.length * 2);
+  assert.equal(manifest.budgets.maximumSupplementalNodes, 64);
+  assert.equal(manifest.budgets.foliageDecodedBytes, NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES);
+  assert.equal(manifest.budgets.combinedDecodedBytes, NINJAONE_ENVIRONMENT_FOLIAGE_COMBINED_DECODED_BYTES);
+  assert.ok(NINJAONE_ENVIRONMENT_FOLIAGE_COMBINED_DECODED_BYTES <= 32 * 1024 * 1024);
+
+  const mountedPaths = new Set(manifest.resources.map((resource) => resource.path));
   assert.equal(manifest.segmentationSources.length, 4);
-  const mountedPaths = new Set(manifest.resources.map(({ path: resourcePath }) => resourcePath));
-  for (const source of [...manifest.neutralizationSources, ...manifest.segmentationSources]) {
-    assert.equal(mountedPaths.has(source.path), false, `${source.id} must not be mounted`);
+  assert.equal(manifest.neutralizationSources.length, 4);
+  for (const source of [...manifest.segmentationSources, ...manifest.neutralizationSources]) {
+    assert.equal(mountedPaths.has(source.path), false, `${source.id} is build input, not runtime texture`);
     const bytes = await readFile(repoFile(source.path));
     assert.equal(sha256(bytes), source.sha256);
   }
 });
 
-test("active source master hash and dimensions are frozen", async () => {
-  const bytes = await readFile(repoFile(manifest.sourceMaster.path));
-  const metadata = await sharp(bytes).metadata();
-  assert.equal(sha256(bytes), manifest.sourceMaster.sha256);
-  assert.deepEqual([metadata.width, metadata.height], manifest.sourceMaster.dimensions);
-  assert.equal(metadata.format, "png");
-  assert.equal(metadata.hasAlpha, true);
-});
+test("the shared atlas is valid, tightly packed, and every registered tree is exact at rest", async () => {
+  const [resource] = manifest.resources;
+  const atlasPath = repoFile(resource.path);
+  const atlasBytes = await readFile(atlasPath);
+  const atlasMetadata = await sharp(atlasBytes).metadata();
+  assert.equal(sha256(atlasBytes), resource.sha256);
+  assert.deepEqual([atlasMetadata.width, atlasMetadata.height], resource.dimensions);
+  assert.equal(resource.decodedBytes, resource.dimensions[0] * resource.dimensions[1] * 4);
+  assert.equal(resource.frameCount, manifest.instances.length * 2);
 
-test("tracked generator is deterministic, native-bound, and noninteractive", async () => {
-  const [packageJson, builder] = await Promise.all([
-    readFile(path.join(ROOT, "package.json"), "utf8").then(JSON.parse),
-    readFile(BUILDER_PATH, "utf8"),
+  const frames = manifest.instances.flatMap((instance) => [
+    instance.canopyAtlasRect,
+    instance.neutralizationAtlasRect,
   ]);
-  assert.equal(
-    packageJson.scripts?.["build:ninjaone-environment-foliage"],
-    "node scripts/build-ninjaone-environment-foliage-r4.mjs",
-  );
-  assert.match(builder, /terrain-master-detail-r8\.png/);
-  assert.match(builder, /registeredSegmentationAlpha/);
-  assert.match(builder, /tree-only-alpha-guidance/);
-  assert.match(builder, /registeredNeutralizationUnderlay/);
-  assert.match(builder, /neutralizationDilation: 12/g);
-  assert.match(builder, /compressionLevel: 9, palette: false/);
-  assert.doesNotMatch(builder, /detail-tiles-r2\/generated|authored-needle-tiers|paletteMatchedNeutralization/);
-  assert.doesNotMatch(builder, /inpaintNeutralization|Date\.now|Math\.random|process\.stdin|readline|prompt\(/);
-  assert.doesNotMatch(builder, /readFile\([^\n]*master-detail-r2/);
-});
+  for (const frame of frames) {
+    assert.ok(frame[0] + frame[2] <= resource.dimensions[0]);
+    assert.ok(frame[1] + frame[3] <= resource.dimensions[1]);
+  }
+  for (let left = 0; left < frames.length; left += 1) {
+    for (let right = left + 1; right < frames.length; right += 1) {
+      assert.equal(rectanglesOverlap(frames[left], frames[right]), false, `atlas frames ${left}/${right} overlap`);
+    }
+  }
 
-test("tracked generator rebuild is byte-deterministic", async () => {
-  const generatedPaths = [
-    MANIFEST_PATH,
-    ...manifest.resources.map(({ path: resourcePath }) => repoFile(resourcePath)),
-  ];
-  const hashes = async () => Object.fromEntries(await Promise.all(
-    generatedPaths.map(async (filePath) => [
-      path.relative(ROOT, filePath),
-      sha256(await readFile(filePath)),
-    ]),
-  ));
-  await execFileAsync(process.execPath, [BUILDER_PATH], { cwd: ROOT });
-  const first = await hashes();
-  await execFileAsync(process.execPath, [BUILDER_PATH], { cwd: ROOT });
-  const second = await hashes();
-  assert.deepEqual(second, first);
-});
-
-test("paired hard leaf masks preserve native gaps and neutralize only vacated foliage", async () => {
-  let decodedBytes = 0;
+  const source = await sharp(repoFile(manifest.sourceMaster.path)).resize(2880, 2160, {
+    fit: "fill",
+    kernel: sharp.kernel.lanczos3,
+  }).ensureAlpha().raw().toBuffer();
+  const atlas = await sharp(atlasPath).ensureAlpha().raw().toBuffer();
   for (const instance of manifest.instances) {
-    const canopyResource = manifest.resources.find(({ id }) => (
-      id === instance.canopyResourceId
-    ));
-    const neutralResource = manifest.resources.find(({ id }) => (
-      id === instance.neutralizationResourceId
-    ));
-    assert.ok(canopyResource && neutralResource, instance.id);
-    assert.equal(canopyResource.kind, "coherent-canopy");
-    assert.equal(neutralResource.kind, "neutralization-underlay");
-    assert.deepEqual(canopyResource.dimensions, neutralResource.dimensions);
-    assert.deepEqual(canopyResource.sourceCrop, neutralResource.sourceCrop);
-
-    const [{ data: canopy, info }, { data: neutral }] = await Promise.all([
-      rawPng(repoFile(canopyResource.path)),
-      rawPng(repoFile(neutralResource.path)),
-    ]);
-    const canopyBytes = await readFile(repoFile(canopyResource.path));
-    const neutralBytes = await readFile(repoFile(neutralResource.path));
-    assert.equal(sha256(canopyBytes), canopyResource.sha256);
-    assert.equal(sha256(neutralBytes), neutralResource.sha256);
-    assert.deepEqual([info.width, info.height], canopyResource.dimensions);
-    const [left, top, width, height] = canopyResource.sourceCrop;
-    assert.equal(instance.sourceMasterId, manifest.sourceMaster.id);
-    assert.equal(canopyResource.sourceMasterId, manifest.sourceMaster.id);
-    const source = await sharp(await readFile(repoFile(manifest.sourceMaster.path)))
-      .extract({ left, top, width, height })
-      .ensureAlpha()
-      .raw()
-      .toBuffer();
-    const canopyAlpha = alphaChannel(canopy);
-    const neutralAlpha = alphaChannel(neutral);
-
-    let canopyPixels = 0;
-    let neutralizedLeafPixels = 0;
-    let nativeGapPixels = 0;
-    let protectedPixels = 0;
-    let internalTransparent = 0;
-    const [alphaLeft, alphaTop, alphaRight, alphaBottom] = canopyResource.alphaBounds;
-    for (let y = 0; y < height; y += 1) {
-      for (let x = 0; x < width; x += 1) {
-        const pixel = y * width + x;
-        const offset = pixel * 4;
-        assert.ok(canopyAlpha[pixel] === 0 || canopyAlpha[pixel] === 255);
-        assert.ok(neutralAlpha[pixel] === 0 || neutralAlpha[pixel] === 255);
-        if (canopyAlpha[pixel] === 255) {
-          canopyPixels += 1;
-          assert.equal(canopy[offset], source[offset], `${instance.id} native red drift`);
-          assert.equal(canopy[offset + 1], source[offset + 1], `${instance.id} native green drift`);
-          assert.equal(canopy[offset + 2], source[offset + 2], `${instance.id} native blue drift`);
-          assert.equal(neutralAlpha[pixel], 255, `${instance.id} uncovered baked canopy leaf`);
-          const difference = Math.max(
-            Math.abs(neutral[offset] - source[offset]),
-            Math.abs(neutral[offset + 1] - source[offset + 1]),
-            Math.abs(neutral[offset + 2] - source[offset + 2]),
-          );
-          if (difference >= 4) neutralizedLeafPixels += 1;
-        }
-        if (neutralAlpha[pixel] === 255 && canopyAlpha[pixel] === 0) {
-          nativeGapPixels += 1;
-          assert.equal(neutral[offset], source[offset], `${instance.id} native-gap red drift`);
-          assert.equal(neutral[offset + 1], source[offset + 1], `${instance.id} native-gap green drift`);
-          assert.equal(neutral[offset + 2], source[offset + 2], `${instance.id} native-gap blue drift`);
-        }
-        const sourceX = left + x;
-        const sourceY = top + y;
-        if (instance.protectedSourceRects.some((shape) => (
-          shapeContains(shape, sourceX, sourceY)
-        ))) {
-          protectedPixels += 1;
-          assert.equal(canopyAlpha[pixel], 0, `${instance.id} moves a protected pixel`);
-          assert.equal(neutralAlpha[pixel], 0, `${instance.id} neutralizes a protected pixel`);
-        }
-        if (
-          x >= alphaLeft && x <= alphaRight
-          && y >= alphaTop && y <= alphaBottom
-          && canopyAlpha[pixel] === 0
-        ) {
-          internalTransparent += 1;
-        }
-      }
-    }
-
-    assert.ok(canopyPixels >= 6_000, `${instance.id} canopy is fragmentary`);
-    assert.ok(nativeGapPixels >= 1_000, `${instance.id} lost genuine native gaps`);
-    assert.equal(protectedPixels, 0, `${instance.id} retained obsolete rectangular exclusions`);
-    assert.ok(internalTransparent > 1_000, `${instance.id} filled all canopy gaps`);
-    assert.ok(neutralizedLeafPixels / canopyPixels > 0.9, `${instance.id} leaves a baked duplicate`);
-    assert.ok(largestConnectedRatio(canopyAlpha, width, height) > 0.55);
-    assert.ok(largestConnectedRatio(neutralAlpha, width, height) > 0.9);
-    assert.ok(longestHighAlphaRun(canopyAlpha, width, height) < Math.max(width, height) * 0.92);
-    assert.equal(canopyResource.boundaryHighAlphaPixels, 0);
-    assert.equal(neutralResource.boundaryHighAlphaPixels, 0);
-    assert.ok(canopyResource.alphaCoverage >= 0.08 && canopyResource.alphaCoverage < 0.75);
-
-    const separation = manifest.separationEvidence.find(({ id }) => (
-      id === instance.checkpoint
-    ));
-    assert.ok(separation, `${instance.id} lacks separation evidence`);
-    assert.ok([8, 12].includes(separation.neutralizationDilationPixels));
-    assert.equal(separation.atRestDifference.changedPixels, 0);
-    assert.equal(separation.forcedProtectedDifference.changedPixels, 0);
-    assert.ok(separation.forcedStartPeakDifference.changedPixels > 3_000);
-    assert.equal(separation.nativeGapDifference.changedPixels, 0);
-    assert.equal(separation.nativeGapPixels, nativeGapPixels);
-    assert.match(separation.maskDerivation, /^native-/);
-
-    const atRest = composite(composite(source, neutral), canopy);
-    let changed = 0;
-    let outsideMaskChanged = 0;
-    let totalDifference = 0;
-    for (let pixel = 0; pixel < width * height; pixel += 1) {
-      const offset = pixel * 4;
-      const difference = Math.max(
-        Math.abs(atRest[offset] - source[offset]),
-        Math.abs(atRest[offset + 1] - source[offset + 1]),
-        Math.abs(atRest[offset + 2] - source[offset + 2]),
-      );
-      totalDifference += difference;
-      if (difference > 0) changed += 1;
-      if (neutralAlpha[pixel] === 0 && difference > 0) outsideMaskChanged += 1;
-    }
-    assert.equal(outsideMaskChanged, 0, `${instance.id} changes static ground`);
-    assert.equal(changed, 0, `${instance.id} at-rest composite does not tie native`);
-    assert.equal(totalDifference, 0, `${instance.id} at-rest composite drifts from native`);
-    decodedBytes += width * height * 4 * 2;
+    exactAtRestCrop(atlas, resource.dimensions[0], source, 2880, instance);
   }
-  assert.equal(decodedBytes, manifest.budgets.foliageDecodedBytes);
 });
 
-test("active B1 and C1 cameras select only the closest registered native groups", () => {
-  const westCamera = { origin: [0.2125, 0.0875], span: [0.075, 0.075] };
-  const eastCamera = { origin: [0.25, 0.075], span: [0.075, 0.075] };
-  assert.equal(selectNinjaOneEnvironmentFoliageInstances(westCamera).length, 3);
+test("registered conifers retain terrain coordinates and varied restrained motion", () => {
   assert.deepEqual(
-    selectNinjaOneEnvironmentFoliageInstances(eastCamera).map(({ gridCell }) => gridCell),
-    ["C1"],
+    [...new Set(NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.map(({ gridCell }) => gridCell))].sort(),
+    ["B1", "B2", "C1", "C2"],
   );
-  assert.deepEqual(
-    environmentFoliageCameraArtboardView(westCamera).origin.map((value) => (
-      Number(value.toFixed(3))
-    )),
-    [504, 283.5],
-  );
-  assert.equal(
-    new Set(NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.map(({ phaseSeconds }) => phaseSeconds)).size,
-    4,
-  );
-  assert.equal(
-    new Set(NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.map(({ durationSeconds }) => durationSeconds)).size,
-    4,
-  );
+  assert.ok(new Set(NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.map(({ durationSeconds }) => durationSeconds)).size >= 12);
+  assert.ok(new Set(NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.map(({ phaseSeconds }) => phaseSeconds)).size >= 8);
   for (const instance of NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES) {
-    assert.ok(instance.pivotYPercent >= 92 && instance.pivotYPercent <= 98);
-    assert.ok(instance.bendDegrees > 0 && instance.bendDegrees <= 1.2);
-    assert.equal(instance.resources.length, 2);
+    const [x, y, width, height] = instance.sourceTargetRect;
+    assert.deepEqual(instance.artboardBounds.origin, [x / 2, y / 2]);
+    assert.deepEqual(instance.artboardBounds.span, [width / 2, height / 2]);
+    assert.strictEqual(instance.canopyResource, instance.neutralizationResource);
+    assert.strictEqual(instance.canopyResource, instance.atlasResource);
+    assert.deepEqual(instance.resources, [instance.atlasResource]);
+    assert.equal(instance.animation, "canopy-bend");
+    assert.ok(instance.bendDegrees >= 0.6 && instance.bendDegrees <= 1.25);
+    assert.ok(instance.durationSeconds >= 6 && instance.durationSeconds <= 10);
+    assert.ok(instance.pivotYPercent >= 94 && instance.pivotYPercent <= 98);
   }
 });
 
-test("close-detail foliage enters through .12 and retains through .14", () => {
-  const cameraAtSpan = (span) => ({
-    origin: [0.23 - span / 2, 0.11 - span / 2],
-    span: [span, span],
+test("the reported lower-ridge camera mounts native trees and gates motion to the actual viewport", () => {
+  const camera = Object.freeze({
+    origin: Object.freeze([0.26148278569762023, 0.14119340966684502]),
+    span: Object.freeze([0.075, 0.075]),
   });
-  const eligibility = (span, previousEligible) => (
-    resolveNinjaOneEnvironmentFoliageEligibility({
-      active: true,
-      camera: cameraAtSpan(span),
-      previousEligible,
-      shouldLoadCloseAssets: true,
-      showFoliage: true,
-    })
-  );
+  const selected = selectNinjaOneEnvironmentFoliageInstances(camera, true, 32);
+  const moving = selected.filter((instance) => (
+    ninjaOneEnvironmentFoliageInstanceIntersectsCamera(camera, instance)
+  ));
+  assert.ok(selected.length >= 4, `expected registered density, received ${selected.length}`);
+  assert.ok(moving.length > 0, "at least one registered canopy must intersect the reported camera");
+  assert.ok(moving.length <= selected.length);
+  assert.ok(selected.length <= NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS);
+  assert.equal(environmentFoliageResourceCohort(NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES).split("\n").length, 1);
 
+  const artboardView = environmentFoliageCameraArtboardView(camera);
+  assert.ok(artboardView.span[0] > 0 && artboardView.span[1] > 0);
+});
+
+test("foliage LoD uses hysteresis and cannot mount outside close detail", () => {
   assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_ENTER_SPAN, 0.12);
   assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_RETAIN_SPAN, 0.14);
-  assert.equal(eligibility(0.04, false), true);
-  assert.equal(eligibility(0.12, false), true);
-  assert.equal(eligibility(0.13, false), false);
-  assert.equal(eligibility(0.13, true), true);
-  assert.equal(eligibility(0.14, true), true);
-  assert.equal(eligibility(0.141, true), false);
-  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.04)).length, 3);
-  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.04), true, 2).length, 2);
-  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.04), true, 1).length, 1);
-  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.04), true, 0).length, 0);
-  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.04), true, 1.5).length, 0);
-  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.12)).length, 3);
-  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.13)).length, 0);
-  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.13), true).length, 3);
-  assert.equal(selectNinjaOneEnvironmentFoliageInstances(cameraAtSpan(0.141), true).length, 0);
+  const camera = { origin: [0.2, 0.1], span: [0.13, 0.13] };
   assert.equal(resolveNinjaOneEnvironmentFoliageEligibility({
-    active: false,
-    camera: cameraAtSpan(0.04),
-    previousEligible: true,
+    active: true,
+    camera,
+    previousEligible: false,
     shouldLoadCloseAssets: true,
     showFoliage: true,
   }), false);
+  assert.equal(resolveNinjaOneEnvironmentFoliageEligibility({
+    active: true,
+    camera,
+    previousEligible: true,
+    shouldLoadCloseAssets: true,
+    showFoliage: true,
+  }), true);
+  assert.deepEqual(selectNinjaOneEnvironmentFoliageInstances(
+    { origin: [0.2, 0.1], span: [0.15, 0.15] },
+    true,
+    32,
+  ), []);
 });
 
-test("resource cohorts are canonical and same-set camera churn cannot restart hidden node loading", async () => {
-  const forward = environmentFoliageResourceCohort(NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES);
-  const reverse = environmentFoliageResourceCohort([
-    ...NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES,
-  ].reverse());
-  assert.equal(forward, reverse);
-  assert.equal(forward.split("\n").length, 8);
-
-  const component = await readFile(
-    path.join(ROOT, "features/career-world/layers/terrain/detail/components/NinjaOneEnvironmentFoliage.tsx"),
-    "utf8",
-  );
-  assert.match(component, /environmentFoliageResourceCohort\(selectedResources\)/);
-  assert.match(component, /resource\.path}#sha256=\$\{resource\.sha256\}/);
-  assert.match(component, /retargetNinjaOneEnvironmentFoliageNodeLoadCohort/);
-  assert.match(component, /recordNinjaOneEnvironmentFoliageNodeLoadEvent/);
-  assert.match(component, /onLoad=\{\(\) => handleLoad\(/);
-  assert.match(component, /onError=\{\(\) => onResourceError\(/);
-  assert.match(component, /key=\{`\$\{currentLoadState\.epoch\}:\$\{instance\.id\}`\}/);
-  assert.match(
-    component,
-    /window\.requestAnimationFrame\(\(\) => \{[\s\S]*?window\.requestAnimationFrame/,
-  );
-  assert.match(component, /observeNinjaOneEnvironmentFoliageDomResidency/);
-  assert.match(component, /querySelectorAll<SVGImageElement>\("image\[data-shared-resource\]"\)/);
-  assert.doesNotMatch(component, /assetPaths/);
-  assert.doesNotMatch(component, /new window\.Image|preloadImage/);
-});
-
-test("component mounts static neutralization before animated canopy and exposes actual accounting", async () => {
-  const [component, css] = await Promise.all([
-    readFile(
-      path.join(ROOT, "features/career-world/layers/terrain/detail/components/NinjaOneEnvironmentFoliage.tsx"),
-      "utf8",
-    ),
-    readFile(path.join(ROOT, "features/career-world/styles/career-world.css"), "utf8"),
+test("the renderer crops one shared atlas and animates the buffered cohort with rooted deformation", async () => {
+  const [component, canvas, webgl, css] = await Promise.all([
+    readFile(COMPONENT_PATH, "utf8"),
+    readFile(CANVAS_PATH, "utf8"),
+    readFile(WEBGL_PATH, "utf8"),
+    readFile(CSS_PATH, "utf8"),
   ]);
-  const neutralIndex = component.indexOf("canopy-neutralization");
-  const swayIndex = component.indexOf("canopy-sway");
-  assert.ok(neutralIndex >= 0 && neutralIndex < swayIndex);
-  assert.match(component, /data-environment-foliage-selected-resource-ids/);
-  assert.match(component, /data-environment-foliage-selected-decoded-bytes/);
-  assert.match(component, /data-environment-foliage-mounted-image-node-count/);
-  assert.match(component, /data-environment-foliage-mounted-resource-ids/);
-  assert.match(component, /data-environment-foliage-max-detail-eligible/);
-  assert.match(component, /data-environment-foliage-maximum-groups/);
-  assert.match(component, /NINJAONE_ENVIRONMENT_FOLIAGE_NODES_PER_GROUP/);
-  assert.doesNotMatch(component, /setInterval|translate\(/);
-  assert.equal(component.match(/window\.requestAnimationFrame/g)?.length, 2);
-  assert.equal(component.match(/window\.cancelAnimationFrame/g)?.length, 2);
+  assert.match(component, /data-shared-resource=\{atlas\.id\}/);
+  assert.match(component, /<use href=\{`#\$\{atlasImageId\}`\} \/>/);
+  assert.match(component, /viewBox=\{`\$\{frameX\} \$\{frameY\} \$\{frameWidth\} \$\{frameHeight\}`\}/);
+  assert.match(component, /instances=\{instances\}/);
+  assert.match(component, /matchMedia\("\(prefers-reduced-motion: reduce\)"\)/);
+  assert.match(component, /ninjaone-environment-foliage-r5/);
+  assert.equal((component.match(/<image/g) ?? []).length, 1);
+  assert.match(canvas, /new IntersectionObserver/);
+  assert.match(canvas, /document\.visibilityState === "visible"/);
+  assert.match(canvas, /window\.requestAnimationFrame\(draw\)/);
+  assert.match(canvas, /window\.cancelAnimationFrame\(frame\)/);
+  assert.match(canvas, /data-environment-foliage-renderer=\{ready \? "webgl2-ready" : "static-fallback"\}/);
+  assert.match(webgl, /float rootLock = smoothstep\(0\.1, 0\.34, height\)/);
+  assert.match(webgl, /float mainWeight = rootLock \* rootLock/);
+  assert.match(webgl, /float detailWave = sin/);
+  assert.match(webgl, /u_shadowPass/);
+  assert.match(webgl, /gl\.TEXTURE_MIN_FILTER, gl\.LINEAR/);
+  assert.doesNotMatch(webgl, /generateMipmap/);
+  assert.match(css, /__foliage-canvas/);
+  assert.doesNotMatch(css, /__canopy-segment/);
+});
 
-  const swayBlock = css.match(
-    /\.ninjaone-environment-native-detail__canopy-sway \{[\s\S]*?@keyframes ninjaone-native-canopy-sway \{[\s\S]*?\n\}/,
-  )?.[0];
-  assert.ok(swayBlock, "canopy animation block is missing");
-  assert.match(swayBlock, /transform-origin: 50% var\(--ninjaone-foliage-pivot-y, 94%\)/);
-  assert.match(swayBlock, /var\(--ninjaone-foliage-duration, 6\.4s\)/);
-  assert.match(swayBlock, /var\(--ninjaone-foliage-phase/);
-  assert.match(swayBlock, /opacity: 1/);
-  assert.doesNotMatch(swayBlock, /translate\(/);
-  const neutralBlock = css.match(
-    /\.ninjaone-environment-native-detail__canopy-neutralization \{[\s\S]*?\}/,
-  )?.[0];
-  assert.ok(neutralBlock);
-  assert.doesNotMatch(neutralBlock, /animation|transform/);
+test("the foliage build is deterministic", async () => {
+  const tracked = [MANIFEST_PATH, repoFile(manifest.resources[0].path)];
+  const before = await Promise.all(tracked.map(async (file) => sha256(await readFile(file))));
+  await execFileAsync(process.execPath, [BUILDER_PATH], { cwd: ROOT });
+  const after = await Promise.all(tracked.map(async (file) => sha256(await readFile(file))));
+  assert.deepEqual(after, before);
 });

@@ -296,9 +296,13 @@ test("native terrain delegates foliage to a separate production manifest", async
     readJson("public/career-world/capitals/ninjaone/environment/manifests/foliage-native-r4.json"),
   ]);
   assert.deepEqual(Object.keys(native.layers), ["dynamicShadows"]);
-  assert.equal(foliage.id, "career-world/capitals/ninjaone/foliage-native@r4");
+  assert.equal(foliage.id, "career-world/capitals/ninjaone/foliage-native@r5");
   assert.ok(foliage.resources.length > 0);
-  assert.ok(foliage.instances.length <= NINJAONE_ENVIRONMENT_NATIVE_MAX_ANIMATED_NODES);
+  assert.equal(foliage.instances.length, foliage.budgets.poolGroups);
+  assert.ok(
+    foliage.budgets.maximumSelectedGroups * foliage.budgets.nodesPerGroup
+      <= foliage.budgets.maximumSupplementalNodes,
+  );
 });
 
 test("registered native tiles keep canonical native-original provenance", () => {
