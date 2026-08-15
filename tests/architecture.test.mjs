@@ -663,6 +663,24 @@ test("water zoom adds detail without suppressing world swell or bathymetry", asy
   );
   assert.doesNotMatch(openWater, /transformWaterCoordinate\(/);
   assert.doesNotMatch(openWater, /hydrology|basinRipple|lakeRipple|u_basinTextureOrigin/i);
+  assert.equal(
+    (openWater.match(/waveField \+= sampleWaveBand\(/g) ?? []).length,
+    3,
+    "three analytic bands should own swell height, slope, and crest trail",
+  );
+  assert.equal(
+    (openWater.match(/(?:float )?chopHeight (?:=|\+=) sampleChopBand\(/g) ?? []).length,
+    2,
+    "two height-only bands should add irregular chop without extra slope work",
+  );
+  assert.match(openWater, /float laggedSine/);
+  assert.match(openWater, /direction \* amplitude \* spatialFrequency/);
+  assert.match(openWater, /waveField\.w \* u_waveStrength/);
+  assert.match(openWater, /max\(0\.0, laggedCrest - crest \* 0\.46\)/);
+  assert.doesNotMatch(
+    openWater,
+    /sampleWaterBodyAtTime|rippleCenter|rippleFrequency|radialWave|lakeWave/,
+  );
   assert.match(openWater, /openFoam/);
   assert.match(openWater, /palette,\s*authored,\s*0\.7/);
   assert.doesNotMatch(
@@ -680,6 +698,16 @@ test("water zoom adds detail without suppressing world swell or bathymetry", asy
   assert.match(renderer, /private readonly coastMaterialTexel/);
   assert.match(renderer, /u_coastMaterialTexel/);
   assert.doesNotMatch(renderer, /resolveWaterTextureCoverage/);
+  assert.doesNotMatch(
+    renderer,
+    /createFramebuffer|waveFieldTargets|WAVE_FIELD_TEXTURE_UNIT/,
+    "the ocean upgrade must remain in the existing single render pass",
+  );
+  assert.equal(
+    (renderer.match(/gl\.drawArrays\(/g) ?? []).length,
+    1,
+    "the ocean renderer should issue one fullscreen draw",
+  );
   assert.match(
     renderer,
     /createTexture\(this\.gl,\s*directionalAlbedo,\s*"clamp"\)/,
