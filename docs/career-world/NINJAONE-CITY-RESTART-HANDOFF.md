@@ -186,3 +186,24 @@ Inspect the I19 station/water transition in free-camera close views, then either
 ### Exact next action
 
 Checkpoint the accepted I21 review routing, then address the upper rear cliff with a materially tighter native-land repair before adding close-detail cohorts.
+
+## 2026-08-17 00:22 CDT
+
+### Completed work and evidence
+
+- Created checkpoint `606621a` (`checkpoint: open station undercroft at close lod`) after I21 passed the exact free-close and fixed D06 runtime gates. The worktree returned clean.
+- An xHigh deterministic native-reuse lane produced LFX03, a translucent `L4_1` grade restricted to `8,523` exposed live-land pixels (`1448x1086` RGBA, bbox `[271,52,656,179]`, max alpha `176`, zero city/water/outside-ROI overlap). Mechanical gates passed.
+- Director live capital proof rejected LFX03: it preserved native texture but the two blunt mesas remained visibly unchanged in silhouette. The review mount and copied asset were removed; nothing was committed.
+- A materially different LFX04 lane reused one coherent accepted close-native rock crop to form a concave rear backwall. Its own worker verdict was `NO-GO`: although the mass connected both shoulders and stayed inside the ROI, the proof read as two soft rounded rock blobs, retained the bright mesa crests, and did not match the parent pixel treatment. It was never mounted or promoted.
+- No ImageGen calls were spent on LFX03/LFX04. Both failures are evidence against grading or warping the soft close-native tile for this defect.
+
+### Concerns, pivots, and tasks left
+
+- The upper rear cliff remains unresolved. The next repair must use crisp parent/master cliff-face pixels or a reversible mask/composition change; do not repeat subtle grading, soft close-native warping, or whole-canvas generation.
+- I21/I20 remain accepted review representations, not manifest-promoted production authority.
+- Parent close-detail softness and missing additive texture, lighting, contact/shadow, circulation/fabric, prop, district, and localized bridge-water-effect cohorts remain open.
+- The train remains intentionally absent/deferred until the stationary city and landscape integration are accepted.
+
+### Exact next action
+
+Define a crisp parent-derived upper-rear cliff face or mask-based silhouette repair, then reject or accept it in the live capital view before any manifest promotion.
