@@ -304,3 +304,28 @@ Audit the registered free-camera site/close node cohort for missing contact/shad
 ### Exact next action
 
 Receive and mechanically/visually grade the quarantined CFX02 candidate. If it passes, mount it only at free-camera close below native foliage/nodes and prove it at multiple close camera positions. If it fails, record `NO-GO` and keep close on the accepted parent-derived CFX01 path; do not re-enable the defective Sxx close cutouts.
+
+## 2026-08-17 02:36 CDT
+
+### Completed work and evidence
+
+- The xHigh CFX02 worker used its two-candidate limit and kept both outputs quarantined. Candidate 1 passed mechanical gates but was rejected as too subtle. Candidate 2 was accepted: `1448x1086` RGBA, `20,730` nonzero-alpha pixels, max alpha `208`, bbox `[309,111,830,512]`, zero pixels outside the locked ROI/architecture support, zero water or vegetation overlap, mean treated-pixel luma shift `6.6045`, and treated-pixel edge-energy gain `25.4755%`. SHA-256 is `049431E780FFE7423C371269268964888C0B15375B141D23AF47E31A2D3F0059`.
+- Director live proof accepted CFX02 at three free-camera close positions. It improves internal masonry, trim, and window definition without changing silhouettes, terraces, land, water, foliage, D06, station order, or contact geometry. It is deliberately absent from site and focused D06 routes.
+- Created recovery checkpoint `3c841e4` (`checkpoint: add close architecture detail`). The unsafe full-building Sxx close cohort remains suppressed.
+- Promoted the six accepted runtime assets from `_review` into stable layer-owned paths: WFX01 (`water-interaction`), LFX06 (`landscape`), CFX01/CFX02 (`detail`), and I20/I21 (`station`). Rejected or superseded I18, I19, and LFX01 remain unpromoted in `_review`.
+- Extended `city-foundation-r3.json` and its builder with exact runtime asset IDs, stable paths, roles, LoD tiers, hashes, and I20/I21 placement. The runtime model validates the six-asset contract, rejects review paths, and permits placement only on the station pair. The renderer now consumes these paths and station placement from the manifest rather than hard-coded review literals; runtime status is `manifest-declared`.
+- Live DOM and visual proof after promotion passed. Capital mounts LFX06/I20; site mounts WFX01/LFX06/CFX01 plus the package-registered site cohort and I21; free close adds CFX02 and I17 while suppressing unsafe full-building close cutouts; focused D06 close remains WFX01/LFX06/CFX01/I17/I21. Train remains absent.
+- Focused tests pass `24/24`; typecheck, focused ESLint, and production build pass. Full `npm test` passes `186/188` with `2` declared skips and `0` failures. The long camera-budget (`129.286s`) and package-command (`92.102s`) tests are classified as environmental/test cost, not regressions or superseded intent. The build retains only the pre-existing chunk-size advisory.
+- Created recovery checkpoint `b55e8db` (`checkpoint: promote accepted city runtime assets`).
+
+### Concerns, pivots, and tasks left
+
+- `city-layer-composition-r2.json` still describes the older provisional/failing composition and stale I13/I16 LoD wording. It is now documentation/contract drift against the accepted R3 runtime authority and should be updated without weakening package anchor or node-count invariants.
+- Site uses the safe package-registered cohort and generic SVG contact/cast shadows. It still needs one final broad composition audit, but no demonstrated defect currently justifies new generated assets or enabling close cutouts.
+- `NinjaOneCapitalCirculation.tsx` contains provisional inferred SVG circulation and is not mounted. Do not enable it without parent-registered evidence; the accepted parent context already owns visible circulation fabric.
+- The stationary city is close to an acceptance decision but the required final proof sequence remains: world/territory invisibility, capital/site/close progression, fixed D06 site/close, city-layer toggle restoring untouched L2/L3, and multi-position seam/overlap inspection.
+- The train remains intentionally deferred and separate from this stationary-city acceptance.
+
+### Exact next action
+
+Align the stale composition manifest with the accepted R3 LoD contract while preserving structural invariants, then run the final complete visual proof sequence. Only open another asset lane if that proof isolates a specific remaining defect.
