@@ -106,20 +106,39 @@ async function artifact(file) {
   });
 }
 
-function analyzeNativeFoliageReuse(context, foliageManifest) {
+async function analyzeNativeFoliageReuse(context, foliageManifest) {
   const thresholds = Object.freeze({
-    alphaFraction: 0.5,
-    baseVegetationFraction: 0.3,
-    vegetationFraction: 0.3,
+    contextAlphaFraction: 0.8,
+    baseVegetationFraction: 0.6,
+    maximumStructureFraction: 0.3,
+    vegetationFraction: 0.65,
   });
+  const atlasById = new Map(await Promise.all(
+    foliageManifest.resources.map(async (resource) => {
+      const atlasPath = path.join(
+        ROOT,
+        "public",
+        resource.path.split("?")[0].replace(/^\//, ""),
+      );
+      const { data, info } = await sharp(await readFile(atlasPath))
+        .ensureAlpha()
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+      return [resource.id, Object.freeze({ data, info })];
+    }),
+  ));
   const admitted = [];
   for (const instance of foliageManifest.instances) {
     const [originX, originY] = instance.artboardBounds.origin;
     const [spanX, spanY] = instance.artboardBounds.span;
-    let alphaPixels = 0;
-    let baseAlphaPixels = 0;
+    const [frameX, frameY, frameWidth, frameHeight] = instance.canopyAtlasRect;
+    const atlas = atlasById.get(instance.atlasResourceId);
+    if (!atlas) throw new TypeError(`Missing foliage atlas ${instance.atlasResourceId}.`);
+    let baseCanopyPixels = 0;
     let baseVegetationPixels = 0;
-    let sampledPixels = 0;
+    let canopyPixels = 0;
+    let contextAlphaPixels = 0;
+    let structurePixels = 0;
     let vegetationPixels = 0;
     for (
       let y = Math.max(0, Math.floor(originY));
@@ -131,32 +150,49 @@ function analyzeNativeFoliageReuse(context, foliageManifest) {
         x < Math.min(WIDTH, Math.ceil(originX + spanX));
         x += 1
       ) {
+        const u = (x + 0.5 - originX) / spanX;
+        const v = (y + 0.5 - originY) / spanY;
+        if (u < 0 || u >= 1 || v < 0 || v >= 1) continue;
+        const atlasX = Math.min(
+          atlas.info.width - 1,
+          Math.floor(frameX + u * frameWidth),
+        );
+        const atlasY = Math.min(
+          atlas.info.height - 1,
+          Math.floor(frameY + v * frameHeight),
+        );
+        const atlasOffset = (atlasY * atlas.info.width + atlasX) * 4;
+        if (atlas.data[atlasOffset + 3] <= 32) continue;
+        canopyPixels += 1;
+        if (v > 0.72) baseCanopyPixels += 1;
         const offset = (y * WIDTH + x) * 4;
         const red = context[offset];
         const green = context[offset + 1];
         const blue = context[offset + 2];
         const alpha = context[offset + 3];
-        sampledPixels += 1;
         if (alpha <= 16) continue;
-        alphaPixels += 1;
+        contextAlphaPixels += 1;
         const vegetation = green > red * 1.08
           && green > blue * 1.03
           && green < 115;
         if (vegetation) vegetationPixels += 1;
-        if (y > originY + spanY * 0.72) {
-          baseAlphaPixels += 1;
+        else structurePixels += 1;
+        if (v > 0.72) {
           if (vegetation) baseVegetationPixels += 1;
         }
       }
     }
     const evidence = {
-      alphaFraction: alphaPixels / Math.max(sampledPixels, 1),
-      baseVegetationFraction: baseVegetationPixels / Math.max(baseAlphaPixels, 1),
-      vegetationFraction: vegetationPixels / Math.max(alphaPixels, 1),
+      baseVegetationFraction: baseVegetationPixels / Math.max(baseCanopyPixels, 1),
+      canopyPixels,
+      contextAlphaFraction: contextAlphaPixels / Math.max(canopyPixels, 1),
+      structureFraction: structurePixels / Math.max(canopyPixels, 1),
+      vegetationFraction: vegetationPixels / Math.max(canopyPixels, 1),
     };
     if (
-      evidence.alphaFraction < thresholds.alphaFraction
+      evidence.contextAlphaFraction < thresholds.contextAlphaFraction
       || evidence.baseVegetationFraction < thresholds.baseVegetationFraction
+      || evidence.structureFraction > thresholds.maximumStructureFraction
       || evidence.vegetationFraction < thresholds.vegetationFraction
     ) continue;
     admitted.push({
@@ -363,7 +399,7 @@ await writePng(outputs.capitalContext, sharp(capitalContext, {
   raw: { width: WIDTH, height: HEIGHT, channels: 4 },
 }));
 const foliageManifest = JSON.parse(await readFile(source.foliageManifest, "utf8"));
-const nativeFoliageReuse = analyzeNativeFoliageReuse(capitalContext, foliageManifest);
+const nativeFoliageReuse = await analyzeNativeFoliageReuse(capitalContext, foliageManifest);
 await mkdir(path.dirname(outputs.nativeFoliageReuseManifest), { recursive: true });
 await writeFile(outputs.nativeFoliageReuseManifest, `${JSON.stringify({
   schemaVersion: 1,
@@ -371,7 +407,7 @@ await writeFile(outputs.nativeFoliageReuseManifest, `${JSON.stringify({
   sourceContext: "/career-world/capitals/ninjaone/city-r3/foundation/city-context-capital-without-d06-r1-alpha.png",
   sourceFoliageManifestId: foliageManifest.id,
   admission: {
-    method: "registered-L2-socket-intersection-with-existing-city-vegetation-and-contact",
+    method: "registered-L2-canopy-alpha-intersection-with-existing-city-vegetation-and-contact",
     thresholds: nativeFoliageReuse.thresholds,
   },
   instances: nativeFoliageReuse.admitted,

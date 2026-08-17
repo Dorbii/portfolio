@@ -148,8 +148,9 @@ test("close city foliage reuses the registered L2 native conifer atlases", async
   assert.equal(reuseManifest.sourceFoliageManifestId, "career-world/capitals/ninjaone/foliage@r6");
   assert.ok(reuseManifest.instances.length > 0);
   for (const instance of reuseManifest.instances) {
-    assert.ok(instance.evidence.alphaFraction >= 0.5);
-    assert.ok(instance.evidence.baseVegetationFraction >= 0.3);
-    assert.ok(instance.evidence.vegetationFraction >= 0.3);
+    assert.ok(instance.evidence.contextAlphaFraction >= 0.8);
+    assert.ok(instance.evidence.baseVegetationFraction >= 0.6);
+    assert.ok(instance.evidence.structureFraction <= 0.3);
+    assert.ok(instance.evidence.vegetationFraction >= 0.65);
   }
 });

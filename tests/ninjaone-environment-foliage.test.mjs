@@ -272,6 +272,28 @@ test("the reported lower-ridge camera mounts native trees and gates motion to th
   assert.ok(artboardView.span[0] > 0 && artboardView.span[1] > 0);
 });
 
+test("an admitted foliage cohort is filtered before the shared residency budget", () => {
+  const camera = Object.freeze({
+    origin: Object.freeze([0.20037197024864656, 0.08141462821867565]),
+    span: Object.freeze([0.0945814074220192, 0.12610854322935894]),
+  });
+  const admittedIds = new Set([
+    "b1-native-conifer-023-instance",
+    "c1-native-conifer-036-instance",
+    "c1-native-conifer-057-instance",
+  ]);
+  const selected = selectNinjaOneEnvironmentFoliageInstances(
+    camera,
+    true,
+    32,
+    NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES,
+    admittedIds,
+  );
+
+  assert.ok(selected.length > 0);
+  assert.ok(selected.every(({ id }) => admittedIds.has(id)));
+});
+
 test("foliage LoD uses hysteresis and cannot mount outside close detail", () => {
   assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_ENTER_SPAN, 0.12);
   assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_RETAIN_SPAN, 0.14);

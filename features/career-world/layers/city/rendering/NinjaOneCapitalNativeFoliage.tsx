@@ -25,7 +25,8 @@ export function NinjaOneCapitalNativeFoliage({ camera }: {
       true,
       NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS,
       NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES,
-    ).filter(({ id }) => APPROVED_NATIVE_FOLIAGE_INSTANCE_IDS.has(id)),
+      APPROVED_NATIVE_FOLIAGE_INSTANCE_IDS,
+    ),
     [camera],
   );
   const resources = useMemo(() => [
