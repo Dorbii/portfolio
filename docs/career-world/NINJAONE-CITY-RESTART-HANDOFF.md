@@ -280,3 +280,27 @@ Inspect the current source-composition masks for the upper rear city cut and the
 ### Exact next action
 
 Audit the registered free-camera site/close node cohort for missing contact/shadow and circulation layers. Add only the smallest parent-registered additive layer needed to unify those nodes; do not restore overlapping full-building cutouts or generate vegetation.
+
+## 2026-08-17 02:09 CDT
+
+### Completed work and evidence
+
+- Audited the free-camera progressive node route. The selector can return package-registered `close` variants, but runtime intentionally admits the cohort only at `site`. A temporary Director-only change enabled close and passed the focused routing test after updating its expectation.
+- Live free-camera close proof rejected that change: `17` package-anchor nodes rendered, but their outer bounds are not parent-registered and the full-building cutouts read approximately 2-4x too large/detached at close. This reproduced the user-reported overlap failure. The code and test were restored immediately; there is no retained diff. Under the test policy, the existing close exclusion remains a **real safety invariant**, not stale intent, until registered close geometry exists.
+- Live free-camera site proof confirmed the current progressive route admits `21` package-registered architecture/transport nodes. Site remains the only safe full-building cohort; legacy halls, trains, inferred nodes, generated foliage, and focused-D06 replacements remain excluded.
+- Tested the smallest station-footprint correction before commissioning another asset. Reducing I21 and its I17 close overlay uniformly from `0.90` to `0.82` while keeping the bottom socket fixed materially reduced land/water coverage and preserved their mutual registration. Fixed D06 site and close proofs passed; the open undercroft continues to expose native land/water and the station no longer dominates the waterfall basin.
+- Added exact regression assertions for the accepted `0.82` site/close station scale. Focused R3/LoD tests pass `23/23`; typecheck and focused ESLint pass; the production build passes with only the pre-existing chunk-size advisory.
+- Created recovery checkpoint `6948500` (`checkpoint: reduce station support footprint`). The worktree returned clean before this handoff update.
+- Spawned one xHigh ImageGen-contract worker for the exact remaining close asset gap: `CFX02-city-central-architecture-detail-overlay-r1-alpha`, a transparent `1448x1086` close-only `L4_4` overlay confined to conservative interiors of seven central package sockets. Maximum two candidates; tracked writes/promotion are forbidden. The worker is still running.
+
+### Concerns, pivots, and tasks left
+
+- Do not enable the existing Sxx full-building cohort at close. Package anchors prove position but not the close-scale exterior bounds required for silhouette replacement.
+- CFX02 must be rejected if it changes building silhouettes, terraces, land, water, foliage, D06, lighting direction, or contact geometry; ImageGen checkerboard/opaque output is also an automatic rejection.
+- Site still relies on full-building cutouts and generic SVG contact/cast shadows. It is serviceable at the current framing, but a later parent-registered contact/circulation audit remains appropriate after close detail is stable.
+- I20, I21, I17, WFX01, CFX01, LFX06, and any accepted CFX02 remain review assets pending one controlled manifest/builder promotion.
+- The train remains intentionally absent/deferred.
+
+### Exact next action
+
+Receive and mechanically/visually grade the quarantined CFX02 candidate. If it passes, mount it only at free-camera close below native foliage/nodes and prove it at multiple close camera positions. If it fails, record `NO-GO` and keep close on the accepted parent-derived CFX01 path; do not re-enable the defective Sxx close cutouts.
