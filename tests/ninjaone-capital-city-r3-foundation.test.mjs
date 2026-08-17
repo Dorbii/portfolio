@@ -67,6 +67,51 @@ test("L4_0 is city-owned and cascades off with the city authority", () => {
   );
 });
 
+test("WFX01 adds support-localized water detail only at site and close", async () => {
+  const rendererSource = await readFile(new URL(
+    "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
+    import.meta.url,
+  ), "utf8");
+  assert.match(rendererSource, /tier === "site" \|\| tier === "close"/);
+  assert.match(rendererSource, /WFX01-city-bridge-water-detail-r1-alpha\.png/);
+  assert.match(rendererSource, /data-city-child-layer="L4_0"/);
+
+  const [candidate, waterMask] = await Promise.all([
+    rgba("/career-world/capitals/ninjaone/city-r3/_review/WFX01-city-bridge-water-detail-r1-alpha.png"),
+    grayscale("../public/career-world/capitals/ninjaone/city-r3/authority/city-water-registration-mask-r1.png"),
+  ]);
+  assert.deepEqual([candidate.info.width, candidate.info.height], [1448, 1086]);
+
+  let alphaCount = 0;
+  let maximumAlpha = 0;
+  let outsideWater = 0;
+  let outsideRegisteredComponents = 0;
+  let componentEdgePixels = 0;
+  for (let index = 0; index < candidate.info.width * candidate.info.height; index += 1) {
+    const alpha = candidate.data[index * 4 + 3];
+    if (alpha === 0) continue;
+    alphaCount += 1;
+    maximumAlpha = Math.max(maximumAlpha, alpha);
+    if (waterMask.data[index] < 128) outsideWater += 1;
+    const x = index % candidate.info.width;
+    const y = Math.floor(index / candidate.info.width);
+    const inCentral = x >= 533 && x <= 968 && y >= 464 && y <= 828;
+    const inStation = x >= 792 && x <= 1036 && y >= 858 && y <= 1077;
+    if (!inCentral && !inStation) outsideRegisteredComponents += 1;
+    if (
+      (inCentral && (x === 533 || x === 968 || y === 464 || y === 828))
+      || (inStation && (x === 792 || x === 1036 || y === 858 || y === 1077))
+    ) {
+      componentEdgePixels += 1;
+    }
+  }
+  assert.equal(alphaCount, 2_786);
+  assert.equal(maximumAlpha, 136);
+  assert.equal(outsideWater, 0);
+  assert.equal(outsideRegisteredComponents, 0);
+  assert.equal(componentEdgePixels, 0);
+});
+
 test("capital context clears D06 for atomic replacement and never repaints registered water", async () => {
   const [context, composite, d06Mask, waterMask] = await Promise.all([
     rgba(NINJAONE_CAPITAL_CITY_R3_CONTEXT.path),

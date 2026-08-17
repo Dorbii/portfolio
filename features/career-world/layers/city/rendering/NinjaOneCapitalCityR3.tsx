@@ -35,6 +35,8 @@ const D06_SITE_CLOSE_REVIEW_BASE = Object.freeze({
 });
 const D06_CLOSE_CONTEXT =
   "/career-world/capitals/ninjaone/city-nodes-r2/close/infrastructure/I17-station-close-civic-overlay-r1-alpha.png";
+const CITY_BRIDGE_WATER_DETAIL_REVIEW =
+  "/career-world/capitals/ninjaone/city-r3/_review/WFX01-city-bridge-water-detail-r1-alpha.png";
 const D06_STATION_REVIEW_SCALE = 0.9;
 const D06_STATION_CLOSE_WIDTH = 846 * D06_STATION_REVIEW_SCALE;
 const D06_STATION_CLOSE_HEIGHT = 564 * D06_STATION_REVIEW_SCALE;
@@ -59,6 +61,8 @@ export function NinjaOneCapitalCityR3({
     visibility,
     "L4_0",
   );
+  const waterDetailVisible = waterInteractionVisible
+    && (tier === "site" || tier === "close");
   const transportationVisible = isEnvironmentLayerEffectivelyVisible(
     visibility,
     "L4_2",
@@ -140,6 +144,20 @@ export function NinjaOneCapitalCityR3({
           data-city-child-layer="L4_0"
           height={height}
           href={NINJAONE_CAPITAL_CITY_R3_WATER_INTERACTION.path}
+          preserveAspectRatio="none"
+          width={width}
+        />
+      ) : null}
+      {waterDetailVisible ? (
+        <image
+          className="ninjaone-capital-city__r3-water-detail"
+          data-city-asset-id="WFX01"
+          data-city-child-layer="L4_0"
+          data-city-runtime-status="director-review"
+          data-city-water-detail-tier={tier}
+          height={height}
+          href={CITY_BRIDGE_WATER_DETAIL_REVIEW}
+          opacity={tier === "close" ? 1 : 0.68}
           preserveAspectRatio="none"
           width={width}
         />

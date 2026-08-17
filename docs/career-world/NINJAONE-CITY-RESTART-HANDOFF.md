@@ -207,3 +207,27 @@ Checkpoint the accepted I21 review routing, then address the upper rear cliff wi
 ### Exact next action
 
 Define a crisp parent-derived upper-rear cliff face or mask-based silhouette repair, then reject or accept it in the live capital view before any manifest promotion.
+
+## 2026-08-17 00:52 CDT
+
+### Completed work and evidence
+
+- LFX05 tested the remaining safe cliff option: a translucent cavity shade above the context with explicit palace protection. The worker removed the candidate and returned `NO-GO`; a visible-strength mask reached `4,893` conservative tower/dome pixels, while the protected mask remained as subtle as rejected LFX03. No runtime/tracked asset was created.
+- The upper rear cliff is now a specific composition blocker: the current flattened parent/context no longer contains a separable rear-land surface. Safe deterministic masking cannot change it; a coherent replacement will require an authored parent-aware patch or a revised source composition.
+- An independent xHigh deterministic lane produced `WFX01-city-bridge-water-detail-r1-alpha` for `L4_0`. Candidate B passed after the Director rejected an initial report with 11 bbox-edge pixels and required an in-place correction.
+- Final WFX01 metrics: `1448x1086` RGBA, `2,786` nonzero-alpha pixels, max alpha `136`, `8.9203%` of the `31,232` registered water pixels, zero outside-water pixels, zero outside-component pixels, zero component-edge seam pixels, and `100%` within 20 px of transformed I21/current-context support authority. SHA-256 `978BBFF405BE2291E16263C587901DD0ADB1CEB67FB06BC0EE13423FAD88D350`.
+- Corrected proof order uses L3 live authority -> existing L4_0 -> WFX01 -> current city context -> I21 at exact artboard placement `(704.15,557.7,704.7x528.3)`. The initial worker proof that retained the master station and placed I21 1:1 was rejected as invalid before promotion.
+- Runtime LoD now keeps WFX01 absent at capital, mounts it at `0.68` opacity for site, and promotes it to full authored opacity at close. Live fixed DOM assets are capital `I20`; site `WFX01,I21`; close `WFX01,I17,I21`. The station openings remain exposed and native animated water remains dominant.
+- Focused R3/LoD tests pass `21/21`; typecheck passes. Focused ESLint passes for TS/test files; the CSS path is outside the configured ESLint scope and reports one ignored-file warning, not a lint failure.
+- The production build passes with only the pre-existing chunk-size advisory.
+
+### Concerns, pivots, and tasks left
+
+- WFX01 remains `_review` pending production-manifest/builder promotion and broader free-camera inspection.
+- The upper rear cliff remains unresolved and should not receive another deterministic mask/warp attempt without new source art or a source-composition decision.
+- Parent close-detail softness and missing additive texture, lighting, contact/shadow, circulation/fabric, prop, and district cohorts remain open.
+- I20/I21 and WFX01 are review-authority assets; manifest alignment remains a controlled later step after visual acceptance.
+
+### Exact next action
+
+Run the production build and broader free-camera water inspection, checkpoint WFX01 if clean, then add a parent-derived close-detail overlay rather than restoring overlapping full-building cutouts.

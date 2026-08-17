@@ -1507,6 +1507,10 @@ g[data-owner-id="project-kaizen-agent"].ambient-structure {
   opacity: 0.55;
 }
 
+.ninjaone-capital-city__r3-water-detail {
+  image-rendering: auto;
+}
+
 .ninjaone-capital-city__r3-train {
   animation: ninjaone-capital-city-r3-train 18s linear infinite;
   transform-box: fill-box;
