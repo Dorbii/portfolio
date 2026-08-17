@@ -256,3 +256,27 @@ Run the production build and broader free-camera water inspection, checkpoint WF
 ### Exact next action
 
 Inspect the current source-composition masks for the upper rear city cut and the I21 support footprint. Choose the smallest reversible repair that exposes native L2/L3 authority where it already exists; only commission a new xHigh asset after the exact missing geometry is isolated.
+
+## 2026-08-17 01:45 CDT
+
+### Completed work and evidence
+
+- Layer-isolation disproved the prior upper-cliff diagnosis. Disabling `L4` left the two bright rear mesas visible, proving they are immutable L2 terrain exposed behind the palace rather than city-context pixels. The LFX03-LFX05 above-context structure-protection conflict was therefore caused by the wrong render order.
+- An xHigh deterministic worker produced `LFX06-upper-rear-native-ridge-underlay-r1-alpha` for `L4_1`, explicitly rendered after L2/L3 but before the city context. No ImageGen calls were used.
+- Director accepted candidate B after exact-order and live on/off review. Mechanical gates: `1448x1086` RGBA, `52,821` alpha pixels, bbox `[249,48,699,259)`, max alpha `196`, transparent corners, zero pixels outside ROI/live-land authority, zero water overlap, zero ROI-border pixels, zero brightened pixels, mean/median visible luma drop `26.8903/22.4264`, and texture correlation `0.91504`. SHA-256 is `EF00A69426B774848D75EFF38A3B238EDCAAD8B276F03C15F59C6A3D99B65296`.
+- Live capital proof mounts `LFX06,I20`. With `L4_1` enabled, the bright L2 mesas read as one darker recessed native-rock backwall; disabling `L4_1` immediately restores the blunt bright ridges. Palace/building pixels remain above the underlay and unchanged. The lit observatory/statue ridge remains consistent with the accepted master.
+- Added an exact asset/ownership invariant test for LFX06. Focused R3 tests pass `11/11`; typecheck, focused ESLint, and production build pass. The build retains only the pre-existing chunk-size advisory.
+- The full suite was not rerun after this low-risk asset mount; the immediately preceding checkpoint passed `184/186` with `2` declared skips and `0` failures.
+- Created recovery checkpoint `7210352` (`checkpoint: recess upper city ridge`).
+
+### Concerns, pivots, and tasks left
+
+- LFX06 is the accepted review-path repair, not yet production-manifest/builder authority. Its success depends on being below the context; moving it above city structures would reintroduce the rejected overlap problem.
+- I21 still has a broad engineered support terrace. Its black undercroft obstruction and water contact are fixed, but geometry should remain review-only until the user accepts the current scale or a specific remaining footprint defect is isolated.
+- The parent close plate is more readable with CFX01, but authored lighting, shadow/contact, circulation, prop, and district-specific close cohorts remain incomplete.
+- I20, I21, WFX01, CFX01, and LFX06 remain review assets. Manifest/builder alignment should be one controlled promotion after the remaining stationary composition is accepted.
+- The train remains intentionally absent/deferred.
+
+### Exact next action
+
+Audit the registered free-camera site/close node cohort for missing contact/shadow and circulation layers. Add only the smallest parent-registered additive layer needed to unify those nodes; do not restore overlapping full-building cutouts or generate vegetation.
