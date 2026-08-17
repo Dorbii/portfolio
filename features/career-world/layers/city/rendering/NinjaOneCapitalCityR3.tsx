@@ -8,6 +8,7 @@ import {
 import {
   NINJAONE_CAPITAL_CITY_R3_ARTBOARD,
   NINJAONE_CAPITAL_CITY_R3_CONTEXT,
+  NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS,
   NINJAONE_CAPITAL_CITY_R3_WATER_INTERACTION,
 } from "../model/ninjaOneCapitalCityFoundationR3";
 import {
@@ -18,32 +19,37 @@ import { NinjaOneCapitalAssetNodes } from "./NinjaOneCapitalAssetNodes";
 import { NinjaOneCapitalNativeFoliage } from "./NinjaOneCapitalNativeFoliage";
 
 const D06_CAPITAL_REVIEW_BASE = Object.freeze({
-  anchorX: 1005,
+  anchorX: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I20.placement!.anchor[0],
   assetId: "I20",
-  height: 610 * 191 / 384,
-  path: "/career-world/capitals/ninjaone/city-r3/_review/I20-station-capital-cluster-no-train-r1-alpha.png",
-  scale: 1,
-  width: 610,
+  height: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I20.placement!.baseSize[1]
+    * NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I20.placement!.scale,
+  path: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I20.asset.path,
+  scale: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I20.placement!.scale,
+  width: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I20.placement!.baseSize[0]
+    * NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I20.placement!.scale,
 });
 const D06_SITE_CLOSE_REVIEW_BASE = Object.freeze({
-  anchorX: 1056.5,
+  anchorX: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I21.placement!.anchor[0],
   assetId: "I21",
-  height: 587 * 0.82,
-  path: "/career-world/capitals/ninjaone/city-r3/_review/I21-station-undercroft-open-r1-alpha.png",
-  scale: 0.82,
-  width: 783 * 0.82,
+  height: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I21.placement!.baseSize[1]
+    * NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I21.placement!.scale,
+  path: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I21.asset.path,
+  scale: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I21.placement!.scale,
+  width: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I21.placement!.baseSize[0]
+    * NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I21.placement!.scale,
 });
 const D06_CLOSE_CONTEXT =
   "/career-world/capitals/ninjaone/city-nodes-r2/close/infrastructure/I17-station-close-civic-overlay-r1-alpha.png";
 const CITY_BRIDGE_WATER_DETAIL_REVIEW =
-  "/career-world/capitals/ninjaone/city-r3/_review/WFX01-city-bridge-water-detail-r1-alpha.png";
+  NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.WFX01.asset.path;
 const CITY_UPPER_REAR_RIDGE_UNDERLAY_REVIEW =
-  "/career-world/capitals/ninjaone/city-r3/_review/LFX06-upper-rear-native-ridge-underlay-r1-alpha.png";
+  NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.LFX06.asset.path;
 const CITY_CLOSE_FABRIC_DETAIL_REVIEW =
-  "/career-world/capitals/ninjaone/city-r3/_review/CFX01-city-close-fabric-detail-r1-alpha.png";
+  NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.CFX01.asset.path;
 const CITY_CENTRAL_ARCHITECTURE_DETAIL_REVIEW =
-  "/career-world/capitals/ninjaone/city-r3/_review/CFX02-city-central-architecture-detail-overlay-r1-alpha.png";
-const D06_STATION_REVIEW_SCALE = 0.82;
+  NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.CFX02.asset.path;
+const D06_STATION_REVIEW_SCALE =
+  NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I21.placement!.scale;
 const D06_STATION_CLOSE_WIDTH = 846 * D06_STATION_REVIEW_SCALE;
 const D06_STATION_CLOSE_HEIGHT = 564 * D06_STATION_REVIEW_SCALE;
 
@@ -167,7 +173,7 @@ export function NinjaOneCapitalCityR3({
           className="ninjaone-capital-city__r3-water-detail"
           data-city-asset-id="WFX01"
           data-city-child-layer="L4_0"
-          data-city-runtime-status="director-review"
+          data-city-runtime-status="manifest-declared"
           data-city-water-detail-tier={tier}
           height={height}
           href={CITY_BRIDGE_WATER_DETAIL_REVIEW}
@@ -181,7 +187,7 @@ export function NinjaOneCapitalCityR3({
           className="ninjaone-capital-city__r3-landscape-underlay"
           data-city-asset-id="LFX06"
           data-city-child-layer="L4_1"
-          data-city-runtime-status="director-review"
+          data-city-runtime-status="manifest-declared"
           height={height}
           href={CITY_UPPER_REAR_RIDGE_UNDERLAY_REVIEW}
           preserveAspectRatio="none"
@@ -204,7 +210,7 @@ export function NinjaOneCapitalCityR3({
           className="ninjaone-capital-city__r3-fabric-detail"
           data-city-asset-id="CFX01"
           data-city-child-layer="L4_4"
-          data-city-runtime-status="director-review"
+          data-city-runtime-status="manifest-declared"
           data-city-fabric-detail-tier={tier}
           height={height}
           href={CITY_CLOSE_FABRIC_DETAIL_REVIEW}
@@ -221,7 +227,7 @@ export function NinjaOneCapitalCityR3({
           className="ninjaone-capital-city__r3-architecture-detail"
           data-city-asset-id="CFX02"
           data-city-child-layer="L4_4"
-          data-city-runtime-status="director-review"
+          data-city-runtime-status="manifest-declared"
           height={height}
           href={CITY_CENTRAL_ARCHITECTURE_DETAIL_REVIEW}
           mask={registeredDetailVisible
@@ -267,7 +273,7 @@ export function NinjaOneCapitalCityR3({
           data-city-asset-source-tier={tier === "capital" ? "capital" : "site-close"}
           data-city-child-layer="L4_2"
           data-city-runtime-scale={d06StationBase.scale}
-          data-city-runtime-status="director-review"
+          data-city-runtime-status="manifest-declared"
           height={d06StationBase.height}
           href={d06StationBase.path}
           preserveAspectRatio="xMidYMid meet"

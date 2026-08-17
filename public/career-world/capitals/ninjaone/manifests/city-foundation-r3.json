@@ -89,6 +89,143 @@
       }
     }
   ],
+  "runtimeAssets": [
+    {
+      "id": "WFX01",
+      "layerId": "L4_0",
+      "role": "support-localized-water-detail",
+      "tiers": [
+        "site",
+        "close"
+      ],
+      "asset": {
+        "decodedBytes": 6290112,
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "encodedBytes": 10255,
+        "path": "/career-world/capitals/ninjaone/city-r3/water-interaction/WFX01-city-bridge-water-detail-r1-alpha.png",
+        "sha256": "978bbff405be2291e16263c587901dd0adb1ceb67fb06bc0ee13423fad88d350"
+      }
+    },
+    {
+      "id": "LFX06",
+      "layerId": "L4_1",
+      "role": "upper-rear-native-ridge-underlay",
+      "tiers": [
+        "capital",
+        "site",
+        "close"
+      ],
+      "asset": {
+        "decodedBytes": 6290112,
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "encodedBytes": 126935,
+        "path": "/career-world/capitals/ninjaone/city-r3/landscape/LFX06-upper-rear-native-ridge-underlay-r1-alpha.png",
+        "sha256": "ef00a69426b774848d75eff38a3b238edcaad8b276f03c15f59c6a3d99b65296"
+      }
+    },
+    {
+      "id": "CFX01",
+      "layerId": "L4_4",
+      "role": "parent-derived-fabric-detail",
+      "tiers": [
+        "site",
+        "close"
+      ],
+      "asset": {
+        "decodedBytes": 6290112,
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "encodedBytes": 1094397,
+        "path": "/career-world/capitals/ninjaone/city-r3/detail/CFX01-city-close-fabric-detail-r1-alpha.png",
+        "sha256": "cb02ebb9b096a5f79d690ba667b218d0acc33730f69def5862ea10333c3008c2"
+      }
+    },
+    {
+      "id": "CFX02",
+      "layerId": "L4_4",
+      "role": "central-architecture-detail",
+      "tiers": [
+        "close"
+      ],
+      "asset": {
+        "decodedBytes": 6290112,
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "encodedBytes": 98008,
+        "path": "/career-world/capitals/ninjaone/city-r3/detail/CFX02-city-central-architecture-detail-overlay-r1-alpha.png",
+        "sha256": "049431e780ffe7423c371269268964888c0b15375b141d23af47e31a2d3f0059"
+      }
+    },
+    {
+      "id": "I20",
+      "layerId": "L4_2",
+      "role": "train-free-capital-station",
+      "tiers": [
+        "capital"
+      ],
+      "placement": {
+        "anchor": [
+          1005,
+          1086
+        ],
+        "baseSize": [
+          610,
+          303.4114583333333
+        ],
+        "scale": 1
+      },
+      "asset": {
+        "decodedBytes": 293376,
+        "dimensions": [
+          384,
+          191
+        ],
+        "encodedBytes": 125898,
+        "path": "/career-world/capitals/ninjaone/city-r3/station/I20-station-capital-cluster-no-train-r1-alpha.png",
+        "sha256": "cd4be5472fc37316f4a87b3ee47c5d8f3aacc27c3ad8c3aa58966df2fcd995d2"
+      }
+    },
+    {
+      "id": "I21",
+      "layerId": "L4_2",
+      "role": "open-undercroft-site-close-station",
+      "tiers": [
+        "site",
+        "close"
+      ],
+      "placement": {
+        "anchor": [
+          1056.5,
+          1086
+        ],
+        "baseSize": [
+          783,
+          587
+        ],
+        "scale": 0.82
+      },
+      "asset": {
+        "decodedBytes": 6290112,
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "encodedBytes": 1668921,
+        "path": "/career-world/capitals/ninjaone/city-r3/station/I21-station-undercroft-open-r1-alpha.png",
+        "sha256": "58ad954173f51d210f4696aed7c05f26258941f1b5d1098e3ddeff38518cdb70"
+      }
+    }
+  ],
   "deliveries": {
     "composite": {
       "decodedBytes": 6290112,

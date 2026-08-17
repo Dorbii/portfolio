@@ -8,6 +8,7 @@ import {
   NINJAONE_CAPITAL_CITY_R3_ARTBOARD,
   NINJAONE_CAPITAL_CITY_R3_AUTHORITY_ID,
   NINJAONE_CAPITAL_CITY_R3_CONTEXT,
+  NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS,
   NINJAONE_CAPITAL_CITY_R3_TERRITORY,
   NINJAONE_CAPITAL_CITY_R3_WATER_COVERAGE,
   NINJAONE_CAPITAL_CITY_R3_WATER_INTERACTION,
@@ -40,6 +41,16 @@ test("r3 foundation publishes a registered water-safe capital cohort", () => {
   assert.deepEqual(NINJAONE_CAPITAL_CITY_R3_WATER_INTERACTION.dimensions, [1448, 1086]);
   assert.deepEqual(NINJAONE_CAPITAL_CITY_R3_TERRITORY.dimensions, [512, 384]);
   assert.equal(NINJAONE_CAPITAL_CITY_R3_WATER_COVERAGE, 0);
+  assert.deepEqual(Object.keys(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS).sort(), [
+    "CFX01",
+    "CFX02",
+    "I20",
+    "I21",
+    "LFX06",
+    "WFX01",
+  ]);
+  assert.ok(Object.values(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS)
+    .every(({ asset }) => !asset.path.includes("/_review/")));
 });
 
 test("L4_0 is city-owned and cascades off with the city authority", () => {
@@ -73,11 +84,11 @@ test("WFX01 adds support-localized water detail only at site and close", async (
     import.meta.url,
   ), "utf8");
   assert.match(rendererSource, /tier === "site" \|\| tier === "close"/);
-  assert.match(rendererSource, /WFX01-city-bridge-water-detail-r1-alpha\.png/);
+  assert.match(rendererSource, /NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS\.WFX01\.asset\.path/);
   assert.match(rendererSource, /data-city-child-layer="L4_0"/);
 
   const [candidate, waterMask] = await Promise.all([
-    rgba("/career-world/capitals/ninjaone/city-r3/_review/WFX01-city-bridge-water-detail-r1-alpha.png"),
+    rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.WFX01.asset.path),
     grayscale("../public/career-world/capitals/ninjaone/city-r3/authority/city-water-registration-mask-r1.png"),
   ]);
   assert.deepEqual([candidate.info.width, candidate.info.height], [1448, 1086]);
@@ -118,12 +129,12 @@ test("CFX01 adds parent-derived fabric detail only at site and close", async () 
     import.meta.url,
   ), "utf8");
   assert.match(rendererSource, /closeFabricVisible = \(tier === "site" \|\| tier === "close"\)[\s\S]*?visibility, "L4_4"/);
-  assert.match(rendererSource, /CFX01-city-close-fabric-detail-r1-alpha\.png/);
+  assert.match(rendererSource, /NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS\.CFX01\.asset\.path/);
   assert.match(rendererSource, /data-city-asset-id="CFX01"/);
   assert.match(rendererSource, /opacity=\{tier === "close" \? 1 : 0\.48\}/);
 
   const [candidate, context, waterMask, d06Mask] = await Promise.all([
-    rgba("/career-world/capitals/ninjaone/city-r3/_review/CFX01-city-close-fabric-detail-r1-alpha.png"),
+    rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.CFX01.asset.path),
     rgba(NINJAONE_CAPITAL_CITY_R3_CONTEXT.path),
     grayscale("../public/career-world/capitals/ninjaone/city-r3/authority/city-water-registration-mask-r1.png"),
     grayscale("../art-source/career-world/ninjaone-capital/city-r3/districts/D06-station-rail-mask.png"),
@@ -157,11 +168,11 @@ test("CFX02 adds registered central architecture detail only at close", async ()
     import.meta.url,
   ), "utf8");
   assert.match(rendererSource, /centralArchitectureDetailVisible = tier === "close" && focusDistrict === null[\s\S]*?visibility, "L4_4"/);
-  assert.match(rendererSource, /CFX02-city-central-architecture-detail-overlay-r1-alpha\.png/);
+  assert.match(rendererSource, /NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS\.CFX02\.asset\.path/);
   assert.match(rendererSource, /data-city-asset-id="CFX02"/);
 
   const [candidate, context, waterMask] = await Promise.all([
-    rgba("/career-world/capitals/ninjaone/city-r3/_review/CFX02-city-central-architecture-detail-overlay-r1-alpha.png"),
+    rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.CFX02.asset.path),
     rgba(NINJAONE_CAPITAL_CITY_R3_CONTEXT.path),
     grayscale("../public/career-world/capitals/ninjaone/city-r3/authority/city-water-registration-mask-r1.png"),
   ]);
@@ -199,12 +210,12 @@ test("LFX06 recesses only live land below the city context", async () => {
     import.meta.url,
   ), "utf8");
   assert.match(rendererSource, /visibility,\s*"L4_1"/);
-  assert.match(rendererSource, /LFX06-upper-rear-native-ridge-underlay-r1-alpha\.png/);
+  assert.match(rendererSource, /NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS\.LFX06\.asset\.path/);
   assert.match(rendererSource, /data-city-asset-id="LFX06"/);
   assert.match(rendererSource, /data-city-child-layer="L4_1"/);
 
   const [candidate, landMask, waterMask] = await Promise.all([
-    rgba("/career-world/capitals/ninjaone/city-r3/_review/LFX06-upper-rear-native-ridge-underlay-r1-alpha.png"),
+    rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.LFX06.asset.path),
     grayscale("../art-source/career-world/ninjaone-capital/city-r3/authority/live-land-authority-mask-r1.png"),
     grayscale("../art-source/career-world/ninjaone-capital/city-r3/authority/live-inland-water-authority-mask-r1.png"),
   ]);
@@ -336,17 +347,19 @@ test("station LoD promotes train-free I20 at capital and open-undercroft I21 at 
     import.meta.url,
   ), "utf8");
   assert.match(rendererSource, /tier === "capital"\s*\? D06_CAPITAL_REVIEW_BASE/);
-  assert.match(rendererSource, /I20-station-capital-cluster-no-train-r1-alpha\.png/);
-  assert.match(rendererSource, /I21-station-undercroft-open-r1-alpha\.png/);
+  assert.match(rendererSource, /NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS\.I20\.asset\.path/);
+  assert.match(rendererSource, /NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS\.I21\.asset\.path/);
   assert.doesNotMatch(rendererSource, /I18-station-site-base-no-train-r1-alpha\.png/);
-  assert.match(rendererSource, /height:\s*587\s*\*\s*0\.82/);
-  assert.match(rendererSource, /width:\s*783\s*\*\s*0\.82/);
-  assert.match(rendererSource, /D06_STATION_REVIEW_SCALE\s*=\s*0\.82/);
+  assert.deepEqual(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I21.placement, {
+    anchor: [1056.5, 1086],
+    baseSize: [783, 587],
+    scale: 0.82,
+  });
 
   const [capital, capitalSource, siteClose, siteCloseSource] = await Promise.all([
-    rgba("/career-world/capitals/ninjaone/city-r3/_review/I20-station-capital-cluster-no-train-r1-alpha.png"),
+    rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I20.asset.path),
     rgba("/career-world/capitals/ninjaone/city-nodes-r2/capital/infrastructure/I13-station-capital-cluster-r1-alpha.png"),
-    rgba("/career-world/capitals/ninjaone/city-r3/_review/I21-station-undercroft-open-r1-alpha.png"),
+    rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I21.asset.path),
     rgba("/career-world/capitals/ninjaone/city-r3/_review/I18-station-site-base-no-train-r1-alpha.png"),
   ]);
   assert.deepEqual([capital.info.width, capital.info.height], [384, 191]);

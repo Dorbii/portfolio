@@ -13,6 +13,27 @@ export interface NinjaOneCapitalCityArtifact {
   readonly sha256: string;
 }
 
+export type NinjaOneCapitalCityRuntimeAssetId =
+  | "CFX01"
+  | "CFX02"
+  | "I20"
+  | "I21"
+  | "LFX06"
+  | "WFX01";
+
+export interface NinjaOneCapitalCityRuntimeAsset {
+  readonly asset: NinjaOneCapitalCityArtifact;
+  readonly id: NinjaOneCapitalCityRuntimeAssetId;
+  readonly layerId: "L4_0" | "L4_1" | "L4_2" | "L4_4";
+  readonly placement?: {
+    readonly anchor: Pair;
+    readonly baseSize: Pair;
+    readonly scale: number;
+  };
+  readonly role: string;
+  readonly tiers: readonly ("capital" | "close" | "site")[];
+}
+
 interface FoundationLayer {
   readonly asset: NinjaOneCapitalCityArtifact;
   readonly id: "L4" | "L4_0";
@@ -43,6 +64,41 @@ const layerByRole = new Map(rawLayers.map((layer) => [layer.role, layer]));
 const waterLayer = layerByRole.get("city-water-interaction");
 const contextLayer = layerByRole.get("capital-composite-context-with-D06-exclusion");
 const waterCoverage = manifest.verification.inlandWaterCoverageFraction;
+const rawRuntimeAssets = manifest.runtimeAssets as unknown as readonly (
+  Omit<NinjaOneCapitalCityRuntimeAsset, "asset" | "placement"> & {
+    readonly asset: Omit<NinjaOneCapitalCityArtifact, "dimensions"> & {
+      readonly dimensions: readonly number[];
+    };
+    readonly placement?: {
+      readonly anchor: readonly number[];
+      readonly baseSize: readonly number[];
+      readonly scale: number;
+    };
+  }
+)[];
+const runtimeAssets = Object.freeze(Object.fromEntries(rawRuntimeAssets.map((entry) => [
+  entry.id,
+  Object.freeze({
+    ...entry,
+    asset: artifact(entry.asset, `city-foundation-r3.runtimeAssets.${entry.id}`),
+    placement: entry.placement
+      ? Object.freeze({
+        anchor: pair(entry.placement.anchor, `${entry.id}.placement.anchor`),
+        baseSize: pair(entry.placement.baseSize, `${entry.id}.placement.baseSize`),
+        scale: entry.placement.scale,
+      })
+      : undefined,
+    tiers: Object.freeze([...entry.tiers]),
+  }),
+]))) as Readonly<Record<NinjaOneCapitalCityRuntimeAssetId, NinjaOneCapitalCityRuntimeAsset>>;
+const expectedRuntimeAssetContract = Object.freeze({
+  CFX01: Object.freeze({ layerId: "L4_4", tiers: "site,close" }),
+  CFX02: Object.freeze({ layerId: "L4_4", tiers: "close" }),
+  I20: Object.freeze({ layerId: "L4_2", tiers: "capital" }),
+  I21: Object.freeze({ layerId: "L4_2", tiers: "site,close" }),
+  LFX06: Object.freeze({ layerId: "L4_1", tiers: "capital,site,close" }),
+  WFX01: Object.freeze({ layerId: "L4_0", tiers: "site,close" }),
+} as const);
 
 if (
   manifest.schemaVersion !== 1
@@ -61,6 +117,19 @@ if (
   || waterCoverage > manifest.verification.maximumInlandWaterCoverageFraction
   || waterLayer?.id !== "L4_0"
   || contextLayer?.id !== "L4"
+  || Object.keys(runtimeAssets).length !== Object.keys(expectedRuntimeAssetContract).length
+  || Object.entries(expectedRuntimeAssetContract).some(([id, expected]) => {
+    const runtimeAsset = runtimeAssets[id as NinjaOneCapitalCityRuntimeAssetId];
+    return runtimeAsset?.id !== id
+      || runtimeAsset.layerId !== expected.layerId
+      || runtimeAsset.tiers.join(",") !== expected.tiers
+      || runtimeAsset.asset.path.includes("/_review/")
+      || (id === "I20" || id === "I21") !== Boolean(runtimeAsset.placement)
+      || (runtimeAsset.placement !== undefined && (
+        !Number.isFinite(runtimeAsset.placement.scale)
+        || runtimeAsset.placement.scale <= 0
+      ));
+  })
 ) {
   throw new TypeError("NinjaOne Capital r3 foundation violates its registered layer contract.");
 }
@@ -85,3 +154,4 @@ export const NINJAONE_CAPITAL_CITY_R3_WATER_INTERACTION = artifact(
   "city-foundation-r3.waterInteraction",
 );
 export const NINJAONE_CAPITAL_CITY_R3_WATER_COVERAGE = waterCoverage;
+export const NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS = runtimeAssets;

@@ -57,6 +57,30 @@ const outputs = Object.freeze({
     outputRoot,
     "water-interaction/city-water-contact-r1-alpha.png",
   ),
+  bridgeWaterDetail: path.join(
+    outputRoot,
+    "water-interaction/WFX01-city-bridge-water-detail-r1-alpha.png",
+  ),
+  rearRidgeUnderlay: path.join(
+    outputRoot,
+    "landscape/LFX06-upper-rear-native-ridge-underlay-r1-alpha.png",
+  ),
+  closeFabricDetail: path.join(
+    outputRoot,
+    "detail/CFX01-city-close-fabric-detail-r1-alpha.png",
+  ),
+  centralArchitectureDetail: path.join(
+    outputRoot,
+    "detail/CFX02-city-central-architecture-detail-overlay-r1-alpha.png",
+  ),
+  stationCapital: path.join(
+    outputRoot,
+    "station/I20-station-capital-cluster-no-train-r1-alpha.png",
+  ),
+  stationSiteClose: path.join(
+    outputRoot,
+    "station/I21-station-undercroft-open-r1-alpha.png",
+  ),
   waterRegistrationMask: path.join(
     outputRoot,
     "authority/city-water-registration-mask-r1.png",
@@ -466,6 +490,52 @@ const manifest = {
   layers: [
     { id: "L4_0", role: "city-water-interaction", asset: await artifact(outputs.waterInteraction) },
     { id: "L4", role: "capital-composite-context-with-D06-exclusion", asset: await artifact(outputs.capitalContext) },
+  ],
+  runtimeAssets: [
+    {
+      id: "WFX01",
+      layerId: "L4_0",
+      role: "support-localized-water-detail",
+      tiers: ["site", "close"],
+      asset: await artifact(outputs.bridgeWaterDetail),
+    },
+    {
+      id: "LFX06",
+      layerId: "L4_1",
+      role: "upper-rear-native-ridge-underlay",
+      tiers: ["capital", "site", "close"],
+      asset: await artifact(outputs.rearRidgeUnderlay),
+    },
+    {
+      id: "CFX01",
+      layerId: "L4_4",
+      role: "parent-derived-fabric-detail",
+      tiers: ["site", "close"],
+      asset: await artifact(outputs.closeFabricDetail),
+    },
+    {
+      id: "CFX02",
+      layerId: "L4_4",
+      role: "central-architecture-detail",
+      tiers: ["close"],
+      asset: await artifact(outputs.centralArchitectureDetail),
+    },
+    {
+      id: "I20",
+      layerId: "L4_2",
+      role: "train-free-capital-station",
+      tiers: ["capital"],
+      placement: { anchor: [1005, 1086], baseSize: [610, 610 * 191 / 384], scale: 1 },
+      asset: await artifact(outputs.stationCapital),
+    },
+    {
+      id: "I21",
+      layerId: "L4_2",
+      role: "open-undercroft-site-close-station",
+      tiers: ["site", "close"],
+      placement: { anchor: [1056.5, 1086], baseSize: [783, 587], scale: 0.82 },
+      asset: await artifact(outputs.stationSiteClose),
+    },
   ],
   deliveries: {
     composite: await artifact(outputs.composite),
