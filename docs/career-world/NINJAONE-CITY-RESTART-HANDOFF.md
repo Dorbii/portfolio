@@ -103,3 +103,34 @@ Create a narrow green checkpoint commit, then inspect free close across addition
 ### Exact next action
 
 Inspect the free-close native-foliage overlay across additional camera positions, then make the station-support decision using the registered 0.9 runtime proof.
+
+## 2026-08-16 22:49 CDT
+
+### Completed work and checkpoint
+
+- Live on/off layer inspection disproved the 55-socket rectangle gate: at least one admitted native conifer covered city architecture. This was a real visual defect in the new city foliage work.
+- Fixed the shared foliage selector so an optional city admission set is applied before the 32-instance residency budget. Default L2 selection behavior is unchanged.
+- Rebuilt city admission against the actual canopy atlas alpha rather than each tree's rectangular bounds. The gate now requires context alpha `>= 0.8`, base vegetation `>= 0.6`, whole-canopy vegetation `>= 0.65`, and structure overlap `<= 0.3`.
+- The admitted city cohort fell from 55 sockets to 9. All assets remain the existing L2 native-conifer atlases; no city foliage atlas or generated tree was introduced.
+- Inspected center, east cliff, west terraces, and lower-west close cameras. Those views collectively covered all nine admitted sockets. No new architecture occlusion was visible, and the tree density is materially lower than the rejected 55-socket pass.
+- Created checkpoint `fa109aa` (`fix: gate city tree reuse by canopy alpha`).
+
+### Evidence and test decision
+
+- R3 builder: pass; transparent fraction `0.25198788193278593`; inland-water coverage `0`.
+- Focused foliage, R3 foundation, and city-LoD tests: 27/27 pass.
+- Typecheck: pass. Focused ESLint: pass.
+- A newly added selector regression fixture initially used the first close-tier camera (`max span 0.1608`), which is outside the existing L2 foliage retain contract (`0.14`) and therefore correctly selected zero trees. The fixture was corrected to the next live close step (`max span 0.1261`); no prior passing test or production threshold was changed.
+- Edited large-file anchor: `selectNinjaOneEnvironmentFoliageInstances` in `ninjaOneEnvironmentFoliage.ts`; the optional admission filter was added at the unique candidate-selection site.
+
+### Remaining concerns and tasks
+
+- The alpha/color gate is deterministic but still a proxy for authored sockets. The nine current sockets passed the inspected cameras; a later city-context revision can invalidate their color evidence and must force a rebuild/review.
+- The parent city plate is still soft at close. Additive texture, lighting, shadow/contact, circulation/fabric, props, and district overlays remain missing.
+- The 0.9 station footprint still needs a cold D06 site/close comparison against the waterfall and water channel before acceptance or a support-base-only xHigh repair.
+- LFX01 remains review-only and still appears too subtle to solve the upper rear cliff cut.
+- Full `npm test` remains deferred until the next visual batch; the last full-suite baseline predates this foliage correction.
+
+### Exact next action
+
+Run cold D06 site and close proofs with the 0.9 station footprint, compare native water/land exposure at the waterfall, and decide whether registration is sufficient or a support-base-only asset repair is required.
