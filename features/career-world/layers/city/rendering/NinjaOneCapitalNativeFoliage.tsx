@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import nativeFoliageReuseManifest from "../../../../../public/career-world/capitals/ninjaone/city-r3/authority/city-native-foliage-reuse-r1.json" with { type: "json" };
 import type { CameraView } from "../../../shared/camera";
+import { NINJAONE_CAPITAL_CITY_DETAIL_POLICY } from "../model/ninjaOneCapitalCityRepresentations";
 import {
   NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES,
   NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS,
@@ -26,6 +27,7 @@ export function NinjaOneCapitalNativeFoliage({ camera }: {
       NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS,
       NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES,
       APPROVED_NATIVE_FOLIAGE_INSTANCE_IDS,
+      NINJAONE_CAPITAL_CITY_DETAIL_POLICY.tierMaximumSpan.close,
     ),
     [camera],
   );

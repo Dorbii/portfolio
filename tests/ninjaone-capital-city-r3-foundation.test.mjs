@@ -13,6 +13,12 @@ import {
   NINJAONE_CAPITAL_CITY_R3_WATER_COVERAGE,
   NINJAONE_CAPITAL_CITY_R3_WATER_INTERACTION,
 } from "../features/career-world/layers/city/model/ninjaOneCapitalCityFoundationR3.ts";
+import { NINJAONE_CAPITAL_CITY_DETAIL_POLICY } from "../features/career-world/layers/city/model/ninjaOneCapitalCityRepresentations.ts";
+import {
+  NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES,
+  NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS,
+  selectNinjaOneEnvironmentFoliageInstances,
+} from "../features/career-world/layers/terrain/detail/model/ninjaOneEnvironmentFoliage.ts";
 import {
   DEFAULT_ENVIRONMENT_LAYER_VISIBILITY,
   ENVIRONMENT_LAYER_DEFINITIONS,
@@ -330,6 +336,35 @@ test("close city foliage reuses the registered L2 native conifer atlases", async
     assert.ok(instance.evidence.structureFraction <= 0.3);
     assert.ok(instance.evidence.vegetationFraction >= 0.65);
   }
+  const approvedIds = new Set(reuseManifest.instances.map(({ id }) => id));
+  const freeCloseCamera = Object.freeze({
+    origin: Object.freeze([0.125, 0]),
+    span: Object.freeze([0.145, 0.194]),
+  });
+  assert.deepEqual(
+    selectNinjaOneEnvironmentFoliageInstances(
+      freeCloseCamera,
+      true,
+      NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS,
+      NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES,
+      approvedIds,
+    ),
+    [],
+    "The global L2 foliage retention ceiling must remain unchanged.",
+  );
+  const cityTrees = selectNinjaOneEnvironmentFoliageInstances(
+    freeCloseCamera,
+    true,
+    NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS,
+    NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES,
+    approvedIds,
+    NINJAONE_CAPITAL_CITY_DETAIL_POLICY.tierMaximumSpan.close,
+  );
+  assert.ok(cityTrees.length > 0, "The wider city close tier must mount approved L2 trees.");
+  assert.ok(cityTrees.every(({ id }) => approvedIds.has(id)));
+  assert.ok(cityTrees.every(({ atlasResource }) => (
+    atlasResource.path.includes("/environment/shared/foliage-native-r4/")
+  )));
 });
 
 test("the rejected LFX01 rear-cliff candidate is not mounted at runtime", async () => {

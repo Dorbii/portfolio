@@ -421,6 +421,7 @@ export function selectNinjaOneEnvironmentFoliageInstances(
   maximumGroups = NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS,
   maximumDecodedBytes = NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES,
   admittedInstanceIds: ReadonlySet<string> | null = null,
+  maximumRetainSpan = NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_RETAIN_SPAN,
 ): readonly NinjaOneEnvironmentFoliageInstance[] {
   const admittedGroups = Number.isInteger(maximumGroups)
     ? Math.max(0, Math.min(maximumGroups, NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS))
@@ -432,7 +433,9 @@ export function selectNinjaOneEnvironmentFoliageInstances(
     !maxDetailEligible
     || admittedGroups === 0
     || admittedDecodedBytes === 0
-    || Math.max(...camera.span) > NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_RETAIN_SPAN
+    || !Number.isFinite(maximumRetainSpan)
+    || maximumRetainSpan <= 0
+    || Math.max(...camera.span) > maximumRetainSpan
   ) return Object.freeze([]);
   const artboardView = environmentFoliageCameraArtboardView(camera);
   const admissionView = overscanned(artboardView);
