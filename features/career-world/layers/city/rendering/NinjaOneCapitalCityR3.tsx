@@ -41,6 +41,8 @@ const CITY_UPPER_REAR_RIDGE_UNDERLAY_REVIEW =
   "/career-world/capitals/ninjaone/city-r3/_review/LFX06-upper-rear-native-ridge-underlay-r1-alpha.png";
 const CITY_CLOSE_FABRIC_DETAIL_REVIEW =
   "/career-world/capitals/ninjaone/city-r3/_review/CFX01-city-close-fabric-detail-r1-alpha.png";
+const CITY_CENTRAL_ARCHITECTURE_DETAIL_REVIEW =
+  "/career-world/capitals/ninjaone/city-r3/_review/CFX02-city-central-architecture-detail-overlay-r1-alpha.png";
 const D06_STATION_REVIEW_SCALE = 0.82;
 const D06_STATION_CLOSE_WIDTH = 846 * D06_STATION_REVIEW_SCALE;
 const D06_STATION_CLOSE_HEIGHT = 564 * D06_STATION_REVIEW_SCALE;
@@ -82,6 +84,8 @@ export function NinjaOneCapitalCityR3({
   const closeContextVisible = tier === "close"
     && isEnvironmentLayerEffectivelyVisible(visibility, "L4_4");
   const closeFabricVisible = (tier === "site" || tier === "close")
+    && isEnvironmentLayerEffectivelyVisible(visibility, "L4_4");
+  const centralArchitectureDetailVisible = tier === "close" && focusDistrict === null
     && isEnvironmentLayerEffectivelyVisible(visibility, "L4_4");
   const nativeFoliageVisible = tier === "close"
     && isEnvironmentLayerEffectivelyVisible(visibility, "L4_6");
@@ -208,6 +212,21 @@ export function NinjaOneCapitalCityR3({
             ? "url(#ninjaone-capital-city-r3-registered-detail-cutout)"
             : undefined}
           opacity={tier === "close" ? 1 : 0.48}
+          preserveAspectRatio="none"
+          width={width}
+        />
+      ) : null}
+      {centralArchitectureDetailVisible ? (
+        <image
+          className="ninjaone-capital-city__r3-architecture-detail"
+          data-city-asset-id="CFX02"
+          data-city-child-layer="L4_4"
+          data-city-runtime-status="director-review"
+          height={height}
+          href={CITY_CENTRAL_ARCHITECTURE_DETAIL_REVIEW}
+          mask={registeredDetailVisible
+            ? "url(#ninjaone-capital-city-r3-registered-detail-cutout)"
+            : undefined}
           preserveAspectRatio="none"
           width={width}
         />
