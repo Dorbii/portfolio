@@ -231,3 +231,28 @@ Define a crisp parent-derived upper-rear cliff face or mask-based silhouette rep
 ### Exact next action
 
 Run the production build and broader free-camera water inspection, checkpoint WFX01 if clean, then add a parent-derived close-detail overlay rather than restoring overlapping full-building cutouts.
+
+## 2026-08-17 01:18 CDT
+
+### Completed work and evidence
+
+- An xHigh deterministic worker produced `CFX01-city-close-fabric-detail-r1-alpha` for `L4_4` from the accepted parent/context only. It adds microcontrast/material response rather than new buildings, roads, trees, water, or silhouette.
+- Director proof review accepted candidate B: `1448x1086` RGBA, `170,276` nonzero-alpha pixels, `17.472%` context coverage, max alpha `104`, parent-to-treated luma correlation `0.988401`, mean absolute luma shift `3.523`, and average inspected-crop edge-energy gain `21.087%`. SHA-256 is `CB02EBB9B096A5F79D690BA667B218D0ACC33730F69DEF5862EA10333C3008C2`.
+- The promoted review asset has zero pixels outside the existing context, zero overlap with registered water, zero D06 overlap, and zero overlap with the worker's dilated foliage guard. Existing L2 tree assets remain the only added city vegetation.
+- Runtime LoD mounts CFX01 under `L4_4` at `0.48` opacity for site and full authored opacity for close. It is absent at capital and sits above the parent context but below native foliage, registered detail nodes, I17, and the station. The same registered-detail cutout mask prevents it from leaking through node replacement sockets.
+- Live D06 site and close proofs passed. DOM evidence was site `WFX01,CFX01,I21` and close `WFX01,CFX01,I17,I21`; no new station seam, outline halo, tree mismatch, water repaint, or D06 collision was visible.
+- Focused CFX/R3 tests, typecheck, focused ESLint, and production build pass. Full `npm test` now passes `184/186` with `2` declared skips and `0` failures. The pre-existing build chunk-size advisory remains unchanged.
+- The full-suite runner appeared silent because the existing exhaustive camera-budget test took `134.321s`; this was classified environmental/test cost, not a regression or stale intent. A duplicate runner accidentally started during diagnosis was stopped; the observed runner completed green.
+- Created recovery checkpoint `ce22f3d` (`checkpoint: add progressive city fabric detail`).
+
+### Concerns, pivots, and tasks left
+
+- The upper rear cliff remains unresolved. LFX01-LFX05 established that translucent grading, soft native-tile warping, whole-canvas generation, and protected cavity shading cannot safely correct the flattened rear mesas. The next attempt must change source composition or use a tightly authored parent-aware replacement; do not repeat those failed methods.
+- The I21 station undercroft now exposes land/water correctly, but the overall engineered support terrace remains visually broad beside the waterfall. It is still a review representation and needs a final footprint decision before manifest promotion.
+- CFX01 improves the parent fabric but does not replace the still-missing authored lighting, shadow/contact, circulation, prop, and district-specific close cohorts.
+- I20, I21, WFX01, and CFX01 remain review-authority assets. Production manifest/builder alignment should happen only after the remaining landscape and station-footprint decisions are accepted together.
+- The train remains intentionally absent/deferred until the stationary city, land, and water composition is accepted.
+
+### Exact next action
+
+Inspect the current source-composition masks for the upper rear city cut and the I21 support footprint. Choose the smallest reversible repair that exposes native L2/L3 authority where it already exists; only commission a new xHigh asset after the exact missing geometry is isolated.
