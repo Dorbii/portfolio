@@ -297,6 +297,9 @@ test("station LoD promotes train-free I20 at capital and open-undercroft I21 at 
   assert.match(rendererSource, /I20-station-capital-cluster-no-train-r1-alpha\.png/);
   assert.match(rendererSource, /I21-station-undercroft-open-r1-alpha\.png/);
   assert.doesNotMatch(rendererSource, /I18-station-site-base-no-train-r1-alpha\.png/);
+  assert.match(rendererSource, /height:\s*587\s*\*\s*0\.82/);
+  assert.match(rendererSource, /width:\s*783\s*\*\s*0\.82/);
+  assert.match(rendererSource, /D06_STATION_REVIEW_SCALE\s*=\s*0\.82/);
 
   const [capital, capitalSource, siteClose, siteCloseSource] = await Promise.all([
     rgba("/career-world/capitals/ninjaone/city-r3/_review/I20-station-capital-cluster-no-train-r1-alpha.png"),

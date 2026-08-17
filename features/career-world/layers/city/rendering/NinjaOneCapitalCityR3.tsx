@@ -28,10 +28,10 @@ const D06_CAPITAL_REVIEW_BASE = Object.freeze({
 const D06_SITE_CLOSE_REVIEW_BASE = Object.freeze({
   anchorX: 1056.5,
   assetId: "I21",
-  height: 587 * 0.9,
+  height: 587 * 0.82,
   path: "/career-world/capitals/ninjaone/city-r3/_review/I21-station-undercroft-open-r1-alpha.png",
-  scale: 0.9,
-  width: 783 * 0.9,
+  scale: 0.82,
+  width: 783 * 0.82,
 });
 const D06_CLOSE_CONTEXT =
   "/career-world/capitals/ninjaone/city-nodes-r2/close/infrastructure/I17-station-close-civic-overlay-r1-alpha.png";
@@ -41,7 +41,7 @@ const CITY_UPPER_REAR_RIDGE_UNDERLAY_REVIEW =
   "/career-world/capitals/ninjaone/city-r3/_review/LFX06-upper-rear-native-ridge-underlay-r1-alpha.png";
 const CITY_CLOSE_FABRIC_DETAIL_REVIEW =
   "/career-world/capitals/ninjaone/city-r3/_review/CFX01-city-close-fabric-detail-r1-alpha.png";
-const D06_STATION_REVIEW_SCALE = 0.9;
+const D06_STATION_REVIEW_SCALE = 0.82;
 const D06_STATION_CLOSE_WIDTH = 846 * D06_STATION_REVIEW_SCALE;
 const D06_STATION_CLOSE_HEIGHT = 564 * D06_STATION_REVIEW_SCALE;
 
