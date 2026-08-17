@@ -21,8 +21,6 @@ const D06_REVIEW_BASE =
   "/career-world/capitals/ninjaone/city-r3/_review/I18-station-site-base-no-train-r1-alpha.png";
 const D06_CLOSE_CONTEXT =
   "/career-world/capitals/ninjaone/city-nodes-r2/close/infrastructure/I17-station-close-civic-overlay-r1-alpha.png";
-const UPPER_CAPITAL_REAR_CLIFF_REVIEW =
-  "/career-world/capitals/ninjaone/city-r3/_review/LFX01-upper-capital-rear-cliff-transition-r1-alpha.png";
 const D06_STATION_REVIEW_SCALE = 0.9;
 const D06_STATION_BASE_WIDTH = 783 * D06_STATION_REVIEW_SCALE;
 const D06_STATION_BASE_HEIGHT = 587 * D06_STATION_REVIEW_SCALE;
@@ -48,10 +46,6 @@ export function NinjaOneCapitalCityR3({
   const waterInteractionVisible = isEnvironmentLayerEffectivelyVisible(
     visibility,
     "L4_0",
-  );
-  const cityLandFixVisible = isEnvironmentLayerEffectivelyVisible(
-    visibility,
-    "L4_1",
   );
   const transportationVisible = isEnvironmentLayerEffectivelyVisible(
     visibility,
@@ -131,18 +125,6 @@ export function NinjaOneCapitalCityR3({
           data-city-child-layer="L4_0"
           height={height}
           href={NINJAONE_CAPITAL_CITY_R3_WATER_INTERACTION.path}
-          preserveAspectRatio="none"
-          width={width}
-        />
-      ) : null}
-      {cityLandFixVisible ? (
-        <image
-          className="ninjaone-capital-city__r3-image"
-          data-city-asset-id="LFX01"
-          data-city-child-layer="L4_1"
-          data-city-runtime-status="director-review"
-          height={height}
-          href={UPPER_CAPITAL_REAR_CLIFF_REVIEW}
           preserveAspectRatio="none"
           width={width}
         />

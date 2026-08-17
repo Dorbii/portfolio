@@ -154,3 +154,12 @@ test("close city foliage reuses the registered L2 native conifer atlases", async
     assert.ok(instance.evidence.vegetationFraction >= 0.65);
   }
 });
+
+test("the rejected LFX01 rear-cliff candidate is not mounted at runtime", async () => {
+  const rendererSource = await readFile(new URL(
+    "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
+    import.meta.url,
+  ), "utf8");
+
+  assert.doesNotMatch(rendererSource, /LFX01|upper-capital-rear-cliff-transition-r1-alpha/);
+});
