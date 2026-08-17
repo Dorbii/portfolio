@@ -164,20 +164,20 @@ test("the rejected LFX01 rear-cliff candidate is not mounted at runtime", async 
   assert.doesNotMatch(rendererSource, /LFX01|upper-capital-rear-cliff-transition-r1-alpha/);
 });
 
-test("station LoD promotes train-free I20 at capital and narrowed I19 at site and close", async () => {
+test("station LoD promotes train-free I20 at capital and open-undercroft I21 at site and close", async () => {
   const rendererSource = await readFile(new URL(
     "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
     import.meta.url,
   ), "utf8");
   assert.match(rendererSource, /tier === "capital"\s*\? D06_CAPITAL_REVIEW_BASE/);
   assert.match(rendererSource, /I20-station-capital-cluster-no-train-r1-alpha\.png/);
-  assert.match(rendererSource, /I19-station-support-base-narrow-r1-alpha\.png/);
+  assert.match(rendererSource, /I21-station-undercroft-open-r1-alpha\.png/);
   assert.doesNotMatch(rendererSource, /I18-station-site-base-no-train-r1-alpha\.png/);
 
   const [capital, capitalSource, siteClose, siteCloseSource] = await Promise.all([
     rgba("/career-world/capitals/ninjaone/city-r3/_review/I20-station-capital-cluster-no-train-r1-alpha.png"),
     rgba("/career-world/capitals/ninjaone/city-nodes-r2/capital/infrastructure/I13-station-capital-cluster-r1-alpha.png"),
-    rgba("/career-world/capitals/ninjaone/city-r3/_review/I19-station-support-base-narrow-r1-alpha.png"),
+    rgba("/career-world/capitals/ninjaone/city-r3/_review/I21-station-undercroft-open-r1-alpha.png"),
     rgba("/career-world/capitals/ninjaone/city-r3/_review/I18-station-site-base-no-train-r1-alpha.png"),
   ]);
   assert.deepEqual([capital.info.width, capital.info.height], [384, 191]);
@@ -199,5 +199,5 @@ test("station LoD promotes train-free I20 at capital and narrowed I19 at site an
   }
   assert.equal(capitalAlphaDifferences, 0);
   assert.equal(siteCloseAlphaExpansion, 0);
-  assert.equal(siteCloseAlphaReduction, 31_390);
+  assert.equal(siteCloseAlphaReduction, 38_927);
 });

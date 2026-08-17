@@ -164,3 +164,25 @@ Run cold D06 site and close proofs with the 0.9 station footprint, compare nativ
 ### Exact next action
 
 Inspect the I19 station/water transition in free-camera close views, then either accept the conservative support repair for this checkpoint or keep it quarantined and define a tighter geometry-only revision before manifest promotion.
+
+## 2026-08-16 23:52 CDT
+
+### Completed work and evidence
+
+- Free-camera close inspection rejected I19 as the final site/close representation. Although six spans exposed native water, five large opaque near-black arch interiors remained and read as empty black pockets.
+- Layer isolation established ownership: disabling `L4_0` did not remove the pockets, while disabling the whole city layer exposed continuous authoritative L2 land and L3 water beneath them. The remaining defect is therefore I19 alpha, not missing base geography or water art.
+- An xHigh worker produced the bounded alpha-only I21 candidate without invoking ImageGen. Director asset checks pass: `1448x1086` RGBA, transparent corners, `7,537` additional alpha reductions across five approved undercroft cavities, zero alpha expansion, zero changes outside the ROI, zero retained-visible RGB changes, SHA-256 `58AD954173F51D210F4696AED7C05F26258941F1B5D1098E3DDEFF38518CDB70`.
+- I21 was copied byte-for-byte into `_review` and provisionally routed at site/close. Capital remains I20 and the train remains absent/deferred.
+- Runtime QA passed at the exact free-close station camera: the five previously opaque cavities now expose the continuous native rock and river without clipping masonry or introducing a new alpha seam. Remaining dark openings align with structural recesses rather than the rejected black-pocket pattern.
+- Fixed proof routing remains exclusive: D06 site mounts `I21`; D06 close mounts `I21,I17`; both suppress L4_6 foliage and free-detail cohorts.
+- Focused R3/LoD tests pass `20/20`; typecheck, focused ESLint, and the production build pass. The build retains only the pre-existing chunk-size advisory. The last full-suite result remains the pre-I21 `182/184` pass with `2` declared skips and `0` failures.
+
+### Concerns, pivots, and tasks left
+
+- I21 is accepted as the current review-path site/close representation. It is not yet manifest-promoted into the production asset authority; that remains coupled to the broader station-cohort acceptance pass.
+- The upper rear cliff land fix remains unresolved. LFX01 was ineffective and LFX02 failed its generation gates; the next approach must be a tighter native-land/material repair.
+- Parent close-detail softness and missing additive texture, lighting, contact/shadow, circulation/fabric, prop, district, and city-water-effect cohorts remain open.
+
+### Exact next action
+
+Checkpoint the accepted I21 review routing, then address the upper rear cliff with a materially tighter native-land repair before adding close-detail cohorts.

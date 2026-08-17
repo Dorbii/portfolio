@@ -27,9 +27,9 @@ const D06_CAPITAL_REVIEW_BASE = Object.freeze({
 });
 const D06_SITE_CLOSE_REVIEW_BASE = Object.freeze({
   anchorX: 1056.5,
-  assetId: "I19",
+  assetId: "I21",
   height: 587 * 0.9,
-  path: "/career-world/capitals/ninjaone/city-r3/_review/I19-station-support-base-narrow-r1-alpha.png",
+  path: "/career-world/capitals/ninjaone/city-r3/_review/I21-station-undercroft-open-r1-alpha.png",
   scale: 0.9,
   width: 783 * 0.9,
 });
