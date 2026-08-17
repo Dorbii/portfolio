@@ -151,6 +151,46 @@ test("CFX01 adds parent-derived fabric detail only at site and close", async () 
   assert.equal(d06Overlap, 0);
 });
 
+test("LFX06 recesses only live land below the city context", async () => {
+  const rendererSource = await readFile(new URL(
+    "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
+    import.meta.url,
+  ), "utf8");
+  assert.match(rendererSource, /visibility,\s*"L4_1"/);
+  assert.match(rendererSource, /LFX06-upper-rear-native-ridge-underlay-r1-alpha\.png/);
+  assert.match(rendererSource, /data-city-asset-id="LFX06"/);
+  assert.match(rendererSource, /data-city-child-layer="L4_1"/);
+
+  const [candidate, landMask, waterMask] = await Promise.all([
+    rgba("/career-world/capitals/ninjaone/city-r3/_review/LFX06-upper-rear-native-ridge-underlay-r1-alpha.png"),
+    grayscale("../art-source/career-world/ninjaone-capital/city-r3/authority/live-land-authority-mask-r1.png"),
+    grayscale("../art-source/career-world/ninjaone-capital/city-r3/authority/live-inland-water-authority-mask-r1.png"),
+  ]);
+  assert.deepEqual([candidate.info.width, candidate.info.height], [1448, 1086]);
+
+  let alphaCount = 0;
+  let maximumAlpha = 0;
+  let outsideRoi = 0;
+  let outsideLand = 0;
+  let waterOverlap = 0;
+  for (let index = 0; index < candidate.info.width * candidate.info.height; index += 1) {
+    const alpha = candidate.data[index * 4 + 3];
+    if (alpha === 0) continue;
+    alphaCount += 1;
+    maximumAlpha = Math.max(maximumAlpha, alpha);
+    const x = index % candidate.info.width;
+    const y = Math.floor(index / candidate.info.width);
+    if (x < 220 || x >= 740 || y < 20 || y >= 260) outsideRoi += 1;
+    if (landMask.data[index] === 0) outsideLand += 1;
+    if (waterMask.data[index] > 0) waterOverlap += 1;
+  }
+  assert.equal(alphaCount, 52_821);
+  assert.equal(maximumAlpha, 196);
+  assert.equal(outsideRoi, 0);
+  assert.equal(outsideLand, 0);
+  assert.equal(waterOverlap, 0);
+});
+
 test("capital context clears D06 for atomic replacement and never repaints registered water", async () => {
   const [context, composite, d06Mask, waterMask] = await Promise.all([
     rgba(NINJAONE_CAPITAL_CITY_R3_CONTEXT.path),
