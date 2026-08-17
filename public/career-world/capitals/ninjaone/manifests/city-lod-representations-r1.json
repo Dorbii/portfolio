@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/capitals/ninjaone/city-lod-representations@r1",
+  "status": "runtime-awaiting-fixed-sequence-visual-acceptance",
+  "authority": {
+    "geographyOwnership": "none",
+    "registrationArtboard": [
+      1448,
+      1086
+    ],
+    "representationPolicy": "world-marker-territory-proxy-district-exclusive-incremental-migration"
+  },
+  "routing": {
+    "capital": "P01-unconverted-context-with-D06-cutout-plus-I13-D06-composite",
+    "close": "P01-unconverted-context-with-D06-cutout-plus-I16-full-resolution-D06-base-plus-I17-close-civic-overlay",
+    "site": "P01-unconverted-context-with-D06-cutout-plus-I16-D06-site-composite",
+    "territory": "P01-only",
+    "world": "interface-marker-only"
+  },
+  "representations": [
+    {
+      "id": "P01",
+      "label": "NinjaOne Capital distant whole-city proxy",
+      "representationClass": "whole-city-proxy",
+      "tier": "territory",
+      "source": {
+        "dimensions": [
+          1386,
+          1024
+        ],
+        "fullAlphaPath": "art-source/career-world/ninjaone-capital/city-nodes-r2/proxies/P01-territory-city-proxy-r1-alpha-full.png",
+        "path": "art-source/career-world/ninjaone-capital/city-nodes-r2/proxies/P01-territory-city-proxy-r1-alpha.png",
+        "sha256": "1cafb9ac54fb5c8af6bcfd2c423cc6c0d6694697c321a18caa47e800490de471"
+      },
+      "deliveries": {
+        "context": {
+          "decodedBytes": 3145728,
+          "dimensions": [
+            1024,
+            768
+          ],
+          "encodedBytes": 939745,
+          "path": "/career-world/capitals/ninjaone/city-representations/context/P01-city-context-with-D06-cutout-r1-alpha.png",
+          "sha256": "5fb16f885d5e3fd848071e861cd22b83bc585b669e0c8298c2fc27c459a06c75"
+        },
+        "territory": {
+          "decodedBytes": 786432,
+          "dimensions": [
+            512,
+            384
+          ],
+          "encodedBytes": 283383,
+          "path": "/career-world/capitals/ninjaone/city-representations/territory/P01-territory-city-proxy-r1-alpha.png",
+          "sha256": "25adc75d1205b157663ce226d8fbcfaaf3c762d1e959bfb6b6425005db7ad0dd"
+        }
+      },
+      "registration": {
+        "artboard": [
+          1448,
+          1086
+        ],
+        "bounds": {
+          "height": 1024,
+          "left": 34,
+          "top": 40,
+          "width": 1386
+        },
+        "method": "full-alpha-trim-offset-preserved"
+      },
+      "presentation": {
+        "contextIntent": "cohesive-unconverted-city-context-without-D06-double-render",
+        "contextOpacity": 0.86,
+        "territoryIntent": "small-readable-distant-city-mass-over-locked-L1-L3",
+        "territoryOpacity": 0.82,
+        "territoryScale": 0.46,
+        "territoryScaleAnchor": [
+          984.64,
+          776.49
+        ]
+      },
+      "replacedDistricts": [
+        {
+          "districtId": "D06",
+          "exclusionMask": "/career-world/capitals/ninjaone/city-nodes-r2/proof/d06/station-rail-mask.png",
+          "maskBounds": {
+            "height": 290,
+            "left": 665,
+            "top": 796,
+            "width": 783
+          },
+          "replacementByTier": {
+            "capital": "I13",
+            "close": "I16+I17",
+            "site": "I16"
+          }
+        }
+      ]
+    }
+  ]
+}

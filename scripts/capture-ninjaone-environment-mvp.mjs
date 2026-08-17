@@ -17,7 +17,7 @@ import {
 } from "./lib/ninjaone-environment-mvp-verification.mjs";
 
 const DEFAULT_URL =
-  "http://127.0.0.1:4173/?view=ninjaone-capital-mvp";
+  "http://127.0.0.1:4173/?view=ninjaone-capital-city-layer";
 const DEFAULT_OUTPUT =
   ".codex-tmp/gauntlet/ninjaone-mvp-20260807-01/proof/runtime-capture-r1/evidence.json";
 const DEFAULT_VIEWPORT = Object.freeze({ height: 900, width: 1440 });
@@ -66,7 +66,7 @@ function parseViewport(value = `${DEFAULT_VIEWPORT.width}x${DEFAULT_VIEWPORT.hei
   return Object.freeze(viewport);
 }
 
-function delay(milliseconds) {
+export function delay(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
@@ -110,7 +110,7 @@ function classifyBrowserDiagnostics(consoleErrors, networkErrors, automationDiag
   });
 }
 
-class CdpConnection {
+export class CdpConnection {
   constructor(socket) {
     this.nextId = 1;
     this.pending = new Map();
@@ -164,7 +164,7 @@ class CdpConnection {
   }
 }
 
-function browserCandidates() {
+export function browserCandidates() {
   if (process.platform === "win32") {
     return [
       path.join(process.env.PROGRAMFILES ?? "", "Google/Chrome/Application/chrome.exe"),
@@ -184,7 +184,7 @@ function browserCandidates() {
   ];
 }
 
-async function firstAccessible(paths) {
+export async function firstAccessible(paths) {
   for (const candidate of paths.filter(Boolean)) {
     try {
       await access(candidate);
@@ -208,7 +208,7 @@ async function waitForFile(file, timeoutMilliseconds = 15_000) {
   throw new Error(`Timed out waiting for ${file}.`);
 }
 
-async function launchBrowser({ executable, viewport }) {
+export async function launchBrowser({ executable, viewport }) {
   const profile = await mkdtemp(path.join(os.tmpdir(), "ninjaone-mvp-capture-"));
   const child = spawn(executable, [
     "--headless=new",
@@ -236,7 +236,7 @@ async function launchBrowser({ executable, viewport }) {
   }
 }
 
-async function resolveCdpWebSocket(cdpUrl) {
+export async function resolveCdpWebSocket(cdpUrl) {
   const response = await fetch(new URL("/json/version", cdpUrl));
   if (!response.ok) throw new Error(`CDP discovery failed with ${response.status}.`);
   const version = await response.json();
@@ -246,7 +246,7 @@ async function resolveCdpWebSocket(cdpUrl) {
   return version.webSocketDebuggerUrl;
 }
 
-async function evaluate(connection, sessionId, expression, awaitPromise = true) {
+export async function evaluate(connection, sessionId, expression, awaitPromise = true) {
   const result = await connection.send("Runtime.evaluate", {
     awaitPromise,
     expression,
@@ -286,7 +286,7 @@ const CAMERA_EXPRESSION = `(() => {
   };
 })()`;
 
-async function waitFor(connection, sessionId, predicate, label, timeout = 20_000) {
+export async function waitFor(connection, sessionId, predicate, label, timeout = 20_000) {
   const deadline = Date.now() + timeout;
   let last = null;
   while (Date.now() < deadline) {
@@ -307,7 +307,7 @@ function cameraMatches(actual, expected) {
     ));
 }
 
-async function readCamera(connection, sessionId) {
+export async function readCamera(connection, sessionId) {
   return evaluate(connection, sessionId, CAMERA_EXPRESSION);
 }
 
@@ -422,7 +422,7 @@ async function waitForNativeReady(connection, sessionId) {
   }
 }
 
-async function screenshot(connection, sessionId, file, clip) {
+export async function screenshot(connection, sessionId, file, clip) {
   const result = await connection.send("Page.captureScreenshot", {
     captureBeyondViewport: false,
     clip,
@@ -436,7 +436,7 @@ function relativePath(fromDirectory, file) {
   return path.relative(fromDirectory, file).replaceAll(path.sep, "/");
 }
 
-async function navigate(connection, sessionId, url) {
+export async function navigate(connection, sessionId, url) {
   await connection.send("Page.navigate", { url }, sessionId);
   await waitFor(connection, sessionId, async () => (
     evaluate(connection, sessionId, `Boolean(document.querySelector('.career-world__viewport'))`)

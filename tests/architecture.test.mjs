@@ -27,7 +27,7 @@ test("composition and environment registries expose unique ordered layer contrac
   assert.ok(CAREER_WORLD_LAYER_ORDER.includes("ocean"));
   assert.ok(CAREER_WORLD_LAYER_ORDER.includes("terrain"));
   assert.equal(CAREER_WORLD_LAYER_ORDER.includes("environment"), false);
-  assert.equal(ENVIRONMENT_LAYER_DEFINITIONS.length, 11);
+  assert.equal(ENVIRONMENT_LAYER_DEFINITIONS.length, 20);
   assert.equal(
     ENVIRONMENT_LAYER_DEFINITIONS.some(({ id }) => id === "L3_3"),
     false,
@@ -40,7 +40,7 @@ test("composition and environment registries expose unique ordered layer contrac
     ENVIRONMENT_LAYER_DEFINITIONS
       .filter(({ parentId }) => parentId)
       .map(({ parentId }) => parentId)
-      .every((parentId) => ["L1", "L2", "L3"].includes(parentId)),
+      .every((parentId) => ["L1", "L2", "L3", "L4"].includes(parentId)),
     true,
   );
 });
@@ -213,9 +213,10 @@ test("composition resolves semantic zoom once and passes it downward", async () 
   );
 
   assert.equal(
-    (scene.match(/resolveDetailState\(/g) ?? []).length,
+    (scene.match(/resolveNinjaOneCapitalDetailState\(/g) ?? []).length,
     1,
   );
+  assert.doesNotMatch(scene, /\bresolveDetailState\(/);
   assert.match(scene, /DETAIL_POLICY\.cameraMinimumSpan/);
   assert.doesNotMatch(scene, /PHASE_3_MINIMUM_SPAN/);
   assert.doesNotMatch(waterCanvas, /resolveDetailState/);
@@ -263,14 +264,20 @@ test("camera-driven DOM and water layers update before the same paint", async ()
   )?.[0] ?? "";
   assert.match(
     wheelHandler,
-    /queueCamera\(zoomCameraViewAt/,
+    /const candidate = zoomCameraViewAt\([\s\S]*?queueCamera\(candidate\)/,
+    "Free-camera wheel input must enqueue the same normalized zoom candidate at every anchor.",
   );
   assert.match(
     wheelHandler,
-    /const scale = wheelZoomScale\(event\.deltaY\)[\s\S]*zoomCameraViewAt\(\s*camera,/,
+    /const scale = wheelZoomScale\(event\.deltaY\)[\s\S]*zoomCameraViewAt\(\s*publishedCamera,/,
     "Wheel bursts must compose from the rendered camera with bounded scale.",
   );
   assert.doesNotMatch(wheelHandler, /zoomCameraViewAt\(\s*cameraRef\.current/);
+  assert.doesNotMatch(
+    wheelHandler,
+    /ninjaOneCapitalCityDistrictAtWorldPoint|selectedCityDistrict|capitalFloor/,
+    "District proof routing must not intercept ordinary free-camera zoom.",
+  );
   assert.match(scene, /MAX_WHEEL_ZOOM_SCALE = 1\.28/);
   assert.doesNotMatch(
     wheelHandler,

@@ -1235,7 +1235,7 @@ export async function auditFoliageIsolationEvidence({
     || producerUrl.protocol !== "http:"
     || !new Set(["localhost", "127.0.0.1", "[::1]"]).has(producerUrl.hostname)
     || producerUrl.pathname !== "/"
-    || producerUrl.searchParams.get("view") !== "ninjaone-capital-mvp"
+    || producerUrl.searchParams.get("view") !== "ninjaone-capital-city-layer"
     || !Number.isFinite(Date.parse(evidence?.producer?.capturedAt ?? ""))
   ) failures.push("foliage_isolation.producer_contract");
   try {

@@ -1,0 +1,367 @@
+import representationManifest from "../../../../../public/career-world/capitals/ninjaone/manifests/city-lod-representations-r1.json" with { type: "json" };
+import {
+  constrainCameraViewToBounds,
+  WORLD_CAMERA_VIEW,
+  type CameraView,
+  type Pair,
+} from "../../../shared/camera.ts";
+import {
+  DETAIL_POLICY,
+  resolveDetailState,
+  type DetailState,
+  type DetailTierId,
+} from "../../../shared/lod/policy.ts";
+import {
+  NINJAONE_ENVIRONMENT_WORLD_ORIGIN,
+  NINJAONE_ENVIRONMENT_WORLD_SPAN,
+} from "../../terrain/model/ninjaOneEnvironmentProof.ts";
+
+export type NinjaOneCapitalCityDistrictId = "D06";
+
+export type NinjaOneCapitalCityRepresentationMode =
+  | "capital-incremental-context"
+  | "d06-close-composite"
+  | "d06-site-composite"
+  | "territory-proxy"
+  | "world-marker";
+
+export type NinjaOneCapitalCityProofViewId =
+  | "capital"
+  | "d06-close"
+  | "d06-site"
+  | "territory"
+  | "world";
+
+interface ProxyDelivery {
+  readonly decodedBytes: number;
+  readonly dimensions: Pair;
+  readonly encodedBytes: number;
+  readonly path: string;
+  readonly sha256: string;
+}
+
+interface WholeCityProxyRepresentation {
+  readonly deliveries: {
+    readonly context: ProxyDelivery;
+    readonly territory: ProxyDelivery;
+  };
+  readonly id: "P01";
+  readonly label: string;
+  readonly presentation: {
+    readonly contextIntent: string;
+    readonly contextOpacity: number;
+    readonly territoryIntent: string;
+    readonly territoryOpacity: number;
+    readonly territoryScale: number;
+    readonly territoryScaleAnchor: Pair;
+  };
+  readonly registration: {
+    readonly artboard: Pair;
+    readonly bounds: {
+      readonly height: number;
+      readonly left: number;
+      readonly top: number;
+      readonly width: number;
+    };
+    readonly method: string;
+  };
+  readonly replacedDistricts: readonly {
+    readonly districtId: NinjaOneCapitalCityDistrictId;
+    readonly exclusionMask: string;
+    readonly maskBounds: {
+      readonly height: number;
+      readonly left: number;
+      readonly top: number;
+      readonly width: number;
+    };
+    readonly replacementByTier: Readonly<Record<"capital" | "close" | "site", string>>;
+  }[];
+  readonly representationClass: "whole-city-proxy";
+  readonly source: {
+    readonly dimensions: Pair;
+    readonly fullAlphaPath: string;
+    readonly path: string;
+    readonly sha256: string;
+  };
+  readonly tier: "territory";
+}
+
+function pair(value: readonly number[], label: string): Pair {
+  if (value.length !== 2 || value.some((coordinate) => !Number.isFinite(coordinate))) {
+    throw new TypeError(`${label} must contain two finite numbers.`);
+  }
+  return Object.freeze([value[0], value[1]] as Pair);
+}
+
+function delivery(
+  value: Omit<ProxyDelivery, "dimensions"> & { readonly dimensions: readonly number[] },
+  label: string,
+): ProxyDelivery {
+  return Object.freeze({
+    ...value,
+    dimensions: pair(value.dimensions, `${label}.dimensions`),
+  });
+}
+
+const rawProxy = representationManifest.representations[0] as unknown as Omit<
+  WholeCityProxyRepresentation,
+  "deliveries" | "registration" | "source"
+> & {
+  readonly deliveries: {
+    readonly context: Omit<ProxyDelivery, "dimensions"> & { readonly dimensions: readonly number[] };
+    readonly territory: Omit<ProxyDelivery, "dimensions"> & { readonly dimensions: readonly number[] };
+  };
+  readonly registration: Omit<WholeCityProxyRepresentation["registration"], "artboard"> & {
+    readonly artboard: readonly number[];
+  };
+  readonly source: Omit<WholeCityProxyRepresentation["source"], "dimensions"> & {
+    readonly dimensions: readonly number[];
+  };
+};
+
+export const NINJAONE_CAPITAL_CITY_REPRESENTATION_AUTHORITY_ID =
+  representationManifest.id;
+export const NINJAONE_CAPITAL_CITY_WHOLE_CITY_PROXY:
+WholeCityProxyRepresentation = Object.freeze({
+  ...rawProxy,
+  deliveries: Object.freeze({
+    context: delivery(rawProxy.deliveries.context, "P01.context"),
+    territory: delivery(rawProxy.deliveries.territory, "P01.territory"),
+  }),
+  registration: Object.freeze({
+    ...rawProxy.registration,
+    artboard: pair(rawProxy.registration.artboard, "P01.registration.artboard"),
+    bounds: Object.freeze({ ...rawProxy.registration.bounds }),
+  }),
+  replacedDistricts: Object.freeze(rawProxy.replacedDistricts.map((district) => Object.freeze({
+    ...district,
+    maskBounds: Object.freeze({ ...district.maskBounds }),
+    replacementByTier: Object.freeze({ ...district.replacementByTier }),
+  }))),
+  presentation: Object.freeze({
+    ...rawProxy.presentation,
+    territoryScaleAnchor: pair(
+      rawProxy.presentation.territoryScaleAnchor,
+      "P01.presentation.territoryScaleAnchor",
+    ),
+  }),
+  source: Object.freeze({
+    ...rawProxy.source,
+    dimensions: pair(rawProxy.source.dimensions, "P01.source.dimensions"),
+  }),
+});
+
+if (
+  representationManifest.schemaVersion !== 1
+  || representationManifest.status !== "runtime-awaiting-fixed-sequence-visual-acceptance"
+  || representationManifest.authority.geographyOwnership !== "none"
+  || representationManifest.authority.representationPolicy
+    !== "world-marker-territory-proxy-district-exclusive-incremental-migration"
+  || representationManifest.representations.length !== 1
+  || NINJAONE_CAPITAL_CITY_WHOLE_CITY_PROXY.id !== "P01"
+  || NINJAONE_CAPITAL_CITY_WHOLE_CITY_PROXY.representationClass !== "whole-city-proxy"
+  || NINJAONE_CAPITAL_CITY_WHOLE_CITY_PROXY.registration.artboard.join(",") !== "1448,1086"
+  || NINJAONE_CAPITAL_CITY_WHOLE_CITY_PROXY.presentation.territoryScale <= 0
+  || NINJAONE_CAPITAL_CITY_WHOLE_CITY_PROXY.presentation.territoryScale >= 1
+  || NINJAONE_CAPITAL_CITY_WHOLE_CITY_PROXY.replacedDistricts.length !== 1
+  || NINJAONE_CAPITAL_CITY_WHOLE_CITY_PROXY.replacedDistricts[0].districtId !== "D06"
+) {
+  throw new TypeError("NinjaOne Capital representation authority is invalid.");
+}
+
+const D06_SELECTION_LOCAL_BOUNDS = Object.freeze({
+  ...NINJAONE_CAPITAL_CITY_WHOLE_CITY_PROXY.replacedDistricts[0].maskBounds,
+});
+
+export const NINJAONE_CAPITAL_CITY_PROOF_LOCAL_WIDTHS = Object.freeze({
+  "d06-close": 880,
+  "d06-site": 1080,
+});
+
+function registeredD06ParentCrop(localWidth: number): CameraView {
+  const localHeight = localWidth * 0.75;
+  const span = Object.freeze([
+    localWidth / 1448 * NINJAONE_ENVIRONMENT_WORLD_SPAN[0],
+    localHeight / 1086 * NINJAONE_ENVIRONMENT_WORLD_SPAN[1],
+  ] as Pair);
+  return Object.freeze({
+    origin: Object.freeze([
+      NINJAONE_ENVIRONMENT_WORLD_ORIGIN[0]
+        + (1448 - localWidth) / 1448 * NINJAONE_ENVIRONMENT_WORLD_SPAN[0],
+      NINJAONE_ENVIRONMENT_WORLD_ORIGIN[1]
+        + (1086 - localHeight) / 1086 * NINJAONE_ENVIRONMENT_WORLD_SPAN[1],
+    ] as Pair),
+    span,
+  });
+}
+
+export const NINJAONE_CAPITAL_CITY_PROOF_CAMERAS:
+Readonly<Record<NinjaOneCapitalCityProofViewId, CameraView>> = Object.freeze({
+  capital: Object.freeze({
+    origin: NINJAONE_ENVIRONMENT_WORLD_ORIGIN,
+    span: NINJAONE_ENVIRONMENT_WORLD_SPAN,
+  }),
+  "d06-close": registeredD06ParentCrop(
+    NINJAONE_CAPITAL_CITY_PROOF_LOCAL_WIDTHS["d06-close"],
+  ),
+  "d06-site": registeredD06ParentCrop(
+    NINJAONE_CAPITAL_CITY_PROOF_LOCAL_WIDTHS["d06-site"],
+  ),
+  territory: Object.freeze({
+    origin: Object.freeze([0, 0] as Pair),
+    span: Object.freeze([0.72, 0.72] as Pair),
+  }),
+  world: WORLD_CAMERA_VIEW,
+});
+
+export const NINJAONE_CAPITAL_CITY_PROOF_TIERS:
+Readonly<Record<NinjaOneCapitalCityProofViewId, DetailTierId>> = Object.freeze({
+  capital: "capital",
+  "d06-close": "close",
+  "d06-site": "site",
+  territory: "territory",
+  world: "world",
+});
+
+export const NINJAONE_CAPITAL_CITY_DETAIL_POLICY = Object.freeze({
+  closeAssetPreloadSpan: 0.235,
+  siteAssetPreloadSpan: 0.31,
+  tierMaximumSpan: Object.freeze({
+    capital: 0.34,
+    close: 0.205,
+    site: 0.25,
+  }),
+  capitalToSite: Object.freeze({ startSpan: 0.285, endSpan: 0.25 }),
+  siteToClose: Object.freeze({ startSpan: 0.225, endSpan: 0.205 }),
+});
+
+function descendingSmoothstep(span: number, start: number, end: number): number {
+  const amount = Math.min(1, Math.max(0, (start - span) / (start - end)));
+  return amount * amount * (3 - 2 * amount);
+}
+
+function cameraIsCenteredInNinjaOneCapital(camera: CameraView): boolean {
+  const centerX = camera.origin[0] + camera.span[0] * 0.5;
+  const centerY = camera.origin[1] + camera.span[1] * 0.5;
+  return centerX >= NINJAONE_ENVIRONMENT_WORLD_ORIGIN[0]
+    && centerX <= NINJAONE_ENVIRONMENT_WORLD_ORIGIN[0] + NINJAONE_ENVIRONMENT_WORLD_SPAN[0]
+    && centerY >= NINJAONE_ENVIRONMENT_WORLD_ORIGIN[1]
+    && centerY <= NINJAONE_ENVIRONMENT_WORLD_ORIGIN[1] + NINJAONE_ENVIRONMENT_WORLD_SPAN[1];
+}
+
+export function resolveNinjaOneCapitalDetailState(
+  camera: CameraView,
+  requestedProofTier: DetailTierId | null = null,
+): DetailState {
+  const globalState = resolveDetailState(camera);
+  const span = Math.max(...camera.span);
+  const tierId = cameraIsCenteredInNinjaOneCapital(camera)
+    ? span <= NINJAONE_CAPITAL_CITY_DETAIL_POLICY.tierMaximumSpan.close
+      ? "close"
+      : span <= NINJAONE_CAPITAL_CITY_DETAIL_POLICY.tierMaximumSpan.site
+        ? "site"
+        : span <= NINJAONE_CAPITAL_CITY_DETAIL_POLICY.tierMaximumSpan.capital
+          ? "capital"
+          : globalState.tier.id
+    : globalState.tier.id;
+  if (requestedProofTier && requestedProofTier !== tierId) {
+    throw new TypeError(
+      `NinjaOne Capital proof tier ${requestedProofTier} disagrees with camera tier ${tierId}.`,
+    );
+  }
+  if (!cameraIsCenteredInNinjaOneCapital(camera) || tierId === "world" || tierId === "territory") {
+    return globalState;
+  }
+  const capitalToSite = descendingSmoothstep(
+    span,
+    NINJAONE_CAPITAL_CITY_DETAIL_POLICY.capitalToSite.startSpan,
+    NINJAONE_CAPITAL_CITY_DETAIL_POLICY.capitalToSite.endSpan,
+  );
+  const siteToClose = descendingSmoothstep(
+    span,
+    NINJAONE_CAPITAL_CITY_DETAIL_POLICY.siteToClose.startSpan,
+    NINJAONE_CAPITAL_CITY_DETAIL_POLICY.siteToClose.endSpan,
+  );
+  return Object.freeze({
+    ...globalState,
+    tier: resolveDetailState(camera, tierId).tier,
+    capitalToSite,
+    siteToClose,
+    renderScale:
+      DETAIL_POLICY.renderScale.world
+      + globalState.worldToTerritory * DETAIL_POLICY.renderScale.territoryGain
+      + globalState.territoryToCapital * DETAIL_POLICY.renderScale.capitalGain
+      + capitalToSite * DETAIL_POLICY.renderScale.siteGain
+      + siteToClose * DETAIL_POLICY.renderScale.closeGain,
+    shouldLoadSiteAssets:
+      span <= NINJAONE_CAPITAL_CITY_DETAIL_POLICY.siteAssetPreloadSpan,
+    shouldLoadCloseAssets:
+      span <= NINJAONE_CAPITAL_CITY_DETAIL_POLICY.closeAssetPreloadSpan,
+  });
+}
+
+const NINJAONE_ENVIRONMENT_CAMERA_BOUNDS: CameraView = Object.freeze({
+  origin: NINJAONE_ENVIRONMENT_WORLD_ORIGIN,
+  span: NINJAONE_ENVIRONMENT_WORLD_SPAN,
+});
+
+export function constrainNinjaOneCapitalCityProofCamera(
+  viewId: NinjaOneCapitalCityProofViewId,
+  candidate: CameraView,
+): CameraView {
+  const registered = NINJAONE_CAPITAL_CITY_PROOF_CAMERAS[viewId];
+  if (viewId !== "d06-site" && viewId !== "d06-close") return registered;
+  return constrainCameraViewToBounds(
+    { origin: candidate.origin, span: registered.span },
+    NINJAONE_ENVIRONMENT_CAMERA_BOUNDS,
+  );
+}
+
+export function ninjaOneCapitalCityFocusedDistrict(
+  tier: DetailTierId,
+  selectedDistrict: NinjaOneCapitalCityDistrictId | null = null,
+  forcedDistrict: NinjaOneCapitalCityDistrictId | null = null,
+): NinjaOneCapitalCityDistrictId | null {
+  if (forcedDistrict) return forcedDistrict;
+  if (tier !== "site" && tier !== "close") return null;
+  return selectedDistrict;
+}
+
+export function ninjaOneCapitalCityUsesFreeCameraDetailCohort(
+  tier: DetailTierId,
+  focusedDistrict: NinjaOneCapitalCityDistrictId | null,
+): boolean {
+  return tier === "site" && focusedDistrict === null;
+}
+
+export function ninjaOneCapitalCityDistrictAtWorldPoint(
+  worldPoint: Pair,
+): NinjaOneCapitalCityDistrictId | null {
+  const localX = (
+    (worldPoint[0] - NINJAONE_ENVIRONMENT_WORLD_ORIGIN[0])
+    / NINJAONE_ENVIRONMENT_WORLD_SPAN[0]
+  ) * 1448;
+  const localY = (
+    (worldPoint[1] - NINJAONE_ENVIRONMENT_WORLD_ORIGIN[1])
+    / NINJAONE_ENVIRONMENT_WORLD_SPAN[1]
+  ) * 1086;
+  const right = D06_SELECTION_LOCAL_BOUNDS.left + D06_SELECTION_LOCAL_BOUNDS.width;
+  const bottom = D06_SELECTION_LOCAL_BOUNDS.top + D06_SELECTION_LOCAL_BOUNDS.height;
+  return localX >= D06_SELECTION_LOCAL_BOUNDS.left
+    && localX <= right
+    && localY >= D06_SELECTION_LOCAL_BOUNDS.top
+    && localY <= bottom
+    ? "D06"
+    : null;
+}
+
+export function ninjaOneCapitalCityRepresentationMode(
+  tier: DetailTierId,
+  focusedDistrict: NinjaOneCapitalCityDistrictId | null,
+): NinjaOneCapitalCityRepresentationMode {
+  if (tier === "world") return "world-marker";
+  if (tier === "territory") return "world-marker";
+  if (tier === "site" && focusedDistrict === "D06") return "d06-site-composite";
+  if (tier === "close" && focusedDistrict === "D06") return "d06-close-composite";
+  return "capital-incremental-context";
+}

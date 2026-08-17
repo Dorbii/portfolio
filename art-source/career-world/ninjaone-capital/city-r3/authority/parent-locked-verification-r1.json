@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "parentAuthority": "C:\\Users\\Steve\\.codex\\visualizations\\2026\\08\\15\\01a00678-f18f-7332-978f-d4163cb06f66\\career-world-capital-concept-r8\\01-ninjaone-capital-wide-skill-buildings-r8.png",
+  "liveGeographyAuthority": "C:\\Users\\Steve\\.codex\\visualizations\\2026\\08\\15\\01a00678-f18f-7332-978f-d4163cb06f66\\career-world-capital-functional-assembly-r1\\01-live-land-water-base.png",
+  "canvas": {
+    "width": 1448,
+    "height": 1086
+  },
+  "districtPlateCount": 6,
+  "skillAnchorCount": 19,
+  "optionalCloseTierLandmarkNodes": [
+    "I01",
+    "I02"
+  ],
+  "selectedOutput": "11-final-with-top-overhang-art.png",
+  "topExtensionLayers": [
+    "09-top-overhang-extension-mask.png",
+    "10-top-overhang-extension-art.png"
+  ],
+  "topExtensionCaps": [
+    "T01-main-palace-cap-alpha.png",
+    "T02-statue-observatory-cap-alpha.png",
+    "T03-dojo-ridge-cap-alpha.png"
+  ],
+  "pixelReconstruction": {
+    "maxChannelDifference": 0,
+    "meanAbsoluteDifference": 0.0,
+    "exact": true
+  },
+  "parentToLiveRegistration": {
+    "uniformScale": 0.98,
+    "translateX": 20,
+    "translateY": 60,
+    "landMaskIoU": 0.8872321242804633
+  },
+  "lodContract": {
+    "capital": "baked semantic district plates",
+    "site": "district plate plus registered building nodes",
+    "close": "high-detail standalone skill and infrastructure assets"
+  }
+}

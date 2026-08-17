@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/capitals/ninjaone/city-package-authority@r4",
+  "status": "sole-city-authority",
+  "handoff": {
+    "archiveName": "career-world-capital-thread-handoff-r1.zip",
+    "archiveSha256": "bb5f06b671c8076ef72a479d98620bdd3680c1b5884f41ded946681d6fa9f6dc"
+  },
+  "selectedMaster": {
+    "packagePath": "selected-wide/11-final-with-top-overhang-art.png",
+    "sha256": "2b5449512138a6679c8dd78987dc94abd0f2f38ad0e59c926aacbcd1d6ba323a",
+    "dimensions": [1448, 1086],
+    "runtimeVisible": false
+  },
+  "liveLandWaterBase": {
+    "packagePath": "parent-authority/01-live-land-water-base.png",
+    "sha256": "344036a81b60fe0970d3d2d7ba7f1698f43b659c156beed67344e49e497738de",
+    "ownership": "L1-L3-only"
+  },
+  "registration": {
+    "sourcePath": "selected-wide/build_parent_locked_layers.py",
+    "uniformScale": 0.98,
+    "translation": [20, 60],
+    "landMaskIoU": 0.8872321242804633,
+    "skillAnchorRole": "promotion-point-with-explicit-ground-offset",
+    "worldOrigin": [0.125, 0],
+    "worldSpan": [0.25, 0.3333333333333333]
+  },
+  "runtimePolicy": {
+    "renderUnit": "individual-node",
+    "cityOwnsGeography": false,
+    "packageAssetDirectories": [
+      "skill-assets/skill-building-alpha",
+      "infrastructure-assets/alpha",
+      "city-detail-assets/alpha",
+      "city-detail-assets/alpha/foliage",
+      "city-detail-assets/alpha/microprops"
+    ],
+    "prohibitedVisibleSources": [
+      "selected-wide/D00-parent-remainder-plate.png",
+      "selected-wide/D01-upper-capital-plate.png",
+      "selected-wide/D02-dojo-ridge-plate.png",
+      "selected-wide/D03-eastern-industry-plate.png",
+      "selected-wide/D04-central-lake-terraces-plate.png",
+      "selected-wide/D05-western-skill-terraces-plate.png",
+      "selected-wide/D06-station-rail-plate.png",
+      "selected-wide/10-top-overhang-extension-art.png",
+      "selected-wide/T01-main-palace-cap-alpha.png",
+      "selected-wide/T02-statue-observatory-cap-alpha.png",
+      "selected-wide/T03-dojo-ridge-cap-alpha.png"
+    ]
+  },
+  "registeredSkillAnchors": [
+    { "assetId": "S01", "anchor": [490, 878] },
+    { "assetId": "S02", "anchor": [397, 521] },
+    { "assetId": "S03", "anchor": [348, 300] },
+    { "assetId": "S04", "anchor": [250, 506] },
+    { "assetId": "S05", "anchor": [539, 462] },
+    { "assetId": "S06", "anchor": [706, 481] },
+    { "assetId": "S07", "anchor": [980, 746] },
+    { "assetId": "S08", "anchor": [1049, 673] },
+    { "assetId": "S09", "anchor": [1118, 550] },
+    { "assetId": "S10", "anchor": [187, 834] },
+    { "assetId": "S11", "anchor": [603, 971] },
+    { "assetId": "S12", "anchor": [897, 668] },
+    { "assetId": "S13", "anchor": [1333, 354], "groundOffset": [0, 76] },
+    { "assetId": "S14", "anchor": [794, 731] },
+    { "assetId": "S15", "anchor": [285, 677] },
+    { "assetId": "S16", "anchor": [765, 330] },
+    { "assetId": "S17", "anchor": [662, 236] },
+    { "assetId": "S18", "anchor": [530, 971] },
+    { "assetId": "S19", "anchor": [495, 192], "groundOffset": [0, 20] }
+  ],
+  "registeredLandmarks": [
+    { "assetId": "I01", "anchor": [880, 350], "displayWidth": 85 },
+    { "assetId": "I02", "anchor": [1380, 480], "displayWidth": 115 }
+  ]
+}

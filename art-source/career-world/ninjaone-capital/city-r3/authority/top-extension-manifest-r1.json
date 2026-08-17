@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "canvas": {
+    "width": 1448,
+    "height": 1086
+  },
+  "combinedArt": "10-top-overhang-extension-art.png",
+  "combinedMask": "09-top-overhang-extension-mask.png",
+  "caps": [
+    {
+      "id": "T01",
+      "name": "T01-main-palace-cap",
+      "file": "T01-main-palace-cap-alpha.png",
+      "globalX": 150,
+      "globalY": 64,
+      "width": 701,
+      "height": 267,
+      "layer": "above-live-terrain-below-interactive-nodes"
+    },
+    {
+      "id": "T02",
+      "name": "T02-statue-observatory-cap",
+      "file": "T02-statue-observatory-cap-alpha.png",
+      "globalX": 713,
+      "globalY": 153,
+      "width": 368,
+      "height": 303,
+      "layer": "above-live-terrain-below-interactive-nodes"
+    },
+    {
+      "id": "T03",
+      "name": "T03-dojo-ridge-cap",
+      "file": "T03-dojo-ridge-cap-alpha.png",
+      "globalX": 1030,
+      "globalY": 260,
+      "width": 409,
+      "height": 260,
+      "layer": "above-live-terrain-below-interactive-nodes"
+    }
+  ]
+}

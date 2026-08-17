@@ -1,20 +1,25 @@
 import { WorldScene } from "../composition/WorldScene";
+import type { NinjaOneCapitalCityProofViewId } from "../layers/city";
 import "../styles/career-world.css";
 
 interface CareerWorldProps {
+  readonly cityLayerProof?: boolean;
+  readonly cityProofView?: NinjaOneCapitalCityProofViewId | null;
+  readonly cityVisualIntent?: boolean;
   readonly enableDevelopmentTools?: boolean;
   readonly enablePerformanceProbe?: boolean;
   readonly environmentProof?: boolean;
   readonly initialView?: "world" | "ninjaone-capital";
-  readonly topologyProof?: boolean;
 }
 
 export function CareerWorld({
+  cityLayerProof = false,
+  cityProofView = null,
+  cityVisualIntent = false,
   enableDevelopmentTools = false,
   enablePerformanceProbe = false,
   environmentProof = false,
   initialView = "world",
-  topologyProof = false,
 }: CareerWorldProps) {
   return (
     <main className="career-world">
@@ -29,11 +34,14 @@ export function CareerWorld({
         </p>
       </header>
       <WorldScene
+        cityLayerProof={cityLayerProof}
+        cityProofView={cityProofView}
+        cityVisualIntent={cityVisualIntent}
         enableDevelopmentTools={enableDevelopmentTools}
         enablePerformanceProbe={enablePerformanceProbe}
         environmentProof={environmentProof}
         initialView={initialView}
-        topologyProof={topologyProof}
+        key={cityProofView ?? "interactive"}
       />
     </main>
   );

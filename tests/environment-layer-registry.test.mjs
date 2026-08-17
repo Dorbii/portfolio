@@ -68,3 +68,18 @@ test("terrain detail and foliage motion are independently toggleable", () => {
     true,
   );
 });
+
+test("city children preserve their selections when the L4 authority is disabled", () => {
+  const cityDisabled = Object.freeze({
+    ...DEFAULT_ENVIRONMENT_LAYER_VISIBILITY,
+    L4: false,
+  });
+  assert.equal(cityDisabled.L4_1, true);
+  assert.equal(cityDisabled.L4_7, true);
+  assert.equal(isEnvironmentLayerEffectivelyVisible(cityDisabled, "L4_1"), false);
+  assert.equal(isEnvironmentLayerEffectivelyVisible(cityDisabled, "L4_7"), false);
+  assert.equal(
+    isEnvironmentLayerEffectivelyVisible(DEFAULT_ENVIRONMENT_LAYER_VISIBILITY, "L4_3"),
+    true,
+  );
+});

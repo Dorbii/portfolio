@@ -1,0 +1,511 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/capitals/ninjaone/city-native-foliage-reuse@r1",
+  "sourceContext": "/career-world/capitals/ninjaone/city-r3/foundation/city-context-capital-without-d06-r1-alpha.png",
+  "sourceFoliageManifestId": "career-world/capitals/ninjaone/foliage@r6",
+  "admission": {
+    "method": "registered-L2-socket-intersection-with-existing-city-vegetation-and-contact",
+    "thresholds": {
+      "alphaFraction": 0.5,
+      "baseVegetationFraction": 0.3,
+      "vegetationFraction": 0.3
+    }
+  },
+  "instances": [
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p1-1",
+      "evidence": {
+        "alphaFraction": 1,
+        "baseVegetationFraction": 0.5102339181286549,
+        "vegetationFraction": 0.36996779388083734
+      },
+      "id": "b1-native-conifer-023-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p1-2",
+      "evidence": {
+        "alphaFraction": 1,
+        "baseVegetationFraction": 0.32894736842105265,
+        "vegetationFraction": 0.31189083820662766
+      },
+      "id": "c1-native-conifer-036-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p1-3",
+      "evidence": {
+        "alphaFraction": 0.998015873015873,
+        "baseVegetationFraction": 0.5034722222222222,
+        "vegetationFraction": 0.5268389662027833
+      },
+      "id": "c1-native-conifer-038-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p1-3",
+      "evidence": {
+        "alphaFraction": 0.9236111111111112,
+        "baseVegetationFraction": 0.5617283950617284,
+        "vegetationFraction": 0.6121553884711779
+      },
+      "id": "c1-native-conifer-041-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p1-3",
+      "evidence": {
+        "alphaFraction": 0.5490196078431373,
+        "baseVegetationFraction": 0.6639344262295082,
+        "vegetationFraction": 0.5428571428571428
+      },
+      "id": "c1-native-conifer-043-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p2-3",
+      "evidence": {
+        "alphaFraction": 0.9136933461909353,
+        "baseVegetationFraction": 0.6155202821869489,
+        "vegetationFraction": 0.645910290237467
+      },
+      "id": "c1-native-conifer-044-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p1-3",
+      "evidence": {
+        "alphaFraction": 0.9804511278195489,
+        "baseVegetationFraction": 0.7473684210526316,
+        "vegetationFraction": 0.6180981595092024
+      },
+      "id": "c1-native-conifer-045-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p1-3",
+      "evidence": {
+        "alphaFraction": 1,
+        "baseVegetationFraction": 0.7407407407407407,
+        "vegetationFraction": 0.5555555555555556
+      },
+      "id": "c1-native-conifer-047-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p2-3",
+      "evidence": {
+        "alphaFraction": 0.98989898989899,
+        "baseVegetationFraction": 0.6509433962264151,
+        "vegetationFraction": 0.6887755102040817
+      },
+      "id": "c1-native-conifer-048-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p2-3",
+      "evidence": {
+        "alphaFraction": 1,
+        "baseVegetationFraction": 0.6357142857142857,
+        "vegetationFraction": 0.7007722007722008
+      },
+      "id": "c1-native-conifer-049-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p2-1",
+      "evidence": {
+        "alphaFraction": 0.9981818181818182,
+        "baseVegetationFraction": 0.5424274973147154,
+        "vegetationFraction": 0.3069216757741348
+      },
+      "id": "b1-native-conifer-052-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p2-3",
+      "evidence": {
+        "alphaFraction": 0.9968102073365231,
+        "baseVegetationFraction": 0.5357664233576642,
+        "vegetationFraction": 0.378
+      },
+      "id": "c1-native-conifer-053-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p2-3",
+      "evidence": {
+        "alphaFraction": 0.9898148148148148,
+        "baseVegetationFraction": 0.7412587412587412,
+        "vegetationFraction": 0.6772684752104771
+      },
+      "id": "c1-native-conifer-054-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p2-3",
+      "evidence": {
+        "alphaFraction": 0.985480943738657,
+        "baseVegetationFraction": 0.7302631578947368,
+        "vegetationFraction": 0.6408839779005525
+      },
+      "id": "c1-native-conifer-056-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p2-2",
+      "evidence": {
+        "alphaFraction": 1,
+        "baseVegetationFraction": 0.5625,
+        "vegetationFraction": 0.5860215053763441
+      },
+      "id": "c1-native-conifer-057-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p2-1",
+      "evidence": {
+        "alphaFraction": 0.999113867966327,
+        "baseVegetationFraction": 0.5658783783783784,
+        "vegetationFraction": 0.7498891352549889
+      },
+      "id": "b1-native-conifer-059-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p2-3",
+      "evidence": {
+        "alphaFraction": 1,
+        "baseVegetationFraction": 0.4212962962962963,
+        "vegetationFraction": 0.5833333333333334
+      },
+      "id": "c1-native-conifer-060-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p2-1",
+      "evidence": {
+        "alphaFraction": 0.9966329966329966,
+        "baseVegetationFraction": 0.7191919191919192,
+        "vegetationFraction": 0.6936936936936937
+      },
+      "id": "b1-native-conifer-061-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p2-3",
+      "evidence": {
+        "alphaFraction": 0.9986522911051213,
+        "baseVegetationFraction": 0.39540816326530615,
+        "vegetationFraction": 0.4824561403508772
+      },
+      "id": "c1-native-conifer-063-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p2-3",
+      "evidence": {
+        "alphaFraction": 0.9551630434782609,
+        "baseVegetationFraction": 0.6135265700483091,
+        "vegetationFraction": 0.662873399715505
+      },
+      "id": "c1-native-conifer-065-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p2-3",
+      "evidence": {
+        "alphaFraction": 1,
+        "baseVegetationFraction": 0.7303030303030303,
+        "vegetationFraction": 0.5495726495726496
+      },
+      "id": "c1-native-conifer-068-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p2-2",
+      "evidence": {
+        "alphaFraction": 0.5390946502057613,
+        "baseVegetationFraction": 0.30851063829787234,
+        "vegetationFraction": 0.4198473282442748
+      },
+      "id": "c1-native-conifer-071-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p2-1",
+      "evidence": {
+        "alphaFraction": 0.9635627530364372,
+        "baseVegetationFraction": 0.8292682926829268,
+        "vegetationFraction": 0.8837535014005602
+      },
+      "id": "b2-native-conifer-073-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p2-2",
+      "evidence": {
+        "alphaFraction": 0.5872235872235873,
+        "baseVegetationFraction": 0.72,
+        "vegetationFraction": 0.49581589958158995
+      },
+      "id": "c2-native-conifer-074-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p2-3",
+      "evidence": {
+        "alphaFraction": 0.9700404858299595,
+        "baseVegetationFraction": 0.3588235294117647,
+        "vegetationFraction": 0.4766277128547579
+      },
+      "id": "c2-native-conifer-077-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p2-3",
+      "evidence": {
+        "alphaFraction": 0.990183525394793,
+        "baseVegetationFraction": 0.6141975308641975,
+        "vegetationFraction": 0.5288793103448276
+      },
+      "id": "c2-native-conifer-080-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p2-1",
+      "evidence": {
+        "alphaFraction": 1,
+        "baseVegetationFraction": 0.4751552795031056,
+        "vegetationFraction": 0.46462063086104005
+      },
+      "id": "b2-native-conifer-081-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p2-2",
+      "evidence": {
+        "alphaFraction": 0.9835294117647059,
+        "baseVegetationFraction": 0.3981762917933131,
+        "vegetationFraction": 0.3492822966507177
+      },
+      "id": "c2-native-conifer-085-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p2-3",
+      "evidence": {
+        "alphaFraction": 0.9691176470588235,
+        "baseVegetationFraction": 0.6205962059620597,
+        "vegetationFraction": 0.6452959028831563
+      },
+      "id": "c2-native-conifer-087-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p2-3",
+      "evidence": {
+        "alphaFraction": 0.9579545454545455,
+        "baseVegetationFraction": 0.8,
+        "vegetationFraction": 0.7651245551601423
+      },
+      "id": "c2-native-conifer-089-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p2-3",
+      "evidence": {
+        "alphaFraction": 1,
+        "baseVegetationFraction": 0.3125,
+        "vegetationFraction": 0.41330645161290325
+      },
+      "id": "c2-native-conifer-090-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p2-1",
+      "evidence": {
+        "alphaFraction": 1,
+        "baseVegetationFraction": 0.875,
+        "vegetationFraction": 0.6025
+      },
+      "id": "b2-native-conifer-091-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p3-1",
+      "evidence": {
+        "alphaFraction": 0.9974659486854609,
+        "baseVegetationFraction": 0.33528722157092616,
+        "vegetationFraction": 0.4880914576055891
+      },
+      "id": "b2-native-conifer-099-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p3-3",
+      "evidence": {
+        "alphaFraction": 0.9993815708101422,
+        "baseVegetationFraction": 0.35147392290249435,
+        "vegetationFraction": 0.5300123762376238
+      },
+      "id": "c2-native-conifer-101-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p3-1",
+      "evidence": {
+        "alphaFraction": 0.9533333333333334,
+        "baseVegetationFraction": 0.7515923566878981,
+        "vegetationFraction": 0.48717948717948717
+      },
+      "id": "b2-native-conifer-102-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p3-3",
+      "evidence": {
+        "alphaFraction": 0.9916267942583732,
+        "baseVegetationFraction": 0.33636363636363636,
+        "vegetationFraction": 0.3486127864897467
+      },
+      "id": "c2-native-conifer-106-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p3-1",
+      "evidence": {
+        "alphaFraction": 0.9614779874213837,
+        "baseVegetationFraction": 0.875,
+        "vegetationFraction": 0.5748160261651676
+      },
+      "id": "b2-native-conifer-109-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p3-3",
+      "evidence": {
+        "alphaFraction": 0.9873737373737373,
+        "baseVegetationFraction": 0.5242718446601942,
+        "vegetationFraction": 0.34612105711849955
+      },
+      "id": "c2-native-conifer-110-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p3-2",
+      "evidence": {
+        "alphaFraction": 1,
+        "baseVegetationFraction": 0.7733333333333333,
+        "vegetationFraction": 0.418018018018018
+      },
+      "id": "b2-native-conifer-112-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p3-3",
+      "evidence": {
+        "alphaFraction": 1,
+        "baseVegetationFraction": 0.5824175824175825,
+        "vegetationFraction": 0.39819004524886875
+      },
+      "id": "c2-native-conifer-113-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p3-2",
+      "evidence": {
+        "alphaFraction": 1,
+        "baseVegetationFraction": 0.7980769230769231,
+        "vegetationFraction": 0.6253101736972705
+      },
+      "id": "b2-native-conifer-115-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p3-2",
+      "evidence": {
+        "alphaFraction": 0.9750223015165032,
+        "baseVegetationFraction": 0.6644518272425249,
+        "vegetationFraction": 0.7191216834400732
+      },
+      "id": "b2-native-conifer-117-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p3-2",
+      "evidence": {
+        "alphaFraction": 0.9388888888888889,
+        "baseVegetationFraction": 0.6746031746031746,
+        "vegetationFraction": 0.7652859960552268
+      },
+      "id": "b2-native-conifer-125-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p3-1",
+      "evidence": {
+        "alphaFraction": 0.6153846153846154,
+        "baseVegetationFraction": 0.5875,
+        "vegetationFraction": 0.375
+      },
+      "id": "b2-native-conifer-126-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p3-1",
+      "evidence": {
+        "alphaFraction": 0.9973333333333333,
+        "baseVegetationFraction": 0.4888888888888889,
+        "vegetationFraction": 0.6657754010695187
+      },
+      "id": "b2-native-conifer-133-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p3-2",
+      "evidence": {
+        "alphaFraction": 0.6461538461538462,
+        "baseVegetationFraction": 0.676923076923077,
+        "vegetationFraction": 0.638095238095238
+      },
+      "id": "b2-native-conifer-138-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p3-2",
+      "evidence": {
+        "alphaFraction": 0.9551724137931035,
+        "baseVegetationFraction": 0.6597014925373135,
+        "vegetationFraction": 0.636101083032491
+      },
+      "id": "b2-native-conifer-144-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p3-1",
+      "evidence": {
+        "alphaFraction": 0.9944331983805668,
+        "baseVegetationFraction": 0.5191570881226054,
+        "vegetationFraction": 0.6127226463104326
+      },
+      "id": "b2-native-conifer-145-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p3-2",
+      "evidence": {
+        "alphaFraction": 0.996969696969697,
+        "baseVegetationFraction": 0.7865168539325843,
+        "vegetationFraction": 0.7264437689969605
+      },
+      "id": "b2-native-conifer-148-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p3-1",
+      "evidence": {
+        "alphaFraction": 1,
+        "baseVegetationFraction": 0.4666666666666667,
+        "vegetationFraction": 0.5307692307692308
+      },
+      "id": "b2-native-conifer-150-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p3-1",
+      "evidence": {
+        "alphaFraction": 0.9973958333333334,
+        "baseVegetationFraction": 0.6145833333333334,
+        "vegetationFraction": 0.7232375979112271
+      },
+      "id": "b2-native-conifer-159-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p3-1",
+      "evidence": {
+        "alphaFraction": 1,
+        "baseVegetationFraction": 0.6535947712418301,
+        "vegetationFraction": 0.4688581314878893
+      },
+      "id": "b2-native-conifer-163-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p3-1",
+      "evidence": {
+        "alphaFraction": 1,
+        "baseVegetationFraction": 0.6973684210526315,
+        "vegetationFraction": 0.6744639376218323
+      },
+      "id": "b2-native-conifer-164-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p3-2",
+      "evidence": {
+        "alphaFraction": 1,
+        "baseVegetationFraction": 0.49282296650717705,
+        "vegetationFraction": 0.3171052631578947
+      },
+      "id": "b2-native-conifer-173-instance"
+    },
+    {
+      "atlasResourceId": "pooled-foliage-atlas-p3-2",
+      "evidence": {
+        "alphaFraction": 1,
+        "baseVegetationFraction": 0.5169230769230769,
+        "vegetationFraction": 0.3165217391304348
+      },
+      "id": "b2-native-conifer-177-instance"
+    }
+  ]
+}

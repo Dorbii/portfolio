@@ -4,6 +4,7 @@ import {
   CAMERA_MINIMUM_SPAN,
   cameraLayerStyle,
   cameraViewBox,
+  constrainCameraViewToBounds,
   interpolateCameraView,
   normalizeCameraView,
   panCameraViewByPixels,
@@ -40,6 +41,25 @@ test("zoom preserves the world point beneath the viewport anchor", () => {
 
   assert.ok(Math.abs(before[0] - after[0]) < 1e-9);
   assert.ok(Math.abs(before[1] - after[1]) < 1e-9);
+});
+
+test("zoom minimum preserves a non-square camera aspect ratio", () => {
+  const view = {
+    origin: [0.27, 0.25],
+    span: [0.05625, 0.075],
+  };
+  const zoomed = zoomCameraViewAt(view, [0.5, 0.5], 0.1);
+  assert.equal(zoomed.span[0], CAMERA_MINIMUM_SPAN);
+  assert.ok(Math.abs(zoomed.span[0] / zoomed.span[1] - 0.75) < 1e-9);
+});
+
+test("bounded cameras retain their span while clamping panning", () => {
+  const constrained = constrainCameraViewToBounds(
+    { origin: [0.4, 0.4], span: [0.05625, 0.075] },
+    { origin: [0.125, 0], span: [0.25, 1 / 3] },
+  );
+  assert.deepEqual(constrained.span, [0.05625, 0.075]);
+  assert.deepEqual(constrained.origin, [0.31875, 0.2583333333333333]);
 });
 
 test("pan and interpolation retain one normalized orthographic camera", () => {

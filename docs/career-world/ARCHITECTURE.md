@@ -35,6 +35,28 @@ toggleable sublayers instead of a generic `environment` bucket:
 | L3_1 | `inland-water/surface-motion` | Currents, ripples, flow, and reflections |
 | L3_2 | `inland-water/effects` | Foam, impact rings, mist, and spray |
 | L3_4 | `inland-water/habitat-detail` | Deterministic submerged stones, wood, reeds, and aquatic vegetation clipped to L3 geometry |
+| L4 | `city/authority` | Package-master-registered city composition without terrain or water ownership |
+| L4_1 | `city/circulation` | Roads, stairs, retaining walls, and pedestrian paths |
+| L4_2 | `city/transportation` | Rail, stations, bridges, hoists, and transport structures |
+| L4_3 | `city/primary-buildings` | Package-registered capital landmarks and skill buildings |
+| L4_4 | `city/secondary-fabric` | Housing, workshops, markets, courtyards, and service structures |
+| L4_5 | `city/street-details` | Small civic and service props registered to the city master |
+| L4_6 | `city/urban-foliage` | City vegetation registered to the city master above L2 foliage |
+| L4_7 | `city/actors-effects` | Moving trains and restrained local temporal cues |
+
+The city handoff archive is the sole authority for L4 art, composition, and
+placement. L4 consumes only the accepted L1-L3 world registration envelope; it
+does not consume the retired capital topology as city-placement authority. It
+may not publish a replacement land plate, redraw inland water, or show any
+district/full-canvas package plate at runtime. Every L4 child remains
+independently toggleable, and the root applies the shared camera tier before
+mounting individual, camera-intersecting assets. The package-selected
+`ninjaone-capital-master-r1.png` is binding for density, hierarchy, terracing,
+circulation material, and silhouette, but is never runtime-visible. The runtime
+reconstructs that read with 96 individual package-asset instances. Visible
+L4_1-L4_7 nodes are globally sorted by their isometric ground baselines after
+each independently toggleable semantic layer is filtered; repeated fabric
+nodes reuse decoded sources rather than increasing the residency cohort.
 
 Coastline is an interface between land geometry and water behavior, not a ninth
 scene layer. Land publishes the mask, elevation, and slope. Water derives
@@ -98,6 +120,7 @@ own separate thresholds.
 | Territory | `0.20-0.78` | Read territory terrain and capital placement | Same coast, seams, and major anchors |
 | Capital | `0.10-0.20` | Roads, districts, capital and project/skill structures | Registered detail tile; no projection or coastline replacement |
 | Site | `0.055-0.10` | Read one capital site and its immediate terrain | Streamed registered crops plus bounded local overrides |
+| Close | `0.04-0.075` | Resolve props, actors, and highest-frequency structure detail | Same registered terrain and topology; camera-culled node masters |
 
 Transitions occupy overlap bands around the tier boundaries. Territory assets
 start loading before their reveal begins. Scene nodes and fixed-world

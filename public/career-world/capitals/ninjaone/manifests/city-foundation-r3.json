@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/capitals/ninjaone/city-foundation@r3",
+  "status": "active-registered-foundation",
+  "authority": {
+    "artboard": [
+      1448,
+      1086
+    ],
+    "sourceMasterSha256": "2b5449512138a6679c8dd78987dc94abd0f2f38ad0e59c926aacbcd1d6ba323a",
+    "registration": {
+      "uniformScale": 0.98,
+      "translation": [
+        20,
+        60
+      ],
+      "method": "registered-parent-land-intersection-plus-independent-top-overhang"
+    },
+    "ownership": {
+      "globalWater": "L1-and-L3-immutable",
+      "globalLand": "L2-immutable",
+      "cityWaterInteraction": "L4_0-reversible",
+      "cityLandscapeModification": "L4_1-reversible"
+    },
+    "waterRegistration": {
+      "sourceComponentCount": 393,
+      "rejectedComponents": [
+        {
+          "bounds": [
+            417,
+            650,
+            566,
+            873
+          ],
+          "pixels": 12597,
+          "reason": "false-positive-city-shadow-pocket"
+        }
+      ],
+      "retainedComponentPixels": [
+        25004,
+        6226
+      ],
+      "mask": {
+        "decodedBytes": 1572528,
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "encodedBytes": 7858,
+        "path": "/career-world/capitals/ninjaone/city-r3/authority/city-water-registration-mask-r1.png",
+        "sha256": "51357652c88ec868a40951c5dad2f78b334bb5b5242aae0b1f3474b5bb7bf252"
+      }
+    }
+  },
+  "lod": {
+    "world": "interface-marker-only",
+    "territory": "preload-cache-only-not-runtime-visible",
+    "capital": "registered-1448x1086-foundation-layers",
+    "site": "capital-foundation-plus-registered-district-cohort",
+    "close": "site-cohort-plus-registered-detail-and-actor-layers"
+  },
+  "layers": [
+    {
+      "id": "L4_0",
+      "role": "city-water-interaction",
+      "asset": {
+        "decodedBytes": 6290112,
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "encodedBytes": 55963,
+        "path": "/career-world/capitals/ninjaone/city-r3/water-interaction/city-water-contact-r1-alpha.png",
+        "sha256": "a1284ce591a05713fb3e307882d26cd52902bf304e903d3a6f8ba77244104878"
+      }
+    },
+    {
+      "id": "L4",
+      "role": "capital-composite-context-with-D06-exclusion",
+      "asset": {
+        "decodedBytes": 6290112,
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "encodedBytes": 3610186,
+        "path": "/career-world/capitals/ninjaone/city-r3/foundation/city-context-capital-without-d06-r1-alpha.png",
+        "sha256": "8015e52b4d89e3d8d1f6265819d243d36b7f4185082bd16bc257026bb3cc7036"
+      }
+    }
+  ],
+  "deliveries": {
+    "composite": {
+      "decodedBytes": 6290112,
+      "dimensions": [
+        1448,
+        1086
+      ],
+      "encodedBytes": 3628541,
+      "path": "/career-world/capitals/ninjaone/city-r3/foundation/city-foundation-composite-r1-alpha.png",
+      "sha256": "36c644bee6fc1ade5d7b29f3b3734121d31b74d9cc4dc1fb986fc40cfe7deba6"
+    },
+    "territory": {
+      "decodedBytes": 786432,
+      "dimensions": [
+        512,
+        384
+      ],
+      "encodedBytes": 465406,
+      "path": "/career-world/capitals/ninjaone/city-r3/territory/city-foundation-territory-r1-alpha.png",
+      "sha256": "96f21f47759e07ec841f08f57376a735f48463126ab220864d846426a9c1eb01"
+    }
+  },
+  "verification": {
+    "transparentPixels": 396258,
+    "transparentFraction": 0.25198788193278593,
+    "inlandWaterPixels": 31232,
+    "coveredInlandWaterPixels": 0,
+    "inlandWaterCoverageFraction": 0,
+    "maximumInlandWaterCoverageFraction": 0.18
+  },
+  "sourceHashes": {
+    "master": "2b5449512138a6679c8dd78987dc94abd0f2f38ad0e59c926aacbcd1d6ba323a",
+    "liveLandMask": "52d320757831411859eb42c25d3b2d548f2b6ee930ec36f7e101bb44156f2bdc",
+    "registeredParentLandMask": "0f5200b2dc9f527d39faa2c78d028c5f246d3b262c8b3cbdf91040b16c77a92b",
+    "liveWaterMask": "62dae097bf95f53d086ef5c2dd6b4957e22f3a173c80bac35400620addd66bc3",
+    "topOverhang": "6db7e4986f08e2ee0dc9beb9b0bc063ed911267f530987207ea55d3f89d35742",
+    "d06DistrictMask": "0017c3b86dd0c05e3b4d698aed6ea9eb0d8270b1fd396a555b1e5c9c08e65a60",
+    "foliageManifest": "776e87784c763b299c51083bf3cddf7bba88038a327f2317667ea8a56669e758"
+  }
+}

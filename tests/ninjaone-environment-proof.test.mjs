@@ -529,7 +529,7 @@ test("the root-selectable environment proof renders semantic terrain and suppres
   assert.doesNotMatch(renderer, /ninjaone-inland-water-field-r1\.png/);
   assert.doesNotMatch(renderer, /wildlife/i);
   assert.doesNotMatch(renderer, /terrain-microdetail/);
-  assert.doesNotMatch(renderer, /<InfrastructureLayer|<StructuresLayer|<NinjaOneCapitalMvp/);
+  assert.doesNotMatch(renderer, /<InfrastructureLayer|<StructuresLayer/);
   assert.match(nativeBuilder, /SOURCE_TILE_ROOT/);
   assert.match(nativeBuilder, /VOID_MASK_TILE_IDS/);
   assert.match(nativeBuilder, /buildNinjaOneEnvironmentStaticTerrain/);

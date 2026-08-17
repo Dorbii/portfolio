@@ -9,13 +9,22 @@ export type EnvironmentLayerId =
   | "L3"
   | "L3_1"
   | "L3_2"
-  | "L3_4";
+  | "L3_4"
+  | "L4"
+  | "L4_0"
+  | "L4_1"
+  | "L4_2"
+  | "L4_3"
+  | "L4_4"
+  | "L4_5"
+  | "L4_6"
+  | "L4_7";
 
 export interface EnvironmentLayerDefinition {
   readonly available: boolean;
   readonly id: EnvironmentLayerId;
   readonly label: string;
-  readonly parentId?: Extract<EnvironmentLayerId, "L1" | "L2" | "L3">;
+  readonly parentId?: Extract<EnvironmentLayerId, "L1" | "L2" | "L3" | "L4">;
   readonly owns: string;
 }
 
@@ -99,6 +108,68 @@ export const ENVIRONMENT_LAYER_DEFINITIONS: readonly EnvironmentLayerDefinition[
       owns: "deterministic submerged stones, wood, reeds, and aquatic vegetation",
       parentId: "L3",
     }),
+    Object.freeze({
+      available: true,
+      id: "L4",
+      label: "City authority",
+      owns: "registered city cohorts and every reversible city-owned modification above immutable land and water authorities",
+    }),
+    Object.freeze({
+      available: true,
+      id: "L4_0",
+      label: "City water interaction",
+      owns: "local under-bridge darkening, waterfront contact, ripples, reflections, and flow deflection without replacing global water",
+      parentId: "L4",
+    }),
+    Object.freeze({
+      available: true,
+      id: "L4_1",
+      label: "City landscape and circulation",
+      owns: "reversible registered terraces, retaining walls, ground transitions, roads, and pedestrian paths",
+      parentId: "L4",
+    }),
+    Object.freeze({
+      available: true,
+      id: "L4_2",
+      label: "City transportation",
+      owns: "provisional rail and transport nodes pending the registered D06 proof",
+      parentId: "L4",
+    }),
+    Object.freeze({
+      available: true,
+      id: "L4_3",
+      label: "Primary city buildings",
+      owns: "package-registered capital landmarks and skill buildings",
+      parentId: "L4",
+    }),
+    Object.freeze({
+      available: true,
+      id: "L4_4",
+      label: "Secondary city fabric",
+      owns: "provisional inferred fabric pending district-level registration",
+      parentId: "L4",
+    }),
+    Object.freeze({
+      available: true,
+      id: "L4_5",
+      label: "Street details",
+      owns: "small civic and service props with inferred placement unless explicitly registered",
+      parentId: "L4",
+    }),
+    Object.freeze({
+      available: true,
+      id: "L4_6",
+      label: "Urban foliage",
+      owns: "city vegetation with inferred placement unless explicitly registered above L2 foliage",
+      parentId: "L4",
+    }),
+    Object.freeze({
+      available: true,
+      id: "L4_7",
+      label: "City actors and effects",
+      owns: "moving trains and restrained local temporal cues",
+      parentId: "L4",
+    }),
   ]);
 
 export const DEFAULT_ENVIRONMENT_LAYER_VISIBILITY: EnvironmentLayerVisibility =
@@ -114,6 +185,15 @@ export const DEFAULT_ENVIRONMENT_LAYER_VISIBILITY: EnvironmentLayerVisibility =
     L3_1: true,
     L3_2: true,
     L3_4: true,
+    L4: true,
+    L4_0: true,
+    L4_1: true,
+    L4_2: true,
+    L4_3: true,
+    L4_4: true,
+    L4_5: true,
+    L4_6: true,
+    L4_7: true,
   });
 
 const ENVIRONMENT_LAYER_BY_ID = new Map(

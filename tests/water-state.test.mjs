@@ -189,10 +189,6 @@ test("live foliage does not trigger full-page layout on every animation frame", 
     styles,
     /\.career-world__foliage-canopy\s*\{[\s\S]*?animation-name:\s*career-world-foliage-breeze;/,
   );
-  assert.match(
-    styles,
-    /\.ninjaone-capital-population__cue\s*\{[\s\S]*?animation: none;/,
-  );
 });
 
 test("layer detail contracts require a world source", () => {

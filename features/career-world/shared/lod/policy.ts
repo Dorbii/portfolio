@@ -141,12 +141,19 @@ function descendingSmoothstep(
   return amount * amount * (3 - 2 * amount);
 }
 
-export function resolveDetailState(camera: CameraView): DetailState {
+export function resolveDetailState(
+  camera: CameraView,
+  forcedTierId: DetailTierId | null = null,
+): DetailState {
   const span = Math.max(...camera.span);
-  const tier = (
+  const cameraTier = (
     DETAIL_TIERS.find((candidate) => span <= candidate.maximumSpan)
     ?? DETAIL_TIERS[DETAIL_TIERS.length - 1]
   );
+  const tier = forcedTierId
+    ? DETAIL_TIERS.find((candidate) => candidate.id === forcedTierId)
+    : cameraTier;
+  if (!tier) throw new TypeError(`Unknown forced detail tier: ${forcedTierId}.`);
   const worldToTerritory = descendingSmoothstep(
     span,
     DETAIL_POLICY.worldToTerritory.startSpan,

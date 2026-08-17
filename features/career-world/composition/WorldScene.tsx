@@ -12,6 +12,20 @@ import {
 import { WorldBackdrop } from "../layers/world-backdrop";
 import { WaterSurfaceCanvas, type WaterRenderState } from "../layers/ocean";
 import {
+  constrainNinjaOneCapitalCityProofCamera,
+  NINJAONE_CAPITAL_CITY_CONCEPT_CAMERA,
+  NINJAONE_CAPITAL_CITY_LAYER_CAMERA,
+  NINJAONE_CAPITAL_CITY_LAYER_WORLD_ORIGIN,
+  NINJAONE_CAPITAL_CITY_LAYER_WORLD_SPAN,
+  NINJAONE_CAPITAL_CITY_PROOF_CAMERAS,
+  NINJAONE_CAPITAL_CITY_PROOF_TIERS,
+  NinjaOneCapitalCityLayer,
+  ninjaOneCapitalCityFocusedDistrict,
+  ninjaOneCapitalCityRepresentationMode,
+  resolveNinjaOneCapitalDetailState,
+  type NinjaOneCapitalCityProofViewId,
+} from "../layers/city";
+import {
   NinjaOneInlandHabitatCanvas,
   NinjaOneInlandWaterCanvas,
 } from "../layers/inland-water";
@@ -50,13 +64,6 @@ import {
 import {
   DevelopmentOverlay,
   EnvironmentLayerInspector,
-  NINJAONE_CAPITAL_CITY_WORLD_ORIGIN,
-  NINJAONE_CAPITAL_CITY_WORLD_SPAN,
-  NINJAONE_CAPITAL_MVP_CAMERA,
-  NINJAONE_CAPITAL_TOPOLOGY_PROOF_CAMERA,
-  NINJAONE_CAPITAL_TOPOLOGY_REGISTRATION_ID,
-  NinjaOneCapitalMvp,
-  NinjaOneCapitalTopologyProof,
   PerformanceProbe,
 } from "../development";
 import {
@@ -67,7 +74,7 @@ import {
   zoomCameraViewAt,
   type CameraView,
 } from "../shared/camera";
-import { DETAIL_POLICY, resolveDetailState } from "../shared/lod";
+import { DETAIL_POLICY } from "../shared/lod";
 import { WORLD_LIGHT } from "../shared/lighting";
 import { resolveTownPresentationAnchor } from "../shared/townPresentation";
 import {
@@ -77,11 +84,13 @@ import {
 } from "../shared/environmentLayers";
 
 interface WorldSceneProps {
+  readonly cityVisualIntent: boolean;
+  readonly cityLayerProof: boolean;
+  readonly cityProofView: NinjaOneCapitalCityProofViewId | null;
   readonly enableDevelopmentTools: boolean;
   readonly enablePerformanceProbe: boolean;
   readonly environmentProof: boolean;
   readonly initialView: "world" | "ninjaone-capital";
-  readonly topologyProof: boolean;
 }
 
 interface DragState {
@@ -125,11 +134,11 @@ function interactiveCameraMinimumSpan(camera: CameraView): number {
   const center = camera.origin.map(
     (value, index) => value + camera.span[index] * 0.5,
   );
-  const capitalMaximum = NINJAONE_CAPITAL_CITY_WORLD_ORIGIN.map(
-    (value, index) => value + NINJAONE_CAPITAL_CITY_WORLD_SPAN[index],
+  const capitalMaximum = NINJAONE_CAPITAL_CITY_LAYER_WORLD_ORIGIN.map(
+    (value, index) => value + NINJAONE_CAPITAL_CITY_LAYER_WORLD_SPAN[index],
   );
   const centeredOnCapital = center.every((value, index) => (
-    value >= NINJAONE_CAPITAL_CITY_WORLD_ORIGIN[index]
+    value >= NINJAONE_CAPITAL_CITY_LAYER_WORLD_ORIGIN[index]
     && value <= capitalMaximum[index]
   ));
   return centeredOnCapital
@@ -261,20 +270,24 @@ const INTERACTIVE_TARGET_SELECTOR = [
 ].join(",");
 
 export function WorldScene({
+  cityVisualIntent,
+  cityLayerProof,
+  cityProofView,
   enableDevelopmentTools,
   enablePerformanceProbe,
   environmentProof,
   initialView,
-  topologyProof,
 }: WorldSceneProps) {
-  const capitalRecoveryBaseline = initialView === "ninjaone-capital";
-  const showNinjaOneCapital = !topologyProof && !environmentProof;
-  const initialCamera = environmentProof
+  const capitalLayerInspection = initialView === "ninjaone-capital";
+  const showNinjaOneCapital = !environmentProof;
+  const initialCamera = cityProofView
+    ? NINJAONE_CAPITAL_CITY_PROOF_CAMERAS[cityProofView]
+    : cityVisualIntent
+      ? NINJAONE_CAPITAL_CITY_CONCEPT_CAMERA
+    : environmentProof
     ? NINJAONE_ENVIRONMENT_CAMERA
     : initialView === "ninjaone-capital"
-      ? NINJAONE_CAPITAL_MVP_CAMERA
-      : topologyProof
-      ? NINJAONE_CAPITAL_TOPOLOGY_PROOF_CAMERA
+      ? NINJAONE_CAPITAL_CITY_LAYER_CAMERA
       : WORLD_CAMERA_VIEW;
   const viewportRef = useRef<HTMLDivElement>(null);
   const cameraRef = useRef<CameraView>(initialCamera);
@@ -285,41 +298,57 @@ export function WorldScene({
     camera: initialCamera,
     generation: 0,
   }));
-  const { camera } = cameraPublication;
+  const publishedCamera = cameraPublication.camera;
+  const camera = cityProofView
+    ? constrainNinjaOneCapitalCityProofCamera(cityProofView, publishedCamera)
+    : publishedCamera;
   const [activeViewId, setActiveViewId] = useState(
     environmentProof
       ? "ninjaone-environment-proof"
       : initialView === "ninjaone-capital"
-        ? "ninjaone-capital-mvp"
-        : topologyProof
-        ? "ninjaone-capital-topology-proof"
+        ? "ninjaone-capital-city-layer"
         : "world",
   );
   const [kaizenVisualReady, setKaizenVisualReady] = useState(false);
   const [ninjaOneGeologyReady, setNinjaOneGeologyReady] = useState(false);
   const [renderState, setRenderState] =
     useState<WaterRenderState>("loading");
-  const [showTopography, setShowTopography] = useState(topologyProof);
+  const [showTopography, setShowTopography] = useState(false);
   const [showTerritoryQa, setShowTerritoryQa] = useState(false);
-  const [showGrid, setShowGrid] = useState(topologyProof);
+  const [showGrid, setShowGrid] = useState(false);
   const [showLandmarkLabels, setShowLandmarkLabels] = useState(false);
   const [isPageVisible, setIsPageVisible] = useState(true);
   const [environmentLayerVisibility, setEnvironmentLayerVisibility] = useState(
     DEFAULT_ENVIRONMENT_LAYER_VISIBILITY,
   );
-  const detailState = resolveDetailState(camera);
+  const detailState = resolveNinjaOneCapitalDetailState(
+    camera,
+    cityProofView ? NINJAONE_CAPITAL_CITY_PROOF_TIERS[cityProofView] : null,
+  );
+  const forcedCityDistrict = cityProofView === "d06-site"
+    || cityProofView === "d06-close"
+    ? "D06" as const
+    : null;
+  const focusedCityDistrict = ninjaOneCapitalCityFocusedDistrict(
+    detailState.tier.id,
+    null,
+    forcedCityDistrict,
+  );
+  const cityRepresentationMode = ninjaOneCapitalCityRepresentationMode(
+    detailState.tier.id,
+    focusedCityDistrict,
+  );
   const focusIsDetailedNinjaOneCapital = (
     showNinjaOneCapital
     && detailState.tier.id !== "world"
     && detailState.tier.id !== "territory"
   );
   const showNinjaOneInlandWater = (
-    !topologyProof
-    && detailState.tier.id !== "world"
+    detailState.tier.id !== "world"
     && detailState.tier.id !== "territory"
   );
   const environmentLayerVisible = (id: EnvironmentLayerId) => (
-    !capitalRecoveryBaseline
+    !capitalLayerInspection
     || isEnvironmentLayerEffectivelyVisible(environmentLayerVisibility, id)
   );
   const oceanAuthorityVisible = environmentLayerVisible("L1");
@@ -332,6 +361,7 @@ export function WorldScene({
   const inlandWaterMotionVisible = environmentLayerVisible("L3_1");
   const inlandWaterEffectsVisible = environmentLayerVisible("L3_2");
   const inlandHabitatVisible = environmentLayerVisible("L3_4");
+  const cityAuthorityVisible = environmentLayerVisible("L4");
   const ninjaOneEnvironmentOwnsCamera = (
     ninjaOneGeologyReady
     && detailState.tier.id !== "world"
@@ -364,11 +394,18 @@ export function WorldScene({
     return () => observer.disconnect();
   }, []);
 
-  const commitCamera = useCallback((next: CameraView) => {
+  const normalizeSceneCamera = useCallback((next: CameraView) => {
     const normalized = normalizeCameraView(
       next,
       DETAIL_POLICY.cameraMinimumSpan,
     );
+    return cityProofView
+      ? constrainNinjaOneCapitalCityProofCamera(cityProofView, normalized)
+      : normalized;
+  }, [cityProofView]);
+
+  const commitCamera = useCallback((next: CameraView) => {
+    const normalized = normalizeSceneCamera(next);
     if (cameraFrameRef.current) {
       cancelAnimationFrame(cameraFrameRef.current);
       cameraFrameRef.current = 0;
@@ -378,13 +415,10 @@ export function WorldScene({
       camera: normalized,
       generation: current.generation + 1,
     }));
-  }, []);
+  }, [normalizeSceneCamera]);
 
   const queueCamera = useCallback((next: CameraView) => {
-    cameraRef.current = normalizeCameraView(
-      next,
-      DETAIL_POLICY.cameraMinimumSpan,
-    );
+    cameraRef.current = normalizeSceneCamera(next);
     if (cameraFrameRef.current) {
       return;
     }
@@ -396,7 +430,7 @@ export function WorldScene({
         generation: current.generation + 1,
       }));
     });
-  }, []);
+  }, [normalizeSceneCamera]);
 
   const cancelFocusAnimation = useCallback(() => {
     if (focusFrameRef.current) {
@@ -461,6 +495,7 @@ export function WorldScene({
       return;
     }
     event.preventDefault();
+    if (cityProofView) return;
     cancelFocusAnimation();
     const bounds = event.currentTarget.getBoundingClientRect();
     const anchor = [
@@ -468,15 +503,21 @@ export function WorldScene({
       (event.clientY - bounds.top) / Math.max(bounds.height, 1),
     ] as const;
     const scale = wheelZoomScale(event.deltaY);
-    const minimumSpan = interactiveCameraMinimumSpan(camera);
-    queueCamera(zoomCameraViewAt(
-      camera,
+    const minimumSpan = interactiveCameraMinimumSpan(publishedCamera);
+    const candidate = zoomCameraViewAt(
+      publishedCamera,
       anchor,
       scale,
       minimumSpan,
-    ));
+    );
+    queueCamera(candidate);
     setActiveViewId("custom");
-  }, [camera, cancelFocusAnimation, queueCamera]);
+  }, [
+    cancelFocusAnimation,
+    cityProofView,
+    publishedCamera,
+    queueCamera,
+  ]);
 
   const handlePointerDown = useCallback(
     (event: PointerEvent<HTMLDivElement>) => {
@@ -490,7 +531,11 @@ export function WorldScene({
       ) {
         return;
       }
+      if (cityProofView && cityProofView !== "d06-site" && cityProofView !== "d06-close") {
+        return;
+      }
       cancelFocusAnimation();
+      cameraRef.current = normalizeSceneCamera(cameraRef.current);
       event.currentTarget.setPointerCapture(event.pointerId);
       dragRef.current = {
         pointerId: event.pointerId,
@@ -500,7 +545,7 @@ export function WorldScene({
       setActiveViewId("custom");
       event.currentTarget.dataset.dragging = "true";
     },
-    [cancelFocusAnimation],
+    [cancelFocusAnimation, cityProofView, normalizeSceneCamera],
   );
 
   const handlePointerMove = useCallback(
@@ -559,7 +604,10 @@ export function WorldScene({
           [viewport.width, viewport.height],
         ));
         setActiveViewId("custom");
-      } else if (event.key === "+" || event.key === "=" || event.key === "-") {
+      } else if (
+        !cityProofView
+        && (event.key === "+" || event.key === "=" || event.key === "-")
+      ) {
         event.preventDefault();
         cancelFocusAnimation();
         commitCamera(zoomCameraViewAt(
@@ -571,7 +619,7 @@ export function WorldScene({
         setActiveViewId("custom");
       }
     },
-    [cancelFocusAnimation, commitCamera],
+    [cancelFocusAnimation, cityProofView, commitCamera],
   );
 
   return (
@@ -580,10 +628,21 @@ export function WorldScene({
       className="career-world__viewport"
       data-camera-origin={camera.origin.join(",")}
       data-camera-span={camera.span.join(",")}
+      data-camera-constraint={cityProofView === "d06-site" || cityProofView === "d06-close"
+        ? "ninjaone-environment-bounds"
+        : cityProofView
+          ? "fixed-proof-camera"
+          : "world-bounds"}
       data-camera-minimum-span={interactiveCameraMinimumSpan(camera)}
       data-page-visible={isPageVisible}
       data-capital-lod={detailState.territoryToCapital.toFixed(3)}
-      data-capital-recovery-baseline={capitalRecoveryBaseline}
+      data-capital-layer-inspection={capitalLayerInspection}
+      data-city-layer-proof={cityLayerProof}
+      data-city-proof-view={cityProofView ?? "interactive"}
+      data-city-proof-tier-locked={cityProofView !== null}
+      data-city-representation-mode={cityRepresentationMode}
+      data-city-visual-intent={cityVisualIntent}
+      data-focused-city-district={focusedCityDistrict ?? "none"}
       data-layer-l1={oceanAuthorityVisible}
       data-layer-l1-1={oceanMotionVisible}
       data-layer-l1-2={environmentLayerVisible("L1_2")}
@@ -594,6 +653,15 @@ export function WorldScene({
       data-layer-l3={inlandWaterAuthorityVisible}
       data-layer-l3-1={inlandWaterMotionVisible}
       data-layer-l3-2={inlandWaterEffectsVisible}
+      data-layer-l4={cityAuthorityVisible}
+      data-layer-l4-0={environmentLayerVisible("L4_0")}
+      data-layer-l4-1={environmentLayerVisible("L4_1")}
+      data-layer-l4-2={environmentLayerVisible("L4_2")}
+      data-layer-l4-3={environmentLayerVisible("L4_3")}
+      data-layer-l4-4={environmentLayerVisible("L4_4")}
+      data-layer-l4-5={environmentLayerVisible("L4_5")}
+      data-layer-l4-6={environmentLayerVisible("L4_6")}
+      data-layer-l4-7={environmentLayerVisible("L4_7")}
       data-ninjaone-geology-ready={ninjaOneGeologyReady}
       data-close-lod={detailState.siteToClose.toFixed(3)}
       data-detail-tier={detailState.tier.id}
@@ -603,9 +671,6 @@ export function WorldScene({
       data-kaizen-visual-ready={kaizenVisualReady}
       data-initial-view={initialView}
       data-site-lod={detailState.capitalToSite.toFixed(3)}
-      data-topology-proof={topologyProof
-        ? NINJAONE_CAPITAL_TOPOLOGY_REGISTRATION_ID
-        : undefined}
       data-territory-lod={detailState.worldToTerritory.toFixed(3)}
       onKeyDown={handleKeyDown}
       onPointerCancel={finishPointer}
@@ -652,17 +717,7 @@ export function WorldScene({
             detailState={detailState}
           />
         ) : null}
-      {showNinjaOneCapital && !capitalRecoveryBaseline ? (
-        <NinjaOneCapitalMvp
-          camera={camera}
-          detailState={detailState}
-          light={WORLD_LIGHT}
-        />
-      ) : null}
-      {topologyProof ? (
-        <NinjaOneCapitalTopologyProof camera={camera} />
-      ) : (
-        <>
+      <>
           {terrainAuthorityVisible ? (
             <NinjaOneEnvironmentProof
               active={isPageVisible}
@@ -707,19 +762,27 @@ export function WorldScene({
               ) : null}
             </>
           ) : null}
-        </>
-      )}
+      </>
+      {showNinjaOneCapital && cityAuthorityVisible ? (
+        <NinjaOneCapitalCityLayer
+          camera={camera}
+          detailState={detailState}
+          focusDistrict={focusedCityDistrict}
+          light={WORLD_LIGHT}
+          visibility={environmentLayerVisibility}
+        />
+      ) : null}
       {enableDevelopmentTools
-          && (topologyProof || showGrid || showTopography || showTerritoryQa) ? (
+          && (showGrid || showTopography || showTerritoryQa) ? (
         <DevelopmentOverlay
           camera={camera}
-          showGrid={topologyProof || showGrid}
+          showGrid={showGrid}
           showTopography={showTopography}
           showTerritories={showTerritoryQa}
           territories={TERRITORIES}
         />
       ) : null}
-      {!topologyProof && !environmentProof ? (
+      {!environmentProof ? (
         <WorldInterface
           activeViewId={activeViewId}
           camera={camera}
@@ -744,7 +807,7 @@ export function WorldScene({
           territories={TERRITORIES}
         />
       ) : null}
-      {capitalRecoveryBaseline ? (
+      {capitalLayerInspection ? (
         <EnvironmentLayerInspector
           onToggle={handleEnvironmentLayerToggle}
           visibility={environmentLayerVisibility}

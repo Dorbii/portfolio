@@ -20,7 +20,7 @@ export function EnvironmentLayerInspector({
       data-layer-inspector="environment"
       open
     >
-      <summary>Layer inspection · L1–L3</summary>
+      <summary>Layer inspection · L1–L4</summary>
       <div className="career-world__layer-inspector-list">
         {ENVIRONMENT_LAYER_DEFINITIONS.map((layer) => {
           const parentVisible = layer.parentId

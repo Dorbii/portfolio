@@ -62,8 +62,15 @@ export function zoomCameraViewAt(
   const anchor = finitePair(viewportAnchor, "Camera zoom anchor").map((value) =>
     clamp(value, 0, 1)
   ) as [number, number];
+  const minimumScale = Math.max(
+    ...normalized.span.map((value) => minimumSpan / value),
+  );
+  const maximumScale = Math.min(
+    ...normalized.span.map((value) => 1 / value),
+  );
+  const boundedScale = clamp(scale, minimumScale, maximumScale);
   const span = normalized.span.map((value) =>
-    clamp(value * scale, minimumSpan, 1)
+    value * boundedScale
   ) as [number, number];
   const worldAnchor = normalized.origin.map(
     (value, index) => value + anchor[index] * normalized.span[index],
@@ -75,6 +82,33 @@ export function zoomCameraViewAt(
     ) as [number, number],
     span,
   }, minimumSpan);
+}
+
+export function constrainCameraViewToBounds(
+  view: CameraView,
+  bounds: CameraView,
+): CameraView {
+  const normalized = normalizeCameraView(view);
+  const boundsOrigin = finitePair(bounds.origin, "Camera bounds origin");
+  const boundsSpan = finitePair(bounds.span, "Camera bounds span");
+  if (
+    boundsOrigin.some((value) => value < 0 || value > 1)
+    || boundsSpan.some((value) => value <= 0 || value > 1)
+    || boundsOrigin.some((value, index) => value + boundsSpan[index] > 1)
+    || normalized.span.some((value, index) => value > boundsSpan[index])
+  ) {
+    throw new RangeError("Camera bounds must contain the normalized camera view.");
+  }
+  return Object.freeze({
+    origin: Object.freeze(boundsOrigin.map((value, index) => (
+      clamp(
+        normalized.origin[index],
+        value,
+        value + boundsSpan[index] - normalized.span[index],
+      )
+    )) as [number, number]),
+    span: normalized.span,
+  });
 }
 
 export function panCameraViewByPixels(

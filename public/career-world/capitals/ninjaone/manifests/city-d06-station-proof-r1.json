@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/capitals/ninjaone/city-d06-station-proof@r1",
+  "status": "approved-D06-tier-replacements-awaiting-global-LOD-sequence-and-Steve-visual-acceptance",
+  "authority": {
+    "masterPath": "art-source/career-world/ninjaone-capital/city-nodes-r2/master/ninjaone-capital-master-r1.png",
+    "districtMaskPackagePath": "selected-wide/D06-station-rail-mask.png",
+    "districtPlateRuntimeVisible": false,
+    "registrationMethod": "fixed-parent-crop-child-node-alignment",
+    "placementAuthority": "D06-proof-only-not-package-master-registration",
+    "promotedConceptDerivativeAssets": [
+      { "assetId": "I12", "authority": "Steve-approved-close-detail-station-concept", "role": "close-straight-station-terrace-base" },
+      { "assetId": "I13", "authority": "Steve-approved-capital-D06-crop", "role": "capital-tier-complete-station-cluster" },
+      { "assetId": "I16", "authority": "Steve-approved-D06-site-composite", "role": "site-close-registered-station-base-silhouette" },
+      { "assetId": "I17", "authority": "master-and-approved-close-concept-derived-generated-overlay", "role": "close-only-civic-integration-overlay" }
+    ]
+  },
+  "crop": {
+    "height": 290,
+    "left": 665,
+    "top": 796,
+    "width": 783
+  },
+  "masterStationGroupBounds": {
+    "height": 225,
+    "left": 700,
+    "top": 796,
+    "width": 610
+  },
+  "capitalClusterRegistration": {
+    "anchor": [1005, 1086],
+    "assetId": "I13",
+    "displayWidth": 610,
+    "expectedRenderedBounds": { "bottom": 1086, "height": 302.927989, "left": 700, "right": 1310, "top": 783.072011, "width": 610 },
+    "maskPolicy": "intrinsic-alpha-only-no-D06-proof-mask",
+    "nodeId": "transport-station-capital-cluster",
+    "registrationBasis": "approved-master-station-left-and-width-with-lower-right-artboard-exit"
+  },
+  "siteCompositeRegistration": {
+    "anchor": [1056.5, 1086],
+    "assetId": "I16",
+    "displayWidth": 783,
+    "maskPolicy": "intrinsic-alpha-only-no-D06-proof-mask",
+    "nodeId": "transport-station-site-composite",
+    "registrationBasis": "approved-D06-site-composite-aligned-to-the-known-station-terrace-anchor"
+  },
+  "masks": {
+    "district": "/career-world/capitals/ninjaone/city-nodes-r2/proof/d06/station-rail-mask.png",
+    "transitionFringe": "/career-world/capitals/ninjaone/city-nodes-r2/proof/d06/station-rail-transition-fringe.png"
+  },
+  "trackTopology": {
+    "parallelTrackCount": 2,
+    "capitalStationNodeId": "transport-station-capital-cluster",
+    "siteStationNodeId": "transport-station-site-composite",
+    "closeBaseNodeId": "transport-station-site-composite",
+    "closeOverlayNodeIds": ["fabric-station-close-civic-overlay"],
+    "legacyNonconformingCloseNodeIds": ["transport-station-straight-terrace-base", "transport-arrivals-hall", "transport-departures-hall", "actor-intercity-train"],
+    "excludedD06NodeIds": ["transport-curve-viaduct", "transport-intercity-turnout", "actor-reverse-train", "transport-station-straight-terrace-base", "transport-arrivals-hall", "transport-departures-hall", "actor-intercity-train"],
+    "outboundDirection": "lower-right-artboard-edge",
+    "futureIntercitySocket": "two-parallel-tracks-exit-artboard-without-visible-branch",
+    "motionStatus": "static-until-path-registered"
+  },
+  "visualAcceptance": {
+    "accepted": false,
+    "evidence": ".codex-tmp/city-polish-r1/final-lod/d06-close.png",
+    "blocker": "I16 preserves SITE-to-CLOSE geometry and I17 supplies the close-only civic integration layer; final runtime sequence still requires Steve visual acceptance.",
+    "requiredExtractionLayers": [
+      "paired-halls",
+      "straight-two-track-platform-terrace-base",
+      "train",
+      "pedestrian-detail",
+      "adjoining-civic-transition",
+      "foreground-occlusion-contact-masks"
+    ]
+  },
+  "nodes": [
+    { "id": "transport-station-capital-cluster", "assetId": "I13", "anchor": [1005, 1086], "displayWidth": 610, "minimumTier": "capital", "visibleTiers": ["capital"], "zBias": 0 },
+    { "id": "transport-station-site-composite", "assetId": "I16", "anchor": [1056.5, 1086], "displayWidth": 783, "minimumTier": "site", "visibleTiers": ["site", "close"], "zBias": 0 },
+    { "id": "fabric-station-close-civic-overlay", "assetId": "I17", "anchor": [1054, 1086], "displayWidth": 846, "minimumTier": "close", "visibleTiers": ["close"], "zBias": -80 },
+    { "id": "transport-station-straight-terrace-base", "assetId": "I12", "anchor": [1056.5, 1086], "admissionStatus": "legacy-nonconforming-close-candidate", "displayWidth": 783, "minimumTier": "close", "visibleTiers": ["close"], "zBias": -240 },
+    { "id": "transport-arrivals-hall", "assetId": "I05", "anchor": [835, 945], "admissionStatus": "legacy-nonconforming-close-candidate", "displayWidth": 240, "minimumTier": "close", "visibleTiers": ["close"], "zBias": 2 },
+    { "id": "transport-departures-hall", "assetId": "I06", "anchor": [1000, 960], "admissionStatus": "legacy-nonconforming-close-candidate", "displayWidth": 240, "minimumTier": "close", "visibleTiers": ["close"], "zBias": 4 },
+    { "id": "actor-intercity-train", "assetId": "I07", "anchor": [1170, 1015], "admissionStatus": "legacy-nonconforming-close-candidate", "displayWidth": 290, "minimumTier": "close", "visibleTiers": ["close"], "zBias": 26 }
+  ]
+}
