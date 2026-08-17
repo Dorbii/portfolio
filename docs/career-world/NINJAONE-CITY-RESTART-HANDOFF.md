@@ -329,3 +329,26 @@ Receive and mechanically/visually grade the quarantined CFX02 candidate. If it p
 ### Exact next action
 
 Align the stale composition manifest with the accepted R3 LoD contract while preserving structural invariants, then run the final complete visual proof sequence. Only open another asset lane if that proof isolates a specific remaining defect.
+
+## 2026-08-17 03:04 CDT
+
+### Completed work and evidence
+
+- Aligned `city-layer-composition-r2.json` with the accepted `city-foundation-r3.json` runtime instead of the superseded I13/I16 composition. The active contract now declares the exact reversible `L4_0`-`L4_7` ownership model, hides the city at world and territory, begins it at capital, reuses only native L2 tree atlases, and keeps the train independent and deferred. Checkpoint: `3397eb6` (`fix: align city composition with r3 runtime`).
+- Classified the prior design-intent conflict under the accepted test policy. The old composition wording was **stale/superseded intent** and was corrected. The I13/I16 alpha/provenance checks remain as legacy asset-safety coverage rather than runtime authority. The existing exclusion of unregistered full-building Sxx cutouts at close remains a **real regression guard** because live proof reproduced the oversized detached overlap when it was temporarily relaxed.
+- Completed the full live visual matrix. World and territory mount zero city layers. Capital mounts the registered parent-derived city with LFX06 and I20. Site progressively adds WFX01, CFX01, I21, and the safe package-registered cohort. Close adds CFX02 and I17 while suppressing the unsafe full-building close cohort. Focused D06 site/close proofs preserve open station arches, native water, and native land at the reduced `0.82` support scale.
+- Verified city ownership by toggling `L4 City authority` in the live layer inspector. L4 off removes every city modification while L2 terrain and L3 animated water remain mounted and visually untouched; L4 on restores the registered city composition.
+- Found a real close-LoD foliage bug during final DOM proof: the shared native-foliage selector hard-capped retain span at `0.14`, below the accepted city close maximum `0.205`, so the city-owned native tree group could never mount. Added an optional maximum-retain-span parameter with the prior default unchanged, and passed the city close policy only from the city layer. Checkpoint: `012f1cc` (`fix: mount native trees at city close lod`).
+- Live close proof after the fix mounts exactly seven restrained tree instances from four existing `/environment/shared/foliage-native-r4/` pooled atlas pages under source `L2-native-conifer-atlas-reuse`. No generated or mismatched vegetation is mounted.
+- Final gates pass: typecheck, focused ESLint, production build, focused R3/LoD/foliage tests, and full `npm test`. Full-suite result is `186/188` passed, `2` declared skips, `0` failures in `263.173s`. The camera-budget test (`133.878s`) and package-command test (`91.741s`) remain classified as environmental/test cost. The build has only the pre-existing chunk-size advisory.
+- Recovery checkpoints for the stable asset promotion and documentation are `b55e8db` and `ed0c824`. The stationary city implementation is now manifest-backed, progressively rendered, reversible, and visually accepted against the parent concept.
+
+### Concerns, pivots, and tasks left
+
+- The train remains intentionally absent by user direction. A future train slice must use an independent animated asset and must not reintroduce it into I20/I21 or other stationary station art.
+- The current stationary city is complete for this goal. Do not reopen rejected I18/I19/LFX01 assets, restore generated vegetation, or enable full-building close cutouts without new registered geometry and a new accepted design decision.
+- The long exhaustive tests are green but expensive; their duration is not a city regression. Preserve their invariants unless an explicit later contract supersedes them.
+
+### Exact next action
+
+Treat this checkpoint as the accepted stationary-city baseline. The next independent feature, if requested, is train extraction/animation with its own LoD and socket proof; no stationary-city repair remains open.
