@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "id": "career-world/capitals/ninjaone/city-layer-composition@r2",
-  "status": "provisional-individual-node-composition-visual-intent-failing-until-proven",
+  "status": "active-registered-r3-composition",
   "authority": {
     "layerId": "L4",
     "packageAuthorityId": "career-world/capitals/ninjaone/city-package-authority@r4",
@@ -17,28 +17,29 @@
     "runtimeVisible": false
   },
   "runtimeLayoutManifest": "/career-world/capitals/ninjaone/manifests/city-master-node-layout-r3.json",
-  "runtimeRepresentationManifest": "/career-world/capitals/ninjaone/manifests/city-lod-representations-r1.json",
+  "runtimeRepresentationManifest": "/career-world/capitals/ninjaone/manifests/city-foundation-r3.json",
   "composition": {
-    "densityExpansion": "provisional-inferred-node-instances-pending-visual-intent-proof",
+    "densityExpansion": "package-registered-site-cohort-with-parent-derived-close-detail",
     "targetNodeCount": 99,
     "circulationMaterial": "narrow-terraced-stone-access-without-modern-road-markings"
   },
   "layers": [
-    { "id": "L4_1", "label": "City circulation", "owns": "provisional inferred stone terraces, stairs, and access paths pending district proof" },
-    { "id": "L4_2", "label": "City transportation", "owns": "two registered landmarks plus inferred rail, station, bridges, hoists, and transport structures" },
-    { "id": "L4_3", "label": "Primary city buildings", "owns": "master-registered capital landmarks and skill buildings" },
-    { "id": "L4_4", "label": "Secondary city fabric", "owns": "inferred housing, workshops, markets, courtyards, and service structures pending district proof" },
-    { "id": "L4_5", "label": "Street details", "owns": "inferred civic and service props pending site and close proof" },
-    { "id": "L4_6", "label": "Urban foliage", "owns": "inferred vegetation above terrain foliage pending site and close proof" },
-    { "id": "L4_7", "label": "City actors and effects", "owns": "moving trains and restrained local temporal cues" }
+    { "id": "L4_0", "label": "City water interaction", "owns": "reversible localized bridge and waterfront contact detail without replacing global L3 water" },
+    { "id": "L4_1", "label": "City landscape and circulation", "owns": "reversible registered terrain transitions, retaining mass, terraces, roads, and pedestrian paths" },
+    { "id": "L4_2", "label": "City transportation", "owns": "registered train-free station infrastructure; the moving train remains an independent L4_7 actor" },
+    { "id": "L4_3", "label": "Primary city buildings", "owns": "package-registered capital landmarks and skill buildings" },
+    { "id": "L4_4", "label": "Secondary city fabric", "owns": "parent-derived and registered secondary fabric and detail overlays without replacing land or water" },
+    { "id": "L4_5", "label": "Street details", "owns": "small civic and service props admitted only with registered placement" },
+    { "id": "L4_6", "label": "Urban foliage", "owns": "registered reuse of existing L2 tree assets only; no generated city vegetation" },
+    { "id": "L4_7", "label": "City actors and effects", "owns": "independent moving train and restrained local temporal cues; the train is currently deferred" }
   ],
   "lod": {
-    "hiddenTiers": ["world"],
+    "hiddenTiers": ["world", "territory"],
     "sourceTierByDetailTier": { "capital": "capital", "site": "site", "close": "close" },
-    "presentation": "district-exclusive-incremental-representation-routing",
-    "territory": "whole-city P01 proxy only, muted over locked L1-L3",
-    "capital": "P01 context with D06 excluded and replaced by I13; no inferred individual nodes",
-    "site": "P01 context with D06 excluded and replaced by the focused I16 site composite",
-    "close": "P01 context with D06 excluded and replaced by the same registered I16 base at native resolution plus the close-only registered I17 civic integration overlay"
+    "presentation": "capital-first-progressive-registered-cohort-routing",
+    "territory": "preload and cache only; city art is not runtime visible",
+    "capital": "registered R3 context plus LFX06 landscape underlay and train-free I20 station",
+    "site": "capital context plus WFX01 water contact, CFX01 fabric detail, safe package-registered site nodes, and open-undercroft I21 station",
+    "close": "parent context plus WFX01, CFX01, close-only CFX02, registered L2 tree reuse, I17 civic overlay, and I21 station; unsafe full-building close cutouts remain suppressed"
   }
 }

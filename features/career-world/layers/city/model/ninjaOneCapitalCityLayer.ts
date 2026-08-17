@@ -20,6 +20,7 @@ import {
 } from "./ninjaOneCapitalCityRepresentations.ts";
 
 export type CityLayerId =
+  | "L4_0"
   | "L4_1"
   | "L4_2"
   | "L4_3"
@@ -201,7 +202,8 @@ export const NINJAONE_CAPITAL_D06_STATION_PROOF = Object.freeze({
 });
 
 if (
-  compositionManifest.authority.packageAuthorityId !== packageAuthority.id
+  compositionManifest.status !== "active-registered-r3-composition"
+  || compositionManifest.authority.packageAuthorityId !== packageAuthority.id
   || compositionManifest.authority.terrainRegistrationId !== NINJAONE_ENVIRONMENT_PROOF_ID
   || compositionManifest.authority.geographyOwnership !== "none"
   || compositionManifest.authority.masterConceptRole
@@ -222,15 +224,19 @@ if (
   || layoutManifest.authority.packageAuthorityId !== packageAuthority.id
   || compositionManifest.runtimeLayoutManifest
     !== "/career-world/capitals/ninjaone/manifests/city-master-node-layout-r3.json"
+  || compositionManifest.runtimeRepresentationManifest
+    !== "/career-world/capitals/ninjaone/manifests/city-foundation-r3.json"
   || NINJAONE_CAPITAL_CITY_LAYER_ARTBOARD.join(",")
     !== NINJAONE_CAPITAL_CITY_MASTER_REFERENCE.dimensions.join(",")
-  || compositionManifest.lod.hiddenTiers.join(",") !== "world"
-  || new Set(NINJAONE_CAPITAL_CITY_LAYER_DEFINITIONS.map(({ id }) => id)).size !== 7
+  || compositionManifest.lod.hiddenTiers.join(",") !== "world,territory"
+  || NINJAONE_CAPITAL_CITY_LAYER_DEFINITIONS.map(({ id }) => id).join(",")
+    !== "L4_0,L4_1,L4_2,L4_3,L4_4,L4_5,L4_6,L4_7"
 ) {
   throw new TypeError("NinjaOne Capital city authority does not match package, terrain, and LOD contracts.");
 }
 
 const DEFAULT_FOOTPRINT_BY_LAYER: Readonly<Record<CityLayerId, Pair>> = Object.freeze({
+  L4_0: Object.freeze([1, 1] as Pair),
   L4_1: Object.freeze([0.5, 0.2] as Pair),
   L4_2: Object.freeze([0.82, 0.22] as Pair),
   L4_3: Object.freeze([0.74, 0.25] as Pair),
@@ -430,6 +436,7 @@ export function ninjaOneCapitalCityLocalCameraBounds(
 }
 
 const CITY_LAYER_ADMISSION_ORDER: readonly CityLayerId[] = Object.freeze([
+  "L4_0",
   "L4_1",
   "L4_3",
   "L4_2",
