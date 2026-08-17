@@ -17,13 +17,25 @@ import {
 import { NinjaOneCapitalAssetNodes } from "./NinjaOneCapitalAssetNodes";
 import { NinjaOneCapitalNativeFoliage } from "./NinjaOneCapitalNativeFoliage";
 
-const D06_REVIEW_BASE =
-  "/career-world/capitals/ninjaone/city-r3/_review/I18-station-site-base-no-train-r1-alpha.png";
+const D06_CAPITAL_REVIEW_BASE = Object.freeze({
+  anchorX: 1005,
+  assetId: "I20",
+  height: 610 * 191 / 384,
+  path: "/career-world/capitals/ninjaone/city-r3/_review/I20-station-capital-cluster-no-train-r1-alpha.png",
+  scale: 1,
+  width: 610,
+});
+const D06_SITE_CLOSE_REVIEW_BASE = Object.freeze({
+  anchorX: 1056.5,
+  assetId: "I19",
+  height: 587 * 0.9,
+  path: "/career-world/capitals/ninjaone/city-r3/_review/I19-station-support-base-narrow-r1-alpha.png",
+  scale: 0.9,
+  width: 783 * 0.9,
+});
 const D06_CLOSE_CONTEXT =
   "/career-world/capitals/ninjaone/city-nodes-r2/close/infrastructure/I17-station-close-civic-overlay-r1-alpha.png";
 const D06_STATION_REVIEW_SCALE = 0.9;
-const D06_STATION_BASE_WIDTH = 783 * D06_STATION_REVIEW_SCALE;
-const D06_STATION_BASE_HEIGHT = 587 * D06_STATION_REVIEW_SCALE;
 const D06_STATION_CLOSE_WIDTH = 846 * D06_STATION_REVIEW_SCALE;
 const D06_STATION_CLOSE_HEIGHT = 564 * D06_STATION_REVIEW_SCALE;
 
@@ -68,6 +80,9 @@ export function NinjaOneCapitalCityR3({
     focusDistrict,
   )
     && registeredDetailLayerIds.length > 0;
+  const d06StationBase = tier === "capital"
+    ? D06_CAPITAL_REVIEW_BASE
+    : D06_SITE_CLOSE_REVIEW_BASE;
   return (
     <g
       data-city-r3-cohort={tier}
@@ -172,16 +187,17 @@ export function NinjaOneCapitalCityR3({
       {transportationVisible ? (
         <image
           className="ninjaone-capital-city__r3-image"
-          data-city-asset-id="I18"
+          data-city-asset-id={d06StationBase.assetId}
+          data-city-asset-source-tier={tier === "capital" ? "capital" : "site-close"}
           data-city-child-layer="L4_2"
-          data-city-runtime-scale={D06_STATION_REVIEW_SCALE}
+          data-city-runtime-scale={d06StationBase.scale}
           data-city-runtime-status="director-review"
-          height={D06_STATION_BASE_HEIGHT}
-          href={D06_REVIEW_BASE}
+          height={d06StationBase.height}
+          href={d06StationBase.path}
           preserveAspectRatio="xMidYMid meet"
-          width={D06_STATION_BASE_WIDTH}
-          x={1056.5 - D06_STATION_BASE_WIDTH * 0.5}
-          y={1086 - D06_STATION_BASE_HEIGHT}
+          width={d06StationBase.width}
+          x={d06StationBase.anchorX - d06StationBase.width * 0.5}
+          y={1086 - d06StationBase.height}
         />
       ) : null}
     </g>

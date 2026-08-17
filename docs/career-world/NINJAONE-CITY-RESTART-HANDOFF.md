@@ -134,3 +134,33 @@ Inspect the free-close native-foliage overlay across additional camera positions
 ### Exact next action
 
 Run cold D06 site and close proofs with the 0.9 station footprint, compare native water/land exposure at the waterfall, and decide whether registration is sufficient or a support-base-only asset repair is required.
+
+## 2026-08-16 23:22 CDT
+
+### Completed work and evidence
+
+- Cold D06 proofs confirmed that scaling I18 to `0.9` did not repair the solid station undercroft; the support still blocked the waterfall channel and site/close reused one overly detailed station representation at every tier.
+- Director-verified and promoted two quarantined xHigh worker outputs into `_review` only:
+  - `I20-station-capital-cluster-no-train-r1-alpha.png`: `384x191` RGBA, source alpha byte-identical, `6,475` changed RGB pixels confined to the train/steam ROI, empty continuous rails, SHA-256 `CD4BE5472FC37316F4A87B3EE47C5D8F3AACC27C3AD8C3AA58966DF2FCD995D2`.
+  - `I19-station-support-base-narrow-r1-alpha.png`: `1448x1086` RGBA, `31,390` alpha reductions confined to the approved undercroft ROI, zero alpha expansion, zero retained-pixel RGB changes, six opened spans, SHA-256 `5489AA16D0AE7745D44ACC9DA7BD610F48690B52D9C74B32CD774AAD444BF0A7`.
+- Repaired runtime LoD routing: capital now mounts lower-resolution I20 at the registered capital socket; site and close mount I19; close alone adds I17. The train remains absent/deferred.
+- Live fixed-view evidence:
+  - capital DOM assets: `I20` only;
+  - D06 site DOM assets: `I19` only, with native water visible through the west spans;
+  - D06 close DOM assets: `I19,I17`, with native water visible through the undercroft;
+  - D06 site/close foliage count `0` and free-detail cohort count `0`, preserving proof isolation.
+- The LFX02 upper-cliff ImageGen lane exhausted 2/2 calls and was rejected: wrong dimensions/mode, opaque checkerboard, reproduced city content or oversized freestanding wall, and ineffective registration. Nothing was promoted.
+- Added an invariant test for the I20 -> I19 -> I19+I17 station progression and alpha preservation. Focused R3/LoD tests pass `20/20`; typecheck and focused ESLint pass. The full suite passes `182/184` with `2` declared skips and `0` failures; the production build passes with only the pre-existing chunk-size advisory.
+- Test-policy classification: two failed invocations without `--experimental-strip-types` were environmental command errors (`tsx` absent / Node did not strip `.ts`); the supported Node 22 invocation passed all focused tests. No prior test or intent contract changed.
+
+### Concerns, pivots, and tasks left
+
+- I19 is a conservative alpha repair, not a full station redraw. It opens the water path and materially improves the collision, but the platform remains a large engineered terrace. Keep it review-only until broader free-camera checks confirm the station scale and shore contact.
+- The failed LFX02 result invalidates the same whole-canvas ImageGen approach for the upper rear cliff. The next attempt must be a materially different, tighter land-fix method or reuse registered native cliff material; do not rerun the failed prompt.
+- The parent city plate remains soft at close. Add registered additive texture, lighting, contact/shadow, circulation/fabric, prop, and district cohorts without restoring overlapping full-building cutouts.
+- The manifest authority still names I13/I16 while the R3 review renderer mounts I20/I19. If live review accepts these assets, update the representation/asset manifests and production variants together instead of leaving review-path duplication.
+- Run free-camera station/water checks before accepting or manifest-promoting I19/I20.
+
+### Exact next action
+
+Inspect the I19 station/water transition in free-camera close views, then either accept the conservative support repair for this checkpoint or keep it quarantined and define a tighter geometry-only revision before manifest promotion.
