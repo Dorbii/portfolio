@@ -112,6 +112,45 @@ test("WFX01 adds support-localized water detail only at site and close", async (
   assert.equal(componentEdgePixels, 0);
 });
 
+test("CFX01 adds parent-derived fabric detail only at site and close", async () => {
+  const rendererSource = await readFile(new URL(
+    "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
+    import.meta.url,
+  ), "utf8");
+  assert.match(rendererSource, /closeFabricVisible = \(tier === "site" \|\| tier === "close"\)[\s\S]*?visibility, "L4_4"/);
+  assert.match(rendererSource, /CFX01-city-close-fabric-detail-r1-alpha\.png/);
+  assert.match(rendererSource, /data-city-asset-id="CFX01"/);
+  assert.match(rendererSource, /opacity=\{tier === "close" \? 1 : 0\.48\}/);
+
+  const [candidate, context, waterMask, d06Mask] = await Promise.all([
+    rgba("/career-world/capitals/ninjaone/city-r3/_review/CFX01-city-close-fabric-detail-r1-alpha.png"),
+    rgba(NINJAONE_CAPITAL_CITY_R3_CONTEXT.path),
+    grayscale("../public/career-world/capitals/ninjaone/city-r3/authority/city-water-registration-mask-r1.png"),
+    grayscale("../art-source/career-world/ninjaone-capital/city-r3/districts/D06-station-rail-mask.png"),
+  ]);
+  assert.deepEqual([candidate.info.width, candidate.info.height], [1448, 1086]);
+
+  let alphaCount = 0;
+  let maximumAlpha = 0;
+  let outsideContext = 0;
+  let waterOverlap = 0;
+  let d06Overlap = 0;
+  for (let index = 0; index < candidate.info.width * candidate.info.height; index += 1) {
+    const alpha = candidate.data[index * 4 + 3];
+    if (alpha === 0) continue;
+    alphaCount += 1;
+    maximumAlpha = Math.max(maximumAlpha, alpha);
+    if (context.data[index * 4 + 3] < 32) outsideContext += 1;
+    if (waterMask.data[index] > 0) waterOverlap += 1;
+    if (d06Mask.data[index] > 0) d06Overlap += 1;
+  }
+  assert.equal(alphaCount, 170_276);
+  assert.equal(maximumAlpha, 104);
+  assert.equal(outsideContext, 0);
+  assert.equal(waterOverlap, 0);
+  assert.equal(d06Overlap, 0);
+});
+
 test("capital context clears D06 for atomic replacement and never repaints registered water", async () => {
   const [context, composite, d06Mask, waterMask] = await Promise.all([
     rgba(NINJAONE_CAPITAL_CITY_R3_CONTEXT.path),

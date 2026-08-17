@@ -37,6 +37,8 @@ const D06_CLOSE_CONTEXT =
   "/career-world/capitals/ninjaone/city-nodes-r2/close/infrastructure/I17-station-close-civic-overlay-r1-alpha.png";
 const CITY_BRIDGE_WATER_DETAIL_REVIEW =
   "/career-world/capitals/ninjaone/city-r3/_review/WFX01-city-bridge-water-detail-r1-alpha.png";
+const CITY_CLOSE_FABRIC_DETAIL_REVIEW =
+  "/career-world/capitals/ninjaone/city-r3/_review/CFX01-city-close-fabric-detail-r1-alpha.png";
 const D06_STATION_REVIEW_SCALE = 0.9;
 const D06_STATION_CLOSE_WIDTH = 846 * D06_STATION_REVIEW_SCALE;
 const D06_STATION_CLOSE_HEIGHT = 564 * D06_STATION_REVIEW_SCALE;
@@ -72,6 +74,8 @@ export function NinjaOneCapitalCityR3({
     "L4_3",
   );
   const closeContextVisible = tier === "close"
+    && isEnvironmentLayerEffectivelyVisible(visibility, "L4_4");
+  const closeFabricVisible = (tier === "site" || tier === "close")
     && isEnvironmentLayerEffectivelyVisible(visibility, "L4_4");
   const nativeFoliageVisible = tier === "close"
     && isEnvironmentLayerEffectivelyVisible(visibility, "L4_6");
@@ -173,6 +177,23 @@ export function NinjaOneCapitalCityR3({
         preserveAspectRatio="none"
         width={width}
       />
+      {closeFabricVisible ? (
+        <image
+          className="ninjaone-capital-city__r3-fabric-detail"
+          data-city-asset-id="CFX01"
+          data-city-child-layer="L4_4"
+          data-city-runtime-status="director-review"
+          data-city-fabric-detail-tier={tier}
+          height={height}
+          href={CITY_CLOSE_FABRIC_DETAIL_REVIEW}
+          mask={registeredDetailVisible
+            ? "url(#ninjaone-capital-city-r3-registered-detail-cutout)"
+            : undefined}
+          opacity={tier === "close" ? 1 : 0.48}
+          preserveAspectRatio="none"
+          width={width}
+        />
+      ) : null}
       {nativeFoliageVisible ? (
         <g mask="url(#ninjaone-capital-city-r3-native-foliage-clip)">
           <NinjaOneCapitalNativeFoliage camera={camera} />
