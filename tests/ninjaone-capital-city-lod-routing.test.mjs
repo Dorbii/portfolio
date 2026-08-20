@@ -9,6 +9,8 @@ import {
   ninjaOneCapitalVisibleCityLayerNodes,
   ninjaOneCapitalVisibleDistrictDetailNodes,
   ninjaOneCapitalVisibleRegisteredDetailNodes,
+  NINJAONE_CAPITAL_D02_DETAIL_ASSET_IDS,
+  NINJAONE_CAPITAL_D02_DETAIL_DISPLAY_WIDTHS,
   NINJAONE_CAPITAL_D05_DETAIL_ASSET_IDS,
   NINJAONE_CAPITAL_D05_DETAIL_DISPLAY_WIDTHS,
   NINJAONE_CAPITAL_CITY_LAYER_NODES,
@@ -186,6 +188,31 @@ test("D05 site and close admit only the five package-registered district sockets
   );
 });
 
+test("D02 site and close admit only the registered dojo ridge sockets", () => {
+  for (const tier of ["site", "close"]) {
+    const nodes = ninjaOneCapitalVisibleDistrictDetailNodes(
+      NINJAONE_CAPITAL_CITY_PROOF_CAMERAS[`d02-${tier}`],
+      tier,
+      ["L4_2", "L4_3"],
+      "D02",
+    );
+    assert.deepEqual(
+      nodes.map(({ assetId }) => assetId).sort(),
+      [...NINJAONE_CAPITAL_D02_DETAIL_ASSET_IDS].sort(),
+    );
+    assert.deepEqual(
+      Object.fromEntries(nodes.map(({ assetId, displayWidth }) => [assetId, displayWidth])),
+      NINJAONE_CAPITAL_D02_DETAIL_DISPLAY_WIDTHS,
+    );
+    assert.ok(nodes.every(({ registrationBinding }) => (
+      registrationBinding.kind === "package-registered-anchor"
+    )));
+    assert.ok(nodes.every((node) => (
+      ninjaOneCapitalCityAssetVariant(node, tier).path.includes(`/${tier}/`)
+    )));
+  }
+});
+
 test("only free-camera site uses the currently registered detail cohort", () => {
   assert.equal(ninjaOneCapitalCityUsesFreeCameraDetailCohort("capital", null), false);
   assert.equal(ninjaOneCapitalCityUsesFreeCameraDetailCohort("site", null), true);
@@ -244,6 +271,14 @@ test("city tiers select explicit district-exclusive representation modes", () =>
     "capital-incremental-context",
   );
   assert.equal(
+    ninjaOneCapitalCityRepresentationMode("site", "D02"),
+    "d02-site-composite",
+  );
+  assert.equal(
+    ninjaOneCapitalCityRepresentationMode("close", "D02"),
+    "d02-close-composite",
+  );
+  assert.equal(
     ninjaOneCapitalCityRepresentationMode("site", "D05"),
     "d05-site-composite",
   );
@@ -277,7 +312,14 @@ test("fixed proof cameras preserve their requested tier and district aspect", ()
       NINJAONE_CAPITAL_CITY_PROOF_TIERS[viewId],
     ));
   }
-  for (const viewId of ["d05-site", "d05-close", "d06-site", "d06-close"]) {
+  for (const viewId of [
+    "d02-site",
+    "d02-close",
+    "d05-site",
+    "d05-close",
+    "d06-site",
+    "d06-close",
+  ]) {
     const camera = NINJAONE_CAPITAL_CITY_PROOF_CAMERAS[viewId];
     assert.ok(Math.abs(camera.span[0] / camera.span[1] - 0.75) < 1e-9);
     const localWidth = camera.span[0] / 0.25 * 1448;
@@ -370,6 +412,10 @@ test("district selection is registered to replacement regions, not visible focal
     y / 1086 / 3,
   ];
   assert.equal(
+    ninjaOneCapitalCityDistrictAtWorldPoint(localToWorld([1333, 300])),
+    "D02",
+  );
+  assert.equal(
     ninjaOneCapitalCityDistrictAtWorldPoint(localToWorld([1056.5, 900])),
     "D06",
   );
@@ -385,6 +431,8 @@ test("district selection is registered to replacement regions, not visible focal
 });
 
 test("proof routes force only their registered district", () => {
+  assert.equal(ninjaOneCapitalCityProofDistrict("d02-site"), "D02");
+  assert.equal(ninjaOneCapitalCityProofDistrict("d02-close"), "D02");
   assert.equal(ninjaOneCapitalCityProofDistrict("d05-site"), "D05");
   assert.equal(ninjaOneCapitalCityProofDistrict("d05-close"), "D05");
   assert.equal(ninjaOneCapitalCityProofDistrict("d06-site"), "D06");
@@ -416,9 +464,21 @@ test("D05 detail atomically replaces five silhouettes without a district plate o
   assert.match(renderer, /deliveryMode="focused-district-progressive-detail"/);
   assert.match(renderer, /focusedDistrict="D05"/);
   assert.match(renderer, /maskOnly/);
-  assert.match(renderer, /d06StationVisible = transportationVisible && focusDistrict !== "D05"/);
+  assert.match(renderer, /focusDistrict === null \|\| focusDistrict === "D06"/);
   assert.doesNotMatch(renderer, /D05-western-skill-terraces-plate/);
   assert.doesNotMatch(renderer, /D05L01/);
+});
+
+test("D02 detail atomically replaces its two registered sockets without a district plate", async () => {
+  const renderer = await readFile(new URL(
+    "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
+    import.meta.url,
+  ), "utf8");
+  assert.match(renderer, /d02DistrictDetailVisible = \(tier === "site" \|\| tier === "close"\)/);
+  assert.match(renderer, /id="ninjaone-capital-city-r3-d02-detail-cutout"/);
+  assert.match(renderer, /focusedDistrict="D02"/);
+  assert.match(renderer, /layerIds=\{d02DistrictDetailLayerIds\}/);
+  assert.doesNotMatch(renderer, /D02-dojo-ridge-plate/);
 });
 
 test("unregistered inferred nodes are quarantined from every fixed LOD proof", () => {
@@ -429,6 +489,8 @@ test("unregistered inferred nodes are quarantined from every fixed LOD proof", (
     ["world", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS.world, null],
     ["territory", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS.territory, null],
     ["capital", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS.capital, null],
+    ["site", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d02-site"], "D02"],
+    ["close", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d02-close"], "D02"],
     ["site", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d05-site"], "D05"],
     ["close", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d05-close"], "D05"],
     ["site", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d06-site"], "D06"],

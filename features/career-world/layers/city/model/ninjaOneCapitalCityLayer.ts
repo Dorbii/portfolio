@@ -446,6 +446,16 @@ const CITY_LAYER_ADMISSION_ORDER: readonly CityLayerId[] = Object.freeze([
   "L4_6",
 ]);
 
+export const NINJAONE_CAPITAL_D02_DETAIL_ASSET_IDS = Object.freeze([
+  "I02",
+  "S13",
+] as const);
+
+export const NINJAONE_CAPITAL_D02_DETAIL_DISPLAY_WIDTHS = Object.freeze({
+  I02: 115,
+  S13: 180,
+} as const);
+
 export const NINJAONE_CAPITAL_D05_DETAIL_ASSET_IDS = Object.freeze([
   "S01",
   "S10",
@@ -517,6 +527,20 @@ export function ninjaOneCapitalVisibleDistrictDetailNodes(
   layerIds: readonly CityLayerId[],
   districtId: NinjaOneCapitalCityDistrictId,
 ): readonly NinjaOneCapitalCityNode[] {
+  if (districtId === "D02") {
+    const nodes = visibleRegisteredDetailNodes(
+      camera,
+      tier,
+      layerIds,
+      new Set(NINJAONE_CAPITAL_D02_DETAIL_ASSET_IDS),
+    );
+    return Object.freeze(nodes.map((node) => Object.freeze({
+      ...node,
+      displayWidth: NINJAONE_CAPITAL_D02_DETAIL_DISPLAY_WIDTHS[
+        node.assetId as keyof typeof NINJAONE_CAPITAL_D02_DETAIL_DISPLAY_WIDTHS
+      ],
+    })));
+  }
   if (districtId !== "D05") return Object.freeze([]);
   const nodes = visibleRegisteredDetailNodes(
     camera,

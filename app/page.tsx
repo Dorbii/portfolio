@@ -20,6 +20,8 @@ function cityProofView(
   return candidate === "world"
     || candidate === "territory"
     || candidate === "capital"
+    || candidate === "d02-site"
+    || candidate === "d02-close"
     || candidate === "d05-site"
     || candidate === "d05-close"
     || candidate === "d06-site"

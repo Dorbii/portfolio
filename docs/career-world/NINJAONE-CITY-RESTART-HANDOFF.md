@@ -400,3 +400,24 @@ Finish the full regression suite, checkpoint the calibrated exact-cutout D05 sli
 ### Exact next action
 
 Keep the dev server running and present `d05-close` and `d05-site` for user review. Use the user's marked defect, if any, as the next bounded repair target.
+
+## 2026-08-20 11:58 CDT
+
+### Remaining-district audit and D02 implementation
+
+- Kept D05 frozen while mechanically auditing the six parent-locked district masks against the 19 package-registered skill anchors. D02 is the smallest remaining district: bbox `[1080,120,1448,456)`, `100,825` mask pixels, one skill anchor (S13) plus registered ridge infrastructure I02. D03 is materially larger (`274,204` pixels/four skill sockets), D04 crosses the central water system (`150,485` pixels/three skill sockets), and D01 is the highest-risk crown (`435,501` pixels/six skill sockets). D05 and D06 remain the completed review slices.
+- A deterministic exact-cutout proof using the existing close S13 and I02 assets passed visual preflight without new art. It reads as one nested ridge compound, keeps the parent cliff/trees/water intact, and does not require the prohibited D02 district plate. Proof: `.codex-tmp/district-audit-r1/D02-existing-nodes-exact-cutout-proof-2x.png`.
+- Added `d02-site` and `d02-close` proof routes, explicit D02 selection and representation modes, and a registered two-socket selector. D02 uses unchanged package anchors and widths: S13 `180`, I02 `115`.
+- D02 site/close now cut exactly the two source-alpha silhouettes from the parent context and render the corresponding site/close assets. Focused D02 excludes D06 station/close overlays, retains native L2-derived foliage, and leaves L2 land/L3 water untouched.
+- The first D02 site camera width (`800`) resolved as close. This was classified as a **real regression** because the declared proof tier disagreed with the central LoD policy; the implementation was corrected to the existing `1080` site width rather than weakening the test. D02 close remains `560` and uses a registered asset-footprint vertical framing within the district selection region.
+- Live D02 site proof mounts exactly S13/I02 plus WFX01/LFX06, with a two-node context mask and no train. Live D02 close mounts the same two nodes, three instances from existing native-tree resources, and no D06 station assets. D05 regression proof remains five nodes/eight native trees/four resources; D06 remains WFX01/LFX06/CFX01/I17/I21 with zero D02/D05 nodes.
+- Focused routing tests pass `17/17`; typecheck, lint, production build, and `git diff --check` pass. Full `npm test` passes `191/193`, with `2` declared skips and `0` failures in `276.369s`. The camera sweep (`138.481s`) and package verifier (`98.927s`) passed and remain classified as environmental test cost.
+
+### Remaining acceptance gates
+
+- Do not call D02 accepted until the full suite passes and the user reviews its site/close progression. If S13/I02 contact or hierarchy is rejected, isolate that registered pair rather than generating or exposing the full district plate.
+- D03 is the next likely district only after D02/D05 feedback; its four-socket eastern-industrial group needs the same deterministic cutout preflight before implementation.
+
+### Exact next action
+
+Checkpoint D02 and preserve both D05 and D02 proof routes for user comparison.

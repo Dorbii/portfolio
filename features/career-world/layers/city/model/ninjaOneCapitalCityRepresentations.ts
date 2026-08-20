@@ -16,10 +16,12 @@ import {
   NINJAONE_ENVIRONMENT_WORLD_SPAN,
 } from "../../terrain/model/ninjaOneEnvironmentProof.ts";
 
-export type NinjaOneCapitalCityDistrictId = "D05" | "D06";
+export type NinjaOneCapitalCityDistrictId = "D02" | "D05" | "D06";
 
 export type NinjaOneCapitalCityRepresentationMode =
   | "capital-incremental-context"
+  | "d02-close-composite"
+  | "d02-site-composite"
   | "d05-close-composite"
   | "d05-site-composite"
   | "d06-close-composite"
@@ -29,6 +31,8 @@ export type NinjaOneCapitalCityRepresentationMode =
 
 export type NinjaOneCapitalCityProofViewId =
   | "capital"
+  | "d02-close"
+  | "d02-site"
   | "d05-close"
   | "d05-site"
   | "d06-close"
@@ -177,6 +181,20 @@ const D06_SELECTION_LOCAL_BOUNDS = Object.freeze({
   ...NINJAONE_CAPITAL_CITY_WHOLE_CITY_PROXY.replacedDistricts[0].maskBounds,
 });
 
+const D02_SELECTION_LOCAL_BOUNDS = Object.freeze({
+  height: 336,
+  left: 1080,
+  top: 120,
+  width: 368,
+});
+
+const D02_PROOF_LOCAL_BOUNDS = Object.freeze({
+  height: 260,
+  left: 1240,
+  top: 230,
+  width: 208,
+});
+
 const D05_SELECTION_LOCAL_BOUNDS = Object.freeze({
   height: 673,
   left: 0,
@@ -185,6 +203,8 @@ const D05_SELECTION_LOCAL_BOUNDS = Object.freeze({
 });
 
 export const NINJAONE_CAPITAL_CITY_PROOF_LOCAL_WIDTHS = Object.freeze({
+  "d02-close": 560,
+  "d02-site": 1080,
   "d05-close": 880,
   "d05-site": 1080,
   "d06-close": 880,
@@ -241,6 +261,14 @@ Readonly<Record<NinjaOneCapitalCityProofViewId, CameraView>> = Object.freeze({
     origin: NINJAONE_ENVIRONMENT_WORLD_ORIGIN,
     span: NINJAONE_ENVIRONMENT_WORLD_SPAN,
   }),
+  "d02-close": registeredDistrictParentCrop(
+    NINJAONE_CAPITAL_CITY_PROOF_LOCAL_WIDTHS["d02-close"],
+    D02_PROOF_LOCAL_BOUNDS,
+  ),
+  "d02-site": registeredDistrictParentCrop(
+    NINJAONE_CAPITAL_CITY_PROOF_LOCAL_WIDTHS["d02-site"],
+    D02_PROOF_LOCAL_BOUNDS,
+  ),
   "d05-close": registeredDistrictParentCrop(
     NINJAONE_CAPITAL_CITY_PROOF_LOCAL_WIDTHS["d05-close"],
     D05_SELECTION_LOCAL_BOUNDS,
@@ -265,6 +293,8 @@ Readonly<Record<NinjaOneCapitalCityProofViewId, CameraView>> = Object.freeze({
 export const NINJAONE_CAPITAL_CITY_PROOF_TIERS:
 Readonly<Record<NinjaOneCapitalCityProofViewId, DetailTierId>> = Object.freeze({
   capital: "capital",
+  "d02-close": "close",
+  "d02-site": "site",
   "d05-close": "close",
   "d05-site": "site",
   "d06-close": "close",
@@ -370,6 +400,7 @@ export function constrainNinjaOneCapitalCityProofCamera(
 export function ninjaOneCapitalCityProofDistrict(
   viewId: NinjaOneCapitalCityProofViewId,
 ): NinjaOneCapitalCityDistrictId | null {
+  if (viewId === "d02-site" || viewId === "d02-close") return "D02";
   if (viewId === "d05-site" || viewId === "d05-close") return "D05";
   if (viewId === "d06-site" || viewId === "d06-close") return "D06";
   return null;
@@ -409,6 +440,12 @@ export function ninjaOneCapitalCityDistrictAtWorldPoint(
     && localX <= right
     && localY >= D06_SELECTION_LOCAL_BOUNDS.top
     && localY <= bottom) return "D06";
+  const d02Right = D02_SELECTION_LOCAL_BOUNDS.left + D02_SELECTION_LOCAL_BOUNDS.width;
+  const d02Bottom = D02_SELECTION_LOCAL_BOUNDS.top + D02_SELECTION_LOCAL_BOUNDS.height;
+  if (localX >= D02_SELECTION_LOCAL_BOUNDS.left
+    && localX <= d02Right
+    && localY >= D02_SELECTION_LOCAL_BOUNDS.top
+    && localY <= d02Bottom) return "D02";
   const d05Right = D05_SELECTION_LOCAL_BOUNDS.left + D05_SELECTION_LOCAL_BOUNDS.width;
   const d05Bottom = D05_SELECTION_LOCAL_BOUNDS.top + D05_SELECTION_LOCAL_BOUNDS.height;
   return localX >= D05_SELECTION_LOCAL_BOUNDS.left
@@ -425,6 +462,8 @@ export function ninjaOneCapitalCityRepresentationMode(
 ): NinjaOneCapitalCityRepresentationMode {
   if (tier === "world") return "world-marker";
   if (tier === "territory") return "world-marker";
+  if (tier === "site" && focusedDistrict === "D02") return "d02-site-composite";
+  if (tier === "close" && focusedDistrict === "D02") return "d02-close-composite";
   if (tier === "site" && focusedDistrict === "D05") return "d05-site-composite";
   if (tier === "close" && focusedDistrict === "D05") return "d05-close-composite";
   if (tier === "site" && focusedDistrict === "D06") return "d06-site-composite";

@@ -87,11 +87,12 @@ export function NinjaOneCapitalCityR3({
     visibility,
     "L4_3",
   );
+  const progressiveDistrictFocused = focusDistrict === "D02" || focusDistrict === "D05";
   const closeContextVisible = tier === "close"
-    && focusDistrict !== "D05"
+    && !progressiveDistrictFocused
     && isEnvironmentLayerEffectivelyVisible(visibility, "L4_4");
   const closeFabricVisible = (tier === "site" || tier === "close")
-    && focusDistrict !== "D05"
+    && !progressiveDistrictFocused
     && isEnvironmentLayerEffectivelyVisible(visibility, "L4_4");
   const centralArchitectureDetailVisible = tier === "close" && focusDistrict === null
     && isEnvironmentLayerEffectivelyVisible(visibility, "L4_4");
@@ -109,12 +110,22 @@ export function NinjaOneCapitalCityR3({
   const d05DistrictDetailVisible = (tier === "site" || tier === "close")
     && focusDistrict === "D05"
     && architectureVisible;
-  const d06StationVisible = transportationVisible && focusDistrict !== "D05";
-  const contextCutoutMask = d05DistrictDetailVisible
-    ? "url(#ninjaone-capital-city-r3-d05-detail-cutout)"
-    : registeredDetailVisible
-      ? "url(#ninjaone-capital-city-r3-registered-detail-cutout)"
-      : undefined;
+  const d02DistrictDetailLayerIds = [
+    ...(architectureVisible ? ["L4_3" as const] : []),
+    ...(transportationVisible ? ["L4_2" as const] : []),
+  ];
+  const d02DistrictDetailVisible = (tier === "site" || tier === "close")
+    && focusDistrict === "D02"
+    && d02DistrictDetailLayerIds.length > 0;
+  const d06StationVisible = transportationVisible
+    && (focusDistrict === null || focusDistrict === "D06");
+  const contextCutoutMask = d02DistrictDetailVisible
+    ? "url(#ninjaone-capital-city-r3-d02-detail-cutout)"
+    : d05DistrictDetailVisible
+      ? "url(#ninjaone-capital-city-r3-d05-detail-cutout)"
+      : registeredDetailVisible
+        ? "url(#ninjaone-capital-city-r3-registered-detail-cutout)"
+        : undefined;
   const d06StationBase = tier === "capital"
     ? D06_CAPITAL_REVIEW_BASE
     : D06_SITE_CLOSE_REVIEW_BASE;
@@ -122,8 +133,8 @@ export function NinjaOneCapitalCityR3({
     <g
       data-city-r3-cohort={tier}
       data-city-r3-foliage-policy="reuse-L2-registered-trees-no-supplemental-urban-atlas"
-      data-city-r3-representation={focusDistrict === "D05"
-        ? "registered-context-plus-progressive-D05"
+      data-city-r3-representation={progressiveDistrictFocused
+        ? `registered-context-plus-progressive-${focusDistrict}`
         : "registered-context-plus-atomic-D06"}
       data-city-r3-train-status="deferred-during-terrain-polish"
     >
@@ -144,6 +155,30 @@ export function NinjaOneCapitalCityR3({
               deliveryMode="registered-progressive-detail"
               focusedDistrict={null}
               layerIds={registeredDetailLayerIds}
+              light={light}
+              maskOnly
+              tier={tier}
+            />
+          </mask>
+        </defs>
+      ) : null}
+      {d02DistrictDetailVisible ? (
+        <defs>
+          <mask
+            height={height}
+            id="ninjaone-capital-city-r3-d02-detail-cutout"
+            maskUnits="userSpaceOnUse"
+            style={{ maskType: "luminance" }}
+            width={width}
+            x={0}
+            y={0}
+          >
+            <rect fill="#fff" height={height} width={width} />
+            <NinjaOneCapitalAssetNodes
+              camera={camera}
+              deliveryMode="focused-district-progressive-detail"
+              focusedDistrict="D02"
+              layerIds={d02DistrictDetailLayerIds}
               light={light}
               maskOnly
               tier={tier}
@@ -201,6 +236,16 @@ export function NinjaOneCapitalCityR3({
           deliveryMode="focused-district-progressive-detail"
           focusedDistrict="D05"
           layerIds={["L4_3"]}
+          light={light}
+          tier={tier}
+        />
+      ) : null}
+      {d02DistrictDetailVisible ? (
+        <NinjaOneCapitalAssetNodes
+          camera={camera}
+          deliveryMode="focused-district-progressive-detail"
+          focusedDistrict="D02"
+          layerIds={d02DistrictDetailLayerIds}
           light={light}
           tier={tier}
         />
