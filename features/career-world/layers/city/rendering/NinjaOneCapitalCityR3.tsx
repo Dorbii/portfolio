@@ -87,7 +87,9 @@ export function NinjaOneCapitalCityR3({
     visibility,
     "L4_3",
   );
-  const progressiveDistrictFocused = focusDistrict === "D02" || focusDistrict === "D05";
+  const progressiveDistrictFocused = focusDistrict === "D02"
+    || focusDistrict === "D03"
+    || focusDistrict === "D05";
   const closeContextVisible = tier === "close"
     && !progressiveDistrictFocused
     && isEnvironmentLayerEffectivelyVisible(visibility, "L4_4");
@@ -117,15 +119,20 @@ export function NinjaOneCapitalCityR3({
   const d02DistrictDetailVisible = (tier === "site" || tier === "close")
     && focusDistrict === "D02"
     && d02DistrictDetailLayerIds.length > 0;
+  const d03DistrictDetailVisible = (tier === "site" || tier === "close")
+    && focusDistrict === "D03"
+    && architectureVisible;
   const d06StationVisible = transportationVisible
     && (focusDistrict === null || focusDistrict === "D06");
   const contextCutoutMask = d02DistrictDetailVisible
     ? "url(#ninjaone-capital-city-r3-d02-detail-cutout)"
-    : d05DistrictDetailVisible
-      ? "url(#ninjaone-capital-city-r3-d05-detail-cutout)"
-      : registeredDetailVisible
-        ? "url(#ninjaone-capital-city-r3-registered-detail-cutout)"
-        : undefined;
+    : d03DistrictDetailVisible
+      ? "url(#ninjaone-capital-city-r3-d03-detail-cutout)"
+      : d05DistrictDetailVisible
+        ? "url(#ninjaone-capital-city-r3-d05-detail-cutout)"
+        : registeredDetailVisible
+          ? "url(#ninjaone-capital-city-r3-registered-detail-cutout)"
+          : undefined;
   const d06StationBase = tier === "capital"
     ? D06_CAPITAL_REVIEW_BASE
     : D06_SITE_CLOSE_REVIEW_BASE;
@@ -179,6 +186,30 @@ export function NinjaOneCapitalCityR3({
               deliveryMode="focused-district-progressive-detail"
               focusedDistrict="D02"
               layerIds={d02DistrictDetailLayerIds}
+              light={light}
+              maskOnly
+              tier={tier}
+            />
+          </mask>
+        </defs>
+      ) : null}
+      {d03DistrictDetailVisible ? (
+        <defs>
+          <mask
+            height={height}
+            id="ninjaone-capital-city-r3-d03-detail-cutout"
+            maskUnits="userSpaceOnUse"
+            style={{ maskType: "luminance" }}
+            width={width}
+            x={0}
+            y={0}
+          >
+            <rect fill="#fff" height={height} width={width} />
+            <NinjaOneCapitalAssetNodes
+              camera={camera}
+              deliveryMode="focused-district-progressive-detail"
+              focusedDistrict="D03"
+              layerIds={["L4_3"]}
               light={light}
               maskOnly
               tier={tier}
@@ -246,6 +277,16 @@ export function NinjaOneCapitalCityR3({
           deliveryMode="focused-district-progressive-detail"
           focusedDistrict="D02"
           layerIds={d02DistrictDetailLayerIds}
+          light={light}
+          tier={tier}
+        />
+      ) : null}
+      {d03DistrictDetailVisible ? (
+        <NinjaOneCapitalAssetNodes
+          camera={camera}
+          deliveryMode="focused-district-progressive-detail"
+          focusedDistrict="D03"
+          layerIds={["L4_3"]}
           light={light}
           tier={tier}
         />

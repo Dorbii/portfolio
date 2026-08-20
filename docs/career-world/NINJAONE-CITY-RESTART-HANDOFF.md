@@ -421,3 +421,27 @@ Keep the dev server running and present `d05-close` and `d05-site` for user revi
 ### Exact next action
 
 Checkpoint D02 and preserve both D05 and D02 proof routes for user comparison.
+
+## 2026-08-20 12:23 CDT
+
+### D03 Eastern Industry review checkpoint
+
+- Deterministically preflighted D03 against its registered mask bbox `[763,252,1448,881)` and the authoritative inland-water mask. The district uses only the four existing registered skill sockets: S07 PostgreSQL, S08 Redis, S09 AWS, and S12 VMware. No ImageGen lane was opened because the existing site/close assets were sufficient.
+- Rejected the inherited display widths during preflight. S09 `235`, S12 `190`, S08 `155`, and S07 `180` produced material collisions; S12 alone repainted `3,016` registered-water pixels and S07 overlapped earlier nodes by `4,369` pixels. The water-safe D03-only widths are S09 `176`, S12 `106`, S08 `116`, and S07 `135`.
+- Added `d03-site` and `d03-close` proof routes, explicit D03 selection and representation modes, and an exact four-socket selector. Both tiers keep the same world footprint while promoting higher-resolution close sources. The parent context is removed only beneath the four calibrated source-alpha silhouettes; the district plate, inferred nodes, generated vegetation, D06 station, and train remain excluded.
+- Added invariant coverage proving the exact D03 cohort and display widths, tier/district exclusivity, deterministic proof cameras, inferred-node quarantine, and zero registered inland-water overlap at alpha threshold `16` for all four rendered silhouettes.
+- The first direct Sharp load of a Windows `file:` URL failed. This was classified as a **test-harness setup failure**, not a design or runtime regression; the test now passes source bytes to Sharp without weakening the asserted image invariant.
+- The prior selection assertion that `[1056.5,700]` returned `null` was classified as **stale/superseded intent** because that coordinate is inside the newly explicit D03 registered bbox. It now resolves to D03. Package provenance, district exclusivity, water preservation, train absence, and inferred-node quarantine remain active regression guards.
+- Live D03 site and close proofs mount exactly S09/S12/S08/S07 plus the accepted WFX01/LFX06 sublayers and no D06/train assets. Close mounts six tree instances from three existing `L2-native-conifer-atlas-reuse` resources. Native land and the inland water passages remain visible between the calibrated structures.
+- Regression proof preserved the prior slices: D05 remains five nodes/eight native trees, D02 remains S13/I02 with three native trees, and D06 remains WFX01/LFX06/CFX01/I17/I21 with zero D02/D03/D05 nodes.
+- Final gates pass: typecheck, lint, production build, `git diff --check`, focused routing tests, and full `npm test`. Full-suite result is `194/196` passed, `2` declared skips, `0` failures in `270.819s`. The exhaustive camera sweep and package-command verifier both passed; their duration remains test cost rather than a regression.
+
+### Remaining acceptance gates
+
+- D03 is ready for user visual review, not yet accepted. Review site and close for scale hierarchy, water clearance, silhouette contact, and whether the four-node eastern-industrial cluster reads as a cohesive district rather than independent cutouts.
+- D02 and D05 remain reviewable and unchanged. D04 is the next bounded candidate only after current visual feedback; it crosses the central water system and needs a separate deterministic preflight. D01 remains last because its crown mask is the largest and highest-risk.
+- The broader city goal remains active. Do not promote the rejected D05 landfix candidates or reopen a generated district plate without a newly isolated defect and Director contract.
+
+### Exact next action
+
+Checkpoint D03, keep the dev server running, and present `d03-close` and `d03-site` beside the preserved D02/D05 proof routes for user review.

@@ -11,6 +11,8 @@ import {
   ninjaOneCapitalVisibleRegisteredDetailNodes,
   NINJAONE_CAPITAL_D02_DETAIL_ASSET_IDS,
   NINJAONE_CAPITAL_D02_DETAIL_DISPLAY_WIDTHS,
+  NINJAONE_CAPITAL_D03_DETAIL_ASSET_IDS,
+  NINJAONE_CAPITAL_D03_DETAIL_DISPLAY_WIDTHS,
   NINJAONE_CAPITAL_D05_DETAIL_ASSET_IDS,
   NINJAONE_CAPITAL_D05_DETAIL_DISPLAY_WIDTHS,
   NINJAONE_CAPITAL_CITY_LAYER_NODES,
@@ -213,6 +215,70 @@ test("D02 site and close admit only the registered dojo ridge sockets", () => {
   }
 });
 
+test("D03 site and close admit only the four water-safe eastern industry sockets", () => {
+  for (const tier of ["site", "close"]) {
+    const nodes = ninjaOneCapitalVisibleDistrictDetailNodes(
+      NINJAONE_CAPITAL_CITY_PROOF_CAMERAS[`d03-${tier}`],
+      tier,
+      ["L4_3"],
+      "D03",
+    );
+    assert.deepEqual(
+      nodes.map(({ assetId }) => assetId).sort(),
+      [...NINJAONE_CAPITAL_D03_DETAIL_ASSET_IDS].sort(),
+    );
+    assert.deepEqual(
+      Object.fromEntries(nodes.map(({ assetId, displayWidth }) => [assetId, displayWidth])),
+      NINJAONE_CAPITAL_D03_DETAIL_DISPLAY_WIDTHS,
+    );
+    assert.ok(nodes.every(({ registrationBinding }) => (
+      registrationBinding.kind === "package-registered-anchor"
+    )));
+    assert.ok(nodes.every((node) => (
+      ninjaOneCapitalCityAssetVariant(node, tier).path.includes(`/${tier}/`)
+    )));
+  }
+});
+
+test("D03 calibrated silhouettes do not repaint registered inland water", async () => {
+  const nodes = ninjaOneCapitalVisibleDistrictDetailNodes(
+    NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d03-close"],
+    "close",
+    ["L4_3"],
+    "D03",
+  );
+  const waterBytes = await readFile(new URL(
+    "../art-source/career-world/ninjaone-capital/city-r3/authority/live-inland-water-authority-mask-r1.png",
+    import.meta.url,
+  ));
+  const { data: water, info: waterInfo } = await sharp(waterBytes)
+    .greyscale().raw().toBuffer({ resolveWithObject: true });
+  for (const node of nodes) {
+    const variant = ninjaOneCapitalCityAssetVariant(node, "close");
+    const height = Math.round(
+      node.displayWidth * node.asset.source.dimensions[1] / node.asset.source.dimensions[0],
+    );
+    const variantBytes = await readFile(new URL(
+      `../public${variant.path}`,
+      import.meta.url,
+    ));
+    const { data, info } = await sharp(variantBytes)
+      .resize(node.displayWidth, height).ensureAlpha().raw()
+      .toBuffer({ resolveWithObject: true });
+    const left = Math.round(node.anchor[0] - node.displayWidth * 0.5);
+    const top = Math.round(node.anchor[1] - height);
+    let waterOverlap = 0;
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 0; x < node.displayWidth; x += 1) {
+        const alpha = data[(y * node.displayWidth + x) * info.channels + 3];
+        const waterIndex = ((top + y) * waterInfo.width + left + x) * waterInfo.channels;
+        if (alpha >= 16 && water[waterIndex] >= 128) waterOverlap += 1;
+      }
+    }
+    assert.equal(waterOverlap, 0, `${node.assetId} overlaps registered water`);
+  }
+});
+
 test("only free-camera site uses the currently registered detail cohort", () => {
   assert.equal(ninjaOneCapitalCityUsesFreeCameraDetailCohort("capital", null), false);
   assert.equal(ninjaOneCapitalCityUsesFreeCameraDetailCohort("site", null), true);
@@ -279,6 +345,14 @@ test("city tiers select explicit district-exclusive representation modes", () =>
     "d02-close-composite",
   );
   assert.equal(
+    ninjaOneCapitalCityRepresentationMode("site", "D03"),
+    "d03-site-composite",
+  );
+  assert.equal(
+    ninjaOneCapitalCityRepresentationMode("close", "D03"),
+    "d03-close-composite",
+  );
+  assert.equal(
     ninjaOneCapitalCityRepresentationMode("site", "D05"),
     "d05-site-composite",
   );
@@ -315,6 +389,8 @@ test("fixed proof cameras preserve their requested tier and district aspect", ()
   for (const viewId of [
     "d02-site",
     "d02-close",
+    "d03-site",
+    "d03-close",
     "d05-site",
     "d05-close",
     "d06-site",
@@ -416,12 +492,16 @@ test("district selection is registered to replacement regions, not visible focal
     "D02",
   );
   assert.equal(
+    ninjaOneCapitalCityDistrictAtWorldPoint(localToWorld([1100, 550])),
+    "D03",
+  );
+  assert.equal(
     ninjaOneCapitalCityDistrictAtWorldPoint(localToWorld([1056.5, 900])),
     "D06",
   );
   assert.equal(
     ninjaOneCapitalCityDistrictAtWorldPoint(localToWorld([1056.5, 700])),
-    null,
+    "D03",
   );
   assert.equal(
     ninjaOneCapitalCityDistrictAtWorldPoint(localToWorld([400, 900])),
@@ -433,6 +513,8 @@ test("district selection is registered to replacement regions, not visible focal
 test("proof routes force only their registered district", () => {
   assert.equal(ninjaOneCapitalCityProofDistrict("d02-site"), "D02");
   assert.equal(ninjaOneCapitalCityProofDistrict("d02-close"), "D02");
+  assert.equal(ninjaOneCapitalCityProofDistrict("d03-site"), "D03");
+  assert.equal(ninjaOneCapitalCityProofDistrict("d03-close"), "D03");
   assert.equal(ninjaOneCapitalCityProofDistrict("d05-site"), "D05");
   assert.equal(ninjaOneCapitalCityProofDistrict("d05-close"), "D05");
   assert.equal(ninjaOneCapitalCityProofDistrict("d06-site"), "D06");
@@ -481,6 +563,17 @@ test("D02 detail atomically replaces its two registered sockets without a distri
   assert.doesNotMatch(renderer, /D02-dojo-ridge-plate/);
 });
 
+test("D03 detail atomically replaces four calibrated silhouettes without a district plate", async () => {
+  const renderer = await readFile(new URL(
+    "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
+    import.meta.url,
+  ), "utf8");
+  assert.match(renderer, /d03DistrictDetailVisible = \(tier === "site" \|\| tier === "close"\)/);
+  assert.match(renderer, /id="ninjaone-capital-city-r3-d03-detail-cutout"/);
+  assert.match(renderer, /focusedDistrict="D03"/);
+  assert.doesNotMatch(renderer, /D03-eastern-industry-plate/);
+});
+
 test("unregistered inferred nodes are quarantined from every fixed LOD proof", () => {
   assert.ok(NINJAONE_CAPITAL_CITY_LAYER_NODES.some(
     ({ representationClass }) => representationClass === "unregistered-close-candidate",
@@ -491,6 +584,8 @@ test("unregistered inferred nodes are quarantined from every fixed LOD proof", (
     ["capital", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS.capital, null],
     ["site", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d02-site"], "D02"],
     ["close", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d02-close"], "D02"],
+    ["site", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d03-site"], "D03"],
+    ["close", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d03-close"], "D03"],
     ["site", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d05-site"], "D05"],
     ["close", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d05-close"], "D05"],
     ["site", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d06-site"], "D06"],

@@ -456,6 +456,20 @@ export const NINJAONE_CAPITAL_D02_DETAIL_DISPLAY_WIDTHS = Object.freeze({
   S13: 180,
 } as const);
 
+export const NINJAONE_CAPITAL_D03_DETAIL_ASSET_IDS = Object.freeze([
+  "S07",
+  "S08",
+  "S09",
+  "S12",
+] as const);
+
+export const NINJAONE_CAPITAL_D03_DETAIL_DISPLAY_WIDTHS = Object.freeze({
+  S07: 135,
+  S08: 116,
+  S09: 176,
+  S12: 106,
+} as const);
+
 export const NINJAONE_CAPITAL_D05_DETAIL_ASSET_IDS = Object.freeze([
   "S01",
   "S10",
@@ -538,6 +552,20 @@ export function ninjaOneCapitalVisibleDistrictDetailNodes(
       ...node,
       displayWidth: NINJAONE_CAPITAL_D02_DETAIL_DISPLAY_WIDTHS[
         node.assetId as keyof typeof NINJAONE_CAPITAL_D02_DETAIL_DISPLAY_WIDTHS
+      ],
+    })));
+  }
+  if (districtId === "D03") {
+    const nodes = visibleRegisteredDetailNodes(
+      camera,
+      tier,
+      layerIds,
+      new Set(NINJAONE_CAPITAL_D03_DETAIL_ASSET_IDS),
+    );
+    return Object.freeze(nodes.map((node) => Object.freeze({
+      ...node,
+      displayWidth: NINJAONE_CAPITAL_D03_DETAIL_DISPLAY_WIDTHS[
+        node.assetId as keyof typeof NINJAONE_CAPITAL_D03_DETAIL_DISPLAY_WIDTHS
       ],
     })));
   }

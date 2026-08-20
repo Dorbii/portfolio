@@ -22,6 +22,8 @@ function cityProofView(
     || candidate === "capital"
     || candidate === "d02-site"
     || candidate === "d02-close"
+    || candidate === "d03-site"
+    || candidate === "d03-close"
     || candidate === "d05-site"
     || candidate === "d05-close"
     || candidate === "d06-site"
