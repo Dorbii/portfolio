@@ -561,7 +561,7 @@ const manifest = {
       layerId: "L4_2",
       role: "open-undercroft-site-close-station",
       tiers: ["site", "close"],
-      placement: { anchor: [1056.5, 1086], baseSize: [783, 587], scale: 0.82 },
+      placement: { anchor: [1056.5, 1086], baseSize: [783, 587], scale: 0.72 },
       asset: await artifact(outputs.stationSiteClose),
     },
   ],

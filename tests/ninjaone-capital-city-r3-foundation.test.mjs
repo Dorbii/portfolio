@@ -471,7 +471,7 @@ test("station LoD promotes train-free I20 at capital and open-undercroft I21 at 
   assert.deepEqual(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I21.placement, {
     anchor: [1056.5, 1086],
     baseSize: [783, 587],
-    scale: 0.82,
+    scale: 0.72,
   });
 
   const [capital, capitalSource, siteClose, siteCloseSource] = await Promise.all([
@@ -500,4 +500,50 @@ test("station LoD promotes train-free I20 at capital and open-undercroft I21 at 
   assert.equal(capitalAlphaDifferences, 0);
   assert.equal(siteCloseAlphaExpansion, 0);
   assert.equal(siteCloseAlphaReduction, 38_927);
+
+  const siteClosePlacement = NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I21.placement;
+  const capitalPlacement = NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I20.placement;
+  const renderedSiteCloseWidth = Math.round(
+    siteClosePlacement.baseSize[0] * siteClosePlacement.scale,
+  );
+  const renderedSiteCloseHeight = Math.round(
+    siteClosePlacement.baseSize[1] * siteClosePlacement.scale,
+  );
+  const renderedCapitalWidth = capitalPlacement.baseSize[0] * capitalPlacement.scale;
+  assert.ok(renderedSiteCloseWidth / renderedCapitalWidth >= 0.9);
+  assert.ok(renderedSiteCloseWidth / renderedCapitalWidth <= 1.1);
+
+  const stationBytes = await readFile(new URL(
+    `../public${NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I21.asset.path}`,
+    import.meta.url,
+  ));
+  const [{ data: placedStation }, registeredWater] = await Promise.all([
+    sharp(stationBytes)
+      .resize(renderedSiteCloseWidth, renderedSiteCloseHeight)
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true }),
+    grayscale(
+      `../public${NINJAONE_CAPITAL_CITY_R3_PROGRESSIVE_WATER_EXCLUSION_MASK.path}`,
+    ),
+  ]);
+  const stationLeft = Math.round(
+    siteClosePlacement.anchor[0] - renderedSiteCloseWidth * 0.5,
+  );
+  const stationTop = NINJAONE_CAPITAL_CITY_R3_ARTBOARD[1] - renderedSiteCloseHeight;
+  let opaqueRegisteredWaterOverlap = 0;
+  for (let y = 0; y < renderedSiteCloseHeight; y += 1) {
+    for (let x = 0; x < renderedSiteCloseWidth; x += 1) {
+      const stationAlpha = placedStation[(y * renderedSiteCloseWidth + x) * 4 + 3];
+      const waterOffset = (stationTop + y) * NINJAONE_CAPITAL_CITY_R3_ARTBOARD[0]
+        + stationLeft + x;
+      if (stationAlpha >= 128 && registeredWater.data[waterOffset] >= 128) {
+        opaqueRegisteredWaterOverlap += 1;
+      }
+    }
+  }
+  assert.ok(
+    opaqueRegisteredWaterOverlap <= 1_800,
+    `I21 must preserve the registered river margin; found ${opaqueRegisteredWaterOverlap} opaque water pixels.`,
+  );
 });

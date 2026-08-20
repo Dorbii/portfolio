@@ -574,3 +574,18 @@ Checkpoint the free-camera LoD fix, then run a reversible D06 station-scale/cont
 
 - D02 is materially closer and now uses the correct tree-node architecture, but user visual acceptance remains required. Any remaining blurry tree is baked parent context without a valid registered R4 replacement socket; do not claim it was converted merely from the group count.
 - Resume the bounded D06 support-width/water-contact repair only after this foliage checkpoint. First use reversible placement evidence; if geometry itself remains defective, issue a new exact high/xHigh asset packet under the ImageGen worker contract.
+
+## 2026-08-20 15:22 CDT
+
+### D06 station footprint and river-margin repair
+
+- Compared the committed I21/I17 site/close placement at `0.82` against controlled `0.76` and `0.72` runtime scales without changing asset alpha, perspective, lighting, camera, socket center, or the train-free source. The `0.82` station remained visibly dominant beside the waterfall; `0.76` reduced the issue but still crowded the channel. Selected `0.72` from live site and close proof.
+- The registered station width changes from about `642px` to `564px` on the 1448 artboard. It remains within 10% of the `610px` capital-LoD footprint, so this is a bounded representation correction rather than arbitrary shrinkage.
+- Mechanical proof against the byte-exact progressive water authority shows opaque station-on-water overlap falls from `3,173` pixels at `0.82` to `1,758` at `0.72`. Added a regression gate requiring no more than `1,800` opaque registered-water pixels and enforcing the 10% capital/site-close footprint tolerance.
+- Live D06 site/close proof shows materially more native terrain and channel around the support, less scale conflict with the waterfall, aligned I17/I21 runtime scale, and the train still deferred. No new asset, ImageGen call, subagent lane, alpha edit, or context-mask relaxation was used.
+- Gates pass for the exact checkpoint state: R3 builder, typecheck, focused R3/LoD suites (`40/40`), lint, production build, `git diff --check`, and the retained full repository suite with process exit `0`.
+
+### Remaining visual acceptance
+
+- D02 native foliage and D06 support footprint are ready for user review, not user-accepted. The full city goal remains active until the user accepts the integrated normal-camera result or marks the next defect.
+- If the D06 support still reads too wide after this bounded scale correction, placement has reached its useful limit. The next step is a new high/xHigh asset packet targeting only the I21 lower support/undercroft silhouette; do not shrink the whole station further or broaden the water mask.
