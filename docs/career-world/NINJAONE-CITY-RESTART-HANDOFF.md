@@ -589,3 +589,9 @@ Checkpoint the free-camera LoD fix, then run a reversible D06 station-scale/cont
 
 - D02 native foliage and D06 support footprint are ready for user review, not user-accepted. The full city goal remains active until the user accepts the integrated normal-camera result or marks the next defect.
 - If the D06 support still reads too wide after this bounded scale correction, placement has reached its useful limit. The next step is a new high/xHigh asset packet targeting only the I21 lower support/undercroft silhouette; do not shrink the whole station further or broaden the water mask.
+
+### Added goal item from user review (do not pivot before I22 verdict)
+
+- Preserve the land-first treatment visible around D06 as the target pattern for another close district shown in user screenshot `codex-clipboard-139dfabe-2646-4a53-b26e-be6112b9c2fc.png`: keep the promoted architecture node, but stop relying on the baked district terrain and baked trees merely to make the node read.
+- Repair that district after the current D06 support lane by exposing the authoritative native land wherever no city-specific incline, contact mass, or feature is required; replace any needed close foliage with the existing registered L2 tree-node pipeline rather than adding more baked/generated trees; add only a reversible city-owned landscape/contact transition where the building cannot ground directly to native land.
+- Acceptance requires the node to read as built into the same land layer, not floating over a blurred duplicate city/forest plate. Do not remove the architecture node, alter L2/L3 authority, or start this repair before the I22 D06 worker verdict.
