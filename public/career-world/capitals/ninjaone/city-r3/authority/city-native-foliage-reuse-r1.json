@@ -119,19 +119,7 @@
       "sourceContext": "/career-world/capitals/ninjaone/city-r3/foundation/city-context-capital-without-d06-r1-alpha.png",
       "instances": [
         {
-          "id": "c1-native-conifer-020-instance"
-        },
-        {
-          "id": "c1-native-conifer-024-instance"
-        },
-        {
-          "id": "c1-native-conifer-029-instance"
-        },
-        {
           "id": "c1-native-conifer-031-instance"
-        },
-        {
-          "id": "c1-native-conifer-037-instance"
         },
         {
           "id": "c1-native-conifer-038-instance"
@@ -149,10 +137,16 @@
           "id": "c1-native-conifer-054-instance"
         },
         {
+          "id": "c1-native-conifer-055-instance"
+        },
+        {
           "id": "c1-native-conifer-060-instance"
         },
         {
           "id": "c1-native-conifer-063-instance"
+        },
+        {
+          "id": "c1-native-conifer-064-instance"
         }
       ]
     }

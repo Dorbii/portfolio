@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import nativeFoliageReuseManifest from "../../../../../public/career-world/capitals/ninjaone/city-r3/authority/city-native-foliage-reuse-r1.json" with { type: "json" };
 import type { CameraView } from "../../../shared/camera";
 import {
@@ -8,9 +8,14 @@ import {
 import {
   NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES,
   NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS,
+  environmentFoliageCameraArtboardView,
   selectNinjaOneEnvironmentFoliageInstances,
-  type NinjaOneEnvironmentFoliageResource,
 } from "../../terrain/detail/model/ninjaOneEnvironmentFoliage";
+import {
+  NinjaOneEnvironmentFoliageGroup,
+  ninjaOneEnvironmentFoliageAtlasImageId,
+} from "../../terrain/detail/components/NinjaOneEnvironmentFoliage";
+import { NinjaOneEnvironmentFoliageCanvas } from "../../terrain/detail/components/NinjaOneEnvironmentFoliageCanvas";
 
 const APPROVED_NATIVE_FOLIAGE_INSTANCE_IDS = new Set(
   nativeFoliageReuseManifest.instances.map(({ id }) => id),
@@ -19,10 +24,6 @@ const D02_REGISTERED_NATIVE_FOLIAGE_INSTANCE_IDS = new Set([
   ...APPROVED_NATIVE_FOLIAGE_INSTANCE_IDS,
   ...nativeFoliageReuseManifest.districtInstances.D02.instances.map(({ id }) => id),
 ]);
-
-function atlasImageId(resource: NinjaOneEnvironmentFoliageResource): string {
-  return `ninjaone-capital-native-foliage-${resource.id.replaceAll(/[^a-z0-9_-]/gi, "-")}`;
-}
 
 export function NinjaOneCapitalNativeFoliage({ camera, focusDistrict }: {
   readonly camera: CameraView;
@@ -48,6 +49,19 @@ export function NinjaOneCapitalNativeFoliage({ camera, focusDistrict }: {
       instance.atlasResource,
     ])).values(),
   ], [instances]);
+  const artboardCamera = useMemo(
+    () => environmentFoliageCameraArtboardView(camera),
+    [camera],
+  );
+  const [canvasReady, setCanvasReady] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReduceMotion(mediaQuery.matches);
+    update();
+    mediaQuery.addEventListener("change", update);
+    return () => mediaQuery.removeEventListener("change", update);
+  }, []);
   if (instances.length === 0) return null;
 
   return (
@@ -56,6 +70,7 @@ export function NinjaOneCapitalNativeFoliage({ camera, focusDistrict }: {
       data-city-native-tree-count={instances.length}
       data-city-native-tree-resource-count={resources.length}
       data-city-tree-source="L2-native-conifer-atlas-reuse"
+      data-city-tree-structure="shared-neutralization-plus-animated-canopy"
       pointerEvents="none"
     >
       <defs>
@@ -64,31 +79,37 @@ export function NinjaOneCapitalNativeFoliage({ camera, focusDistrict }: {
             data-shared-resource={resource.id}
             height={resource.dimensions[1]}
             href={resource.path}
-            id={atlasImageId(resource)}
+            id={ninjaOneEnvironmentFoliageAtlasImageId(resource)}
             key={resource.id}
             preserveAspectRatio="none"
             width={resource.dimensions[0]}
           />
         ))}
       </defs>
-      {instances.map((instance) => {
-        const [frameX, frameY, frameWidth, frameHeight] = instance.canopyAtlasRect;
-        return (
-          <svg
-            data-city-native-tree-instance={instance.id}
-            height={instance.artboardBounds.span[1]}
-            key={instance.id}
-            overflow="hidden"
-            preserveAspectRatio="none"
-            viewBox={`${frameX} ${frameY} ${frameWidth} ${frameHeight}`}
-            width={instance.artboardBounds.span[0]}
-            x={instance.artboardBounds.origin[0]}
-            y={instance.artboardBounds.origin[1]}
-          >
-            <use href={`#${atlasImageId(instance.atlasResource)}`} />
-          </svg>
-        );
-      })}
+      {instances.map((instance) => (
+        <g data-city-native-tree-instance={instance.id} key={instance.id}>
+          <NinjaOneEnvironmentFoliageGroup
+            instance={instance}
+            showCanopyFallback={!canvasReady}
+          />
+        </g>
+      ))}
+      <foreignObject
+        className="ninjaone-environment-native-detail__foliage-viewport"
+        height={artboardCamera.span[1]}
+        pointerEvents="none"
+        width={artboardCamera.span[0]}
+        x={artboardCamera.origin[0]}
+        y={artboardCamera.origin[1]}
+      >
+        <NinjaOneEnvironmentFoliageCanvas
+          atlases={resources}
+          camera={artboardCamera}
+          instances={instances}
+          motionEnabled={!reduceMotion}
+          onReadyChange={setCanvasReady}
+        />
+      </foreignObject>
     </g>
   );
 }

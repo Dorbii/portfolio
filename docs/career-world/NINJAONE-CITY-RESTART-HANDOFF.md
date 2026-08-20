@@ -558,3 +558,19 @@ Commit this D04 recovery checkpoint, keep the development server running on `htt
 ### Exact next action
 
 Checkpoint the free-camera LoD fix, then run a reversible D06 station-scale/contact proof. Promote a placement change only if live site/close views improve water clearance without exposing the D06 context cutout or breaking the fixed station socket.
+
+## 2026-08-20 15:02 CDT
+
+### D02 native foliage pipeline correction
+
+- User review correctly rejected the apparent D02 tree replacement. The runtime claimed 15 mounted L2 trees, but the city-specific renderer bypassed the established L2 node structure: it painted only raw canopy atlas frames, without the registered neutralization underlay or the animated WebGL canopy pass. That left the blurred baked canopy underneath and created the reported contrast mismatch.
+- Audited every D02 registration against the exact R4 atlas alpha. Four registered IDs (`020`, `024`, `029`, and `037`) had zero-alpha canopy and neutralization frames and therefore could never paint a tree despite being counted as mounted. Removed those false registrations and added valid baked-position instances `055` and `064`. The D02-specific registration is now 10 valid sockets; the close proof selects 13 valid native trees after the general admitted cohort is included.
+- Reused the actual shared L2 foliage group implementation rather than maintaining a city-only approximation. D02 close now paints each registered neutralization underlay, then replaces it with the same native canopy nodes through the existing WebGL2 renderer. Live runtime evidence reports `13` groups, `13` neutralization underlays, `webgl2-ready`, and animation running. Site/capital still add no close-tree cohort.
+- Added a durable regression gate that opens every D02 canopy and neutralization atlas frame and rejects a registered frame with zero nontransparent pixels. This prevents a manifest count from being treated as visual evidence again.
+- The unrelated D06 `0.72` station-scale experiment was never built or accepted and was restored to the committed `0.82` placement before rebuilding the foliage authority. D06 remains the next unresolved visual repair; this D02 checkpoint does not claim station progress.
+- Gates pass: R3 builder, typecheck, focused R3/LoD suites (`40/40`), lint, production build, `git diff --check`, and the full repository suite with zero failures. The live development server remains on `http://localhost:3000` with `d02-close` open for review.
+
+### Remaining work
+
+- D02 is materially closer and now uses the correct tree-node architecture, but user visual acceptance remains required. Any remaining blurry tree is baked parent context without a valid registered R4 replacement socket; do not claim it was converted merely from the group count.
+- Resume the bounded D06 support-width/water-contact repair only after this foliage checkpoint. First use reversible placement evidence; if geometry itself remains defective, issue a new exact high/xHigh asset packet under the ImageGen worker contract.

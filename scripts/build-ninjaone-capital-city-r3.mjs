@@ -430,18 +430,16 @@ await writePng(outputs.capitalContext, sharp(capitalContext, {
 const foliageManifest = JSON.parse(await readFile(source.foliageManifest, "utf8"));
 const nativeFoliageReuse = await analyzeNativeFoliageReuse(capitalContext, foliageManifest);
 const d02RegisteredNativeFoliageInstanceIds = Object.freeze([
-  "c1-native-conifer-020-instance",
-  "c1-native-conifer-024-instance",
-  "c1-native-conifer-029-instance",
   "c1-native-conifer-031-instance",
-  "c1-native-conifer-037-instance",
   "c1-native-conifer-038-instance",
   "c1-native-conifer-041-instance",
   "c1-native-conifer-042-instance",
   "c1-native-conifer-053-instance",
   "c1-native-conifer-054-instance",
+  "c1-native-conifer-055-instance",
   "c1-native-conifer-060-instance",
   "c1-native-conifer-063-instance",
+  "c1-native-conifer-064-instance",
 ]);
 await mkdir(path.dirname(outputs.nativeFoliageReuseManifest), { recursive: true });
 await writeFile(outputs.nativeFoliageReuseManifest, `${JSON.stringify({

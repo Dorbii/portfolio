@@ -33,7 +33,9 @@ function resourceKey(resource: NinjaOneEnvironmentFoliageResource): string {
   return `${resource.id}\t${resource.path}#sha256=${resource.sha256}`;
 }
 
-function foliageAtlasImageId(resource: NinjaOneEnvironmentFoliageResource): string {
+export function ninjaOneEnvironmentFoliageAtlasImageId(
+  resource: NinjaOneEnvironmentFoliageResource,
+): string {
   return `ninjaone-pooled-foliage-${resource.id.replaceAll(/[^a-z0-9_-]/gi, "-")}`;
 }
 
@@ -75,14 +77,14 @@ function FoliageAtlasFrame({
   );
 }
 
-function FoliageGroup({
+export function NinjaOneEnvironmentFoliageGroup({
   instance,
   showCanopyFallback,
 }: {
   readonly instance: NinjaOneEnvironmentFoliageInstance;
   readonly showCanopyFallback: boolean;
 }) {
-  const atlasImageId = foliageAtlasImageId(instance.atlasResource);
+  const atlasImageId = ninjaOneEnvironmentFoliageAtlasImageId(instance.atlasResource);
   return (
     <g
       data-environment-foliage-checkpoint={instance.checkpoint}
@@ -212,7 +214,7 @@ export function NinjaOneEnvironmentFoliage({
               data-shared-resource={atlasResource.id}
               height={atlasResource.dimensions[1]}
               href={atlasResource.path}
-              id={foliageAtlasImageId(atlasResource)}
+              id={ninjaOneEnvironmentFoliageAtlasImageId(atlasResource)}
               key={atlasResource.id}
               onError={() => residency.recordResourceError(
                 residency.cohortEpoch,
@@ -229,7 +231,7 @@ export function NinjaOneEnvironmentFoliage({
         </defs>
       ) : null}
       {residency.cohortMounted ? instances.map((instance) => (
-        <FoliageGroup
+        <NinjaOneEnvironmentFoliageGroup
           instance={instance}
           key={`${residency.cohortEpoch}:${instance.id}`}
           showCanopyFallback={!canvasReady}

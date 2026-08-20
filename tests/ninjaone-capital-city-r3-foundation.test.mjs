@@ -352,6 +352,9 @@ test("close city foliage reuses the registered L2 native conifer atlases", async
   assert.match(rendererSource, /tier === "close"[\s\S]*?visibility, "L4_6"/);
   assert.match(foliageSource, /selectNinjaOneEnvironmentFoliageInstances/);
   assert.match(foliageSource, /L2-native-conifer-atlas-reuse/);
+  assert.match(foliageSource, /NinjaOneEnvironmentFoliageGroup/);
+  assert.match(foliageSource, /NinjaOneEnvironmentFoliageCanvas/);
+  assert.match(foliageSource, /shared-neutralization-plus-animated-canopy/);
   assert.doesNotMatch(foliageSource, /city-nodes-r2[\\/]foliage/);
   assert.equal(reuseManifest.sourceFoliageManifestId, "career-world/capitals/ninjaone/foliage@r6");
   assert.ok(reuseManifest.instances.length > 0);
@@ -395,7 +398,7 @@ test("close city foliage reuses the registered L2 native conifer atlases", async
     d02Registration.method,
     "existing-L2-tree-node-positions-registered-to-baked-D02-ridge-foliage",
   );
-  assert.equal(d02Registration.instances.length, 12);
+  assert.equal(d02Registration.instances.length, 10);
   const sourceFoliageIds = new Set(
     NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.map(({ id }) => id),
   );
@@ -404,6 +407,35 @@ test("close city foliage reuses the registered L2 native conifer atlases", async
     ...d02Registration.instances.map(({ id }) => id),
   ]);
   assert.ok(d02Registration.instances.every(({ id }) => sourceFoliageIds.has(id)));
+  for (const { id } of d02Registration.instances) {
+    const sourceInstance = NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.find(
+      (instance) => instance.id === id,
+    );
+    assert.ok(sourceInstance?.neutralizationAtlasRect);
+    const atlasBytes = await readFile(new URL(
+      `../public${sourceInstance.atlasResource.path.split("?")[0]}`,
+      import.meta.url,
+    ));
+    for (const [frameKind, rect] of [
+      ["canopy", sourceInstance.canopyAtlasRect],
+      ["neutralization", sourceInstance.neutralizationAtlasRect],
+    ]) {
+      const [left, top, width, height] = rect;
+      const { data } = await sharp(atlasBytes)
+        .extract({ left, top, width, height })
+        .ensureAlpha()
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+      let nontransparentPixels = 0;
+      for (let offset = 3; offset < data.length; offset += 4) {
+        if (data[offset] > 0) nontransparentPixels += 1;
+      }
+      assert.ok(
+        nontransparentPixels > 0,
+        `${id} must not register an empty ${frameKind} atlas frame.`,
+      );
+    }
+  }
   const d02Trees = selectNinjaOneEnvironmentFoliageInstances(
     NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d02-close"],
     true,
