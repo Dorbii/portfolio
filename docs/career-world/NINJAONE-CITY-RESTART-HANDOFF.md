@@ -620,3 +620,24 @@ Checkpoint the free-camera LoD fix, then run a reversible D06 station-scale/cont
 - Uncommitted tracer edits: builder, foundation manifest/model, D03 runtime mask consumption, shared native foliage registration, and focused tests; one new generated runtime mask exists under `public/.../authority/` but is not yet accepted.
 - Dev server remains healthy at `http://localhost:3000/` and must stay running.
 - Next action: wait for the D03M01 worker, independently verify its gates and visual proofs, promote only a conforming BEST candidate, rebuild the manifest, then inspect fixed D03 site/close and normal free-camera transitions before committing.
+
+## Crash-safe checkpoint — 2026-08-20 16:35 CDT
+
+### D03M01 runtime rejection and diagnosis pivot
+
+- The first xHigh D03 worker returned two deterministic context-retention masks with passing static gates. Candidate 1 retained `38.47%` of D03 context and Candidate 2 retained `26.66%`; no ImageGen call was used. Director runtime proof rejected **both** candidates.
+- In the actual SVG renderer, each retained source region became a large blurry oval or road-shaped island over authoritative native land. Candidate 2 reduced the number of islands but preserved the same defect. This disproves the context-threshold/extraction approach; changing the threshold again is not a valid next attempt.
+- Authoritative live evidence is saved at `.codex-tmp/city-restart-r1/imagegen/D03-land-first-context-extraction/director-runtime-stable-baseline.png` and `director-runtime-candidate2-reject.png`. The worker's proof-only scaling of 2880x2160 and 1440x1080 references to the 1448x1086 artboard was insufficient to predict real runtime registration.
+- The live renderer was restored to the stable pre-mask D03 cutout while the replacement lane runs. The accepted D03 native foliage work remains: 16 D03-specific existing L2 registrations, 20 admitted/shared groups in the close tracer, shared neutralization underlays, animated WebGL canopy nodes, and no generated city tree art.
+
+### Replacement layer split now active
+
+- New xHigh lane `/root/d03_land_first_layer_split` is producing at most two quarantine-only bundles. Each bundle has a continuous full-D03 exclusion mask (`D03M02-city-full-context-exclusion-r1`) plus a separate narrow transparent L4_1 road/platform/retaining/contact overlay (`D03L01-city-contact-road-transition-r1-alpha`).
+- The exclusion mask must have no internal retention islands. The contact overlay may preserve only source-derived connective fabric near S07, S08, S09, and S12; it must contain no baked terrain, cliffs, water, forests, tree filler, or architecture-node pixels. Existing L2/L3 land and water remain authoritative.
+- The worker received both failed live captures as negative references and may not claim static proof as runtime acceptance. Director acceptance still requires real D03 site and close inspection plus normal-camera transition proof.
+
+### Worktree/evidence concern and exact recovery action
+
+- The untracked accepted-source path currently contains rejected Candidate 1 while the untracked public path contains rejected Candidate 2 from the controlled live comparison; the generated manifest still names Candidate 1. Runtime no longer mounts either file, but source/public/manifest hashes are temporarily inconsistent. Do not build, test, stage, or commit this state as a valid authority.
+- Preserve the uncommitted D03 native-tree code and tests. When the new bundle returns, independently verify it, wire it temporarily into the actual renderer, and reject it if any blurry island, district polygon seam, floating node, broad land cover, or duplicate foliage remains.
+- Only after a live-accepted bundle exists: promote both assets, make builder/source/public/manifest hashes consistent, mount the contact overlay on L4_1 for D03 site/close only, run builder + focused tests + typecheck + lint + production build + diff check + full suite, then checkpoint and leave the development server on the review-ready D03 view.
