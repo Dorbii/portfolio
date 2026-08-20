@@ -352,3 +352,28 @@ Align the stale composition manifest with the accepted R3 LoD contract while pre
 ### Exact next action
 
 Treat this checkpoint as the accepted stationary-city baseline. The next independent feature, if requested, is train extraction/animation with its own LoD and socket proof; no stationary-city repair remains open.
+
+## 2026-08-20 11:06 CDT
+
+### Recovery pivot and completed work
+
+- The August 17 completion claim above is superseded by direct user review. The stationary city was not accepted: free-camera site/close still behaved as a mostly flattened parent plate with sparse additive nodes, close building bounds overlapped, non-native vegetation appeared in prior iterations, land/water authority was obscured, and district-level progression was not proven.
+- Re-audited the runtime. Capital, site, and close retain the same `1448x1086` parent context; free-camera site alone admits the package-registered node cohort, while close suppresses it. The intent test grades only capital and weights silhouette/boundary much more heavily than progressive district detail. This explains how the prior gates passed without proving the requested LoD behavior.
+- Chose D05 Western Skill Terraces as the first bounded recovery slice. Its registered mask is `[0,413,691,1086)`. The only package-registered D05 sockets are S01, S10, S11, S15, and S18.
+- Director diagnostics proved two shortcuts invalid. Overlaying those five nodes on the parent yields sharp isolated buildings over softer baked architecture at close; cutting D05 directly to native L2 produces a large unsupported cavity. The missing production dependency is therefore an `L4_1` D05 terrain/circulation/contact layer, not another generic building or microcontrast overlay.
+- Added `d05-site` and `d05-close` proof routes with registered 4:3 cameras, explicit D05 focus, D05 representation modes, and a district selector that admits exactly the five package-registered sockets. D06 and free-camera behavior remains unchanged; D06 station layers are suppressed only in a focused D05 proof. Checkpoint `b2a86c8` (`checkpoint: route progressive D05 city detail`).
+- Focused LoD routing tests pass `14/14`; typecheck, lint, and production build pass. The pre-edit full baseline passes `186/188`, with `2` declared skips and `0` failures. The direct `node --test` attempt without the repo's type-stripping flag was a setup/environment failure; the same focused test passes through the configured loader.
+- Under the accepted test policy, changing the old `[400,900]` selection expectation from `null` to `D05` is **stale/superseded intent** because D05 is now an explicitly registered focus region. Package-anchor provenance, inferred-node quarantine, D06 exclusivity, and fixed-tier camera checks remain active regression guards.
+- Spawned one xHigh ImageGen-contract worker for `D05L01-western-skill-terraces-landfix-r1-alpha`, full-artboard transparent `1448x1086` `L4_1`, maximum two candidates, quarantine only. It may add only retaining mass, terraces, stairs/roads, and contact fabric required by the five sockets; water, buildings, trees, adjacent context, and native land beyond causal support are locked.
+
+### Tasks left, evidence gates, and concerns
+
+- Grade D05L01 mechanically and visually. Reject wrong dimensions/channels, baked backgrounds, outside-D05 alpha, any L3 water overlap, generated vegetation/buildings, broad native-land repainting, seams, or failure to ground all five sockets.
+- If accepted, promote the asset and D05 mask under Director control, register them in the R3 manifest/builder, and render the focused D05 order as native L2/L3 -> city-owned D05 landfix -> parent context outside the D05 cut -> existing native tree reuse -> D05 site/close nodes.
+- Inspect both D05 site and close at multiple pans. The current five node images are not accepted merely because their anchors are registered; if the landfix does not remove the collage reading, isolate and replace only the specific defective node bounds/assets under new xHigh contracts.
+- Add visual/invariant tests for D05 asset dimensions, alpha, mask/water containment, LoD exclusivity, train absence, and existing-tree-only vegetation. Do not weaken the close overlap guard globally.
+- Run the complete typecheck/lint/test/build set after asset integration. Start the dev server only after the Director's live proof passes; user review is still required before declaring the D05 slice accepted.
+
+### Exact next action
+
+Receive the quarantined D05L01 worker result, inspect its exact-order proofs and alpha gates, then either reject it with a specific failure or promote it into the D05 site/close composition for live browser grading.
