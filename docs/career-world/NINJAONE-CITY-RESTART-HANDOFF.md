@@ -641,3 +641,24 @@ Checkpoint the free-camera LoD fix, then run a reversible D06 station-scale/cont
 - The untracked accepted-source path currently contains rejected Candidate 1 while the untracked public path contains rejected Candidate 2 from the controlled live comparison; the generated manifest still names Candidate 1. Runtime no longer mounts either file, but source/public/manifest hashes are temporarily inconsistent. Do not build, test, stage, or commit this state as a valid authority.
 - Preserve the uncommitted D03 native-tree code and tests. When the new bundle returns, independently verify it, wire it temporarily into the actual renderer, and reject it if any blurry island, district polygon seam, floating node, broad land cover, or duplicate foliage remains.
 - Only after a live-accepted bundle exists: promote both assets, make builder/source/public/manifest hashes consistent, mount the contact overlay on L4_1 for D03 site/close only, run builder + focused tests + typecheck + lint + production build + diff check + full suite, then checkpoint and leave the development server on the review-ready D03 view.
+
+## Crash-safe checkpoint — 2026-08-20 17:27 CDT
+
+### Continuous land reveal is live-proven; deterministic contact extraction is closed
+
+- The xHigh D03 layer-split worker finalized **NO-GO** after two deterministic bundles and zero ImageGen calls. Its continuous exclusion mask `D03M02` independently passes: 1448x1086 8-bit grayscale, SHA-256 `260A5FE73EBE31035B8AE4E73A6F6294486AEB47D06F130837C7A009FFC29A45`, 93.92% hard-white D03 coverage, one component, no holes, 7px feather, and zero outside-support pixels.
+- Director wired D03M02 into the real SVG renderer using a linear inverse-luminance mask. Live D03 close proof at `.codex-tmp/city-restart-r1/imagegen/D03-land-first-layer-split/director-runtime-M02-mask-only.png` removes the old blurry D03 terrain/forest plate and retained islands while exposing authoritative native land/water. D03M02 is provisionally accepted for the integrated bundle; outer-boundary polish remains subject to the final contact-layer view.
+- Both deterministic contact overlays are rejected. Candidate 1 passed numeric gates but left the four nodes floating. Candidate 2 either retained baked façade fragments or became fragmented/sub-threshold after conservative removal. Do not promote either overlay or repeat source-threshold extraction.
+
+### Purpose-authored D03L02 contact lane
+
+- New xHigh lane `/root/d03_ground_contact_imagegen` targets only `D03L02-city-grounded-contact-platforms-r1-alpha`: four localized L4_1 industrial/civic contact platforms under S07/S08/S09/S12, site + close only. It cannot alter water, foliage, land, node assets, non-D03 pixels, or add terrain/buildings/trees.
+- ImageGen budget is exhausted at 2/2 calls. Call 1 regenerated the full city and was rejected before extraction. Call 2 produced the correct object class—four low slate/bronze contact platforms—but as RGB with a baked near-white checkerboard. The worker recovered a quarantined RGBA source and is allowed only deterministic matte cleanup, isolation, registration, and validation now.
+- Working candidates fit the intended footprint (`5.62%` and `6.60%` of D03), remain inside the four fixed ROIs, and have zero hard-water, outside-support, and registered-foliage overlap. They are not yet accepted or promoted.
+- Director proof exposed a packet error: requiring zero alpha under each node silhouette carved crescent holes out of platforms and made them look pasted beside buildings. The corrected invariant allows each L4_1 platform to underlap its own immutable L4_3 node only at/below the locked ground line, because the platform renders first and is occluded by the untouched node. Above-ground, other-node, water, and foliage intrusion remain hard-zero.
+
+### Current worktree and exact continuation
+
+- Runtime currently contains the provisional D03M02 inverse-mask wiring and an untracked public mask copy for live proof; no contact overlay is mounted. The browser is therefore an intermediate mask-only state and must not be presented as ready.
+- Preserve the D03 native-tree registration/test work and the provisional D03M02 evidence. Wait for the amended D03L02 worker verdict, independently inspect alpha/halo/perspective and the four socket crops, then mount only a conforming candidate beneath the nodes for actual site + close proof.
+- If matte recovery leaves a white halo, platform geometry reads as four pasted slabs, or runtime grounding remains weak, reject D03L02 and restore the stable baseline rather than relaxing water/foliage/ROI gates. If it passes, promote D03M02 + D03L02, reconcile builder/manifests/source/public hashes, update durable order/containment tests, run the full gate stack, commit, and leave the dev server on D03 close for user review.
