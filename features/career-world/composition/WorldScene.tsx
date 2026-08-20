@@ -21,6 +21,7 @@ import {
   NINJAONE_CAPITAL_CITY_PROOF_TIERS,
   NinjaOneCapitalCityLayer,
   ninjaOneCapitalCityFocusedDistrict,
+  ninjaOneCapitalCityProofDistrict,
   ninjaOneCapitalCityRepresentationMode,
   resolveNinjaOneCapitalDetailState,
   type NinjaOneCapitalCityProofViewId,
@@ -325,9 +326,8 @@ export function WorldScene({
     camera,
     cityProofView ? NINJAONE_CAPITAL_CITY_PROOF_TIERS[cityProofView] : null,
   );
-  const forcedCityDistrict = cityProofView === "d06-site"
-    || cityProofView === "d06-close"
-    ? "D06" as const
+  const forcedCityDistrict = cityProofView
+    ? ninjaOneCapitalCityProofDistrict(cityProofView)
     : null;
   const focusedCityDistrict = ninjaOneCapitalCityFocusedDistrict(
     detailState.tier.id,
@@ -531,7 +531,7 @@ export function WorldScene({
       ) {
         return;
       }
-      if (cityProofView && cityProofView !== "d06-site" && cityProofView !== "d06-close") {
+      if (cityProofView && ninjaOneCapitalCityProofDistrict(cityProofView) === null) {
         return;
       }
       cancelFocusAnimation();
@@ -628,7 +628,7 @@ export function WorldScene({
       className="career-world__viewport"
       data-camera-origin={camera.origin.join(",")}
       data-camera-span={camera.span.join(",")}
-      data-camera-constraint={cityProofView === "d06-site" || cityProofView === "d06-close"
+      data-camera-constraint={cityProofView && ninjaOneCapitalCityProofDistrict(cityProofView)
         ? "ninjaone-environment-bounds"
         : cityProofView
           ? "fixed-proof-camera"

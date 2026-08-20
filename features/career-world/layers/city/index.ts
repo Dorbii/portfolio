@@ -9,7 +9,9 @@ export {
   NINJAONE_CAPITAL_CITY_LAYER_NODES,
   NINJAONE_CAPITAL_CITY_LAYER_WORLD_ORIGIN,
   NINJAONE_CAPITAL_CITY_LAYER_WORLD_SPAN,
+  NINJAONE_CAPITAL_D05_DETAIL_ASSET_IDS,
   ninjaOneCapitalCityAssetVariant,
+  ninjaOneCapitalVisibleDistrictDetailNodes,
   ninjaOneCapitalVisibleCityLayerNodes,
 } from "./model/ninjaOneCapitalCityLayer";
 export {
@@ -22,6 +24,7 @@ export {
   NINJAONE_CAPITAL_CITY_WHOLE_CITY_PROXY,
   ninjaOneCapitalCityDistrictAtWorldPoint,
   ninjaOneCapitalCityFocusedDistrict,
+  ninjaOneCapitalCityProofDistrict,
   ninjaOneCapitalCityRepresentationMode,
   resolveNinjaOneCapitalDetailState,
   type NinjaOneCapitalCityDistrictId,

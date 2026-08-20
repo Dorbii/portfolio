@@ -16,10 +16,12 @@ import {
   NINJAONE_ENVIRONMENT_WORLD_SPAN,
 } from "../../terrain/model/ninjaOneEnvironmentProof.ts";
 
-export type NinjaOneCapitalCityDistrictId = "D06";
+export type NinjaOneCapitalCityDistrictId = "D05" | "D06";
 
 export type NinjaOneCapitalCityRepresentationMode =
   | "capital-incremental-context"
+  | "d05-close-composite"
+  | "d05-site-composite"
   | "d06-close-composite"
   | "d06-site-composite"
   | "territory-proxy"
@@ -27,6 +29,8 @@ export type NinjaOneCapitalCityRepresentationMode =
 
 export type NinjaOneCapitalCityProofViewId =
   | "capital"
+  | "d05-close"
+  | "d05-site"
   | "d06-close"
   | "d06-site"
   | "territory"
@@ -173,7 +177,16 @@ const D06_SELECTION_LOCAL_BOUNDS = Object.freeze({
   ...NINJAONE_CAPITAL_CITY_WHOLE_CITY_PROXY.replacedDistricts[0].maskBounds,
 });
 
+const D05_SELECTION_LOCAL_BOUNDS = Object.freeze({
+  height: 673,
+  left: 0,
+  top: 413,
+  width: 691,
+});
+
 export const NINJAONE_CAPITAL_CITY_PROOF_LOCAL_WIDTHS = Object.freeze({
+  "d05-close": 880,
+  "d05-site": 1080,
   "d06-close": 880,
   "d06-site": 1080,
 });
@@ -195,12 +208,47 @@ function registeredD06ParentCrop(localWidth: number): CameraView {
   });
 }
 
+function registeredDistrictParentCrop(
+  localWidth: number,
+  bounds: Readonly<{ height: number; left: number; top: number; width: number }>,
+): CameraView {
+  const localHeight = localWidth * 0.75;
+  const localLeft = Math.min(
+    1448 - localWidth,
+    Math.max(0, bounds.left + bounds.width * 0.5 - localWidth * 0.5),
+  );
+  const localTop = Math.min(
+    1086 - localHeight,
+    Math.max(0, bounds.top + bounds.height * 0.5 - localHeight * 0.5),
+  );
+  return Object.freeze({
+    origin: Object.freeze([
+      NINJAONE_ENVIRONMENT_WORLD_ORIGIN[0]
+        + localLeft / 1448 * NINJAONE_ENVIRONMENT_WORLD_SPAN[0],
+      NINJAONE_ENVIRONMENT_WORLD_ORIGIN[1]
+        + localTop / 1086 * NINJAONE_ENVIRONMENT_WORLD_SPAN[1],
+    ] as Pair),
+    span: Object.freeze([
+      localWidth / 1448 * NINJAONE_ENVIRONMENT_WORLD_SPAN[0],
+      localHeight / 1086 * NINJAONE_ENVIRONMENT_WORLD_SPAN[1],
+    ] as Pair),
+  });
+}
+
 export const NINJAONE_CAPITAL_CITY_PROOF_CAMERAS:
 Readonly<Record<NinjaOneCapitalCityProofViewId, CameraView>> = Object.freeze({
   capital: Object.freeze({
     origin: NINJAONE_ENVIRONMENT_WORLD_ORIGIN,
     span: NINJAONE_ENVIRONMENT_WORLD_SPAN,
   }),
+  "d05-close": registeredDistrictParentCrop(
+    NINJAONE_CAPITAL_CITY_PROOF_LOCAL_WIDTHS["d05-close"],
+    D05_SELECTION_LOCAL_BOUNDS,
+  ),
+  "d05-site": registeredDistrictParentCrop(
+    NINJAONE_CAPITAL_CITY_PROOF_LOCAL_WIDTHS["d05-site"],
+    D05_SELECTION_LOCAL_BOUNDS,
+  ),
   "d06-close": registeredD06ParentCrop(
     NINJAONE_CAPITAL_CITY_PROOF_LOCAL_WIDTHS["d06-close"],
   ),
@@ -217,6 +265,8 @@ Readonly<Record<NinjaOneCapitalCityProofViewId, CameraView>> = Object.freeze({
 export const NINJAONE_CAPITAL_CITY_PROOF_TIERS:
 Readonly<Record<NinjaOneCapitalCityProofViewId, DetailTierId>> = Object.freeze({
   capital: "capital",
+  "d05-close": "close",
+  "d05-site": "site",
   "d06-close": "close",
   "d06-site": "site",
   territory: "territory",
@@ -310,11 +360,19 @@ export function constrainNinjaOneCapitalCityProofCamera(
   candidate: CameraView,
 ): CameraView {
   const registered = NINJAONE_CAPITAL_CITY_PROOF_CAMERAS[viewId];
-  if (viewId !== "d06-site" && viewId !== "d06-close") return registered;
+  if (ninjaOneCapitalCityProofDistrict(viewId) === null) return registered;
   return constrainCameraViewToBounds(
     { origin: candidate.origin, span: registered.span },
     NINJAONE_ENVIRONMENT_CAMERA_BOUNDS,
   );
+}
+
+export function ninjaOneCapitalCityProofDistrict(
+  viewId: NinjaOneCapitalCityProofViewId,
+): NinjaOneCapitalCityDistrictId | null {
+  if (viewId === "d05-site" || viewId === "d05-close") return "D05";
+  if (viewId === "d06-site" || viewId === "d06-close") return "D06";
+  return null;
 }
 
 export function ninjaOneCapitalCityFocusedDistrict(
@@ -347,11 +405,17 @@ export function ninjaOneCapitalCityDistrictAtWorldPoint(
   ) * 1086;
   const right = D06_SELECTION_LOCAL_BOUNDS.left + D06_SELECTION_LOCAL_BOUNDS.width;
   const bottom = D06_SELECTION_LOCAL_BOUNDS.top + D06_SELECTION_LOCAL_BOUNDS.height;
-  return localX >= D06_SELECTION_LOCAL_BOUNDS.left
+  if (localX >= D06_SELECTION_LOCAL_BOUNDS.left
     && localX <= right
     && localY >= D06_SELECTION_LOCAL_BOUNDS.top
-    && localY <= bottom
-    ? "D06"
+    && localY <= bottom) return "D06";
+  const d05Right = D05_SELECTION_LOCAL_BOUNDS.left + D05_SELECTION_LOCAL_BOUNDS.width;
+  const d05Bottom = D05_SELECTION_LOCAL_BOUNDS.top + D05_SELECTION_LOCAL_BOUNDS.height;
+  return localX >= D05_SELECTION_LOCAL_BOUNDS.left
+    && localX <= d05Right
+    && localY >= D05_SELECTION_LOCAL_BOUNDS.top
+    && localY <= d05Bottom
+    ? "D05"
     : null;
 }
 
@@ -361,6 +425,8 @@ export function ninjaOneCapitalCityRepresentationMode(
 ): NinjaOneCapitalCityRepresentationMode {
   if (tier === "world") return "world-marker";
   if (tier === "territory") return "world-marker";
+  if (tier === "site" && focusedDistrict === "D05") return "d05-site-composite";
+  if (tier === "close" && focusedDistrict === "D05") return "d05-close-composite";
   if (tier === "site" && focusedDistrict === "D06") return "d06-site-composite";
   if (tier === "close" && focusedDistrict === "D06") return "d06-close-composite";
   return "capital-incremental-context";

@@ -446,16 +446,26 @@ const CITY_LAYER_ADMISSION_ORDER: readonly CityLayerId[] = Object.freeze([
   "L4_6",
 ]);
 
-export function ninjaOneCapitalVisibleRegisteredDetailNodes(
+export const NINJAONE_CAPITAL_D05_DETAIL_ASSET_IDS = Object.freeze([
+  "S01",
+  "S10",
+  "S11",
+  "S15",
+  "S18",
+] as const);
+
+function visibleRegisteredDetailNodes(
   camera: CameraView,
   tier: DetailTierId,
   layerIds: readonly CityLayerId[],
+  assetIds: ReadonlySet<string> | null,
 ): readonly NinjaOneCapitalCityNode[] {
   if (tier !== "site" && tier !== "close") return Object.freeze([]);
   const [left, top, right, bottom] = ninjaOneCapitalCityLocalCameraBounds(camera);
   const margin = tier === "close" ? 96 : 180;
   const candidates = NINJAONE_CAPITAL_CITY_LAYER_NODES.filter((node) => (
     node.registrationBinding.kind === "package-registered-anchor"
+    && (assetIds === null || assetIds.has(node.assetId))
     && layerIds.includes(node.layerId)
     && (node.visibleTiers?.includes(tier)
       ?? DETAIL_TIER_DEPTH[tier] >= DETAIL_TIER_DEPTH[node.minimumTier])
@@ -483,6 +493,29 @@ export function ninjaOneCapitalVisibleRegisteredDetailNodes(
     decodedBytes += variant.decodedBytes;
     return true;
   }));
+}
+
+export function ninjaOneCapitalVisibleRegisteredDetailNodes(
+  camera: CameraView,
+  tier: DetailTierId,
+  layerIds: readonly CityLayerId[],
+): readonly NinjaOneCapitalCityNode[] {
+  return visibleRegisteredDetailNodes(camera, tier, layerIds, null);
+}
+
+export function ninjaOneCapitalVisibleDistrictDetailNodes(
+  camera: CameraView,
+  tier: DetailTierId,
+  layerIds: readonly CityLayerId[],
+  districtId: NinjaOneCapitalCityDistrictId,
+): readonly NinjaOneCapitalCityNode[] {
+  if (districtId !== "D05") return Object.freeze([]);
+  return visibleRegisteredDetailNodes(
+    camera,
+    tier,
+    layerIds,
+    new Set(NINJAONE_CAPITAL_D05_DETAIL_ASSET_IDS),
+  );
 }
 
 export function ninjaOneCapitalVisibleCityLayerNodes(

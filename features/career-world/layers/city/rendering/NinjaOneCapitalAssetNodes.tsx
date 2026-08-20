@@ -5,6 +5,7 @@ import type { NinjaOneCapitalCityDistrictId } from "../model/ninjaOneCapitalCity
 import {
   ninjaOneCapitalCityAssetVariant,
   ninjaOneCapitalVisibleCityLayerNodes,
+  ninjaOneCapitalVisibleDistrictDetailNodes,
   ninjaOneCapitalVisibleRegisteredDetailNodes,
   NINJAONE_CAPITAL_D06_STATION_PROOF,
   type CityLayerId,
@@ -53,7 +54,10 @@ export function NinjaOneCapitalAssetNodes({
   tier,
 }: {
   readonly camera: CameraView;
-  readonly deliveryMode?: "district-proof" | "registered-progressive-detail";
+  readonly deliveryMode?:
+    | "district-proof"
+    | "focused-district-progressive-detail"
+    | "registered-progressive-detail";
   readonly focusedDistrict: NinjaOneCapitalCityDistrictId | null;
   readonly layerIds: readonly CityLayerId[];
   readonly light: WorldLight;
@@ -62,9 +66,16 @@ export function NinjaOneCapitalAssetNodes({
 }) {
   const nodes = [...(deliveryMode === "registered-progressive-detail"
     ? ninjaOneCapitalVisibleRegisteredDetailNodes(camera, tier, layerIds)
-    : layerIds.flatMap((layerId) => (
-      ninjaOneCapitalVisibleCityLayerNodes(camera, tier, layerId, focusedDistrict)
-    )))].sort((leftNode, rightNode) => (
+    : deliveryMode === "focused-district-progressive-detail" && focusedDistrict
+      ? ninjaOneCapitalVisibleDistrictDetailNodes(
+        camera,
+        tier,
+        layerIds,
+        focusedDistrict,
+      )
+      : layerIds.flatMap((layerId) => (
+        ninjaOneCapitalVisibleCityLayerNodes(camera, tier, layerId, focusedDistrict)
+      )))].sort((leftNode, rightNode) => (
     leftNode.anchor[1] + leftNode.zBias - rightNode.anchor[1] - rightNode.zBias
   ));
   if (nodes.length === 0) return null;

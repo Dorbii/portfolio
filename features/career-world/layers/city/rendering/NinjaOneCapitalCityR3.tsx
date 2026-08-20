@@ -88,8 +88,10 @@ export function NinjaOneCapitalCityR3({
     "L4_3",
   );
   const closeContextVisible = tier === "close"
+    && focusDistrict !== "D05"
     && isEnvironmentLayerEffectivelyVisible(visibility, "L4_4");
   const closeFabricVisible = (tier === "site" || tier === "close")
+    && focusDistrict !== "D05"
     && isEnvironmentLayerEffectivelyVisible(visibility, "L4_4");
   const centralArchitectureDetailVisible = tier === "close" && focusDistrict === null
     && isEnvironmentLayerEffectivelyVisible(visibility, "L4_4");
@@ -104,6 +106,10 @@ export function NinjaOneCapitalCityR3({
     focusDistrict,
   )
     && registeredDetailLayerIds.length > 0;
+  const d05DistrictDetailVisible = (tier === "site" || tier === "close")
+    && focusDistrict === "D05"
+    && architectureVisible;
+  const d06StationVisible = transportationVisible && focusDistrict !== "D05";
   const d06StationBase = tier === "capital"
     ? D06_CAPITAL_REVIEW_BASE
     : D06_SITE_CLOSE_REVIEW_BASE;
@@ -111,7 +117,9 @@ export function NinjaOneCapitalCityR3({
     <g
       data-city-r3-cohort={tier}
       data-city-r3-foliage-policy="reuse-L2-registered-trees-no-supplemental-urban-atlas"
-      data-city-r3-representation="registered-context-plus-atomic-D06"
+      data-city-r3-representation={focusDistrict === "D05"
+        ? "registered-context-plus-progressive-D05"
+        : "registered-context-plus-atomic-D06"}
       data-city-r3-train-status="deferred-during-terrain-polish"
     >
       {registeredDetailVisible ? (
@@ -157,6 +165,16 @@ export function NinjaOneCapitalCityR3({
             />
           </mask>
         </defs>
+      ) : null}
+      {d05DistrictDetailVisible ? (
+        <NinjaOneCapitalAssetNodes
+          camera={camera}
+          deliveryMode="focused-district-progressive-detail"
+          focusedDistrict="D05"
+          layerIds={["L4_3"]}
+          light={light}
+          tier={tier}
+        />
       ) : null}
       {waterInteractionVisible ? (
         <image
@@ -266,7 +284,7 @@ export function NinjaOneCapitalCityR3({
           y={1086 - D06_STATION_CLOSE_HEIGHT}
         />
       ) : null}
-      {transportationVisible ? (
+      {d06StationVisible ? (
         <image
           className="ninjaone-capital-city__r3-image"
           data-city-asset-id={d06StationBase.assetId}
