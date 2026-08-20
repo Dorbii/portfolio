@@ -365,15 +365,38 @@ Treat this checkpoint as the accepted stationary-city baseline. The next indepen
 - Focused LoD routing tests pass `14/14`; typecheck, lint, and production build pass. The pre-edit full baseline passes `186/188`, with `2` declared skips and `0` failures. The direct `node --test` attempt without the repo's type-stripping flag was a setup/environment failure; the same focused test passes through the configured loader.
 - Under the accepted test policy, changing the old `[400,900]` selection expectation from `null` to `D05` is **stale/superseded intent** because D05 is now an explicitly registered focus region. Package-anchor provenance, inferred-node quarantine, D06 exclusivity, and fixed-tier camera checks remain active regression guards.
 - Spawned one xHigh ImageGen-contract worker for `D05L01-western-skill-terraces-landfix-r1-alpha`, full-artboard transparent `1448x1086` `L4_1`, maximum two candidates, quarantine only. It may add only retaining mass, terraces, stairs/roads, and contact fabric required by the five sockets; water, buildings, trees, adjacent context, and native land beyond causal support are locked.
+- The worker exhausted both calls and returned `NO-GO`; nothing was promoted. Candidate 1 passed derived containment/water checks but repainted `69.79%` of D05 and introduced hard bright seams. Candidate 2 covered only `3.62%`, left S15 with zero contact and S10 with 21 contact pixels, and contained unprovable regenerated foliage/terrain fragments. Evidence remains quarantined under `.codex-tmp/d05-recovery-r1/imagegen/D05L01-western-skill-terraces-landfix/`.
+- Pivoted to the existing cohesive parent terrain/terrace fabric rather than accepting generated replacement ground. D05 site/close now use a five-node luminance cutout so each verified node atomically replaces only its own silhouette; the rest of the parent circulation, cliffs, water openings, and vegetation remain stable.
+- Live close proof isolated the inherited D05 display widths as provisional and oversized even though the anchors are package-registered. D05-only widths were reduced to S01 `130`, S10 `126`, S11 `133`, S15 `144`, and S18 `140`; site and close retain the same world footprint while their source resolution changes. No anchor moved and no global close-node guard changed.
+- A 7 px expanded native-land clearance was tested and immediately rejected/reverted because live L2 exposure created bright texture halos around the node silhouettes. Exact silhouette replacement remains the accepted local cutout; do not repeat expanded L2 clearance without a newly registered grade transition.
+- Live D05 close proof mounts five nodes, eight instances from four existing `L2-native-conifer-atlas-reuse` resources, WFX01 water detail, and no D06 station or train. D06 close regression proof still mounts exactly WFX01/LFX06/CFX01/I17/I21 with zero D05 nodes.
 
 ### Tasks left, evidence gates, and concerns
 
-- Grade D05L01 mechanically and visually. Reject wrong dimensions/channels, baked backgrounds, outside-D05 alpha, any L3 water overlap, generated vegetation/buildings, broad native-land repainting, seams, or failure to ground all five sockets.
-- If accepted, promote the asset and D05 mask under Director control, register them in the R3 manifest/builder, and render the focused D05 order as native L2/L3 -> city-owned D05 landfix -> parent context outside the D05 cut -> existing native tree reuse -> D05 site/close nodes.
-- Inspect both D05 site and close at multiple pans. The current five node images are not accepted merely because their anchors are registered; if the landfix does not remove the collage reading, isolate and replace only the specific defective node bounds/assets under new xHigh contracts.
+- D05L01 is rejected and must not be promoted. Do not retry another full-district generation with the same prompt; any later asset lane must be a smaller, newly isolated socket/contact defect.
+- User visual review remains the acceptance gate for the calibrated five-node D05 site/close sequence. If a specific node still reads as detached, adjust or replace only that node/contact socket rather than reopening the district-scale landfix.
 - Add visual/invariant tests for D05 asset dimensions, alpha, mask/water containment, LoD exclusivity, train absence, and existing-tree-only vegetation. Do not weaken the close overlap guard globally.
 - Run the complete typecheck/lint/test/build set after asset integration. Start the dev server only after the Director's live proof passes; user review is still required before declaring the D05 slice accepted.
 
 ### Exact next action
 
-Receive the quarantined D05L01 worker result, inspect its exact-order proofs and alpha gates, then either reject it with a specific failure or promote it into the D05 site/close composition for live browser grading.
+Finish the full regression suite, checkpoint the calibrated exact-cutout D05 slice, keep the dev server running, and hand the `d05-site` and `d05-close` proof URLs to the user for visual acceptance.
+
+## 2026-08-20 11:37 CDT
+
+### D05 review checkpoint
+
+- Completed the calibrated D05 exact-cutout implementation. Site and close replace exactly S01, S10, S11, S15, and S18 at unchanged package anchors with D05-only display widths; no broad generated district plate or generated terrain was accepted.
+- Preserved the parent-derived city terrain, terraces, circulation, cliff mass, and water openings as reversible city-owned fabric over unchanged L2 land and L3 water. The rejected expanded L2 clearance remains reverted because it produced bright contact halos.
+- Live proof confirmed D05 close mounts the five registered nodes, eight tree instances from four existing `L2-native-conifer-atlas-reuse` resources, WFX01 water detail, and zero D06 station or train assets. D06 close remains isolated and mounts its accepted WFX01/LFX06/CFX01/I17/I21 cohort with zero D05 nodes.
+- The rejected D05L01 ImageGen candidates remain quarantined and unpromoted. Candidate 1 repainted too much terrain and created seams; candidate 2 did not support all five sockets and introduced unprovable fragments.
+- Final gates pass: typecheck, lint, production build, `git diff --check`, focused D05/D06 routing tests, and full `npm test`. Full-suite result is `189/191` passed, `2` declared skips, `0` failures in `308.110s`. The two long camera/package checks passed and remain classified as environmental test cost rather than regressions.
+
+### Remaining acceptance gate
+
+- D05 is ready for user visual review, not yet accepted. Review both fixed proof routes for cohesive hierarchy, contact, and footprint scale. If a defect remains, isolate it to one socket/contact region before any additional ImageGen work.
+- The broader city goal remains active after D05 review; do not infer acceptance of other districts from this slice.
+
+### Exact next action
+
+Keep the dev server running and present `d05-close` and `d05-site` for user review. Use the user's marked defect, if any, as the next bounded repair target.

@@ -110,6 +110,11 @@ export function NinjaOneCapitalCityR3({
     && focusDistrict === "D05"
     && architectureVisible;
   const d06StationVisible = transportationVisible && focusDistrict !== "D05";
+  const contextCutoutMask = d05DistrictDetailVisible
+    ? "url(#ninjaone-capital-city-r3-d05-detail-cutout)"
+    : registeredDetailVisible
+      ? "url(#ninjaone-capital-city-r3-registered-detail-cutout)"
+      : undefined;
   const d06StationBase = tier === "capital"
     ? D06_CAPITAL_REVIEW_BASE
     : D06_SITE_CLOSE_REVIEW_BASE;
@@ -139,6 +144,30 @@ export function NinjaOneCapitalCityR3({
               deliveryMode="registered-progressive-detail"
               focusedDistrict={null}
               layerIds={registeredDetailLayerIds}
+              light={light}
+              maskOnly
+              tier={tier}
+            />
+          </mask>
+        </defs>
+      ) : null}
+      {d05DistrictDetailVisible ? (
+        <defs>
+          <mask
+            height={height}
+            id="ninjaone-capital-city-r3-d05-detail-cutout"
+            maskUnits="userSpaceOnUse"
+            style={{ maskType: "luminance" }}
+            width={width}
+            x={0}
+            y={0}
+          >
+            <rect fill="#fff" height={height} width={width} />
+            <NinjaOneCapitalAssetNodes
+              camera={camera}
+              deliveryMode="focused-district-progressive-detail"
+              focusedDistrict="D05"
+              layerIds={["L4_3"]}
               light={light}
               maskOnly
               tier={tier}
@@ -217,9 +246,7 @@ export function NinjaOneCapitalCityR3({
         data-city-cohort-ownership="L4-capital-composite"
         height={height}
         href={NINJAONE_CAPITAL_CITY_R3_CONTEXT.path}
-        mask={registeredDetailVisible
-          ? "url(#ninjaone-capital-city-r3-registered-detail-cutout)"
-          : undefined}
+        mask={contextCutoutMask}
         preserveAspectRatio="none"
         width={width}
       />

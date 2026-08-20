@@ -10,6 +10,7 @@ export {
   NINJAONE_CAPITAL_CITY_LAYER_WORLD_ORIGIN,
   NINJAONE_CAPITAL_CITY_LAYER_WORLD_SPAN,
   NINJAONE_CAPITAL_D05_DETAIL_ASSET_IDS,
+  NINJAONE_CAPITAL_D05_DETAIL_DISPLAY_WIDTHS,
   ninjaOneCapitalCityAssetVariant,
   ninjaOneCapitalVisibleDistrictDetailNodes,
   ninjaOneCapitalVisibleCityLayerNodes,

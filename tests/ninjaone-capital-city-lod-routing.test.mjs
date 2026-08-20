@@ -10,6 +10,7 @@ import {
   ninjaOneCapitalVisibleDistrictDetailNodes,
   ninjaOneCapitalVisibleRegisteredDetailNodes,
   NINJAONE_CAPITAL_D05_DETAIL_ASSET_IDS,
+  NINJAONE_CAPITAL_D05_DETAIL_DISPLAY_WIDTHS,
   NINJAONE_CAPITAL_CITY_LAYER_NODES,
 } from "../features/career-world/layers/city/model/ninjaOneCapitalCityLayer.ts";
 import {
@@ -162,6 +163,10 @@ test("D05 site and close admit only the five package-registered district sockets
     assert.deepEqual(
       nodes.map(({ assetId }) => assetId).sort(),
       [...NINJAONE_CAPITAL_D05_DETAIL_ASSET_IDS].sort(),
+    );
+    assert.deepEqual(
+      Object.fromEntries(nodes.map(({ assetId, displayWidth }) => [assetId, displayWidth])),
+      NINJAONE_CAPITAL_D05_DETAIL_DISPLAY_WIDTHS,
     );
     assert.ok(nodes.every(({ registrationBinding }) => (
       registrationBinding.kind === "package-registered-anchor"
@@ -399,6 +404,21 @@ test("city proof renderer fills the viewport and locks fixed proof zoom", async 
   assert.match(scene, /if \(cityProofView\) return;/);
   assert.match(scene, /constrainNinjaOneCapitalCityProofCamera\(cityProofView, normalized\)/);
   assert.match(scene, /resolveNinjaOneCapitalDetailState\(/);
+});
+
+test("D05 detail atomically replaces five silhouettes without a district plate or D06 station", async () => {
+  const renderer = await readFile(new URL(
+    "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
+    import.meta.url,
+  ), "utf8");
+  assert.match(renderer, /d05DistrictDetailVisible = \(tier === "site" \|\| tier === "close"\)/);
+  assert.match(renderer, /id="ninjaone-capital-city-r3-d05-detail-cutout"/);
+  assert.match(renderer, /deliveryMode="focused-district-progressive-detail"/);
+  assert.match(renderer, /focusedDistrict="D05"/);
+  assert.match(renderer, /maskOnly/);
+  assert.match(renderer, /d06StationVisible = transportationVisible && focusDistrict !== "D05"/);
+  assert.doesNotMatch(renderer, /D05-western-skill-terraces-plate/);
+  assert.doesNotMatch(renderer, /D05L01/);
 });
 
 test("unregistered inferred nodes are quarantined from every fixed LOD proof", () => {
