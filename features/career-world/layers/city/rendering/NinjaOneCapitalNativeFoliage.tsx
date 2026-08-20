@@ -1,7 +1,10 @@
 import { useMemo } from "react";
 import nativeFoliageReuseManifest from "../../../../../public/career-world/capitals/ninjaone/city-r3/authority/city-native-foliage-reuse-r1.json" with { type: "json" };
 import type { CameraView } from "../../../shared/camera";
-import { NINJAONE_CAPITAL_CITY_DETAIL_POLICY } from "../model/ninjaOneCapitalCityRepresentations";
+import {
+  NINJAONE_CAPITAL_CITY_DETAIL_POLICY,
+  type NinjaOneCapitalCityDistrictId,
+} from "../model/ninjaOneCapitalCityRepresentations";
 import {
   NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES,
   NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS,
@@ -12,24 +15,32 @@ import {
 const APPROVED_NATIVE_FOLIAGE_INSTANCE_IDS = new Set(
   nativeFoliageReuseManifest.instances.map(({ id }) => id),
 );
+const D02_REGISTERED_NATIVE_FOLIAGE_INSTANCE_IDS = new Set([
+  ...APPROVED_NATIVE_FOLIAGE_INSTANCE_IDS,
+  ...nativeFoliageReuseManifest.districtInstances.D02.instances.map(({ id }) => id),
+]);
 
 function atlasImageId(resource: NinjaOneEnvironmentFoliageResource): string {
   return `ninjaone-capital-native-foliage-${resource.id.replaceAll(/[^a-z0-9_-]/gi, "-")}`;
 }
 
-export function NinjaOneCapitalNativeFoliage({ camera }: {
+export function NinjaOneCapitalNativeFoliage({ camera, focusDistrict }: {
   readonly camera: CameraView;
+  readonly focusDistrict: NinjaOneCapitalCityDistrictId | null;
 }) {
+  const approvedInstanceIds = focusDistrict === "D02"
+    ? D02_REGISTERED_NATIVE_FOLIAGE_INSTANCE_IDS
+    : APPROVED_NATIVE_FOLIAGE_INSTANCE_IDS;
   const instances = useMemo(
     () => selectNinjaOneEnvironmentFoliageInstances(
       camera,
       true,
       NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS,
       NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES,
-      APPROVED_NATIVE_FOLIAGE_INSTANCE_IDS,
+      approvedInstanceIds,
       NINJAONE_CAPITAL_CITY_DETAIL_POLICY.tierMaximumSpan.close,
     ),
-    [camera],
+    [approvedInstanceIds, camera],
   );
   const resources = useMemo(() => [
     ...new Map(instances.map((instance) => [

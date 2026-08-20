@@ -446,6 +446,24 @@ const CITY_LAYER_ADMISSION_ORDER: readonly CityLayerId[] = Object.freeze([
   "L4_6",
 ]);
 
+export const NINJAONE_CAPITAL_D01_DETAIL_ASSET_IDS = Object.freeze([
+  "S03",
+  "S05",
+  "S06",
+  "S16",
+  "S17",
+  "S19",
+] as const);
+
+export const NINJAONE_CAPITAL_D01_DETAIL_DISPLAY_WIDTHS = Object.freeze({
+  S03: 105,
+  S05: 96,
+  S06: 108,
+  S16: 114,
+  S17: 111,
+  S19: 138,
+} as const);
+
 export const NINJAONE_CAPITAL_D02_DETAIL_ASSET_IDS = Object.freeze([
   "I02",
   "S13",
@@ -468,6 +486,18 @@ export const NINJAONE_CAPITAL_D03_DETAIL_DISPLAY_WIDTHS = Object.freeze({
   S08: 116,
   S09: 176,
   S12: 106,
+} as const);
+
+export const NINJAONE_CAPITAL_D04_DETAIL_ASSET_IDS = Object.freeze([
+  "S02",
+  "S04",
+  "S14",
+] as const);
+
+export const NINJAONE_CAPITAL_D04_DETAIL_DISPLAY_WIDTHS = Object.freeze({
+  S02: 95,
+  S04: 107,
+  S14: 114,
 } as const);
 
 export const NINJAONE_CAPITAL_D05_DETAIL_ASSET_IDS = Object.freeze([
@@ -541,6 +571,20 @@ export function ninjaOneCapitalVisibleDistrictDetailNodes(
   layerIds: readonly CityLayerId[],
   districtId: NinjaOneCapitalCityDistrictId,
 ): readonly NinjaOneCapitalCityNode[] {
+  if (districtId === "D01") {
+    const nodes = visibleRegisteredDetailNodes(
+      camera,
+      tier,
+      layerIds,
+      new Set(NINJAONE_CAPITAL_D01_DETAIL_ASSET_IDS),
+    );
+    return Object.freeze(nodes.map((node) => Object.freeze({
+      ...node,
+      displayWidth: NINJAONE_CAPITAL_D01_DETAIL_DISPLAY_WIDTHS[
+        node.assetId as keyof typeof NINJAONE_CAPITAL_D01_DETAIL_DISPLAY_WIDTHS
+      ],
+    })));
+  }
   if (districtId === "D02") {
     const nodes = visibleRegisteredDetailNodes(
       camera,
@@ -566,6 +610,20 @@ export function ninjaOneCapitalVisibleDistrictDetailNodes(
       ...node,
       displayWidth: NINJAONE_CAPITAL_D03_DETAIL_DISPLAY_WIDTHS[
         node.assetId as keyof typeof NINJAONE_CAPITAL_D03_DETAIL_DISPLAY_WIDTHS
+      ],
+    })));
+  }
+  if (districtId === "D04") {
+    const nodes = visibleRegisteredDetailNodes(
+      camera,
+      tier,
+      layerIds,
+      new Set(NINJAONE_CAPITAL_D04_DETAIL_ASSET_IDS),
+    );
+    return Object.freeze(nodes.map((node) => Object.freeze({
+      ...node,
+      displayWidth: NINJAONE_CAPITAL_D04_DETAIL_DISPLAY_WIDTHS[
+        node.assetId as keyof typeof NINJAONE_CAPITAL_D04_DETAIL_DISPLAY_WIDTHS
       ],
     })));
   }

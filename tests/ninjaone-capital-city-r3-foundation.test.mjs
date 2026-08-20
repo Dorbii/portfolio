@@ -13,9 +13,13 @@ import {
   NINJAONE_CAPITAL_CITY_R3_WATER_COVERAGE,
   NINJAONE_CAPITAL_CITY_R3_WATER_INTERACTION,
 } from "../features/career-world/layers/city/model/ninjaOneCapitalCityFoundationR3.ts";
-import { NINJAONE_CAPITAL_CITY_DETAIL_POLICY } from "../features/career-world/layers/city/model/ninjaOneCapitalCityRepresentations.ts";
+import {
+  NINJAONE_CAPITAL_CITY_DETAIL_POLICY,
+  NINJAONE_CAPITAL_CITY_PROOF_CAMERAS,
+} from "../features/career-world/layers/city/model/ninjaOneCapitalCityRepresentations.ts";
 import {
   NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES,
+  NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES,
   NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS,
   selectNinjaOneEnvironmentFoliageInstances,
 } from "../features/career-world/layers/terrain/detail/model/ninjaOneEnvironmentFoliage.ts";
@@ -363,6 +367,32 @@ test("close city foliage reuses the registered L2 native conifer atlases", async
   assert.ok(cityTrees.length > 0, "The wider city close tier must mount approved L2 trees.");
   assert.ok(cityTrees.every(({ id }) => approvedIds.has(id)));
   assert.ok(cityTrees.every(({ atlasResource }) => (
+    atlasResource.path.includes("/environment/shared/foliage-native-r4/")
+  )));
+  const d02Registration = reuseManifest.districtInstances.D02;
+  assert.equal(
+    d02Registration.method,
+    "existing-L2-tree-node-positions-registered-to-baked-D02-ridge-foliage",
+  );
+  assert.equal(d02Registration.instances.length, 12);
+  const sourceFoliageIds = new Set(
+    NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.map(({ id }) => id),
+  );
+  const d02ApprovedIds = new Set([
+    ...approvedIds,
+    ...d02Registration.instances.map(({ id }) => id),
+  ]);
+  assert.ok(d02Registration.instances.every(({ id }) => sourceFoliageIds.has(id)));
+  const d02Trees = selectNinjaOneEnvironmentFoliageInstances(
+    NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d02-close"],
+    true,
+    NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS,
+    NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES,
+    d02ApprovedIds,
+    NINJAONE_CAPITAL_CITY_DETAIL_POLICY.tierMaximumSpan.close,
+  );
+  assert.ok(d02Trees.length >= 12);
+  assert.ok(d02Trees.every(({ atlasResource }) => (
     atlasResource.path.includes("/environment/shared/foliage-native-r4/")
   )));
 });

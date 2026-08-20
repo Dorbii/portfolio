@@ -112,5 +112,25 @@
       },
       "id": "b2-native-conifer-159-instance"
     }
-  ]
+  ],
+  "districtInstances": {
+    "D02": {
+      "method": "existing-L2-tree-node-positions-registered-to-baked-D02-ridge-foliage",
+      "sourceContext": "/career-world/capitals/ninjaone/city-r3/foundation/city-context-capital-without-d06-r1-alpha.png",
+      "instances": [
+        { "id": "c1-native-conifer-020-instance" },
+        { "id": "c1-native-conifer-024-instance" },
+        { "id": "c1-native-conifer-029-instance" },
+        { "id": "c1-native-conifer-031-instance" },
+        { "id": "c1-native-conifer-037-instance" },
+        { "id": "c1-native-conifer-038-instance" },
+        { "id": "c1-native-conifer-041-instance" },
+        { "id": "c1-native-conifer-042-instance" },
+        { "id": "c1-native-conifer-053-instance" },
+        { "id": "c1-native-conifer-054-instance" },
+        { "id": "c1-native-conifer-060-instance" },
+        { "id": "c1-native-conifer-063-instance" }
+      ]
+    }
+  }
 }

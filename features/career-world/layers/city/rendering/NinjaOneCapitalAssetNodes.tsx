@@ -93,6 +93,7 @@ export function NinjaOneCapitalAssetNodes({
           return (
             <image
               height={height}
+              filter="url(#ninjaone-capital-city-r3-detail-mask-black)"
               href={source.path}
               key={node.id}
               preserveAspectRatio="xMidYMid meet"

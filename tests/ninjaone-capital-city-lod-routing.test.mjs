@@ -9,14 +9,21 @@ import {
   ninjaOneCapitalVisibleCityLayerNodes,
   ninjaOneCapitalVisibleDistrictDetailNodes,
   ninjaOneCapitalVisibleRegisteredDetailNodes,
+  NINJAONE_CAPITAL_D01_DETAIL_ASSET_IDS,
+  NINJAONE_CAPITAL_D01_DETAIL_DISPLAY_WIDTHS,
   NINJAONE_CAPITAL_D02_DETAIL_ASSET_IDS,
   NINJAONE_CAPITAL_D02_DETAIL_DISPLAY_WIDTHS,
   NINJAONE_CAPITAL_D03_DETAIL_ASSET_IDS,
   NINJAONE_CAPITAL_D03_DETAIL_DISPLAY_WIDTHS,
+  NINJAONE_CAPITAL_D04_DETAIL_ASSET_IDS,
+  NINJAONE_CAPITAL_D04_DETAIL_DISPLAY_WIDTHS,
   NINJAONE_CAPITAL_D05_DETAIL_ASSET_IDS,
   NINJAONE_CAPITAL_D05_DETAIL_DISPLAY_WIDTHS,
   NINJAONE_CAPITAL_CITY_LAYER_NODES,
 } from "../features/career-world/layers/city/model/ninjaOneCapitalCityLayer.ts";
+import {
+  NINJAONE_CAPITAL_CITY_R3_CONTEXT,
+} from "../features/career-world/layers/city/model/ninjaOneCapitalCityFoundationR3.ts";
 import {
   constrainNinjaOneCapitalCityProofCamera,
   NINJAONE_CAPITAL_CITY_DETAIL_POLICY,
@@ -190,6 +197,86 @@ test("D05 site and close admit only the five package-registered district sockets
   );
 });
 
+test("D01 site and close admit only the six calibrated crown sockets", () => {
+  for (const tier of ["site", "close"]) {
+    const nodes = ninjaOneCapitalVisibleDistrictDetailNodes(
+      NINJAONE_CAPITAL_CITY_PROOF_CAMERAS[`d01-${tier}`],
+      tier,
+      ["L4_3"],
+      "D01",
+    );
+    assert.deepEqual(
+      nodes.map(({ assetId }) => assetId).sort(),
+      [...NINJAONE_CAPITAL_D01_DETAIL_ASSET_IDS].sort(),
+    );
+    assert.deepEqual(
+      Object.fromEntries(nodes.map(({ assetId, displayWidth }) => [assetId, displayWidth])),
+      NINJAONE_CAPITAL_D01_DETAIL_DISPLAY_WIDTHS,
+    );
+    assert.ok(nodes.every(({ registrationBinding }) => (
+      registrationBinding.kind === "package-registered-anchor"
+    )));
+    assert.ok(nodes.every((node) => (
+      ninjaOneCapitalCityAssetVariant(node, tier).path.includes(`/${tier}/`)
+    )));
+  }
+});
+
+test("D01 calibrated crown is disjoint and the runtime context clip prevents skyline expansion", async () => {
+  const nodes = ninjaOneCapitalVisibleDistrictDetailNodes(
+    NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d01-close"],
+    "close",
+    ["L4_3"],
+    "D01",
+  );
+  const contextBytes = await readFile(new URL(
+    `../public${NINJAONE_CAPITAL_CITY_R3_CONTEXT.path}`,
+    import.meta.url,
+  ));
+  const { data: context, info: contextInfo } = await sharp(contextBytes)
+    .ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const occupied = new Uint8Array(contextInfo.width * contextInfo.height);
+  let pairOverlap = 0;
+  let unclippedOutsideContext = 0;
+  let clippedOutsideContext = 0;
+  for (const node of nodes) {
+    const variant = ninjaOneCapitalCityAssetVariant(node, "close");
+    const height = Math.round(
+      node.displayWidth * node.asset.source.dimensions[1] / node.asset.source.dimensions[0],
+    );
+    const variantBytes = await readFile(new URL(
+      `../public${variant.path}`,
+      import.meta.url,
+    ));
+    const { data, info } = await sharp(variantBytes)
+      .resize(node.displayWidth, height).ensureAlpha().raw()
+      .toBuffer({ resolveWithObject: true });
+    const left = Math.round(node.anchor[0] - node.displayWidth * 0.5);
+    const top = Math.round(node.anchor[1] - height);
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 0; x < node.displayWidth; x += 1) {
+        const worldX = left + x;
+        const worldY = top + y;
+        if (worldX < 0 || worldY < 0
+          || worldX >= contextInfo.width || worldY >= contextInfo.height) continue;
+        const alpha = data[(y * node.displayWidth + x) * info.channels + 3];
+        if (alpha < 16) continue;
+        const pixelIndex = worldY * contextInfo.width + worldX;
+        if (occupied[pixelIndex]) pairOverlap += 1;
+        occupied[pixelIndex] = 1;
+        const contextAlpha = context[pixelIndex * contextInfo.channels + 3];
+        if (contextAlpha < 16) unclippedOutsideContext += 1;
+        if (Math.round(alpha * contextAlpha / 255) >= 16 && contextAlpha < 16) {
+          clippedOutsideContext += 1;
+        }
+      }
+    }
+  }
+  assert.equal(pairOverlap, 0, "D01 calibrated node silhouettes must remain disjoint");
+  assert.ok(unclippedOutsideContext > 0, "D01 must retain its explicit silhouette clip gate");
+  assert.equal(clippedOutsideContext, 0, "D01 must not expand the existing city skyline");
+});
+
 test("D02 site and close admit only the registered dojo ridge sockets", () => {
   for (const tier of ["site", "close"]) {
     const nodes = ninjaOneCapitalVisibleDistrictDetailNodes(
@@ -279,6 +366,31 @@ test("D03 calibrated silhouettes do not repaint registered inland water", async 
   }
 });
 
+test("D04 site and close admit only the three registered central-water sockets", () => {
+  for (const tier of ["site", "close"]) {
+    const nodes = ninjaOneCapitalVisibleDistrictDetailNodes(
+      NINJAONE_CAPITAL_CITY_PROOF_CAMERAS[`d04-${tier}`],
+      tier,
+      ["L4_3"],
+      "D04",
+    );
+    assert.deepEqual(
+      nodes.map(({ assetId }) => assetId).sort(),
+      [...NINJAONE_CAPITAL_D04_DETAIL_ASSET_IDS].sort(),
+    );
+    assert.deepEqual(
+      Object.fromEntries(nodes.map(({ assetId, displayWidth }) => [assetId, displayWidth])),
+      NINJAONE_CAPITAL_D04_DETAIL_DISPLAY_WIDTHS,
+    );
+    assert.ok(nodes.every(({ registrationBinding }) => (
+      registrationBinding.kind === "package-registered-anchor"
+    )));
+    assert.ok(nodes.every((node) => (
+      ninjaOneCapitalCityAssetVariant(node, tier).path.includes(`/${tier}/`)
+    )));
+  }
+});
+
 test("only free-camera site uses the currently registered detail cohort", () => {
   assert.equal(ninjaOneCapitalCityUsesFreeCameraDetailCohort("capital", null), false);
   assert.equal(ninjaOneCapitalCityUsesFreeCameraDetailCohort("site", null), true);
@@ -337,6 +449,14 @@ test("city tiers select explicit district-exclusive representation modes", () =>
     "capital-incremental-context",
   );
   assert.equal(
+    ninjaOneCapitalCityRepresentationMode("site", "D01"),
+    "d01-site-composite",
+  );
+  assert.equal(
+    ninjaOneCapitalCityRepresentationMode("close", "D01"),
+    "d01-close-composite",
+  );
+  assert.equal(
     ninjaOneCapitalCityRepresentationMode("site", "D02"),
     "d02-site-composite",
   );
@@ -351,6 +471,14 @@ test("city tiers select explicit district-exclusive representation modes", () =>
   assert.equal(
     ninjaOneCapitalCityRepresentationMode("close", "D03"),
     "d03-close-composite",
+  );
+  assert.equal(
+    ninjaOneCapitalCityRepresentationMode("site", "D04"),
+    "d04-site-composite",
+  );
+  assert.equal(
+    ninjaOneCapitalCityRepresentationMode("close", "D04"),
+    "d04-close-composite",
   );
   assert.equal(
     ninjaOneCapitalCityRepresentationMode("site", "D05"),
@@ -391,6 +519,8 @@ test("fixed proof cameras preserve their requested tier and district aspect", ()
     "d02-close",
     "d03-site",
     "d03-close",
+    "d04-site",
+    "d04-close",
     "d05-site",
     "d05-close",
     "d06-site",
@@ -492,6 +622,30 @@ test("district selection is registered to replacement regions, not visible focal
     "D02",
   );
   assert.equal(
+    ninjaOneCapitalCityDistrictAtWorldPoint(localToWorld([495, 212])),
+    "D01",
+  );
+  assert.equal(
+    ninjaOneCapitalCityDistrictAtWorldPoint(localToWorld([662, 236])),
+    "D01",
+  );
+  assert.equal(
+    ninjaOneCapitalCityDistrictAtWorldPoint(localToWorld([765, 330])),
+    "D01",
+  );
+  assert.equal(
+    ninjaOneCapitalCityDistrictAtWorldPoint(localToWorld([539, 462])),
+    "D01",
+  );
+  assert.equal(
+    ninjaOneCapitalCityDistrictAtWorldPoint(localToWorld([348, 300])),
+    "D01",
+  );
+  assert.equal(
+    ninjaOneCapitalCityDistrictAtWorldPoint(localToWorld([706, 481])),
+    "D01",
+  );
+  assert.equal(
     ninjaOneCapitalCityDistrictAtWorldPoint(localToWorld([1100, 550])),
     "D03",
   );
@@ -504,6 +658,18 @@ test("district selection is registered to replacement regions, not visible focal
     "D03",
   );
   assert.equal(
+    ninjaOneCapitalCityDistrictAtWorldPoint(localToWorld([397, 521])),
+    "D04",
+  );
+  assert.equal(
+    ninjaOneCapitalCityDistrictAtWorldPoint(localToWorld([250, 506])),
+    "D04",
+  );
+  assert.equal(
+    ninjaOneCapitalCityDistrictAtWorldPoint(localToWorld([794, 731])),
+    "D04",
+  );
+  assert.equal(
     ninjaOneCapitalCityDistrictAtWorldPoint(localToWorld([400, 900])),
     "D05",
   );
@@ -511,10 +677,14 @@ test("district selection is registered to replacement regions, not visible focal
 });
 
 test("proof routes force only their registered district", () => {
+  assert.equal(ninjaOneCapitalCityProofDistrict("d01-site"), "D01");
+  assert.equal(ninjaOneCapitalCityProofDistrict("d01-close"), "D01");
   assert.equal(ninjaOneCapitalCityProofDistrict("d02-site"), "D02");
   assert.equal(ninjaOneCapitalCityProofDistrict("d02-close"), "D02");
   assert.equal(ninjaOneCapitalCityProofDistrict("d03-site"), "D03");
   assert.equal(ninjaOneCapitalCityProofDistrict("d03-close"), "D03");
+  assert.equal(ninjaOneCapitalCityProofDistrict("d04-site"), "D04");
+  assert.equal(ninjaOneCapitalCityProofDistrict("d04-close"), "D04");
   assert.equal(ninjaOneCapitalCityProofDistrict("d05-site"), "D05");
   assert.equal(ninjaOneCapitalCityProofDistrict("d05-close"), "D05");
   assert.equal(ninjaOneCapitalCityProofDistrict("d06-site"), "D06");
@@ -546,9 +716,54 @@ test("D05 detail atomically replaces five silhouettes without a district plate o
   assert.match(renderer, /deliveryMode="focused-district-progressive-detail"/);
   assert.match(renderer, /focusedDistrict="D05"/);
   assert.match(renderer, /maskOnly/);
-  assert.match(renderer, /focusDistrict === null \|\| focusDistrict === "D06"/);
+  assert.match(
+    renderer,
+    /focusDistrict === null \|\| focusDistrict === "D06"/,
+  );
   assert.doesNotMatch(renderer, /D05-western-skill-terraces-plate/);
   assert.doesNotMatch(renderer, /D05L01/);
+});
+
+test("D01 detail atomically replaces six calibrated silhouettes inside the parent skyline", async () => {
+  const [renderer, nodeRenderer] = await Promise.all([
+    readFile(new URL(
+      "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
+      import.meta.url,
+    ), "utf8"),
+    readFile(new URL(
+      "../features/career-world/layers/city/rendering/NinjaOneCapitalAssetNodes.tsx",
+      import.meta.url,
+    ), "utf8"),
+  ]);
+  assert.match(renderer, /d01DistrictDetailVisible = \(tier === "site" \|\| tier === "close"\)/);
+  assert.match(renderer, /id="ninjaone-capital-city-r3-d01-detail-cutout"/);
+  assert.match(renderer, /id="ninjaone-capital-city-r3-d01-context-clip"/);
+  assert.match(renderer, /<g mask="url\(#ninjaone-capital-city-r3-d01-context-clip\)">/);
+  assert.match(renderer, /focusedDistrict="D01"/);
+  assert.doesNotMatch(renderer, /D01-crown-plate/);
+  assert.match(
+    nodeRenderer,
+    /if \(maskOnly\)[\s\S]*?filter="url\(#ninjaone-capital-city-r3-detail-mask-black\)"/,
+    "detail cutouts must use alpha silhouettes instead of asset luminance",
+  );
+  assert.match(
+    renderer,
+    /id="ninjaone-capital-city-r3-detail-mask-black"[\s\S]*?<feColorMatrix/,
+    "detail cutouts must force every opaque source pixel to black",
+  );
+  const landscapeIndex = renderer.indexOf("data-city-asset-id=\"LFX06\"");
+  const contextIndex = renderer.indexOf("data-city-cohort-ownership=\"L4-capital-composite\"");
+  const d01RenderIndex = renderer.indexOf(
+    "<g mask=\"url(#ninjaone-capital-city-r3-d01-context-clip)\">",
+  );
+  assert.ok(landscapeIndex < contextIndex, "L4_1 must remain below the city context");
+  assert.ok(contextIndex < d01RenderIndex, "D01 L4_3 must remain above L4_1 and context");
+  for (const district of ["D02", "D03", "D04", "D05"]) {
+    assert.ok(
+      contextIndex < renderer.lastIndexOf(`focusedDistrict=\"${district}\"`),
+      `${district} progressive L4_3 must remain above L4_1 and context`,
+    );
+  }
 });
 
 test("D02 detail atomically replaces its two registered sockets without a district plate", async () => {
@@ -574,6 +789,17 @@ test("D03 detail atomically replaces four calibrated silhouettes without a distr
   assert.doesNotMatch(renderer, /D03-eastern-industry-plate/);
 });
 
+test("D04 detail atomically replaces three calibrated silhouettes without a district plate", async () => {
+  const renderer = await readFile(new URL(
+    "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
+    import.meta.url,
+  ), "utf8");
+  assert.match(renderer, /d04DistrictDetailVisible = \(tier === "site" \|\| tier === "close"\)/);
+  assert.match(renderer, /id="ninjaone-capital-city-r3-d04-detail-cutout"/);
+  assert.match(renderer, /focusedDistrict="D04"/);
+  assert.doesNotMatch(renderer, /D04-central-lake-terraces-plate/);
+});
+
 test("unregistered inferred nodes are quarantined from every fixed LOD proof", () => {
   assert.ok(NINJAONE_CAPITAL_CITY_LAYER_NODES.some(
     ({ representationClass }) => representationClass === "unregistered-close-candidate",
@@ -582,10 +808,14 @@ test("unregistered inferred nodes are quarantined from every fixed LOD proof", (
     ["world", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS.world, null],
     ["territory", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS.territory, null],
     ["capital", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS.capital, null],
+    ["site", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d01-site"], "D01"],
+    ["close", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d01-close"], "D01"],
     ["site", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d02-site"], "D02"],
     ["close", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d02-close"], "D02"],
     ["site", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d03-site"], "D03"],
     ["close", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d03-close"], "D03"],
+    ["site", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d04-site"], "D04"],
+    ["close", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d04-close"], "D04"],
     ["site", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d05-site"], "D05"],
     ["close", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d05-close"], "D05"],
     ["site", NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d06-site"], "D06"],
