@@ -645,7 +645,7 @@ test("NinjaOne capital interactive thresholds match parent composition framing o
   );
 });
 
-test("district focus requires explicit selection instead of viewport coincidence", () => {
+test("free-camera site and close derive progressive district focus from the registered camera center", () => {
   assert.equal(ninjaOneCapitalCityFocusedDistrict("site", "D05"), "D05");
   assert.equal(ninjaOneCapitalCityFocusedDistrict("close", "D05"), "D05");
   assert.equal(
@@ -662,6 +662,7 @@ test("district focus requires explicit selection instead of viewport coincidence
     ),
     "D06",
   );
+  assert.equal(ninjaOneCapitalCityFocusedDistrict("capital", "D05"), null);
   assert.equal(
     ninjaOneCapitalCityFocusedDistrict(
       "site",
@@ -671,6 +672,25 @@ test("district focus requires explicit selection instead of viewport coincidence
   );
   assert.equal(ninjaOneCapitalCityFocusedDistrict("site", null, "D06"), "D06");
   assert.equal(ninjaOneCapitalCityFocusedDistrict("site", null, "D05"), "D05");
+});
+
+test("WorldScene routes normal camera ownership into progressive city focus", async () => {
+  const scene = await readFile(new URL(
+    "../features/career-world/composition/WorldScene.tsx",
+    import.meta.url,
+  ), "utf8");
+  assert.match(
+    scene,
+    /cameraCityDistrict = ninjaOneCapitalCityDistrictAtWorldPoint\(\[[\s\S]*?camera\.origin\[0\] \+ camera\.span\[0\] \* 0\.5,[\s\S]*?camera\.origin\[1\] \+ camera\.span\[1\] \* 0\.5,[\s\S]*?\]\)/,
+  );
+  assert.match(
+    scene,
+    /ninjaOneCapitalCityFocusedDistrict\([\s\S]*?detailState\.tier\.id,[\s\S]*?cameraCityDistrict,[\s\S]*?forcedCityDistrict/,
+  );
+  assert.doesNotMatch(
+    scene,
+    /ninjaOneCapitalCityFocusedDistrict\([\s\S]*?detailState\.tier\.id,[\s\S]*?null,[\s\S]*?forcedCityDistrict/,
+  );
 });
 
 test("district selection is registered to replacement regions, not visible focal points", () => {

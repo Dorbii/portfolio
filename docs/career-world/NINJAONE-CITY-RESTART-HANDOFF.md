@@ -538,3 +538,23 @@ Finish the full suite, inspect D01 site/close once more after the build, then ch
 ### Exact next action
 
 Commit this D04 recovery checkpoint, keep the development server running on `http://localhost:3000`, and leave the in-app browser on `d04-close` for user review. Use the user's marked visual defect as the next bounded repair target.
+
+## 2026-08-20 14:47 CDT
+
+### Normal free-camera LoD authority repair
+
+- Fixed the systemic LoD defect hidden by fixed district proof routes. `WorldScene` previously passed `null` as the selected district for every normal camera, so site/close wheel zoom never promoted D01-D06 nodes unless a forced proof URL was active. This contradicted the accepted land-like contract that more registered detail renders as the camera closes.
+- Superseded the test named `district focus requires explicit selection instead of viewport coincidence`. Classified it as **stale/superseded design intent** under the accepted test policy: the user explicitly requires camera-driven progressive rendering, not click-gated detail. World/territory/capital invariants remain unchanged; only site/close use the registered district beneath the camera center.
+- Normal runtime proof now exercises the real interaction path rather than fixed proof URLs. Starting from world: NinjaOne destination enters capital; two zoom-in keys enter site with D01; another enters close; panning switches the active representation through D01, D03, D04, D02, and D06 based on registered camera-center ownership.
+- Verified runtime attributes for representative states: D01 site `span=0.1764,0.2352`, `mode=d01-site-composite`; D01 close `span=0.148176,0.197568`, `mode=d01-close-composite`; D03 close, D04 close, D02 close, and D06 close each resolved to their corresponding district composite without a click.
+- Live D02 normal-camera proof mounts only S13/I02 plus its accepted native L2 tree-node cohort. Live D06 normal-camera proof mounts the train-free open-undercroft station. World remains marker-only and the NinjaOne capital view remains the cohesive parent composition.
+- Gates pass: typecheck, lint, production build, `git diff --check`, and combined focused city suites (`40/40`, zero failures). The full repository suite was already green immediately before this bounded two-file authority change and remains due after the next integrated visual correction.
+
+### Evidence concerns and next repair
+
+- The free-camera routing defect is fixed and live-proven, but the whole-city goal remains active. The strongest remaining visible issue is still D06: at close range its station/support mass dominates the local landscape and the lower water outlet reads as a rectangular cut. Do not infer station acceptance from successful routing.
+- First test a smaller registered I21/I17 runtime scale against the existing context cutout, water, and contact geometry. If shrinking exposes an unacceptable hole or cannot correct the support mass, restore the placement and open a new exact high/xHigh asset contract; do not casually regenerate the full station.
+
+### Exact next action
+
+Checkpoint the free-camera LoD fix, then run a reversible D06 station-scale/contact proof. Promote a placement change only if live site/close views improve water clearance without exposing the D06 context cutout or breaking the fixed station socket.

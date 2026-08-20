@@ -20,6 +20,7 @@ import {
   NINJAONE_CAPITAL_CITY_PROOF_CAMERAS,
   NINJAONE_CAPITAL_CITY_PROOF_TIERS,
   NinjaOneCapitalCityLayer,
+  ninjaOneCapitalCityDistrictAtWorldPoint,
   ninjaOneCapitalCityFocusedDistrict,
   ninjaOneCapitalCityProofDistrict,
   ninjaOneCapitalCityRepresentationMode,
@@ -329,9 +330,13 @@ export function WorldScene({
   const forcedCityDistrict = cityProofView
     ? ninjaOneCapitalCityProofDistrict(cityProofView)
     : null;
+  const cameraCityDistrict = ninjaOneCapitalCityDistrictAtWorldPoint([
+    camera.origin[0] + camera.span[0] * 0.5,
+    camera.origin[1] + camera.span[1] * 0.5,
+  ]);
   const focusedCityDistrict = ninjaOneCapitalCityFocusedDistrict(
     detailState.tier.id,
-    null,
+    cameraCityDistrict,
     forcedCityDistrict,
   );
   const cityRepresentationMode = ninjaOneCapitalCityRepresentationMode(
