@@ -64,6 +64,7 @@ const layerByRole = new Map(rawLayers.map((layer) => [layer.role, layer]));
 const waterLayer = layerByRole.get("city-water-interaction");
 const contextLayer = layerByRole.get("capital-composite-context-with-D06-exclusion");
 const waterCoverage = manifest.verification.inlandWaterCoverageFraction;
+const progressiveWaterExclusion = manifest.authority.progressiveDetailWaterExclusion;
 const rawRuntimeAssets = manifest.runtimeAssets as unknown as readonly (
   Omit<NinjaOneCapitalCityRuntimeAsset, "asset" | "placement"> & {
     readonly asset: Omit<NinjaOneCapitalCityArtifact, "dimensions"> & {
@@ -113,6 +114,8 @@ if (
   || manifest.authority.waterRegistration.rejectedComponents?.length !== 1
   || manifest.authority.waterRegistration.rejectedComponents[0].reason
     !== "false-positive-city-shadow-pocket"
+  || progressiveWaterExclusion.method !== "byte-exact-live-water-authority"
+  || progressiveWaterExclusion.mask.dimensions.join(",") !== "1448,1086"
   || !Number.isFinite(waterCoverage)
   || waterCoverage > manifest.verification.maximumInlandWaterCoverageFraction
   || waterLayer?.id !== "L4_0"
@@ -144,6 +147,10 @@ export const NINJAONE_CAPITAL_CITY_R3_WORLD_SPAN = NINJAONE_ENVIRONMENT_WORLD_SP
 export const NINJAONE_CAPITAL_CITY_R3_CONTEXT = artifact(
   contextLayer.asset,
   "city-foundation-r3.context",
+);
+export const NINJAONE_CAPITAL_CITY_R3_PROGRESSIVE_WATER_EXCLUSION_MASK = artifact(
+  progressiveWaterExclusion.mask,
+  "city-foundation-r3.progressiveDetailWaterExclusion.mask",
 );
 export const NINJAONE_CAPITAL_CITY_R3_TERRITORY = artifact(
   manifest.deliveries.territory,

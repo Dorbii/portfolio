@@ -8,6 +8,7 @@ import {
 import {
   NINJAONE_CAPITAL_CITY_R3_ARTBOARD,
   NINJAONE_CAPITAL_CITY_R3_CONTEXT,
+  NINJAONE_CAPITAL_CITY_R3_PROGRESSIVE_WATER_EXCLUSION_MASK,
   NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS,
   NINJAONE_CAPITAL_CITY_R3_WATER_INTERACTION,
 } from "../model/ninjaOneCapitalCityFoundationR3";
@@ -174,6 +175,20 @@ export function NinjaOneCapitalCityR3({
               0 0 0 1 0"
           />
         </filter>
+        <filter
+          colorInterpolationFilters="sRGB"
+          height="100%"
+          id="ninjaone-capital-city-r3-inverse-water-mask"
+          width="100%"
+          x="0%"
+          y="0%"
+        >
+          <feComponentTransfer>
+            <feFuncR tableValues="1 0" type="discrete" />
+            <feFuncG tableValues="1 0" type="discrete" />
+            <feFuncB tableValues="1 0" type="discrete" />
+          </feComponentTransfer>
+        </filter>
       </defs>
       {registeredDetailVisible ? (
         <defs>
@@ -291,6 +306,39 @@ export function NinjaOneCapitalCityR3({
         <defs>
           <mask
             height={height}
+            id="ninjaone-capital-city-r3-d04-context-clip"
+            maskUnits="userSpaceOnUse"
+            style={{ maskType: "alpha" }}
+            width={width}
+            x={0}
+            y={0}
+          >
+            <image
+              height={height}
+              href={NINJAONE_CAPITAL_CITY_R3_CONTEXT.path}
+              preserveAspectRatio="none"
+              width={width}
+            />
+          </mask>
+          <mask
+            height={height}
+            id="ninjaone-capital-city-r3-d04-dry-fabric-clip"
+            maskUnits="userSpaceOnUse"
+            style={{ maskType: "luminance" }}
+            width={width}
+            x={0}
+            y={0}
+          >
+            <image
+              filter="url(#ninjaone-capital-city-r3-inverse-water-mask)"
+              height={height}
+              href={NINJAONE_CAPITAL_CITY_R3_PROGRESSIVE_WATER_EXCLUSION_MASK.path}
+              preserveAspectRatio="none"
+              width={width}
+            />
+          </mask>
+          <mask
+            height={height}
             id="ninjaone-capital-city-r3-d04-detail-cutout"
             maskUnits="userSpaceOnUse"
             style={{ maskType: "luminance" }}
@@ -299,15 +347,17 @@ export function NinjaOneCapitalCityR3({
             y={0}
           >
             <rect fill="#fff" height={height} width={width} />
-            <NinjaOneCapitalAssetNodes
-              camera={camera}
-              deliveryMode="focused-district-progressive-detail"
-              focusedDistrict="D04"
-              layerIds={["L4_3"]}
-              light={light}
-              maskOnly
-              tier={tier}
-            />
+            <g mask="url(#ninjaone-capital-city-r3-d04-dry-fabric-clip)">
+              <NinjaOneCapitalAssetNodes
+                camera={camera}
+                deliveryMode="focused-district-progressive-detail"
+                focusedDistrict="D04"
+                layerIds={["L4_3"]}
+                light={light}
+                maskOnly
+                tier={tier}
+              />
+            </g>
           </mask>
         </defs>
       ) : null}
@@ -443,14 +493,18 @@ export function NinjaOneCapitalCityR3({
         />
       ) : null}
       {d04DistrictDetailVisible ? (
-        <NinjaOneCapitalAssetNodes
-          camera={camera}
-          deliveryMode="focused-district-progressive-detail"
-          focusedDistrict="D04"
-          layerIds={["L4_3"]}
-          light={light}
-          tier={tier}
-        />
+        <g mask="url(#ninjaone-capital-city-r3-d04-dry-fabric-clip)">
+          <g mask="url(#ninjaone-capital-city-r3-d04-context-clip)">
+            <NinjaOneCapitalAssetNodes
+              camera={camera}
+              deliveryMode="focused-district-progressive-detail"
+              focusedDistrict="D04"
+              layerIds={["L4_3"]}
+              light={light}
+              tier={tier}
+            />
+          </g>
+        </g>
       ) : null}
       {closeFabricVisible ? (
         <image

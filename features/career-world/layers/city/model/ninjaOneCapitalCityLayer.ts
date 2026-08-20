@@ -491,13 +491,11 @@ export const NINJAONE_CAPITAL_D03_DETAIL_DISPLAY_WIDTHS = Object.freeze({
 export const NINJAONE_CAPITAL_D04_DETAIL_ASSET_IDS = Object.freeze([
   "S02",
   "S04",
-  "S14",
 ] as const);
 
 export const NINJAONE_CAPITAL_D04_DETAIL_DISPLAY_WIDTHS = Object.freeze({
   S02: 95,
   S04: 107,
-  S14: 114,
 } as const);
 
 export const NINJAONE_CAPITAL_D05_DETAIL_ASSET_IDS = Object.freeze([

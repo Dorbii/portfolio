@@ -8,6 +8,7 @@ import {
   NINJAONE_CAPITAL_CITY_R3_ARTBOARD,
   NINJAONE_CAPITAL_CITY_R3_AUTHORITY_ID,
   NINJAONE_CAPITAL_CITY_R3_CONTEXT,
+  NINJAONE_CAPITAL_CITY_R3_PROGRESSIVE_WATER_EXCLUSION_MASK,
   NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS,
   NINJAONE_CAPITAL_CITY_R3_TERRITORY,
   NINJAONE_CAPITAL_CITY_R3_WATER_COVERAGE,
@@ -48,6 +49,10 @@ test("r3 foundation publishes a registered water-safe capital cohort", () => {
   );
   assert.deepEqual(NINJAONE_CAPITAL_CITY_R3_ARTBOARD, [1448, 1086]);
   assert.deepEqual(NINJAONE_CAPITAL_CITY_R3_CONTEXT.dimensions, [1448, 1086]);
+  assert.deepEqual(
+    NINJAONE_CAPITAL_CITY_R3_PROGRESSIVE_WATER_EXCLUSION_MASK.dimensions,
+    [1448, 1086],
+  );
   assert.deepEqual(NINJAONE_CAPITAL_CITY_R3_WATER_INTERACTION.dimensions, [1448, 1086]);
   assert.deepEqual(NINJAONE_CAPITAL_CITY_R3_TERRITORY.dimensions, [512, 384]);
   assert.equal(NINJAONE_CAPITAL_CITY_R3_WATER_COVERAGE, 0);
@@ -61,6 +66,22 @@ test("r3 foundation publishes a registered water-safe capital cohort", () => {
   ]);
   assert.ok(Object.values(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS)
     .every(({ asset }) => !asset.path.includes("/_review/")));
+});
+
+test("progressive city detail uses the byte-exact accepted live-water authority", async () => {
+  const [runtimeBytes, sourceBytes] = await Promise.all([
+    readFile(new URL(
+      `../public${NINJAONE_CAPITAL_CITY_R3_PROGRESSIVE_WATER_EXCLUSION_MASK.path}`,
+      import.meta.url,
+    )),
+    readFile(new URL(
+      "../art-source/career-world/ninjaone-capital/city-r3/authority/live-inland-water-authority-mask-r1.png",
+      import.meta.url,
+    )),
+  ]);
+  assert.equal(runtimeBytes.equals(sourceBytes), true);
+  const metadata = await sharp(runtimeBytes).metadata();
+  assert.deepEqual([metadata.width, metadata.height, metadata.channels], [1448, 1086, 1]);
 });
 
 test("L4_0 is city-owned and cascades off with the city authority", () => {

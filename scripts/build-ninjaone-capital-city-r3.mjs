@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import sharp from "sharp";
@@ -84,6 +84,10 @@ const outputs = Object.freeze({
   waterRegistrationMask: path.join(
     outputRoot,
     "authority/city-water-registration-mask-r1.png",
+  ),
+  progressiveWaterExclusionMask: path.join(
+    outputRoot,
+    "authority/city-progressive-water-exclusion-mask-r1.png",
   ),
   nativeFoliageReuseManifest: path.join(
     outputRoot,
@@ -325,6 +329,7 @@ const liveWater = cleanedWater.mask;
 await writePng(outputs.waterRegistrationMask, sharp(liveWater, {
   raw: { width: WIDTH, height: HEIGHT, channels: 1 },
 }).toColourspace("b-w"));
+await copyFile(source.liveWaterMask, outputs.progressiveWaterExclusionMask);
 
 const registeredCityMaskRaw = Buffer.alloc(PIXELS);
 for (let index = 0; index < PIXELS; index += 1) {
@@ -424,6 +429,20 @@ await writePng(outputs.capitalContext, sharp(capitalContext, {
 }));
 const foliageManifest = JSON.parse(await readFile(source.foliageManifest, "utf8"));
 const nativeFoliageReuse = await analyzeNativeFoliageReuse(capitalContext, foliageManifest);
+const d02RegisteredNativeFoliageInstanceIds = Object.freeze([
+  "c1-native-conifer-020-instance",
+  "c1-native-conifer-024-instance",
+  "c1-native-conifer-029-instance",
+  "c1-native-conifer-031-instance",
+  "c1-native-conifer-037-instance",
+  "c1-native-conifer-038-instance",
+  "c1-native-conifer-041-instance",
+  "c1-native-conifer-042-instance",
+  "c1-native-conifer-053-instance",
+  "c1-native-conifer-054-instance",
+  "c1-native-conifer-060-instance",
+  "c1-native-conifer-063-instance",
+]);
 await mkdir(path.dirname(outputs.nativeFoliageReuseManifest), { recursive: true });
 await writeFile(outputs.nativeFoliageReuseManifest, `${JSON.stringify({
   schemaVersion: 1,
@@ -435,6 +454,13 @@ await writeFile(outputs.nativeFoliageReuseManifest, `${JSON.stringify({
     thresholds: nativeFoliageReuse.thresholds,
   },
   instances: nativeFoliageReuse.admitted,
+  districtInstances: {
+    D02: {
+      method: "existing-L2-tree-node-positions-registered-to-baked-D02-ridge-foliage",
+      sourceContext: "/career-world/capitals/ninjaone/city-r3/foundation/city-context-capital-without-d06-r1-alpha.png",
+      instances: d02RegisteredNativeFoliageInstanceIds.map((id) => ({ id })),
+    },
+  },
 }, null, 2)}\n`, "utf8");
 let waterPixels = 0;
 let coveredWaterPixels = 0;
@@ -478,6 +504,10 @@ const manifest = {
       rejectedComponents: cleanedWater.rejectedComponents,
       retainedComponentPixels: cleanedWater.retainedComponentPixels,
       mask: await artifact(outputs.waterRegistrationMask),
+    },
+    progressiveDetailWaterExclusion: {
+      method: "byte-exact-live-water-authority",
+      mask: await artifact(outputs.progressiveWaterExclusionMask),
     },
   },
   lod: {

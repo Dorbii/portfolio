@@ -23,6 +23,7 @@ import {
 } from "../features/career-world/layers/city/model/ninjaOneCapitalCityLayer.ts";
 import {
   NINJAONE_CAPITAL_CITY_R3_CONTEXT,
+  NINJAONE_CAPITAL_CITY_R3_PROGRESSIVE_WATER_EXCLUSION_MASK,
 } from "../features/career-world/layers/city/model/ninjaOneCapitalCityFoundationR3.ts";
 import {
   constrainNinjaOneCapitalCityProofCamera,
@@ -366,7 +367,7 @@ test("D03 calibrated silhouettes do not repaint registered inland water", async 
   }
 });
 
-test("D04 site and close admit only the three registered central-water sockets", () => {
+test("D04 site and close promote only the two dry-fabric sockets", () => {
   for (const tier of ["site", "close"]) {
     const nodes = ninjaOneCapitalVisibleDistrictDetailNodes(
       NINJAONE_CAPITAL_CITY_PROOF_CAMERAS[`d04-${tier}`],
@@ -388,7 +389,67 @@ test("D04 site and close admit only the three registered central-water sockets",
     assert.ok(nodes.every((node) => (
       ninjaOneCapitalCityAssetVariant(node, tier).path.includes(`/${tier}/`)
     )));
+    assert.equal(
+      nodes.some(({ assetId }) => assetId === "S14"),
+      false,
+      "D04 must preserve the cohesive baked S14 gateway until a conforming replacement exists",
+    );
   }
+});
+
+test("D04 dry-fabric clipping preserves registered water around S02 and S04", async () => {
+  const nodes = ninjaOneCapitalVisibleDistrictDetailNodes(
+    NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d04-close"],
+    "close",
+    ["L4_3"],
+    "D04",
+  );
+  const [contextBytes, waterBytes] = await Promise.all([
+    readFile(new URL(`../public${NINJAONE_CAPITAL_CITY_R3_CONTEXT.path}`, import.meta.url)),
+    readFile(new URL(
+      `../public${NINJAONE_CAPITAL_CITY_R3_PROGRESSIVE_WATER_EXCLUSION_MASK.path}`,
+      import.meta.url,
+    )),
+  ]);
+  const [{ data: context, info: contextInfo }, { data: water, info: waterInfo }] = await Promise.all([
+    sharp(contextBytes).ensureAlpha().raw().toBuffer({ resolveWithObject: true }),
+    sharp(waterBytes).greyscale().raw().toBuffer({ resolveWithObject: true }),
+  ]);
+  let rawWaterOverlap = 0;
+  let clippedWaterOverlap = 0;
+  let clippedOutsideContext = 0;
+  for (const node of nodes) {
+    const variant = ninjaOneCapitalCityAssetVariant(node, "close");
+    const height = Math.round(
+      node.displayWidth * node.asset.source.dimensions[1] / node.asset.source.dimensions[0],
+    );
+    const variantBytes = await readFile(new URL(`../public${variant.path}`, import.meta.url));
+    const { data, info } = await sharp(variantBytes)
+      .resize(node.displayWidth, height).ensureAlpha().raw()
+      .toBuffer({ resolveWithObject: true });
+    const left = Math.round(node.anchor[0] - node.displayWidth * 0.5);
+    const top = Math.round(node.anchor[1] - height);
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 0; x < node.displayWidth; x += 1) {
+        const worldX = left + x;
+        const worldY = top + y;
+        if (worldX < 0 || worldY < 0
+          || worldX >= contextInfo.width || worldY >= contextInfo.height) continue;
+        const alpha = data[(y * node.displayWidth + x) * info.channels + 3];
+        if (alpha < 16) continue;
+        const pixelIndex = worldY * contextInfo.width + worldX;
+        const contextAlpha = context[pixelIndex * contextInfo.channels + 3];
+        const isWater = water[pixelIndex * waterInfo.channels] >= 128;
+        if (isWater) rawWaterOverlap += 1;
+        const clippedAlpha = isWater ? 0 : Math.round(alpha * contextAlpha / 255);
+        if (clippedAlpha >= 16 && isWater) clippedWaterOverlap += 1;
+        if (clippedAlpha >= 16 && contextAlpha < 16) clippedOutsideContext += 1;
+      }
+    }
+  }
+  assert.ok(rawWaterOverlap > 0, "D04 must retain its explicit dry-fabric clip gate");
+  assert.equal(clippedWaterOverlap, 0, "D04 progressive nodes must not repaint registered water");
+  assert.equal(clippedOutsideContext, 0, "D04 progressive nodes must not expand city fabric");
 });
 
 test("only free-camera site uses the currently registered detail cohort", () => {
@@ -789,13 +850,18 @@ test("D03 detail atomically replaces four calibrated silhouettes without a distr
   assert.doesNotMatch(renderer, /D03-eastern-industry-plate/);
 });
 
-test("D04 detail atomically replaces three calibrated silhouettes without a district plate", async () => {
+test("D04 detail replaces only two dry-fabric silhouettes and preserves the baked S14 gateway", async () => {
   const renderer = await readFile(new URL(
     "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
     import.meta.url,
   ), "utf8");
   assert.match(renderer, /d04DistrictDetailVisible = \(tier === "site" \|\| tier === "close"\)/);
   assert.match(renderer, /id="ninjaone-capital-city-r3-d04-detail-cutout"/);
+  assert.match(renderer, /id="ninjaone-capital-city-r3-d04-context-clip"/);
+  assert.match(renderer, /id="ninjaone-capital-city-r3-d04-dry-fabric-clip"/);
+  assert.match(renderer, /id="ninjaone-capital-city-r3-inverse-water-mask"/);
+  assert.match(renderer, /<feFuncR tableValues="1 0" type="discrete"/);
+  assert.match(renderer, /<g mask="url\(#ninjaone-capital-city-r3-d04-dry-fabric-clip\)">/);
   assert.match(renderer, /focusedDistrict="D04"/);
   assert.doesNotMatch(renderer, /D04-central-lake-terraces-plate/);
 });

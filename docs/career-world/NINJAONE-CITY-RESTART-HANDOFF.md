@@ -515,3 +515,26 @@ Take user feedback on the live D02 close foliage registration. If accepted, chec
 ### Exact next action
 
 Finish the full suite, inspect D01 site/close once more after the build, then checkpoint the current state and return the browser to `d01-close` for user review. The next design slice after feedback is either a materially different D04 gateway/socket contract or a user-marked defect in D01/D02.
+
+## 2026-08-20 14:29 CDT
+
+### D04 dry-fabric recovery checkpoint
+
+- Rejected a third attempt to reinterpret or relax the failed S14 gateway. The accepted repair is materially different: preserve the cohesive baked S14 bridge/gateway in the parent context and promote only the two conforming dry-fabric sockets, S02 TypeScript at width `95` and S04 TanStack at width `107`, for D04 site/close.
+- Mechanical preflight proved that clipping those two nodes only to the city context was insufficient: their source silhouettes still crossed `1,168` accepted live-water pixels (`1,176` before context clipping). The previously packaged narrow interaction mask was not the correct authority for this gate because it marks `31,232` hard-water pixels while the accepted live inland-water authority marks `93,030`.
+- Added a versioned runtime control mask copied byte-for-byte from `art-source/.../live-inland-water-authority-mask-r1.png`. The xHigh asset worker produced one quarantine candidate and returned GO; Director verification confirmed source, quarantine, and promoted runtime files are all `1448x1086` 8-bit grayscale with SHA-256 `62DAE097BF95F53D086EF5C2DD6B4957E22F3A173C80BAC35400620ADDD66BC3` and zero byte/pixel differences.
+- Both the D04 parent cutout and the promoted S02/S04 nodes are now clipped to the inverse accepted-water authority and the existing city-context alpha. This prevents progressive architecture from removing or repainting the lake/channel while leaving the baked S14 gateway and its connective fabric intact. The rejected S14 ImageGen and alpha-repair candidates remain quarantined and unmounted.
+- Repaired the R3 builder before running it: the prior builder would have erased the accepted D02 `districtInstances` native-tree registration. The builder now deterministically emits the 12 D02 L2-conifer instance IDs, so rebuilds preserve the user-requested native tree-node replacement rather than restoring blurry baked-only foliage.
+- Live D04 site/close proof shows the parent lake/channel exposed, S02/S04 replacing only their dry silhouettes, no rectangular district plate, no promoted S14 asset, no D06 station, and no train. Live regression proof preserved D01, D02, D03, D05, and train-free D06; D02 still mounts its registered native conifers after the rebuild.
+- The first direct focused-test invocation omitted `--experimental-strip-types` and failed to load `.ts` imports. Classified as a **test invocation/setup error**; the repository command with its declared loader passed without changing an assertion.
+- Final gates pass: typecheck, lint, production build, `git diff --check`, focused R3/LoD suites (`39/39`), and the full repository suite. Full-suite result is `201/203` passed, `2` declared skips, `0` failures in `335.520s`. The exhaustive camera/foliage sweep and deterministic package-command verifier both passed.
+
+### Remaining acceptance and whole-city work
+
+- D04 is ready for user visual review, not yet user-accepted. Review the fixed `d04-site` and `d04-close` routes for whether the preserved baked S14 gateway reads coherently beside the sharper S02/S04 nodes and whether any water-edge seam remains objectionable.
+- D01/D02/D03/D05 remain reviewable; this checkpoint does not claim user acceptance of those districts. The broader free-camera city pass and any user-marked district defects remain active after D04 review.
+- Keep every rejected S14 candidate unpromoted. If the user rejects the baked S14 result, the next repair must start from a newly isolated gateway asset/socket contract, not a broader water-mask relaxation.
+
+### Exact next action
+
+Commit this D04 recovery checkpoint, keep the development server running on `http://localhost:3000`, and leave the in-app browser on `d04-close` for user review. Use the user's marked visual defect as the next bounded repair target.

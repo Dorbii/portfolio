@@ -50,6 +50,19 @@
         "path": "/career-world/capitals/ninjaone/city-r3/authority/city-water-registration-mask-r1.png",
         "sha256": "51357652c88ec868a40951c5dad2f78b334bb5b5242aae0b1f3474b5bb7bf252"
       }
+    },
+    "progressiveDetailWaterExclusion": {
+      "method": "byte-exact-live-water-authority",
+      "mask": {
+        "decodedBytes": 1572528,
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "encodedBytes": 104083,
+        "path": "/career-world/capitals/ninjaone/city-r3/authority/city-progressive-water-exclusion-mask-r1.png",
+        "sha256": "62dae097bf95f53d086ef5c2dd6b4957e22f3a173c80bac35400620addd66bc3"
+      }
     }
   },
   "lod": {
