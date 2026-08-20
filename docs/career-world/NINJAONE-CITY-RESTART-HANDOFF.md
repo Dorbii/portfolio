@@ -595,3 +595,28 @@ Checkpoint the free-camera LoD fix, then run a reversible D06 station-scale/cont
 - Preserve the land-first treatment visible around D06 as the target pattern for another close district shown in user screenshot `codex-clipboard-139dfabe-2646-4a53-b26e-be6112b9c2fc.png`: keep the promoted architecture node, but stop relying on the baked district terrain and baked trees merely to make the node read.
 - Repair that district after the current D06 support lane by exposing the authoritative native land wherever no city-specific incline, contact mass, or feature is required; replace any needed close foliage with the existing registered L2 tree-node pipeline rather than adding more baked/generated trees; add only a reversible city-owned landscape/contact transition where the building cannot ground directly to native land.
 - Acceptance requires the node to read as built into the same land layer, not floating over a blurred duplicate city/forest plate. Do not remove the architecture node, alter L2/L3 authority, or start this repair before the I22 D06 worker verdict.
+
+## Crash-safe checkpoint — 2026-08-20 16:00 CDT
+
+### D06 I22 support trim verdict
+
+- The xHigh I22 worker returned **NO-GO** without creating a candidate or spending an ImageGen call. Director inspection confirmed the result.
+- Current whole-station opaque overlap with the accepted water authority is 1,758 pixels. Deleting every opaque pixel in the complete permitted lower-undercroft envelope—an intentionally invalid maximum-removal diagnostic—removes only 173 pixels and leaves 1,585 protected overlap pixels, still 585 above the proposed `<=1,000` gate.
+- The proof classifies most counted overlap on protected roofs, towers, tracks, platforms, and upper fabric rather than on the lower support shelf. Therefore `<=1,000 whole-station water overlap` is a superseded repair metric, not a valid undercroft invariant. Do not promote I22 and do not silently widen the edit envelope.
+- Evidence: `.codex-tmp/city-restart-r1/imagegen/I22-D06-narrow-support/worker-report.md`, `metrics.json`, and `proof-NO-GO-water-overlap-classification-2x.png`.
+- Preserve the accepted D06 `0.72` placement checkpoint. A future D06 support repair must gate the editable support/contact ROI directly instead of using whole-station water overlap.
+
+### D03 land-first repair now active
+
+- Live proof positively identifies the user's logged example as D03 eastern industry: S09 AWS industrial at `[1118,550]`, with S07/S08/S12 as the other promoted L4_3 nodes.
+- Root cause: the prior D03 context cutout removed baked city context only under the four node silhouettes. Blurred baked cliffs, vegetation, and duplicate district fabric remained above L2 everywhere else.
+- A reproducible D03 context-exclusion authority entry and runtime mask path are implemented as a tracer. The first broad registered-district mask proves native land/water exposure but is **not accepted**: it removes too much connective architecture and exposes the district polygon.
+- Sixteen existing L2 tree registrations were added for D03 from the native foliage atlas; the live D03 close tracer mounts 20 admitted/shared groups total, uses the shared neutralization-underlay plus WebGL canopy pipeline, reports `webgl2-ready`, and animates. No generated/city-specific tree art is used.
+- Focused R3/LoD tests remain 40/40 green and TypeScript typecheck is green. Existing passing D03 silhouette and water invariants were preserved; no prior test was removed.
+- Required xHigh asset lane `/root/d03_land_first_mask` is active with a strict quarantine-only packet for a D03 context-extraction mask that retains useful roads/buildings while removing baked terrain/forest. Maximum two candidates; Director promotion and runtime proof remain pending.
+
+### Current worktree and next action
+
+- Uncommitted tracer edits: builder, foundation manifest/model, D03 runtime mask consumption, shared native foliage registration, and focused tests; one new generated runtime mask exists under `public/.../authority/` but is not yet accepted.
+- Dev server remains healthy at `http://localhost:3000/` and must stay running.
+- Next action: wait for the D03M01 worker, independently verify its gates and visual proofs, promote only a conforming BEST candidate, rebuild the manifest, then inspect fixed D03 site/close and normal free-camera transitions before committing.
