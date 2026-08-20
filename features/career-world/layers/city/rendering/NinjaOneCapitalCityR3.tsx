@@ -8,6 +8,7 @@ import {
 import {
   NINJAONE_CAPITAL_CITY_R3_ARTBOARD,
   NINJAONE_CAPITAL_CITY_R3_CONTEXT,
+  NINJAONE_CAPITAL_CITY_R3_D03_CONTEXT_EXCLUSION_MASK,
   NINJAONE_CAPITAL_CITY_R3_PROGRESSIVE_WATER_EXCLUSION_MASK,
   NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS,
   NINJAONE_CAPITAL_CITY_R3_WATER_INTERACTION,
@@ -49,6 +50,10 @@ const CITY_CLOSE_FABRIC_DETAIL_REVIEW =
   NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.CFX01.asset.path;
 const CITY_CENTRAL_ARCHITECTURE_DETAIL_REVIEW =
   NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.CFX02.asset.path;
+const D03_GROUND_CONTACT_REVIEW =
+  NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L02.asset.path;
+const D03_TERRAIN_INTEGRATION_DETAIL_REVIEW =
+  NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L03.asset.path;
 const D06_STATION_REVIEW_SCALE =
   NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I21.placement!.scale;
 const D06_STATION_CLOSE_WIDTH = 846 * D06_STATION_REVIEW_SCALE;
@@ -178,6 +183,20 @@ export function NinjaOneCapitalCityR3({
         <filter
           colorInterpolationFilters="sRGB"
           height="100%"
+          id="ninjaone-capital-city-r3-inverse-district-exclusion"
+          width="100%"
+          x="0%"
+          y="0%"
+        >
+          <feComponentTransfer>
+            <feFuncR tableValues="1 0" type="table" />
+            <feFuncG tableValues="1 0" type="table" />
+            <feFuncB tableValues="1 0" type="table" />
+          </feComponentTransfer>
+        </filter>
+        <filter
+          colorInterpolationFilters="sRGB"
+          height="100%"
           id="ninjaone-capital-city-r3-inverse-water-mask"
           width="100%"
           x="0%"
@@ -289,15 +308,12 @@ export function NinjaOneCapitalCityR3({
             x={0}
             y={0}
           >
-            <rect fill="#fff" height={height} width={width} />
-            <NinjaOneCapitalAssetNodes
-              camera={camera}
-              deliveryMode="focused-district-progressive-detail"
-              focusedDistrict="D03"
-              layerIds={["L4_3"]}
-              light={light}
-              maskOnly
-              tier={tier}
+            <image
+              filter="url(#ninjaone-capital-city-r3-inverse-district-exclusion)"
+              height={height}
+              href={NINJAONE_CAPITAL_CITY_R3_D03_CONTEXT_EXCLUSION_MASK.path}
+              preserveAspectRatio="none"
+              width={width}
             />
           </mask>
         </defs>
@@ -450,6 +466,31 @@ export function NinjaOneCapitalCityR3({
         preserveAspectRatio="none"
         width={width}
       />
+      {d03DistrictDetailVisible && landscapeVisible ? (
+        <image
+          className="ninjaone-capital-city__r3-d03-ground-contact"
+          data-city-asset-id="D03L02"
+          data-city-child-layer="L4_1"
+          data-city-runtime-status="manifest-declared"
+          height={height}
+          href={D03_GROUND_CONTACT_REVIEW}
+          opacity={tier === "close" ? 0.44 : 0.4}
+          preserveAspectRatio="none"
+          width={width}
+        />
+      ) : null}
+      {d03DistrictDetailVisible && landscapeVisible ? (
+        <image
+          className="ninjaone-capital-city__r3-d03-terrain-integration"
+          data-city-asset-id="D03L03"
+          data-city-child-layer="L4_2"
+          data-city-runtime-status="manifest-declared"
+          height={height}
+          href={D03_TERRAIN_INTEGRATION_DETAIL_REVIEW}
+          preserveAspectRatio="none"
+          width={width}
+        />
+      ) : null}
       {d01DistrictDetailVisible ? (
         <g mask="url(#ninjaone-capital-city-r3-d01-context-clip)">
           <NinjaOneCapitalAssetNodes

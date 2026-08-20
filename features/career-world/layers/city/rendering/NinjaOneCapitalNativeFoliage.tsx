@@ -24,6 +24,10 @@ const D02_REGISTERED_NATIVE_FOLIAGE_INSTANCE_IDS = new Set([
   ...APPROVED_NATIVE_FOLIAGE_INSTANCE_IDS,
   ...nativeFoliageReuseManifest.districtInstances.D02.instances.map(({ id }) => id),
 ]);
+const D03_REGISTERED_NATIVE_FOLIAGE_INSTANCE_IDS = new Set([
+  ...APPROVED_NATIVE_FOLIAGE_INSTANCE_IDS,
+  ...nativeFoliageReuseManifest.districtInstances.D03.instances.map(({ id }) => id),
+]);
 
 export function NinjaOneCapitalNativeFoliage({ camera, focusDistrict }: {
   readonly camera: CameraView;
@@ -31,7 +35,9 @@ export function NinjaOneCapitalNativeFoliage({ camera, focusDistrict }: {
 }) {
   const approvedInstanceIds = focusDistrict === "D02"
     ? D02_REGISTERED_NATIVE_FOLIAGE_INSTANCE_IDS
-    : APPROVED_NATIVE_FOLIAGE_INSTANCE_IDS;
+    : focusDistrict === "D03"
+      ? D03_REGISTERED_NATIVE_FOLIAGE_INSTANCE_IDS
+      : APPROVED_NATIVE_FOLIAGE_INSTANCE_IDS;
   const instances = useMemo(
     () => selectNinjaOneEnvironmentFoliageInstances(
       camera,

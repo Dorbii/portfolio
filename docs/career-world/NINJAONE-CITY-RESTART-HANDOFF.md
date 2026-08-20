@@ -662,3 +662,33 @@ Checkpoint the free-camera LoD fix, then run a reversible D06 station-scale/cont
 - Runtime currently contains the provisional D03M02 inverse-mask wiring and an untracked public mask copy for live proof; no contact overlay is mounted. The browser is therefore an intermediate mask-only state and must not be presented as ready.
 - Preserve the D03 native-tree registration/test work and the provisional D03M02 evidence. Wait for the amended D03L02 worker verdict, independently inspect alpha/halo/perspective and the four socket crops, then mount only a conforming candidate beneath the nodes for actual site + close proof.
 - If matte recovery leaves a white halo, platform geometry reads as four pasted slabs, or runtime grounding remains weak, reject D03L02 and restore the stable baseline rather than relaxing water/foliage/ROI gates. If it passes, promote D03M02 + D03L02, reconcile builder/manifests/source/public hashes, update durable order/containment tests, run the full gate stack, commit, and leave the dev server on D03 close for user review.
+
+## Crash-safe checkpoint — 2026-08-20 18:01 CDT
+
+### User correction: native foliage is necessary but not sufficient
+
+- The user rejected the current D03 site composition as sticker-like. This is a real visual integration failure, not a foliage-selection failure: D03M02 exposes the authoritative native land and the D03 runtime uses 16 registered existing L2 tree nodes, but the isolated architecture nodes lack the city-owned paths, steps, retaining edges, drainage detail, and contact shadow that previously joined them to the district.
+- Preserve D03M02 and the native L2 tree-node replacement. Do not restore the baked D03 terrain/forest plate and do not generate more trees. D03L02 remains a valid shallow contact underlay but is insufficient by itself.
+- A new xHigh quarantine-only asset lane `/root/d03_terrain_integration_detail` targets `D03L03-city-terrain-integration-detail-r1-alpha` on L4_2, between the L4_1 contacts and immutable L4_3 buildings. The exact 1448x1086 overlay may add only sparse paths, ramps/steps, thin retaining edges, drainage/curb hints, and soft lower-right contact shadow. It must preserve native land by transparency and remain zero on hard water and registered foliage.
+
+### Promotion and gate state
+
+- D03M02 and D03L02 now have source/public promotion copies and manifest-driven runtime wiring. The builder validates continuous D03 reveal, D03 support, live-parent land ownership, hard-water exclusion, transparent corners, and a 2–8% contact footprint; its focused test pair passes 14/14.
+- The first builder run exposed a validation-definition mismatch: 28 contact pixels touched antialiased water-mask fringe values, while the worker contract defined hard water. The durable gate now uses `>223`; the candidate has zero pixels there and still has zero pixels outside registered parent land. This is classified as setup/validator alignment, not a stale design test or relaxed water-ownership decision.
+- Current runtime is still not review-ready because the missing D03L03 transition layer is the user-visible defect. Next action: inspect the worker's candidate against actual site and close runtime, reject any broad terrain patch/generated foliage/architecture/halo, then promote only a live-proven asset, add manifest/order/containment tests, run the full gate stack, checkpoint, and leave the dev server on D03 close.
+
+## Crash-safe checkpoint — 2026-08-20 18:30 CDT
+
+### D03 land-first + native-foliage composition is Director-accepted
+
+- The xHigh D03L03 worker used the full two-call ImageGen allowance. Candidate 1 is accepted; Candidate 2 is rejected as too broad and gray. The accepted 1448x1086 RGBA overlay SHA is `E4E975372FF6EE116B50A922AFC79F7852FAD892C737CA4FC5E9E0995C9AB3E7`.
+- Director independently verified 7,252 positive-alpha pixels (2.645% of D03), maximum alpha 220, transparent corners, no pale matte, and zero pixels outside D03, outside registered parent land (`L < 64`), or on hard water (`L >= 240`). Worker registration also reports zero overlap with dilated active native-foliage occupancy and disallowed node geometry; durable tests reconstruct the active foliage occupancy and confirm zero D03L03 overlap.
+- The live stack is now D03M02 inverse exclusion -> D03L02 L4_1 contact at `0.40` site / `0.44` close -> D03L03 L4_2 paths/steps/retaining detail -> immutable S07/S08/S09/S12 L4_3 nodes -> shared L2 native foliage reuse. D03L03 adds no trees, terrain plate, water, or building volume.
+- Live site and close proof passed after softening the older contact layer. Evidence: `.codex-tmp/city-restart-r1/imagegen/D03-terrain-integration-detail/director-runtime-d03-site-contact040-stable.png` and `director-runtime-d03-close-contact044-stable.png`. The paths visibly taper into native terrain, the large S09 building no longer relies on a broad dark pad, water remains visible, and the existing shared tree nodes remain above the hardscape.
+- Normal-camera world proof still shows only the NinjaOne marker at world LoD; the city plate does not leak outside its detail scope. Evidence: `.codex-tmp/city-restart-r1/imagegen/D03-terrain-integration-detail/director-runtime-normal-camera.png`.
+
+### Gate/checkpoint state
+
+- R3 builder, TypeScript typecheck, ESLint, focused R3/LoD tests (14/14), production build, and `git diff --check` pass. The full single-concurrency repository suite also finished green: 205 tests, 203 passed, 2 intentionally skipped, 0 failed.
+- The builder/manifest now declare D03M02, D03L02, and D03L03 with explicit L4_1/L4_2 reversible ownership, source/public hashes, LoD tiers, coverage bounds, and land/water containment. Runtime uses only manifest-declared production paths.
+- Next exact action: run the final status/hash/diff audit, commit the coherent D03 unit, and leave the live browser on fixed D03 close for user review.

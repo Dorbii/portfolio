@@ -8,6 +8,7 @@ import {
   NINJAONE_CAPITAL_CITY_R3_ARTBOARD,
   NINJAONE_CAPITAL_CITY_R3_AUTHORITY_ID,
   NINJAONE_CAPITAL_CITY_R3_CONTEXT,
+  NINJAONE_CAPITAL_CITY_R3_D03_CONTEXT_EXCLUSION_MASK,
   NINJAONE_CAPITAL_CITY_R3_PROGRESSIVE_WATER_EXCLUSION_MASK,
   NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS,
   NINJAONE_CAPITAL_CITY_R3_TERRITORY,
@@ -49,6 +50,7 @@ test("r3 foundation publishes a registered water-safe capital cohort", () => {
   );
   assert.deepEqual(NINJAONE_CAPITAL_CITY_R3_ARTBOARD, [1448, 1086]);
   assert.deepEqual(NINJAONE_CAPITAL_CITY_R3_CONTEXT.dimensions, [1448, 1086]);
+  assert.deepEqual(NINJAONE_CAPITAL_CITY_R3_D03_CONTEXT_EXCLUSION_MASK.dimensions, [1448, 1086]);
   assert.deepEqual(
     NINJAONE_CAPITAL_CITY_R3_PROGRESSIVE_WATER_EXCLUSION_MASK.dimensions,
     [1448, 1086],
@@ -59,6 +61,8 @@ test("r3 foundation publishes a registered water-safe capital cohort", () => {
   assert.deepEqual(Object.keys(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS).sort(), [
     "CFX01",
     "CFX02",
+    "D03L02",
+    "D03L03",
     "I20",
     "I21",
     "LFX06",
@@ -66,6 +70,116 @@ test("r3 foundation publishes a registered water-safe capital cohort", () => {
   ]);
   assert.ok(Object.values(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS)
     .every(({ asset }) => !asset.path.includes("/_review/")));
+});
+
+test("D03 reveals native land and restores only city-owned contact and integration fabric", async () => {
+  const [exclusion, contact, integration, district, land, water] = await Promise.all([
+    grayscale(`../public${NINJAONE_CAPITAL_CITY_R3_D03_CONTEXT_EXCLUSION_MASK.path}`),
+    rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L02.asset.path),
+    rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L03.asset.path),
+    grayscale("../art-source/career-world/ninjaone-capital/city-r3/districts/D03-eastern-industry-mask.png"),
+    grayscale("../art-source/career-world/ninjaone-capital/city-r3/authority/registered-parent-land-mask-r1.png"),
+    grayscale("../art-source/career-world/ninjaone-capital/city-r3/authority/live-inland-water-authority-mask-r1.png"),
+  ]);
+  assert.deepEqual([exclusion.info.width, exclusion.info.height, exclusion.info.channels], [1448, 1086, 1]);
+  assert.deepEqual([contact.info.width, contact.info.height, contact.info.channels], [1448, 1086, 4]);
+  assert.deepEqual([integration.info.width, integration.info.height, integration.info.channels], [1448, 1086, 4]);
+  assert.deepEqual(
+    {
+      layerId: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L02.layerId,
+      role: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L02.role,
+      tiers: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L02.tiers,
+    },
+    {
+      layerId: "L4_1",
+      role: "eastern-industry-ground-contact-platforms",
+      tiers: ["site", "close"],
+    },
+  );
+  assert.deepEqual(
+    {
+      layerId: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L03.layerId,
+      role: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L03.role,
+      tiers: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L03.tiers,
+    },
+    {
+      layerId: "L4_2",
+      role: "eastern-industry-terrain-integration-detail",
+      tiers: ["site", "close"],
+    },
+  );
+
+  let districtPixels = 0;
+  let hardRevealPixels = 0;
+  let exclusionOutsideDistrict = 0;
+  let contactPixels = 0;
+  let contactOutsideDistrict = 0;
+  let contactOutsideLand = 0;
+  let contactOnWater = 0;
+  let integrationPixels = 0;
+  let integrationOutsideDistrict = 0;
+  let integrationOutsideLand = 0;
+  let integrationOnWater = 0;
+  let integrationMaximumAlpha = 0;
+  for (let index = 0; index < district.data.length; index += 1) {
+    if (district.data[index] > 0) districtPixels += 1;
+    if (exclusion.data[index] >= 240) hardRevealPixels += 1;
+    if (exclusion.data[index] > 0 && district.data[index] === 0) {
+      exclusionOutsideDistrict += 1;
+    }
+    const alpha = contact.data[index * 4 + 3];
+    if (alpha > 0) {
+      contactPixels += 1;
+      if (district.data[index] === 0) contactOutsideDistrict += 1;
+      if (land.data[index] === 0) contactOutsideLand += 1;
+      if (water.data[index] > 223) contactOnWater += 1;
+    }
+    const integrationAlpha = integration.data[index * 4 + 3];
+    if (integrationAlpha > 0) {
+      integrationPixels += 1;
+      integrationMaximumAlpha = Math.max(integrationMaximumAlpha, integrationAlpha);
+      if (district.data[index] === 0) integrationOutsideDistrict += 1;
+      if (land.data[index] < 64) integrationOutsideLand += 1;
+      if (water.data[index] >= 240) integrationOnWater += 1;
+    }
+  }
+  assert.ok(hardRevealPixels / districtPixels >= 0.9);
+  assert.ok(hardRevealPixels / districtPixels <= 0.97);
+  assert.equal(exclusionOutsideDistrict, 0);
+  assert.ok(contactPixels / districtPixels >= 0.02);
+  assert.ok(contactPixels / districtPixels <= 0.08);
+  assert.equal(contactOutsideDistrict, 0);
+  assert.equal(contactOutsideLand, 0);
+  assert.equal(contactOnWater, 0);
+  assert.ok(integrationPixels / districtPixels >= 0.02);
+  assert.ok(integrationPixels / districtPixels <= 0.1);
+  assert.equal(integrationMaximumAlpha, 220);
+  assert.equal(integrationOutsideDistrict, 0);
+  assert.equal(integrationOutsideLand, 0);
+  assert.equal(integrationOnWater, 0);
+  assert.deepEqual([
+    contact.data[3],
+    contact.data[(contact.info.width - 1) * 4 + 3],
+    contact.data[(contact.info.width * (contact.info.height - 1)) * 4 + 3],
+    contact.data[(contact.info.width * contact.info.height - 1) * 4 + 3],
+  ], [0, 0, 0, 0]);
+  assert.deepEqual([
+    integration.data[3],
+    integration.data[(integration.info.width - 1) * 4 + 3],
+    integration.data[(integration.info.width * (integration.info.height - 1)) * 4 + 3],
+    integration.data[(integration.info.width * integration.info.height - 1) * 4 + 3],
+  ], [0, 0, 0, 0]);
+
+  const rendererSource = await readFile(new URL(
+    "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
+    import.meta.url,
+  ), "utf8");
+  const contactIndex = rendererSource.indexOf('data-city-asset-id="D03L02"');
+  const integrationIndex = rendererSource.indexOf('data-city-asset-id="D03L03"');
+  const d03NodeIndex = rendererSource.indexOf('focusedDistrict="D03"', integrationIndex);
+  assert.ok(contactIndex >= 0);
+  assert.ok(integrationIndex > contactIndex);
+  assert.ok(d03NodeIndex > integrationIndex);
 });
 
 test("progressive city detail uses the byte-exact accepted live-water authority", async () => {
@@ -448,6 +562,111 @@ test("close city foliage reuses the registered L2 native conifer atlases", async
   assert.ok(d02Trees.every(({ atlasResource }) => (
     atlasResource.path.includes("/environment/shared/foliage-native-r4/")
   )));
+  const d03Registration = reuseManifest.districtInstances.D03;
+  assert.equal(
+    d03Registration.method,
+    "existing-L2-tree-node-positions-registered-to-baked-D03-native-land-foliage",
+  );
+  assert.equal(d03Registration.instances.length, 16);
+  const d03ApprovedIds = new Set([
+    ...approvedIds,
+    ...d03Registration.instances.map(({ id }) => id),
+  ]);
+  assert.ok(d03Registration.instances.every(({ id }) => sourceFoliageIds.has(id)));
+  for (const { id } of d03Registration.instances) {
+    const sourceInstance = NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES.find(
+      (instance) => instance.id === id,
+    );
+    assert.ok(sourceInstance?.neutralizationAtlasRect);
+    const atlasBytes = await readFile(new URL(
+      `../public${sourceInstance.atlasResource.path.split("?")[0]}`,
+      import.meta.url,
+    ));
+    for (const [frameKind, rect] of [
+      ["canopy", sourceInstance.canopyAtlasRect],
+      ["neutralization", sourceInstance.neutralizationAtlasRect],
+    ]) {
+      const [left, top, width, height] = rect;
+      const { data } = await sharp(atlasBytes)
+        .extract({ left, top, width, height })
+        .ensureAlpha()
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+      let nontransparentPixels = 0;
+      for (let offset = 3; offset < data.length; offset += 4) {
+        if (data[offset] > 0) nontransparentPixels += 1;
+      }
+      assert.ok(
+        nontransparentPixels > 0,
+        `${id} must not register an empty ${frameKind} atlas frame.`,
+      );
+    }
+  }
+  const d03Trees = selectNinjaOneEnvironmentFoliageInstances(
+    NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d03-close"],
+    true,
+    NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS,
+    NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES,
+    d03ApprovedIds,
+    NINJAONE_CAPITAL_CITY_DETAIL_POLICY.tierMaximumSpan.close,
+  );
+  assert.ok(d03Trees.length >= 16);
+  assert.ok(d03Trees.every(({ atlasResource }) => (
+    atlasResource.path.includes("/environment/shared/foliage-native-r4/")
+  )));
+
+  const integration = await rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L03.asset.path);
+  const foliageOccupancy = Buffer.alloc(integration.info.width * integration.info.height);
+  const atlasCache = new Map();
+  for (const instance of d03Trees) {
+    let atlasBytes = atlasCache.get(instance.atlasResource.path);
+    if (!atlasBytes) {
+      atlasBytes = await readFile(new URL(`../public${instance.atlasResource.path.split("?")[0]}`, import.meta.url));
+      atlasCache.set(instance.atlasResource.path, atlasBytes);
+    }
+    const [frameX, frameY, frameWidth, frameHeight] = instance.canopyAtlasRect;
+    const left = Math.floor(instance.artboardBounds.origin[0]);
+    const top = Math.floor(instance.artboardBounds.origin[1]);
+    const right = Math.ceil(instance.artboardBounds.origin[0] + instance.artboardBounds.span[0]);
+    const bottom = Math.ceil(instance.artboardBounds.origin[1] + instance.artboardBounds.span[1]);
+    const targetWidth = right - left;
+    const targetHeight = bottom - top;
+    const canopyAlpha = await sharp(atlasBytes)
+      .extract({ left: frameX, top: frameY, width: frameWidth, height: frameHeight })
+      .ensureAlpha()
+      .extractChannel(3)
+      .resize(targetWidth, targetHeight, { fit: "fill" })
+      .raw()
+      .toBuffer();
+    for (let y = 0; y < targetHeight; y += 1) {
+      for (let x = 0; x < targetWidth; x += 1) {
+        if (canopyAlpha[y * targetWidth + x] === 0) continue;
+        for (let dy = -1; dy <= 1; dy += 1) {
+          for (let dx = -1; dx <= 1; dx += 1) {
+            const artboardX = left + x + dx;
+            const artboardY = top + y + dy;
+            if (
+              artboardX >= 0
+              && artboardX < integration.info.width
+              && artboardY >= 0
+              && artboardY < integration.info.height
+            ) {
+              foliageOccupancy[artboardY * integration.info.width + artboardX] = 1;
+            }
+          }
+        }
+      }
+    }
+  }
+  let foliagePixels = 0;
+  let integrationFoliageOverlap = 0;
+  for (let index = 0; index < foliageOccupancy.length; index += 1) {
+    if (foliageOccupancy[index] === 0) continue;
+    foliagePixels += 1;
+    if (integration.data[index * 4 + 3] > 0) integrationFoliageOverlap += 1;
+  }
+  assert.ok(foliagePixels > 1_000);
+  assert.equal(integrationFoliageOverlap, 0);
 });
 
 test("the rejected LFX01 rear-cliff candidate is not mounted at runtime", async () => {

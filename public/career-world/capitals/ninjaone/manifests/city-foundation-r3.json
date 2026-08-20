@@ -20,7 +20,8 @@
       "globalWater": "L1-and-L3-immutable",
       "globalLand": "L2-immutable",
       "cityWaterInteraction": "L4_0-reversible",
-      "cityLandscapeModification": "L4_1-reversible"
+      "cityLandscapeModification": "L4_1-reversible",
+      "cityTerrainIntegrationDetail": "L4_2-reversible"
     },
     "waterRegistration": {
       "sourceComponentCount": 393,
@@ -63,6 +64,44 @@
         "path": "/career-world/capitals/ninjaone/city-r3/authority/city-progressive-water-exclusion-mask-r1.png",
         "sha256": "62dae097bf95f53d086ef5c2dd6b4957e22f3a173c80bac35400620addd66bc3"
       }
+    },
+    "progressiveDistrictContextExclusions": {
+      "D03": {
+        "method": "continuous-D03-context-exclusion-plus-city-owned-L4_1-contact-platforms",
+        "hardRevealFraction": 0.9391985529022188,
+        "mask": {
+          "decodedBytes": 1572528,
+          "dimensions": [
+            1448,
+            1086
+          ],
+          "encodedBytes": 8029,
+          "path": "/career-world/capitals/ninjaone/city-r3/authority/D03M02-city-full-context-exclusion-r1.png",
+          "sha256": "260a5fe73ebe31035b8ae4e73a6f6294486aeb47d06f130837c7a009ffc29a45"
+        },
+        "contactFraction": 0.028190690143105133,
+        "contactLayer": {
+          "decodedBytes": 6290112,
+          "dimensions": [
+            1448,
+            1086
+          ],
+          "encodedBytes": 33624,
+          "path": "/career-world/capitals/ninjaone/city-r3/landscape/D03L02-city-grounded-contact-platforms-r1-alpha.png",
+          "sha256": "32c324ef0f5e6a21a46716ef8a9acc1a98c71cedd3d088dc75d7172341437778"
+        },
+        "terrainIntegrationFraction": 0.02644746247319514,
+        "terrainIntegrationLayer": {
+          "decodedBytes": 6290112,
+          "dimensions": [
+            1448,
+            1086
+          ],
+          "encodedBytes": 35398,
+          "path": "/career-world/capitals/ninjaone/city-r3/detail/D03L03-city-terrain-integration-detail-r1-alpha.png",
+          "sha256": "e4e975372ff6ee116b50a922afc79f7852fad892c737ca4fc5e9e0995c9ab3e7"
+        }
+      }
     }
   },
   "lod": {
@@ -103,6 +142,44 @@
     }
   ],
   "runtimeAssets": [
+    {
+      "id": "D03L02",
+      "layerId": "L4_1",
+      "role": "eastern-industry-ground-contact-platforms",
+      "tiers": [
+        "site",
+        "close"
+      ],
+      "asset": {
+        "decodedBytes": 6290112,
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "encodedBytes": 33624,
+        "path": "/career-world/capitals/ninjaone/city-r3/landscape/D03L02-city-grounded-contact-platforms-r1-alpha.png",
+        "sha256": "32c324ef0f5e6a21a46716ef8a9acc1a98c71cedd3d088dc75d7172341437778"
+      }
+    },
+    {
+      "id": "D03L03",
+      "layerId": "L4_2",
+      "role": "eastern-industry-terrain-integration-detail",
+      "tiers": [
+        "site",
+        "close"
+      ],
+      "asset": {
+        "decodedBytes": 6290112,
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "encodedBytes": 35398,
+        "path": "/career-world/capitals/ninjaone/city-r3/detail/D03L03-city-terrain-integration-detail-r1-alpha.png",
+        "sha256": "e4e975372ff6ee116b50a922afc79f7852fad892c737ca4fc5e9e0995c9ab3e7"
+      }
+    },
     {
       "id": "WFX01",
       "layerId": "L4_0",
@@ -275,6 +352,10 @@
     "registeredParentLandMask": "0f5200b2dc9f527d39faa2c78d028c5f246d3b262c8b3cbdf91040b16c77a92b",
     "liveWaterMask": "62dae097bf95f53d086ef5c2dd6b4957e22f3a173c80bac35400620addd66bc3",
     "topOverhang": "6db7e4986f08e2ee0dc9beb9b0bc063ed911267f530987207ea55d3f89d35742",
+    "d03DistrictMask": "872bde51347a8fddf3e6644bc25d49144639002d9c75da46a1ebf45b3b250e04",
+    "d03ContextExclusionMask": "260a5fe73ebe31035b8ae4e73a6f6294486aeb47d06f130837c7a009ffc29a45",
+    "d03GroundContact": "32c324ef0f5e6a21a46716ef8a9acc1a98c71cedd3d088dc75d7172341437778",
+    "d03TerrainIntegrationDetail": "e4e975372ff6ee116b50a922afc79f7852fad892c737ca4fc5e9e0995c9ab3e7",
     "d06DistrictMask": "0017c3b86dd0c05e3b4d698aed6ea9eb0d8270b1fd396a555b1e5c9c08e65a60",
     "foliageManifest": "776e87784c763b299c51083bf3cddf7bba88038a327f2317667ea8a56669e758"
   }

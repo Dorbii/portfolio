@@ -149,6 +149,60 @@
           "id": "c1-native-conifer-064-instance"
         }
       ]
+    },
+    "D03": {
+      "method": "existing-L2-tree-node-positions-registered-to-baked-D03-native-land-foliage",
+      "sourceContext": "/career-world/capitals/ninjaone/city-r3/foundation/city-context-capital-without-d06-r1-alpha.png",
+      "instances": [
+        {
+          "id": "c1-native-conifer-044-instance"
+        },
+        {
+          "id": "c1-native-conifer-048-instance"
+        },
+        {
+          "id": "c1-native-conifer-049-instance"
+        },
+        {
+          "id": "c1-native-conifer-054-instance"
+        },
+        {
+          "id": "c1-native-conifer-056-instance"
+        },
+        {
+          "id": "c1-native-conifer-065-instance"
+        },
+        {
+          "id": "c1-native-conifer-067-instance"
+        },
+        {
+          "id": "c1-native-conifer-069-instance"
+        },
+        {
+          "id": "c1-native-conifer-070-instance"
+        },
+        {
+          "id": "c1-native-conifer-071-instance"
+        },
+        {
+          "id": "c2-native-conifer-074-instance"
+        },
+        {
+          "id": "c2-native-conifer-075-instance"
+        },
+        {
+          "id": "c2-native-conifer-083-instance"
+        },
+        {
+          "id": "c2-native-conifer-088-instance"
+        },
+        {
+          "id": "c2-native-conifer-093-instance"
+        },
+        {
+          "id": "c2-native-conifer-110-instance"
+        }
+      ]
     }
   }
 }
