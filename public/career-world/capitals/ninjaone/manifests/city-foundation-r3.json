@@ -234,6 +234,28 @@
           "encodedBytes": 31884,
           "path": "/career-world/capitals/ninjaone/city-r3/detail/D05L03-western-skill-terrain-integration-detail-r1-alpha.png",
           "sha256": "985585a7c94d2710cc126caa23945d3c4dde1612f933a5c07115d12f499e3db5"
+        },
+        "terraceMassFraction": 0.09995575739437078,
+        "terraceMassLayer": {
+          "decodedBytes": 762944,
+          "dimensions": [
+            524,
+            364
+          ],
+          "encodedBytes": 111534,
+          "path": "/career-world/capitals/ninjaone/city-r3/landscape/D05L04-western-skill-terrace-mass-r1-alpha.png",
+          "sha256": "0715639fbe348cb60639037319a0813c8d77f2d4a53ca170ae92f6a5164e7359"
+        },
+        "terraceMassPlacement": {
+          "anchor": [
+            122,
+            646
+          ],
+          "baseSize": [
+            524,
+            364
+          ],
+          "scale": 1
         }
       }
     }
@@ -459,6 +481,36 @@
       }
     },
     {
+      "id": "D05L04",
+      "layerId": "L4_1",
+      "role": "western-skill-terrace-mass",
+      "tiers": [
+        "site",
+        "close"
+      ],
+      "placement": {
+        "anchor": [
+          122,
+          646
+        ],
+        "baseSize": [
+          524,
+          364
+        ],
+        "scale": 1
+      },
+      "asset": {
+        "decodedBytes": 762944,
+        "dimensions": [
+          524,
+          364
+        ],
+        "encodedBytes": 111534,
+        "path": "/career-world/capitals/ninjaone/city-r3/landscape/D05L04-western-skill-terrace-mass-r1-alpha.png",
+        "sha256": "0715639fbe348cb60639037319a0813c8d77f2d4a53ca170ae92f6a5164e7359"
+      }
+    },
+    {
       "id": "WFX01",
       "layerId": "L4_0",
       "role": "support-localized-water-detail",
@@ -649,6 +701,7 @@
     "d05ContextExclusionMask": "f24b8e7ea8c2a9658fc55e0880aa8d102b6d7909c9621ebb15b5f949e032b929",
     "d05GroundIntegration": "bf56f85f373eef3356fcae11d5d3f658db278eb868b7251a46029ed43bb80167",
     "d05TerrainIntegrationDetail": "985585a7c94d2710cc126caa23945d3c4dde1612f933a5c07115d12f499e3db5",
+    "d05TerraceMass": "b69771147295cfcde77a85d6b30514b71236e193e52d013cd5978646fc21836c",
     "d06DistrictMask": "0017c3b86dd0c05e3b4d698aed6ea9eb0d8270b1fd396a555b1e5c9c08e65a60",
     "foliageManifest": "776e87784c763b299c51083bf3cddf7bba88038a327f2317667ea8a56669e758"
   }

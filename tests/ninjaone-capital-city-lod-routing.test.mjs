@@ -833,12 +833,15 @@ test("D05 progressively reveals native land before independently owned grounding
   );
   assert.match(renderer, /data-city-asset-id="D05L02"[\s\S]*?data-city-child-layer="L4_1"/);
   assert.match(renderer, /data-city-asset-id="D05L03"[\s\S]*?data-city-child-layer="L4_1"/);
+  assert.match(renderer, /data-city-asset-id="D05L04"[\s\S]*?data-city-child-layer="L4_1"/);
   const contactIndex = renderer.indexOf('data-city-asset-id="D05L02"');
   const integrationIndex = renderer.indexOf('data-city-asset-id="D05L03"');
-  const nodeIndex = renderer.indexOf('district="D05"', integrationIndex);
+  const terraceMassIndex = renderer.indexOf('data-city-asset-id="D05L04"');
+  const nodeIndex = renderer.indexOf('district="D05"', terraceMassIndex);
   assert.ok(contactIndex >= 0);
   assert.ok(integrationIndex > contactIndex);
-  assert.ok(nodeIndex > integrationIndex);
+  assert.ok(terraceMassIndex > integrationIndex);
+  assert.ok(nodeIndex > terraceMassIndex);
   assert.match(
     nodeRenderer,
     /usesAuthoredGrounding = node\.districtId === "D01"[\s\S]*?node\.districtId === "D02"[\s\S]*?node\.districtId === "D03"[\s\S]*?node\.districtId === "D04"[\s\S]*?node\.districtId === "D05"/,

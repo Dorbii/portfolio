@@ -24,6 +24,7 @@ export type NinjaOneCapitalCityRuntimeAssetId =
   | "D04W02"
   | "D05L02"
   | "D05L03"
+  | "D05L04"
   | "I20"
   | "I21"
   | "LFX06"
@@ -117,6 +118,7 @@ const expectedRuntimeAssetContract = Object.freeze({
   D04W02: Object.freeze({ layerId: "L4_0", tiers: "site,close" }),
   D05L02: Object.freeze({ layerId: "L4_1", tiers: "site,close" }),
   D05L03: Object.freeze({ layerId: "L4_1", tiers: "site,close" }),
+  D05L04: Object.freeze({ layerId: "L4_1", tiers: "site,close" }),
   I20: Object.freeze({ layerId: "L4_2", tiers: "capital" }),
   I21: Object.freeze({ layerId: "L4_2", tiers: "site,close" }),
   LFX06: Object.freeze({ layerId: "L4_1", tiers: "capital,site,close" }),
@@ -186,12 +188,18 @@ if (
   || d05ContextExclusion.mask.dimensions.join(",") !== "1448,1086"
   || d05ContextExclusion.contactLayer.dimensions.join(",") !== "1448,1086"
   || d05ContextExclusion.terrainIntegrationLayer.dimensions.join(",") !== "1448,1086"
+  || d05ContextExclusion.terraceMassLayer.dimensions.join(",") !== "524,364"
+  || d05ContextExclusion.terraceMassPlacement.anchor.join(",") !== "122,646"
+  || d05ContextExclusion.terraceMassPlacement.baseSize.join(",") !== "524,364"
+  || d05ContextExclusion.terraceMassPlacement.scale !== 1
   || d05ContextExclusion.hardRevealFraction < 0.96
   || d05ContextExclusion.hardRevealFraction > 0.99
   || d05ContextExclusion.contactFraction < 0.015
   || d05ContextExclusion.contactFraction > 0.05
   || d05ContextExclusion.terrainIntegrationFraction < 0.015
   || d05ContextExclusion.terrainIntegrationFraction > 0.06
+  || d05ContextExclusion.terraceMassFraction < 0.04
+  || d05ContextExclusion.terraceMassFraction > 0.1
   || !Number.isFinite(waterCoverage)
   || waterCoverage > manifest.verification.maximumInlandWaterCoverageFraction
   || waterLayer?.id !== "L4_0"
@@ -203,7 +211,7 @@ if (
       || runtimeAsset.layerId !== expected.layerId
       || runtimeAsset.tiers.join(",") !== expected.tiers
       || runtimeAsset.asset.path.includes("/_review/")
-      || (id === "I20" || id === "I21" || id === "S14D04")
+      || (id === "D05L04" || id === "I20" || id === "I21" || id === "S14D04")
         !== Boolean(runtimeAsset.placement)
       || (runtimeAsset.placement !== undefined && (
         !Number.isFinite(runtimeAsset.placement.scale)

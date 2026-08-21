@@ -76,6 +76,7 @@ test("r3 foundation publishes a registered water-safe capital cohort", () => {
     "D04W02",
     "D05L02",
     "D05L03",
+    "D05L04",
     "I20",
     "I21",
     "LFX06",
@@ -437,10 +438,11 @@ test("D04 reveals native land and adds only localized grounding, water contact, 
 });
 
 test("D05 reveals native land and keeps grounding inside reversible L4_1 ownership", async () => {
-  const [exclusion, contact, integration, district, land, water] = await Promise.all([
+  const [exclusion, contact, integration, terraceMass, district, land, water] = await Promise.all([
     grayscale(`../public${NINJAONE_CAPITAL_CITY_R3_D05_CONTEXT_EXCLUSION_MASK.path}`),
     rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L02.asset.path),
     rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L03.asset.path),
+    rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L04.asset.path),
     grayscale("../art-source/career-world/ninjaone-capital/city-r3/districts/D05-western-skill-terraces-mask.png"),
     grayscale("../art-source/career-world/ninjaone-capital/city-r3/authority/registered-parent-land-mask-r1.png"),
     grayscale("../art-source/career-world/ninjaone-capital/city-r3/authority/live-inland-water-authority-mask-r1.png"),
@@ -448,15 +450,27 @@ test("D05 reveals native land and keeps grounding inside reversible L4_1 ownersh
   assert.deepEqual([exclusion.info.width, exclusion.info.height, exclusion.info.channels], [1448, 1086, 1]);
   assert.deepEqual([contact.info.width, contact.info.height, contact.info.channels], [1448, 1086, 4]);
   assert.deepEqual([integration.info.width, integration.info.height, integration.info.channels], [1448, 1086, 4]);
+  assert.deepEqual([terraceMass.info.width, terraceMass.info.height, terraceMass.info.channels], [524, 364, 4]);
+  assert.deepEqual(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L04.placement, {
+    anchor: [122, 646],
+    baseSize: [524, 364],
+    scale: 1,
+  });
+  assert.equal(
+    NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L04.asset.decodedBytes,
+    524 * 364 * 4,
+  );
   assert.deepEqual(
     [NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L02.layerId,
-      NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L03.layerId],
-    ["L4_1", "L4_1"],
+      NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L03.layerId,
+      NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L04.layerId],
+    ["L4_1", "L4_1", "L4_1"],
   );
   assert.deepEqual(
     [NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L02.tiers,
-      NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L03.tiers],
-    [["site", "close"], ["site", "close"]],
+      NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L03.tiers,
+      NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L04.tiers],
+    [["site", "close"], ["site", "close"], ["site", "close"]],
   );
 
   let districtPixels = 0;
@@ -471,6 +485,11 @@ test("D05 reveals native land and keeps grounding inside reversible L4_1 ownersh
   let integrationOutsideLand = 0;
   let integrationOnWater = 0;
   let integrationMaximumAlpha = 0;
+  let terraceMassPixels = 0;
+  let terraceMassOutsideDistrict = 0;
+  let terraceMassOutsideLand = 0;
+  let terraceMassOnWater = 0;
+  let terraceMassMaximumAlpha = 0;
   for (let index = 0; index < district.data.length; index += 1) {
     if (district.data[index] > 0) districtPixels += 1;
     if (exclusion.data[index] >= 240) hardRevealPixels += 1;
@@ -493,6 +512,22 @@ test("D05 reveals native land and keeps grounding inside reversible L4_1 ownersh
       if (water.data[index] >= 240) integrationOnWater += 1;
     }
   }
+  const terraceMassPlacement = NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L04.placement;
+  for (let y = 0; y < terraceMass.info.height; y += 1) {
+    for (let x = 0; x < terraceMass.info.width; x += 1) {
+      const localIndex = y * terraceMass.info.width + x;
+      const alpha = terraceMass.data[localIndex * 4 + 3];
+      if (alpha === 0) continue;
+      const artboardX = terraceMassPlacement.anchor[0] + x;
+      const artboardY = terraceMassPlacement.anchor[1] + y;
+      const artboardIndex = artboardY * district.info.width + artboardX;
+      terraceMassPixels += 1;
+      terraceMassMaximumAlpha = Math.max(terraceMassMaximumAlpha, alpha);
+      if (district.data[artboardIndex] === 0) terraceMassOutsideDistrict += 1;
+      if (land.data[artboardIndex] < 64) terraceMassOutsideLand += 1;
+      if (water.data[artboardIndex] >= 240) terraceMassOnWater += 1;
+    }
+  }
   assert.ok(hardRevealPixels / districtPixels >= 0.96);
   assert.ok(hardRevealPixels / districtPixels <= 0.99);
   assert.equal(exclusionOutsideDistrict, 0);
@@ -507,6 +542,12 @@ test("D05 reveals native land and keeps grounding inside reversible L4_1 ownersh
   assert.equal(integrationOutsideDistrict, 0);
   assert.equal(integrationOutsideLand, 0);
   assert.equal(integrationOnWater, 0);
+  assert.ok(terraceMassPixels / districtPixels >= 0.04);
+  assert.ok(terraceMassPixels / districtPixels <= 0.1);
+  assert.equal(terraceMassMaximumAlpha, 218);
+  assert.equal(terraceMassOutsideDistrict, 0);
+  assert.equal(terraceMassOutsideLand, 0);
+  assert.equal(terraceMassOnWater, 0);
   assert.deepEqual([
     contact.data[3],
     contact.data[(contact.info.width - 1) * 4 + 3],
@@ -526,10 +567,12 @@ test("D05 reveals native land and keeps grounding inside reversible L4_1 ownersh
   ), "utf8");
   const contactIndex = rendererSource.indexOf('data-city-asset-id="D05L02"');
   const integrationIndex = rendererSource.indexOf('data-city-asset-id="D05L03"');
-  const d05NodeIndex = rendererSource.indexOf('district="D05"', integrationIndex);
+  const terraceMassIndex = rendererSource.indexOf('data-city-asset-id="D05L04"');
+  const d05NodeIndex = rendererSource.indexOf('district="D05"', terraceMassIndex);
   assert.ok(contactIndex >= 0);
   assert.ok(integrationIndex > contactIndex);
-  assert.ok(d05NodeIndex > integrationIndex);
+  assert.ok(terraceMassIndex > integrationIndex);
+  assert.ok(d05NodeIndex > terraceMassIndex);
 });
 
 test("progressive city detail uses the byte-exact accepted live-water authority", async () => {

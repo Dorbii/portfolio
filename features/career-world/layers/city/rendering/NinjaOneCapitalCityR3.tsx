@@ -86,6 +86,10 @@ const D05_GROUND_INTEGRATION_REVIEW =
   NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L02.asset.path;
 const D05_TERRAIN_INTEGRATION_DETAIL_REVIEW =
   NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L03.asset.path;
+const D05_TERRACE_MASS_REVIEW =
+  NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L04.asset.path;
+const D05_TERRACE_MASS_PLACEMENT =
+  NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L04.placement!;
 
 function ProgressiveDistrictAssetNodes({
   camera,
@@ -652,6 +656,21 @@ export function NinjaOneCapitalCityR3({
           opacity={siteProgress * (0.54 + closeProgress * 0.08)}
           preserveAspectRatio="none"
           width={width}
+        />
+      ) : null}
+      {d05DistrictLandscapeVisible ? (
+        <image
+          className="ninjaone-capital-city__r3-d05-terrace-mass"
+          data-city-asset-id="D05L04"
+          data-city-child-layer="L4_1"
+          data-city-runtime-status="manifest-declared"
+          height={D05_TERRACE_MASS_PLACEMENT.baseSize[1] * D05_TERRACE_MASS_PLACEMENT.scale}
+          href={D05_TERRACE_MASS_REVIEW}
+          opacity={siteProgress}
+          preserveAspectRatio="none"
+          width={D05_TERRACE_MASS_PLACEMENT.baseSize[0] * D05_TERRACE_MASS_PLACEMENT.scale}
+          x={D05_TERRACE_MASS_PLACEMENT.anchor[0]}
+          y={D05_TERRACE_MASS_PLACEMENT.anchor[1]}
         />
       ) : null}
       {d01DistrictArchitectureVisible ? (

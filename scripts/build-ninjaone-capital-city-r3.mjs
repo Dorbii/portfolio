@@ -107,6 +107,10 @@ const source = Object.freeze({
     ROOT,
     "art-source/career-world/ninjaone-capital/city-r3/detail/D05L03-western-skill-terrain-integration-detail-r1-alpha.png",
   ),
+  d05TerraceMass: path.join(
+    ROOT,
+    "art-source/career-world/ninjaone-capital/city-r3/landscape/D05L04-western-skill-terrace-mass-r1-alpha.png",
+  ),
   d06DistrictMask: path.join(
     ROOT,
     "art-source/career-world/ninjaone-capital/city-r3/districts/D06-station-rail-mask.png",
@@ -221,6 +225,10 @@ const outputs = Object.freeze({
   d05TerrainIntegrationDetail: path.join(
     outputRoot,
     "detail/D05L03-western-skill-terrain-integration-detail-r1-alpha.png",
+  ),
+  d05TerraceMass: path.join(
+    outputRoot,
+    "landscape/D05L04-western-skill-terrace-mass-r1-alpha.png",
   ),
   nativeFoliageReuseManifest: path.join(
     outputRoot,
@@ -479,6 +487,7 @@ const [
   d05ContextExclusionMask,
   d05GroundIntegration,
   d05TerrainIntegrationDetail,
+  d05TerraceMass,
   d06DistrictMask,
 ] =
   await Promise.all([
@@ -505,6 +514,7 @@ const [
     singleChannel(source.d05ContextExclusionMask),
     imageMetadata(source.d05GroundIntegration),
     imageMetadata(source.d05TerrainIntegrationDetail),
+    imageMetadata(source.d05TerraceMass),
     singleChannel(source.d06DistrictMask),
   ]);
 const d04CompactGatewayBytes = await readFile(source.d04CompactGateway);
@@ -952,6 +962,62 @@ if (
 await mkdir(path.dirname(outputs.d05TerrainIntegrationDetail), { recursive: true });
 await copyFile(source.d05TerrainIntegrationDetail, outputs.d05TerrainIntegrationDetail);
 
+const d05TerraceMassRgba = await sharp(d05TerraceMass.bytes)
+  .ensureAlpha()
+  .raw()
+  .toBuffer();
+let d05TerraceMassPixels = 0;
+let d05TerraceMassMaximumAlpha = 0;
+let d05TerraceMassOutsideSupportPixels = 0;
+let d05TerraceMassOutsideLandPixels = 0;
+let d05TerraceMassWaterPixels = 0;
+let d05TerraceMassLeft = WIDTH;
+let d05TerraceMassTop = HEIGHT;
+let d05TerraceMassRight = -1;
+let d05TerraceMassBottom = -1;
+for (let index = 0; index < PIXELS; index += 1) {
+  const alpha = d05TerraceMassRgba[index * 4 + 3];
+  if (alpha === 0) continue;
+  const x = index % WIDTH;
+  const y = Math.floor(index / WIDTH);
+  d05TerraceMassPixels += 1;
+  d05TerraceMassMaximumAlpha = Math.max(d05TerraceMassMaximumAlpha, alpha);
+  d05TerraceMassLeft = Math.min(d05TerraceMassLeft, x);
+  d05TerraceMassTop = Math.min(d05TerraceMassTop, y);
+  d05TerraceMassRight = Math.max(d05TerraceMassRight, x);
+  d05TerraceMassBottom = Math.max(d05TerraceMassBottom, y);
+  if (d05DistrictMask[index] === 0) d05TerraceMassOutsideSupportPixels += 1;
+  if (registeredParentLand[index] < 64) d05TerraceMassOutsideLandPixels += 1;
+  if (rawLiveWater[index] >= 240) d05TerraceMassWaterPixels += 1;
+}
+const d05TerraceMassFraction = d05TerraceMassPixels / d05RegisteredPixels;
+const d05TerraceMassCrop = Object.freeze({
+  left: 122,
+  top: 646,
+  width: 524,
+  height: 364,
+});
+if (
+  sha256(d05TerraceMass.bytes) !== "b69771147295cfcde77a85d6b30514b71236e193e52d013cd5978646fc21836c"
+  || d05TerraceMass.metadata.channels !== 4
+  || d05TerraceMassOutsideSupportPixels !== 0
+  || d05TerraceMassOutsideLandPixels !== 0
+  || d05TerraceMassWaterPixels !== 0
+  || d05TerraceMassMaximumAlpha > 224
+  || d05TerraceMassFraction < 0.04
+  || d05TerraceMassFraction > 0.1
+  || d05TerraceMassLeft !== d05TerraceMassCrop.left
+  || d05TerraceMassTop !== d05TerraceMassCrop.top
+  || d05TerraceMassRight !== d05TerraceMassCrop.left + d05TerraceMassCrop.width - 1
+  || d05TerraceMassBottom !== d05TerraceMassCrop.top + d05TerraceMassCrop.height - 1
+) {
+  throw new TypeError("The accepted D05 terrace-mass layer violates city/land ownership or crop registration.");
+}
+await writePng(
+  outputs.d05TerraceMass,
+  sharp(d05TerraceMass.bytes).extract(d05TerraceMassCrop),
+);
+
 const registeredCityMaskRaw = Buffer.alloc(PIXELS);
 for (let index = 0; index < PIXELS; index += 1) {
   registeredCityMaskRaw[index] = Math.round(
@@ -1195,6 +1261,13 @@ const manifest = {
         contactLayer: await artifact(outputs.d05GroundIntegration),
         terrainIntegrationFraction: d05TerrainIntegrationFraction,
         terrainIntegrationLayer: await artifact(outputs.d05TerrainIntegrationDetail),
+        terraceMassFraction: d05TerraceMassFraction,
+        terraceMassLayer: await artifact(outputs.d05TerraceMass),
+        terraceMassPlacement: {
+          anchor: [d05TerraceMassCrop.left, d05TerraceMassCrop.top],
+          baseSize: [d05TerraceMassCrop.width, d05TerraceMassCrop.height],
+          scale: 1,
+        },
       },
     },
   },
@@ -1273,6 +1346,18 @@ const manifest = {
       role: "western-skill-terrain-integration-detail",
       tiers: ["site", "close"],
       asset: await artifact(outputs.d05TerrainIntegrationDetail),
+    },
+    {
+      id: "D05L04",
+      layerId: "L4_1",
+      role: "western-skill-terrace-mass",
+      tiers: ["site", "close"],
+      placement: {
+        anchor: [d05TerraceMassCrop.left, d05TerraceMassCrop.top],
+        baseSize: [d05TerraceMassCrop.width, d05TerraceMassCrop.height],
+        scale: 1,
+      },
+      asset: await artifact(outputs.d05TerraceMass),
     },
     {
       id: "WFX01",
