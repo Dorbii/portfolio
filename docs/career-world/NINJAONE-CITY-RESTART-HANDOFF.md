@@ -863,3 +863,32 @@ Checkpoint the free-camera LoD fix, then run a reversible D06 station-scale/cont
 - Run the full repository test suite and production build, stage only the D02/D04 production unit plus shared renderer/model/builder/tests/handoff, and commit the checkpoint. Leave obsolete `_review` evidence files unstaged.
 - Repair and re-audit D06 with the train absent: verify I20/I21/I17 ownership and scale progression, open undercroft, support width, water-under-bridge detail, land reveal, and close overlap/bleed. Generate a new asset only if a specific defect remains after current assets/layers are isolated.
 - Finish the required world -> territory -> capital -> site -> close truth pass, cold-entry performance measurement, close-detail asset-bleed isolation, and whole-city comparison. Only then tell the user the port-3000 view is ready for final review; black page regions outside the fixed viewport remain explicitly out of scope.
+
+## Crash-safe checkpoint — 2026-08-21 01:48 CDT
+
+### D06 ownership and progressive LoD are technically proven
+
+- I17 was briefly moved toward manifest ownership to eliminate the old public-path bypass, but the asset itself bakes conifers into masonry, stairs, and undercroft edges. The strict xHigh tree-removal lane exhausted two calls and returned NO-GO: candidate 1 creates architectural holes; candidate 2 redraws masonry, retains foliage, and adds matte seams. The Director rejected both and removed I17 from renderer, manifest, builder, model, and LoD contract. No I17 candidate was promoted.
+- The refreshed LoD harness now passes the accepted sequence without that defective plate: world and territory mount no city artwork; capital mounts only the capital context cohort; D06 site mounts WFX01/LFX06/CFX01/I21; D06 close retains those layers and progressively adds six existing native-tree nodes. No legacy node-ID assertions or territory-level city plate remain in the harness.
+- Layer-isolation proof is clean: L4_0 removes only WFX01; L4_1 removes only LFX06; L4_2 removes I21; L4_4 removes CFX01; L4_6 removes the six native-tree nodes; disabling parent L4 removes every city modification and restores the untouched land/water composition. Runtime proof reports zero `_review` asset references.
+- The flat blue terminal below the station is confirmed L3 inland-water geometry, not L4 city bleed. The xHigh D06L02 transition lane returned NO-GO: two compliant city-owned overlays could soften the neck but could not conceal the terminal while tapering to zero at the 1448x1086 city artboard boundary. Nothing was promoted. The smallest credible correction requires explicit authority to modify the L3 endpoint or extend the city transition socket beyond the current artboard; do not silently alter base water.
+
+### Remaining D06 acceptance and performance work
+
+- I17 is intentionally omitted. Close detail now adds only the six accepted native-tree nodes over the train-free/open-undercroft station representation. A replacement civic overlay remains future work only if a specific close-detail deficit is demonstrated and a new asset can preserve the overall parent art without baked foliage.
+- The temporary diagnostic that disabled close native foliage has been reverted. That experiment did not reduce the approximately `1.0-1.4 s` full-page close-load long task, so the shared native-tree renderer is not the demonstrated bottleneck. Steady rendering remains approximately `16.7 ms`; the final representative performance capture must be rerun with foliage enabled and the accepted I17 decision applied. Treat full-page cold close initialization as a material residual concern, not a steady-frame failure.
+- Port 3000 remains live. Next: rerun LoD sequence, layer isolation, representative performance, focused tests, typecheck, lint, build, full single-concurrency suite, and final whole-city visual comparison; then commit the D06 checkpoint. Black page regions outside the fixed viewport remain explicitly out of scope.
+
+## Crash-safe checkpoint — 2026-08-21 02:13 CDT
+
+### D06 and the whole-city verification pass are review-ready
+
+- Final runtime proof passes the full world -> territory -> capital -> D06 site -> D06 close sequence. The captures report no city at world/territory; `LFX06/I20` at capital; `WFX01/LFX06/CFX01/I21` at site and close; and exactly six existing native-tree instances added only at close. Every view fills the fixed `1448x1086` viewport and references zero `_review` paths.
+- Final close layer isolation is exact: L4_0 removes WFX01, L4_1 removes LFX06, L4_2 removes I21, L4_4 removes CFX01, L4_6 removes the six native trees, and parent L4 removes the city entirely to expose untouched native land/water. The rejected I17 and D06L02 assets are absent from runtime.
+- Final performance evidence separates steady rendering from startup cost. Site and close steady samples hold approximately `16.7 ms` p50/p95 with zero frames over `25 ms`. Full-page close initialization still shows a `957 ms` cold and `675 ms` warm long task, with approximately `5.5 s` readiness. The foliage-disabled control did not improve that cost, so removing the correct native-tree LoD is not a supported optimization. Record this as remaining startup debt, not a steady-frame or layer-bleed failure.
+- Gate stack is green: deterministic R3 builder, focused foundation/LoD tests `45/45`, typecheck, lint, production build, full single-concurrency repository suite `207/209` passed with two declared skips and zero failures, and `git diff --check`. The existing build chunk-size advisory remains non-fatal. The temporary untracked production I17 copy was removed and remains recoverable from its source asset; obsolete `_review` evidence files remain intentionally unstaged.
+
+### Exact continuation
+
+- Stage and commit only the four tracked D06/final-audit files: renderer, LoD capture harness, foundation test, and this handoff. Keep port 3000 alive and hand the fixed D06 close URL to Steve for review.
+- Do not claim the L3 stream terminal is repaired; it is a documented ownership-bound residual requiring explicit base-water or beyond-artboard socket authority. Do not reintroduce I17 unless a new tree-free asset independently passes architecture, alpha, placement, seam, and runtime LoD gates.

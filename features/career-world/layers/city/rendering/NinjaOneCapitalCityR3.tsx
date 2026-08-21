@@ -44,8 +44,6 @@ const D06_SITE_CLOSE_REVIEW_BASE = Object.freeze({
   width: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I21.placement!.baseSize[0]
     * NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I21.placement!.scale,
 });
-const D06_CLOSE_CONTEXT =
-  "/career-world/capitals/ninjaone/city-nodes-r2/close/infrastructure/I17-station-close-civic-overlay-r1-alpha.png";
 const CITY_BRIDGE_WATER_DETAIL_REVIEW =
   NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.WFX01.asset.path;
 const CITY_UPPER_REAR_RIDGE_UNDERLAY_REVIEW =
@@ -86,11 +84,6 @@ const D05_GROUND_INTEGRATION_REVIEW =
   NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L02.asset.path;
 const D05_TERRAIN_INTEGRATION_DETAIL_REVIEW =
   NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L03.asset.path;
-const D06_STATION_REVIEW_SCALE =
-  NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I21.placement!.scale;
-const D06_STATION_CLOSE_WIDTH = 846 * D06_STATION_REVIEW_SCALE;
-const D06_STATION_CLOSE_HEIGHT = 564 * D06_STATION_REVIEW_SCALE;
-
 export function NinjaOneCapitalCityR3({
   camera,
   focusDistrict,
@@ -130,9 +123,6 @@ export function NinjaOneCapitalCityR3({
     || focusDistrict === "D03"
     || focusDistrict === "D04"
     || focusDistrict === "D05";
-  const closeContextVisible = tier === "close"
-    && !progressiveDistrictFocused
-    && isEnvironmentLayerEffectivelyVisible(visibility, "L4_4");
   const closeFabricVisible = (tier === "site" || tier === "close")
     && !progressiveDistrictFocused
     && isEnvironmentLayerEffectivelyVisible(visibility, "L4_4");
@@ -707,20 +697,6 @@ export function NinjaOneCapitalCityR3({
           layerIds={registeredDetailLayerIds}
           light={light}
           tier={tier}
-        />
-      ) : null}
-      {closeContextVisible ? (
-        <image
-          className="ninjaone-capital-city__r3-image"
-          data-city-asset-id="I17"
-          data-city-child-layer="L4_4"
-          data-city-runtime-scale={D06_STATION_REVIEW_SCALE}
-          height={D06_STATION_CLOSE_HEIGHT}
-          href={D06_CLOSE_CONTEXT}
-          preserveAspectRatio="xMidYMid meet"
-          width={D06_STATION_CLOSE_WIDTH}
-          x={1054 - D06_STATION_CLOSE_WIDTH * 0.5}
-          y={1086 - D06_STATION_CLOSE_HEIGHT}
         />
       ) : null}
       {d06StationVisible ? (

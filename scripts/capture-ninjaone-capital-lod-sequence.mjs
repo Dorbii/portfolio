@@ -23,24 +23,30 @@ const DEFAULT_OUTPUT =
   ".codex-tmp/city-lod-correction-r1/lod-sequence-r1/evidence.json";
 const VIEWPORT = Object.freeze({ height: 1086, width: 1448 });
 const VIEWS = Object.freeze([
-  Object.freeze({ id: "world", mode: "world-marker", nodeIds: [], tier: "world" }),
-  Object.freeze({ id: "territory", mode: "territory-proxy", nodeIds: [], tier: "territory" }),
+  Object.freeze({ assetIds: [], cityRendered: false, id: "world", mode: "world-marker", nativeTreeCount: 0, tier: "world" }),
+  Object.freeze({ assetIds: [], cityRendered: false, id: "territory", mode: "world-marker", nativeTreeCount: 0, tier: "territory" }),
   Object.freeze({
+    assetIds: ["I20", "LFX06"],
+    cityRendered: true,
     id: "capital",
     mode: "capital-incremental-context",
-    nodeIds: ["transport-station-capital-cluster"],
+    nativeTreeCount: 0,
     tier: "capital",
   }),
   Object.freeze({
+    assetIds: ["CFX01", "I21", "LFX06", "WFX01"],
+    cityRendered: true,
     id: "d06-site",
     mode: "d06-site-composite",
-    nodeIds: ["transport-station-site-composite"],
+    nativeTreeCount: 0,
     tier: "site",
   }),
   Object.freeze({
+    assetIds: ["CFX01", "I21", "LFX06", "WFX01"],
+    cityRendered: true,
     id: "d06-close",
     mode: "d06-close-composite",
-    nodeIds: ["fabric-station-close-civic-overlay", "transport-station-site-composite"],
+    nativeTreeCount: 6,
     tier: "close",
   }),
 ]);
@@ -179,6 +185,9 @@ async function captureSequence(options) {
           cameraSpan: viewport.dataset.cameraSpan.split(',').map(Number),
           cityRendered: Boolean(city),
           focusDistrict: city?.dataset.cityFocusDistrict ?? 'none',
+          assetIds: [...viewport.querySelectorAll('[data-city-asset-id]')]
+            .map((asset) => asset.dataset.cityAssetId),
+          nativeTreeCount: viewport.querySelectorAll('[data-city-native-tree-instance]').length,
           nodeIds: [...viewport.querySelectorAll('[data-city-node-id]')]
             .map((node) => node.dataset.cityNodeId),
           nodeRepresentationClasses: [...viewport.querySelectorAll('[data-city-node-id]')]
@@ -197,7 +206,9 @@ async function captureSequence(options) {
       const routePass = telemetry.tier === expected.tier
         && telemetry.proofView === expected.id
         && telemetry.representationMode === expected.mode
-        && sameMembers(telemetry.nodeIds, expected.nodeIds)
+        && telemetry.cityRendered === expected.cityRendered
+        && sameMembers(telemetry.assetIds, expected.assetIds)
+        && telemetry.nativeTreeCount === expected.nativeTreeCount
         && telemetry.rect.width === VIEWPORT.width
         && telemetry.rect.height === VIEWPORT.height;
       captures.push(Object.freeze({
@@ -252,9 +263,10 @@ if (options.help) {
 } else {
   const evidence = await captureSequence(options);
   process.stdout.write(`${JSON.stringify({
-    captures: evidence.captures.map(({ expected, nodeIds, routePass }) => ({
+    captures: evidence.captures.map(({ assetIds, expected, nativeTreeCount, routePass }) => ({
       id: expected.id,
-      nodeCount: nodeIds.length,
+      assetIds,
+      nativeTreeCount,
       routePass,
     })),
     status: evidence.status,

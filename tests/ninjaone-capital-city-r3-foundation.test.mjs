@@ -1034,7 +1034,7 @@ test("the rejected LFX01 rear-cliff candidate is not mounted at runtime", async 
   assert.doesNotMatch(rendererSource, /LFX01|upper-capital-rear-cliff-transition-r1-alpha/);
 });
 
-test("station LoD promotes train-free I20 at capital and open-undercroft I21 at site and close", async () => {
+test("station LoD promotes train-free I20 and open-undercroft I21 without the rejected baked-foliage I17", async () => {
   const rendererSource = await readFile(new URL(
     "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
     import.meta.url,
@@ -1042,13 +1042,14 @@ test("station LoD promotes train-free I20 at capital and open-undercroft I21 at 
   assert.match(rendererSource, /tier === "capital"\s*\? D06_CAPITAL_REVIEW_BASE/);
   assert.match(rendererSource, /NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS\.I20\.asset\.path/);
   assert.match(rendererSource, /NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS\.I21\.asset\.path/);
+  assert.doesNotMatch(rendererSource, /I17|station-close-civic-overlay/);
+  assert.equal(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I17, undefined);
   assert.doesNotMatch(rendererSource, /I18-station-site-base-no-train-r1-alpha\.png/);
   assert.deepEqual(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I21.placement, {
     anchor: [1056.5, 1086],
     baseSize: [783, 587],
     scale: 0.72,
   });
-
   const [capital, capitalSource, siteClose, siteCloseSource] = await Promise.all([
     rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I20.asset.path),
     rgba("/career-world/capitals/ninjaone/city-nodes-r2/capital/infrastructure/I13-station-capital-cluster-r1-alpha.png"),
