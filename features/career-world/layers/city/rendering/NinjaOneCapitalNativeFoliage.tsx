@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import nativeFoliageReuseManifest from "../../../../../public/career-world/capitals/ninjaone/city-r3/authority/city-native-foliage-reuse-r1.json" with { type: "json" };
 import type { CameraView } from "../../../shared/camera";
-import { decodeImage } from "../../../shared/assets/decodeImage";
+import { preloadImage } from "../../../shared/assets/decodeImage";
 import {
   NINJAONE_CAPITAL_CITY_DETAIL_POLICY,
   type NinjaOneCapitalCityDistrictId,
@@ -74,7 +74,7 @@ export function NinjaOneCapitalNativeFoliagePreloader({
   ], [focusDistrict, projectedCamera]);
   useEffect(() => {
     resources.forEach((resource) => {
-      void decodeImage(resource.path).catch(() => undefined);
+      void preloadImage(resource.path).catch(() => undefined);
     });
   }, [resources]);
   return null;

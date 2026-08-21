@@ -825,6 +825,8 @@ test("D05 progressively reveals native land before independently owned grounding
   assert.match(renderer, /progressiveDistrict = focusDistrict \?\? \(siteAssetsMounted \? preloadDistrict : null\)/);
   assert.match(renderer, /siteNodeOpacity = siteProgress \* \(1 - closeProgress\)/);
   assert.match(renderer, /closeNodeOpacity = siteProgress \* closeProgress/);
+  assert.match(renderer, /siteMounted && siteOpacity > 0/);
+  assert.match(renderer, /closeMounted && closeOpacity > 0/);
   assert.match(renderer, /id="ninjaone-capital-city-r3-d05-detail-cutout"/);
   assert.match(renderer, /NINJAONE_CAPITAL_CITY_R3_D05_CONTEXT_EXCLUSION_MASK\.path/);
   assert.match(
@@ -952,7 +954,9 @@ test("D03 independently owns native-land reveal, grounding, and four architectur
   assert.match(renderer, /id="ninjaone-capital-city-r3-d03-detail-cutout"/);
   assert.match(renderer, /NINJAONE_CAPITAL_CITY_R3_D03_CONTEXT_EXCLUSION_MASK\.path/);
   assert.match(renderer, /data-city-asset-id="D03L02"[\s\S]*?data-city-child-layer="L4_1"/);
+  assert.match(renderer, /opacity=\{siteProgress \* \(0\.12 \+ closeProgress \* 0\.02\)\}/);
   assert.match(renderer, /data-city-asset-id="D03L03"[\s\S]*?data-city-child-layer="L4_1"/);
+  assert.match(renderer, /data-city-asset-id="D03L04"[\s\S]*?data-city-child-layer="L4_1"/);
   assert.match(renderer, /district="D03"/);
   assert.match(
     nodeRenderer,

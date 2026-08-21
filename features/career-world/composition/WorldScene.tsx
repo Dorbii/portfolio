@@ -777,6 +777,7 @@ export function WorldScene({
           detailState={detailState}
           focusDistrict={focusedCityDistrict}
           light={WORLD_LIGHT}
+          nativeFoliageFallback={cityProofView !== null || !terrainFoliageVisible}
           preloadDistrict={cameraCityDistrict}
           presentationOpacity={cityPresentationOpacity}
           visibility={environmentLayerVisibility}

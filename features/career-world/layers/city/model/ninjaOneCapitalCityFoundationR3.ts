@@ -20,6 +20,7 @@ export type NinjaOneCapitalCityRuntimeAssetId =
   | "D02L02"
   | "D03L02"
   | "D03L03"
+  | "D03L04"
   | "D04L02"
   | "D04W02"
   | "D05L02"
@@ -114,6 +115,7 @@ const expectedRuntimeAssetContract = Object.freeze({
   D02L02: Object.freeze({ layerId: "L4_1", tiers: "site,close" }),
   D03L02: Object.freeze({ layerId: "L4_1", tiers: "site,close" }),
   D03L03: Object.freeze({ layerId: "L4_1", tiers: "site,close" }),
+  D03L04: Object.freeze({ layerId: "L4_1", tiers: "site,close" }),
   D04L02: Object.freeze({ layerId: "L4_1", tiers: "site,close" }),
   D04W02: Object.freeze({ layerId: "L4_0", tiers: "site,close" }),
   D05L02: Object.freeze({ layerId: "L4_1", tiers: "site,close" }),
@@ -211,7 +213,13 @@ if (
       || runtimeAsset.layerId !== expected.layerId
       || runtimeAsset.tiers.join(",") !== expected.tiers
       || runtimeAsset.asset.path.includes("/_review/")
-      || (id === "D05L04" || id === "I20" || id === "I21" || id === "S14D04")
+      || (
+        id === "D03L04"
+        || id === "D05L04"
+        || id === "I20"
+        || id === "I21"
+        || id === "S14D04"
+      )
         !== Boolean(runtimeAsset.placement)
       || (runtimeAsset.placement !== undefined && (
         !Number.isFinite(runtimeAsset.placement.scale)

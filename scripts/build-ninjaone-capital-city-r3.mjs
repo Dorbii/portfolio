@@ -71,6 +71,10 @@ const source = Object.freeze({
     ROOT,
     "art-source/career-world/ninjaone-capital/city-r3/detail/D03L03-city-terrain-integration-detail-r1-alpha.png",
   ),
+  d03RetainingCirculationMass: path.join(
+    ROOT,
+    "art-source/career-world/ninjaone-capital/city-r3/landscape/D03L04-eastern-industry-retaining-circulation-mass-r1-alpha.png",
+  ),
   d04DistrictMask: path.join(
     ROOT,
     "art-source/career-world/ninjaone-capital/city-r3/districts/D04-central-lake-terraces-mask.png",
@@ -197,6 +201,10 @@ const outputs = Object.freeze({
   d03TerrainIntegrationDetail: path.join(
     outputRoot,
     "detail/D03L03-city-terrain-integration-detail-r1-alpha.png",
+  ),
+  d03RetainingCirculationMass: path.join(
+    outputRoot,
+    "landscape/D03L04-eastern-industry-retaining-circulation-mass-r1-alpha.png",
   ),
   d04ContextExclusionMask: path.join(
     outputRoot,
@@ -479,6 +487,7 @@ const [
   d03ContextExclusionMask,
   d03GroundContact,
   d03TerrainIntegrationDetail,
+  d03RetainingCirculationMass,
   d04DistrictMask,
   d04ContextExclusionMask,
   d04GroundingAndCirculation,
@@ -506,6 +515,7 @@ const [
     singleChannel(source.d03ContextExclusionMask),
     imageMetadata(source.d03GroundContact),
     imageMetadata(source.d03TerrainIntegrationDetail),
+    imageMetadata(source.d03RetainingCirculationMass),
     singleChannel(source.d04DistrictMask),
     singleChannel(source.d04ContextExclusionMask),
     imageMetadata(source.d04GroundingAndCirculation),
@@ -746,6 +756,73 @@ if (
 }
 await mkdir(path.dirname(outputs.d03TerrainIntegrationDetail), { recursive: true });
 await copyFile(source.d03TerrainIntegrationDetail, outputs.d03TerrainIntegrationDetail);
+
+const d03RetainingCirculationMassRgba = await sharp(d03RetainingCirculationMass.bytes)
+  .ensureAlpha()
+  .raw()
+  .toBuffer();
+let d03RetainingCirculationMassPixels = 0;
+let d03RetainingCirculationMassMaximumAlpha = 0;
+let d03RetainingCirculationMassOutsideSupportPixels = 0;
+let d03RetainingCirculationMassOutsideLandPixels = 0;
+let d03RetainingCirculationMassWaterPixels = 0;
+let d03RetainingCirculationMassLeft = WIDTH;
+let d03RetainingCirculationMassTop = HEIGHT;
+let d03RetainingCirculationMassRight = -1;
+let d03RetainingCirculationMassBottom = -1;
+for (let index = 0; index < PIXELS; index += 1) {
+  const alpha = d03RetainingCirculationMassRgba[index * 4 + 3];
+  if (alpha === 0) continue;
+  const x = index % WIDTH;
+  const y = Math.floor(index / WIDTH);
+  d03RetainingCirculationMassPixels += 1;
+  d03RetainingCirculationMassMaximumAlpha = Math.max(
+    d03RetainingCirculationMassMaximumAlpha,
+    alpha,
+  );
+  d03RetainingCirculationMassLeft = Math.min(d03RetainingCirculationMassLeft, x);
+  d03RetainingCirculationMassTop = Math.min(d03RetainingCirculationMassTop, y);
+  d03RetainingCirculationMassRight = Math.max(d03RetainingCirculationMassRight, x);
+  d03RetainingCirculationMassBottom = Math.max(d03RetainingCirculationMassBottom, y);
+  if (d03DistrictMask[index] === 0) d03RetainingCirculationMassOutsideSupportPixels += 1;
+  if (registeredParentLand[index] < 64) d03RetainingCirculationMassOutsideLandPixels += 1;
+  if (rawLiveWater[index] >= 240) d03RetainingCirculationMassWaterPixels += 1;
+}
+const d03RetainingCirculationMassFraction =
+  d03RetainingCirculationMassPixels / d03RegisteredPixels;
+const d03RetainingCirculationMassCrop = Object.freeze({
+  left: 847,
+  top: 521,
+  width: 367,
+  height: 266,
+});
+if (
+  sha256(d03RetainingCirculationMass.bytes)
+    !== "0f06fc17ea7c4291d440f0f0f54652ff33368d739c6334c4b0066cb59825bcc5"
+  || d03RetainingCirculationMass.metadata.width !== WIDTH
+  || d03RetainingCirculationMass.metadata.height !== HEIGHT
+  || d03RetainingCirculationMass.metadata.channels !== 4
+  || d03RetainingCirculationMassOutsideSupportPixels !== 0
+  || d03RetainingCirculationMassOutsideLandPixels !== 0
+  || d03RetainingCirculationMassWaterPixels !== 0
+  || d03RetainingCirculationMassMaximumAlpha > 224
+  || d03RetainingCirculationMassFraction < 0.04
+  || d03RetainingCirculationMassFraction > 0.08
+  || d03RetainingCirculationMassLeft !== d03RetainingCirculationMassCrop.left
+  || d03RetainingCirculationMassTop !== d03RetainingCirculationMassCrop.top
+  || d03RetainingCirculationMassRight
+    !== d03RetainingCirculationMassCrop.left + d03RetainingCirculationMassCrop.width - 1
+  || d03RetainingCirculationMassBottom
+    !== d03RetainingCirculationMassCrop.top + d03RetainingCirculationMassCrop.height - 1
+) {
+  throw new TypeError(
+    "The accepted D03 retaining/circulation mass violates city/land ownership or crop registration.",
+  );
+}
+await writePng(
+  outputs.d03RetainingCirculationMass,
+  sharp(d03RetainingCirculationMass.bytes).extract(d03RetainingCirculationMassCrop),
+);
 
 let d04RegisteredPixels = 0;
 let d04HardRevealPixels = 0;
@@ -1241,6 +1318,19 @@ const manifest = {
         contactLayer: await artifact(outputs.d03GroundContact),
         terrainIntegrationFraction: d03TerrainIntegrationFraction,
         terrainIntegrationLayer: await artifact(outputs.d03TerrainIntegrationDetail),
+        retainingCirculationMassFraction: d03RetainingCirculationMassFraction,
+        retainingCirculationMassLayer: await artifact(outputs.d03RetainingCirculationMass),
+        retainingCirculationMassPlacement: {
+          anchor: [
+            d03RetainingCirculationMassCrop.left,
+            d03RetainingCirculationMassCrop.top,
+          ],
+          baseSize: [
+            d03RetainingCirculationMassCrop.width,
+            d03RetainingCirculationMassCrop.height,
+          ],
+          scale: 1,
+        },
       },
       D04: {
         method: "continuous-D04-context-exclusion-plus-city-owned-L4_0-L4_1-and-L4_3-detail",
@@ -1310,6 +1400,24 @@ const manifest = {
       role: "eastern-industry-terrain-integration-detail",
       tiers: ["site", "close"],
       asset: await artifact(outputs.d03TerrainIntegrationDetail),
+    },
+    {
+      id: "D03L04",
+      layerId: "L4_1",
+      role: "eastern-industry-retaining-circulation-mass",
+      tiers: ["site", "close"],
+      placement: {
+        anchor: [
+          d03RetainingCirculationMassCrop.left,
+          d03RetainingCirculationMassCrop.top,
+        ],
+        baseSize: [
+          d03RetainingCirculationMassCrop.width,
+          d03RetainingCirculationMassCrop.height,
+        ],
+        scale: 1,
+      },
+      asset: await artifact(outputs.d03RetainingCirculationMass),
     },
     {
       id: "D04W02",

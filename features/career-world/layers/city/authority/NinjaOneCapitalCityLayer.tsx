@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { cameraViewBox, type CameraView } from "../../../shared/camera";
-import { decodeImage } from "../../../shared/assets/decodeImage";
+import { preloadImage } from "../../../shared/assets/decodeImage";
 import type { DetailState } from "../../../shared/lod";
 import type { WorldLight } from "../../../shared/lighting";
 import {
@@ -38,6 +38,7 @@ export function NinjaOneCapitalCityLayer({
   detailState,
   focusDistrict,
   light,
+  nativeFoliageFallback,
   preloadDistrict,
   presentationOpacity = 1,
   visibility,
@@ -46,6 +47,7 @@ export function NinjaOneCapitalCityLayer({
   readonly detailState: DetailState;
   readonly focusDistrict?: NinjaOneCapitalCityDistrictId | null;
   readonly light: WorldLight;
+  readonly nativeFoliageFallback: boolean;
   readonly preloadDistrict?: NinjaOneCapitalCityDistrictId | null;
   readonly presentationOpacity?: number;
   readonly visibility: EnvironmentLayerVisibility;
@@ -65,7 +67,7 @@ export function NinjaOneCapitalCityLayer({
       ).map((node) => ninjaOneCapitalCityAssetVariant(node, tier).path)
     )));
     paths.forEach((path) => {
-      void decodeImage(path).catch(() => undefined);
+      void preloadImage(path).catch(() => undefined);
     });
   }, [camera, detailState.shouldLoadCloseAssets, detailState.shouldLoadSiteAssets, preloadDistrict]);
 
@@ -85,7 +87,7 @@ export function NinjaOneCapitalCityLayer({
 
   return (
     <>
-      {detailState.shouldLoadCloseAssets && preloadDistrict ? (
+      {nativeFoliageFallback && detailState.shouldLoadCloseAssets && preloadDistrict ? (
         <NinjaOneCapitalNativeFoliagePreloader
           camera={camera}
           focusDistrict={preloadDistrict}
@@ -130,6 +132,7 @@ export function NinjaOneCapitalCityLayer({
           closeProgress={detailState.siteToClose}
           focusDistrict={focusDistrict ?? null}
           light={light}
+          nativeFoliageFallback={nativeFoliageFallback}
           preloadDistrict={preloadDistrict ?? null}
           siteAssetsMounted={detailState.shouldLoadSiteAssets}
           siteProgress={detailState.capitalToSite}

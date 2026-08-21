@@ -72,6 +72,7 @@ test("r3 foundation publishes a registered water-safe capital cohort", () => {
     "D02L02",
     "D03L02",
     "D03L03",
+    "D03L04",
     "D04L02",
     "D04W02",
     "D05L02",
@@ -241,10 +242,11 @@ test("D02 reveals native land and restores only localized ridge grounding", asyn
 });
 
 test("D03 reveals native land and restores only city-owned contact and integration fabric", async () => {
-  const [exclusion, contact, integration, district, land, water] = await Promise.all([
+  const [exclusion, contact, integration, retainingMass, district, land, water] = await Promise.all([
     grayscale(`../public${NINJAONE_CAPITAL_CITY_R3_D03_CONTEXT_EXCLUSION_MASK.path}`),
     rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L02.asset.path),
     rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L03.asset.path),
+    rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L04.asset.path),
     grayscale("../art-source/career-world/ninjaone-capital/city-r3/districts/D03-eastern-industry-mask.png"),
     grayscale("../art-source/career-world/ninjaone-capital/city-r3/authority/registered-parent-land-mask-r1.png"),
     grayscale("../art-source/career-world/ninjaone-capital/city-r3/authority/live-inland-water-authority-mask-r1.png"),
@@ -252,6 +254,16 @@ test("D03 reveals native land and restores only city-owned contact and integrati
   assert.deepEqual([exclusion.info.width, exclusion.info.height, exclusion.info.channels], [1448, 1086, 1]);
   assert.deepEqual([contact.info.width, contact.info.height, contact.info.channels], [1448, 1086, 4]);
   assert.deepEqual([integration.info.width, integration.info.height, integration.info.channels], [1448, 1086, 4]);
+  assert.deepEqual([retainingMass.info.width, retainingMass.info.height, retainingMass.info.channels], [367, 266, 4]);
+  assert.deepEqual(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L04.placement, {
+    anchor: [847, 521],
+    baseSize: [367, 266],
+    scale: 1,
+  });
+  assert.equal(
+    NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L04.asset.decodedBytes,
+    367 * 266 * 4,
+  );
   assert.deepEqual(
     {
       layerId: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L02.layerId,
@@ -261,6 +273,18 @@ test("D03 reveals native land and restores only city-owned contact and integrati
     {
       layerId: "L4_1",
       role: "eastern-industry-ground-contact-platforms",
+      tiers: ["site", "close"],
+    },
+  );
+  assert.deepEqual(
+    {
+      layerId: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L04.layerId,
+      role: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L04.role,
+      tiers: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L04.tiers,
+    },
+    {
+      layerId: "L4_1",
+      role: "eastern-industry-retaining-circulation-mass",
       tiers: ["site", "close"],
     },
   );
@@ -289,6 +313,11 @@ test("D03 reveals native land and restores only city-owned contact and integrati
   let integrationOutsideLand = 0;
   let integrationOnWater = 0;
   let integrationMaximumAlpha = 0;
+  let retainingMassPixels = 0;
+  let retainingMassOutsideDistrict = 0;
+  let retainingMassOutsideLand = 0;
+  let retainingMassOnWater = 0;
+  let retainingMassMaximumAlpha = 0;
   for (let index = 0; index < district.data.length; index += 1) {
     if (district.data[index] > 0) districtPixels += 1;
     if (exclusion.data[index] >= 240) hardRevealPixels += 1;
@@ -311,6 +340,22 @@ test("D03 reveals native land and restores only city-owned contact and integrati
       if (water.data[index] >= 240) integrationOnWater += 1;
     }
   }
+  const retainingMassPlacement = NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L04.placement;
+  for (let y = 0; y < retainingMass.info.height; y += 1) {
+    for (let x = 0; x < retainingMass.info.width; x += 1) {
+      const localIndex = y * retainingMass.info.width + x;
+      const alpha = retainingMass.data[localIndex * 4 + 3];
+      if (alpha === 0) continue;
+      const artboardX = retainingMassPlacement.anchor[0] + x;
+      const artboardY = retainingMassPlacement.anchor[1] + y;
+      const artboardIndex = artboardY * district.info.width + artboardX;
+      retainingMassPixels += 1;
+      retainingMassMaximumAlpha = Math.max(retainingMassMaximumAlpha, alpha);
+      if (district.data[artboardIndex] === 0) retainingMassOutsideDistrict += 1;
+      if (land.data[artboardIndex] < 64) retainingMassOutsideLand += 1;
+      if (water.data[artboardIndex] >= 240) retainingMassOnWater += 1;
+    }
+  }
   assert.ok(hardRevealPixels / districtPixels >= 0.9);
   assert.ok(hardRevealPixels / districtPixels <= 0.97);
   assert.equal(exclusionOutsideDistrict, 0);
@@ -325,6 +370,12 @@ test("D03 reveals native land and restores only city-owned contact and integrati
   assert.equal(integrationOutsideDistrict, 0);
   assert.equal(integrationOutsideLand, 0);
   assert.equal(integrationOnWater, 0);
+  assert.ok(retainingMassPixels / districtPixels >= 0.04);
+  assert.ok(retainingMassPixels / districtPixels <= 0.08);
+  assert.equal(retainingMassMaximumAlpha, 220);
+  assert.equal(retainingMassOutsideDistrict, 0);
+  assert.equal(retainingMassOutsideLand, 0);
+  assert.equal(retainingMassOnWater, 0);
   assert.deepEqual([
     contact.data[3],
     contact.data[(contact.info.width - 1) * 4 + 3],
@@ -344,10 +395,12 @@ test("D03 reveals native land and restores only city-owned contact and integrati
   ), "utf8");
   const contactIndex = rendererSource.indexOf('data-city-asset-id="D03L02"');
   const integrationIndex = rendererSource.indexOf('data-city-asset-id="D03L03"');
-  const d03NodeIndex = rendererSource.indexOf('district="D03"', integrationIndex);
+  const retainingMassIndex = rendererSource.indexOf('data-city-asset-id="D03L04"');
+  const d03NodeIndex = rendererSource.indexOf('district="D03"', retainingMassIndex);
   assert.ok(contactIndex >= 0);
   assert.ok(integrationIndex > contactIndex);
-  assert.ok(d03NodeIndex > integrationIndex);
+  assert.ok(retainingMassIndex > integrationIndex);
+  assert.ok(d03NodeIndex > retainingMassIndex);
 });
 
 test("D04 reveals native land and adds only localized grounding, water contact, and gateway layers", async () => {
@@ -841,8 +894,43 @@ test("territory keeps the city plate preload-only until capital detail", async (
   );
 });
 
-test("close city foliage reuses the registered L2 native conifer atlases", async () => {
-  const [rendererSource, foliageSource, reuseManifestSource] = await Promise.all([
+test("close-detail image preloads share a bounded decode queue", async () => {
+  const [decodeSource, cityLayerSource, foliageSource, geologySource] = await Promise.all([
+    readFile(new URL(
+      "../features/career-world/shared/assets/decodeImage.ts",
+      import.meta.url,
+    ), "utf8"),
+    readFile(new URL(
+      "../features/career-world/layers/city/authority/NinjaOneCapitalCityLayer.tsx",
+      import.meta.url,
+    ), "utf8"),
+    readFile(new URL(
+      "../features/career-world/layers/city/rendering/NinjaOneCapitalNativeFoliage.tsx",
+      import.meta.url,
+    ), "utf8"),
+    readFile(new URL(
+      "../features/career-world/layers/terrain/components/NinjaOneEnvironmentGeology.tsx",
+      import.meta.url,
+    ), "utf8"),
+  ]);
+  assert.match(decodeSource, /IMAGE_PRELOAD_CONCURRENCY = 2/);
+  assert.match(decodeSource, /activeImagePreloads < IMAGE_PRELOAD_CONCURRENCY/);
+  assert.match(decodeSource, /queuedImagePreloads\.get\(path\)/);
+  assert.match(cityLayerSource, /preloadImage\(path\)/);
+  assert.match(foliageSource, /preloadImage\(resource\.path\)/);
+  assert.match(geologySource, /preloadImage\(path\)/);
+});
+
+test("close city foliage reuses native conifers only when L2 needs a city fallback", async () => {
+  const [sceneSource, authoritySource, rendererSource, foliageSource, reuseManifestSource] = await Promise.all([
+    readFile(new URL(
+      "../features/career-world/composition/WorldScene.tsx",
+      import.meta.url,
+    ), "utf8"),
+    readFile(new URL(
+      "../features/career-world/layers/city/authority/NinjaOneCapitalCityLayer.tsx",
+      import.meta.url,
+    ), "utf8"),
     readFile(new URL(
       "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
       import.meta.url,
@@ -857,7 +945,19 @@ test("close city foliage reuses the registered L2 native conifer atlases", async
     ), "utf8"),
   ]);
   const reuseManifest = JSON.parse(reuseManifestSource);
-  assert.match(rendererSource, /nativeFoliageVisible = closeAssetsMounted[\s\S]*?visibility, "L4_6"/);
+  assert.match(
+    sceneSource,
+    /nativeFoliageFallback=\{cityProofView !== null \|\| !terrainFoliageVisible\}/,
+  );
+  assert.match(
+    authoritySource,
+    /nativeFoliageFallback && detailState\.shouldLoadCloseAssets && preloadDistrict/,
+  );
+  assert.match(authoritySource, /nativeFoliageFallback=\{nativeFoliageFallback\}/);
+  assert.match(
+    rendererSource,
+    /nativeFoliageVisible = nativeFoliageFallback && closeAssetsMounted[\s\S]*?visibility, "L4_6"/,
+  );
   assert.match(foliageSource, /selectNinjaOneEnvironmentFoliageInstances/);
   assert.match(foliageSource, /L2-native-conifer-atlas-reuse/);
   assert.match(foliageSource, /NinjaOneEnvironmentFoliageGroup/);
@@ -992,7 +1092,11 @@ test("close city foliage reuses the registered L2 native conifer atlases", async
     atlasResource.path.includes("/environment/shared/foliage-native-r4/")
   )));
 
-  const integration = await rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L03.asset.path);
+  const [integration, retainingMass] = await Promise.all([
+    rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L03.asset.path),
+    rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L04.asset.path),
+  ]);
+  const retainingMassPlacement = NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L04.placement;
   const foliageOccupancy = Buffer.alloc(integration.info.width * integration.info.height);
   const atlasCache = new Map();
   for (const instance of d03Trees) {
@@ -1037,13 +1141,28 @@ test("close city foliage reuses the registered L2 native conifer atlases", async
   }
   let foliagePixels = 0;
   let integrationFoliageOverlap = 0;
+  let retainingMassFoliageOverlap = 0;
   for (let index = 0; index < foliageOccupancy.length; index += 1) {
     if (foliageOccupancy[index] === 0) continue;
     foliagePixels += 1;
     if (integration.data[index * 4 + 3] > 0) integrationFoliageOverlap += 1;
+    const artboardX = index % integration.info.width;
+    const artboardY = Math.floor(index / integration.info.width);
+    const localX = artboardX - retainingMassPlacement.anchor[0];
+    const localY = artboardY - retainingMassPlacement.anchor[1];
+    if (
+      localX >= 0
+      && localX < retainingMass.info.width
+      && localY >= 0
+      && localY < retainingMass.info.height
+      && retainingMass.data[(localY * retainingMass.info.width + localX) * 4 + 3] > 0
+    ) {
+      retainingMassFoliageOverlap += 1;
+    }
   }
   assert.ok(foliagePixels > 1_000);
   assert.equal(integrationFoliageOverlap, 0);
+  assert.equal(retainingMassFoliageOverlap, 0);
 });
 
 test("the rejected LFX01 rear-cliff candidate is not mounted at runtime", async () => {

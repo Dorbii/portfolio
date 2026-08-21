@@ -1,4 +1,12 @@
 const decodedImages = new Map<string, Promise<HTMLImageElement>>();
+const queuedImagePreloads = new Map<string, Promise<HTMLImageElement>>();
+const imagePreloadQueue: Array<{
+  path: string;
+  reject: (error: unknown) => void;
+  resolve: (image: HTMLImageElement) => void;
+}> = [];
+const IMAGE_PRELOAD_CONCURRENCY = 2;
+let activeImagePreloads = 0;
 
 export function decodeImage(path: string): Promise<HTMLImageElement> {
   const cached = decodedImages.get(path);
@@ -28,4 +36,32 @@ export function decodeImage(path: string): Promise<HTMLImageElement> {
   });
   decodedImages.set(path, decoded);
   return decoded;
+}
+
+function pumpImagePreloadQueue(): void {
+  while (
+    activeImagePreloads < IMAGE_PRELOAD_CONCURRENCY
+    && imagePreloadQueue.length > 0
+  ) {
+    const request = imagePreloadQueue.shift();
+    if (!request) return;
+    activeImagePreloads += 1;
+    void decodeImage(request.path).then(request.resolve, request.reject).finally(() => {
+      activeImagePreloads -= 1;
+      queuedImagePreloads.delete(request.path);
+      pumpImagePreloadQueue();
+    });
+  }
+}
+
+export function preloadImage(path: string): Promise<HTMLImageElement> {
+  const queued = queuedImagePreloads.get(path);
+  if (queued) return queued;
+
+  const preload = new Promise<HTMLImageElement>((resolve, reject) => {
+    imagePreloadQueue.push({ path, reject, resolve });
+    pumpImagePreloadQueue();
+  });
+  queuedImagePreloads.set(path, preload);
+  return preload;
 }

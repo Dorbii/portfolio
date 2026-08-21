@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { cameraViewBox, type CameraView } from "../../../shared/camera";
-import { decodeImage } from "../../../shared/assets/decodeImage";
+import { decodeImage, preloadImage } from "../../../shared/assets/decodeImage";
 import type { DetailState } from "../../../shared/lod";
 import { WORLD_PLANE } from "../../../shared/world";
 import {
@@ -99,7 +99,7 @@ export function NinjaOneEnvironmentGeology({
         : []),
     ];
     paths.forEach((path) => {
-      void decodeImage(path).catch(() => undefined);
+      void preloadImage(path).catch(() => undefined);
     });
   }, [detailState.shouldLoadCloseAssets, detailState.shouldLoadSiteAssets]);
 

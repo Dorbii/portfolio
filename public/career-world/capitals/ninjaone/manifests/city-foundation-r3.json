@@ -151,6 +151,28 @@
           "encodedBytes": 35398,
           "path": "/career-world/capitals/ninjaone/city-r3/detail/D03L03-city-terrain-integration-detail-r1-alpha.png",
           "sha256": "e4e975372ff6ee116b50a922afc79f7852fad892c737ca4fc5e9e0995c9ab3e7"
+        },
+        "retainingCirculationMassFraction": 0.06972181295677671,
+        "retainingCirculationMassLayer": {
+          "decodedBytes": 390488,
+          "dimensions": [
+            367,
+            266
+          ],
+          "encodedBytes": 67829,
+          "path": "/career-world/capitals/ninjaone/city-r3/landscape/D03L04-eastern-industry-retaining-circulation-mass-r1-alpha.png",
+          "sha256": "b4d64093b633352f42eb2ffb9c9b8a97b7a8b83be929751e7177a0ab48acbe1a"
+        },
+        "retainingCirculationMassPlacement": {
+          "anchor": [
+            847,
+            521
+          ],
+          "baseSize": [
+            367,
+            266
+          ],
+          "scale": 1
         }
       },
       "D04": {
@@ -372,6 +394,36 @@
         "encodedBytes": 35398,
         "path": "/career-world/capitals/ninjaone/city-r3/detail/D03L03-city-terrain-integration-detail-r1-alpha.png",
         "sha256": "e4e975372ff6ee116b50a922afc79f7852fad892c737ca4fc5e9e0995c9ab3e7"
+      }
+    },
+    {
+      "id": "D03L04",
+      "layerId": "L4_1",
+      "role": "eastern-industry-retaining-circulation-mass",
+      "tiers": [
+        "site",
+        "close"
+      ],
+      "placement": {
+        "anchor": [
+          847,
+          521
+        ],
+        "baseSize": [
+          367,
+          266
+        ],
+        "scale": 1
+      },
+      "asset": {
+        "decodedBytes": 390488,
+        "dimensions": [
+          367,
+          266
+        ],
+        "encodedBytes": 67829,
+        "path": "/career-world/capitals/ninjaone/city-r3/landscape/D03L04-eastern-industry-retaining-circulation-mass-r1-alpha.png",
+        "sha256": "b4d64093b633352f42eb2ffb9c9b8a97b7a8b83be929751e7177a0ab48acbe1a"
       }
     },
     {
@@ -692,6 +744,7 @@
     "d03ContextExclusionMask": "260a5fe73ebe31035b8ae4e73a6f6294486aeb47d06f130837c7a009ffc29a45",
     "d03GroundContact": "32c324ef0f5e6a21a46716ef8a9acc1a98c71cedd3d088dc75d7172341437778",
     "d03TerrainIntegrationDetail": "e4e975372ff6ee116b50a922afc79f7852fad892c737ca4fc5e9e0995c9ab3e7",
+    "d03RetainingCirculationMass": "0f06fc17ea7c4291d440f0f0f54652ff33368d739c6334c4b0066cb59825bcc5",
     "d04DistrictMask": "3c830943858fc71633e45a5d3909c9be3141b2a094e1afc435f1a0ed75e681a5",
     "d04ContextExclusionMask": "4c75a7ef6890ef7ea693d6959bf6517bb4f14fe110389e65072733410c175e68",
     "d04GroundingAndCirculation": "30d4865dabcb300bd5f8346ee81381215596055fbefd9a5689c1437d2201bedd",

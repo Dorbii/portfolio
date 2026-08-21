@@ -962,3 +962,48 @@ Checkpoint the free-camera LoD fix, then run a reversible D06 station-scale/cont
 - Commit only the D05 authoring/runtime asset, deterministic builder/manifest/model/renderer contracts, D05 foundation/LoD tests, and this handoff. Leave every obsolete untracked `_review` file unstaged.
 - Keep port 3000 alive and leave the fixed D05 close URL open for Steve. This is the review boundary for the D05 vertical slice, not completion of the whole city goal.
 - After D05 review, continue the separate D03 cohesion pass and the rejected D06 endpoint/civic-overlay residuals. Do not reintroduce broad baked terrain/foliage plates, I17, or the train.
+
+## Crash-safe checkpoint — 2026-08-21 07:21 CDT
+
+### Objective and authority
+
+- The active goal remains a cohesive node-based NinjaOne capital with progressive LoD, authoritative L2 land/L3 water, reversible city-owned sublayers, existing native tree assets, and no train. The fixed black page area outside the world viewport remains out of scope.
+- Commit `5e7553a checkpoint: ground D05 with progressive terrace mass` is the latest accepted tracked checkpoint. The worktree is clean apart from intentionally preserved untracked `public/career-world/capitals/ninjaone/city-r3/_review/*` evidence files and this handoff update.
+
+### Current D03 state and decisions
+
+- Live D03 site/close inspection confirms the remaining defect is grounding mass, not LoD routing or missing city-tree nodes. `D03M02` removes the baked parent plate; D03 mounts `D03L02`, `D03L03`, S09/S08/S07/S12, shared whole-city support layers, and the existing native-tree reuse cohort. A corrected live query reports 20 unique `[data-environment-foliage-instance]` conifer nodes at close from the shared L2 foliage atlas; the earlier zero used a nonexistent selector.
+- Existing `D03L02` and `D03L03` remain accepted but sparse. Their small pads/routes do not make the four sharp close nodes read as embedded in the softer native terrain or visually integrate with the correctly reused tree nodes. Do not restore the old baked D03 plate or invent additional tree nodes without source evidence.
+- High ImageGen worker `/root/d03l04_retaining_mass` is producing `D03L04-eastern-industry-retaining-circulation-mass-r1-alpha` as a transparent L4_1 layer below the four immutable nodes. The locked output is 1448x1086 RGBA, restricted to D03 registered land and four socket ROIs, with zero water/foliage/foreign-node coverage and a 4-8% D03 footprint.
+- Safe boundary: one of two successful ImageGen calls is used; zero candidate PNGs are accepted. The raw 1536x1024 RGB hardscape kit has usable isometric geometry/palette but baked pale checker and somewhat rock-heavy forms. It is not a candidate. Deterministic matte recovery, registration, authority clipping, alpha feather, saved-PNG validation, and exact site/close proof are still pending. No authority contradiction or tracked/runtime/public/art-source write exists.
+
+### Verification and residual risk
+
+- `git status --short` at 07:20 shows only the preserved untracked `_review` files before this handoff edit; `git log -3 --oneline` reports `5e7553a`, `c731df3`, `cd0ede8`.
+- Port 3000 returned HTTP 200 at 07:21 and is intentionally retained for review.
+- D05 remains green at its committed checkpoint: focused tests 45/45, full suite 207/209 with two declared skips, typecheck/lint/builder/build/diff checks green, and no measured D05 performance regression. No D03L04 gate has passed yet.
+- The main residual risk is replacing one sticker edge with a broad generated plate. Reject D03L04 if native land stops dominating, alpha recovery leaves checker/halo, contacts miss any socket, or exact close proof remains asset-like.
+
+### Open work and next action
+
+- First, wait for the frozen D03L04 worker result and independently inspect its saved RGBA, dimensions/corners/hash, ownership masks, contact geometry, perspective/lighting, seams, and exact site/close comparisons. Do not promote a raw or isolated candidate.
+- If D03L04 passes, package only its tight lossless crop, render after D03L03 and before S09/S08/S07/S12, add ownership/order/LoD tests, run the deterministic builder and focused/full gates, and profile zoom 10 through close for asset bleed and frame cost.
+- After the D03 slice is checkpointed or rejected, reassess the separate D06 stream endpoint and civic-overlay residuals. Keep I17, I22, D06L02/D06W03, broad baked plates, and the train out unless new evidence satisfies their existing rejection gates.
+
+## Crash-safe checkpoint — 2026-08-21 08:34 CDT
+
+### D03 retaining mass and foliage/performance repair are integrated
+
+- High worker candidate `D03L04-eastern-industry-retaining-circulation-mass-r1-alpha` was corrected after the worker's first proof omitted the neutralization half of the runtime tree composite. The frozen `1448x1086` RGBA authoring asset is SHA-256 `0f06fc17ea7c4291d440f0f0f54652ff33368d739c6334c4b0066cb59825bcc5`; its saved-PNG verifier passes 25/25 gates, selected-close-foliage overlap is zero, max H/V alpha delta is 40, and only three collided pixels plus one adjacent feather pixel changed from the superseded candidate.
+- The deterministic builder packages D03L04 as a tight `367x266` runtime crop at `[847,521]`, after D03L03 and before S09/S12/S08/S07. The source/public extraction is lossless, the corrected builder run passes, and focused foundation/LoD tests pass 45/45 under the required `--experimental-strip-types` invocation. A raw `node --test` failure was an invocation/setup error because Node did not strip TypeScript; it was not a product regression or stale design assertion.
+- Director live proof accepts a restrained D03 grounding balance with D03L02 opacity reduced from the prior dark pad treatment to `site=.12`, `close=.14`; native L2 terrain remains dominant while D03L04 supplies the deeper retaining mass. Fixed close has one close node cohort, 20 registered city-fallback tree instances, and zero `/_review/` asset bleed.
+- Profiling proved the foliage/performance problem: interactive free camera simultaneously rendered the authoritative L2 tree cohort and the city L4_6 reuse cohort. Measured ID overlap was 15 duplicated IDs at zoom 10, 15 at zoom 12, 13 at zoom 14, and 8/8 city-visible IDs at steady close. This was a real runtime regression, not accepted LoD intent; it explained both the harsh/dark doubled trees and a foliage decode/mount spike.
+- `WorldScene` now requests the city-native foliage fallback only for isolated city proofs or when authoritative L2_2 foliage is disabled. Normal free camera neither mounts nor preloads the duplicate L4_6 cohort; the fixed D03 close proof still renders all 20 registered fallback instances because its base proof cohort is intentionally empty. Live fixed proof reports one close node group, zero site node groups, zero city/base tree overlap, and zero `/_review/` bleed.
+- Hidden zero-opacity site/close node groups no longer remain mounted, and close/geology/foliage preloads share a bounded decode queue with concurrency 2. The accepted cold profile is `.codex-tmp/city-lod-performance/d03-final/after-foliage-dedup-r1.json`. At zoom 10 it improves from `20,028,184` bytes / `66.7 ms` / 28 images to `15,960,471` bytes / `16.8 ms` / 19 images. Site-to-close blend remains bounded at `50.1 ms`; steady close is `16.9 ms` maximum, approximately `16.8 ms` p95, 17 images versus 24 before, and zero long tasks. Concurrency 1 was worse and remains rejected.
+- Final gates are green: focused foundation/LoD tests `46/46`; full repository `208/210` passed with two declared skips and zero failures; typecheck, lint, deterministic R3 builder, production build, and `git diff --check` pass. The existing non-fatal large-chunk build advisory is unchanged. Test classification preserved the accepted policy: the foliage duplication was a real regression, the raw TypeScript test invocation failure was environmental/setup, and no accepted asset/hash/ownership invariant was weakened.
+
+### Exact continuation
+
+- Stage only the D03 authoring/runtime assets and relevant builder/model/renderer/performance/test/handoff files, then create the user-authorized checkpoint commit. Preserve every untracked `_review` file and all quarantined worker evidence.
+- Keep port 3000 alive and leave the fixed D03 close proof open for review. This checkpoint repairs the demonstrated LoD/performance/tree-duplication defect and advances D03 cohesion; it does not complete the entire city.
+- After the checkpoint, return to the separate D06 endpoint and civic-overlay residuals. Keep I17, I22, D06L02/D06W03, broad baked plates, and the train absent unless new evidence clears their existing rejection gates.
