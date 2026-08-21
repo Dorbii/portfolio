@@ -42,6 +42,12 @@ export interface NinjaOneCapitalCityRuntimeAsset {
     readonly scale: number;
   };
   readonly role: string;
+  readonly sourceWindow?: {
+    readonly origin: Pair;
+    readonly sourceDimensions: Pair;
+    readonly sourcePath: string;
+    readonly sourceSha256: string;
+  };
   readonly tiers: readonly ("capital" | "close" | "site")[];
 }
 
@@ -82,7 +88,7 @@ const d03ContextExclusion = manifest.authority.progressiveDistrictContextExclusi
 const d04ContextExclusion = manifest.authority.progressiveDistrictContextExclusions.D04;
 const d05ContextExclusion = manifest.authority.progressiveDistrictContextExclusions.D05;
 const rawRuntimeAssets = manifest.runtimeAssets as unknown as readonly (
-  Omit<NinjaOneCapitalCityRuntimeAsset, "asset" | "placement"> & {
+  Omit<NinjaOneCapitalCityRuntimeAsset, "asset" | "placement" | "sourceWindow"> & {
     readonly asset: Omit<NinjaOneCapitalCityArtifact, "dimensions"> & {
       readonly dimensions: readonly number[];
     };
@@ -90,6 +96,12 @@ const rawRuntimeAssets = manifest.runtimeAssets as unknown as readonly (
       readonly anchor: readonly number[];
       readonly baseSize: readonly number[];
       readonly scale: number;
+    };
+    readonly sourceWindow?: {
+      readonly origin: readonly number[];
+      readonly sourceDimensions: readonly number[];
+      readonly sourcePath: string;
+      readonly sourceSha256: string;
     };
   }
 )[];
@@ -103,6 +115,16 @@ const runtimeAssets = Object.freeze(Object.fromEntries(rawRuntimeAssets.map((ent
         anchor: pair(entry.placement.anchor, `${entry.id}.placement.anchor`),
         baseSize: pair(entry.placement.baseSize, `${entry.id}.placement.baseSize`),
         scale: entry.placement.scale,
+      })
+      : undefined,
+    sourceWindow: entry.sourceWindow
+      ? Object.freeze({
+        ...entry.sourceWindow,
+        origin: pair(entry.sourceWindow.origin, `${entry.id}.sourceWindow.origin`),
+        sourceDimensions: pair(
+          entry.sourceWindow.sourceDimensions,
+          `${entry.id}.sourceWindow.sourceDimensions`,
+        ),
       })
       : undefined,
     tiers: Object.freeze([...entry.tiers]),
@@ -127,6 +149,12 @@ const expectedRuntimeAssetContract = Object.freeze({
   S14D04: Object.freeze({ layerId: "L4_3", tiers: "site,close" }),
   WFX01: Object.freeze({ layerId: "L4_0", tiers: "site,close" }),
 } as const);
+const expectedSourceWindowAssetIds = new Set<NinjaOneCapitalCityRuntimeAssetId>([
+  "CFX01",
+  "I24",
+  "LFX06",
+  "WFX01",
+]);
 
 if (
   manifest.schemaVersion !== 1
@@ -224,6 +252,18 @@ if (
       || (runtimeAsset.placement !== undefined && (
         !Number.isFinite(runtimeAsset.placement.scale)
         || runtimeAsset.placement.scale <= 0
+      ))
+      || expectedSourceWindowAssetIds.has(id as NinjaOneCapitalCityRuntimeAssetId)
+        !== Boolean(runtimeAsset.sourceWindow)
+      || (runtimeAsset.sourceWindow !== undefined && (
+        runtimeAsset.sourceWindow.sourceDimensions.join(",") !== "1448,1086"
+        || runtimeAsset.sourceWindow.origin.some((coordinate) => coordinate < 0)
+        || runtimeAsset.sourceWindow.origin[0] + runtimeAsset.asset.dimensions[0]
+          > runtimeAsset.sourceWindow.sourceDimensions[0]
+        || runtimeAsset.sourceWindow.origin[1] + runtimeAsset.asset.dimensions[1]
+          > runtimeAsset.sourceWindow.sourceDimensions[1]
+        || runtimeAsset.sourceWindow.sourcePath.includes("/_review/")
+        || !/^[0-9a-f]{64}$/.test(runtimeAsset.sourceWindow.sourceSha256)
       ));
   })
 ) {

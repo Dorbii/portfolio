@@ -570,15 +570,27 @@
         "site",
         "close"
       ],
-      "asset": {
-        "decodedBytes": 6290112,
-        "dimensions": [
+      "sourceWindow": {
+        "origin": [
+          698,
+          634
+        ],
+        "sourceDimensions": [
           1448,
           1086
         ],
-        "encodedBytes": 10255,
-        "path": "/career-world/capitals/ninjaone/city-r3/water-interaction/WFX01-city-bridge-water-detail-r1-alpha.png",
-        "sha256": "978bbff405be2291e16263c587901dd0adb1ceb67fb06bc0ee13423fad88d350"
+        "sourcePath": "public/career-world/capitals/ninjaone/city-r3/water-interaction/WFX01-city-bridge-water-detail-r1-alpha.png",
+        "sourceSha256": "978bbff405be2291e16263c587901dd0adb1ceb67fb06bc0ee13423fad88d350"
+      },
+      "asset": {
+        "decodedBytes": 125496,
+        "dimensions": [
+          126,
+          249
+        ],
+        "encodedBytes": 3555,
+        "path": "/career-world/capitals/ninjaone/city-r3/water-interaction/WFX01-city-bridge-water-detail-r1-alpha-crop.png",
+        "sha256": "bac494a81e7a2b8cf2ef4559aaae97c3596c0cbe035e0a363d0f36d31669dad1"
       }
     },
     {
@@ -590,15 +602,27 @@
         "site",
         "close"
       ],
-      "asset": {
-        "decodedBytes": 6290112,
-        "dimensions": [
+      "sourceWindow": {
+        "origin": [
+          249,
+          48
+        ],
+        "sourceDimensions": [
           1448,
           1086
         ],
-        "encodedBytes": 126935,
-        "path": "/career-world/capitals/ninjaone/city-r3/landscape/LFX06-upper-rear-native-ridge-underlay-r1-alpha.png",
-        "sha256": "ef00a69426b774848d75eff38a3b238edcaad8b276f03c15f59c6a3d99b65296"
+        "sourcePath": "public/career-world/capitals/ninjaone/city-r3/landscape/LFX06-upper-rear-native-ridge-underlay-r1-alpha.png",
+        "sourceSha256": "ef00a69426b774848d75eff38a3b238edcaad8b276f03c15f59c6a3d99b65296"
+      },
+      "asset": {
+        "decodedBytes": 379800,
+        "dimensions": [
+          450,
+          211
+        ],
+        "encodedBytes": 114996,
+        "path": "/career-world/capitals/ninjaone/city-r3/landscape/LFX06-upper-rear-native-ridge-underlay-r1-alpha-crop.png",
+        "sha256": "b6b8a3395a04872f44068e0387e8f9fe7d35d1a23e3cc8b7af790077b869336d"
       }
     },
     {
@@ -609,15 +633,27 @@
         "site",
         "close"
       ],
-      "asset": {
-        "decodedBytes": 6290112,
-        "dimensions": [
+      "sourceWindow": {
+        "origin": [
+          27,
+          77
+        ],
+        "sourceDimensions": [
           1448,
           1086
         ],
-        "encodedBytes": 1094397,
-        "path": "/career-world/capitals/ninjaone/city-r3/detail/CFX01-city-close-fabric-detail-r1-alpha.png",
-        "sha256": "cb02ebb9b096a5f79d690ba667b218d0acc33730f69def5862ea10333c3008c2"
+        "sourcePath": "public/career-world/capitals/ninjaone/city-r3/detail/CFX01-city-close-fabric-detail-r1-alpha.png",
+        "sourceSha256": "cb02ebb9b096a5f79d690ba667b218d0acc33730f69def5862ea10333c3008c2"
+      },
+      "asset": {
+        "decodedBytes": 5530624,
+        "dimensions": [
+          1408,
+          982
+        ],
+        "encodedBytes": 769385,
+        "path": "/career-world/capitals/ninjaone/city-r3/detail/CFX01-city-close-fabric-detail-r1-alpha-crop.png",
+        "sha256": "6a7b0b4e3e79557d328bc8a69664a2f1f0aa9177414e6d490f2ebe47485a20bb"
       }
     },
     {
@@ -686,15 +722,27 @@
         ],
         "scale": 0.72
       },
-      "asset": {
-        "decodedBytes": 6290112,
-        "dimensions": [
+      "sourceWindow": {
+        "origin": [
+          19,
+          106
+        ],
+        "sourceDimensions": [
           1448,
           1086
         ],
-        "encodedBytes": 1595094,
-        "path": "/career-world/capitals/ninjaone/city-r3/station/I24-station-cliff-registered-undercroft-r1-alpha.png",
-        "sha256": "7344259d23a979bc697073c71fde2cb94eaa6fa60da9b10dfd3604780ad9ad85"
+        "sourcePath": "art-source/career-world/ninjaone-capital/city-r3/station/I24-station-cliff-registered-undercroft-r1-alpha.png",
+        "sourceSha256": "7344259d23a979bc697073c71fde2cb94eaa6fa60da9b10dfd3604780ad9ad85"
+      },
+      "asset": {
+        "decodedBytes": 4651920,
+        "dimensions": [
+          1420,
+          819
+        ],
+        "encodedBytes": 1694727,
+        "path": "/career-world/capitals/ninjaone/city-r3/station/I24-station-cliff-registered-undercroft-r1-alpha-crop.png",
+        "sha256": "cecbaca535f11712cf2e8e1e9adbe6f31871de3ccffd6b48f6e872d2a33f48a4"
       }
     }
   ],
@@ -756,6 +804,10 @@
     "d05TerrainIntegrationDetail": "985585a7c94d2710cc126caa23945d3c4dde1612f933a5c07115d12f499e3db5",
     "d05TerraceMass": "b69771147295cfcde77a85d6b30514b71236e193e52d013cd5978646fc21836c",
     "d06DistrictMask": "0017c3b86dd0c05e3b4d698aed6ea9eb0d8270b1fd396a555b1e5c9c08e65a60",
+    "bridgeWaterDetail": "978bbff405be2291e16263c587901dd0adb1ceb67fb06bc0ee13423fad88d350",
+    "rearRidgeUnderlay": "ef00a69426b774848d75eff38a3b238edcaad8b276f03c15f59c6a3d99b65296",
+    "closeFabricDetail": "cb02ebb9b096a5f79d690ba667b218d0acc33730f69def5862ea10333c3008c2",
+    "stationSiteClose": "7344259d23a979bc697073c71fde2cb94eaa6fa60da9b10dfd3604780ad9ad85",
     "foliageManifest": "776e87784c763b299c51083bf3cddf7bba88038a327f2317667ea8a56669e758"
   }
 }

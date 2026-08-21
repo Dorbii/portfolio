@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
@@ -39,6 +40,43 @@ const ROOT = new URL("../", import.meta.url);
 async function rgba(publicPath) {
   const bytes = await readFile(new URL(`../public${publicPath}`, import.meta.url));
   return sharp(bytes).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+}
+
+async function registeredRgba(runtimeAsset) {
+  const cropped = await rgba(runtimeAsset.asset.path);
+  if (!runtimeAsset.sourceWindow) return cropped;
+  const [sourceWidth, sourceHeight] = runtimeAsset.sourceWindow.sourceDimensions;
+  const [originX, originY] = runtimeAsset.sourceWindow.origin;
+  assert.deepEqual(
+    [cropped.info.width, cropped.info.height],
+    runtimeAsset.asset.dimensions,
+  );
+  const data = Buffer.alloc(sourceWidth * sourceHeight * 4);
+  for (let y = 0; y < cropped.info.height; y += 1) {
+    cropped.data.copy(
+      data,
+      ((originY + y) * sourceWidth + originX) * 4,
+      y * cropped.info.width * 4,
+      (y + 1) * cropped.info.width * 4,
+    );
+  }
+  return {
+    data,
+    info: {
+      ...cropped.info,
+      height: sourceHeight,
+      size: data.byteLength,
+      width: sourceWidth,
+    },
+  };
+}
+
+async function sourceRgba(runtimeAsset) {
+  const bytes = await readFile(new URL(runtimeAsset.sourceWindow.sourcePath, ROOT));
+  return {
+    bytes,
+    decoded: await sharp(bytes).ensureAlpha().raw().toBuffer({ resolveWithObject: true }),
+  };
 }
 
 async function grayscale(relativePath) {
@@ -86,6 +124,51 @@ test("r3 foundation publishes a registered water-safe capital cohort", () => {
   ]);
   assert.ok(Object.values(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS)
     .every(({ asset }) => !asset.path.includes("/_review/")));
+});
+
+test("sparse D06 overlays use lossless registered crop windows within an 11 MiB decode budget", async () => {
+  const runtimeAssets = [
+    NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.WFX01,
+    NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.LFX06,
+    NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.CFX01,
+    NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I24,
+  ];
+  assert.ok(runtimeAssets.every(({ sourceWindow }) => sourceWindow !== undefined));
+  assert.ok(
+    runtimeAssets.reduce((total, { asset }) => total + asset.decodedBytes, 0)
+      <= 11 * 1_024 * 1_024,
+  );
+
+  for (const runtimeAsset of runtimeAssets) {
+    const [registered, source] = await Promise.all([
+      registeredRgba(runtimeAsset),
+      sourceRgba(runtimeAsset),
+    ]);
+    assert.deepEqual(
+      [source.decoded.info.width, source.decoded.info.height],
+      runtimeAsset.sourceWindow.sourceDimensions,
+    );
+    assert.equal(
+      createHash("sha256").update(source.bytes).digest("hex"),
+      runtimeAsset.sourceWindow.sourceSha256,
+    );
+    let alphaDifferences = 0;
+    let visibleRgbDifferences = 0;
+    for (let index = 0; index < registered.info.width * registered.info.height; index += 1) {
+      const offset = index * 4;
+      if (registered.data[offset + 3] !== source.decoded.data[offset + 3]) {
+        alphaDifferences += 1;
+      }
+      if (source.decoded.data[offset + 3] === 0) continue;
+      if (
+        registered.data[offset] !== source.decoded.data[offset]
+        || registered.data[offset + 1] !== source.decoded.data[offset + 1]
+        || registered.data[offset + 2] !== source.decoded.data[offset + 2]
+      ) visibleRgbDifferences += 1;
+    }
+    assert.equal(alphaDifferences, 0);
+    assert.equal(visibleRgbDifferences, 0);
+  }
 });
 
 test("D01 reveals native land and restores only reversible crown grounding", async () => {
@@ -679,7 +762,7 @@ test("WFX01 preloads and progressively reveals support-localized water detail", 
   assert.match(rendererSource, /data-city-child-layer="L4_0"/);
 
   const [candidate, waterMask] = await Promise.all([
-    rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.WFX01.asset.path),
+    registeredRgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.WFX01),
     grayscale("../public/career-world/capitals/ninjaone/city-r3/authority/city-water-registration-mask-r1.png"),
   ]);
   assert.deepEqual([candidate.info.width, candidate.info.height], [1448, 1086]);
@@ -725,7 +808,7 @@ test("CFX01 progressively adds parent-derived fabric detail through site and clo
   assert.match(rendererSource, /opacity=\{siteProgress \* \(0\.48 \+ closeProgress \* 0\.52\)\}/);
 
   const [candidate, context, waterMask, d06Mask] = await Promise.all([
-    rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.CFX01.asset.path),
+    registeredRgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.CFX01),
     rgba(NINJAONE_CAPITAL_CITY_R3_CONTEXT.path),
     grayscale("../public/career-world/capitals/ninjaone/city-r3/authority/city-water-registration-mask-r1.png"),
     grayscale("../art-source/career-world/ninjaone-capital/city-r3/districts/D06-station-rail-mask.png"),
@@ -807,7 +890,7 @@ test("LFX06 recesses only live land below the city context", async () => {
   assert.match(rendererSource, /data-city-child-layer="L4_1"/);
 
   const [candidate, landMask, waterMask] = await Promise.all([
-    rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.LFX06.asset.path),
+    registeredRgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.LFX06),
     grayscale("../art-source/career-world/ninjaone-capital/city-r3/authority/live-land-authority-mask-r1.png"),
     grayscale("../art-source/career-world/ninjaone-capital/city-r3/authority/live-inland-water-authority-mask-r1.png"),
   ]);
@@ -1212,7 +1295,7 @@ test("station LoD promotes train-free I20 and cliff-registered I24 without rejec
   const [capital, capitalSource, siteClose, siteCloseSource, stationRail] = await Promise.all([
     rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I20.asset.path),
     rgba("/career-world/capitals/ninjaone/city-nodes-r2/capital/infrastructure/I13-station-capital-cluster-r1-alpha.png"),
-    rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I24.asset.path),
+    registeredRgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I24),
     rgba("/career-world/capitals/ninjaone/city-r3/station/I21-station-undercroft-open-r1-alpha.png"),
     grayscale("../art-source/career-world/ninjaone-capital/city-r3/districts/D06-station-rail-mask.png"),
   ]);
@@ -1239,7 +1322,8 @@ test("station LoD promotes train-free I20 and cliff-registered I24 without rejec
     const rgbChanged = siteClose.data[index * 4] !== siteCloseSource.data[index * 4]
       || siteClose.data[index * 4 + 1] !== siteCloseSource.data[index * 4 + 1]
       || siteClose.data[index * 4 + 2] !== siteCloseSource.data[index * 4 + 2];
-    const rgbaChanged = rgbChanged || candidateAlpha !== sourceAlpha;
+    const rgbaChanged = candidateAlpha !== sourceAlpha
+      || ((candidateAlpha > 0 || sourceAlpha > 0) && rgbChanged);
     if (candidateAlpha > sourceAlpha) siteCloseAlphaExpansion += 1;
     if (candidateAlpha < sourceAlpha) siteCloseAlphaReduction += 1;
     if (rgbaChanged && !insideRedesignRoi(x, y)) siteCloseOutsideRedesignDifferences += 1;
@@ -1275,14 +1359,15 @@ test("station LoD promotes train-free I20 and cliff-registered I24 without rejec
   assert.ok(renderedSiteCloseWidth / renderedCapitalWidth >= 0.9);
   assert.ok(renderedSiteCloseWidth / renderedCapitalWidth <= 1.1);
 
-  const stationBytes = await readFile(new URL(
-    `../public${NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I24.asset.path}`,
-    import.meta.url,
-  ));
   const [{ data: placedStation }, registeredWater] = await Promise.all([
-    sharp(stationBytes)
+    sharp(siteClose.data, {
+      raw: {
+        channels: 4,
+        height: siteClose.info.height,
+        width: siteClose.info.width,
+      },
+    })
       .resize(renderedSiteCloseWidth, renderedSiteCloseHeight)
-      .ensureAlpha()
       .raw()
       .toBuffer({ resolveWithObject: true }),
     grayscale(

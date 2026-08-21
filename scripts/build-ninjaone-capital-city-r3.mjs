@@ -119,6 +119,22 @@ const source = Object.freeze({
     ROOT,
     "art-source/career-world/ninjaone-capital/city-r3/districts/D06-station-rail-mask.png",
   ),
+  bridgeWaterDetail: path.join(
+    ROOT,
+    "public/career-world/capitals/ninjaone/city-r3/water-interaction/WFX01-city-bridge-water-detail-r1-alpha.png",
+  ),
+  rearRidgeUnderlay: path.join(
+    ROOT,
+    "public/career-world/capitals/ninjaone/city-r3/landscape/LFX06-upper-rear-native-ridge-underlay-r1-alpha.png",
+  ),
+  closeFabricDetail: path.join(
+    ROOT,
+    "public/career-world/capitals/ninjaone/city-r3/detail/CFX01-city-close-fabric-detail-r1-alpha.png",
+  ),
+  stationSiteClose: path.join(
+    ROOT,
+    "art-source/career-world/ninjaone-capital/city-r3/station/I24-station-cliff-registered-undercroft-r1-alpha.png",
+  ),
   foliageManifest: path.join(
     ROOT,
     "public/career-world/capitals/ninjaone/environment/manifests/foliage-native-r4.json",
@@ -144,15 +160,15 @@ const outputs = Object.freeze({
   ),
   bridgeWaterDetail: path.join(
     outputRoot,
-    "water-interaction/WFX01-city-bridge-water-detail-r1-alpha.png",
+    "water-interaction/WFX01-city-bridge-water-detail-r1-alpha-crop.png",
   ),
   rearRidgeUnderlay: path.join(
     outputRoot,
-    "landscape/LFX06-upper-rear-native-ridge-underlay-r1-alpha.png",
+    "landscape/LFX06-upper-rear-native-ridge-underlay-r1-alpha-crop.png",
   ),
   closeFabricDetail: path.join(
     outputRoot,
-    "detail/CFX01-city-close-fabric-detail-r1-alpha.png",
+    "detail/CFX01-city-close-fabric-detail-r1-alpha-crop.png",
   ),
   centralArchitectureDetail: path.join(
     outputRoot,
@@ -164,7 +180,7 @@ const outputs = Object.freeze({
   ),
   stationSiteClose: path.join(
     outputRoot,
-    "station/I24-station-cliff-registered-undercroft-r1-alpha.png",
+    "station/I24-station-cliff-registered-undercroft-r1-alpha-crop.png",
   ),
   waterRegistrationMask: path.join(
     outputRoot,
@@ -287,6 +303,54 @@ async function artifact(file) {
     encodedBytes: bytes.byteLength,
     path: `/${path.relative(path.join(ROOT, "public"), file).replaceAll("\\", "/")}`,
     sha256: sha256(bytes),
+  });
+}
+
+async function writeRegisteredAlphaCrop(sourceFile, outputFile) {
+  const { bytes, metadata } = await imageMetadata(sourceFile);
+  const { data, info } = await sharp(bytes)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  let left = info.width;
+  let top = info.height;
+  let right = -1;
+  let bottom = -1;
+  for (let index = 0; index < info.width * info.height; index += 1) {
+    if (data[index * 4 + 3] === 0) continue;
+    const x = index % info.width;
+    const y = Math.floor(index / info.width);
+    left = Math.min(left, x);
+    top = Math.min(top, y);
+    right = Math.max(right, x);
+    bottom = Math.max(bottom, y);
+  }
+  if (right < left || bottom < top) {
+    throw new TypeError(`${sourceFile} has no visible alpha to package.`);
+  }
+  const crop = Object.freeze({
+    height: bottom - top + 1,
+    left,
+    top,
+    width: right - left + 1,
+  });
+  await writePng(
+    outputFile,
+    sharp(bytes).ensureAlpha().extract(crop),
+  );
+  const outputMetadata = await sharp(await readFile(outputFile)).metadata();
+  if (
+    outputMetadata.width !== crop.width
+    || outputMetadata.height !== crop.height
+    || outputMetadata.channels !== 4
+  ) {
+    throw new TypeError(`${outputFile} does not match its registered alpha crop.`);
+  }
+  return Object.freeze({
+    origin: Object.freeze([crop.left, crop.top]),
+    sourceDimensions: Object.freeze([metadata.width, metadata.height]),
+    sourcePath: path.relative(ROOT, sourceFile).replaceAll("\\", "/"),
+    sourceSha256: sha256(bytes),
   });
 }
 
@@ -529,6 +593,17 @@ const [
   ]);
 const d04CompactGatewayBytes = await readFile(source.d04CompactGateway);
 const d04CompactGatewayMetadata = await sharp(d04CompactGatewayBytes).metadata();
+const [
+  bridgeWaterDetailSourceWindow,
+  rearRidgeUnderlaySourceWindow,
+  closeFabricDetailSourceWindow,
+  stationSiteCloseSourceWindow,
+] = await Promise.all([
+  writeRegisteredAlphaCrop(source.bridgeWaterDetail, outputs.bridgeWaterDetail),
+  writeRegisteredAlphaCrop(source.rearRidgeUnderlay, outputs.rearRidgeUnderlay),
+  writeRegisteredAlphaCrop(source.closeFabricDetail, outputs.closeFabricDetail),
+  writeRegisteredAlphaCrop(source.stationSiteClose, outputs.stationSiteClose),
+]);
 const cleanedWater = await cleanConnectedWaterMask(rawLiveWater);
 const liveWater = cleanedWater.mask;
 await writePng(outputs.waterRegistrationMask, sharp(liveWater, {
@@ -1472,6 +1547,7 @@ const manifest = {
       layerId: "L4_0",
       role: "support-localized-water-detail",
       tiers: ["site", "close"],
+      sourceWindow: bridgeWaterDetailSourceWindow,
       asset: await artifact(outputs.bridgeWaterDetail),
     },
     {
@@ -1479,6 +1555,7 @@ const manifest = {
       layerId: "L4_1",
       role: "upper-rear-native-ridge-underlay",
       tiers: ["capital", "site", "close"],
+      sourceWindow: rearRidgeUnderlaySourceWindow,
       asset: await artifact(outputs.rearRidgeUnderlay),
     },
     {
@@ -1486,6 +1563,7 @@ const manifest = {
       layerId: "L4_4",
       role: "parent-derived-fabric-detail",
       tiers: ["site", "close"],
+      sourceWindow: closeFabricDetailSourceWindow,
       asset: await artifact(outputs.closeFabricDetail),
     },
     {
@@ -1509,6 +1587,7 @@ const manifest = {
       role: "cliff-registered-undercroft-site-close-station",
       tiers: ["site", "close"],
       placement: { anchor: [1056.5, 1086], baseSize: [783, 587], scale: 0.72 },
+      sourceWindow: stationSiteCloseSourceWindow,
       asset: await artifact(outputs.stationSiteClose),
     },
   ],
