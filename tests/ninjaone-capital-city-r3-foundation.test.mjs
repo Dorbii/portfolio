@@ -8,6 +8,7 @@ import {
   NINJAONE_CAPITAL_CITY_R3_ARTBOARD,
   NINJAONE_CAPITAL_CITY_R3_AUTHORITY_ID,
   NINJAONE_CAPITAL_CITY_R3_CONTEXT,
+  NINJAONE_CAPITAL_CITY_R3_D01_CONTEXT_EXCLUSION_MASK,
   NINJAONE_CAPITAL_CITY_R3_D03_CONTEXT_EXCLUSION_MASK,
   NINJAONE_CAPITAL_CITY_R3_D05_CONTEXT_EXCLUSION_MASK,
   NINJAONE_CAPITAL_CITY_R3_PROGRESSIVE_WATER_EXCLUSION_MASK,
@@ -51,6 +52,7 @@ test("r3 foundation publishes a registered water-safe capital cohort", () => {
   );
   assert.deepEqual(NINJAONE_CAPITAL_CITY_R3_ARTBOARD, [1448, 1086]);
   assert.deepEqual(NINJAONE_CAPITAL_CITY_R3_CONTEXT.dimensions, [1448, 1086]);
+  assert.deepEqual(NINJAONE_CAPITAL_CITY_R3_D01_CONTEXT_EXCLUSION_MASK.dimensions, [1448, 1086]);
   assert.deepEqual(NINJAONE_CAPITAL_CITY_R3_D03_CONTEXT_EXCLUSION_MASK.dimensions, [1448, 1086]);
   assert.deepEqual(NINJAONE_CAPITAL_CITY_R3_D05_CONTEXT_EXCLUSION_MASK.dimensions, [1448, 1086]);
   assert.deepEqual(
@@ -63,6 +65,7 @@ test("r3 foundation publishes a registered water-safe capital cohort", () => {
   assert.deepEqual(Object.keys(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS).sort(), [
     "CFX01",
     "CFX02",
+    "D01L02",
     "D03L02",
     "D03L03",
     "D05L02",
@@ -74,6 +77,80 @@ test("r3 foundation publishes a registered water-safe capital cohort", () => {
   ]);
   assert.ok(Object.values(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS)
     .every(({ asset }) => !asset.path.includes("/_review/")));
+});
+
+test("D01 reveals native land and restores only reversible crown grounding", async () => {
+  const [exclusion, grounding, district, land, water] = await Promise.all([
+    grayscale(`../public${NINJAONE_CAPITAL_CITY_R3_D01_CONTEXT_EXCLUSION_MASK.path}`),
+    rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D01L02.asset.path),
+    grayscale("../art-source/career-world/ninjaone-capital/city-r3/districts/D01-upper-capital-mask.png"),
+    grayscale("../art-source/career-world/ninjaone-capital/city-r3/authority/registered-parent-land-mask-r1.png"),
+    grayscale("../art-source/career-world/ninjaone-capital/city-r3/authority/live-inland-water-authority-mask-r1.png"),
+  ]);
+  assert.deepEqual([exclusion.info.width, exclusion.info.height, exclusion.info.channels], [1448, 1086, 1]);
+  assert.deepEqual([grounding.info.width, grounding.info.height, grounding.info.channels], [1448, 1086, 4]);
+  assert.deepEqual(
+    {
+      layerId: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D01L02.layerId,
+      role: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D01L02.role,
+      tiers: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D01L02.tiers,
+    },
+    {
+      layerId: "L4_1",
+      role: "crown-grounding-and-circulation",
+      tiers: ["site", "close"],
+    },
+  );
+
+  let districtPixels = 0;
+  let hardRevealPixels = 0;
+  let exclusionOutsideDistrict = 0;
+  let groundingPixels = 0;
+  let groundingMaximumAlpha = 0;
+  let groundingOutsideDistrict = 0;
+  let groundingOutsideLand = 0;
+  let groundingOnWater = 0;
+  for (let index = 0; index < district.data.length; index += 1) {
+    if (district.data[index] > 0) districtPixels += 1;
+    if (exclusion.data[index] >= 240) hardRevealPixels += 1;
+    if (exclusion.data[index] > 0 && district.data[index] === 0) {
+      exclusionOutsideDistrict += 1;
+    }
+    const alpha = grounding.data[index * 4 + 3];
+    if (alpha > 0) {
+      groundingPixels += 1;
+      groundingMaximumAlpha = Math.max(groundingMaximumAlpha, alpha);
+      if (district.data[index] === 0) groundingOutsideDistrict += 1;
+      if (land.data[index] < 64) groundingOutsideLand += 1;
+      if (water.data[index] >= 240) groundingOnWater += 1;
+    }
+  }
+  assert.ok(hardRevealPixels / districtPixels >= 0.95);
+  assert.ok(hardRevealPixels / districtPixels <= 0.99);
+  assert.equal(exclusionOutsideDistrict, 0);
+  assert.ok(groundingPixels / districtPixels >= 0.02);
+  assert.ok(groundingPixels / districtPixels <= 0.06);
+  assert.equal(groundingMaximumAlpha, 220);
+  assert.equal(groundingOutsideDistrict, 0);
+  assert.equal(groundingOutsideLand, 0);
+  assert.equal(groundingOnWater, 0);
+  assert.deepEqual([
+    grounding.data[3],
+    grounding.data[(grounding.info.width - 1) * 4 + 3],
+    grounding.data[(grounding.info.width * (grounding.info.height - 1)) * 4 + 3],
+    grounding.data[(grounding.info.width * grounding.info.height - 1) * 4 + 3],
+  ], [0, 0, 0, 0]);
+
+  const rendererSource = await readFile(new URL(
+    "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
+    import.meta.url,
+  ), "utf8");
+  const groundingIndex = rendererSource.indexOf('data-city-asset-id="D01L02"');
+  const d01NodeIndex = rendererSource.indexOf('focusedDistrict="D01"', groundingIndex);
+  assert.ok(groundingIndex >= 0);
+  assert.ok(d01NodeIndex > groundingIndex);
+  assert.doesNotMatch(rendererSource, /D01-upper-capital-plate/);
+  assert.doesNotMatch(rendererSource, /\/_review\//);
 });
 
 test("D03 reveals native land and restores only city-owned contact and integration fabric", async () => {

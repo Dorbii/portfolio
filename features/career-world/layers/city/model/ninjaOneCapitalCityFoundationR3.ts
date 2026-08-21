@@ -16,6 +16,7 @@ export interface NinjaOneCapitalCityArtifact {
 export type NinjaOneCapitalCityRuntimeAssetId =
   | "CFX01"
   | "CFX02"
+  | "D01L02"
   | "D03L02"
   | "D03L03"
   | "D05L02"
@@ -69,6 +70,7 @@ const waterLayer = layerByRole.get("city-water-interaction");
 const contextLayer = layerByRole.get("capital-composite-context-with-D06-exclusion");
 const waterCoverage = manifest.verification.inlandWaterCoverageFraction;
 const progressiveWaterExclusion = manifest.authority.progressiveDetailWaterExclusion;
+const d01ContextExclusion = manifest.authority.progressiveDistrictContextExclusions.D01;
 const d03ContextExclusion = manifest.authority.progressiveDistrictContextExclusions.D03;
 const d05ContextExclusion = manifest.authority.progressiveDistrictContextExclusions.D05;
 const rawRuntimeAssets = manifest.runtimeAssets as unknown as readonly (
@@ -101,6 +103,7 @@ const runtimeAssets = Object.freeze(Object.fromEntries(rawRuntimeAssets.map((ent
 const expectedRuntimeAssetContract = Object.freeze({
   CFX01: Object.freeze({ layerId: "L4_4", tiers: "site,close" }),
   CFX02: Object.freeze({ layerId: "L4_4", tiers: "close" }),
+  D01L02: Object.freeze({ layerId: "L4_1", tiers: "site,close" }),
   D03L02: Object.freeze({ layerId: "L4_1", tiers: "site,close" }),
   D03L03: Object.freeze({ layerId: "L4_1", tiers: "site,close" }),
   D05L02: Object.freeze({ layerId: "L4_1", tiers: "site,close" }),
@@ -127,6 +130,14 @@ if (
     !== "false-positive-city-shadow-pocket"
   || progressiveWaterExclusion.method !== "byte-exact-live-water-authority"
   || progressiveWaterExclusion.mask.dimensions.join(",") !== "1448,1086"
+  || d01ContextExclusion.method
+    !== "continuous-D01-context-exclusion-plus-city-owned-L4_1-grounding"
+  || d01ContextExclusion.mask.dimensions.join(",") !== "1448,1086"
+  || d01ContextExclusion.contactLayer.dimensions.join(",") !== "1448,1086"
+  || d01ContextExclusion.hardRevealFraction < 0.95
+  || d01ContextExclusion.hardRevealFraction > 0.99
+  || d01ContextExclusion.contactFraction < 0.02
+  || d01ContextExclusion.contactFraction > 0.06
   || d03ContextExclusion.method
     !== "continuous-D03-context-exclusion-plus-city-owned-L4_1-grounding"
   || d03ContextExclusion.mask.dimensions.join(",") !== "1448,1086"
@@ -184,6 +195,10 @@ export const NINJAONE_CAPITAL_CITY_R3_CONTEXT = artifact(
 export const NINJAONE_CAPITAL_CITY_R3_PROGRESSIVE_WATER_EXCLUSION_MASK = artifact(
   progressiveWaterExclusion.mask,
   "city-foundation-r3.progressiveDetailWaterExclusion.mask",
+);
+export const NINJAONE_CAPITAL_CITY_R3_D01_CONTEXT_EXCLUSION_MASK = artifact(
+  d01ContextExclusion.mask,
+  "city-foundation-r3.progressiveDistrictContextExclusions.D01.mask",
 );
 export const NINJAONE_CAPITAL_CITY_R3_D03_CONTEXT_EXCLUSION_MASK = artifact(
   d03ContextExclusion.mask,

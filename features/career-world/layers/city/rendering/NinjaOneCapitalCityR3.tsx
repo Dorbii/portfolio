@@ -8,6 +8,7 @@ import {
 import {
   NINJAONE_CAPITAL_CITY_R3_ARTBOARD,
   NINJAONE_CAPITAL_CITY_R3_CONTEXT,
+  NINJAONE_CAPITAL_CITY_R3_D01_CONTEXT_EXCLUSION_MASK,
   NINJAONE_CAPITAL_CITY_R3_D03_CONTEXT_EXCLUSION_MASK,
   NINJAONE_CAPITAL_CITY_R3_D05_CONTEXT_EXCLUSION_MASK,
   NINJAONE_CAPITAL_CITY_R3_PROGRESSIVE_WATER_EXCLUSION_MASK,
@@ -51,6 +52,10 @@ const CITY_CLOSE_FABRIC_DETAIL_REVIEW =
   NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.CFX01.asset.path;
 const CITY_CENTRAL_ARCHITECTURE_DETAIL_REVIEW =
   NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.CFX02.asset.path;
+const D01_CONTEXT_EXCLUSION_REVIEW =
+  NINJAONE_CAPITAL_CITY_R3_D01_CONTEXT_EXCLUSION_MASK.path;
+const D01_GROUNDING_AND_CIRCULATION_REVIEW =
+  NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D01L02.asset.path;
 const D03_GROUND_CONTACT_REVIEW =
   NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L02.asset.path;
 const D03_TERRAIN_INTEGRATION_DETAIL_REVIEW =
@@ -124,9 +129,10 @@ export function NinjaOneCapitalCityR3({
     focusDistrict,
   )
     && registeredDetailLayerIds.length > 0;
-  const d01DistrictDetailVisible = (tier === "site" || tier === "close")
-    && focusDistrict === "D01"
-    && architectureVisible;
+  const d01DistrictInFocus = (tier === "site" || tier === "close")
+    && focusDistrict === "D01";
+  const d01DistrictLandscapeVisible = d01DistrictInFocus && landscapeVisible;
+  const d01DistrictArchitectureVisible = d01DistrictInFocus && architectureVisible;
   const d05DistrictInFocus = (tier === "site" || tier === "close")
     && focusDistrict === "D05";
   const d05DistrictLandscapeVisible = d05DistrictInFocus && landscapeVisible;
@@ -147,7 +153,7 @@ export function NinjaOneCapitalCityR3({
     && architectureVisible;
   const d06StationVisible = transportationVisible
     && (focusDistrict === null || focusDistrict === "D06");
-  const contextCutoutMask = d01DistrictDetailVisible
+  const contextCutoutMask = d01DistrictLandscapeVisible
     ? "url(#ninjaone-capital-city-r3-d01-detail-cutout)"
     : d02DistrictDetailVisible
       ? "url(#ninjaone-capital-city-r3-d02-detail-cutout)"
@@ -242,7 +248,7 @@ export function NinjaOneCapitalCityR3({
           </mask>
         </defs>
       ) : null}
-      {d01DistrictDetailVisible ? (
+      {d01DistrictLandscapeVisible ? (
         <defs>
           <mask
             height={height}
@@ -253,15 +259,12 @@ export function NinjaOneCapitalCityR3({
             x={0}
             y={0}
           >
-            <rect fill="#fff" height={height} width={width} />
-            <NinjaOneCapitalAssetNodes
-              camera={camera}
-              deliveryMode="focused-district-progressive-detail"
-              focusedDistrict="D01"
-              layerIds={["L4_3"]}
-              light={light}
-              maskOnly
-              tier={tier}
+            <image
+              filter="url(#ninjaone-capital-city-r3-inverse-district-exclusion)"
+              height={height}
+              href={D01_CONTEXT_EXCLUSION_REVIEW}
+              preserveAspectRatio="none"
+              width={width}
             />
           </mask>
           <mask
@@ -472,6 +475,18 @@ export function NinjaOneCapitalCityR3({
         preserveAspectRatio="none"
         width={width}
       />
+      {d01DistrictLandscapeVisible ? (
+        <image
+          className="ninjaone-capital-city__r3-d01-grounding"
+          data-city-asset-id="D01L02"
+          data-city-child-layer="L4_1"
+          data-city-runtime-status="manifest-declared"
+          height={height}
+          href={D01_GROUNDING_AND_CIRCULATION_REVIEW}
+          preserveAspectRatio="none"
+          width={width}
+        />
+      ) : null}
       {d03DistrictLandscapeVisible ? (
         <image
           className="ninjaone-capital-city__r3-d03-ground-contact"
@@ -522,7 +537,7 @@ export function NinjaOneCapitalCityR3({
           width={width}
         />
       ) : null}
-      {d01DistrictDetailVisible ? (
+      {d01DistrictArchitectureVisible ? (
         <g mask="url(#ninjaone-capital-city-r3-d01-context-clip)">
           <NinjaOneCapitalAssetNodes
             camera={camera}

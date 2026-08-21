@@ -66,6 +66,31 @@
       }
     },
     "progressiveDistrictContextExclusions": {
+      "D01": {
+        "method": "continuous-D01-context-exclusion-plus-city-owned-L4_1-grounding",
+        "hardRevealFraction": 0.9678944480035637,
+        "mask": {
+          "decodedBytes": 1572528,
+          "dimensions": [
+            1448,
+            1086
+          ],
+          "encodedBytes": 5209,
+          "path": "/career-world/capitals/ninjaone/city-r3/authority/D01M02-crown-full-context-exclusion-r1.png",
+          "sha256": "58cba9b60d03ff592566bec9338d4a7e93fa23465c505fd3163f1574f371d4c1"
+        },
+        "contactFraction": 0.032254805385062264,
+        "contactLayer": {
+          "decodedBytes": 6290112,
+          "dimensions": [
+            1448,
+            1086
+          ],
+          "encodedBytes": 61566,
+          "path": "/career-world/capitals/ninjaone/city-r3/landscape/D01L02-crown-grounding-and-circulation-r1-alpha.png",
+          "sha256": "a3568ec9b6cd2e751a21dfef290705b1502573831764a03317ecb14ffc74eb34"
+        }
+      },
       "D03": {
         "method": "continuous-D03-context-exclusion-plus-city-owned-L4_1-grounding",
         "hardRevealFraction": 0.9391985529022188,
@@ -178,6 +203,25 @@
     }
   ],
   "runtimeAssets": [
+    {
+      "id": "D01L02",
+      "layerId": "L4_1",
+      "role": "crown-grounding-and-circulation",
+      "tiers": [
+        "site",
+        "close"
+      ],
+      "asset": {
+        "decodedBytes": 6290112,
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "encodedBytes": 61566,
+        "path": "/career-world/capitals/ninjaone/city-r3/landscape/D01L02-crown-grounding-and-circulation-r1-alpha.png",
+        "sha256": "a3568ec9b6cd2e751a21dfef290705b1502573831764a03317ecb14ffc74eb34"
+      }
+    },
     {
       "id": "D03L02",
       "layerId": "L4_1",
@@ -426,6 +470,9 @@
     "registeredParentLandMask": "0f5200b2dc9f527d39faa2c78d028c5f246d3b262c8b3cbdf91040b16c77a92b",
     "liveWaterMask": "62dae097bf95f53d086ef5c2dd6b4957e22f3a173c80bac35400620addd66bc3",
     "topOverhang": "6db7e4986f08e2ee0dc9beb9b0bc063ed911267f530987207ea55d3f89d35742",
+    "d01DistrictMask": "596e66e0289863fa39c4deecc1e45a1ab5da1e6c7c2b50d07307eb397392aed2",
+    "d01ContextExclusionMask": "58cba9b60d03ff592566bec9338d4a7e93fa23465c505fd3163f1574f371d4c1",
+    "d01GroundingAndCirculation": "a3568ec9b6cd2e751a21dfef290705b1502573831764a03317ecb14ffc74eb34",
     "d03DistrictMask": "872bde51347a8fddf3e6644bc25d49144639002d9c75da46a1ebf45b3b250e04",
     "d03ContextExclusionMask": "260a5fe73ebe31035b8ae4e73a6f6294486aeb47d06f130837c7a009ffc29a45",
     "d03GroundContact": "32c324ef0f5e6a21a46716ef8a9acc1a98c71cedd3d088dc75d7172341437778",

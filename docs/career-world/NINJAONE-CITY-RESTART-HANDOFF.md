@@ -762,3 +762,54 @@ Checkpoint the free-camera LoD fix, then run a reversible D06 station-scale/cont
 - Final verification is green: R3 builder, typecheck, lint, focused foundation/LoD tests (`42/42`), full single-concurrency repository suite, production build, and `git diff --check`. Source/public D05 hashes match byte-for-byte. The production build retains its existing large-chunk advisory; this did not fail the build and is separate from the measured close-entry hitch.
 - Stage only the tracked D05 unit plus its production/source assets and tests, commit the checkpoint, keep the port-3000 dev server alive, and leave the in-app browser on the fixed D05 close URL for user review. Obsolete untracked `_review` D05 copies are evidence only and must remain unstaged.
 - Do not claim the overall six-district city goal complete. D05 is the review-ready vertical slice; D01/D02/D04/D06 still need the same land-first, water-safe, independent-layer audit, and the cold close-entry hitch remains open.
+
+## Crash-safe checkpoint — 2026-08-20 21:57 CDT
+
+### D01 parent-context diagnosis is live-proven
+
+- D01 is the next repair slice because its site/close view rendered six sharp L4_3 crown nodes over six blurry baked counterparts plus baked city forest/terraces. This is the same stale atomic-silhouette replacement failure already corrected in D03 and D05.
+- `D01M02-crown-full-context-exclusion-r1` is accepted for mask fitness and copied only to the untracked review path. Quarantine/public-review SHA-256 is `58cba9b60d03ff592566bec9338d4a7e93fa23465c505fd3163f1574f371d4c1`; the 1448x1086 one-channel mask owns exactly the 435,501-pixel D01 authority, has 96.639043% hard-white coverage, zero positive pixels outside D01, one component/no holes, and direct H/V gradients no greater than 32.
+- Director wired the review mask behind a split `d01DistrictLandscapeVisible` / `d01DistrictArchitectureVisible` contract and restarted the stale development process. Live D01 site/close now removes the baked D01 city/forest plate and reveals the accepted native mountainous L2 land while retaining the six immutable node sockets and the parent-alpha skyline clip.
+- The live result is intentionally **not review-ready**: full reveal proves the six buildings float without city-owned contacts, stairs, retaining lips, or narrow circulation. Do not restore the baked D01 plate or widen the nodes to hide that gap.
+
+### Native foliage and active asset lane
+
+- A full existing-tree audit is a documented NO-GO for additional D01 registrations under unchanged evidence thresholds: 179 L2 instances scanned, 28 intersect D01 canopy alpha, zero pass all alpha/base-vegetation/vegetation/structure gates. The sole near-miss (`c1-native-conifer-057-instance`) fails structure at `0.31067961165 > 0.30`. Current D01 site selects zero native instances; close selects four instances across two resources (6,572,032 decoded bytes). Preserve the current shared close cohort and do not invent filler trees.
+- xHigh worker `/root/d01_crown_grounding` is the only active ImageGen lane. It targets `D01L02-crown-grounding-and-circulation-r1-alpha` on reversible L4_1: six localized contacts plus restrained stairs/retaining/drainage/narrow paths, with zero buildings, foliage, water, broad plateau, outside-D01, or outside-live-land coverage. Maximum two calls/candidates; quarantine only; Director runtime acceptance remains required.
+- The prior live server was stale despite serving HTTP 200 and still rendered the old node-shaped D01 cutout. Director verified the mismatch from the actual SVG mask, stopped the exact port-3000 owner, and restarted the dev server from the current checkout. The refreshed DOM now references the D01M02 review mask and live imagery matches the expected native-land reveal.
+
+### Exact continuation
+
+- Wait for D01L02, independently inspect alpha, perspective, contact geometry, foliage/water containment, and exact-order proofs. Promote only a conforming candidate to the review runtime beneath the six L4_3 nodes; then suppress D01 generic procedural shadows because authored grounding replaces that fallback.
+- Capture real D01 site/close proof. If grounding remains sparse or sticker-like, issue a separate D01-local terrain-integration-detail asset only after identifying the exact missing connective fabric; do not reuse the old broad D01/D07 plates or generate trees.
+- After live acceptance, promote D01M02/D01L02 (and a proven D01L03 only if necessary), add builder/manifest/model declarations, replace the stale atomic-silhouette test while preserving socket/width/skyline/containment/LoD invariants, run the full gate stack, and commit a coherent D01 checkpoint. Continue with D02/D04/D06; the overall city goal remains active.
+
+## Crash-safe checkpoint — 2026-08-20 22:59 CDT
+
+### D01 grounding is live-accepted; production integration is active
+
+- `D01L02-crown-grounding-and-circulation-r1-alpha` is frozen at SHA-256 `a3568ec9b6cd2e751a21dfef290705b1502573831764a03317ecb14ffc74eb34`. It is a `1448x1086` RGBA L4_1 asset with 5.374% registered-D01-land coverage, max alpha 220, zero hard-water/foliage/upper-node/outside-D01 leakage, six socket contacts, and 7-16px circulation arms. The xHigh worker used one of two allowed ImageGen calls and did not promote it.
+- Director rejected the worker's first runtime proof because the `2880x2160` live base and `1448x1086` assets were composed without registration. The worker rebuilt the proof at the exact `1448x1086` runtime registration; its independent verifier then passed with zero failed gates. The frozen asset was copied to `_review`, its hash was rechecked byte-for-byte, and the real application was captured at fixed D01 site and close URLs.
+- Live D01 site/close now mounts the full D01 exclusion, D01L02 beneath the six immutable L4_3 architecture nodes, and zero generic procedural node shadows. The broad baked city forest/terraces and duplicate architecture are absent. Native L2 terrain remains visible; the close tier progressively adds four existing shared-foliage instances through the WebGL2 native foliage renderer, while site adds none. No new or generated trees were added.
+- Pixel ownership disproved an apparent bleed concern: WFX01 has zero nontransparent pixels inside D01, while all 52,821 LFX06 pixels are inside the accepted D01 mask and provide the already-approved rear-ridge grade. Their DOM presence is therefore not cross-district visual bleed. D01 site/close contain no D03 or D05 runtime assets.
+- The live result is accepted for production integration without a D01L03 generation lane. D01L02 supplies restrained contacts/routes while the native land remains dominant; further broad fabric would work against the user's land-first direction.
+
+### Exact continuation
+
+- Promote D01M02 and frozen D01L02 to tracked art-source/public authority and landscape paths. Add D01 to the builder manifest, model runtime contract, renderer production paths, and tests using the same reversible full-reveal contract as D03/D05.
+- Classify only the old D01 atomic parent-silhouette assertion as stale/superseded intent. Preserve the six socket IDs, widths, skyline clip, disjoint-node, district containment, L2/L3 ownership, progressive site/close routing, and absence of generic node shadows.
+- Run builder, focused tests, typecheck, lint, production build, full suite, and diff check; capture production D01 site/close again; stage only the coherent D01 unit and commit it. D02/D04/D06 and the full-to-close performance/bleed audit remain open, so the overall goal stays active.
+
+## Crash-safe checkpoint — 2026-08-20 23:17 CDT
+
+### D01 production contract and gates are green
+
+- D01M02 and D01L02 are promoted to tracked art-source/public paths with byte-identical hashes `58cba9b...` and `a3568ec...`. The R3 builder now validates D01 district containment, 95-99% hard parent reveal, 2-6% L4_1 grounding coverage, alpha/corner limits, registered-land ownership, and zero hard-water overlap before publishing them through the production manifest.
+- Runtime now consumes only manifest-declared production URLs. Fresh application proof reports zero `/_review/` image references, six D01 L4_3 node IDs, D01L02 on L4_1, zero generic shadows, zero foliage instances at site, and four existing WebGL2 native-foliage instances at close.
+- Test classification is recorded and applied: the former assertion that D01 must atomically replace only six parent silhouettes was **stale/superseded design intent** because the accepted land-first decision now removes the full baked D01 district context. The replacement test preserves the real invariants: six calibrated/disjoint sockets, parent skyline clip, independent L4_1/L4_3 visibility and ordering, exact D01 containment, no water repaint, native-land reveal, progressive site/close routing, and no broad procedural shadow. The generic alpha-silhouette mask invariant remains protected for unrepaired atomic-detail districts.
+- Gate evidence is green: deterministic R3 builder; focused city contract tests `43/43`; typecheck; lint; full repository suite `205/207` passed with two declared skips and zero failures; production build; source/public hash equality; and `git diff --check`. The existing build chunk-size advisory remains non-fatal and unchanged.
+
+### Exact continuation
+
+- Stage and commit only the D01 production unit; leave all `_review` files untracked. Then audit D02 and D04 against the same full-reveal/native-land decision before requesting any new asset. D06 station/water/undercroft cleanup remains after those dry districts.
+- The dev server remains on port 3000. Do not declare the overall city complete until D02/D04/D06, full-to-close LoD truth, close asset bleed, cold-entry performance, and final whole-city visual review all pass.

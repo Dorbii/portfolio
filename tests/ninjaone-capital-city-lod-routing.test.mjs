@@ -811,7 +811,10 @@ test("D05 progressively reveals native land before independently owned grounding
   assert.ok(contactIndex >= 0);
   assert.ok(integrationIndex > contactIndex);
   assert.ok(nodeIndex > integrationIndex);
-  assert.match(nodeRenderer, /usesAuthoredGrounding = node\.districtId === "D03" \|\| node\.districtId === "D05"/);
+  assert.match(
+    nodeRenderer,
+    /usesAuthoredGrounding = node\.districtId === "D01"[\s\S]*?node\.districtId === "D03"[\s\S]*?node\.districtId === "D05"/,
+  );
   assert.match(nodeRenderer, /ownsLargeFootprint && !usesAuthoredGrounding/);
   assert.match(
     renderer,
@@ -821,7 +824,7 @@ test("D05 progressively reveals native land before independently owned grounding
   assert.doesNotMatch(renderer, /D05L01/);
 });
 
-test("D01 detail atomically replaces six calibrated silhouettes inside the parent skyline", async () => {
+test("D01 independently owns native-land reveal, grounding, and six architecture nodes", async () => {
   const [renderer, nodeRenderer] = await Promise.all([
     readFile(new URL(
       "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
@@ -832,12 +835,22 @@ test("D01 detail atomically replaces six calibrated silhouettes inside the paren
       import.meta.url,
     ), "utf8"),
   ]);
-  assert.match(renderer, /d01DistrictDetailVisible = \(tier === "site" \|\| tier === "close"\)/);
+  assert.match(renderer, /d01DistrictInFocus = \(tier === "site" \|\| tier === "close"\)/);
+  assert.match(renderer, /d01DistrictLandscapeVisible = d01DistrictInFocus && landscapeVisible/);
+  assert.match(renderer, /d01DistrictArchitectureVisible = d01DistrictInFocus && architectureVisible/);
   assert.match(renderer, /id="ninjaone-capital-city-r3-d01-detail-cutout"/);
   assert.match(renderer, /id="ninjaone-capital-city-r3-d01-context-clip"/);
+  assert.match(renderer, /NINJAONE_CAPITAL_CITY_R3_D01_CONTEXT_EXCLUSION_MASK\.path/);
+  assert.match(renderer, /data-city-asset-id="D01L02"[\s\S]*?data-city-child-layer="L4_1"/);
   assert.match(renderer, /<g mask="url\(#ninjaone-capital-city-r3-d01-context-clip\)">/);
   assert.match(renderer, /focusedDistrict="D01"/);
-  assert.doesNotMatch(renderer, /D01-crown-plate/);
+  assert.doesNotMatch(renderer, /D01-upper-capital-plate/);
+  assert.match(
+    nodeRenderer,
+    /usesAuthoredGrounding = node\.districtId === "D01"[\s\S]*?node\.districtId === "D03"[\s\S]*?node\.districtId === "D05"/,
+  );
+  assert.match(nodeRenderer, /ownsLargeFootprint && !usesAuthoredGrounding/);
+  // Preserve the silhouette-mask invariant for the unrepaired atomic detail paths.
   assert.match(
     nodeRenderer,
     /if \(maskOnly\)[\s\S]*?filter="url\(#ninjaone-capital-city-r3-detail-mask-black\)"/,
@@ -850,11 +863,13 @@ test("D01 detail atomically replaces six calibrated silhouettes inside the paren
   );
   const landscapeIndex = renderer.indexOf("data-city-asset-id=\"LFX06\"");
   const contextIndex = renderer.indexOf("data-city-cohort-ownership=\"L4-capital-composite\"");
+  const groundingIndex = renderer.indexOf('data-city-asset-id="D01L02"');
   const d01RenderIndex = renderer.indexOf(
     "<g mask=\"url(#ninjaone-capital-city-r3-d01-context-clip)\">",
   );
   assert.ok(landscapeIndex < contextIndex, "L4_1 must remain below the city context");
-  assert.ok(contextIndex < d01RenderIndex, "D01 L4_3 must remain above L4_1 and context");
+  assert.ok(contextIndex < groundingIndex, "D01 full-artboard L4_1 must follow the cut parent context");
+  assert.ok(groundingIndex < d01RenderIndex, "D01 L4_3 must remain above authored L4_1 grounding");
   for (const district of ["D02", "D03", "D04", "D05"]) {
     assert.ok(
       contextIndex < renderer.lastIndexOf(`focusedDistrict=\"${district}\"`),
@@ -894,7 +909,10 @@ test("D03 independently owns native-land reveal, grounding, and four architectur
   assert.match(renderer, /data-city-asset-id="D03L02"[\s\S]*?data-city-child-layer="L4_1"/);
   assert.match(renderer, /data-city-asset-id="D03L03"[\s\S]*?data-city-child-layer="L4_1"/);
   assert.match(renderer, /focusedDistrict="D03"/);
-  assert.match(nodeRenderer, /usesAuthoredGrounding = node\.districtId === "D03" \|\| node\.districtId === "D05"/);
+  assert.match(
+    nodeRenderer,
+    /usesAuthoredGrounding = node\.districtId === "D01"[\s\S]*?node\.districtId === "D03"[\s\S]*?node\.districtId === "D05"/,
+  );
   assert.doesNotMatch(renderer, /D03-eastern-industry-plate/);
 });
 

@@ -31,6 +31,18 @@ const source = Object.freeze({
     ROOT,
     "art-source/career-world/ninjaone-capital/city-r3/overlays/top-overhang-extension-r1-alpha.png",
   ),
+  d01DistrictMask: path.join(
+    ROOT,
+    "art-source/career-world/ninjaone-capital/city-r3/districts/D01-upper-capital-mask.png",
+  ),
+  d01ContextExclusionMask: path.join(
+    ROOT,
+    "art-source/career-world/ninjaone-capital/city-r3/authority/D01M02-crown-full-context-exclusion-r1.png",
+  ),
+  d01GroundingAndCirculation: path.join(
+    ROOT,
+    "art-source/career-world/ninjaone-capital/city-r3/landscape/D01L02-crown-grounding-and-circulation-r1-alpha.png",
+  ),
   d03DistrictMask: path.join(
     ROOT,
     "art-source/career-world/ninjaone-capital/city-r3/districts/D03-eastern-industry-mask.png",
@@ -121,6 +133,14 @@ const outputs = Object.freeze({
   progressiveWaterExclusionMask: path.join(
     outputRoot,
     "authority/city-progressive-water-exclusion-mask-r1.png",
+  ),
+  d01ContextExclusionMask: path.join(
+    outputRoot,
+    "authority/D01M02-crown-full-context-exclusion-r1.png",
+  ),
+  d01GroundingAndCirculation: path.join(
+    outputRoot,
+    "landscape/D01L02-crown-grounding-and-circulation-r1-alpha.png",
   ),
   d03ContextExclusionMask: path.join(
     outputRoot,
@@ -378,6 +398,9 @@ const [
   registeredParentLand,
   rawLiveWater,
   topOverhang,
+  d01DistrictMask,
+  d01ContextExclusionMask,
+  d01GroundingAndCirculation,
   d03DistrictMask,
   d03ContextExclusionMask,
   d03GroundContact,
@@ -394,6 +417,9 @@ const [
     singleChannel(source.registeredParentLandMask),
     singleChannel(source.liveWaterMask),
     imageMetadata(source.topOverhang),
+    singleChannel(source.d01DistrictMask),
+    singleChannel(source.d01ContextExclusionMask),
+    imageMetadata(source.d01GroundingAndCirculation),
     singleChannel(source.d03DistrictMask),
     singleChannel(source.d03ContextExclusionMask),
     imageMetadata(source.d03GroundContact),
@@ -410,6 +436,67 @@ await writePng(outputs.waterRegistrationMask, sharp(liveWater, {
   raw: { width: WIDTH, height: HEIGHT, channels: 1 },
 }).toColourspace("b-w"));
 await copyFile(source.liveWaterMask, outputs.progressiveWaterExclusionMask);
+
+let d01RegisteredPixels = 0;
+let d01HardRevealPixels = 0;
+let d01OutsideSupportPixels = 0;
+for (let index = 0; index < PIXELS; index += 1) {
+  if (d01DistrictMask[index] > 0) d01RegisteredPixels += 1;
+  if (d01ContextExclusionMask[index] > 0 && d01DistrictMask[index] === 0) {
+    d01OutsideSupportPixels += 1;
+  }
+  if (d01ContextExclusionMask[index] >= 240) d01HardRevealPixels += 1;
+}
+const d01HardRevealFraction = d01HardRevealPixels / d01RegisteredPixels;
+if (
+  d01OutsideSupportPixels !== 0
+  || d01HardRevealFraction < 0.95
+  || d01HardRevealFraction > 0.99
+) {
+  throw new TypeError("The accepted D01 land-first context exclusion violates its registered support.");
+}
+await copyFile(source.d01ContextExclusionMask, outputs.d01ContextExclusionMask);
+
+const d01GroundingRgba = await sharp(d01GroundingAndCirculation.bytes)
+  .ensureAlpha()
+  .raw()
+  .toBuffer();
+let d01GroundingPixels = 0;
+let d01GroundingMaximumAlpha = 0;
+let d01GroundingOutsideSupportPixels = 0;
+let d01GroundingOutsideLandPixels = 0;
+let d01GroundingWaterPixels = 0;
+for (let index = 0; index < PIXELS; index += 1) {
+  const alpha = d01GroundingRgba[index * 4 + 3];
+  if (alpha === 0) continue;
+  d01GroundingPixels += 1;
+  d01GroundingMaximumAlpha = Math.max(d01GroundingMaximumAlpha, alpha);
+  if (d01DistrictMask[index] === 0) d01GroundingOutsideSupportPixels += 1;
+  if (registeredParentLand[index] < 64) d01GroundingOutsideLandPixels += 1;
+  if (rawLiveWater[index] >= 240) d01GroundingWaterPixels += 1;
+}
+const d01GroundingFraction = d01GroundingPixels / d01RegisteredPixels;
+const d01GroundingCornerAlpha = [
+  d01GroundingRgba[3],
+  d01GroundingRgba[(WIDTH - 1) * 4 + 3],
+  d01GroundingRgba[(PIXELS - WIDTH) * 4 + 3],
+  d01GroundingRgba[(PIXELS - 1) * 4 + 3],
+];
+if (
+  d01GroundingAndCirculation.metadata.channels !== 4
+  || d01GroundingCornerAlpha.some((alpha) => alpha !== 0)
+  || d01GroundingOutsideSupportPixels !== 0
+  || d01GroundingOutsideLandPixels !== 0
+  || d01GroundingWaterPixels !== 0
+  || d01GroundingMaximumAlpha > 220
+  || d01GroundingFraction < 0.02
+  || d01GroundingFraction > 0.06
+) {
+  throw new TypeError("The accepted D01 grounding layer violates city/land ownership.");
+}
+await mkdir(path.dirname(outputs.d01GroundingAndCirculation), { recursive: true });
+await copyFile(source.d01GroundingAndCirculation, outputs.d01GroundingAndCirculation);
+
 let d03RegisteredPixels = 0;
 let d03HardRevealPixels = 0;
 let d03OutsideSupportPixels = 0;
@@ -805,6 +892,13 @@ const manifest = {
       mask: await artifact(outputs.progressiveWaterExclusionMask),
     },
     progressiveDistrictContextExclusions: {
+      D01: {
+        method: "continuous-D01-context-exclusion-plus-city-owned-L4_1-grounding",
+        hardRevealFraction: d01HardRevealFraction,
+        mask: await artifact(outputs.d01ContextExclusionMask),
+        contactFraction: d01GroundingFraction,
+        contactLayer: await artifact(outputs.d01GroundingAndCirculation),
+      },
       D03: {
         method: "continuous-D03-context-exclusion-plus-city-owned-L4_1-grounding",
         hardRevealFraction: d03HardRevealFraction,
@@ -837,6 +931,13 @@ const manifest = {
     { id: "L4", role: "capital-composite-context-with-D06-exclusion", asset: await artifact(outputs.capitalContext) },
   ],
   runtimeAssets: [
+    {
+      id: "D01L02",
+      layerId: "L4_1",
+      role: "crown-grounding-and-circulation",
+      tiers: ["site", "close"],
+      asset: await artifact(outputs.d01GroundingAndCirculation),
+    },
     {
       id: "D03L02",
       layerId: "L4_1",
