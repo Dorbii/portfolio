@@ -70,6 +70,17 @@ Maintained by Claude (director). One entry per dispatched run (desktop thread ta
 - **Verdict: PASS at director review (~25 min wall).** 250-line contract; taxonomy with measurable class boundaries (px² ranges from the grammar), a genuinely precise socket/baseline standard (baselineY/sortPoint/footprint-vs-silhouette/terrace modes/support polygons), reuse-first foliage (0 new entries), comprehensive mechanical gates, minimal D05 slice (26 entries), and four well-chosen owner questions. Every numeric citation checked out against the grammar JSON — including one (595 edges) that corrected the director's own stale memory of interim counts. One gap noted for per-asset packets (scale-coherence gate).
 - **Sol-vs-Terra observation:** on a design-shaped task Sol produced near-acceptance-quality work in one pass with zero revisions — versus Terra's honest-but-iterative convergence on mechanical work. Early but consistent with the tier split: Sol where the task is open-ended synthesis, Terra where properties can bound it. **Awaiting Steve's acceptance.**
 
+### R004 — 2026-08-21 — T3a composer skeleton, D05 placeholders (codex exec, gpt-5.6-terra, effort=high)
+
+- **Setup:** T2 accepted by Steve (parameters in CITY-KIT-CONTRACT.md §9; commit `e779ffe`). T3 staged: skeleton (a) → kit generation (b) → full composition (c). T3a validates placement/sockets/consolidation/z-sort with procedural placeholder parts — zero generation spend at risk. The composer is also the grammar's first real consumer; its friction report drives any grammar revision. Dispatched ~15:20.
+- **Verdict: MIXED — mechanics PASS, registration proof unusable, friction report excellent.** 28 road + 9 stair runs, 25 placements, 0 z-sort violations, deterministic, green gates. But the registration proof rendered terrace bands as opaque full-width horizontal strips, hiding the master entirely — one revision (R005). The friction report earned its keep: named anchors displaced 146–300 px from nearest grammar footprints (S01/S18/S11), D05 band data is left-edge samples only, 25 footprints thin vs the visibly dense district. **The skeleton stage caught grammar-v1's gaps before a dollar of generation spend — exactly why T3 was staged.**
+- **Director decisions:** registered anchors become placement authority for named entries; terrace bands demoted to advisory outlines for the proof (region extraction descoped as a CV rat-hole the generation probe doesn't need); footprint-density revisit deferred until after the T3b generation probe.
+
+### R005 — 2026-08-21 — T3a-r2 composer fixes (codex exec, gpt-5.6-terra, effort=medium)
+
+- **Setup:** visible registration proof (outlines over master), anchor-authority placement, advisory bands. Dispatched ~15:45.
+- **Verdict:** pending.
+
 ## Findings backlog (flow improvements to fold into future packets)
 
 - F1: Task packets must declare required gate tier (focused / full / none) — otherwise workers default to maximal ceremony. (From R000.)

@@ -1,0 +1,4924 @@
+{
+  "schemaVersion": 1,
+  "id": "ninjaone-d05-placeholder-composition-r1",
+  "status": "diagnostic-placeholder",
+  "source": {
+    "grammar": "public/career-world/capitals/ninjaone/city-v2/grammar/ninjaone-city-grammar-r3.json",
+    "grammarSha256": "6742e153be57bb4cf68939d4b77d6e2c4d6c6f474911eea9f1dd693a0db8ebbd",
+    "layout": "public/career-world/capitals/ninjaone/manifests/city-master-node-layout-r3.json",
+    "layoutSha256": "cd3d2434c40106632a4d6708b5b045c8b9bb4d1e5bb1a21420dc024e93582b10",
+    "mask": "art-source/career-world/ninjaone-capital/city-r3/districts/D05-western-skill-terraces-mask.png",
+    "master": "art-source/career-world/ninjaone-capital/city-nodes-r2/master/ninjaone-capital-master-r1.png"
+  },
+  "masterBounds": [
+    0,
+    413,
+    691,
+    1086
+  ],
+  "output": {
+    "scale": 2,
+    "dimensions": [
+      1382,
+      1346
+    ],
+    "plate": ".codex-tmp/qa/T3/d05-skeleton-plate-r1.png",
+    "registrationProof": ".codex-tmp/qa/T3/d05-skeleton-registration-r1.png"
+  },
+  "socketStandard": {
+    "sort": "sortPoint.y + zBias, then sortPoint.x, then asset ID",
+    "terraceModes": [
+      "level-pad",
+      "contour-follow",
+      "cross-band"
+    ]
+  },
+  "placements": [
+    {
+      "id": "terrace-D05-band-01",
+      "family": "ground",
+      "class": "terrace-band",
+      "assetId": "placeholder-terrace-1",
+      "masterAnchor": [
+        96,
+        448
+      ],
+      "masterFootprint": [
+        [
+          0,
+          448
+        ],
+        [
+          32,
+          448
+        ],
+        [
+          64,
+          448
+        ],
+        [
+          96,
+          448
+        ],
+        [
+          128,
+          448
+        ],
+        [
+          160,
+          448
+        ],
+        [
+          192,
+          448
+        ]
+      ],
+      "terraceTrace": {
+        "id": "D05-band-01",
+        "index": 1
+      },
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 448,
+        "sortPoint": [
+          96,
+          448
+        ],
+        "footprintPolygon": [
+          [
+            0,
+            448
+          ],
+          [
+            32,
+            448
+          ],
+          [
+            64,
+            448
+          ],
+          [
+            96,
+            448
+          ],
+          [
+            128,
+            448
+          ],
+          [
+            160,
+            448
+          ],
+          [
+            192,
+            448
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        96,
+        448
+      ],
+      "zBias": -10000,
+      "zSortKey": -9552,
+      "renderOrder": 0
+    },
+    {
+      "id": "terrace-D05-band-02",
+      "family": "ground",
+      "class": "terrace-band",
+      "assetId": "placeholder-terrace-2",
+      "masterAnchor": [
+        112,
+        506
+      ],
+      "masterFootprint": [
+        [
+          0,
+          506
+        ],
+        [
+          32,
+          506
+        ],
+        [
+          64,
+          506
+        ],
+        [
+          96,
+          506
+        ],
+        [
+          128,
+          506
+        ],
+        [
+          160,
+          506
+        ],
+        [
+          192,
+          506
+        ],
+        [
+          224,
+          506
+        ]
+      ],
+      "terraceTrace": {
+        "id": "D05-band-02",
+        "index": 2
+      },
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 506,
+        "sortPoint": [
+          112,
+          506
+        ],
+        "footprintPolygon": [
+          [
+            0,
+            506
+          ],
+          [
+            32,
+            506
+          ],
+          [
+            64,
+            506
+          ],
+          [
+            96,
+            506
+          ],
+          [
+            128,
+            506
+          ],
+          [
+            160,
+            506
+          ],
+          [
+            192,
+            506
+          ],
+          [
+            224,
+            506
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        112,
+        506
+      ],
+      "zBias": -10000,
+      "zSortKey": -9494,
+      "renderOrder": 1
+    },
+    {
+      "id": "terrace-D05-band-03",
+      "family": "ground",
+      "class": "terrace-band",
+      "assetId": "placeholder-terrace-3",
+      "masterAnchor": [
+        96,
+        564
+      ],
+      "masterFootprint": [
+        [
+          0,
+          564
+        ],
+        [
+          32,
+          564
+        ],
+        [
+          64,
+          564
+        ],
+        [
+          96,
+          564
+        ],
+        [
+          128,
+          564
+        ],
+        [
+          160,
+          564
+        ],
+        [
+          192,
+          564
+        ]
+      ],
+      "terraceTrace": {
+        "id": "D05-band-03",
+        "index": 3
+      },
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 564,
+        "sortPoint": [
+          96,
+          564
+        ],
+        "footprintPolygon": [
+          [
+            0,
+            564
+          ],
+          [
+            32,
+            564
+          ],
+          [
+            64,
+            564
+          ],
+          [
+            96,
+            564
+          ],
+          [
+            128,
+            564
+          ],
+          [
+            160,
+            564
+          ],
+          [
+            192,
+            564
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        96,
+        564
+      ],
+      "zBias": -10000,
+      "zSortKey": -9436,
+      "renderOrder": 2
+    },
+    {
+      "id": "terrace-D05-band-04",
+      "family": "ground",
+      "class": "terrace-band",
+      "assetId": "placeholder-terrace-4",
+      "masterAnchor": [
+        128,
+        622
+      ],
+      "masterFootprint": [
+        [
+          0,
+          622
+        ],
+        [
+          32,
+          622
+        ],
+        [
+          64,
+          622
+        ],
+        [
+          96,
+          622
+        ],
+        [
+          128,
+          622
+        ],
+        [
+          160,
+          622
+        ],
+        [
+          192,
+          622
+        ],
+        [
+          224,
+          622
+        ],
+        [
+          256,
+          622
+        ]
+      ],
+      "terraceTrace": {
+        "id": "D05-band-04",
+        "index": 4
+      },
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 622,
+        "sortPoint": [
+          128,
+          622
+        ],
+        "footprintPolygon": [
+          [
+            0,
+            622
+          ],
+          [
+            32,
+            622
+          ],
+          [
+            64,
+            622
+          ],
+          [
+            96,
+            622
+          ],
+          [
+            128,
+            622
+          ],
+          [
+            160,
+            622
+          ],
+          [
+            192,
+            622
+          ],
+          [
+            224,
+            622
+          ],
+          [
+            256,
+            622
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        128,
+        622
+      ],
+      "zBias": -10000,
+      "zSortKey": -9378,
+      "renderOrder": 3
+    },
+    {
+      "id": "D05-stairs-run-01",
+      "family": "circulation",
+      "class": "stair-run",
+      "assetId": "placeholder-stair",
+      "kind": "stairs",
+      "masterAnchor": [
+        222,
+        535.5
+      ],
+      "masterFootprint": [
+        [
+          220.5,
+          529.5
+        ],
+        [
+          223.5,
+          541.5
+        ]
+      ],
+      "stairBandTransition": {
+        "start": {
+          "id": "D05-band-02",
+          "index": 2,
+          "sourceDistance": 23.759
+        },
+        "end": {
+          "id": "D05-band-03",
+          "index": 3,
+          "sourceDistance": 35.504
+        },
+        "inferredFromTwoDimensionalTrace": true
+      },
+      "terraceMode": "cross-band",
+      "socket": {
+        "baselineY": 541.5,
+        "sortPoint": [
+          223.5,
+          541.5
+        ],
+        "footprintPolygon": [
+          [
+            220.5,
+            529.5
+          ],
+          [
+            223.5,
+            541.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "stair",
+            "point": [
+              220.5,
+              529.5
+            ],
+            "widthMasterPx": 32.43,
+            "bandOffset": 2
+          },
+          {
+            "id": "end",
+            "kind": "stair",
+            "point": [
+              223.5,
+              541.5
+            ],
+            "widthMasterPx": 32.43,
+            "bandOffset": 3
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0200"
+      ],
+      "sortPoint": [
+        223.5,
+        541.5
+      ],
+      "zBias": -100,
+      "zSortKey": 441.5,
+      "renderOrder": 4
+    },
+    {
+      "id": "D05-road-run-01",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        205.5,
+        553.5
+      ],
+      "masterFootprint": [
+        [
+          199.5,
+          550.5
+        ],
+        [
+          211.5,
+          556.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 556.5,
+        "sortPoint": [
+          211.5,
+          556.5
+        ],
+        "footprintPolygon": [
+          [
+            199.5,
+            550.5
+          ],
+          [
+            211.5,
+            556.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              199.5,
+              550.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              211.5,
+              556.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0222"
+      ],
+      "sortPoint": [
+        211.5,
+        556.5
+      ],
+      "zBias": -100,
+      "zSortKey": 456.5,
+      "renderOrder": 5
+    },
+    {
+      "id": "building-structure-100",
+      "family": "building",
+      "class": "compact",
+      "assetId": "placeholder-compact",
+      "namedSkill": null,
+      "masterAnchor": [
+        53.53846153846154,
+        524.6153846153846
+      ],
+      "placementAnchor": [
+        53.53846153846154,
+        524.6153846153846
+      ],
+      "masterFootprint": [
+        [
+          49,
+          520
+        ],
+        [
+          59,
+          520
+        ],
+        [
+          59,
+          530
+        ],
+        [
+          49,
+          530
+        ]
+      ],
+      "terraceMode": "level-pad",
+      "socket": {
+        "baselineY": 530,
+        "sortPoint": [
+          54,
+          530
+        ],
+        "footprintPolygon": [
+          [
+            49,
+            520
+          ],
+          [
+            59,
+            520
+          ],
+          [
+            59,
+            530
+          ],
+          [
+            49,
+            530
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        54,
+        530
+      ],
+      "zBias": 0,
+      "zSortKey": 530,
+      "renderOrder": 6
+    },
+    {
+      "id": "D05-stairs-run-02",
+      "family": "circulation",
+      "class": "stair-run",
+      "assetId": "placeholder-stair",
+      "kind": "stairs",
+      "masterAnchor": [
+        159,
+        651
+      ],
+      "masterFootprint": [
+        [
+          157.5,
+          643.5
+        ],
+        [
+          160.5,
+          658.5
+        ]
+      ],
+      "stairBandTransition": {
+        "start": {
+          "id": "D05-band-04",
+          "index": 4,
+          "sourceDistance": 21.645
+        },
+        "end": {
+          "id": "D05-band-03",
+          "index": 3,
+          "sourceDistance": 36.503
+        },
+        "inferredFromTwoDimensionalTrace": true
+      },
+      "terraceMode": "cross-band",
+      "socket": {
+        "baselineY": 658.5,
+        "sortPoint": [
+          160.5,
+          658.5
+        ],
+        "footprintPolygon": [
+          [
+            157.5,
+            643.5
+          ],
+          [
+            160.5,
+            658.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "stair",
+            "point": [
+              157.5,
+              643.5
+            ],
+            "widthMasterPx": 32.43,
+            "bandOffset": 4
+          },
+          {
+            "id": "end",
+            "kind": "stair",
+            "point": [
+              160.5,
+              658.5
+            ],
+            "widthMasterPx": 32.43,
+            "bandOffset": 3
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0264"
+      ],
+      "sortPoint": [
+        160.5,
+        658.5
+      ],
+      "zBias": -100,
+      "zSortKey": 558.5,
+      "renderOrder": 7
+    },
+    {
+      "id": "D05-road-run-28",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        153,
+        673.5
+      ],
+      "masterFootprint": [
+        [
+          160.5,
+          658.5
+        ],
+        [
+          145.5,
+          688.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 688.5,
+        "sortPoint": [
+          145.5,
+          688.5
+        ],
+        "footprintPolygon": [
+          [
+            160.5,
+            658.5
+          ],
+          [
+            145.5,
+            688.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              160.5,
+              658.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              145.5,
+              688.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "I0036"
+      ],
+      "sortPoint": [
+        145.5,
+        688.5
+      ],
+      "zBias": -100,
+      "zSortKey": 588.5,
+      "renderOrder": 8
+    },
+    {
+      "id": "building-structure-105",
+      "family": "building",
+      "class": "compact",
+      "assetId": "placeholder-compact",
+      "namedSkill": null,
+      "masterAnchor": [
+        204.66666666666666,
+        584.6111111111111
+      ],
+      "placementAnchor": [
+        204.66666666666666,
+        584.6111111111111
+      ],
+      "masterFootprint": [
+        [
+          200,
+          580
+        ],
+        [
+          210,
+          580
+        ],
+        [
+          210,
+          590
+        ],
+        [
+          200,
+          590
+        ]
+      ],
+      "terraceMode": "level-pad",
+      "socket": {
+        "baselineY": 590,
+        "sortPoint": [
+          205,
+          590
+        ],
+        "footprintPolygon": [
+          [
+            200,
+            580
+          ],
+          [
+            210,
+            580
+          ],
+          [
+            210,
+            590
+          ],
+          [
+            200,
+            590
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        205,
+        590
+      ],
+      "zBias": 0,
+      "zSortKey": 590,
+      "renderOrder": 9
+    },
+    {
+      "id": "D05-road-run-02",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        144,
+        690
+      ],
+      "masterFootprint": [
+        [
+          145.5,
+          688.5
+        ],
+        [
+          142.5,
+          691.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 691.5,
+        "sortPoint": [
+          142.5,
+          691.5
+        ],
+        "footprintPolygon": [
+          [
+            145.5,
+            688.5
+          ],
+          [
+            142.5,
+            691.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              145.5,
+              688.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              142.5,
+              691.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0311"
+      ],
+      "sortPoint": [
+        142.5,
+        691.5
+      ],
+      "zBias": -100,
+      "zSortKey": 591.5,
+      "renderOrder": 10
+    },
+    {
+      "id": "building-structure-106",
+      "family": "building",
+      "class": "compact",
+      "assetId": "placeholder-compact",
+      "namedSkill": null,
+      "masterAnchor": [
+        160.35,
+        593.95
+      ],
+      "placementAnchor": [
+        160.35,
+        593.95
+      ],
+      "masterFootprint": [
+        [
+          156.5,
+          589.5
+        ],
+        [
+          166.5,
+          589.5
+        ],
+        [
+          166.5,
+          599.5
+        ],
+        [
+          156.5,
+          599.5
+        ]
+      ],
+      "terraceMode": "level-pad",
+      "socket": {
+        "baselineY": 599.5,
+        "sortPoint": [
+          161.5,
+          599.5
+        ],
+        "footprintPolygon": [
+          [
+            156.5,
+            589.5
+          ],
+          [
+            166.5,
+            589.5
+          ],
+          [
+            166.5,
+            599.5
+          ],
+          [
+            156.5,
+            599.5
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        161.5,
+        599.5
+      ],
+      "zBias": 0,
+      "zSortKey": 599.5,
+      "renderOrder": 11
+    },
+    {
+      "id": "D05-road-run-03",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        226.5,
+        703.5
+      ],
+      "masterFootprint": [
+        [
+          232.5,
+          700.5
+        ],
+        [
+          220.5,
+          706.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 706.5,
+        "sortPoint": [
+          220.5,
+          706.5
+        ],
+        "footprintPolygon": [
+          [
+            232.5,
+            700.5
+          ],
+          [
+            220.5,
+            706.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              232.5,
+              700.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              220.5,
+              706.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0323"
+      ],
+      "sortPoint": [
+        220.5,
+        706.5
+      ],
+      "zBias": -100,
+      "zSortKey": 606.5,
+      "renderOrder": 12
+    },
+    {
+      "id": "building-structure-011",
+      "family": "building",
+      "class": "large",
+      "assetId": "placeholder-large",
+      "namedSkill": null,
+      "masterAnchor": [
+        166.0989010989011,
+        617.9560439560439
+      ],
+      "placementAnchor": [
+        166.0989010989011,
+        617.9560439560439
+      ],
+      "masterFootprint": [
+        [
+          158,
+          604
+        ],
+        [
+          181,
+          604
+        ],
+        [
+          181,
+          629
+        ],
+        [
+          158,
+          629
+        ]
+      ],
+      "terraceMode": "level-pad",
+      "socket": {
+        "baselineY": 629,
+        "sortPoint": [
+          169.5,
+          629
+        ],
+        "footprintPolygon": [
+          [
+            158,
+            604
+          ],
+          [
+            181,
+            604
+          ],
+          [
+            181,
+            629
+          ],
+          [
+            158,
+            629
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        169.5,
+        629
+      ],
+      "zBias": 0,
+      "zSortKey": 629,
+      "renderOrder": 13
+    },
+    {
+      "id": "building-structure-109",
+      "family": "building",
+      "class": "compact",
+      "assetId": "placeholder-compact",
+      "namedSkill": null,
+      "masterAnchor": [
+        126.35714285714286,
+        646
+      ],
+      "placementAnchor": [
+        126.35714285714286,
+        646
+      ],
+      "masterFootprint": [
+        [
+          122,
+          641
+        ],
+        [
+          132,
+          641
+        ],
+        [
+          132,
+          651
+        ],
+        [
+          122,
+          651
+        ]
+      ],
+      "terraceMode": "level-pad",
+      "socket": {
+        "baselineY": 651,
+        "sortPoint": [
+          127,
+          651
+        ],
+        "footprintPolygon": [
+          [
+            122,
+            641
+          ],
+          [
+            132,
+            641
+          ],
+          [
+            132,
+            651
+          ],
+          [
+            122,
+            651
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        127,
+        651
+      ],
+      "zBias": 0,
+      "zSortKey": 651,
+      "renderOrder": 14
+    },
+    {
+      "id": "building-structure-051",
+      "family": "building",
+      "class": "standard",
+      "assetId": "placeholder-standard",
+      "namedSkill": null,
+      "masterAnchor": [
+        187.89473684210526,
+        667.2894736842105
+      ],
+      "placementAnchor": [
+        187.89473684210526,
+        667.2894736842105
+      ],
+      "masterFootprint": [
+        [
+          182.5,
+          660
+        ],
+        [
+          192.5,
+          660
+        ],
+        [
+          192.5,
+          675
+        ],
+        [
+          182.5,
+          675
+        ]
+      ],
+      "terraceMode": "level-pad",
+      "socket": {
+        "baselineY": 675,
+        "sortPoint": [
+          187.5,
+          675
+        ],
+        "footprintPolygon": [
+          [
+            182.5,
+            660
+          ],
+          [
+            192.5,
+            660
+          ],
+          [
+            192.5,
+            675
+          ],
+          [
+            182.5,
+            675
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        187.5,
+        675
+      ],
+      "zBias": 0,
+      "zSortKey": 675,
+      "renderOrder": 15
+    },
+    {
+      "id": "building-structure-116",
+      "family": "building",
+      "class": "named",
+      "assetId": "placeholder-s15",
+      "namedSkill": {
+        "id": "S15",
+        "name": "OpenAPI Observatory",
+        "registeredNodeId": "primary-openapi-observatory",
+        "registrationAnchor": [
+          285,
+          677
+        ],
+        "nearestFootprintId": "structure-116",
+        "anchorToNearestFootprintDistance": 40.042
+      },
+      "masterAnchor": [
+        285,
+        677
+      ],
+      "placementAnchor": [
+        285,
+        677
+      ],
+      "masterFootprint": [
+        [
+          280.857,
+          672.357
+        ],
+        [
+          290.857,
+          672.357
+        ],
+        [
+          290.857,
+          682.357
+        ],
+        [
+          280.857,
+          682.357
+        ]
+      ],
+      "terraceMode": "level-pad",
+      "socket": {
+        "baselineY": 682.357,
+        "sortPoint": [
+          285.857,
+          682.357
+        ],
+        "footprintPolygon": [
+          [
+            286.5,
+            712
+          ],
+          [
+            296.5,
+            712
+          ],
+          [
+            296.5,
+            722
+          ],
+          [
+            286.5,
+            722
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        285.857,
+        682.357
+      ],
+      "zBias": 0,
+      "zSortKey": 682.357,
+      "renderOrder": 16
+    },
+    {
+      "id": "building-structure-037",
+      "family": "building",
+      "class": "standard",
+      "assetId": "placeholder-standard",
+      "namedSkill": null,
+      "masterAnchor": [
+        126.83333333333333,
+        672.6111111111111
+      ],
+      "placementAnchor": [
+        126.83333333333333,
+        672.6111111111111
+      ],
+      "masterFootprint": [
+        [
+          122.5,
+          662
+        ],
+        [
+          132.5,
+          662
+        ],
+        [
+          132.5,
+          683
+        ],
+        [
+          122.5,
+          683
+        ]
+      ],
+      "terraceMode": "level-pad",
+      "socket": {
+        "baselineY": 683,
+        "sortPoint": [
+          127.5,
+          683
+        ],
+        "footprintPolygon": [
+          [
+            122.5,
+            662
+          ],
+          [
+            132.5,
+            662
+          ],
+          [
+            132.5,
+            683
+          ],
+          [
+            122.5,
+            683
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        127.5,
+        683
+      ],
+      "zBias": 0,
+      "zSortKey": 683,
+      "renderOrder": 17
+    },
+    {
+      "id": "building-structure-048",
+      "family": "building",
+      "class": "standard",
+      "assetId": "placeholder-standard",
+      "namedSkill": null,
+      "masterAnchor": [
+        232.56666666666666,
+        687.9
+      ],
+      "placementAnchor": [
+        232.56666666666666,
+        687.9
+      ],
+      "masterFootprint": [
+        [
+          228.5,
+          680
+        ],
+        [
+          238.5,
+          680
+        ],
+        [
+          238.5,
+          696
+        ],
+        [
+          228.5,
+          696
+        ]
+      ],
+      "terraceMode": "level-pad",
+      "socket": {
+        "baselineY": 696,
+        "sortPoint": [
+          233.5,
+          696
+        ],
+        "footprintPolygon": [
+          [
+            228.5,
+            680
+          ],
+          [
+            238.5,
+            680
+          ],
+          [
+            238.5,
+            696
+          ],
+          [
+            228.5,
+            696
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        233.5,
+        696
+      ],
+      "zBias": 0,
+      "zSortKey": 696,
+      "renderOrder": 18
+    },
+    {
+      "id": "building-structure-065",
+      "family": "building",
+      "class": "standard",
+      "assetId": "placeholder-standard",
+      "namedSkill": null,
+      "masterAnchor": [
+        129.18421052631578,
+        696.6578947368421
+      ],
+      "placementAnchor": [
+        129.18421052631578,
+        696.6578947368421
+      ],
+      "masterFootprint": [
+        [
+          124,
+          691.5
+        ],
+        [
+          135,
+          691.5
+        ],
+        [
+          135,
+          701.5
+        ],
+        [
+          124,
+          701.5
+        ]
+      ],
+      "terraceMode": "level-pad",
+      "socket": {
+        "baselineY": 701.5,
+        "sortPoint": [
+          129.5,
+          701.5
+        ],
+        "footprintPolygon": [
+          [
+            124,
+            691.5
+          ],
+          [
+            135,
+            691.5
+          ],
+          [
+            135,
+            701.5
+          ],
+          [
+            124,
+            701.5
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        129.5,
+        701.5
+      ],
+      "zBias": 0,
+      "zSortKey": 701.5,
+      "renderOrder": 19
+    },
+    {
+      "id": "building-structure-113",
+      "family": "building",
+      "class": "compact",
+      "assetId": "placeholder-compact",
+      "namedSkill": null,
+      "masterAnchor": [
+        202.83333333333334,
+        700.0833333333334
+      ],
+      "placementAnchor": [
+        202.83333333333334,
+        700.0833333333334
+      ],
+      "masterFootprint": [
+        [
+          198.5,
+          695.5
+        ],
+        [
+          208.5,
+          695.5
+        ],
+        [
+          208.5,
+          705.5
+        ],
+        [
+          198.5,
+          705.5
+        ]
+      ],
+      "terraceMode": "level-pad",
+      "socket": {
+        "baselineY": 705.5,
+        "sortPoint": [
+          203.5,
+          705.5
+        ],
+        "footprintPolygon": [
+          [
+            198.5,
+            695.5
+          ],
+          [
+            208.5,
+            695.5
+          ],
+          [
+            208.5,
+            705.5
+          ],
+          [
+            198.5,
+            705.5
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        203.5,
+        705.5
+      ],
+      "zBias": 0,
+      "zSortKey": 705.5,
+      "renderOrder": 20
+    },
+    {
+      "id": "D05-road-run-04",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        255,
+        804
+      ],
+      "masterFootprint": [
+        [
+          253.5,
+          802.5
+        ],
+        [
+          256.5,
+          805.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 805.5,
+        "sortPoint": [
+          256.5,
+          805.5
+        ],
+        "footprintPolygon": [
+          [
+            253.5,
+            802.5
+          ],
+          [
+            256.5,
+            805.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              253.5,
+              802.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              256.5,
+              805.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0380"
+      ],
+      "sortPoint": [
+        256.5,
+        805.5
+      ],
+      "zBias": -100,
+      "zSortKey": 705.5,
+      "renderOrder": 21
+    },
+    {
+      "id": "D05-road-run-05",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        249,
+        810
+      ],
+      "masterFootprint": [
+        [
+          247.5,
+          808.5
+        ],
+        [
+          250.5,
+          811.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 811.5,
+        "sortPoint": [
+          250.5,
+          811.5
+        ],
+        "footprintPolygon": [
+          [
+            247.5,
+            808.5
+          ],
+          [
+            250.5,
+            811.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              247.5,
+              808.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              250.5,
+              811.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0386"
+      ],
+      "sortPoint": [
+        250.5,
+        811.5
+      ],
+      "zBias": -100,
+      "zSortKey": 711.5,
+      "renderOrder": 22
+    },
+    {
+      "id": "building-structure-057",
+      "family": "building",
+      "class": "standard",
+      "assetId": "placeholder-standard",
+      "namedSkill": null,
+      "masterAnchor": [
+        167.5625,
+        717.5
+      ],
+      "placementAnchor": [
+        167.5625,
+        717.5
+      ],
+      "masterFootprint": [
+        [
+          161,
+          713
+        ],
+        [
+          174,
+          713
+        ],
+        [
+          174,
+          723
+        ],
+        [
+          161,
+          723
+        ]
+      ],
+      "terraceMode": "level-pad",
+      "socket": {
+        "baselineY": 723,
+        "sortPoint": [
+          167.5,
+          723
+        ],
+        "footprintPolygon": [
+          [
+            161,
+            713
+          ],
+          [
+            174,
+            713
+          ],
+          [
+            174,
+            723
+          ],
+          [
+            161,
+            723
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        167.5,
+        723
+      ],
+      "zBias": 0,
+      "zSortKey": 723,
+      "renderOrder": 23
+    },
+    {
+      "id": "D05-road-run-23",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        256.5,
+        817.5
+      ],
+      "masterFootprint": [
+        [
+          250.5,
+          811.5
+        ],
+        [
+          262.5,
+          823.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 823.5,
+        "sortPoint": [
+          262.5,
+          823.5
+        ],
+        "footprintPolygon": [
+          [
+            250.5,
+            811.5
+          ],
+          [
+            262.5,
+            823.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              250.5,
+              811.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              262.5,
+              823.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "I0001"
+      ],
+      "sortPoint": [
+        262.5,
+        823.5
+      ],
+      "zBias": -100,
+      "zSortKey": 723.5,
+      "renderOrder": 24
+    },
+    {
+      "id": "D05-road-run-25",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        259.5,
+        814.5
+      ],
+      "masterFootprint": [
+        [
+          256.5,
+          805.5
+        ],
+        [
+          262.5,
+          823.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 823.5,
+        "sortPoint": [
+          262.5,
+          823.5
+        ],
+        "footprintPolygon": [
+          [
+            256.5,
+            805.5
+          ],
+          [
+            262.5,
+            823.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              256.5,
+              805.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              262.5,
+              823.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "I0019"
+      ],
+      "sortPoint": [
+        262.5,
+        823.5
+      ],
+      "zBias": -100,
+      "zSortKey": 723.5,
+      "renderOrder": 25
+    },
+    {
+      "id": "building-structure-014",
+      "family": "building",
+      "class": "large",
+      "assetId": "placeholder-large",
+      "namedSkill": null,
+      "masterAnchor": [
+        153.51639344262296,
+        713.9754098360655
+      ],
+      "placementAnchor": [
+        153.51639344262296,
+        713.9754098360655
+      ],
+      "masterFootprint": [
+        [
+          145,
+          704
+        ],
+        [
+          170,
+          704
+        ],
+        [
+          170,
+          724
+        ],
+        [
+          145,
+          724
+        ]
+      ],
+      "terraceMode": "level-pad",
+      "socket": {
+        "baselineY": 724,
+        "sortPoint": [
+          157.5,
+          724
+        ],
+        "footprintPolygon": [
+          [
+            145,
+            704
+          ],
+          [
+            170,
+            704
+          ],
+          [
+            170,
+            724
+          ],
+          [
+            145,
+            724
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        157.5,
+        724
+      ],
+      "zBias": 0,
+      "zSortKey": 724,
+      "renderOrder": 26
+    },
+    {
+      "id": "D05-road-run-07",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        261,
+        825
+      ],
+      "masterFootprint": [
+        [
+          262.5,
+          823.5
+        ],
+        [
+          259.5,
+          826.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 826.5,
+        "sortPoint": [
+          259.5,
+          826.5
+        ],
+        "footprintPolygon": [
+          [
+            262.5,
+            823.5
+          ],
+          [
+            259.5,
+            826.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              262.5,
+              823.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              259.5,
+              826.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0396"
+      ],
+      "sortPoint": [
+        259.5,
+        826.5
+      ],
+      "zBias": -100,
+      "zSortKey": 726.5,
+      "renderOrder": 27
+    },
+    {
+      "id": "D05-road-run-08",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        264,
+        825
+      ],
+      "masterFootprint": [
+        [
+          262.5,
+          823.5
+        ],
+        [
+          265.5,
+          826.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 826.5,
+        "sortPoint": [
+          265.5,
+          826.5
+        ],
+        "footprintPolygon": [
+          [
+            262.5,
+            823.5
+          ],
+          [
+            265.5,
+            826.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              262.5,
+              823.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              265.5,
+              826.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0397"
+      ],
+      "sortPoint": [
+        265.5,
+        826.5
+      ],
+      "zBias": -100,
+      "zSortKey": 726.5,
+      "renderOrder": 28
+    },
+    {
+      "id": "D05-road-run-06",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        280.5,
+        825
+      ],
+      "masterFootprint": [
+        [
+          286.5,
+          820.5
+        ],
+        [
+          274.5,
+          829.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 829.5,
+        "sortPoint": [
+          274.5,
+          829.5
+        ],
+        "footprintPolygon": [
+          [
+            286.5,
+            820.5
+          ],
+          [
+            274.5,
+            829.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              286.5,
+              820.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              274.5,
+              829.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0395"
+      ],
+      "sortPoint": [
+        274.5,
+        829.5
+      ],
+      "zBias": -100,
+      "zSortKey": 729.5,
+      "renderOrder": 29
+    },
+    {
+      "id": "D05-road-run-21",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        273,
+        831
+      ],
+      "masterFootprint": [
+        [
+          274.5,
+          829.5
+        ],
+        [
+          271.5,
+          832.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 832.5,
+        "sortPoint": [
+          271.5,
+          832.5
+        ],
+        "footprintPolygon": [
+          [
+            274.5,
+            829.5
+          ],
+          [
+            271.5,
+            832.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              274.5,
+              829.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              271.5,
+              832.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "G0003"
+      ],
+      "sortPoint": [
+        271.5,
+        832.5
+      ],
+      "zBias": -100,
+      "zSortKey": 732.5,
+      "renderOrder": 30
+    },
+    {
+      "id": "building-structure-146",
+      "family": "building",
+      "class": "compact",
+      "assetId": "placeholder-compact",
+      "namedSkill": null,
+      "masterAnchor": [
+        345.9230769230769,
+        731.5384615384615
+      ],
+      "placementAnchor": [
+        345.9230769230769,
+        731.5384615384615
+      ],
+      "masterFootprint": [
+        [
+          343.5,
+          729
+        ],
+        [
+          349.5,
+          729
+        ],
+        [
+          349.5,
+          735
+        ],
+        [
+          343.5,
+          735
+        ]
+      ],
+      "terraceMode": "level-pad",
+      "socket": {
+        "baselineY": 735,
+        "sortPoint": [
+          346.5,
+          735
+        ],
+        "footprintPolygon": [
+          [
+            343.5,
+            729
+          ],
+          [
+            349.5,
+            729
+          ],
+          [
+            349.5,
+            735
+          ],
+          [
+            343.5,
+            735
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        346.5,
+        735
+      ],
+      "zBias": 0,
+      "zSortKey": 735,
+      "renderOrder": 31
+    },
+    {
+      "id": "D05-road-run-09",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        270,
+        834
+      ],
+      "masterFootprint": [
+        [
+          271.5,
+          832.5
+        ],
+        [
+          268.5,
+          835.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 835.5,
+        "sortPoint": [
+          268.5,
+          835.5
+        ],
+        "footprintPolygon": [
+          [
+            271.5,
+            832.5
+          ],
+          [
+            268.5,
+            835.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              271.5,
+              832.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              268.5,
+              835.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0405"
+      ],
+      "sortPoint": [
+        268.5,
+        835.5
+      ],
+      "zBias": -100,
+      "zSortKey": 735.5,
+      "renderOrder": 32
+    },
+    {
+      "id": "D05-stairs-run-03",
+      "family": "circulation",
+      "class": "stair-run",
+      "assetId": "placeholder-stair",
+      "kind": "stairs",
+      "masterAnchor": [
+        352.5,
+        832.5
+      ],
+      "masterFootprint": [
+        [
+          358.5,
+          823.5
+        ],
+        [
+          346.5,
+          841.5
+        ]
+      ],
+      "stairBandTransition": {
+        "start": {
+          "id": "D05-band-04",
+          "index": 4,
+          "sourceDistance": 226.072
+        },
+        "end": {
+          "id": "D05-band-03",
+          "index": 3,
+          "sourceDistance": 237.425
+        },
+        "inferredFromTwoDimensionalTrace": true
+      },
+      "terraceMode": "cross-band",
+      "socket": {
+        "baselineY": 841.5,
+        "sortPoint": [
+          346.5,
+          841.5
+        ],
+        "footprintPolygon": [
+          [
+            358.5,
+            823.5
+          ],
+          [
+            346.5,
+            841.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "stair",
+            "point": [
+              358.5,
+              823.5
+            ],
+            "widthMasterPx": 32.43,
+            "bandOffset": 4
+          },
+          {
+            "id": "end",
+            "kind": "stair",
+            "point": [
+              346.5,
+              841.5
+            ],
+            "widthMasterPx": 32.43,
+            "bandOffset": 3
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0398"
+      ],
+      "sortPoint": [
+        346.5,
+        841.5
+      ],
+      "zBias": -100,
+      "zSortKey": 741.5,
+      "renderOrder": 33
+    },
+    {
+      "id": "building-structure-147",
+      "family": "building",
+      "class": "compact",
+      "assetId": "placeholder-compact",
+      "namedSkill": null,
+      "masterAnchor": [
+        49.65,
+        749.5
+      ],
+      "placementAnchor": [
+        49.65,
+        749.5
+      ],
+      "masterFootprint": [
+        [
+          47.5,
+          747
+        ],
+        [
+          53.5,
+          747
+        ],
+        [
+          53.5,
+          753
+        ],
+        [
+          47.5,
+          753
+        ]
+      ],
+      "terraceMode": "level-pad",
+      "socket": {
+        "baselineY": 753,
+        "sortPoint": [
+          50.5,
+          753
+        ],
+        "footprintPolygon": [
+          [
+            47.5,
+            747
+          ],
+          [
+            53.5,
+            747
+          ],
+          [
+            53.5,
+            753
+          ],
+          [
+            47.5,
+            753
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        50.5,
+        753
+      ],
+      "zBias": 0,
+      "zSortKey": 753,
+      "renderOrder": 34
+    },
+    {
+      "id": "D05-road-run-10",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        393,
+        847.5
+      ],
+      "masterFootprint": [
+        [
+          388.5,
+          841.5
+        ],
+        [
+          397.5,
+          853.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 853.5,
+        "sortPoint": [
+          397.5,
+          853.5
+        ],
+        "footprintPolygon": [
+          [
+            388.5,
+            841.5
+          ],
+          [
+            397.5,
+            853.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              388.5,
+              841.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              397.5,
+              853.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0408"
+      ],
+      "sortPoint": [
+        397.5,
+        853.5
+      ],
+      "zBias": -100,
+      "zSortKey": 753.5,
+      "renderOrder": 35
+    },
+    {
+      "id": "D05-road-run-11",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        408,
+        858
+      ],
+      "masterFootprint": [
+        [
+          409.5,
+          856.5
+        ],
+        [
+          406.5,
+          859.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 859.5,
+        "sortPoint": [
+          406.5,
+          859.5
+        ],
+        "footprintPolygon": [
+          [
+            409.5,
+            856.5
+          ],
+          [
+            406.5,
+            859.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              409.5,
+              856.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              406.5,
+              859.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0413"
+      ],
+      "sortPoint": [
+        406.5,
+        859.5
+      ],
+      "zBias": -100,
+      "zSortKey": 759.5,
+      "renderOrder": 36
+    },
+    {
+      "id": "D05-road-run-22",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        402,
+        856.5
+      ],
+      "masterFootprint": [
+        [
+          397.5,
+          853.5
+        ],
+        [
+          406.5,
+          859.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 859.5,
+        "sortPoint": [
+          406.5,
+          859.5
+        ],
+        "footprintPolygon": [
+          [
+            397.5,
+            853.5
+          ],
+          [
+            406.5,
+            859.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              397.5,
+              853.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              406.5,
+              859.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "G0015"
+      ],
+      "sortPoint": [
+        406.5,
+        859.5
+      ],
+      "zBias": -100,
+      "zSortKey": 759.5,
+      "renderOrder": 37
+    },
+    {
+      "id": "D05-road-run-12",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        411,
+        858
+      ],
+      "masterFootprint": [
+        [
+          409.5,
+          856.5
+        ],
+        [
+          412.5,
+          859.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 859.5,
+        "sortPoint": [
+          412.5,
+          859.5
+        ],
+        "footprintPolygon": [
+          [
+            409.5,
+            856.5
+          ],
+          [
+            412.5,
+            859.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              409.5,
+              856.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              412.5,
+              859.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0414"
+      ],
+      "sortPoint": [
+        412.5,
+        859.5
+      ],
+      "zBias": -100,
+      "zSortKey": 759.5,
+      "renderOrder": 38
+    },
+    {
+      "id": "D05-road-run-13",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        408,
+        861
+      ],
+      "masterFootprint": [
+        [
+          406.5,
+          859.5
+        ],
+        [
+          409.5,
+          862.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 862.5,
+        "sortPoint": [
+          409.5,
+          862.5
+        ],
+        "footprintPolygon": [
+          [
+            406.5,
+            859.5
+          ],
+          [
+            409.5,
+            862.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              406.5,
+              859.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              409.5,
+              862.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0417"
+      ],
+      "sortPoint": [
+        409.5,
+        862.5
+      ],
+      "zBias": -100,
+      "zSortKey": 762.5,
+      "renderOrder": 39
+    },
+    {
+      "id": "D05-road-run-14",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        411,
+        861
+      ],
+      "masterFootprint": [
+        [
+          412.5,
+          859.5
+        ],
+        [
+          409.5,
+          862.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 862.5,
+        "sortPoint": [
+          409.5,
+          862.5
+        ],
+        "footprintPolygon": [
+          [
+            412.5,
+            859.5
+          ],
+          [
+            409.5,
+            862.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              412.5,
+              859.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              409.5,
+              862.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0419"
+      ],
+      "sortPoint": [
+        409.5,
+        862.5
+      ],
+      "zBias": -100,
+      "zSortKey": 762.5,
+      "renderOrder": 40
+    },
+    {
+      "id": "building-structure-118",
+      "family": "building",
+      "class": "compact",
+      "assetId": "placeholder-compact",
+      "namedSkill": null,
+      "masterAnchor": [
+        370.0769230769231,
+        768.9230769230769
+      ],
+      "placementAnchor": [
+        370.0769230769231,
+        768.9230769230769
+      ],
+      "masterFootprint": [
+        [
+          366,
+          764
+        ],
+        [
+          376,
+          764
+        ],
+        [
+          376,
+          774
+        ],
+        [
+          366,
+          774
+        ]
+      ],
+      "terraceMode": "level-pad",
+      "socket": {
+        "baselineY": 774,
+        "sortPoint": [
+          371,
+          774
+        ],
+        "footprintPolygon": [
+          [
+            366,
+            764
+          ],
+          [
+            376,
+            764
+          ],
+          [
+            376,
+            774
+          ],
+          [
+            366,
+            774
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        371,
+        774
+      ],
+      "zBias": 0,
+      "zSortKey": 774,
+      "renderOrder": 41
+    },
+    {
+      "id": "D05-stairs-run-04",
+      "family": "circulation",
+      "class": "stair-run",
+      "assetId": "placeholder-stair",
+      "kind": "stairs",
+      "masterAnchor": [
+        454.5,
+        865.5
+      ],
+      "masterFootprint": [
+        [
+          454.5,
+          856.5
+        ],
+        [
+          454.5,
+          874.5
+        ]
+      ],
+      "stairBandTransition": {
+        "start": {
+          "id": "D05-band-04",
+          "index": 4,
+          "sourceDistance": 307.234
+        },
+        "end": {
+          "id": "D05-band-03",
+          "index": 3,
+          "sourceDistance": 321.183
+        },
+        "inferredFromTwoDimensionalTrace": true
+      },
+      "terraceMode": "cross-band",
+      "socket": {
+        "baselineY": 874.5,
+        "sortPoint": [
+          454.5,
+          874.5
+        ],
+        "footprintPolygon": [
+          [
+            454.5,
+            856.5
+          ],
+          [
+            454.5,
+            874.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "stair",
+            "point": [
+              454.5,
+              856.5
+            ],
+            "widthMasterPx": 32.43,
+            "bandOffset": 4
+          },
+          {
+            "id": "end",
+            "kind": "stair",
+            "point": [
+              454.5,
+              874.5
+            ],
+            "widthMasterPx": 32.43,
+            "bandOffset": 3
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0415"
+      ],
+      "sortPoint": [
+        454.5,
+        874.5
+      ],
+      "zBias": -100,
+      "zSortKey": 774.5,
+      "renderOrder": 42
+    },
+    {
+      "id": "D05-road-run-26",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        450,
+        880.5
+      ],
+      "masterFootprint": [
+        [
+          454.5,
+          874.5
+        ],
+        [
+          445.5,
+          886.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 886.5,
+        "sortPoint": [
+          445.5,
+          886.5
+        ],
+        "footprintPolygon": [
+          [
+            454.5,
+            874.5
+          ],
+          [
+            445.5,
+            886.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              454.5,
+              874.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              445.5,
+              886.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "I0024"
+      ],
+      "sortPoint": [
+        445.5,
+        886.5
+      ],
+      "zBias": -100,
+      "zSortKey": 786.5,
+      "renderOrder": 43
+    },
+    {
+      "id": "D05-road-run-15",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        472.5,
+        886.5
+      ],
+      "masterFootprint": [
+        [
+          466.5,
+          886.5
+        ],
+        [
+          478.5,
+          886.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 886.5,
+        "sortPoint": [
+          466.5,
+          886.5
+        ],
+        "footprintPolygon": [
+          [
+            466.5,
+            886.5
+          ],
+          [
+            478.5,
+            886.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              466.5,
+              886.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              478.5,
+              886.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0446"
+      ],
+      "sortPoint": [
+        466.5,
+        886.5
+      ],
+      "zBias": -100,
+      "zSortKey": 786.5,
+      "renderOrder": 44
+    },
+    {
+      "id": "D05-road-run-27",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        438,
+        874.5
+      ],
+      "masterFootprint": [
+        [
+          409.5,
+          862.5
+        ],
+        [
+          438,
+          874.5
+        ],
+        [
+          466.5,
+          886.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 886.5,
+        "sortPoint": [
+          466.5,
+          886.5
+        ],
+        "footprintPolygon": [
+          [
+            409.5,
+            862.5
+          ],
+          [
+            438,
+            874.5
+          ],
+          [
+            466.5,
+            886.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              409.5,
+              862.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              466.5,
+              886.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "I0029"
+      ],
+      "sortPoint": [
+        466.5,
+        886.5
+      ],
+      "zBias": -100,
+      "zSortKey": 786.5,
+      "renderOrder": 45
+    },
+    {
+      "id": "D05-road-run-16",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        426,
+        892.5
+      ],
+      "masterFootprint": [
+        [
+          418.5,
+          892.5
+        ],
+        [
+          433.5,
+          892.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 892.5,
+        "sortPoint": [
+          418.5,
+          892.5
+        ],
+        "footprintPolygon": [
+          [
+            418.5,
+            892.5
+          ],
+          [
+            433.5,
+            892.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              418.5,
+              892.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              433.5,
+              892.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0451"
+      ],
+      "sortPoint": [
+        418.5,
+        892.5
+      ],
+      "zBias": -100,
+      "zSortKey": 792.5,
+      "renderOrder": 46
+    },
+    {
+      "id": "D05-stairs-run-05",
+      "family": "circulation",
+      "class": "stair-run",
+      "assetId": "placeholder-stair",
+      "kind": "stairs",
+      "masterAnchor": [
+        442.5,
+        892.5
+      ],
+      "masterFootprint": [
+        [
+          445.5,
+          886.5
+        ],
+        [
+          439.5,
+          898.5
+        ]
+      ],
+      "stairBandTransition": {
+        "start": {
+          "id": "D05-band-04",
+          "index": 4,
+          "sourceDistance": 325.377
+        },
+        "end": {
+          "id": "D05-band-03",
+          "index": 3,
+          "sourceDistance": 331.85
+        },
+        "inferredFromTwoDimensionalTrace": true
+      },
+      "terraceMode": "cross-band",
+      "socket": {
+        "baselineY": 898.5,
+        "sortPoint": [
+          439.5,
+          898.5
+        ],
+        "footprintPolygon": [
+          [
+            445.5,
+            886.5
+          ],
+          [
+            439.5,
+            898.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "stair",
+            "point": [
+              445.5,
+              886.5
+            ],
+            "widthMasterPx": 32.43,
+            "bandOffset": 4
+          },
+          {
+            "id": "end",
+            "kind": "stair",
+            "point": [
+              439.5,
+              898.5
+            ],
+            "widthMasterPx": 32.43,
+            "bandOffset": 3
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0445"
+      ],
+      "sortPoint": [
+        439.5,
+        898.5
+      ],
+      "zBias": -100,
+      "zSortKey": 798.5,
+      "renderOrder": 47
+    },
+    {
+      "id": "building-structure-026",
+      "family": "building",
+      "class": "large",
+      "assetId": "placeholder-large",
+      "namedSkill": null,
+      "masterAnchor": [
+        275.1294117647059,
+        828.1058823529412
+      ],
+      "placementAnchor": [
+        275.1294117647059,
+        828.1058823529412
+      ],
+      "masterFootprint": [
+        [
+          265,
+          820
+        ],
+        [
+          286,
+          820
+        ],
+        [
+          286,
+          836
+        ],
+        [
+          265,
+          836
+        ]
+      ],
+      "terraceMode": "level-pad",
+      "socket": {
+        "baselineY": 836,
+        "sortPoint": [
+          275.5,
+          836
+        ],
+        "footprintPolygon": [
+          [
+            265,
+            820
+          ],
+          [
+            286,
+            820
+          ],
+          [
+            286,
+            836
+          ],
+          [
+            265,
+            836
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        275.5,
+        836
+      ],
+      "zBias": 0,
+      "zSortKey": 836,
+      "renderOrder": 48
+    },
+    {
+      "id": "building-structure-120",
+      "family": "building",
+      "class": "named",
+      "assetId": "placeholder-s10",
+      "namedSkill": {
+        "id": "S10",
+        "name": "Databricks Works",
+        "registeredNodeId": "primary-databricks-works",
+        "registrationAnchor": [
+          187,
+          834
+        ],
+        "nearestFootprintId": "structure-120",
+        "anchorToNearestFootprintDistance": 47.163
+      },
+      "masterAnchor": [
+        187,
+        834
+      ],
+      "placementAnchor": [
+        187,
+        834
+      ],
+      "masterFootprint": [
+        [
+          182.733,
+          829.4
+        ],
+        [
+          192.733,
+          829.4
+        ],
+        [
+          192.733,
+          839.4
+        ],
+        [
+          182.733,
+          839.4
+        ]
+      ],
+      "terraceMode": "level-pad",
+      "socket": {
+        "baselineY": 839.4,
+        "sortPoint": [
+          187.733,
+          839.4
+        ],
+        "footprintPolygon": [
+          [
+            154,
+            792
+          ],
+          [
+            164,
+            792
+          ],
+          [
+            164,
+            802
+          ],
+          [
+            154,
+            802
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        187.733,
+        839.4
+      ],
+      "zBias": 0,
+      "zSortKey": 839.4,
+      "renderOrder": 49
+    },
+    {
+      "id": "building-structure-007",
+      "family": "building",
+      "class": "large",
+      "assetId": "placeholder-large",
+      "namedSkill": null,
+      "masterAnchor": [
+        79.06521739130434,
+        829.8586956521739
+      ],
+      "placementAnchor": [
+        79.06521739130434,
+        829.8586956521739
+      ],
+      "masterFootprint": [
+        [
+          68,
+          814
+        ],
+        [
+          91,
+          814
+        ],
+        [
+          91,
+          841
+        ],
+        [
+          68,
+          841
+        ]
+      ],
+      "terraceMode": "level-pad",
+      "socket": {
+        "baselineY": 841,
+        "sortPoint": [
+          79.5,
+          841
+        ],
+        "footprintPolygon": [
+          [
+            68,
+            814
+          ],
+          [
+            91,
+            814
+          ],
+          [
+            91,
+            841
+          ],
+          [
+            68,
+            841
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        79.5,
+        841
+      ],
+      "zBias": 0,
+      "zSortKey": 841,
+      "renderOrder": 50
+    },
+    {
+      "id": "D05-stairs-run-06",
+      "family": "circulation",
+      "class": "stair-run",
+      "assetId": "placeholder-stair",
+      "kind": "stairs",
+      "masterAnchor": [
+        496.5,
+        945
+      ],
+      "masterFootprint": [
+        [
+          499.5,
+          934.5
+        ],
+        [
+          493.5,
+          955.5
+        ]
+      ],
+      "stairBandTransition": {
+        "start": {
+          "id": "D05-band-04",
+          "index": 4,
+          "sourceDistance": 396.167
+        },
+        "end": {
+          "id": "D05-band-03",
+          "index": 3,
+          "sourceDistance": 409.425
+        },
+        "inferredFromTwoDimensionalTrace": true
+      },
+      "terraceMode": "cross-band",
+      "socket": {
+        "baselineY": 955.5,
+        "sortPoint": [
+          493.5,
+          955.5
+        ],
+        "footprintPolygon": [
+          [
+            499.5,
+            934.5
+          ],
+          [
+            493.5,
+            955.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "stair",
+            "point": [
+              499.5,
+              934.5
+            ],
+            "widthMasterPx": 32.43,
+            "bandOffset": 4
+          },
+          {
+            "id": "end",
+            "kind": "stair",
+            "point": [
+              493.5,
+              955.5
+            ],
+            "widthMasterPx": 32.43,
+            "bandOffset": 3
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0481"
+      ],
+      "sortPoint": [
+        493.5,
+        955.5
+      ],
+      "zBias": -100,
+      "zSortKey": 855.5,
+      "renderOrder": 51
+    },
+    {
+      "id": "building-structure-060",
+      "family": "building",
+      "class": "named",
+      "assetId": "placeholder-s01",
+      "namedSkill": {
+        "id": "S01",
+        "name": "Golang Foundry",
+        "registeredNodeId": "primary-golang-foundry",
+        "registrationAnchor": [
+          490,
+          878
+        ],
+        "nearestFootprintId": "structure-060",
+        "anchorToNearestFootprintDistance": 146.213
+      },
+      "masterAnchor": [
+        490,
+        878
+      ],
+      "placementAnchor": [
+        490,
+        878
+      ],
+      "masterFootprint": [
+        [
+          484.5,
+          872.795
+        ],
+        [
+          495.5,
+          872.795
+        ],
+        [
+          495.5,
+          883.795
+        ],
+        [
+          484.5,
+          883.795
+        ]
+      ],
+      "terraceMode": "level-pad",
+      "socket": {
+        "baselineY": 883.795,
+        "sortPoint": [
+          490,
+          883.795
+        ],
+        "footprintPolygon": [
+          [
+            345,
+            829
+          ],
+          [
+            356,
+            829
+          ],
+          [
+            356,
+            840
+          ],
+          [
+            345,
+            840
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        490,
+        883.795
+      ],
+      "zBias": 0,
+      "zSortKey": 883.795,
+      "renderOrder": 52
+    },
+    {
+      "id": "D05-stairs-run-08",
+      "family": "circulation",
+      "class": "stair-run",
+      "assetId": "placeholder-stair",
+      "kind": "stairs",
+      "masterAnchor": [
+        315,
+        1009.5
+      ],
+      "masterFootprint": [
+        [
+          313.5,
+          1006.5
+        ],
+        [
+          316.5,
+          1012.5
+        ]
+      ],
+      "stairBandTransition": {
+        "start": {
+          "id": "D05-band-04",
+          "index": 4,
+          "sourceDistance": 388.776
+        },
+        "end": {
+          "id": "D05-band-03",
+          "index": 3,
+          "sourceDistance": 395.159
+        },
+        "inferredFromTwoDimensionalTrace": true
+      },
+      "terraceMode": "cross-band",
+      "socket": {
+        "baselineY": 1012.5,
+        "sortPoint": [
+          316.5,
+          1012.5
+        ],
+        "footprintPolygon": [
+          [
+            313.5,
+            1006.5
+          ],
+          [
+            316.5,
+            1012.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "stair",
+            "point": [
+              313.5,
+              1006.5
+            ],
+            "widthMasterPx": 32.43,
+            "bandOffset": 4
+          },
+          {
+            "id": "end",
+            "kind": "stair",
+            "point": [
+              316.5,
+              1012.5
+            ],
+            "widthMasterPx": 32.43,
+            "bandOffset": 3
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0512"
+      ],
+      "sortPoint": [
+        316.5,
+        1012.5
+      ],
+      "zBias": -100,
+      "zSortKey": 912.5,
+      "renderOrder": 53
+    },
+    {
+      "id": "D05-stairs-run-07",
+      "family": "circulation",
+      "class": "stair-run",
+      "assetId": "placeholder-stair",
+      "kind": "stairs",
+      "masterAnchor": [
+        468,
+        1008
+      ],
+      "masterFootprint": [
+        [
+          463.5,
+          1000.5
+        ],
+        [
+          472.5,
+          1015.5
+        ]
+      ],
+      "stairBandTransition": {
+        "start": {
+          "id": "D05-band-04",
+          "index": 4,
+          "sourceDistance": 431.646
+        },
+        "end": {
+          "id": "D05-band-03",
+          "index": 3,
+          "sourceDistance": 449.126
+        },
+        "inferredFromTwoDimensionalTrace": true
+      },
+      "terraceMode": "cross-band",
+      "socket": {
+        "baselineY": 1015.5,
+        "sortPoint": [
+          472.5,
+          1015.5
+        ],
+        "footprintPolygon": [
+          [
+            463.5,
+            1000.5
+          ],
+          [
+            472.5,
+            1015.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "stair",
+            "point": [
+              463.5,
+              1000.5
+            ],
+            "widthMasterPx": 32.43,
+            "bandOffset": 4
+          },
+          {
+            "id": "end",
+            "kind": "stair",
+            "point": [
+              472.5,
+              1015.5
+            ],
+            "widthMasterPx": 32.43,
+            "bandOffset": 3
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0510"
+      ],
+      "sortPoint": [
+        472.5,
+        1015.5
+      ],
+      "zBias": -100,
+      "zSortKey": 915.5,
+      "renderOrder": 54
+    },
+    {
+      "id": "D05-road-run-17",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        349.5,
+        1017
+      ],
+      "masterFootprint": [
+        [
+          358.5,
+          1015.5
+        ],
+        [
+          340.5,
+          1018.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 1018.5,
+        "sortPoint": [
+          340.5,
+          1018.5
+        ],
+        "footprintPolygon": [
+          [
+            358.5,
+            1015.5
+          ],
+          [
+            340.5,
+            1018.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              358.5,
+              1015.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              340.5,
+              1018.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0514"
+      ],
+      "sortPoint": [
+        340.5,
+        1018.5
+      ],
+      "zBias": -100,
+      "zSortKey": 918.5,
+      "renderOrder": 55
+    },
+    {
+      "id": "D05-road-run-18",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        309,
+        1020
+      ],
+      "masterFootprint": [
+        [
+          307.5,
+          1018.5
+        ],
+        [
+          310.5,
+          1021.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 1021.5,
+        "sortPoint": [
+          310.5,
+          1021.5
+        ],
+        "footprintPolygon": [
+          [
+            307.5,
+            1018.5
+          ],
+          [
+            310.5,
+            1021.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              307.5,
+              1018.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              310.5,
+              1021.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0517"
+      ],
+      "sortPoint": [
+        310.5,
+        1021.5
+      ],
+      "zBias": -100,
+      "zSortKey": 921.5,
+      "renderOrder": 56
+    },
+    {
+      "id": "D05-stairs-run-09",
+      "family": "circulation",
+      "class": "stair-run",
+      "assetId": "placeholder-stair",
+      "kind": "stairs",
+      "masterAnchor": [
+        553.5,
+        1021.5
+      ],
+      "masterFootprint": [
+        [
+          553.5,
+          1015.5
+        ],
+        [
+          553.5,
+          1027.5
+        ]
+      ],
+      "stairBandTransition": {
+        "start": {
+          "id": "D05-band-04",
+          "index": 4,
+          "sourceDistance": 493.304
+        },
+        "end": {
+          "id": "D05-band-03",
+          "index": 3,
+          "sourceDistance": 502.928
+        },
+        "inferredFromTwoDimensionalTrace": true
+      },
+      "terraceMode": "cross-band",
+      "socket": {
+        "baselineY": 1027.5,
+        "sortPoint": [
+          553.5,
+          1027.5
+        ],
+        "footprintPolygon": [
+          [
+            553.5,
+            1015.5
+          ],
+          [
+            553.5,
+            1027.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "stair",
+            "point": [
+              553.5,
+              1015.5
+            ],
+            "widthMasterPx": 32.43,
+            "bandOffset": 4
+          },
+          {
+            "id": "end",
+            "kind": "stair",
+            "point": [
+              553.5,
+              1027.5
+            ],
+            "widthMasterPx": 32.43,
+            "bandOffset": 3
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0516"
+      ],
+      "sortPoint": [
+        553.5,
+        1027.5
+      ],
+      "zBias": -100,
+      "zSortKey": 927.5,
+      "renderOrder": 57
+    },
+    {
+      "id": "D05-road-run-19",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        541.5,
+        1029
+      ],
+      "masterFootprint": [
+        [
+          535.5,
+          1027.5
+        ],
+        [
+          547.5,
+          1030.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 1030.5,
+        "sortPoint": [
+          547.5,
+          1030.5
+        ],
+        "footprintPolygon": [
+          [
+            535.5,
+            1027.5
+          ],
+          [
+            547.5,
+            1030.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              535.5,
+              1027.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              547.5,
+              1030.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0521"
+      ],
+      "sortPoint": [
+        547.5,
+        1030.5
+      ],
+      "zBias": -100,
+      "zSortKey": 930.5,
+      "renderOrder": 58
+    },
+    {
+      "id": "D05-road-run-24",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        556.5,
+        1030.5
+      ],
+      "masterFootprint": [
+        [
+          547.5,
+          1030.5
+        ],
+        [
+          565.5,
+          1030.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 1030.5,
+        "sortPoint": [
+          547.5,
+          1030.5
+        ],
+        "footprintPolygon": [
+          [
+            547.5,
+            1030.5
+          ],
+          [
+            565.5,
+            1030.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              547.5,
+              1030.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              565.5,
+              1030.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "I0008"
+      ],
+      "sortPoint": [
+        547.5,
+        1030.5
+      ],
+      "zBias": -100,
+      "zSortKey": 930.5,
+      "renderOrder": 59
+    },
+    {
+      "id": "D05-road-run-20",
+      "family": "circulation",
+      "class": "road-run",
+      "assetId": "placeholder-road",
+      "kind": "road",
+      "masterAnchor": [
+        576,
+        1029
+      ],
+      "masterFootprint": [
+        [
+          586.5,
+          1027.5
+        ],
+        [
+          565.5,
+          1030.5
+        ]
+      ],
+      "terraceMode": "contour-follow",
+      "socket": {
+        "baselineY": 1030.5,
+        "sortPoint": [
+          565.5,
+          1030.5
+        ],
+        "footprintPolygon": [
+          [
+            586.5,
+            1027.5
+          ],
+          [
+            565.5,
+            1030.5
+          ]
+        ],
+        "connectionSockets": [
+          {
+            "id": "start",
+            "kind": "road",
+            "point": [
+              586.5,
+              1027.5
+            ],
+            "widthMasterPx": 32.43
+          },
+          {
+            "id": "end",
+            "kind": "road",
+            "point": [
+              565.5,
+              1030.5
+            ],
+            "widthMasterPx": 32.43
+          }
+        ]
+      },
+      "widthMasterPx": 32.43,
+      "sourceEdgeIds": [
+        "E0523"
+      ],
+      "sortPoint": [
+        565.5,
+        1030.5
+      ],
+      "zBias": -100,
+      "zSortKey": 930.5,
+      "renderOrder": 60
+    },
+    {
+      "id": "building-structure-013",
+      "family": "building",
+      "class": "large",
+      "assetId": "placeholder-large",
+      "namedSkill": null,
+      "masterAnchor": [
+        302.0412371134021,
+        942.9381443298969
+      ],
+      "placementAnchor": [
+        302.0412371134021,
+        942.9381443298969
+      ],
+      "masterFootprint": [
+        [
+          292,
+          932
+        ],
+        [
+          317,
+          932
+        ],
+        [
+          317,
+          953
+        ],
+        [
+          292,
+          953
+        ]
+      ],
+      "terraceMode": "level-pad",
+      "socket": {
+        "baselineY": 953,
+        "sortPoint": [
+          304.5,
+          953
+        ],
+        "footprintPolygon": [
+          [
+            292,
+            932
+          ],
+          [
+            317,
+            932
+          ],
+          [
+            317,
+            953
+          ],
+          [
+            292,
+            953
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        304.5,
+        953
+      ],
+      "zBias": 0,
+      "zSortKey": 953,
+      "renderOrder": 61
+    },
+    {
+      "id": "building-structure-132",
+      "family": "building",
+      "class": "compact",
+      "assetId": "placeholder-compact",
+      "namedSkill": null,
+      "masterAnchor": [
+        246.71428571428572,
+        962.5714285714286
+      ],
+      "placementAnchor": [
+        246.71428571428572,
+        962.5714285714286
+      ],
+      "masterFootprint": [
+        [
+          242.5,
+          958
+        ],
+        [
+          252.5,
+          958
+        ],
+        [
+          252.5,
+          968
+        ],
+        [
+          242.5,
+          968
+        ]
+      ],
+      "terraceMode": "level-pad",
+      "socket": {
+        "baselineY": 968,
+        "sortPoint": [
+          247.5,
+          968
+        ],
+        "footprintPolygon": [
+          [
+            242.5,
+            958
+          ],
+          [
+            252.5,
+            958
+          ],
+          [
+            252.5,
+            968
+          ],
+          [
+            242.5,
+            968
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        247.5,
+        968
+      ],
+      "zBias": 0,
+      "zSortKey": 968,
+      "renderOrder": 62
+    },
+    {
+      "id": "building-structure-121",
+      "family": "building",
+      "class": "named",
+      "assetId": "placeholder-s18",
+      "namedSkill": {
+        "id": "S18",
+        "name": "Tool Generation Wheelworks",
+        "registeredNodeId": "primary-tool-generation-wheelworks",
+        "registrationAnchor": [
+          530,
+          971
+        ],
+        "nearestFootprintId": "structure-121",
+        "anchorToNearestFootprintDistance": 220.656
+      },
+      "masterAnchor": [
+        530,
+        971
+      ],
+      "placementAnchor": [
+        530,
+        971
+      ],
+      "masterFootprint": [
+        [
+          524.974,
+          966.579
+        ],
+        [
+          534.974,
+          966.579
+        ],
+        [
+          534.974,
+          976.579
+        ],
+        [
+          524.974,
+          976.579
+        ]
+      ],
+      "terraceMode": "level-pad",
+      "socket": {
+        "baselineY": 976.579,
+        "sortPoint": [
+          529.974,
+          976.579
+        ],
+        "footprintPolygon": [
+          [
+            369.5,
+            810
+          ],
+          [
+            379.5,
+            810
+          ],
+          [
+            379.5,
+            820
+          ],
+          [
+            369.5,
+            820
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        529.974,
+        976.579
+      ],
+      "zBias": 0,
+      "zSortKey": 976.579,
+      "renderOrder": 63
+    },
+    {
+      "id": "building-structure-039",
+      "family": "building",
+      "class": "named",
+      "assetId": "placeholder-s11",
+      "namedSkill": {
+        "id": "S11",
+        "name": "Docker Warehouse",
+        "registeredNodeId": "primary-docker-warehouse",
+        "registrationAnchor": [
+          603,
+          971
+        ],
+        "nearestFootprintId": "structure-039",
+        "anchorToNearestFootprintDistance": 299.738
+      },
+      "masterAnchor": [
+        603,
+        971
+      ],
+      "placementAnchor": [
+        603,
+        971
+      ],
+      "masterFootprint": [
+        [
+          597,
+          963.781
+        ],
+        [
+          609,
+          963.781
+        ],
+        [
+          609,
+          980.781
+        ],
+        [
+          597,
+          980.781
+        ]
+      ],
+      "terraceMode": "level-pad",
+      "socket": {
+        "baselineY": 980.781,
+        "sortPoint": [
+          603,
+          980.781
+        ],
+        "footprintPolygon": [
+          [
+            307,
+            888
+          ],
+          [
+            319,
+            888
+          ],
+          [
+            319,
+            905
+          ],
+          [
+            307,
+            905
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        603,
+        980.781
+      ],
+      "zBias": 0,
+      "zSortKey": 980.781,
+      "renderOrder": 64
+    },
+    {
+      "id": "building-structure-134",
+      "family": "building",
+      "class": "compact",
+      "assetId": "placeholder-compact",
+      "namedSkill": null,
+      "masterAnchor": [
+        227.875,
+        991
+      ],
+      "placementAnchor": [
+        227.875,
+        991
+      ],
+      "masterFootprint": [
+        [
+          224,
+          986.5
+        ],
+        [
+          234,
+          986.5
+        ],
+        [
+          234,
+          996.5
+        ],
+        [
+          224,
+          996.5
+        ]
+      ],
+      "terraceMode": "level-pad",
+      "socket": {
+        "baselineY": 996.5,
+        "sortPoint": [
+          229,
+          996.5
+        ],
+        "footprintPolygon": [
+          [
+            224,
+            986.5
+          ],
+          [
+            234,
+            986.5
+          ],
+          [
+            234,
+            996.5
+          ],
+          [
+            224,
+            996.5
+          ]
+        ],
+        "connectionSockets": []
+      },
+      "sortPoint": [
+        229,
+        996.5
+      ],
+      "zBias": 0,
+      "zSortKey": 996.5,
+      "renderOrder": 65
+    }
+  ],
+  "statistics": {
+    "buildingCounts": {
+      "large": 5,
+      "standard": 5,
+      "named": 5,
+      "compact": 10
+    },
+    "circulationRunCounts": {
+      "road": 28,
+      "stairs": 9
+    },
+    "zSort": {
+      "placementCount": 66,
+      "violations": 0
+    },
+    "stairBandAssignmentsInferredFromTwoDimensionalTrace": 9,
+    "namedAnchorToNearestFootprintDisplacements": [
+      {
+        "id": "S11",
+        "nearestFootprintId": "structure-039",
+        "distance": 299.738
+      },
+      {
+        "id": "S01",
+        "nearestFootprintId": "structure-060",
+        "distance": 146.213
+      },
+      {
+        "id": "S15",
+        "nearestFootprintId": "structure-116",
+        "distance": 40.042
+      },
+      {
+        "id": "S10",
+        "nearestFootprintId": "structure-120",
+        "distance": 47.163
+      },
+      {
+        "id": "S18",
+        "nearestFootprintId": "structure-121",
+        "distance": 220.656
+      }
+    ]
+  }
+}

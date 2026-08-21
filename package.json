@@ -18,6 +18,8 @@
     "build:ninjaone-capital-city-r3": "node scripts/build-ninjaone-capital-city-r3.mjs",
     "build:ninjaone-city-grammar": "node scripts/build-ninjaone-city-grammar-r3.mjs",
     "check:ninjaone-city-grammar": "node scripts/build-ninjaone-city-grammar-r3.mjs --check",
+    "build:ninjaone-city-composer": "node scripts/build-ninjaone-city-composer-r1.mjs",
+    "check:ninjaone-city-composer": "node scripts/build-ninjaone-city-composer-r1.mjs --check",
     "build:ninjaone-capital-city-representations": "node scripts/build-ninjaone-capital-city-representations-r1.mjs",
     "build:ninjaone-capital-d06-proof": "node scripts/build-ninjaone-capital-d06-proof-r1.mjs",
     "capture:ninjaone-environment-mvp": "node scripts/capture-ninjaone-environment-mvp.mjs",
