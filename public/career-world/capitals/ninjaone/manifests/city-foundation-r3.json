@@ -668,9 +668,9 @@
       }
     },
     {
-      "id": "I21",
+      "id": "I24",
       "layerId": "L4_2",
-      "role": "open-undercroft-site-close-station",
+      "role": "cliff-registered-undercroft-site-close-station",
       "tiers": [
         "site",
         "close"
@@ -692,9 +692,9 @@
           1448,
           1086
         ],
-        "encodedBytes": 1668921,
-        "path": "/career-world/capitals/ninjaone/city-r3/station/I21-station-undercroft-open-r1-alpha.png",
-        "sha256": "58ad954173f51d210f4696aed7c05f26258941f1b5d1098e3ddeff38518cdb70"
+        "encodedBytes": 1595094,
+        "path": "/career-world/capitals/ninjaone/city-r3/station/I24-station-cliff-registered-undercroft-r1-alpha.png",
+        "sha256": "7344259d23a979bc697073c71fde2cb94eaa6fa60da9b10dfd3604780ad9ad85"
       }
     }
   ],

@@ -164,7 +164,7 @@ const outputs = Object.freeze({
   ),
   stationSiteClose: path.join(
     outputRoot,
-    "station/I21-station-undercroft-open-r1-alpha.png",
+    "station/I24-station-cliff-registered-undercroft-r1-alpha.png",
   ),
   waterRegistrationMask: path.join(
     outputRoot,
@@ -1504,9 +1504,9 @@ const manifest = {
       asset: await artifact(outputs.stationCapital),
     },
     {
-      id: "I21",
+      id: "I24",
       layerId: "L4_2",
-      role: "open-undercroft-site-close-station",
+      role: "cliff-registered-undercroft-site-close-station",
       tiers: ["site", "close"],
       placement: { anchor: [1056.5, 1086], baseSize: [783, 587], scale: 0.72 },
       asset: await artifact(outputs.stationSiteClose),

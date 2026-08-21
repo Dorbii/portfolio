@@ -79,7 +79,7 @@ test("r3 foundation publishes a registered water-safe capital cohort", () => {
     "D05L03",
     "D05L04",
     "I20",
-    "I21",
+    "I24",
     "LFX06",
     "S14D04",
     "WFX01",
@@ -1174,27 +1174,47 @@ test("the rejected LFX01 rear-cliff candidate is not mounted at runtime", async 
   assert.doesNotMatch(rendererSource, /LFX01|upper-capital-rear-cliff-transition-r1-alpha/);
 });
 
-test("station LoD promotes train-free I20 and open-undercroft I21 without the rejected baked-foliage I17", async () => {
+test("station LoD promotes train-free I20 and cliff-registered I24 without rejected I17/I21 runtime assets", async () => {
   const rendererSource = await readFile(new URL(
     "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
     import.meta.url,
   ), "utf8");
   assert.match(rendererSource, /tier === "capital"\s*\? D06_CAPITAL_REVIEW_BASE/);
   assert.match(rendererSource, /NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS\.I20\.asset\.path/);
-  assert.match(rendererSource, /NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS\.I21\.asset\.path/);
-  assert.doesNotMatch(rendererSource, /I17|station-close-civic-overlay/);
+  assert.match(rendererSource, /NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS\.I24\.asset\.path/);
+  assert.doesNotMatch(rendererSource, /I17|I21|station-close-civic-overlay/);
   assert.equal(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I17, undefined);
+  assert.equal(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I21, undefined);
   assert.doesNotMatch(rendererSource, /I18-station-site-base-no-train-r1-alpha\.png/);
-  assert.deepEqual(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I21.placement, {
+  assert.deepEqual(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I24.placement, {
     anchor: [1056.5, 1086],
     baseSize: [783, 587],
     scale: 0.72,
   });
-  const [capital, capitalSource, siteClose, siteCloseSource] = await Promise.all([
+  const redesignRoi = [
+    [[0, 408], [500, 535], [650, 680], [620, 790], [70, 620], [0, 525]],
+    [[500, 535], [1325, 765], [1310, 905], [1140, 985], [620, 790]],
+  ];
+  const insidePolygon = (x, y, polygon) => {
+    let inside = false;
+    for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index, index += 1) {
+      const [currentX, currentY] = polygon[index];
+      const [previousX, previousY] = polygon[previous];
+      const intersects = ((currentY > y) !== (previousY > y))
+        && (x < (previousX - currentX) * (y - currentY) / (previousY - currentY) + currentX);
+      if (intersects) inside = !inside;
+    }
+    return inside;
+  };
+  const insideRedesignRoi = (x, y) => redesignRoi.some(
+    (polygon) => insidePolygon(x + 0.5, y + 0.5, polygon),
+  );
+  const [capital, capitalSource, siteClose, siteCloseSource, stationRail] = await Promise.all([
     rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I20.asset.path),
     rgba("/career-world/capitals/ninjaone/city-nodes-r2/capital/infrastructure/I13-station-capital-cluster-r1-alpha.png"),
-    rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I21.asset.path),
-    rgba("/career-world/capitals/ninjaone/city-r3/_review/I18-station-site-base-no-train-r1-alpha.png"),
+    rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I24.asset.path),
+    rgba("/career-world/capitals/ninjaone/city-r3/station/I21-station-undercroft-open-r1-alpha.png"),
+    grayscale("../art-source/career-world/ninjaone-capital/city-r3/districts/D06-station-rail-mask.png"),
   ]);
   assert.deepEqual([capital.info.width, capital.info.height], [384, 191]);
   assert.deepEqual([siteClose.info.width, siteClose.info.height], [1448, 1086]);
@@ -1202,6 +1222,10 @@ test("station LoD promotes train-free I20 and open-undercroft I21 without the re
   let capitalAlphaDifferences = 0;
   let siteCloseAlphaExpansion = 0;
   let siteCloseAlphaReduction = 0;
+  let siteCloseOutsideRedesignDifferences = 0;
+  let siteCloseProtectedRailDifferences = 0;
+  let siteCloseRetainedRgbDifferences = 0;
+  let siteCloseNewTransparentRgbViolations = 0;
   for (let index = 0; index < capital.info.width * capital.info.height; index += 1) {
     if (capital.data[index * 4 + 3] !== capitalSource.data[index * 4 + 3]) {
       capitalAlphaDifferences += 1;
@@ -1210,14 +1234,36 @@ test("station LoD promotes train-free I20 and open-undercroft I21 without the re
   for (let index = 0; index < siteClose.info.width * siteClose.info.height; index += 1) {
     const candidateAlpha = siteClose.data[index * 4 + 3];
     const sourceAlpha = siteCloseSource.data[index * 4 + 3];
+    const x = index % siteClose.info.width;
+    const y = Math.floor(index / siteClose.info.width);
+    const rgbChanged = siteClose.data[index * 4] !== siteCloseSource.data[index * 4]
+      || siteClose.data[index * 4 + 1] !== siteCloseSource.data[index * 4 + 1]
+      || siteClose.data[index * 4 + 2] !== siteCloseSource.data[index * 4 + 2];
+    const rgbaChanged = rgbChanged || candidateAlpha !== sourceAlpha;
     if (candidateAlpha > sourceAlpha) siteCloseAlphaExpansion += 1;
     if (candidateAlpha < sourceAlpha) siteCloseAlphaReduction += 1;
+    if (rgbaChanged && !insideRedesignRoi(x, y)) siteCloseOutsideRedesignDifferences += 1;
+    if (rgbaChanged && stationRail.data[index] >= 128) siteCloseProtectedRailDifferences += 1;
+    if (rgbChanged && sourceAlpha > 0 && candidateAlpha > 0) siteCloseRetainedRgbDifferences += 1;
+    if (
+      sourceAlpha > 0
+      && candidateAlpha === 0
+      && (
+        siteClose.data[index * 4] !== 0
+        || siteClose.data[index * 4 + 1] !== 0
+        || siteClose.data[index * 4 + 2] !== 0
+      )
+    ) siteCloseNewTransparentRgbViolations += 1;
   }
   assert.equal(capitalAlphaDifferences, 0);
   assert.equal(siteCloseAlphaExpansion, 0);
-  assert.equal(siteCloseAlphaReduction, 38_927);
+  assert.ok(siteCloseAlphaReduction > 20_000);
+  assert.equal(siteCloseOutsideRedesignDifferences, 0);
+  assert.equal(siteCloseProtectedRailDifferences, 0);
+  assert.equal(siteCloseRetainedRgbDifferences, 0);
+  assert.equal(siteCloseNewTransparentRgbViolations, 0);
 
-  const siteClosePlacement = NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I21.placement;
+  const siteClosePlacement = NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I24.placement;
   const capitalPlacement = NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I20.placement;
   const renderedSiteCloseWidth = Math.round(
     siteClosePlacement.baseSize[0] * siteClosePlacement.scale,
@@ -1230,7 +1276,7 @@ test("station LoD promotes train-free I20 and open-undercroft I21 without the re
   assert.ok(renderedSiteCloseWidth / renderedCapitalWidth <= 1.1);
 
   const stationBytes = await readFile(new URL(
-    `../public${NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I21.asset.path}`,
+    `../public${NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I24.asset.path}`,
     import.meta.url,
   ));
   const [{ data: placedStation }, registeredWater] = await Promise.all([
@@ -1259,7 +1305,7 @@ test("station LoD promotes train-free I20 and open-undercroft I21 without the re
     }
   }
   assert.ok(
-    opaqueRegisteredWaterOverlap <= 1_800,
-    `I21 must preserve the registered river margin; found ${opaqueRegisteredWaterOverlap} opaque water pixels.`,
+    opaqueRegisteredWaterOverlap <= 1_600,
+    `I24 must preserve the registered river margin; found ${opaqueRegisteredWaterOverlap} opaque water pixels.`,
   );
 });

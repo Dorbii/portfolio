@@ -27,7 +27,7 @@ export type NinjaOneCapitalCityRuntimeAssetId =
   | "D05L03"
   | "D05L04"
   | "I20"
-  | "I21"
+  | "I24"
   | "LFX06"
   | "S14D04"
   | "WFX01";
@@ -122,7 +122,7 @@ const expectedRuntimeAssetContract = Object.freeze({
   D05L03: Object.freeze({ layerId: "L4_1", tiers: "site,close" }),
   D05L04: Object.freeze({ layerId: "L4_1", tiers: "site,close" }),
   I20: Object.freeze({ layerId: "L4_2", tiers: "capital" }),
-  I21: Object.freeze({ layerId: "L4_2", tiers: "site,close" }),
+  I24: Object.freeze({ layerId: "L4_2", tiers: "site,close" }),
   LFX06: Object.freeze({ layerId: "L4_1", tiers: "capital,site,close" }),
   S14D04: Object.freeze({ layerId: "L4_3", tiers: "site,close" }),
   WFX01: Object.freeze({ layerId: "L4_0", tiers: "site,close" }),
@@ -217,7 +217,7 @@ if (
         id === "D03L04"
         || id === "D05L04"
         || id === "I20"
-        || id === "I21"
+        || id === "I24"
         || id === "S14D04"
       )
         !== Boolean(runtimeAsset.placement)
