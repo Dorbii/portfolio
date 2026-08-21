@@ -177,6 +177,8 @@ Uniform scaling is allowed only to the sidecar’s `masterFootprintSize`; a cand
 
 ## 7. Generation and promotion workflow
 
+**Amendment 2026-08-21 (director, after the R007 probe — F11):** the generator cannot emit alpha or honor canvas size; it draws a literal transparency checkerboard and chooses its own resolution. Therefore every generation call MUST request a **solid pure-magenta (#FF00FF) background** (never "transparent"), and a deterministic post-process produces the contract-compliant asset: (1) key the magenta to alpha with a tight tolerance (the palette's blue-violet accents must survive — validate no accent pixels were keyed), (2) decontaminate the fringe ring, (3) crop to subject and uniformly rescale so the alpha bounds match the declared `masterFootprintSize` × `nativePixelsPerMasterPixel` within 15%, composited onto the exact declared canvas with required margins, (4) measure `baselineY`, `footprintPolygon`, and sockets from the keyed alpha. The §7 mechanical gates then apply to the post-processed asset; the raw generator output is retained beside it in quarantine as provenance.
+
 One asset packet names one defect or kit entry. It includes class, exact canvas, heading, master footprint target, palette families, one primary master crop, optional named-skill reference, socket metadata draft, and mechanical thresholds.
 
 Output is quarantine-only:

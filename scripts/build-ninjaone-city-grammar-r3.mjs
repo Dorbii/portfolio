@@ -26,6 +26,14 @@ const MAX_BARE_ROCK_FRACTION = 0.1;
 const MAX_INFERRED_LENGTH_SHARE = 0.4;
 const MIN_NETWORK_LENGTH_SHARE_AT_LEAST_50_PX = 0.6;
 const MAX_NETWORK_LENGTH_SHARE_BELOW_40_PX = 0.35;
+const D05_MAJOR_STRUCTURES = Object.freeze([
+  { id: "blue-dome-hall", label: "blue-dome hall", point: [0.128 * WIDTH, 0.564 * HEIGHT], coreRadius: 44, mergeRadius: 24, maxSpan: [150, 150] },
+  { id: "great-cathedral", label: "great cathedral", point: [0.079 * WIDTH, 0.813 * HEIGHT], coreRadius: 48, mergeRadius: 28, maxSpan: [170, 200] },
+  { id: "central-tower-church", label: "central tower church", point: [0.2 * WIDTH, 0.703 * HEIGHT], coreRadius: 44, mergeRadius: 24, maxSpan: [150, 180] },
+  { id: "waterwheel-works", label: "waterwheel works", point: [0.3 * WIDTH, 0.762 * HEIGHT], coreRadius: 42, mergeRadius: 24, maxSpan: [140, 150] },
+  { id: "lower-dome-church", label: "lower dome church", point: [0.221 * WIDTH, 0.882 * HEIGHT], coreRadius: 46, mergeRadius: 26, maxSpan: [155, 160] },
+  { id: "lower-right-wheel-house", label: "lower-right wheel house", point: [0.373 * WIDTH, 0.882 * HEIGHT], coreRadius: 42, mergeRadius: 24, maxSpan: [135, 145] },
+]);
 
 const source = Object.freeze({
   layout: "public/career-world/capitals/ninjaone/manifests/city-master-node-layout-r3.json",
@@ -85,7 +93,9 @@ function material(master, x, y, water) {
   const saturation = high === 0 ? 0 : (high - low) / high;
   const registeredWater = water.data[fullIndex(Math.floor(x), Math.floor(y))] >= 128;
   const vegetation = green > red * 1.12 && green > blue * 1.16 && green > 28;
-  const waterLike = registeredWater || (blue > red * 1.08 && blue > green * 0.96);
+  const blueSlateRoof = !registeredWater && high >= 32 && high <= 150 && saturation <= 0.5
+    && blue >= red * 1.15 && blue >= green * 1.08 && green >= red * 1.05;
+  const waterLike = registeredWater || (!blueSlateRoof && blue > red * 1.08 && blue > green * 0.96);
   const warmStone = red >= 54 && green >= 46 && blue >= 28
     && red >= green * 0.95 && red <= green * 1.3
     && green >= blue * 1.25 && green <= blue * 1.85
@@ -94,14 +104,18 @@ function material(master, x, y, water) {
     && red >= green * 0.98 && green >= blue * 1.08
     && red - blue >= 12 && saturation <= 0.58 && high <= 190;
   const darkBuiltMetal = high >= 12 && high <= 72 && high - low <= 18 && red >= green * 0.78;
-  const slateRoof = high >= 32 && high <= 135 && saturation <= 0.42
-    && blue >= red * 0.85 && blue >= green * 0.8;
+  const slateRoof = blueSlateRoof || (high >= 32 && high <= 135 && saturation <= 0.42
+    && blue >= red * 0.85 && blue >= green * 0.8);
+  const shadedTerraceStone = red >= 28 && red <= 62 && green >= 21 && blue >= 10
+    && red >= green * 0.95 && red <= green * 1.32
+    && green >= blue * 1.18 && green <= blue * 1.95
+    && saturation >= 0.2 && saturation <= 0.62;
   const bareRock = !vegetation && !waterLike && !slateRoof
     && high >= 30 && high <= 150 && saturation <= 0.3
     && Math.abs(red - green) <= 20 && Math.abs(green - blue) <= 24;
   const roofOrMasonry = !vegetation && !waterLike
     && (darkBuiltMetal || slateRoof || (high >= 38 && ((red >= green * 1.03 && green >= blue * 0.9) || (high - low >= 18 && red >= blue * 1.05))));
-  return { bareRock, roofOrMasonry, structuralCore: roofOrMasonry && !pavingExclusion, vegetation, warmStone, waterLike };
+  return { bareRock, roofOrMasonry, shadedTerraceStone, structuralCore: roofOrMasonry && !pavingExclusion, vegetation, warmStone, waterLike };
 }
 
 function maskAt(mask, x, y) {
@@ -149,7 +163,7 @@ function districtForPoint(districts, point) {
   return best;
 }
 
-function buildFullMasks(master, water, districtUnion) {
+function buildFullMasks(master, water, districts, districtUnion) {
   const bareRockMask = new Uint8Array(WIDTH * HEIGHT);
   const occluderMask = new Uint8Array(WIDTH * HEIGHT);
   const pathMask = new Uint8Array(WIDTH * HEIGHT);
@@ -161,18 +175,18 @@ function buildFullMasks(master, water, districtUnion) {
     const sample = material(master, x, y, water);
     if (sample.bareRock) bareRockMask[index] = 1;
     if (sample.roofOrMasonry || sample.vegetation) occluderMask[index] = 1;
-    if (sample.warmStone) pathMask[index] = 1;
+    if (sample.warmStone || (districts.find((district) => district.definition.id === "D05").mask.data[index] >= 128 && sample.shadedTerraceStone && !sample.roofOrMasonry && !sample.vegetation && !sample.waterLike)) pathMask[index] = 1;
     if (sample.roofOrMasonry) landmarkMask[index] = 1;
     if (sample.structuralCore) structureMask[index] = 1;
   }
   return { bareRockMask, landmarkMask, occluderMask, pathMask, structureMask };
 }
-function downsampleMask(fullMask) {
+function downsampleMask(fullMask, d05Mask) {
   const small = new Uint8Array(SMALL_WIDTH * SMALL_HEIGHT);
   for (let sy = 0; sy < SMALL_HEIGHT; sy += 1) for (let sx = 0; sx < SMALL_WIDTH; sx += 1) {
-    let hits = 0;
-    for (let y = sy * SCALE; y < Math.min(HEIGHT, (sy + 1) * SCALE); y += 1) for (let x = sx * SCALE; x < Math.min(WIDTH, (sx + 1) * SCALE); x += 1) hits += fullMask[fullIndex(x, y)];
-    if (hits >= 6) small[smallIndex(sx, sy)] = 1;
+    let hits = 0; let d05Hits = 0;
+    for (let y = sy * SCALE; y < Math.min(HEIGHT, (sy + 1) * SCALE); y += 1) for (let x = sx * SCALE; x < Math.min(WIDTH, (sx + 1) * SCALE); x += 1) { hits += fullMask[fullIndex(x, y)]; d05Hits += d05Mask.data[fullIndex(x, y)] >= 128 ? 1 : 0; }
+    if (hits >= (d05Hits >= 5 ? 5 : 6)) small[smallIndex(sx, sy)] = 1;
   }
   return small;
 }
@@ -349,7 +363,7 @@ function topologyLinkSelection(rawEdges, shortCandidates, inferredCandidates) {
   return { inferred, short };
 }
 function buildCirculation(master, water, pathMask, districts, occluderMask, bareRockMask) {
-  const skeleton = pruneSpurs(skeletonize(downsampleMask(pathMask)));
+  const skeleton = pruneSpurs(skeletonize(downsampleMask(pathMask, districts.find((district) => district.definition.id === "D05").mask)));
   const rawEdges = traceSkeleton(skeleton, pathMask);
   const tracedEdges = rawEdges.map(({ points, onPath }, index) => {
     const dense = densify(points); const classification = edgeKind(dense, water);
@@ -452,6 +466,32 @@ function boundsGap(left, right) {
   const vertical = Math.max(0, Math.max(left[1], right[1]) - Math.min(left[3], right[3]));
   return Math.hypot(horizontal, vertical);
 }
+function pointToBoundsDistance(point, bounds) {
+  const x = Math.max(bounds[0], Math.min(point[0], bounds[2]));
+  const y = Math.max(bounds[1], Math.min(point[1], bounds[3]));
+  return distance(point, [x, y]);
+}
+function unionBounds(left, right) { return [Math.min(left[0], right[0]), Math.min(left[1], right[1]), Math.max(left[2], right[2]), Math.max(left[3], right[3])]; }
+function seededD05Component(seed, landmarkComponents, district) {
+  const rows = landmarkComponents.map((component) => component.filter((index) => {
+    const x = index % WIDTH; const y = Math.floor(index / WIDTH);
+    return Math.abs(x - seed.point[0]) <= seed.maxSpan[0] / 2 && Math.abs(y - seed.point[1]) <= seed.maxSpan[1] / 2;
+  })).filter((component) => component.length >= 8).map((component) => ({ bounds: boxForComponent(component).bounds, component }))
+    .filter((row) => maskAt(district.mask, row.bounds[0], row.bounds[1]) || maskAt(district.mask, row.bounds[2] - 1, row.bounds[3] - 1));
+  const initial = rows.filter((row) => pointToBoundsDistance(seed.point, row.bounds) <= seed.coreRadius)
+    .sort((left, right) => right.component.length - left.component.length || pointToBoundsDistance(seed.point, left.bounds) - pointToBoundsDistance(seed.point, right.bounds))[0];
+  if (!initial) return null;
+  const selected = [initial]; let merged = initial.bounds;
+  while (true) {
+    const next = rows.filter((row) => !selected.includes(row) && boundsGap(merged, row.bounds) <= seed.mergeRadius)
+      .map((row) => ({ row, bounds: unionBounds(merged, row.bounds) }))
+      .filter(({ bounds }) => bounds[2] - bounds[0] <= seed.maxSpan[0] && bounds[3] - bounds[1] <= seed.maxSpan[1])
+      .sort((left, right) => boundsGap(merged, left.row.bounds) - boundsGap(merged, right.row.bounds) || right.row.component.length - left.row.component.length)[0];
+    if (!next) break;
+    selected.push(next.row); merged = next.bounds;
+  }
+  return selected.flatMap((row) => row.component);
+}
 function mergeNearbyComponents(extracted, radius = 8) {
   const rows = extracted.map((component, index) => ({ bounds: boxForComponent(component).bounds, component, index })); const parent = rows.map((row) => row.index);
   const root = (index) => { while (parent[index] !== index) { parent[index] = parent[parent[index]]; index = parent[index]; } return index; };
@@ -490,6 +530,23 @@ function fitComponent(component, master, water, districts, landmark = null) {
   }
   return null;
 }
+function fitSeededD05Region(seed, master, water, district) {
+  let footprint = null;
+  for (let halfWidth = 12; halfWidth <= seed.maxSpan[0] / 2; halfWidth += 4) for (let halfHeight = 10; halfHeight <= seed.maxSpan[1] / 2; halfHeight += 4) {
+    const polygon = [
+      [seed.point[0] - halfWidth, seed.point[1] - halfHeight],
+      [seed.point[0] + halfWidth, seed.point[1] - halfHeight],
+      [seed.point[0] + halfWidth, seed.point[1] + halfHeight],
+      [seed.point[0] - halfWidth, seed.point[1] + halfHeight],
+    ];
+    if (!polygonInsideMask(polygon, district.mask)) continue;
+    const dominance = structureDominance(master, water, polygon);
+    if (dominance.fraction < MIN_STRUCTURE_DOMINANCE) continue;
+    const candidate = { area: halfWidth * halfHeight * 4, center: seed.point, districtId: district.definition.id, dominance, polygon, sourcePixels: 0, seededRegion: true };
+    if (!footprint || candidate.area > footprint.area) footprint = candidate;
+  }
+  return footprint;
+}
 function buildFootprints(master, water, structureMask, landmarkMask, districts) {
   const extractedComponents = mergeNearbyComponents(components(structureMask).filter((component) => component.length >= 12 && component.length <= 7_500));
   const landmarkComponents = components(landmarkMask);
@@ -516,8 +573,17 @@ function buildFootprints(master, water, structureMask, landmarkMask, districts) 
     if (!footprint) throw new TypeError(`Landmark seed ${landmark.id} cannot form a structure-dominant footprint.`);
     return { ...footprint, id: landmark.id, landmarkSeed: landmark.point, sizeClass: "landmark" };
   });
+  const d05 = districts.find((district) => district.definition.id === "D05");
+  const d05MajorStructures = D05_MAJOR_STRUCTURES.map((seed) => {
+    if (!maskAt(d05.mask, seed.point[0], seed.point[1])) throw new TypeError(`D05 seed ${seed.id} is outside the D05 district mask.`);
+    const component = seededD05Component(seed, landmarkComponents, d05);
+    if (!component) throw new TypeError(`D05 seed ${seed.id} cannot find a nearby roof-or-masonry core.`);
+    const footprint = fitComponent(component, master, water, districts, { point: seed.point }) ?? fitSeededD05Region(seed, master, water, d05);
+    if (!footprint || footprint.area < 600) throw new TypeError(`D05 seed ${seed.id} cannot form a merged structure-dominant footprint of at least 600 master px2.`);
+    return { ...footprint, id: `d05-${seed.id}`, d05MajorStructureSeed: seed.point, sizeClass: "large" };
+  });
   const distinct = result.filter((entry) => !landmarks.some((landmark) => distance(entry.center, landmark.center) < 40));
-  const selected = [...landmarks, ...distinct].sort((a, b) => b.area - a.area).slice(0, 180);
+  const selected = [...landmarks, ...d05MajorStructures, ...distinct].sort((a, b) => b.area - a.area).slice(0, 180);
   if (selected.length < 100) throw new TypeError(`Pixel component extraction yielded ${selected.length} structure-dominant footprints, below the required property.`);
   const areas = selected.filter(({ sizeClass }) => sizeClass !== "landmark").map(({ area }) => area).sort((a, b) => a - b);
   const compact = areas[Math.floor(areas.length * 0.45)]; const standard = areas[Math.floor(areas.length * 0.8)];
@@ -567,7 +633,7 @@ async function verifyExact(file, bytes) { const current = await readFile(absolut
 const [layoutBytes, master, water, districtMasks] = await Promise.all([readFile(absolute(source.layout)), rawImage(source.master), rawImage(source.water, true), Promise.all(districtDefinitions.map(async (definition) => ({ definition, mask: await rawImage(definition.file, true) })))]);
 const layout = JSON.parse(layoutBytes); if (layout.artboard.join(",") !== ARTBOARD.join(",")) throw new TypeError("The registered layout does not share master space.");
 const districts = districtMasks.map((district) => ({ ...district, analysis: analyzeMask(district.mask) })); const districtUnion = new Uint8Array(WIDTH * HEIGHT); for (const district of districts) for (let index = 0; index < districtUnion.length; index += 1) if (district.mask.data[index] >= 128) districtUnion[index] = 1;
-const masks = buildFullMasks(master, water, districtUnion); const circulation = buildCirculation(master, water, masks.pathMask, districts, masks.occluderMask, masks.bareRockMask); const footprints = buildFootprints(master, water, masks.structureMask, masks.landmarkMask, districts); const density = densityMap(footprints, districtUnion); const terraces = terraceBands(districts); const swatches = palette(master, water, districtUnion);
+const masks = buildFullMasks(master, water, districts, districtUnion); const circulation = buildCirculation(master, water, masks.pathMask, districts, masks.occluderMask, masks.bareRockMask); const footprints = buildFootprints(master, water, masks.structureMask, masks.landmarkMask, districts); const density = densityMap(footprints, districtUnion); const terraces = terraceBands(districts); const swatches = palette(master, water, districtUnion);
 const circulationTopology = graphComponents(circulation.edges);
 const inferredLength = circulation.edges.filter((edge) => edge.inferred).reduce((sum, edge) => sum + edgeLength(edge.points), 0);
 const topologyDiagnostic = topologyDiagnostics(circulationTopology, inferredLength);
@@ -589,6 +655,10 @@ for (const landmark of LANDMARKS) {
 }
 const grammar = { schemaVersion: 1, id: "career-world/capitals/ninjaone/city-grammar@r3", status: "review", authority: { coordinateSpace: "master-1448x1086", derivation: "master-plate-pixel-classification-and-district-mask-assignment-with-occlusion-inference", sources: [{ id: "master-plate", path: source.master, role: "pixel-extraction-source", sha256: sha256(master.bytes) }, { id: "registered-layout", path: source.layout, role: "artboard-validation-and-node-naming-only", sha256: sha256(layoutBytes) }, { id: "registered-water", path: source.water, role: "bridge-classification-only", sha256: sha256(water.bytes) }] }, artboard: ARTBOARD, metadata: { topologyDiagnostic }, districts: districts.map(({ definition, analysis, mask }) => ({ ...analysis, id: definition.id, label: definition.label, maskPath: definition.file, maskSha256: sha256(mask.bytes) })), circulation: { ...circulation, pathMask: undefined, skeleton: undefined }, buildings: { footprints }, densityMap: density, terraces: { bands: terraces }, palette: swatches, validation: { circulationEdgesByKind: Object.fromEntries(["road", "stairs", "bridge"].map((kind) => [kind, circulation.edges.filter((edge) => edge.kind === kind).length])), circulationOnPathRate: round(Math.min(...circulation.edges.filter((edge) => !edge.inferred).map((edge) => edge.evidence.onPathRate)), 4), circulationTopology: topologyDiagnostic, districtCoverage: circulation.coverage, footprintCount: footprints.length, footprintStructureDominanceRate: round(Math.min(...footprints.map((footprint) => footprint.structureDominance)), 4), landmarkBboxOverlap, landmarkSeedHits: Object.fromEntries(LANDMARKS.map((seed) => [seed.id, footprints.some((footprint) => footprint.sizeClass === "landmark" && pointInsidePolygon(seed.point, footprint.polygon))])), propertyChecks: ["short angle-continuous mask-gap links repair visible extraction noise", "inferred links are endpoint-continuous, at most 70px, predominantly roof-or-foliage occluded, and never cross bare rock", "inferred links are marked in JSON, dashed in the graph overlay, and consume at most 40 percent of total network length", "components at least 50px hold at least 60 percent of total network length and components below 40px hold at most 35 percent", "topology component count and largest-component share remain reported diagnostics", "visible circulation points remain on classified warm-stone material", "each district skeleton satisfies pixel-normalized visible-circulation coverage", "merged roof-and-facade footprints remain within district masks and structure-dominant", "landmark footprints overlap the director-supplied extent boxes; the train hall is checked against its tightened bbox"] } };
 if (Object.values(grammar.validation.landmarkSeedHits).some((hit) => !hit)) throw new TypeError("A required landmark seed misses its component footprint.");
+const d05MajorStructureSeedHits = Object.fromEntries(D05_MAJOR_STRUCTURES.map((seed) => [seed.id, footprints.some((footprint) => footprint.id === `d05-${seed.id}` && footprint.districtId === "D05" && footprint.area >= 600 && pointInsidePolygon(seed.point, footprint.polygon))]));
+if (Object.values(d05MajorStructureSeedHits).some((hit) => !hit)) throw new TypeError("A D05 major-structure seed misses its merged footprint.");
+grammar.validation.d05MajorStructureSeedHits = d05MajorStructureSeedHits;
+grammar.validation.propertyChecks.push("each director-supplied D05 major-structure seed lands inside its D05 merged footprint with at least 600 master px2 area");
 const grammarBytes = Buffer.from(`${JSON.stringify(grammar, null, 2)}\n`); const [graphBytes, footprintBytes] = await Promise.all([graphOverlay(master, circulation, circulationTopology), footprintOverlay(master, footprints, density)]);
 if (CHECK_ONLY) await Promise.all([verifyExact(output.grammar, grammarBytes), verifyExact(output.graph, graphBytes), verifyExact(output.footprints, footprintBytes)]); else await Promise.all([writeIfChanged(output.grammar, grammarBytes), writeIfChanged(output.graph, graphBytes), writeIfChanged(output.footprints, footprintBytes)]);
-console.log(JSON.stringify({ checkOnly: CHECK_ONLY, circulationEdgesByKind: grammar.validation.circulationEdgesByKind, circulationOnPathRate: grammar.validation.circulationOnPathRate, topologyDiagnostic, districtCoverage: grammar.validation.districtCoverage, footprintCount: grammar.validation.footprintCount, footprintStructureDominanceRate: grammar.validation.footprintStructureDominanceRate, landmarkBboxOverlap: grammar.validation.landmarkBboxOverlap, landmarkSeedHits: grammar.validation.landmarkSeedHits }, null, 2));
+console.log(JSON.stringify({ checkOnly: CHECK_ONLY, circulationEdgesByKind: grammar.validation.circulationEdgesByKind, circulationOnPathRate: grammar.validation.circulationOnPathRate, topologyDiagnostic, districtCoverage: grammar.validation.districtCoverage, footprintCount: grammar.validation.footprintCount, footprintStructureDominanceRate: grammar.validation.footprintStructureDominanceRate, landmarkBboxOverlap: grammar.validation.landmarkBboxOverlap, landmarkSeedHits: grammar.validation.landmarkSeedHits, d05MajorStructureSeedHits }, null, 2));
