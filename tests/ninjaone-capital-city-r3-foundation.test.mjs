@@ -9,6 +9,7 @@ import {
   NINJAONE_CAPITAL_CITY_R3_AUTHORITY_ID,
   NINJAONE_CAPITAL_CITY_R3_CONTEXT,
   NINJAONE_CAPITAL_CITY_R3_D03_CONTEXT_EXCLUSION_MASK,
+  NINJAONE_CAPITAL_CITY_R3_D05_CONTEXT_EXCLUSION_MASK,
   NINJAONE_CAPITAL_CITY_R3_PROGRESSIVE_WATER_EXCLUSION_MASK,
   NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS,
   NINJAONE_CAPITAL_CITY_R3_TERRITORY,
@@ -51,6 +52,7 @@ test("r3 foundation publishes a registered water-safe capital cohort", () => {
   assert.deepEqual(NINJAONE_CAPITAL_CITY_R3_ARTBOARD, [1448, 1086]);
   assert.deepEqual(NINJAONE_CAPITAL_CITY_R3_CONTEXT.dimensions, [1448, 1086]);
   assert.deepEqual(NINJAONE_CAPITAL_CITY_R3_D03_CONTEXT_EXCLUSION_MASK.dimensions, [1448, 1086]);
+  assert.deepEqual(NINJAONE_CAPITAL_CITY_R3_D05_CONTEXT_EXCLUSION_MASK.dimensions, [1448, 1086]);
   assert.deepEqual(
     NINJAONE_CAPITAL_CITY_R3_PROGRESSIVE_WATER_EXCLUSION_MASK.dimensions,
     [1448, 1086],
@@ -63,6 +65,8 @@ test("r3 foundation publishes a registered water-safe capital cohort", () => {
     "CFX02",
     "D03L02",
     "D03L03",
+    "D05L02",
+    "D05L03",
     "I20",
     "I21",
     "LFX06",
@@ -103,7 +107,7 @@ test("D03 reveals native land and restores only city-owned contact and integrati
       tiers: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D03L03.tiers,
     },
     {
-      layerId: "L4_2",
+      layerId: "L4_1",
       role: "eastern-industry-terrain-integration-detail",
       tiers: ["site", "close"],
     },
@@ -180,6 +184,102 @@ test("D03 reveals native land and restores only city-owned contact and integrati
   assert.ok(contactIndex >= 0);
   assert.ok(integrationIndex > contactIndex);
   assert.ok(d03NodeIndex > integrationIndex);
+});
+
+test("D05 reveals native land and keeps grounding inside reversible L4_1 ownership", async () => {
+  const [exclusion, contact, integration, district, land, water] = await Promise.all([
+    grayscale(`../public${NINJAONE_CAPITAL_CITY_R3_D05_CONTEXT_EXCLUSION_MASK.path}`),
+    rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L02.asset.path),
+    rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L03.asset.path),
+    grayscale("../art-source/career-world/ninjaone-capital/city-r3/districts/D05-western-skill-terraces-mask.png"),
+    grayscale("../art-source/career-world/ninjaone-capital/city-r3/authority/registered-parent-land-mask-r1.png"),
+    grayscale("../art-source/career-world/ninjaone-capital/city-r3/authority/live-inland-water-authority-mask-r1.png"),
+  ]);
+  assert.deepEqual([exclusion.info.width, exclusion.info.height, exclusion.info.channels], [1448, 1086, 1]);
+  assert.deepEqual([contact.info.width, contact.info.height, contact.info.channels], [1448, 1086, 4]);
+  assert.deepEqual([integration.info.width, integration.info.height, integration.info.channels], [1448, 1086, 4]);
+  assert.deepEqual(
+    [NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L02.layerId,
+      NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L03.layerId],
+    ["L4_1", "L4_1"],
+  );
+  assert.deepEqual(
+    [NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L02.tiers,
+      NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L03.tiers],
+    [["site", "close"], ["site", "close"]],
+  );
+
+  let districtPixels = 0;
+  let hardRevealPixels = 0;
+  let exclusionOutsideDistrict = 0;
+  let contactPixels = 0;
+  let contactOutsideDistrict = 0;
+  let contactOutsideLand = 0;
+  let contactOnWater = 0;
+  let integrationPixels = 0;
+  let integrationOutsideDistrict = 0;
+  let integrationOutsideLand = 0;
+  let integrationOnWater = 0;
+  let integrationMaximumAlpha = 0;
+  for (let index = 0; index < district.data.length; index += 1) {
+    if (district.data[index] > 0) districtPixels += 1;
+    if (exclusion.data[index] >= 240) hardRevealPixels += 1;
+    if (exclusion.data[index] > 0 && district.data[index] === 0) {
+      exclusionOutsideDistrict += 1;
+    }
+    const contactAlpha = contact.data[index * 4 + 3];
+    if (contactAlpha > 0) {
+      contactPixels += 1;
+      if (district.data[index] === 0) contactOutsideDistrict += 1;
+      if (land.data[index] < 64) contactOutsideLand += 1;
+      if (water.data[index] >= 240) contactOnWater += 1;
+    }
+    const integrationAlpha = integration.data[index * 4 + 3];
+    if (integrationAlpha > 0) {
+      integrationPixels += 1;
+      integrationMaximumAlpha = Math.max(integrationMaximumAlpha, integrationAlpha);
+      if (district.data[index] === 0) integrationOutsideDistrict += 1;
+      if (land.data[index] < 64) integrationOutsideLand += 1;
+      if (water.data[index] >= 240) integrationOnWater += 1;
+    }
+  }
+  assert.ok(hardRevealPixels / districtPixels >= 0.96);
+  assert.ok(hardRevealPixels / districtPixels <= 0.99);
+  assert.equal(exclusionOutsideDistrict, 0);
+  assert.ok(contactPixels / districtPixels >= 0.015);
+  assert.ok(contactPixels / districtPixels <= 0.05);
+  assert.equal(contactOutsideDistrict, 0);
+  assert.equal(contactOutsideLand, 0);
+  assert.equal(contactOnWater, 0);
+  assert.ok(integrationPixels / districtPixels >= 0.015);
+  assert.ok(integrationPixels / districtPixels <= 0.06);
+  assert.equal(integrationMaximumAlpha, 220);
+  assert.equal(integrationOutsideDistrict, 0);
+  assert.equal(integrationOutsideLand, 0);
+  assert.equal(integrationOnWater, 0);
+  assert.deepEqual([
+    contact.data[3],
+    contact.data[(contact.info.width - 1) * 4 + 3],
+    contact.data[(contact.info.width * (contact.info.height - 1)) * 4 + 3],
+    contact.data[(contact.info.width * contact.info.height - 1) * 4 + 3],
+  ], [0, 0, 0, 0]);
+  assert.deepEqual([
+    integration.data[3],
+    integration.data[(integration.info.width - 1) * 4 + 3],
+    integration.data[(integration.info.width * (integration.info.height - 1)) * 4 + 3],
+    integration.data[(integration.info.width * integration.info.height - 1) * 4 + 3],
+  ], [0, 0, 0, 0]);
+
+  const rendererSource = await readFile(new URL(
+    "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
+    import.meta.url,
+  ), "utf8");
+  const contactIndex = rendererSource.indexOf('data-city-asset-id="D05L02"');
+  const integrationIndex = rendererSource.indexOf('data-city-asset-id="D05L03"');
+  const d05NodeIndex = rendererSource.indexOf('focusedDistrict="D05"', integrationIndex);
+  assert.ok(contactIndex >= 0);
+  assert.ok(integrationIndex > contactIndex);
+  assert.ok(d05NodeIndex > integrationIndex);
 });
 
 test("progressive city detail uses the byte-exact accepted live-water authority", async () => {

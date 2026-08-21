@@ -119,6 +119,7 @@ export function NinjaOneCapitalAssetNodes({
           * node.asset.source.dimensions[1]
           / node.asset.source.dimensions[0];
         const ownsLargeFootprint = node.layerId === "L4_2" || node.layerId === "L4_3";
+        const usesAuthoredGrounding = node.districtId === "D03" || node.districtId === "D05";
         const isD06ProofNode = NINJAONE_CAPITAL_D06_STATION_PROOF.nodeIds.includes(node.id);
         const isD06IntrinsicAlphaNode = node.id
           === NINJAONE_CAPITAL_D06_STATION_PROOF.trackTopology.capitalStationNodeId
@@ -147,7 +148,9 @@ export function NinjaOneCapitalAssetNodes({
             mask={usesD06ProofMask ? "url(#ninjaone-capital-d06-station-mask)" : undefined}
           >
             <title>{node.label}</title>
-            {ownsLargeFootprint ? <CityNodeShadow light={light} node={node} /> : null}
+            {ownsLargeFootprint && !usesAuthoredGrounding
+              ? <CityNodeShadow light={light} node={node} />
+              : null}
             <image
               height={height}
               href={source.path}

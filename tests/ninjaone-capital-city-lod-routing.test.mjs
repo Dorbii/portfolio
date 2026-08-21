@@ -787,16 +787,32 @@ test("city proof renderer fills the viewport and locks fixed proof zoom", async 
   assert.match(scene, /resolveNinjaOneCapitalDetailState\(/);
 });
 
-test("D05 detail atomically replaces five silhouettes without a district plate or D06 station", async () => {
-  const renderer = await readFile(new URL(
-    "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
-    import.meta.url,
-  ), "utf8");
-  assert.match(renderer, /d05DistrictDetailVisible = \(tier === "site" \|\| tier === "close"\)/);
+test("D05 progressively reveals native land before independently owned grounding and buildings", async () => {
+  const [renderer, nodeRenderer] = await Promise.all([
+    readFile(new URL(
+      "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
+      import.meta.url,
+    ), "utf8"),
+    readFile(new URL(
+      "../features/career-world/layers/city/rendering/NinjaOneCapitalAssetNodes.tsx",
+      import.meta.url,
+    ), "utf8"),
+  ]);
+  assert.match(renderer, /d05DistrictInFocus = \(tier === "site" \|\| tier === "close"\)/);
+  assert.match(renderer, /d05DistrictLandscapeVisible = d05DistrictInFocus && landscapeVisible/);
+  assert.match(renderer, /d05DistrictArchitectureVisible = d05DistrictInFocus && architectureVisible/);
   assert.match(renderer, /id="ninjaone-capital-city-r3-d05-detail-cutout"/);
-  assert.match(renderer, /deliveryMode="focused-district-progressive-detail"/);
-  assert.match(renderer, /focusedDistrict="D05"/);
-  assert.match(renderer, /maskOnly/);
+  assert.match(renderer, /NINJAONE_CAPITAL_CITY_R3_D05_CONTEXT_EXCLUSION_MASK\.path/);
+  assert.match(renderer, /data-city-asset-id="D05L02"[\s\S]*?data-city-child-layer="L4_1"/);
+  assert.match(renderer, /data-city-asset-id="D05L03"[\s\S]*?data-city-child-layer="L4_1"/);
+  const contactIndex = renderer.indexOf('data-city-asset-id="D05L02"');
+  const integrationIndex = renderer.indexOf('data-city-asset-id="D05L03"');
+  const nodeIndex = renderer.indexOf('focusedDistrict="D05"', integrationIndex);
+  assert.ok(contactIndex >= 0);
+  assert.ok(integrationIndex > contactIndex);
+  assert.ok(nodeIndex > integrationIndex);
+  assert.match(nodeRenderer, /usesAuthoredGrounding = node\.districtId === "D03" \|\| node\.districtId === "D05"/);
+  assert.match(nodeRenderer, /ownsLargeFootprint && !usesAuthoredGrounding/);
   assert.match(
     renderer,
     /focusDistrict === null \|\| focusDistrict === "D06"/,
@@ -859,14 +875,26 @@ test("D02 detail atomically replaces its two registered sockets without a distri
   assert.doesNotMatch(renderer, /D02-dojo-ridge-plate/);
 });
 
-test("D03 detail atomically replaces four calibrated silhouettes without a district plate", async () => {
-  const renderer = await readFile(new URL(
-    "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
-    import.meta.url,
-  ), "utf8");
-  assert.match(renderer, /d03DistrictDetailVisible = \(tier === "site" \|\| tier === "close"\)/);
+test("D03 independently owns native-land reveal, grounding, and four architecture nodes", async () => {
+  const [renderer, nodeRenderer] = await Promise.all([
+    readFile(new URL(
+      "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
+      import.meta.url,
+    ), "utf8"),
+    readFile(new URL(
+      "../features/career-world/layers/city/rendering/NinjaOneCapitalAssetNodes.tsx",
+      import.meta.url,
+    ), "utf8"),
+  ]);
+  assert.match(renderer, /d03DistrictInFocus = \(tier === "site" \|\| tier === "close"\)/);
+  assert.match(renderer, /d03DistrictLandscapeVisible = d03DistrictInFocus && landscapeVisible/);
+  assert.match(renderer, /d03DistrictArchitectureVisible = d03DistrictInFocus && architectureVisible/);
   assert.match(renderer, /id="ninjaone-capital-city-r3-d03-detail-cutout"/);
+  assert.match(renderer, /NINJAONE_CAPITAL_CITY_R3_D03_CONTEXT_EXCLUSION_MASK\.path/);
+  assert.match(renderer, /data-city-asset-id="D03L02"[\s\S]*?data-city-child-layer="L4_1"/);
+  assert.match(renderer, /data-city-asset-id="D03L03"[\s\S]*?data-city-child-layer="L4_1"/);
   assert.match(renderer, /focusedDistrict="D03"/);
+  assert.match(nodeRenderer, /usesAuthoredGrounding = node\.districtId === "D03" \|\| node\.districtId === "D05"/);
   assert.doesNotMatch(renderer, /D03-eastern-industry-plate/);
 });
 

@@ -47,6 +47,22 @@ const source = Object.freeze({
     ROOT,
     "art-source/career-world/ninjaone-capital/city-r3/detail/D03L03-city-terrain-integration-detail-r1-alpha.png",
   ),
+  d05DistrictMask: path.join(
+    ROOT,
+    "art-source/career-world/ninjaone-capital/city-r3/districts/D05-western-skill-terraces-mask.png",
+  ),
+  d05ContextExclusionMask: path.join(
+    ROOT,
+    "art-source/career-world/ninjaone-capital/city-r3/authority/D05M02-western-skill-full-context-exclusion-r1.png",
+  ),
+  d05GroundIntegration: path.join(
+    ROOT,
+    "art-source/career-world/ninjaone-capital/city-r3/landscape/D05L02-western-skill-ground-integration-r1-alpha.png",
+  ),
+  d05TerrainIntegrationDetail: path.join(
+    ROOT,
+    "art-source/career-world/ninjaone-capital/city-r3/detail/D05L03-western-skill-terrain-integration-detail-r1-alpha.png",
+  ),
   d06DistrictMask: path.join(
     ROOT,
     "art-source/career-world/ninjaone-capital/city-r3/districts/D06-station-rail-mask.png",
@@ -117,6 +133,18 @@ const outputs = Object.freeze({
   d03TerrainIntegrationDetail: path.join(
     outputRoot,
     "detail/D03L03-city-terrain-integration-detail-r1-alpha.png",
+  ),
+  d05ContextExclusionMask: path.join(
+    outputRoot,
+    "authority/D05M02-western-skill-full-context-exclusion-r1.png",
+  ),
+  d05GroundIntegration: path.join(
+    outputRoot,
+    "landscape/D05L02-western-skill-ground-integration-r1-alpha.png",
+  ),
+  d05TerrainIntegrationDetail: path.join(
+    outputRoot,
+    "detail/D05L03-western-skill-terrain-integration-detail-r1-alpha.png",
   ),
   nativeFoliageReuseManifest: path.join(
     outputRoot,
@@ -354,6 +382,10 @@ const [
   d03ContextExclusionMask,
   d03GroundContact,
   d03TerrainIntegrationDetail,
+  d05DistrictMask,
+  d05ContextExclusionMask,
+  d05GroundIntegration,
+  d05TerrainIntegrationDetail,
   d06DistrictMask,
 ] =
   await Promise.all([
@@ -366,6 +398,10 @@ const [
     singleChannel(source.d03ContextExclusionMask),
     imageMetadata(source.d03GroundContact),
     imageMetadata(source.d03TerrainIntegrationDetail),
+    singleChannel(source.d05DistrictMask),
+    singleChannel(source.d05ContextExclusionMask),
+    imageMetadata(source.d05GroundIntegration),
+    imageMetadata(source.d05TerrainIntegrationDetail),
     singleChannel(source.d06DistrictMask),
   ]);
 const cleanedWater = await cleanConnectedWaterMask(rawLiveWater);
@@ -470,6 +506,103 @@ if (
 }
 await mkdir(path.dirname(outputs.d03TerrainIntegrationDetail), { recursive: true });
 await copyFile(source.d03TerrainIntegrationDetail, outputs.d03TerrainIntegrationDetail);
+
+let d05RegisteredPixels = 0;
+let d05HardRevealPixels = 0;
+let d05OutsideSupportPixels = 0;
+for (let index = 0; index < PIXELS; index += 1) {
+  if (d05DistrictMask[index] > 0) d05RegisteredPixels += 1;
+  if (d05ContextExclusionMask[index] > 0 && d05DistrictMask[index] === 0) {
+    d05OutsideSupportPixels += 1;
+  }
+  if (d05ContextExclusionMask[index] >= 240) d05HardRevealPixels += 1;
+}
+const d05HardRevealFraction = d05HardRevealPixels / d05RegisteredPixels;
+if (
+  d05OutsideSupportPixels !== 0
+  || d05HardRevealFraction < 0.96
+  || d05HardRevealFraction > 0.99
+) {
+  throw new TypeError("The accepted D05 land-first context exclusion violates its registered support.");
+}
+await copyFile(source.d05ContextExclusionMask, outputs.d05ContextExclusionMask);
+
+const d05GroundIntegrationRgba = await sharp(d05GroundIntegration.bytes)
+  .ensureAlpha()
+  .raw()
+  .toBuffer();
+let d05GroundIntegrationPixels = 0;
+let d05GroundIntegrationOutsideSupportPixels = 0;
+let d05GroundIntegrationOutsideLandPixels = 0;
+let d05GroundIntegrationWaterPixels = 0;
+for (let index = 0; index < PIXELS; index += 1) {
+  const alpha = d05GroundIntegrationRgba[index * 4 + 3];
+  if (alpha === 0) continue;
+  d05GroundIntegrationPixels += 1;
+  if (d05DistrictMask[index] === 0) d05GroundIntegrationOutsideSupportPixels += 1;
+  if (registeredParentLand[index] < 64) d05GroundIntegrationOutsideLandPixels += 1;
+  if (rawLiveWater[index] >= 240) d05GroundIntegrationWaterPixels += 1;
+}
+const d05GroundIntegrationFraction = d05GroundIntegrationPixels / d05RegisteredPixels;
+const d05GroundIntegrationCornerAlpha = [
+  d05GroundIntegrationRgba[3],
+  d05GroundIntegrationRgba[(WIDTH - 1) * 4 + 3],
+  d05GroundIntegrationRgba[(PIXELS - WIDTH) * 4 + 3],
+  d05GroundIntegrationRgba[(PIXELS - 1) * 4 + 3],
+];
+if (
+  d05GroundIntegration.metadata.channels !== 4
+  || d05GroundIntegrationCornerAlpha.some((alpha) => alpha !== 0)
+  || d05GroundIntegrationOutsideSupportPixels !== 0
+  || d05GroundIntegrationOutsideLandPixels !== 0
+  || d05GroundIntegrationWaterPixels !== 0
+  || d05GroundIntegrationFraction < 0.015
+  || d05GroundIntegrationFraction > 0.05
+) {
+  throw new TypeError("The accepted D05 ground-integration layer violates land/water ownership.");
+}
+await mkdir(path.dirname(outputs.d05GroundIntegration), { recursive: true });
+await copyFile(source.d05GroundIntegration, outputs.d05GroundIntegration);
+
+const d05TerrainIntegrationRgba = await sharp(d05TerrainIntegrationDetail.bytes)
+  .ensureAlpha()
+  .raw()
+  .toBuffer();
+let d05TerrainIntegrationPixels = 0;
+let d05TerrainIntegrationMaximumAlpha = 0;
+let d05TerrainIntegrationOutsideSupportPixels = 0;
+let d05TerrainIntegrationOutsideLandPixels = 0;
+let d05TerrainIntegrationWaterPixels = 0;
+for (let index = 0; index < PIXELS; index += 1) {
+  const alpha = d05TerrainIntegrationRgba[index * 4 + 3];
+  if (alpha === 0) continue;
+  d05TerrainIntegrationPixels += 1;
+  d05TerrainIntegrationMaximumAlpha = Math.max(d05TerrainIntegrationMaximumAlpha, alpha);
+  if (d05DistrictMask[index] === 0) d05TerrainIntegrationOutsideSupportPixels += 1;
+  if (registeredParentLand[index] < 64) d05TerrainIntegrationOutsideLandPixels += 1;
+  if (rawLiveWater[index] >= 240) d05TerrainIntegrationWaterPixels += 1;
+}
+const d05TerrainIntegrationFraction = d05TerrainIntegrationPixels / d05RegisteredPixels;
+const d05TerrainIntegrationCornerAlpha = [
+  d05TerrainIntegrationRgba[3],
+  d05TerrainIntegrationRgba[(WIDTH - 1) * 4 + 3],
+  d05TerrainIntegrationRgba[(PIXELS - WIDTH) * 4 + 3],
+  d05TerrainIntegrationRgba[(PIXELS - 1) * 4 + 3],
+];
+if (
+  d05TerrainIntegrationDetail.metadata.channels !== 4
+  || d05TerrainIntegrationCornerAlpha.some((alpha) => alpha !== 0)
+  || d05TerrainIntegrationOutsideSupportPixels !== 0
+  || d05TerrainIntegrationOutsideLandPixels !== 0
+  || d05TerrainIntegrationWaterPixels !== 0
+  || d05TerrainIntegrationMaximumAlpha > 220
+  || d05TerrainIntegrationFraction < 0.015
+  || d05TerrainIntegrationFraction > 0.06
+) {
+  throw new TypeError("The accepted D05 terrain-integration detail violates city/land ownership.");
+}
+await mkdir(path.dirname(outputs.d05TerrainIntegrationDetail), { recursive: true });
+await copyFile(source.d05TerrainIntegrationDetail, outputs.d05TerrainIntegrationDetail);
 
 const registeredCityMaskRaw = Buffer.alloc(PIXELS);
 for (let index = 0; index < PIXELS; index += 1) {
@@ -659,7 +792,7 @@ const manifest = {
       globalLand: "L2-immutable",
       cityWaterInteraction: "L4_0-reversible",
       cityLandscapeModification: "L4_1-reversible",
-      cityTerrainIntegrationDetail: "L4_2-reversible",
+      cityTerrainIntegrationDetail: "L4_1-reversible",
     },
     waterRegistration: {
       sourceComponentCount: cleanedWater.componentCount,
@@ -673,13 +806,22 @@ const manifest = {
     },
     progressiveDistrictContextExclusions: {
       D03: {
-        method: "continuous-D03-context-exclusion-plus-city-owned-L4_1-contact-platforms",
+        method: "continuous-D03-context-exclusion-plus-city-owned-L4_1-grounding",
         hardRevealFraction: d03HardRevealFraction,
         mask: await artifact(outputs.d03ContextExclusionMask),
         contactFraction: d03GroundContactFraction,
         contactLayer: await artifact(outputs.d03GroundContact),
         terrainIntegrationFraction: d03TerrainIntegrationFraction,
         terrainIntegrationLayer: await artifact(outputs.d03TerrainIntegrationDetail),
+      },
+      D05: {
+        method: "continuous-D05-context-exclusion-plus-city-owned-L4_1-grounding",
+        hardRevealFraction: d05HardRevealFraction,
+        mask: await artifact(outputs.d05ContextExclusionMask),
+        contactFraction: d05GroundIntegrationFraction,
+        contactLayer: await artifact(outputs.d05GroundIntegration),
+        terrainIntegrationFraction: d05TerrainIntegrationFraction,
+        terrainIntegrationLayer: await artifact(outputs.d05TerrainIntegrationDetail),
       },
     },
   },
@@ -704,10 +846,24 @@ const manifest = {
     },
     {
       id: "D03L03",
-      layerId: "L4_2",
+      layerId: "L4_1",
       role: "eastern-industry-terrain-integration-detail",
       tiers: ["site", "close"],
       asset: await artifact(outputs.d03TerrainIntegrationDetail),
+    },
+    {
+      id: "D05L02",
+      layerId: "L4_1",
+      role: "western-skill-ground-integration",
+      tiers: ["site", "close"],
+      asset: await artifact(outputs.d05GroundIntegration),
+    },
+    {
+      id: "D05L03",
+      layerId: "L4_1",
+      role: "western-skill-terrain-integration-detail",
+      tiers: ["site", "close"],
+      asset: await artifact(outputs.d05TerrainIntegrationDetail),
     },
     {
       id: "WFX01",

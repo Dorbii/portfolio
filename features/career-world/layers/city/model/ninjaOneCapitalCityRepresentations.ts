@@ -257,6 +257,14 @@ const D05_SELECTION_LOCAL_BOUNDS = Object.freeze({
   width: 691,
 });
 
+// The selectable district reaches the registered artboard edge, but centering the
+// proof camera on that full footprint exposes the plane boundary at close LoD.
+// Reframe the proof only; district ownership and node/world coordinates stay fixed.
+const D05_PROOF_LOCAL_BOUNDS = Object.freeze({
+  ...D05_SELECTION_LOCAL_BOUNDS,
+  left: 135,
+});
+
 export const NINJAONE_CAPITAL_CITY_PROOF_LOCAL_WIDTHS = Object.freeze({
   "d01-close": 760,
   "d01-site": 1080,
@@ -356,11 +364,11 @@ Readonly<Record<NinjaOneCapitalCityProofViewId, CameraView>> = Object.freeze({
   ),
   "d05-close": registeredDistrictParentCrop(
     NINJAONE_CAPITAL_CITY_PROOF_LOCAL_WIDTHS["d05-close"],
-    D05_SELECTION_LOCAL_BOUNDS,
+    D05_PROOF_LOCAL_BOUNDS,
   ),
   "d05-site": registeredDistrictParentCrop(
     NINJAONE_CAPITAL_CITY_PROOF_LOCAL_WIDTHS["d05-site"],
-    D05_SELECTION_LOCAL_BOUNDS,
+    D05_PROOF_LOCAL_BOUNDS,
   ),
   "d06-close": registeredD06ParentCrop(
     NINJAONE_CAPITAL_CITY_PROOF_LOCAL_WIDTHS["d06-close"],

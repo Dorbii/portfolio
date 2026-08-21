@@ -21,7 +21,7 @@
       "globalLand": "L2-immutable",
       "cityWaterInteraction": "L4_0-reversible",
       "cityLandscapeModification": "L4_1-reversible",
-      "cityTerrainIntegrationDetail": "L4_2-reversible"
+      "cityTerrainIntegrationDetail": "L4_1-reversible"
     },
     "waterRegistration": {
       "sourceComponentCount": 393,
@@ -67,7 +67,7 @@
     },
     "progressiveDistrictContextExclusions": {
       "D03": {
-        "method": "continuous-D03-context-exclusion-plus-city-owned-L4_1-contact-platforms",
+        "method": "continuous-D03-context-exclusion-plus-city-owned-L4_1-grounding",
         "hardRevealFraction": 0.9391985529022188,
         "mask": {
           "decodedBytes": 1572528,
@@ -100,6 +100,42 @@
           "encodedBytes": 35398,
           "path": "/career-world/capitals/ninjaone/city-r3/detail/D03L03-city-terrain-integration-detail-r1-alpha.png",
           "sha256": "e4e975372ff6ee116b50a922afc79f7852fad892c737ca4fc5e9e0995c9ab3e7"
+        }
+      },
+      "D05": {
+        "method": "continuous-D05-context-exclusion-plus-city-owned-L4_1-grounding",
+        "hardRevealFraction": 0.9726801910239561,
+        "mask": {
+          "decodedBytes": 1572528,
+          "dimensions": [
+            1448,
+            1086
+          ],
+          "encodedBytes": 5770,
+          "path": "/career-world/capitals/ninjaone/city-r3/authority/D05M02-western-skill-full-context-exclusion-r1.png",
+          "sha256": "f24b8e7ea8c2a9658fc55e0880aa8d102b6d7909c9621ebb15b5f949e032b929"
+        },
+        "contactFraction": 0.0229053078114224,
+        "contactLayer": {
+          "decodedBytes": 6290112,
+          "dimensions": [
+            1448,
+            1086
+          ],
+          "encodedBytes": 34661,
+          "path": "/career-world/capitals/ninjaone/city-r3/landscape/D05L02-western-skill-ground-integration-r1-alpha.png",
+          "sha256": "bf56f85f373eef3356fcae11d5d3f658db278eb868b7251a46029ed43bb80167"
+        },
+        "terrainIntegrationFraction": 0.02042967377584614,
+        "terrainIntegrationLayer": {
+          "decodedBytes": 6290112,
+          "dimensions": [
+            1448,
+            1086
+          ],
+          "encodedBytes": 31884,
+          "path": "/career-world/capitals/ninjaone/city-r3/detail/D05L03-western-skill-terrain-integration-detail-r1-alpha.png",
+          "sha256": "985585a7c94d2710cc126caa23945d3c4dde1612f933a5c07115d12f499e3db5"
         }
       }
     }
@@ -163,7 +199,7 @@
     },
     {
       "id": "D03L03",
-      "layerId": "L4_2",
+      "layerId": "L4_1",
       "role": "eastern-industry-terrain-integration-detail",
       "tiers": [
         "site",
@@ -178,6 +214,44 @@
         "encodedBytes": 35398,
         "path": "/career-world/capitals/ninjaone/city-r3/detail/D03L03-city-terrain-integration-detail-r1-alpha.png",
         "sha256": "e4e975372ff6ee116b50a922afc79f7852fad892c737ca4fc5e9e0995c9ab3e7"
+      }
+    },
+    {
+      "id": "D05L02",
+      "layerId": "L4_1",
+      "role": "western-skill-ground-integration",
+      "tiers": [
+        "site",
+        "close"
+      ],
+      "asset": {
+        "decodedBytes": 6290112,
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "encodedBytes": 34661,
+        "path": "/career-world/capitals/ninjaone/city-r3/landscape/D05L02-western-skill-ground-integration-r1-alpha.png",
+        "sha256": "bf56f85f373eef3356fcae11d5d3f658db278eb868b7251a46029ed43bb80167"
+      }
+    },
+    {
+      "id": "D05L03",
+      "layerId": "L4_1",
+      "role": "western-skill-terrain-integration-detail",
+      "tiers": [
+        "site",
+        "close"
+      ],
+      "asset": {
+        "decodedBytes": 6290112,
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "encodedBytes": 31884,
+        "path": "/career-world/capitals/ninjaone/city-r3/detail/D05L03-western-skill-terrain-integration-detail-r1-alpha.png",
+        "sha256": "985585a7c94d2710cc126caa23945d3c4dde1612f933a5c07115d12f499e3db5"
       }
     },
     {
@@ -356,6 +430,10 @@
     "d03ContextExclusionMask": "260a5fe73ebe31035b8ae4e73a6f6294486aeb47d06f130837c7a009ffc29a45",
     "d03GroundContact": "32c324ef0f5e6a21a46716ef8a9acc1a98c71cedd3d088dc75d7172341437778",
     "d03TerrainIntegrationDetail": "e4e975372ff6ee116b50a922afc79f7852fad892c737ca4fc5e9e0995c9ab3e7",
+    "d05DistrictMask": "1078c69efe56c446786dca236bc68d834f8153b01fd604799b70ea5e5be1aa18",
+    "d05ContextExclusionMask": "f24b8e7ea8c2a9658fc55e0880aa8d102b6d7909c9621ebb15b5f949e032b929",
+    "d05GroundIntegration": "bf56f85f373eef3356fcae11d5d3f658db278eb868b7251a46029ed43bb80167",
+    "d05TerrainIntegrationDetail": "985585a7c94d2710cc126caa23945d3c4dde1612f933a5c07115d12f499e3db5",
     "d06DistrictMask": "0017c3b86dd0c05e3b4d698aed6ea9eb0d8270b1fd396a555b1e5c9c08e65a60",
     "foliageManifest": "776e87784c763b299c51083bf3cddf7bba88038a327f2317667ea8a56669e758"
   }
