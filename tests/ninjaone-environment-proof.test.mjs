@@ -521,10 +521,17 @@ test("the root-selectable environment proof renders semantic terrain and suppres
     /ninjaone-environment-geology[^}]*filter:/,
     "the accepted authored terrain master must not be recolored by runtime CSS",
   );
-  assert.doesNotMatch(
+  // Superseded intent: accepted progressive LoD now blends registered geology
+  // sources with the same semantic weights used by the rest of the world plane.
+  assert.match(
     geologyRenderer,
-    /territoryToCapital|opacity=\{opacity\}/,
-    "the authored land authority must replace the lower tier atomically instead of blurring through it",
+    /opacity: 1 - detailState\.capitalToSite[\s\S]*?opacity: detailState\.capitalToSite \* \(1 - detailState\.siteToClose\)[\s\S]*?opacity: detailState\.capitalToSite \* detailState\.siteToClose/,
+    "authored land tiers must blend through the centralized semantic LoD weights",
+  );
+  assert.match(
+    geologyRenderer,
+    /sourceLayers\.map\(\(\{ opacity, source, tier \}\)[\s\S]*?opacity=\{opacity\}/,
+    "registered geology sources must consume their semantic LoD weight",
   );
   assert.doesNotMatch(renderer, /ninjaone-inland-water-field-r1\.png/);
   assert.doesNotMatch(renderer, /wildlife/i);

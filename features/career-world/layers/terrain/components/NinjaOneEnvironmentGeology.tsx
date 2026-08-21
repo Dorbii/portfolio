@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { cameraViewBox, type CameraView } from "../../../shared/camera";
+import { decodeImage } from "../../../shared/assets/decodeImage";
 import type { DetailState } from "../../../shared/lod";
 import { WORLD_PLANE } from "../../../shared/world";
 import {
@@ -42,46 +43,67 @@ export function NinjaOneEnvironmentGeology({
     ? null
     : detailState.tier.id as NinjaOneEnvironmentPlateTier;
   const visibleLayers = NINJAONE_ENVIRONMENT_LOD_LAYERS[detailState.tier.id];
-  const source = plateTier && visibleLayers.includes("terrain-geology")
+  const currentSource = plateTier && visibleLayers.includes("terrain-geology")
     ? NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES[plateTier]
     : null;
+  const sourceLayers = !currentSource
+    ? []
+    : plateTier === "territory"
+      ? [{ opacity: 1, source: currentSource, tier: plateTier }]
+      : [
+        {
+          opacity: 1 - detailState.capitalToSite,
+          source: NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES.capital,
+          tier: "capital" as const,
+        },
+        {
+          opacity: detailState.capitalToSite * (1 - detailState.siteToClose),
+          source: NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES.site,
+          tier: "site" as const,
+        },
+        {
+          opacity: detailState.capitalToSite * detailState.siteToClose,
+          source: NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES.close,
+          tier: "close" as const,
+        },
+      ].filter(({ opacity }) => opacity > 0);
 
   useEffect(() => {
-    onReadyChange?.(false);
-    if (!source) return;
+    if (!currentSource) {
+      onReadyChange?.(false);
+      return;
+    }
 
     let cancelled = false;
-    const image = new Image();
-    const publishReady = () => {
-      if (!cancelled) onReadyChange?.(true);
-    };
-    const publishError = () => {
-      if (!cancelled) onReadyChange?.(false);
-    };
-    const decode = () => {
-      void image.decode().then(publishReady, () => {
-        if (image.complete && image.naturalWidth > 0) {
-          publishReady();
-        } else {
-          publishError();
-        }
-      });
-    };
-
-    image.decoding = "async";
-    image.addEventListener("load", decode, { once: true });
-    image.addEventListener("error", publishError, { once: true });
-    image.src = source.path;
-    if (image.complete && image.naturalWidth > 0) decode();
+    void decodeImage(currentSource.path).then(
+      () => {
+        if (!cancelled) onReadyChange?.(true);
+      },
+      () => {
+        if (!cancelled) onReadyChange?.(false);
+      },
+    );
 
     return () => {
       cancelled = true;
-      image.removeEventListener("load", decode);
-      image.removeEventListener("error", publishError);
     };
-  }, [onReadyChange, source]);
+  }, [currentSource, onReadyChange]);
 
-  if (!source) {
+  useEffect(() => {
+    const paths = [
+      ...(detailState.shouldLoadSiteAssets
+        ? [NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES.site.path]
+        : []),
+      ...(detailState.shouldLoadCloseAssets
+        ? [NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES.close.path]
+        : []),
+    ];
+    paths.forEach((path) => {
+      void decodeImage(path).catch(() => undefined);
+    });
+  }, [detailState.shouldLoadCloseAssets, detailState.shouldLoadSiteAssets]);
+
+  if (!currentSource) {
     return null;
   }
 
@@ -96,7 +118,7 @@ export function NinjaOneEnvironmentGeology({
       aria-label="NinjaOne authored L2 terrain geology"
       className="career-world__layer ninjaone-environment-geology"
       data-environment-authority="L2"
-      data-environment-geology-source={source.path}
+      data-environment-geology-source={sourceLayers.map(({ source }) => source.path).join(",")}
       data-environment-role={proofMode ? "isolated-proof-geology" : "production-geology"}
       data-lod-tier={detailState.tier.id}
       preserveAspectRatio="none"
@@ -183,17 +205,22 @@ export function NinjaOneEnvironmentGeology({
           mask="url(#ninjaone-environment-geology-contact)"
         >
           <g mask="url(#ninjaone-environment-geology-water-cutout)">
-            <image
-              data-environment-layer="terrain-geology"
-              data-environment-source={source.path}
-              filter="url(#ninjaone-environment-geology-source-alpha)"
-              height={NINJAONE_ENVIRONMENT_ARTBOARD[1]}
-              href={source.path}
-              preserveAspectRatio="none"
-              width={NINJAONE_ENVIRONMENT_ARTBOARD[0]}
-              x="0"
-              y="0"
-            />
+            {sourceLayers.map(({ opacity, source, tier }) => (
+              <image
+                data-environment-layer="terrain-geology"
+                data-environment-source={source.path}
+                data-environment-source-tier={tier}
+                filter="url(#ninjaone-environment-geology-source-alpha)"
+                height={NINJAONE_ENVIRONMENT_ARTBOARD[1]}
+                href={source.path}
+                key={tier}
+                opacity={opacity}
+                preserveAspectRatio="none"
+                width={NINJAONE_ENVIRONMENT_ARTBOARD[0]}
+                x="0"
+                y="0"
+              />
+            ))}
           </g>
         </g>
       </g>

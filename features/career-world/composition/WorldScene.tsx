@@ -104,10 +104,10 @@ interface DragState {
 const FOCUS_DURATION_MS = 680;
 const MAX_WHEEL_ZOOM_SCALE = 1.28;
 const MIN_WHEEL_ZOOM_SCALE = 1 / MAX_WHEEL_ZOOM_SCALE;
-// The authored capital circulation source is 1448x1086. Zooming beyond this
-// bound enlarges the road/terrace pixels past an honest presentation scale and
-// makes sharp independent buildings appear pasted onto a blurred substrate.
-const NINJAONE_CAPITAL_INTERACTIVE_MINIMUM_SPAN = 0.075;
+// NinjaOne follows the world camera floor. Site and close detail now arrive at
+// local spans instead of using an early zoom clamp as a substitute for LoD.
+const NINJAONE_CAPITAL_INTERACTIVE_MINIMUM_SPAN =
+  DETAIL_POLICY.cameraMinimumSpan;
 const LIVE_PROJECT_STRUCTURES = Object.freeze(
   PROJECT_STRUCTURES.filter(({ id }) => id !== KAIZEN_NEIGHBORHOOD_OWNER_ID),
 );
@@ -343,6 +343,9 @@ export function WorldScene({
     detailState.tier.id,
     focusedCityDistrict,
   );
+  const cityPresentationOpacity = cityProofView
+    ? 1
+    : Math.min(1, Math.max(0, 0.15 + detailState.territoryToCapital * 1.35));
   const focusIsDetailedNinjaOneCapital = (
     showNinjaOneCapital
     && detailState.tier.id !== "world"
@@ -774,6 +777,8 @@ export function WorldScene({
           detailState={detailState}
           focusDistrict={focusedCityDistrict}
           light={WORLD_LIGHT}
+          preloadDistrict={cameraCityDistrict}
+          presentationOpacity={cityPresentationOpacity}
           visibility={environmentLayerVisibility}
         />
       ) : null}

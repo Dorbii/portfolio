@@ -190,7 +190,8 @@ export function NinjaOneEnvironmentProof({
                 camera={camera}
                 detailState={detailState}
                 showFoliage={showFoliage
-                  && visibleLayers.includes("shared-animated-foliage")}
+                  && (visibleLayers.includes("shared-animated-foliage")
+                    || detailState.shouldLoadSiteAssets)}
               />
             {secondaryReliefSource ? (
               <PlateImage layer="secondary-relief" source={secondaryReliefSource} />

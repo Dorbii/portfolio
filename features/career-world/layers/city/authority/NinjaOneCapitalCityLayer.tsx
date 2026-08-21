@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { cameraViewBox, type CameraView } from "../../../shared/camera";
+import { decodeImage } from "../../../shared/assets/decodeImage";
 import type { DetailState } from "../../../shared/lod";
 import type { WorldLight } from "../../../shared/lighting";
 import {
@@ -13,7 +15,12 @@ import {
   NINJAONE_CAPITAL_CITY_R3_WORLD_SPAN,
 } from "../model/ninjaOneCapitalCityFoundationR3";
 import type { NinjaOneCapitalCityDistrictId } from "../model/ninjaOneCapitalCityRepresentations";
+import {
+  ninjaOneCapitalCityAssetVariant,
+  ninjaOneCapitalVisibleDistrictDetailNodes,
+} from "../model/ninjaOneCapitalCityLayer";
 import { NinjaOneCapitalCityR3 } from "../rendering/NinjaOneCapitalCityR3";
+import { NinjaOneCapitalNativeFoliagePreloader } from "../rendering/NinjaOneCapitalNativeFoliage";
 
 const CITY_CHILD_LAYER_ORDER = Object.freeze([
   "L4_0",
@@ -31,14 +38,37 @@ export function NinjaOneCapitalCityLayer({
   detailState,
   focusDistrict,
   light,
+  preloadDistrict,
+  presentationOpacity = 1,
   visibility,
 }: {
   readonly camera: CameraView;
   readonly detailState: DetailState;
   readonly focusDistrict?: NinjaOneCapitalCityDistrictId | null;
   readonly light: WorldLight;
+  readonly preloadDistrict?: NinjaOneCapitalCityDistrictId | null;
+  readonly presentationOpacity?: number;
   readonly visibility: EnvironmentLayerVisibility;
 }) {
+  useEffect(() => {
+    if (!preloadDistrict) return;
+    const tiers = [
+      ...(detailState.shouldLoadSiteAssets ? ["site" as const] : []),
+      ...(detailState.shouldLoadCloseAssets ? ["close" as const] : []),
+    ];
+    const paths = new Set(tiers.flatMap((tier) => (
+      ninjaOneCapitalVisibleDistrictDetailNodes(
+        camera,
+        tier,
+        ["L4_2", "L4_3"],
+        preloadDistrict,
+      ).map((node) => ninjaOneCapitalCityAssetVariant(node, tier).path)
+    )));
+    paths.forEach((path) => {
+      void decodeImage(path).catch(() => undefined);
+    });
+  }, [camera, detailState.shouldLoadCloseAssets, detailState.shouldLoadSiteAssets, preloadDistrict]);
+
   if (
     detailState.tier.id === "world"
     || detailState.tier.id === "territory"
@@ -54,7 +84,14 @@ export function NinjaOneCapitalCityLayer({
     / NINJAONE_CAPITAL_CITY_R3_ARTBOARD[1];
 
   return (
-    <svg
+    <>
+      {detailState.shouldLoadCloseAssets && preloadDistrict ? (
+        <NinjaOneCapitalNativeFoliagePreloader
+          camera={camera}
+          focusDistrict={preloadDistrict}
+        />
+      ) : null}
+      <svg
       aria-label="Registered progressive-LoD NinjaOne Capital city"
       className="career-world__layer ninjaone-capital-city"
       data-city-artboard={NINJAONE_CAPITAL_CITY_R3_ARTBOARD.join(",")}
@@ -69,6 +106,8 @@ export function NinjaOneCapitalCityLayer({
       data-city-light-direction={light.direction.join(",")}
       data-city-representation-authority={NINJAONE_CAPITAL_CITY_R3_AUTHORITY_ID}
       data-city-representation-mode="r3-registered-cohort"
+      data-city-presentation-opacity={presentationOpacity.toFixed(3)}
+      opacity={presentationOpacity}
       preserveAspectRatio="none"
       role="img"
       viewBox={cameraViewBox(camera, [WORLD_PLANE.width, WORLD_PLANE.height])}
@@ -87,12 +126,18 @@ export function NinjaOneCapitalCityLayer({
       <g transform={`translate(${worldX} ${worldY}) scale(${scaleX} ${scaleY})`}>
         <NinjaOneCapitalCityR3
           camera={camera}
+          closeAssetsMounted={detailState.shouldLoadCloseAssets}
+          closeProgress={detailState.siteToClose}
           focusDistrict={focusDistrict ?? null}
           light={light}
+          preloadDistrict={preloadDistrict ?? null}
+          siteAssetsMounted={detailState.shouldLoadSiteAssets}
+          siteProgress={detailState.capitalToSite}
           tier={detailState.tier.id}
           visibility={visibility}
         />
       </g>
-    </svg>
+      </svg>
+    </>
   );
 }

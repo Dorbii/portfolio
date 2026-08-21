@@ -20,7 +20,6 @@ import {
   NINJAONE_CAPITAL_CITY_R3_WATER_INTERACTION,
 } from "../features/career-world/layers/city/model/ninjaOneCapitalCityFoundationR3.ts";
 import {
-  NINJAONE_CAPITAL_CITY_DETAIL_POLICY,
   NINJAONE_CAPITAL_CITY_PROOF_CAMERAS,
 } from "../features/career-world/layers/city/model/ninjaOneCapitalCityRepresentations.ts";
 import {
@@ -154,7 +153,7 @@ test("D01 reveals native land and restores only reversible crown grounding", asy
     import.meta.url,
   ), "utf8");
   const groundingIndex = rendererSource.indexOf('data-city-asset-id="D01L02"');
-  const d01NodeIndex = rendererSource.indexOf('focusedDistrict="D01"', groundingIndex);
+  const d01NodeIndex = rendererSource.indexOf('district="D01"', groundingIndex);
   assert.ok(groundingIndex >= 0);
   assert.ok(d01NodeIndex > groundingIndex);
   assert.doesNotMatch(rendererSource, /D01-upper-capital-plate/);
@@ -232,7 +231,7 @@ test("D02 reveals native land and restores only localized ridge grounding", asyn
   ), "utf8");
   const contextIndex = rendererSource.indexOf('data-city-cohort-ownership="L4-capital-composite"');
   const groundingIndex = rendererSource.indexOf('data-city-asset-id="D02L02"');
-  const d02NodeIndex = rendererSource.indexOf('focusedDistrict="D02"', groundingIndex);
+  const d02NodeIndex = rendererSource.indexOf('district="D02"', groundingIndex);
   assert.ok(contextIndex >= 0);
   assert.ok(groundingIndex > contextIndex);
   assert.ok(d02NodeIndex > groundingIndex);
@@ -344,7 +343,7 @@ test("D03 reveals native land and restores only city-owned contact and integrati
   ), "utf8");
   const contactIndex = rendererSource.indexOf('data-city-asset-id="D03L02"');
   const integrationIndex = rendererSource.indexOf('data-city-asset-id="D03L03"');
-  const d03NodeIndex = rendererSource.indexOf('focusedDistrict="D03"', integrationIndex);
+  const d03NodeIndex = rendererSource.indexOf('district="D03"', integrationIndex);
   assert.ok(contactIndex >= 0);
   assert.ok(integrationIndex > contactIndex);
   assert.ok(d03NodeIndex > integrationIndex);
@@ -424,7 +423,7 @@ test("D04 reveals native land and adds only localized grounding, water contact, 
   const waterIndex = rendererSource.indexOf('data-city-asset-id="D04W02"');
   const contextIndex = rendererSource.indexOf('data-city-cohort-ownership="L4-capital-composite"');
   const groundingIndex = rendererSource.indexOf('data-city-asset-id="D04L02"');
-  const d04NodeIndex = rendererSource.indexOf('focusedDistrict="D04"', groundingIndex);
+  const d04NodeIndex = rendererSource.indexOf('district="D04"', groundingIndex);
   const gatewayIndex = rendererSource.indexOf('data-city-asset-id="S14"', d04NodeIndex);
   assert.ok(waterIndex >= 0);
   assert.ok(contextIndex > waterIndex);
@@ -527,7 +526,7 @@ test("D05 reveals native land and keeps grounding inside reversible L4_1 ownersh
   ), "utf8");
   const contactIndex = rendererSource.indexOf('data-city-asset-id="D05L02"');
   const integrationIndex = rendererSource.indexOf('data-city-asset-id="D05L03"');
-  const d05NodeIndex = rendererSource.indexOf('focusedDistrict="D05"', integrationIndex);
+  const d05NodeIndex = rendererSource.indexOf('district="D05"', integrationIndex);
   assert.ok(contactIndex >= 0);
   assert.ok(integrationIndex > contactIndex);
   assert.ok(d05NodeIndex > integrationIndex);
@@ -574,12 +573,12 @@ test("L4_0 is city-owned and cascades off with the city authority", () => {
   );
 });
 
-test("WFX01 adds support-localized water detail only at site and close", async () => {
+test("WFX01 preloads and progressively reveals support-localized water detail", async () => {
   const rendererSource = await readFile(new URL(
     "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
     import.meta.url,
   ), "utf8");
-  assert.match(rendererSource, /tier === "site" \|\| tier === "close"/);
+  assert.match(rendererSource, /waterDetailVisible = waterInteractionVisible && siteAssetsMounted/);
   assert.match(rendererSource, /NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS\.WFX01\.asset\.path/);
   assert.match(rendererSource, /data-city-child-layer="L4_0"/);
 
@@ -619,15 +618,15 @@ test("WFX01 adds support-localized water detail only at site and close", async (
   assert.equal(componentEdgePixels, 0);
 });
 
-test("CFX01 adds parent-derived fabric detail only at site and close", async () => {
+test("CFX01 progressively adds parent-derived fabric detail through site and close", async () => {
   const rendererSource = await readFile(new URL(
     "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
     import.meta.url,
   ), "utf8");
-  assert.match(rendererSource, /closeFabricVisible = \(tier === "site" \|\| tier === "close"\)[\s\S]*?visibility, "L4_4"/);
+  assert.match(rendererSource, /closeFabricVisible = siteAssetsMounted[\s\S]*?visibility, "L4_4"/);
   assert.match(rendererSource, /NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS\.CFX01\.asset\.path/);
   assert.match(rendererSource, /data-city-asset-id="CFX01"/);
-  assert.match(rendererSource, /opacity=\{tier === "close" \? 1 : 0\.48\}/);
+  assert.match(rendererSource, /opacity=\{siteProgress \* \(0\.48 \+ closeProgress \* 0\.52\)\}/);
 
   const [candidate, context, waterMask, d06Mask] = await Promise.all([
     rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.CFX01.asset.path),
@@ -658,14 +657,15 @@ test("CFX01 adds parent-derived fabric detail only at site and close", async () 
   assert.equal(d06Overlap, 0);
 });
 
-test("CFX02 adds registered central architecture detail only at close", async () => {
+test("CFX02 preloads and progressively reveals registered central architecture detail at close", async () => {
   const rendererSource = await readFile(new URL(
     "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
     import.meta.url,
   ), "utf8");
-  assert.match(rendererSource, /centralArchitectureDetailVisible = tier === "close" && focusDistrict === null[\s\S]*?visibility, "L4_4"/);
+  assert.match(rendererSource, /centralArchitectureDetailVisible = closeAssetsMounted && progressiveDistrict === null[\s\S]*?visibility, "L4_4"/);
   assert.match(rendererSource, /NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS\.CFX02\.asset\.path/);
   assert.match(rendererSource, /data-city-asset-id="CFX02"/);
+  assert.match(rendererSource, /data-city-asset-id="CFX02"[\s\S]*?opacity=\{closeProgress\}/);
 
   const [candidate, context, waterMask] = await Promise.all([
     rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.CFX02.asset.path),
@@ -814,13 +814,19 @@ test("close city foliage reuses the registered L2 native conifer atlases", async
     ), "utf8"),
   ]);
   const reuseManifest = JSON.parse(reuseManifestSource);
-  assert.match(rendererSource, /tier === "close"[\s\S]*?visibility, "L4_6"/);
+  assert.match(rendererSource, /nativeFoliageVisible = closeAssetsMounted[\s\S]*?visibility, "L4_6"/);
   assert.match(foliageSource, /selectNinjaOneEnvironmentFoliageInstances/);
   assert.match(foliageSource, /L2-native-conifer-atlas-reuse/);
   assert.match(foliageSource, /NinjaOneEnvironmentFoliageGroup/);
   assert.match(foliageSource, /NinjaOneEnvironmentFoliageCanvas/);
   assert.match(foliageSource, /shared-neutralization-plus-animated-canopy/);
   assert.doesNotMatch(foliageSource, /city-nodes-r2[\\/]foliage/);
+  assert.match(foliageSource, /function projectedCloseCamera\(camera: CameraView\)/);
+  assert.match(
+    rendererSource,
+    /maximumSpan=\{focusDistrict === null[\s\S]*?closeAssetPreloadSpan[\s\S]*?Math\.max\(\.\.\.camera\.span\)\}/,
+  );
+  assert.match(rendererSource, /opacity=\{closeProgress\}/);
   assert.equal(reuseManifest.sourceFoliageManifestId, "career-world/capitals/ninjaone/foliage@r6");
   assert.ok(reuseManifest.instances.length > 0);
   for (const instance of reuseManifest.instances) {
@@ -830,34 +836,6 @@ test("close city foliage reuses the registered L2 native conifer atlases", async
     assert.ok(instance.evidence.vegetationFraction >= 0.65);
   }
   const approvedIds = new Set(reuseManifest.instances.map(({ id }) => id));
-  const freeCloseCamera = Object.freeze({
-    origin: Object.freeze([0.125, 0]),
-    span: Object.freeze([0.145, 0.194]),
-  });
-  assert.deepEqual(
-    selectNinjaOneEnvironmentFoliageInstances(
-      freeCloseCamera,
-      true,
-      NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS,
-      NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES,
-      approvedIds,
-    ),
-    [],
-    "The global L2 foliage retention ceiling must remain unchanged.",
-  );
-  const cityTrees = selectNinjaOneEnvironmentFoliageInstances(
-    freeCloseCamera,
-    true,
-    NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS,
-    NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES,
-    approvedIds,
-    NINJAONE_CAPITAL_CITY_DETAIL_POLICY.tierMaximumSpan.close,
-  );
-  assert.ok(cityTrees.length > 0, "The wider city close tier must mount approved L2 trees.");
-  assert.ok(cityTrees.every(({ id }) => approvedIds.has(id)));
-  assert.ok(cityTrees.every(({ atlasResource }) => (
-    atlasResource.path.includes("/environment/shared/foliage-native-r4/")
-  )));
   const d02Registration = reuseManifest.districtInstances.D02;
   assert.equal(
     d02Registration.method,
@@ -912,7 +890,7 @@ test("close city foliage reuses the registered L2 native conifer atlases", async
     NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS,
     NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES,
     d02ApprovedIds,
-    NINJAONE_CAPITAL_CITY_DETAIL_POLICY.tierMaximumSpan.close,
+    Math.max(...NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d02-close"].span),
   );
   assert.ok(d02Trees.length >= 12);
   assert.ok(d02Trees.every(({ atlasResource }) => (
@@ -964,7 +942,7 @@ test("close city foliage reuses the registered L2 native conifer atlases", async
     NINJAONE_ENVIRONMENT_FOLIAGE_MAX_SELECTED_GROUPS,
     NINJAONE_ENVIRONMENT_FOLIAGE_DECODED_BYTES,
     d03ApprovedIds,
-    NINJAONE_CAPITAL_CITY_DETAIL_POLICY.tierMaximumSpan.close,
+    Math.max(...NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d03-close"].span),
   );
   assert.ok(d03Trees.length >= 16);
   assert.ok(d03Trees.every(({ atlasResource }) => (

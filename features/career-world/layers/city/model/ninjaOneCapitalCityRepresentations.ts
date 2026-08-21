@@ -403,15 +403,15 @@ Readonly<Record<NinjaOneCapitalCityProofViewId, DetailTierId>> = Object.freeze({
 });
 
 export const NINJAONE_CAPITAL_CITY_DETAIL_POLICY = Object.freeze({
-  closeAssetPreloadSpan: 0.235,
-  siteAssetPreloadSpan: 0.31,
+  closeAssetPreloadSpan: 0.12,
+  siteAssetPreloadSpan: DETAIL_POLICY.siteAssetPreloadSpan,
   tierMaximumSpan: Object.freeze({
-    capital: 0.34,
-    close: 0.205,
-    site: 0.25,
+    capital: DETAIL_POLICY.tierMaximumSpan.capital,
+    close: DETAIL_POLICY.tierMaximumSpan.close,
+    site: DETAIL_POLICY.tierMaximumSpan.site,
   }),
-  capitalToSite: Object.freeze({ startSpan: 0.285, endSpan: 0.25 }),
-  siteToClose: Object.freeze({ startSpan: 0.225, endSpan: 0.205 }),
+  capitalToSite: DETAIL_POLICY.capitalToSite,
+  siteToClose: DETAIL_POLICY.siteToClose,
 });
 
 function descendingSmoothstep(span: number, start: number, end: number): number {
@@ -434,7 +434,7 @@ export function resolveNinjaOneCapitalDetailState(
 ): DetailState {
   const globalState = resolveDetailState(camera);
   const span = Math.max(...camera.span);
-  const tierId = cameraIsCenteredInNinjaOneCapital(camera)
+  const cameraTierId = cameraIsCenteredInNinjaOneCapital(camera)
     ? span <= NINJAONE_CAPITAL_CITY_DETAIL_POLICY.tierMaximumSpan.close
       ? "close"
       : span <= NINJAONE_CAPITAL_CITY_DETAIL_POLICY.tierMaximumSpan.site
@@ -443,24 +443,24 @@ export function resolveNinjaOneCapitalDetailState(
           ? "capital"
           : globalState.tier.id
     : globalState.tier.id;
-  if (requestedProofTier && requestedProofTier !== tierId) {
-    throw new TypeError(
-      `NinjaOne Capital proof tier ${requestedProofTier} disagrees with camera tier ${tierId}.`,
-    );
-  }
+  const tierId = requestedProofTier ?? cameraTierId;
   if (!cameraIsCenteredInNinjaOneCapital(camera) || tierId === "world" || tierId === "territory") {
     return globalState;
   }
-  const capitalToSite = descendingSmoothstep(
-    span,
-    NINJAONE_CAPITAL_CITY_DETAIL_POLICY.capitalToSite.startSpan,
-    NINJAONE_CAPITAL_CITY_DETAIL_POLICY.capitalToSite.endSpan,
-  );
-  const siteToClose = descendingSmoothstep(
-    span,
-    NINJAONE_CAPITAL_CITY_DETAIL_POLICY.siteToClose.startSpan,
-    NINJAONE_CAPITAL_CITY_DETAIL_POLICY.siteToClose.endSpan,
-  );
+  const capitalToSite = requestedProofTier
+    ? tierId === "site" || tierId === "close" ? 1 : 0
+    : descendingSmoothstep(
+      span,
+      NINJAONE_CAPITAL_CITY_DETAIL_POLICY.capitalToSite.startSpan,
+      NINJAONE_CAPITAL_CITY_DETAIL_POLICY.capitalToSite.endSpan,
+    );
+  const siteToClose = requestedProofTier
+    ? tierId === "close" ? 1 : 0
+    : descendingSmoothstep(
+      span,
+      NINJAONE_CAPITAL_CITY_DETAIL_POLICY.siteToClose.startSpan,
+      NINJAONE_CAPITAL_CITY_DETAIL_POLICY.siteToClose.endSpan,
+    );
   return Object.freeze({
     ...globalState,
     tier: resolveDetailState(camera, tierId).tier,
@@ -473,9 +473,11 @@ export function resolveNinjaOneCapitalDetailState(
       + capitalToSite * DETAIL_POLICY.renderScale.siteGain
       + siteToClose * DETAIL_POLICY.renderScale.closeGain,
     shouldLoadSiteAssets:
-      span <= NINJAONE_CAPITAL_CITY_DETAIL_POLICY.siteAssetPreloadSpan,
+      tierId === "site" || tierId === "close"
+      || span <= NINJAONE_CAPITAL_CITY_DETAIL_POLICY.siteAssetPreloadSpan,
     shouldLoadCloseAssets:
-      span <= NINJAONE_CAPITAL_CITY_DETAIL_POLICY.closeAssetPreloadSpan,
+      tierId === "close"
+      || span <= NINJAONE_CAPITAL_CITY_DETAIL_POLICY.closeAssetPreloadSpan,
   });
 }
 

@@ -561,7 +561,10 @@ test("city tiers select explicit district-exclusive representation modes", () =>
 test("fixed proof cameras preserve their requested tier and district aspect", () => {
   for (const [viewId, camera] of Object.entries(NINJAONE_CAPITAL_CITY_PROOF_CAMERAS)) {
     assert.equal(
-      resolveNinjaOneCapitalDetailState(camera).tier.id,
+      resolveNinjaOneCapitalDetailState(
+        camera,
+        NINJAONE_CAPITAL_CITY_PROOF_TIERS[viewId],
+      ).tier.id,
       NINJAONE_CAPITAL_CITY_PROOF_TIERS[viewId],
       `${viewId} must resolve its declared proof tier`,
     );
@@ -596,22 +599,45 @@ test("fixed proof cameras preserve their requested tier and district aspect", ()
     assert.ok(constrained.origin[0] + constrained.span[0] <= 0.375);
     assert.ok(constrained.origin[1] + constrained.span[1] <= 1 / 3);
     assert.equal(
-      resolveNinjaOneCapitalDetailState(constrained).tier.id,
+      resolveNinjaOneCapitalDetailState(
+        constrained,
+        NINJAONE_CAPITAL_CITY_PROOF_TIERS[viewId],
+      ).tier.id,
       NINJAONE_CAPITAL_CITY_PROOF_TIERS[viewId],
     );
   }
 });
 
-test("NinjaOne capital interactive thresholds match parent composition framing only in its envelope", () => {
+test("NinjaOne capital interactive thresholds stay local while proof framing remains independent", () => {
   const centered = (maximumSpan) => ({
     origin: [0.25 - maximumSpan * 0.75 * 0.5, 1 / 6 - maximumSpan * 0.5],
     span: [maximumSpan * 0.75, maximumSpan],
   });
   assert.equal(resolveNinjaOneCapitalDetailState(centered(1 / 3)).tier.id, "capital");
-  assert.equal(resolveNinjaOneCapitalDetailState(centered(0.251)).tier.id, "capital");
-  assert.equal(resolveNinjaOneCapitalDetailState(centered(0.25)).tier.id, "site");
-  assert.equal(resolveNinjaOneCapitalDetailState(centered(0.206)).tier.id, "site");
-  assert.equal(resolveNinjaOneCapitalDetailState(centered(0.205)).tier.id, "close");
+  assert.equal(
+    resolveNinjaOneCapitalDetailState(centered(
+      NINJAONE_CAPITAL_CITY_DETAIL_POLICY.tierMaximumSpan.site + 0.001,
+    )).tier.id,
+    "capital",
+  );
+  assert.equal(
+    resolveNinjaOneCapitalDetailState(centered(
+      NINJAONE_CAPITAL_CITY_DETAIL_POLICY.tierMaximumSpan.site,
+    )).tier.id,
+    "site",
+  );
+  assert.equal(
+    resolveNinjaOneCapitalDetailState(centered(
+      NINJAONE_CAPITAL_CITY_DETAIL_POLICY.tierMaximumSpan.close + 0.001,
+    )).tier.id,
+    "site",
+  );
+  assert.equal(
+    resolveNinjaOneCapitalDetailState(centered(
+      NINJAONE_CAPITAL_CITY_DETAIL_POLICY.tierMaximumSpan.close,
+    )).tier.id,
+    "close",
+  );
   assert.equal(
     resolveNinjaOneCapitalDetailState(
       centered(NINJAONE_CAPITAL_CITY_DETAIL_POLICY.siteAssetPreloadSpan),
@@ -631,12 +657,12 @@ test("NinjaOne capital interactive thresholds match parent composition framing o
     resolveNinjaOneCapitalDetailState(outsideCapital).tier.id,
     resolveDetailState(outsideCapital).tier.id,
   );
-  assert.throws(
-    () => resolveNinjaOneCapitalDetailState(
+  assert.equal(
+    resolveNinjaOneCapitalDetailState(
       NINJAONE_CAPITAL_CITY_PROOF_CAMERAS["d06-site"],
       "close",
-    ),
-    /proof tier close disagrees with camera tier site/,
+    ).tier.id,
+    "close",
   );
 });
 
@@ -793,16 +819,23 @@ test("D05 progressively reveals native land before independently owned grounding
       import.meta.url,
     ), "utf8"),
   ]);
-  assert.match(renderer, /d05DistrictInFocus = \(tier === "site" \|\| tier === "close"\)/);
+  assert.match(renderer, /d05DistrictInFocus = siteAssetsMounted && progressiveDistrict === "D05"/);
   assert.match(renderer, /d05DistrictLandscapeVisible = d05DistrictInFocus && landscapeVisible/);
   assert.match(renderer, /d05DistrictArchitectureVisible = d05DistrictInFocus && architectureVisible/);
+  assert.match(renderer, /progressiveDistrict = focusDistrict \?\? \(siteAssetsMounted \? preloadDistrict : null\)/);
+  assert.match(renderer, /siteNodeOpacity = siteProgress \* \(1 - closeProgress\)/);
+  assert.match(renderer, /closeNodeOpacity = siteProgress \* closeProgress/);
   assert.match(renderer, /id="ninjaone-capital-city-r3-d05-detail-cutout"/);
   assert.match(renderer, /NINJAONE_CAPITAL_CITY_R3_D05_CONTEXT_EXCLUSION_MASK\.path/);
+  assert.match(
+    renderer,
+    /href=\{D05_CONTEXT_EXCLUSION_REVIEW\}[\s\S]*?opacity=\{siteProgress\}/,
+  );
   assert.match(renderer, /data-city-asset-id="D05L02"[\s\S]*?data-city-child-layer="L4_1"/);
   assert.match(renderer, /data-city-asset-id="D05L03"[\s\S]*?data-city-child-layer="L4_1"/);
   const contactIndex = renderer.indexOf('data-city-asset-id="D05L02"');
   const integrationIndex = renderer.indexOf('data-city-asset-id="D05L03"');
-  const nodeIndex = renderer.indexOf('focusedDistrict="D05"', integrationIndex);
+  const nodeIndex = renderer.indexOf('district="D05"', integrationIndex);
   assert.ok(contactIndex >= 0);
   assert.ok(integrationIndex > contactIndex);
   assert.ok(nodeIndex > integrationIndex);
@@ -830,7 +863,7 @@ test("D01 independently owns native-land reveal, grounding, and six architecture
       import.meta.url,
     ), "utf8"),
   ]);
-  assert.match(renderer, /d01DistrictInFocus = \(tier === "site" \|\| tier === "close"\)/);
+  assert.match(renderer, /d01DistrictInFocus = siteAssetsMounted && progressiveDistrict === "D01"/);
   assert.match(renderer, /d01DistrictLandscapeVisible = d01DistrictInFocus && landscapeVisible/);
   assert.match(renderer, /d01DistrictArchitectureVisible = d01DistrictInFocus && architectureVisible/);
   assert.match(renderer, /id="ninjaone-capital-city-r3-d01-detail-cutout"/);
@@ -838,7 +871,7 @@ test("D01 independently owns native-land reveal, grounding, and six architecture
   assert.match(renderer, /NINJAONE_CAPITAL_CITY_R3_D01_CONTEXT_EXCLUSION_MASK\.path/);
   assert.match(renderer, /data-city-asset-id="D01L02"[\s\S]*?data-city-child-layer="L4_1"/);
   assert.match(renderer, /<g mask="url\(#ninjaone-capital-city-r3-d01-context-clip\)">/);
-  assert.match(renderer, /focusedDistrict="D01"/);
+  assert.match(renderer, /district="D01"/);
   assert.doesNotMatch(renderer, /D01-upper-capital-plate/);
   assert.match(
     nodeRenderer,
@@ -867,7 +900,7 @@ test("D01 independently owns native-land reveal, grounding, and six architecture
   assert.ok(groundingIndex < d01RenderIndex, "D01 L4_3 must remain above authored L4_1 grounding");
   for (const district of ["D02", "D03", "D04", "D05"]) {
     assert.ok(
-      contextIndex < renderer.lastIndexOf(`focusedDistrict=\"${district}\"`),
+      contextIndex < renderer.lastIndexOf(`district=\"${district}\"`),
       `${district} progressive L4_3 must remain above L4_1 and context`,
     );
   }
@@ -884,13 +917,13 @@ test("D02 independently owns native-land reveal, grounding, and two detail layer
       import.meta.url,
     ), "utf8"),
   ]);
-  assert.match(renderer, /d02DistrictInFocus = \(tier === "site" \|\| tier === "close"\)/);
+  assert.match(renderer, /d02DistrictInFocus = siteAssetsMounted && progressiveDistrict === "D02"/);
   assert.match(renderer, /d02DistrictLandscapeVisible = d02DistrictInFocus && landscapeVisible/);
   assert.match(renderer, /d02DistrictDetailVisible = d02DistrictInFocus/);
   assert.match(renderer, /id="ninjaone-capital-city-r3-d02-detail-cutout"/);
   assert.match(renderer, /NINJAONE_CAPITAL_CITY_R3_D02_CONTEXT_EXCLUSION_MASK\.path/);
   assert.match(renderer, /data-city-asset-id="D02L02"[\s\S]*?data-city-child-layer="L4_1"/);
-  assert.match(renderer, /focusedDistrict="D02"/);
+  assert.match(renderer, /district="D02"/);
   assert.match(renderer, /layerIds=\{d02DistrictDetailLayerIds\}/);
   assert.match(
     nodeRenderer,
@@ -910,14 +943,14 @@ test("D03 independently owns native-land reveal, grounding, and four architectur
       import.meta.url,
     ), "utf8"),
   ]);
-  assert.match(renderer, /d03DistrictInFocus = \(tier === "site" \|\| tier === "close"\)/);
+  assert.match(renderer, /d03DistrictInFocus = siteAssetsMounted && progressiveDistrict === "D03"/);
   assert.match(renderer, /d03DistrictLandscapeVisible = d03DistrictInFocus && landscapeVisible/);
   assert.match(renderer, /d03DistrictArchitectureVisible = d03DistrictInFocus && architectureVisible/);
   assert.match(renderer, /id="ninjaone-capital-city-r3-d03-detail-cutout"/);
   assert.match(renderer, /NINJAONE_CAPITAL_CITY_R3_D03_CONTEXT_EXCLUSION_MASK\.path/);
   assert.match(renderer, /data-city-asset-id="D03L02"[\s\S]*?data-city-child-layer="L4_1"/);
   assert.match(renderer, /data-city-asset-id="D03L03"[\s\S]*?data-city-child-layer="L4_1"/);
-  assert.match(renderer, /focusedDistrict="D03"/);
+  assert.match(renderer, /district="D03"/);
   assert.match(
     nodeRenderer,
     /usesAuthoredGrounding = node\.districtId === "D01"[\s\S]*?node\.districtId === "D02"[\s\S]*?node\.districtId === "D03"[\s\S]*?node\.districtId === "D05"/,
@@ -930,7 +963,7 @@ test("D04 independently owns native-land reveal, dry nodes, and the compact S14 
     "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
     import.meta.url,
   ), "utf8");
-  assert.match(renderer, /d04DistrictInFocus = \(tier === "site" \|\| tier === "close"\)/);
+  assert.match(renderer, /d04DistrictInFocus = siteAssetsMounted && progressiveDistrict === "D04"/);
   assert.match(renderer, /d04DistrictLandscapeVisible = d04DistrictInFocus && landscapeVisible/);
   assert.match(renderer, /d04DistrictArchitectureVisible = d04DistrictInFocus && architectureVisible/);
   assert.match(renderer, /id="ninjaone-capital-city-r3-d04-detail-cutout"/);
@@ -939,7 +972,7 @@ test("D04 independently owns native-land reveal, dry nodes, and the compact S14 
   assert.match(renderer, /id="ninjaone-capital-city-r3-inverse-water-mask"/);
   assert.match(renderer, /<feFuncR tableValues="1 0" type="discrete"/);
   assert.match(renderer, /<g mask="url\(#ninjaone-capital-city-r3-d04-dry-fabric-clip\)">/);
-  assert.match(renderer, /focusedDistrict="D04"/);
+  assert.match(renderer, /district="D04"/);
   assert.match(renderer, /data-city-asset-id="D04W02"[\s\S]*?data-city-runtime-status="manifest-declared"/);
   assert.match(renderer, /data-city-asset-id="D04L02"[\s\S]*?data-city-runtime-status="manifest-declared"/);
   assert.match(renderer, /data-city-asset-id="S14"[\s\S]*?data-city-child-layer="L4_3"/);

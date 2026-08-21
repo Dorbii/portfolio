@@ -36,7 +36,8 @@ export function NinjaOneEnvironmentNativeDetail({
   showFoliage,
 }: NinjaOneEnvironmentNativeDetailProps) {
   const siteOrCloser = detailState.tier.id === "site"
-    || detailState.tier.id === "close";
+    || detailState.tier.id === "close"
+    || detailState.shouldLoadSiteAssets;
   const maximumFoliageDecodedBytes = useMemo(() => {
     const terrainPlan = planNinjaOneEnvironmentNativeResidency({
       camera,

@@ -911,7 +911,10 @@ test("NinjaOne controls expose progressive map destinations without affecting la
     scene,
     /territory\.id === "ninjaone"[\s\S]*?animateTo\(territory\.development\.capitalEnvelope, territory\.id\)/,
   );
-  assert.match(scene, /NINJAONE_CAPITAL_INTERACTIVE_MINIMUM_SPAN = 0\.075/);
+  assert.match(
+    scene,
+    /NINJAONE_CAPITAL_INTERACTIVE_MINIMUM_SPAN =[\s\S]*?DETAIL_POLICY\.cameraMinimumSpan/,
+  );
   assert.match(scene, /interactiveCameraMinimumSpan\(camera\)/);
   assert.match(scene, /resolveProjectFocusView/);
   assert.match(scene, /SUPPORT_STRUCTURE_INSTANCES\.filter/);
