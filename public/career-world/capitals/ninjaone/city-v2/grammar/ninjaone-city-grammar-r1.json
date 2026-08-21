@@ -1,0 +1,5061 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/capitals/ninjaone/city-grammar@r1",
+  "status": "review",
+  "authority": {
+    "coordinateSpace": "master-1448x1086",
+    "derivation": "deterministic-master-analysis-plus-registered-layout-and-district-masks",
+    "limitations": [
+      "The 19 skill anchors and dojo-ridge landmark retain registered-anchor confidence.",
+      "Secondary-fabric footprints and circulation geometry remain deterministic approximations pending director overlay review.",
+      "Palette families are quantized dominant samples, not material acceptance decisions."
+    ],
+    "projection": {
+      "bearing": "south-southeast",
+      "camera": "orthographic-high-oblique",
+      "pitchDegrees": 72
+    },
+    "sources": [
+      {
+        "id": "master-plate",
+        "path": "art-source/career-world/ninjaone-capital/city-nodes-r2/master/ninjaone-capital-master-r1.png",
+        "role": "style-composition-density-and-palette-reference",
+        "sha256": "2b5449512138a6679c8dd78987dc94abd0f2f38ad0e59c926aacbcd1d6ba323a"
+      },
+      {
+        "id": "registered-layout",
+        "path": "public/career-world/capitals/ninjaone/manifests/city-master-node-layout-r3.json",
+        "role": "registered-anchor-and-inferred-layout-seed",
+        "sha256": "cd3d2434c40106632a4d6708b5b045c8b9bb4d1e5bb1a21420dc024e93582b10"
+      },
+      {
+        "id": "registered-inland-water",
+        "path": "public/career-world/capitals/ninjaone/city-r3/authority/city-water-registration-mask-r1.png",
+        "role": "read-only-bridge-and-water-palette-classifier",
+        "sha256": "51357652c88ec868a40951c5dad2f78b334bb5b5242aae0b1f3474b5bb7bf252"
+      },
+      {
+        "id": "D01-district-mask",
+        "path": "art-source/career-world/ninjaone-capital/city-r3/districts/D01-upper-capital-mask.png",
+        "role": "footprint-and-contour-boundary",
+        "sha256": "596e66e0289863fa39c4deecc1e45a1ab5da1e6c7c2b50d07307eb397392aed2"
+      },
+      {
+        "id": "D02-district-mask",
+        "path": "art-source/career-world/ninjaone-capital/city-r3/districts/D02-dojo-ridge-mask.png",
+        "role": "footprint-and-contour-boundary",
+        "sha256": "e1572686514d8a5167d3068e70ea24be04bf5ede4e1b5df54696553eb93decae"
+      },
+      {
+        "id": "D03-district-mask",
+        "path": "art-source/career-world/ninjaone-capital/city-r3/districts/D03-eastern-industry-mask.png",
+        "role": "footprint-and-contour-boundary",
+        "sha256": "872bde51347a8fddf3e6644bc25d49144639002d9c75da46a1ebf45b3b250e04"
+      },
+      {
+        "id": "D04-district-mask",
+        "path": "art-source/career-world/ninjaone-capital/city-r3/districts/D04-central-lake-terraces-mask.png",
+        "role": "footprint-and-contour-boundary",
+        "sha256": "3c830943858fc71633e45a5d3909c9be3141b2a094e1afc435f1a0ed75e681a5"
+      },
+      {
+        "id": "D05-district-mask",
+        "path": "art-source/career-world/ninjaone-capital/city-r3/districts/D05-western-skill-terraces-mask.png",
+        "role": "footprint-and-contour-boundary",
+        "sha256": "1078c69efe56c446786dca236bc68d834f8153b01fd604799b70ea5e5be1aa18"
+      },
+      {
+        "id": "D06-district-mask",
+        "path": "art-source/career-world/ninjaone-capital/city-r3/districts/D06-station-rail-mask.png",
+        "role": "footprint-and-contour-boundary",
+        "sha256": "0017c3b86dd0c05e3b4d698aed6ea9eb0d8270b1fd396a555b1e5c9c08e65a60"
+      }
+    ]
+  },
+  "artboard": [
+    1448,
+    1086
+  ],
+  "districts": [
+    {
+      "bounds": [
+        0,
+        0,
+        1011,
+        536
+      ],
+      "centroid": [
+        501.68,
+        251.54
+      ],
+      "id": "D01",
+      "label": "Upper Capital Crown",
+      "maskPath": "art-source/career-world/ninjaone-capital/city-r3/districts/D01-upper-capital-mask.png",
+      "maskSha256": "596e66e0289863fa39c4deecc1e45a1ab5da1e6c7c2b50d07307eb397392aed2",
+      "pixelCount": 435501
+    },
+    {
+      "bounds": [
+        1080,
+        120,
+        1448,
+        456
+      ],
+      "centroid": [
+        1285.45,
+        281.66
+      ],
+      "id": "D02",
+      "label": "Dojo Ridge",
+      "maskPath": "art-source/career-world/ninjaone-capital/city-r3/districts/D02-dojo-ridge-mask.png",
+      "maskSha256": "e1572686514d8a5167d3068e70ea24be04bf5ede4e1b5df54696553eb93decae",
+      "pixelCount": 100825
+    },
+    {
+      "bounds": [
+        763,
+        252,
+        1448,
+        881
+      ],
+      "centroid": [
+        1131.15,
+        607.22
+      ],
+      "id": "D03",
+      "label": "Eastern Industry",
+      "maskPath": "art-source/career-world/ninjaone-capital/city-r3/districts/D03-eastern-industry-mask.png",
+      "maskSha256": "872bde51347a8fddf3e6644bc25d49144639002d9c75da46a1ebf45b3b250e04",
+      "pixelCount": 274204
+    },
+    {
+      "bounds": [
+        210,
+        480,
+        965,
+        851
+      ],
+      "centroid": [
+        574.63,
+        659.69
+      ],
+      "id": "D04",
+      "label": "Central Lake Terraces",
+      "maskPath": "art-source/career-world/ninjaone-capital/city-r3/districts/D04-central-lake-terraces-mask.png",
+      "maskSha256": "3c830943858fc71633e45a5d3909c9be3141b2a094e1afc435f1a0ed75e681a5",
+      "pixelCount": 150485
+    },
+    {
+      "bounds": [
+        0,
+        413,
+        691,
+        1086
+      ],
+      "centroid": [
+        272.39,
+        830.9
+      ],
+      "id": "D05",
+      "label": "Western Skill Terraces",
+      "maskPath": "art-source/career-world/ninjaone-capital/city-r3/districts/D05-western-skill-terraces-mask.png",
+      "maskSha256": "1078c69efe56c446786dca236bc68d834f8153b01fd604799b70ea5e5be1aa18",
+      "pixelCount": 307396
+    },
+    {
+      "bounds": [
+        665,
+        796,
+        1448,
+        1086
+      ],
+      "centroid": [
+        1057.54,
+        960.39
+      ],
+      "id": "D06",
+      "label": "Station and Rail",
+      "maskPath": "art-source/career-world/ninjaone-capital/city-r3/districts/D06-station-rail-mask.png",
+      "maskSha256": "0017c3b86dd0c05e3b4d698aed6ea9eb0d8270b1fd396a555b1e5c9c08e65a60",
+      "pixelCount": 190066
+    }
+  ],
+  "circulation": {
+    "connectedComponents": 1,
+    "edges": [
+      {
+        "approximateWidth": 8,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0
+        },
+        "kind": "road",
+        "points": [
+          [
+            185,
+            270
+          ],
+          [
+            348,
+            300
+          ]
+        ],
+        "sourceRouteId": "upper-capital-crown",
+        "endVertexId": "V002",
+        "id": "E001",
+        "startVertexId": "V001"
+      },
+      {
+        "approximateWidth": 8,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0
+        },
+        "kind": "road",
+        "points": [
+          [
+            348,
+            300
+          ],
+          [
+            495,
+            310
+          ]
+        ],
+        "sourceRouteId": "upper-capital-crown",
+        "endVertexId": "V003",
+        "id": "E002",
+        "startVertexId": "V002"
+      },
+      {
+        "approximateWidth": 8,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0
+        },
+        "kind": "road",
+        "points": [
+          [
+            495,
+            310
+          ],
+          [
+            662,
+            330
+          ]
+        ],
+        "sourceRouteId": "upper-capital-crown",
+        "endVertexId": "V004",
+        "id": "E003",
+        "startVertexId": "V003"
+      },
+      {
+        "approximateWidth": 8,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0
+        },
+        "kind": "road",
+        "points": [
+          [
+            662,
+            330
+          ],
+          [
+            765,
+            360
+          ]
+        ],
+        "sourceRouteId": "upper-capital-crown",
+        "endVertexId": "V006",
+        "id": "E004",
+        "startVertexId": "V004"
+      },
+      {
+        "approximateWidth": 8,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0
+        },
+        "kind": "road",
+        "points": [
+          [
+            765,
+            360
+          ],
+          [
+            880,
+            350
+          ]
+        ],
+        "sourceRouteId": "upper-capital-crown",
+        "endVertexId": "V005",
+        "id": "E005",
+        "startVertexId": "V006"
+      },
+      {
+        "approximateWidth": 6.75,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0
+        },
+        "kind": "stairs",
+        "points": [
+          [
+            495,
+            310
+          ],
+          [
+            539,
+            462
+          ]
+        ],
+        "sourceRouteId": "central-terrace-descent",
+        "endVertexId": "V008",
+        "id": "E006",
+        "startVertexId": "V003"
+      },
+      {
+        "approximateWidth": 10.35,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0.0968
+        },
+        "kind": "bridge",
+        "points": [
+          [
+            539,
+            462
+          ],
+          [
+            610,
+            555
+          ]
+        ],
+        "sourceRouteId": "central-terrace-descent",
+        "endVertexId": "V013",
+        "id": "E007",
+        "startVertexId": "V008"
+      },
+      {
+        "approximateWidth": 10.35,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0.4706
+        },
+        "kind": "bridge",
+        "points": [
+          [
+            610,
+            555
+          ],
+          [
+            706,
+            640
+          ]
+        ],
+        "sourceRouteId": "central-terrace-descent",
+        "endVertexId": "V017",
+        "id": "E008",
+        "startVertexId": "V013"
+      },
+      {
+        "approximateWidth": 10.35,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0.1818
+        },
+        "kind": "bridge",
+        "points": [
+          [
+            706,
+            640
+          ],
+          [
+            794,
+            731
+          ]
+        ],
+        "sourceRouteId": "central-terrace-descent",
+        "endVertexId": "V021",
+        "id": "E009",
+        "startVertexId": "V017"
+      },
+      {
+        "approximateWidth": 6.75,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0
+        },
+        "kind": "stairs",
+        "points": [
+          [
+            794,
+            731
+          ],
+          [
+            900,
+            835
+          ]
+        ],
+        "sourceRouteId": "central-terrace-descent",
+        "endVertexId": "V024",
+        "id": "E010",
+        "startVertexId": "V021"
+      },
+      {
+        "approximateWidth": 8,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0
+        },
+        "kind": "road",
+        "points": [
+          [
+            397,
+            521
+          ],
+          [
+            250,
+            560
+          ]
+        ],
+        "sourceRouteId": "western-skill-terraces",
+        "endVertexId": "V014",
+        "id": "E011",
+        "startVertexId": "V010"
+      },
+      {
+        "approximateWidth": 6,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0
+        },
+        "kind": "stairs",
+        "points": [
+          [
+            250,
+            560
+          ],
+          [
+            285,
+            677
+          ]
+        ],
+        "sourceRouteId": "western-skill-terraces",
+        "endVertexId": "V020",
+        "id": "E012",
+        "startVertexId": "V014"
+      },
+      {
+        "approximateWidth": 6,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0
+        },
+        "kind": "stairs",
+        "points": [
+          [
+            285,
+            677
+          ],
+          [
+            187,
+            834
+          ]
+        ],
+        "sourceRouteId": "western-skill-terraces",
+        "endVertexId": "V023",
+        "id": "E013",
+        "startVertexId": "V020"
+      },
+      {
+        "approximateWidth": 8,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0
+        },
+        "kind": "road",
+        "points": [
+          [
+            187,
+            834
+          ],
+          [
+            350,
+            875
+          ]
+        ],
+        "sourceRouteId": "western-skill-terraces",
+        "endVertexId": "V025",
+        "id": "E014",
+        "startVertexId": "V023"
+      },
+      {
+        "approximateWidth": 8,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0
+        },
+        "kind": "road",
+        "points": [
+          [
+            350,
+            875
+          ],
+          [
+            490,
+            878
+          ]
+        ],
+        "sourceRouteId": "western-skill-terraces",
+        "endVertexId": "V026",
+        "id": "E015",
+        "startVertexId": "V025"
+      },
+      {
+        "approximateWidth": 9.2,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0.2258
+        },
+        "kind": "bridge",
+        "points": [
+          [
+            539,
+            570
+          ],
+          [
+            650,
+            535
+          ]
+        ],
+        "sourceRouteId": "lake-and-bridge-approach",
+        "endVertexId": "V011",
+        "id": "E016",
+        "startVertexId": "V015"
+      },
+      {
+        "approximateWidth": 8,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0
+        },
+        "kind": "road",
+        "points": [
+          [
+            650,
+            535
+          ],
+          [
+            760,
+            590
+          ]
+        ],
+        "sourceRouteId": "lake-and-bridge-approach",
+        "endVertexId": "V016",
+        "id": "E017",
+        "startVertexId": "V011"
+      },
+      {
+        "approximateWidth": 9.2,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0.1707
+        },
+        "kind": "bridge",
+        "points": [
+          [
+            760,
+            590
+          ],
+          [
+            897,
+            668
+          ]
+        ],
+        "sourceRouteId": "lake-and-bridge-approach",
+        "endVertexId": "V018",
+        "id": "E018",
+        "startVertexId": "V016"
+      },
+      {
+        "approximateWidth": 6,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0
+        },
+        "kind": "stairs",
+        "points": [
+          [
+            897,
+            668
+          ],
+          [
+            980,
+            746
+          ]
+        ],
+        "sourceRouteId": "lake-and-bridge-approach",
+        "endVertexId": "V022",
+        "id": "E019",
+        "startVertexId": "V018"
+      },
+      {
+        "approximateWidth": 8,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0
+        },
+        "kind": "road",
+        "points": [
+          [
+            765,
+            390
+          ],
+          [
+            930,
+            465
+          ]
+        ],
+        "sourceRouteId": "eastern-industrial-terraces",
+        "endVertexId": "V009",
+        "id": "E020",
+        "startVertexId": "V007"
+      },
+      {
+        "approximateWidth": 9.2,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0.0377
+        },
+        "kind": "bridge",
+        "points": [
+          [
+            930,
+            465
+          ],
+          [
+            1118,
+            550
+          ]
+        ],
+        "sourceRouteId": "eastern-industrial-terraces",
+        "endVertexId": "V012",
+        "id": "E021",
+        "startVertexId": "V009"
+      },
+      {
+        "approximateWidth": 6,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0
+        },
+        "kind": "stairs",
+        "points": [
+          [
+            1118,
+            550
+          ],
+          [
+            1049,
+            673
+          ]
+        ],
+        "sourceRouteId": "eastern-industrial-terraces",
+        "endVertexId": "V019",
+        "id": "E022",
+        "startVertexId": "V012"
+      },
+      {
+        "approximateWidth": 6,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0
+        },
+        "kind": "stairs",
+        "points": [
+          [
+            1049,
+            673
+          ],
+          [
+            980,
+            746
+          ]
+        ],
+        "sourceRouteId": "eastern-industrial-terraces",
+        "endVertexId": "V022",
+        "id": "E023",
+        "startVertexId": "V019"
+      },
+      {
+        "approximateWidth": 9,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0
+        },
+        "kind": "road",
+        "points": [
+          [
+            530,
+            971
+          ],
+          [
+            700,
+            920
+          ]
+        ],
+        "sourceRouteId": "station-terminal-concourse",
+        "endVertexId": "V027",
+        "id": "E024",
+        "startVertexId": "V030"
+      },
+      {
+        "approximateWidth": 9,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0
+        },
+        "kind": "road",
+        "points": [
+          [
+            700,
+            920
+          ],
+          [
+            850,
+            930
+          ]
+        ],
+        "sourceRouteId": "station-terminal-concourse",
+        "endVertexId": "V028",
+        "id": "E025",
+        "startVertexId": "V027"
+      },
+      {
+        "approximateWidth": 10.35,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0.1905
+        },
+        "kind": "bridge",
+        "points": [
+          [
+            850,
+            930
+          ],
+          [
+            1010,
+            950
+          ]
+        ],
+        "sourceRouteId": "station-terminal-concourse",
+        "endVertexId": "V029",
+        "id": "E026",
+        "startVertexId": "V028"
+      },
+      {
+        "approximateWidth": 9,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0
+        },
+        "kind": "road",
+        "points": [
+          [
+            1010,
+            950
+          ],
+          [
+            1190,
+            1000
+          ]
+        ],
+        "sourceRouteId": "station-terminal-concourse",
+        "endVertexId": "V031",
+        "id": "E027",
+        "startVertexId": "V029"
+      },
+      {
+        "approximateWidth": 9,
+        "classificationEvidence": {
+          "source": "registered-water-intersection-and-segment-slope",
+          "waterFraction": 0
+        },
+        "kind": "road",
+        "points": [
+          [
+            1190,
+            1000
+          ],
+          [
+            1360,
+            1050
+          ]
+        ],
+        "sourceRouteId": "station-terminal-concourse",
+        "endVertexId": "V032",
+        "id": "E028",
+        "startVertexId": "V031"
+      },
+      {
+        "approximateWidth": 6,
+        "classificationEvidence": {
+          "source": "nearest-component-connector",
+          "waterFraction": 0
+        },
+        "kind": "stairs",
+        "points": [
+          [
+            765,
+            360
+          ],
+          [
+            765,
+            390
+          ]
+        ],
+        "sourceRouteId": "inferred-component-connector",
+        "endVertexId": "V007",
+        "id": "E029",
+        "startVertexId": "V006"
+      },
+      {
+        "approximateWidth": 6,
+        "classificationEvidence": {
+          "source": "nearest-component-connector",
+          "waterFraction": 0
+        },
+        "kind": "stairs",
+        "points": [
+          [
+            490,
+            878
+          ],
+          [
+            530,
+            971
+          ]
+        ],
+        "sourceRouteId": "inferred-component-connector",
+        "endVertexId": "V030",
+        "id": "E030",
+        "startVertexId": "V026"
+      },
+      {
+        "approximateWidth": 8,
+        "classificationEvidence": {
+          "source": "nearest-component-connector",
+          "waterFraction": 0.1429
+        },
+        "kind": "bridge",
+        "points": [
+          [
+            900,
+            835
+          ],
+          [
+            850,
+            930
+          ]
+        ],
+        "sourceRouteId": "inferred-component-connector",
+        "endVertexId": "V028",
+        "id": "E031",
+        "startVertexId": "V024"
+      }
+    ],
+    "vertices": [
+      {
+        "id": "V001",
+        "point": [
+          185,
+          270
+        ]
+      },
+      {
+        "id": "V002",
+        "point": [
+          348,
+          300
+        ]
+      },
+      {
+        "id": "V003",
+        "point": [
+          495,
+          310
+        ]
+      },
+      {
+        "id": "V004",
+        "point": [
+          662,
+          330
+        ]
+      },
+      {
+        "id": "V005",
+        "point": [
+          880,
+          350
+        ]
+      },
+      {
+        "id": "V006",
+        "point": [
+          765,
+          360
+        ]
+      },
+      {
+        "id": "V007",
+        "point": [
+          765,
+          390
+        ]
+      },
+      {
+        "id": "V008",
+        "point": [
+          539,
+          462
+        ]
+      },
+      {
+        "id": "V009",
+        "point": [
+          930,
+          465
+        ]
+      },
+      {
+        "id": "V010",
+        "point": [
+          397,
+          521
+        ]
+      },
+      {
+        "id": "V011",
+        "point": [
+          650,
+          535
+        ]
+      },
+      {
+        "id": "V012",
+        "point": [
+          1118,
+          550
+        ]
+      },
+      {
+        "id": "V013",
+        "point": [
+          610,
+          555
+        ]
+      },
+      {
+        "id": "V014",
+        "point": [
+          250,
+          560
+        ]
+      },
+      {
+        "id": "V015",
+        "point": [
+          539,
+          570
+        ]
+      },
+      {
+        "id": "V016",
+        "point": [
+          760,
+          590
+        ]
+      },
+      {
+        "id": "V017",
+        "point": [
+          706,
+          640
+        ]
+      },
+      {
+        "id": "V018",
+        "point": [
+          897,
+          668
+        ]
+      },
+      {
+        "id": "V019",
+        "point": [
+          1049,
+          673
+        ]
+      },
+      {
+        "id": "V020",
+        "point": [
+          285,
+          677
+        ]
+      },
+      {
+        "id": "V021",
+        "point": [
+          794,
+          731
+        ]
+      },
+      {
+        "id": "V022",
+        "point": [
+          980,
+          746
+        ]
+      },
+      {
+        "id": "V023",
+        "point": [
+          187,
+          834
+        ]
+      },
+      {
+        "id": "V024",
+        "point": [
+          900,
+          835
+        ]
+      },
+      {
+        "id": "V025",
+        "point": [
+          350,
+          875
+        ]
+      },
+      {
+        "id": "V026",
+        "point": [
+          490,
+          878
+        ]
+      },
+      {
+        "id": "V027",
+        "point": [
+          700,
+          920
+        ]
+      },
+      {
+        "id": "V028",
+        "point": [
+          850,
+          930
+        ]
+      },
+      {
+        "id": "V029",
+        "point": [
+          1010,
+          950
+        ]
+      },
+      {
+        "id": "V030",
+        "point": [
+          530,
+          971
+        ]
+      },
+      {
+        "id": "V031",
+        "point": [
+          1190,
+          1000
+        ]
+      },
+      {
+        "id": "V032",
+        "point": [
+          1360,
+          1050
+        ]
+      }
+    ]
+  },
+  "buildings": {
+    "footprints": [
+      {
+        "anchor": [
+          495,
+          212
+        ],
+        "area": 2598.89,
+        "assetId": "S19",
+        "center": [
+          495,
+          204
+        ],
+        "depth": 38.84,
+        "districtId": "D01",
+        "id": "primary-ai-palace",
+        "layerId": "L4_3",
+        "polygon": [
+          [
+            454.19,
+            184.58
+          ],
+          [
+            552.12,
+            199.34
+          ],
+          [
+            535.81,
+            223.42
+          ],
+          [
+            437.88,
+            208.66
+          ]
+        ],
+        "sizeClass": "landmark",
+        "sourceConfidence": "registered-anchor",
+        "sourceDisplayWidth": 230,
+        "width": 114.24
+      },
+      {
+        "anchor": [
+          662,
+          236
+        ],
+        "area": 1155.46,
+        "assetId": "S17",
+        "center": [
+          662,
+          230
+        ],
+        "depth": 25.89,
+        "districtId": "D01",
+        "id": "primary-capability-citadel",
+        "layerId": "L4_3",
+        "polygon": [
+          [
+            634.8,
+            217.05
+          ],
+          [
+            700.08,
+            226.89
+          ],
+          [
+            689.2,
+            242.95
+          ],
+          [
+            623.92,
+            233.11
+          ]
+        ],
+        "sizeClass": "compact",
+        "sourceConfidence": "registered-anchor",
+        "sourceDisplayWidth": 185,
+        "width": 76.16
+      },
+      {
+        "anchor": [
+          285,
+          677
+        ],
+        "area": 624.32,
+        "assetId": "S15",
+        "center": [
+          285,
+          673
+        ],
+        "depth": 19.04,
+        "districtId": "D05",
+        "id": "primary-openapi-observatory",
+        "layerId": "L4_3",
+        "polygon": [
+          [
+            265,
+            663.48
+          ],
+          [
+            313,
+            670.72
+          ],
+          [
+            305,
+            682.52
+          ],
+          [
+            257,
+            675.28
+          ]
+        ],
+        "sizeClass": "compact",
+        "sourceConfidence": "registered-anchor",
+        "sourceDisplayWidth": 200,
+        "width": 56
+      },
+      {
+        "anchor": [
+          765,
+          330
+        ],
+        "area": 1728.58,
+        "assetId": "S16",
+        "center": [
+          765,
+          323
+        ],
+        "depth": 31.67,
+        "districtId": "D01",
+        "id": "primary-mcp-sanctum",
+        "layerId": "L4_3",
+        "polygon": [
+          [
+            731.72,
+            307.16
+          ],
+          [
+            811.58,
+            319.2
+          ],
+          [
+            798.28,
+            338.84
+          ],
+          [
+            718.42,
+            326.8
+          ]
+        ],
+        "sizeClass": "large",
+        "sourceConfidence": "registered-anchor",
+        "sourceDisplayWidth": 190,
+        "width": 93.16
+      },
+      {
+        "anchor": [
+          794,
+          731
+        ],
+        "area": 589.47,
+        "assetId": "S14",
+        "center": [
+          794,
+          727
+        ],
+        "depth": 18.5,
+        "districtId": "D04",
+        "id": "primary-grpc-gateway",
+        "layerId": "L4_3",
+        "polygon": [
+          [
+            774.57,
+            717.75
+          ],
+          [
+            821.2,
+            724.78
+          ],
+          [
+            813.43,
+            736.25
+          ],
+          [
+            766.8,
+            729.22
+          ]
+        ],
+        "sizeClass": "compact",
+        "sourceConfidence": "registered-anchor",
+        "sourceDisplayWidth": 175,
+        "width": 54.4
+      },
+      {
+        "anchor": [
+          397,
+          521
+        ],
+        "area": 546.04,
+        "assetId": "S02",
+        "center": [
+          397,
+          517
+        ],
+        "depth": 17.8,
+        "districtId": "D04",
+        "id": "primary-typescript-tower",
+        "layerId": "L4_3",
+        "polygon": [
+          [
+            378.3,
+            508.1
+          ],
+          [
+            423.18,
+            514.86
+          ],
+          [
+            415.7,
+            525.9
+          ],
+          [
+            370.82,
+            519.14
+          ]
+        ],
+        "sizeClass": "compact",
+        "sourceConfidence": "registered-anchor",
+        "sourceDisplayWidth": 95,
+        "width": 52.36
+      },
+      {
+        "anchor": [
+          980,
+          746
+        ],
+        "area": 1910.21,
+        "assetId": "S07",
+        "center": [
+          980,
+          739
+        ],
+        "depth": 33.29,
+        "districtId": "D03",
+        "id": "primary-postgresql-archive",
+        "layerId": "L4_3",
+        "polygon": [
+          [
+            945.02,
+            722.35
+          ],
+          [
+            1028.96,
+            735
+          ],
+          [
+            1014.98,
+            755.65
+          ],
+          [
+            931.04,
+            743
+          ]
+        ],
+        "sizeClass": "landmark",
+        "sourceConfidence": "registered-anchor",
+        "sourceDisplayWidth": 180,
+        "width": 97.92
+      },
+      {
+        "anchor": [
+          539,
+          462
+        ],
+        "area": 1261.18,
+        "assetId": "S05",
+        "center": [
+          539,
+          456
+        ],
+        "depth": 27.05,
+        "districtId": "D01",
+        "id": "primary-csharp-guild",
+        "layerId": "L4_3",
+        "polygon": [
+          [
+            510.58,
+            442.47
+          ],
+          [
+            578.78,
+            452.75
+          ],
+          [
+            567.42,
+            469.53
+          ],
+          [
+            499.22,
+            459.25
+          ]
+        ],
+        "sizeClass": "standard",
+        "sourceConfidence": "registered-anchor",
+        "sourceDisplayWidth": 160,
+        "width": 79.56
+      },
+      {
+        "anchor": [
+          348,
+          300
+        ],
+        "area": 1753.51,
+        "assetId": "S03",
+        "center": [
+          348,
+          293
+        ],
+        "depth": 31.91,
+        "districtId": "D01",
+        "id": "primary-react-observatory",
+        "layerId": "L4_3",
+        "polygon": [
+          [
+            314.48,
+            277.05
+          ],
+          [
+            394.92,
+            289.17
+          ],
+          [
+            381.52,
+            308.95
+          ],
+          [
+            301.08,
+            296.83
+          ]
+        ],
+        "sizeClass": "large",
+        "sourceConfidence": "registered-anchor",
+        "sourceDisplayWidth": 175,
+        "width": 93.84
+      },
+      {
+        "anchor": [
+          250,
+          506
+        ],
+        "area": 424.71,
+        "assetId": "S04",
+        "center": [
+          266,
+          514
+        ],
+        "depth": 15.71,
+        "districtId": "D04",
+        "id": "primary-tanstack-archive",
+        "layerId": "L4_3",
+        "polygon": [
+          [
+            249.5,
+            506.15
+          ],
+          [
+            289.1,
+            512.12
+          ],
+          [
+            282.5,
+            521.85
+          ],
+          [
+            242.9,
+            515.88
+          ]
+        ],
+        "sizeClass": "compact",
+        "sourceConfidence": "registered-anchor",
+        "sourceDisplayWidth": 165,
+        "width": 46.2
+      },
+      {
+        "anchor": [
+          706,
+          481
+        ],
+        "area": 1604.42,
+        "assetId": "S06",
+        "center": [
+          706,
+          474
+        ],
+        "depth": 30.52,
+        "districtId": "D01",
+        "id": "primary-python-quarter",
+        "layerId": "L4_3",
+        "polygon": [
+          [
+            673.94,
+            458.74
+          ],
+          [
+            750.88,
+            470.34
+          ],
+          [
+            738.06,
+            489.26
+          ],
+          [
+            661.12,
+            477.66
+          ]
+        ],
+        "sizeClass": "standard",
+        "sourceConfidence": "registered-anchor",
+        "sourceDisplayWidth": 180,
+        "width": 89.76
+      },
+      {
+        "anchor": [
+          1049,
+          673
+        ],
+        "area": 1370.03,
+        "assetId": "S08",
+        "center": [
+          1049,
+          667
+        ],
+        "depth": 28.21,
+        "districtId": "D03",
+        "id": "primary-redis-depot",
+        "layerId": "L4_3",
+        "polygon": [
+          [
+            1019.37,
+            652.9
+          ],
+          [
+            1090.48,
+            663.62
+          ],
+          [
+            1078.63,
+            681.1
+          ],
+          [
+            1007.52,
+            670.38
+          ]
+        ],
+        "sizeClass": "standard",
+        "sourceConfidence": "registered-anchor",
+        "sourceDisplayWidth": 155,
+        "width": 82.96
+      },
+      {
+        "anchor": [
+          530,
+          971
+        ],
+        "area": 1804.25,
+        "assetId": "S18",
+        "center": [
+          530,
+          964
+        ],
+        "depth": 32.37,
+        "districtId": "D05",
+        "id": "primary-tool-generation-wheelworks",
+        "layerId": "L4_3",
+        "polygon": [
+          [
+            495.99,
+            947.82
+          ],
+          [
+            577.6,
+            960.12
+          ],
+          [
+            564.01,
+            980.18
+          ],
+          [
+            482.4,
+            967.88
+          ]
+        ],
+        "sizeClass": "large",
+        "sourceConfidence": "registered-anchor",
+        "sourceDisplayWidth": 195,
+        "width": 95.2
+      },
+      {
+        "anchor": [
+          490,
+          878
+        ],
+        "area": 1678.92,
+        "assetId": "S01",
+        "center": [
+          490,
+          871
+        ],
+        "depth": 31.21,
+        "districtId": "D05",
+        "id": "primary-golang-foundry",
+        "layerId": "L4_3",
+        "polygon": [
+          [
+            457.21,
+            855.39
+          ],
+          [
+            535.9,
+            867.25
+          ],
+          [
+            522.79,
+            886.61
+          ],
+          [
+            444.1,
+            874.75
+          ]
+        ],
+        "sizeClass": "large",
+        "sourceConfidence": "registered-anchor",
+        "sourceDisplayWidth": 180,
+        "width": 91.8
+      },
+      {
+        "anchor": [
+          1118,
+          550
+        ],
+        "area": 3323.65,
+        "assetId": "S09",
+        "center": [
+          1118,
+          540
+        ],
+        "depth": 43.93,
+        "districtId": "D03",
+        "id": "primary-aws-industrial",
+        "layerId": "L4_3",
+        "polygon": [
+          [
+            1071.85,
+            518.04
+          ],
+          [
+            1182.6,
+            534.73
+          ],
+          [
+            1164.15,
+            561.96
+          ],
+          [
+            1053.4,
+            545.27
+          ]
+        ],
+        "sizeClass": "landmark",
+        "sourceConfidence": "registered-anchor",
+        "sourceDisplayWidth": 235,
+        "width": 129.2
+      },
+      {
+        "anchor": [
+          187,
+          834
+        ],
+        "area": 1484.95,
+        "assetId": "S10",
+        "center": [
+          187,
+          827
+        ],
+        "depth": 29.36,
+        "districtId": "D05",
+        "id": "primary-databricks-works",
+        "layerId": "L4_3",
+        "polygon": [
+          [
+            156.15,
+            812.32
+          ],
+          [
+            230.18,
+            823.48
+          ],
+          [
+            217.85,
+            841.68
+          ],
+          [
+            143.82,
+            830.52
+          ]
+        ],
+        "sizeClass": "standard",
+        "sourceConfidence": "registered-anchor",
+        "sourceDisplayWidth": 175,
+        "width": 86.36
+      },
+      {
+        "anchor": [
+          603,
+          971
+        ],
+        "area": 1438.95,
+        "assetId": "S11",
+        "center": [
+          603,
+          965
+        ],
+        "depth": 28.9,
+        "districtId": "D05",
+        "id": "primary-docker-warehouse",
+        "layerId": "L4_3",
+        "polygon": [
+          [
+            572.64,
+            950.55
+          ],
+          [
+            645.5,
+            961.53
+          ],
+          [
+            633.36,
+            979.45
+          ],
+          [
+            560.5,
+            968.47
+          ]
+        ],
+        "sizeClass": "standard",
+        "sourceConfidence": "registered-anchor",
+        "sourceDisplayWidth": 185,
+        "width": 85
+      },
+      {
+        "anchor": [
+          897,
+          668
+        ],
+        "area": 1438.95,
+        "assetId": "S12",
+        "center": [
+          897,
+          662
+        ],
+        "depth": 28.9,
+        "districtId": "D03",
+        "id": "primary-vmware-hall",
+        "layerId": "L4_3",
+        "polygon": [
+          [
+            866.64,
+            647.55
+          ],
+          [
+            939.5,
+            658.53
+          ],
+          [
+            927.36,
+            676.45
+          ],
+          [
+            854.5,
+            665.47
+          ]
+        ],
+        "sizeClass": "standard",
+        "sourceConfidence": "registered-anchor",
+        "sourceDisplayWidth": 190,
+        "width": 85
+      },
+      {
+        "anchor": [
+          1333,
+          430
+        ],
+        "area": 1196.71,
+        "assetId": "S13",
+        "center": [
+          1333,
+          424
+        ],
+        "depth": 26.36,
+        "districtId": "D02",
+        "id": "primary-macstadium-dojo",
+        "layerId": "L4_3",
+        "polygon": [
+          [
+            1305.31,
+            410.82
+          ],
+          [
+            1371.76,
+            420.84
+          ],
+          [
+            1360.69,
+            437.18
+          ],
+          [
+            1294.24,
+            427.16
+          ]
+        ],
+        "sizeClass": "standard",
+        "sourceConfidence": "registered-anchor",
+        "sourceDisplayWidth": 180,
+        "width": 77.52
+      },
+      {
+        "anchor": [
+          1380,
+          480
+        ],
+        "area": 712.86,
+        "assetId": "I02",
+        "center": [
+          1380,
+          475
+        ],
+        "depth": 20.35,
+        "districtId": "D03",
+        "id": "transport-dojo-ridge-compound",
+        "layerId": "L4_2",
+        "polygon": [
+          [
+            1358.63,
+            464.83
+          ],
+          [
+            1409.92,
+            472.56
+          ],
+          [
+            1401.37,
+            485.17
+          ],
+          [
+            1350.08,
+            477.44
+          ]
+        ],
+        "sizeClass": "compact",
+        "sourceConfidence": "registered-anchor",
+        "sourceDisplayWidth": 115,
+        "width": 59.84
+      },
+      {
+        "anchor": [
+          250,
+          420
+        ],
+        "area": 1393.14,
+        "assetId": "D01",
+        "center": [
+          250,
+          414
+        ],
+        "depth": 28.44,
+        "districtId": "D01",
+        "id": "fabric-upper-west-rowhomes",
+        "layerId": "L4_4",
+        "polygon": [
+          [
+            220.12,
+            399.78
+          ],
+          [
+            291.82,
+            410.59
+          ],
+          [
+            279.88,
+            428.22
+          ],
+          [
+            208.18,
+            417.41
+          ]
+        ],
+        "sizeClass": "standard",
+        "sourceConfidence": "layout-inferred",
+        "sourceDisplayWidth": 170,
+        "width": 83.64
+      },
+      {
+        "anchor": [
+          450,
+          450
+        ],
+        "area": 1628.51,
+        "assetId": "D01",
+        "center": [
+          450,
+          443
+        ],
+        "depth": 30.75,
+        "districtId": "D01",
+        "id": "fabric-upper-center-rowhomes",
+        "layerId": "L4_4",
+        "polygon": [
+          [
+            417.69,
+            427.63
+          ],
+          [
+            495.22,
+            439.31
+          ],
+          [
+            482.31,
+            458.37
+          ],
+          [
+            404.78,
+            446.69
+          ]
+        ],
+        "sizeClass": "standard",
+        "sourceConfidence": "layout-inferred",
+        "sourceDisplayWidth": 170,
+        "width": 90.44
+      },
+      {
+        "anchor": [
+          250,
+          650
+        ],
+        "area": 490.95,
+        "assetId": "D01",
+        "center": [
+          250,
+          646
+        ],
+        "depth": 16.88,
+        "districtId": "D05",
+        "id": "fabric-west-rowhomes",
+        "layerId": "L4_4",
+        "polygon": [
+          [
+            232.27,
+            637.56
+          ],
+          [
+            274.82,
+            643.97
+          ],
+          [
+            267.73,
+            654.44
+          ],
+          [
+            225.18,
+            648.03
+          ]
+        ],
+        "sizeClass": "compact",
+        "sourceConfidence": "layout-inferred",
+        "sourceDisplayWidth": 170,
+        "width": 49.64
+      },
+      {
+        "anchor": [
+          520,
+          620
+        ],
+        "area": 1753.51,
+        "assetId": "D01",
+        "center": [
+          520,
+          613
+        ],
+        "depth": 31.91,
+        "districtId": "D04",
+        "id": "fabric-basin-rowhomes",
+        "layerId": "L4_4",
+        "polygon": [
+          [
+            486.48,
+            597.05
+          ],
+          [
+            566.92,
+            609.17
+          ],
+          [
+            553.52,
+            628.95
+          ],
+          [
+            473.08,
+            616.83
+          ]
+        ],
+        "sizeClass": "large",
+        "sourceConfidence": "layout-inferred",
+        "sourceDisplayWidth": 175,
+        "width": 93.84
+      },
+      {
+        "anchor": [
+          1200,
+          700
+        ],
+        "area": 1484.95,
+        "assetId": "D01",
+        "center": [
+          1200,
+          693
+        ],
+        "depth": 29.36,
+        "districtId": "D03",
+        "id": "fabric-east-rowhomes",
+        "layerId": "L4_4",
+        "polygon": [
+          [
+            1169.15,
+            678.32
+          ],
+          [
+            1243.18,
+            689.48
+          ],
+          [
+            1230.85,
+            707.68
+          ],
+          [
+            1156.82,
+            696.52
+          ]
+        ],
+        "sizeClass": "standard",
+        "sourceConfidence": "layout-inferred",
+        "sourceDisplayWidth": 170,
+        "width": 86.36
+      },
+      {
+        "anchor": [
+          940,
+          520
+        ],
+        "area": 1910.21,
+        "assetId": "D02",
+        "center": [
+          940,
+          513
+        ],
+        "depth": 33.29,
+        "districtId": "D03",
+        "id": "fabric-industrial-forge",
+        "layerId": "L4_4",
+        "polygon": [
+          [
+            905.02,
+            496.35
+          ],
+          [
+            988.96,
+            509
+          ],
+          [
+            974.98,
+            529.65
+          ],
+          [
+            891.04,
+            517
+          ]
+        ],
+        "sizeClass": "landmark",
+        "sourceConfidence": "layout-inferred",
+        "sourceDisplayWidth": 180,
+        "width": 97.92
+      },
+      {
+        "anchor": [
+          1040,
+          600
+        ],
+        "area": 1857.3,
+        "assetId": "D02",
+        "center": [
+          1040,
+          593
+        ],
+        "depth": 32.83,
+        "districtId": "D03",
+        "id": "fabric-east-forge",
+        "layerId": "L4_4",
+        "polygon": [
+          [
+            1005.51,
+            576.58
+          ],
+          [
+            1088.28,
+            589.06
+          ],
+          [
+            1074.49,
+            609.42
+          ],
+          [
+            991.72,
+            596.94
+          ]
+        ],
+        "sizeClass": "landmark",
+        "sourceConfidence": "layout-inferred",
+        "sourceDisplayWidth": 190,
+        "width": 96.56
+      },
+      {
+        "anchor": [
+          950,
+          720
+        ],
+        "area": 1753.51,
+        "assetId": "D02",
+        "center": [
+          950,
+          713
+        ],
+        "depth": 31.91,
+        "districtId": "D03",
+        "id": "fabric-lower-forge",
+        "layerId": "L4_4",
+        "polygon": [
+          [
+            916.48,
+            697.05
+          ],
+          [
+            996.92,
+            709.17
+          ],
+          [
+            983.52,
+            728.95
+          ],
+          [
+            903.08,
+            716.83
+          ]
+        ],
+        "sizeClass": "large",
+        "sourceConfidence": "layout-inferred",
+        "sourceDisplayWidth": 180,
+        "width": 93.84
+      },
+      {
+        "anchor": [
+          1110,
+          760
+        ],
+        "area": 1753.51,
+        "assetId": "D02",
+        "center": [
+          1110,
+          753
+        ],
+        "depth": 31.91,
+        "districtId": "D03",
+        "id": "fabric-ridge-forge",
+        "layerId": "L4_4",
+        "polygon": [
+          [
+            1076.48,
+            737.05
+          ],
+          [
+            1156.92,
+            749.17
+          ],
+          [
+            1143.52,
+            768.95
+          ],
+          [
+            1063.08,
+            756.83
+          ]
+        ],
+        "sizeClass": "large",
+        "sourceConfidence": "layout-inferred",
+        "sourceDisplayWidth": 175,
+        "width": 93.84
+      },
+      {
+        "anchor": [
+          630,
+          390
+        ],
+        "area": 1628.51,
+        "assetId": "D03",
+        "center": [
+          630,
+          383
+        ],
+        "depth": 30.75,
+        "districtId": "D01",
+        "id": "fabric-upper-residences",
+        "layerId": "L4_4",
+        "polygon": [
+          [
+            597.69,
+            367.63
+          ],
+          [
+            675.22,
+            379.31
+          ],
+          [
+            662.31,
+            398.37
+          ],
+          [
+            584.78,
+            386.69
+          ]
+        ],
+        "sizeClass": "standard",
+        "sourceConfidence": "layout-inferred",
+        "sourceDisplayWidth": 170,
+        "width": 90.44
+      },
+      {
+        "anchor": [
+          580,
+          530
+        ],
+        "area": 451.04,
+        "assetId": "D03",
+        "center": [
+          580,
+          534
+        ],
+        "depth": 16.18,
+        "districtId": "D04",
+        "id": "fabric-central-residences",
+        "layerId": "L4_4",
+        "polygon": [
+          [
+            563,
+            525.91
+          ],
+          [
+            603.8,
+            532.06
+          ],
+          [
+            597,
+            542.09
+          ],
+          [
+            556.2,
+            535.94
+          ]
+        ],
+        "sizeClass": "compact",
+        "sourceConfidence": "layout-inferred",
+        "sourceDisplayWidth": 170,
+        "width": 47.6
+      },
+      {
+        "anchor": [
+          350,
+          720
+        ],
+        "area": 451.04,
+        "assetId": "D03",
+        "center": [
+          346,
+          720
+        ],
+        "depth": 16.18,
+        "districtId": "D05",
+        "id": "fabric-west-residences",
+        "layerId": "L4_4",
+        "polygon": [
+          [
+            329,
+            711.91
+          ],
+          [
+            369.8,
+            718.06
+          ],
+          [
+            363,
+            728.09
+          ],
+          [
+            322.2,
+            721.94
+          ]
+        ],
+        "sizeClass": "compact",
+        "sourceConfidence": "layout-inferred",
+        "sourceDisplayWidth": 170,
+        "width": 47.6
+      },
+      {
+        "anchor": [
+          650,
+          800
+        ],
+        "area": 1653.62,
+        "assetId": "D03",
+        "center": [
+          650,
+          793
+        ],
+        "depth": 30.98,
+        "districtId": "D04",
+        "id": "fabric-lower-residences",
+        "layerId": "L4_4",
+        "polygon": [
+          [
+            617.45,
+            777.51
+          ],
+          [
+            695.56,
+            789.28
+          ],
+          [
+            682.55,
+            808.49
+          ],
+          [
+            604.44,
+            796.72
+          ]
+        ],
+        "sizeClass": "large",
+        "sourceConfidence": "layout-inferred",
+        "sourceDisplayWidth": 175,
+        "width": 91.12
+      },
+      {
+        "anchor": [
+          390,
+          610
+        ],
+        "area": 1217.47,
+        "assetId": "D04",
+        "center": [
+          390,
+          604
+        ],
+        "depth": 26.59,
+        "districtId": "D04",
+        "id": "fabric-west-market",
+        "layerId": "L4_4",
+        "polygon": [
+          [
+            362.07,
+            590.71
+          ],
+          [
+            429.1,
+            600.81
+          ],
+          [
+            417.93,
+            617.29
+          ],
+          [
+            350.9,
+            607.19
+          ]
+        ],
+        "sizeClass": "standard",
+        "sourceConfidence": "layout-inferred",
+        "sourceDisplayWidth": 170,
+        "width": 78.2
+      },
+      {
+        "anchor": [
+          550,
+          700
+        ],
+        "area": 1910.21,
+        "assetId": "D04",
+        "center": [
+          550,
+          693
+        ],
+        "depth": 33.29,
+        "districtId": "D04",
+        "id": "fabric-central-market",
+        "layerId": "L4_4",
+        "polygon": [
+          [
+            515.02,
+            676.35
+          ],
+          [
+            598.96,
+            689
+          ],
+          [
+            584.98,
+            709.65
+          ],
+          [
+            501.04,
+            697
+          ]
+        ],
+        "sizeClass": "landmark",
+        "sourceConfidence": "layout-inferred",
+        "sourceDisplayWidth": 180,
+        "width": 97.92
+      },
+      {
+        "anchor": [
+          780,
+          780
+        ],
+        "area": 1484.95,
+        "assetId": "D04",
+        "center": [
+          780,
+          773
+        ],
+        "depth": 29.36,
+        "districtId": "D04",
+        "id": "fabric-lower-market",
+        "layerId": "L4_4",
+        "polygon": [
+          [
+            749.15,
+            758.32
+          ],
+          [
+            823.18,
+            769.48
+          ],
+          [
+            810.85,
+            787.68
+          ],
+          [
+            736.82,
+            776.52
+          ]
+        ],
+        "sizeClass": "standard",
+        "sourceConfidence": "layout-inferred",
+        "sourceDisplayWidth": 180,
+        "width": 86.36
+      },
+      {
+        "anchor": [
+          1120,
+          520
+        ],
+        "area": 1753.51,
+        "assetId": "D05",
+        "center": [
+          1120,
+          513
+        ],
+        "depth": 31.91,
+        "districtId": "D03",
+        "id": "fabric-upper-service-yard",
+        "layerId": "L4_4",
+        "polygon": [
+          [
+            1086.48,
+            497.05
+          ],
+          [
+            1166.92,
+            509.17
+          ],
+          [
+            1153.52,
+            528.95
+          ],
+          [
+            1073.08,
+            516.83
+          ]
+        ],
+        "sizeClass": "large",
+        "sourceConfidence": "layout-inferred",
+        "sourceDisplayWidth": 175,
+        "width": 93.84
+      },
+      {
+        "anchor": [
+          1180,
+          620
+        ],
+        "area": 1628.51,
+        "assetId": "D05",
+        "center": [
+          1180,
+          613
+        ],
+        "depth": 30.75,
+        "districtId": "D03",
+        "id": "fabric-ridge-service-yard",
+        "layerId": "L4_4",
+        "polygon": [
+          [
+            1147.69,
+            597.63
+          ],
+          [
+            1225.22,
+            609.31
+          ],
+          [
+            1212.31,
+            628.37
+          ],
+          [
+            1134.78,
+            616.69
+          ]
+        ],
+        "sizeClass": "standard",
+        "sourceConfidence": "layout-inferred",
+        "sourceDisplayWidth": 175,
+        "width": 90.44
+      },
+      {
+        "anchor": [
+          1020,
+          820
+        ],
+        "area": 1175.92,
+        "assetId": "D05",
+        "center": [
+          1028,
+          806
+        ],
+        "depth": 26.13,
+        "districtId": "D03",
+        "id": "fabric-terminal-service-yard",
+        "layerId": "L4_4",
+        "polygon": [
+          [
+            1000.55,
+            792.94
+          ],
+          [
+            1066.42,
+            802.86
+          ],
+          [
+            1055.45,
+            819.06
+          ],
+          [
+            989.58,
+            809.14
+          ]
+        ],
+        "sizeClass": "compact",
+        "sourceConfidence": "layout-inferred",
+        "sourceDisplayWidth": 180,
+        "width": 76.84
+      },
+      {
+        "anchor": [
+          420,
+          350
+        ],
+        "area": 1462.56,
+        "assetId": "D06",
+        "center": [
+          420,
+          344
+        ],
+        "depth": 29.13,
+        "districtId": "D01",
+        "id": "fabric-upper-civic-court",
+        "layerId": "L4_4",
+        "polygon": [
+          [
+            389.4,
+            329.43
+          ],
+          [
+            462.84,
+            340.5
+          ],
+          [
+            450.6,
+            358.57
+          ],
+          [
+            377.16,
+            347.5
+          ]
+        ],
+        "sizeClass": "standard",
+        "sourceConfidence": "layout-inferred",
+        "sourceDisplayWidth": 170,
+        "width": 85.68
+      },
+      {
+        "anchor": [
+          720,
+          480
+        ],
+        "area": 1532.23,
+        "assetId": "D06",
+        "center": [
+          720,
+          473
+        ],
+        "depth": 29.82,
+        "districtId": "D01",
+        "id": "fabric-basin-civic-court",
+        "layerId": "L4_4",
+        "polygon": [
+          [
+            688.67,
+            458.09
+          ],
+          [
+            763.86,
+            469.42
+          ],
+          [
+            751.33,
+            487.91
+          ],
+          [
+            676.14,
+            476.58
+          ]
+        ],
+        "sizeClass": "standard",
+        "sourceConfidence": "layout-inferred",
+        "sourceDisplayWidth": 170,
+        "width": 87.72
+      },
+      {
+        "anchor": [
+          680,
+          720
+        ],
+        "area": 1604.42,
+        "assetId": "D06",
+        "center": [
+          680,
+          713
+        ],
+        "depth": 30.52,
+        "districtId": "D04",
+        "id": "fabric-lower-civic-court",
+        "layerId": "L4_4",
+        "polygon": [
+          [
+            647.94,
+            697.74
+          ],
+          [
+            724.88,
+            709.34
+          ],
+          [
+            712.06,
+            728.26
+          ],
+          [
+            635.12,
+            716.66
+          ]
+        ],
+        "sizeClass": "standard",
+        "sourceConfidence": "layout-inferred",
+        "sourceDisplayWidth": 170,
+        "width": 89.76
+      },
+      {
+        "anchor": [
+          800,
+          580
+        ],
+        "area": 762.36,
+        "assetId": "D08",
+        "center": [
+          812,
+          571
+        ],
+        "depth": 21.04,
+        "districtId": "D03",
+        "id": "fabric-bridge-quay",
+        "layerId": "L4_4",
+        "polygon": [
+          [
+            789.9,
+            560.48
+          ],
+          [
+            842.94,
+            568.48
+          ],
+          [
+            834.1,
+            581.52
+          ],
+          [
+            781.06,
+            573.52
+          ]
+        ],
+        "sizeClass": "compact",
+        "sourceConfidence": "layout-inferred",
+        "sourceDisplayWidth": 190,
+        "width": 61.88
+      },
+      {
+        "anchor": [
+          760,
+          680
+        ],
+        "area": 902.42,
+        "assetId": "D08",
+        "center": [
+          760,
+          675
+        ],
+        "depth": 22.89,
+        "districtId": "D04",
+        "id": "fabric-basin-quay",
+        "layerId": "L4_4",
+        "polygon": [
+          [
+            735.95,
+            663.56
+          ],
+          [
+            793.66,
+            672.25
+          ],
+          [
+            784.05,
+            686.44
+          ],
+          [
+            726.34,
+            677.75
+          ]
+        ],
+        "sizeClass": "compact",
+        "sourceConfidence": "layout-inferred",
+        "sourceDisplayWidth": 190,
+        "width": 67.32
+      },
+      {
+        "anchor": [
+          820,
+          850
+        ],
+        "area": 884.5,
+        "assetId": "D08",
+        "center": [
+          820,
+          845
+        ],
+        "depth": 22.66,
+        "districtId": "D06",
+        "id": "fabric-terminal-quay",
+        "layerId": "L4_4",
+        "polygon": [
+          [
+            796.2,
+            833.67
+          ],
+          [
+            853.32,
+            842.28
+          ],
+          [
+            843.8,
+            856.33
+          ],
+          [
+            786.68,
+            847.72
+          ]
+        ],
+        "sizeClass": "compact",
+        "sourceConfidence": "layout-inferred",
+        "sourceDisplayWidth": 200,
+        "width": 66.64
+      }
+    ],
+    "sizeClasses": [
+      {
+        "id": "compact",
+        "maximumWidth": 76.84
+      },
+      {
+        "id": "standard",
+        "maximumWidth": 90.44,
+        "minimumWidthExclusive": 76.84
+      },
+      {
+        "id": "large",
+        "maximumWidth": 95.2,
+        "minimumWidthExclusive": 90.44
+      },
+      {
+        "id": "landmark",
+        "minimumWidthExclusive": 95.2
+      }
+    ]
+  },
+  "densityMap": {
+    "cells": [
+      {
+        "bounds": [
+          0,
+          0,
+          121,
+          121
+        ],
+        "buildingCount": 0,
+        "column": 0,
+        "coverageFraction": 0.4593,
+        "row": 0,
+        "density": 0.0441
+      },
+      {
+        "bounds": [
+          121,
+          0,
+          241,
+          121
+        ],
+        "buildingCount": 0,
+        "column": 1,
+        "coverageFraction": 1,
+        "row": 0,
+        "density": 0.1288
+      },
+      {
+        "bounds": [
+          241,
+          0,
+          362,
+          121
+        ],
+        "buildingCount": 0,
+        "column": 2,
+        "coverageFraction": 1,
+        "row": 0,
+        "density": 0.1736
+      },
+      {
+        "bounds": [
+          362,
+          0,
+          483,
+          121
+        ],
+        "buildingCount": 0,
+        "column": 3,
+        "coverageFraction": 1,
+        "row": 0,
+        "density": 0.2265
+      },
+      {
+        "bounds": [
+          483,
+          0,
+          603,
+          121
+        ],
+        "buildingCount": 0,
+        "column": 4,
+        "coverageFraction": 1,
+        "row": 0,
+        "density": 0.247
+      },
+      {
+        "bounds": [
+          603,
+          0,
+          724,
+          121
+        ],
+        "buildingCount": 0,
+        "column": 5,
+        "coverageFraction": 0.9957,
+        "row": 0,
+        "density": 0.2223
+      },
+      {
+        "bounds": [
+          724,
+          0,
+          845,
+          121
+        ],
+        "buildingCount": 0,
+        "column": 6,
+        "coverageFraction": 0.6689,
+        "row": 0,
+        "density": 0.1284
+      },
+      {
+        "bounds": [
+          845,
+          0,
+          965,
+          121
+        ],
+        "buildingCount": 0,
+        "column": 7,
+        "coverageFraction": 0.156,
+        "row": 0,
+        "density": 0.0255
+      },
+      {
+        "bounds": [
+          965,
+          0,
+          1086,
+          121
+        ],
+        "buildingCount": 0,
+        "column": 8,
+        "coverageFraction": 0,
+        "row": 0,
+        "density": 0
+      },
+      {
+        "bounds": [
+          1086,
+          0,
+          1207,
+          121
+        ],
+        "buildingCount": 0,
+        "column": 9,
+        "coverageFraction": 0.0003,
+        "row": 0,
+        "density": 0
+      },
+      {
+        "bounds": [
+          1207,
+          0,
+          1327,
+          121
+        ],
+        "buildingCount": 0,
+        "column": 10,
+        "coverageFraction": 0,
+        "row": 0,
+        "density": 0
+      },
+      {
+        "bounds": [
+          1327,
+          0,
+          1448,
+          121
+        ],
+        "buildingCount": 0,
+        "column": 11,
+        "coverageFraction": 0,
+        "row": 0,
+        "density": 0
+      },
+      {
+        "bounds": [
+          0,
+          121,
+          121,
+          241
+        ],
+        "buildingCount": 0,
+        "column": 0,
+        "coverageFraction": 0.8505,
+        "row": 1,
+        "density": 0.1039
+      },
+      {
+        "bounds": [
+          121,
+          121,
+          241,
+          241
+        ],
+        "buildingCount": 0,
+        "column": 1,
+        "coverageFraction": 1,
+        "row": 1,
+        "density": 0.1826
+      },
+      {
+        "bounds": [
+          241,
+          121,
+          362,
+          241
+        ],
+        "buildingCount": 0,
+        "column": 2,
+        "coverageFraction": 1,
+        "row": 1,
+        "density": 0.2882
+      },
+      {
+        "bounds": [
+          362,
+          121,
+          483,
+          241
+        ],
+        "buildingCount": 0,
+        "column": 3,
+        "coverageFraction": 1,
+        "row": 1,
+        "density": 0.436
+      },
+      {
+        "bounds": [
+          483,
+          121,
+          603,
+          241
+        ],
+        "buildingCount": 1,
+        "column": 4,
+        "coverageFraction": 1,
+        "row": 1,
+        "density": 0.4918
+      },
+      {
+        "bounds": [
+          603,
+          121,
+          724,
+          241
+        ],
+        "buildingCount": 1,
+        "column": 5,
+        "coverageFraction": 1,
+        "row": 1,
+        "density": 0.4087
+      },
+      {
+        "bounds": [
+          724,
+          121,
+          845,
+          241
+        ],
+        "buildingCount": 0,
+        "column": 6,
+        "coverageFraction": 1,
+        "row": 1,
+        "density": 0.3135
+      },
+      {
+        "bounds": [
+          845,
+          121,
+          965,
+          241
+        ],
+        "buildingCount": 0,
+        "column": 7,
+        "coverageFraction": 0.9839,
+        "row": 1,
+        "density": 0.2373
+      },
+      {
+        "bounds": [
+          965,
+          121,
+          1086,
+          241
+        ],
+        "buildingCount": 0,
+        "column": 8,
+        "coverageFraction": 0.2128,
+        "row": 1,
+        "density": 0.0428
+      },
+      {
+        "bounds": [
+          1086,
+          121,
+          1207,
+          241
+        ],
+        "buildingCount": 0,
+        "column": 9,
+        "coverageFraction": 0.5653,
+        "row": 1,
+        "density": 0.0982
+      },
+      {
+        "bounds": [
+          1207,
+          121,
+          1327,
+          241
+        ],
+        "buildingCount": 0,
+        "column": 10,
+        "coverageFraction": 0.9692,
+        "row": 1,
+        "density": 0.144
+      },
+      {
+        "bounds": [
+          1327,
+          121,
+          1448,
+          241
+        ],
+        "buildingCount": 0,
+        "column": 11,
+        "coverageFraction": 0.9344,
+        "row": 1,
+        "density": 0.1134
+      },
+      {
+        "bounds": [
+          0,
+          241,
+          121,
+          362
+        ],
+        "buildingCount": 0,
+        "column": 0,
+        "coverageFraction": 0.742,
+        "row": 2,
+        "density": 0.1122
+      },
+      {
+        "bounds": [
+          121,
+          241,
+          241,
+          362
+        ],
+        "buildingCount": 0,
+        "column": 1,
+        "coverageFraction": 1,
+        "row": 2,
+        "density": 0.2564
+      },
+      {
+        "bounds": [
+          241,
+          241,
+          362,
+          362
+        ],
+        "buildingCount": 1,
+        "column": 2,
+        "coverageFraction": 1,
+        "row": 2,
+        "density": 0.4725
+      },
+      {
+        "bounds": [
+          362,
+          241,
+          483,
+          362
+        ],
+        "buildingCount": 1,
+        "column": 3,
+        "coverageFraction": 1,
+        "row": 2,
+        "density": 0.6245
+      },
+      {
+        "bounds": [
+          483,
+          241,
+          603,
+          362
+        ],
+        "buildingCount": 0,
+        "column": 4,
+        "coverageFraction": 1,
+        "row": 2,
+        "density": 0.5843
+      },
+      {
+        "bounds": [
+          603,
+          241,
+          724,
+          362
+        ],
+        "buildingCount": 0,
+        "column": 5,
+        "coverageFraction": 1,
+        "row": 2,
+        "density": 0.593
+      },
+      {
+        "bounds": [
+          724,
+          241,
+          845,
+          362
+        ],
+        "buildingCount": 1,
+        "column": 6,
+        "coverageFraction": 1,
+        "row": 2,
+        "density": 0.5401
+      },
+      {
+        "bounds": [
+          845,
+          241,
+          965,
+          362
+        ],
+        "buildingCount": 0,
+        "column": 7,
+        "coverageFraction": 1,
+        "row": 2,
+        "density": 0.3632
+      },
+      {
+        "bounds": [
+          965,
+          241,
+          1086,
+          362
+        ],
+        "buildingCount": 0,
+        "column": 8,
+        "coverageFraction": 0.9334,
+        "row": 2,
+        "density": 0.285
+      },
+      {
+        "bounds": [
+          1086,
+          241,
+          1207,
+          362
+        ],
+        "buildingCount": 0,
+        "column": 9,
+        "coverageFraction": 0.9734,
+        "row": 2,
+        "density": 0.2628
+      },
+      {
+        "bounds": [
+          1207,
+          241,
+          1327,
+          362
+        ],
+        "buildingCount": 0,
+        "column": 10,
+        "coverageFraction": 1,
+        "row": 2,
+        "density": 0.2333
+      },
+      {
+        "bounds": [
+          1327,
+          241,
+          1448,
+          362
+        ],
+        "buildingCount": 0,
+        "column": 11,
+        "coverageFraction": 1,
+        "row": 2,
+        "density": 0.1857
+      },
+      {
+        "bounds": [
+          0,
+          362,
+          121,
+          483
+        ],
+        "buildingCount": 0,
+        "column": 0,
+        "coverageFraction": 0.7184,
+        "row": 3,
+        "density": 0.1243
+      },
+      {
+        "bounds": [
+          121,
+          362,
+          241,
+          483
+        ],
+        "buildingCount": 0,
+        "column": 1,
+        "coverageFraction": 1,
+        "row": 3,
+        "density": 0.3267
+      },
+      {
+        "bounds": [
+          241,
+          362,
+          362,
+          483
+        ],
+        "buildingCount": 1,
+        "column": 2,
+        "coverageFraction": 1,
+        "row": 3,
+        "density": 0.5127
+      },
+      {
+        "bounds": [
+          362,
+          362,
+          483,
+          483
+        ],
+        "buildingCount": 1,
+        "column": 3,
+        "coverageFraction": 1,
+        "row": 3,
+        "density": 0.693
+      },
+      {
+        "bounds": [
+          483,
+          362,
+          603,
+          483
+        ],
+        "buildingCount": 1,
+        "column": 4,
+        "coverageFraction": 1,
+        "row": 3,
+        "density": 0.7366
+      },
+      {
+        "bounds": [
+          603,
+          362,
+          724,
+          483
+        ],
+        "buildingCount": 3,
+        "column": 5,
+        "coverageFraction": 1,
+        "row": 3,
+        "density": 0.7842
+      },
+      {
+        "bounds": [
+          724,
+          362,
+          845,
+          483
+        ],
+        "buildingCount": 0,
+        "column": 6,
+        "coverageFraction": 1,
+        "row": 3,
+        "density": 0.6615
+      },
+      {
+        "bounds": [
+          845,
+          362,
+          965,
+          483
+        ],
+        "buildingCount": 0,
+        "column": 7,
+        "coverageFraction": 1,
+        "row": 3,
+        "density": 0.5447
+      },
+      {
+        "bounds": [
+          965,
+          362,
+          1086,
+          483
+        ],
+        "buildingCount": 0,
+        "column": 8,
+        "coverageFraction": 1,
+        "row": 3,
+        "density": 0.5333
+      },
+      {
+        "bounds": [
+          1086,
+          362,
+          1207,
+          483
+        ],
+        "buildingCount": 0,
+        "column": 9,
+        "coverageFraction": 1,
+        "row": 3,
+        "density": 0.5087
+      },
+      {
+        "bounds": [
+          1207,
+          362,
+          1327,
+          483
+        ],
+        "buildingCount": 0,
+        "column": 10,
+        "coverageFraction": 1,
+        "row": 3,
+        "density": 0.3943
+      },
+      {
+        "bounds": [
+          1327,
+          362,
+          1448,
+          483
+        ],
+        "buildingCount": 2,
+        "column": 11,
+        "coverageFraction": 1,
+        "row": 3,
+        "density": 0.3168
+      },
+      {
+        "bounds": [
+          0,
+          483,
+          121,
+          603
+        ],
+        "buildingCount": 0,
+        "column": 0,
+        "coverageFraction": 1,
+        "row": 4,
+        "density": 0.178
+      },
+      {
+        "bounds": [
+          121,
+          483,
+          241,
+          603
+        ],
+        "buildingCount": 0,
+        "column": 1,
+        "coverageFraction": 1,
+        "row": 4,
+        "density": 0.3057
+      },
+      {
+        "bounds": [
+          241,
+          483,
+          362,
+          603
+        ],
+        "buildingCount": 1,
+        "column": 2,
+        "coverageFraction": 1,
+        "row": 4,
+        "density": 0.4844
+      },
+      {
+        "bounds": [
+          362,
+          483,
+          483,
+          603
+        ],
+        "buildingCount": 1,
+        "column": 3,
+        "coverageFraction": 1,
+        "row": 4,
+        "density": 0.661
+      },
+      {
+        "bounds": [
+          483,
+          483,
+          603,
+          603
+        ],
+        "buildingCount": 1,
+        "column": 4,
+        "coverageFraction": 1,
+        "row": 4,
+        "density": 0.7484
+      },
+      {
+        "bounds": [
+          603,
+          483,
+          724,
+          603
+        ],
+        "buildingCount": 0,
+        "column": 5,
+        "coverageFraction": 1,
+        "row": 4,
+        "density": 0.7512
+      },
+      {
+        "bounds": [
+          724,
+          483,
+          845,
+          603
+        ],
+        "buildingCount": 1,
+        "column": 6,
+        "coverageFraction": 1,
+        "row": 4,
+        "density": 0.7485
+      },
+      {
+        "bounds": [
+          845,
+          483,
+          965,
+          603
+        ],
+        "buildingCount": 1,
+        "column": 7,
+        "coverageFraction": 1,
+        "row": 4,
+        "density": 0.7846
+      },
+      {
+        "bounds": [
+          965,
+          483,
+          1086,
+          603
+        ],
+        "buildingCount": 1,
+        "column": 8,
+        "coverageFraction": 1,
+        "row": 4,
+        "density": 0.9069
+      },
+      {
+        "bounds": [
+          1086,
+          483,
+          1207,
+          603
+        ],
+        "buildingCount": 2,
+        "column": 9,
+        "coverageFraction": 1,
+        "row": 4,
+        "density": 0.9539
+      },
+      {
+        "bounds": [
+          1207,
+          483,
+          1327,
+          603
+        ],
+        "buildingCount": 0,
+        "column": 10,
+        "coverageFraction": 1,
+        "row": 4,
+        "density": 0.4875
+      },
+      {
+        "bounds": [
+          1327,
+          483,
+          1448,
+          603
+        ],
+        "buildingCount": 0,
+        "column": 11,
+        "coverageFraction": 1,
+        "row": 4,
+        "density": 0.2973
+      },
+      {
+        "bounds": [
+          0,
+          603,
+          121,
+          724
+        ],
+        "buildingCount": 0,
+        "column": 0,
+        "coverageFraction": 1,
+        "row": 5,
+        "density": 0.1788
+      },
+      {
+        "bounds": [
+          121,
+          603,
+          241,
+          724
+        ],
+        "buildingCount": 0,
+        "column": 1,
+        "coverageFraction": 1,
+        "row": 5,
+        "density": 0.306
+      },
+      {
+        "bounds": [
+          241,
+          603,
+          362,
+          724
+        ],
+        "buildingCount": 3,
+        "column": 2,
+        "coverageFraction": 1,
+        "row": 5,
+        "density": 0.4819
+      },
+      {
+        "bounds": [
+          362,
+          603,
+          483,
+          724
+        ],
+        "buildingCount": 1,
+        "column": 3,
+        "coverageFraction": 1,
+        "row": 5,
+        "density": 0.5977
+      },
+      {
+        "bounds": [
+          483,
+          603,
+          603,
+          724
+        ],
+        "buildingCount": 2,
+        "column": 4,
+        "coverageFraction": 1,
+        "row": 5,
+        "density": 0.7962
+      },
+      {
+        "bounds": [
+          603,
+          603,
+          724,
+          724
+        ],
+        "buildingCount": 1,
+        "column": 5,
+        "coverageFraction": 1,
+        "row": 5,
+        "density": 0.7867
+      },
+      {
+        "bounds": [
+          724,
+          603,
+          845,
+          724
+        ],
+        "buildingCount": 1,
+        "column": 6,
+        "coverageFraction": 1,
+        "row": 5,
+        "density": 0.8244
+      },
+      {
+        "bounds": [
+          845,
+          603,
+          965,
+          724
+        ],
+        "buildingCount": 2,
+        "column": 7,
+        "coverageFraction": 1,
+        "row": 5,
+        "density": 0.9295
+      },
+      {
+        "bounds": [
+          965,
+          603,
+          1086,
+          724
+        ],
+        "buildingCount": 1,
+        "column": 8,
+        "coverageFraction": 1,
+        "row": 5,
+        "density": 1
+      },
+      {
+        "bounds": [
+          1086,
+          603,
+          1207,
+          724
+        ],
+        "buildingCount": 2,
+        "column": 9,
+        "coverageFraction": 1,
+        "row": 5,
+        "density": 0.8471
+      },
+      {
+        "bounds": [
+          1207,
+          603,
+          1327,
+          724
+        ],
+        "buildingCount": 0,
+        "column": 10,
+        "coverageFraction": 1,
+        "row": 5,
+        "density": 0.4957
+      },
+      {
+        "bounds": [
+          1327,
+          603,
+          1448,
+          724
+        ],
+        "buildingCount": 0,
+        "column": 11,
+        "coverageFraction": 1,
+        "row": 5,
+        "density": 0.2486
+      },
+      {
+        "bounds": [
+          0,
+          724,
+          121,
+          845
+        ],
+        "buildingCount": 0,
+        "column": 0,
+        "coverageFraction": 1,
+        "row": 6,
+        "density": 0.1812
+      },
+      {
+        "bounds": [
+          121,
+          724,
+          241,
+          845
+        ],
+        "buildingCount": 1,
+        "column": 1,
+        "coverageFraction": 1,
+        "row": 6,
+        "density": 0.3299
+      },
+      {
+        "bounds": [
+          241,
+          724,
+          362,
+          845
+        ],
+        "buildingCount": 0,
+        "column": 2,
+        "coverageFraction": 1,
+        "row": 6,
+        "density": 0.375
+      },
+      {
+        "bounds": [
+          362,
+          724,
+          483,
+          845
+        ],
+        "buildingCount": 0,
+        "column": 3,
+        "coverageFraction": 1,
+        "row": 6,
+        "density": 0.4811
+      },
+      {
+        "bounds": [
+          483,
+          724,
+          603,
+          845
+        ],
+        "buildingCount": 0,
+        "column": 4,
+        "coverageFraction": 1,
+        "row": 6,
+        "density": 0.6453
+      },
+      {
+        "bounds": [
+          603,
+          724,
+          724,
+          845
+        ],
+        "buildingCount": 1,
+        "column": 5,
+        "coverageFraction": 1,
+        "row": 6,
+        "density": 0.7833
+      },
+      {
+        "bounds": [
+          724,
+          724,
+          845,
+          845
+        ],
+        "buildingCount": 2,
+        "column": 6,
+        "coverageFraction": 1,
+        "row": 6,
+        "density": 0.7929
+      },
+      {
+        "bounds": [
+          845,
+          724,
+          965,
+          845
+        ],
+        "buildingCount": 0,
+        "column": 7,
+        "coverageFraction": 1,
+        "row": 6,
+        "density": 0.7543
+      },
+      {
+        "bounds": [
+          965,
+          724,
+          1086,
+          845
+        ],
+        "buildingCount": 2,
+        "column": 8,
+        "coverageFraction": 1,
+        "row": 6,
+        "density": 0.8112
+      },
+      {
+        "bounds": [
+          1086,
+          724,
+          1207,
+          845
+        ],
+        "buildingCount": 1,
+        "column": 9,
+        "coverageFraction": 1,
+        "row": 6,
+        "density": 0.612
+      },
+      {
+        "bounds": [
+          1207,
+          724,
+          1327,
+          845
+        ],
+        "buildingCount": 0,
+        "column": 10,
+        "coverageFraction": 1,
+        "row": 6,
+        "density": 0.3529
+      },
+      {
+        "bounds": [
+          1327,
+          724,
+          1448,
+          845
+        ],
+        "buildingCount": 0,
+        "column": 11,
+        "coverageFraction": 1,
+        "row": 6,
+        "density": 0.2018
+      },
+      {
+        "bounds": [
+          0,
+          845,
+          121,
+          965
+        ],
+        "buildingCount": 0,
+        "column": 0,
+        "coverageFraction": 1,
+        "row": 7,
+        "density": 0.1522
+      },
+      {
+        "bounds": [
+          121,
+          845,
+          241,
+          965
+        ],
+        "buildingCount": 0,
+        "column": 1,
+        "coverageFraction": 1,
+        "row": 7,
+        "density": 0.2444
+      },
+      {
+        "bounds": [
+          241,
+          845,
+          362,
+          965
+        ],
+        "buildingCount": 0,
+        "column": 2,
+        "coverageFraction": 1,
+        "row": 7,
+        "density": 0.2802
+      },
+      {
+        "bounds": [
+          362,
+          845,
+          483,
+          965
+        ],
+        "buildingCount": 0,
+        "column": 3,
+        "coverageFraction": 1,
+        "row": 7,
+        "density": 0.4288
+      },
+      {
+        "bounds": [
+          483,
+          845,
+          603,
+          965
+        ],
+        "buildingCount": 2,
+        "column": 4,
+        "coverageFraction": 1,
+        "row": 7,
+        "density": 0.6177
+      },
+      {
+        "bounds": [
+          603,
+          845,
+          724,
+          965
+        ],
+        "buildingCount": 0,
+        "column": 5,
+        "coverageFraction": 1,
+        "row": 7,
+        "density": 0.5385
+      },
+      {
+        "bounds": [
+          724,
+          845,
+          845,
+          965
+        ],
+        "buildingCount": 1,
+        "column": 6,
+        "coverageFraction": 1,
+        "row": 7,
+        "density": 0.4832
+      },
+      {
+        "bounds": [
+          845,
+          845,
+          965,
+          965
+        ],
+        "buildingCount": 0,
+        "column": 7,
+        "coverageFraction": 1,
+        "row": 7,
+        "density": 0.4381
+      },
+      {
+        "bounds": [
+          965,
+          845,
+          1086,
+          965
+        ],
+        "buildingCount": 0,
+        "column": 8,
+        "coverageFraction": 1,
+        "row": 7,
+        "density": 0.4099
+      },
+      {
+        "bounds": [
+          1086,
+          845,
+          1207,
+          965
+        ],
+        "buildingCount": 0,
+        "column": 9,
+        "coverageFraction": 1,
+        "row": 7,
+        "density": 0.3226
+      },
+      {
+        "bounds": [
+          1207,
+          845,
+          1327,
+          965
+        ],
+        "buildingCount": 0,
+        "column": 10,
+        "coverageFraction": 1,
+        "row": 7,
+        "density": 0.2239
+      },
+      {
+        "bounds": [
+          1327,
+          845,
+          1448,
+          965
+        ],
+        "buildingCount": 0,
+        "column": 11,
+        "coverageFraction": 1,
+        "row": 7,
+        "density": 0.1527
+      },
+      {
+        "bounds": [
+          0,
+          965,
+          121,
+          1086
+        ],
+        "buildingCount": 0,
+        "column": 0,
+        "coverageFraction": 1,
+        "row": 8,
+        "density": 0.1112
+      },
+      {
+        "bounds": [
+          121,
+          965,
+          241,
+          1086
+        ],
+        "buildingCount": 0,
+        "column": 1,
+        "coverageFraction": 1,
+        "row": 8,
+        "density": 0.1492
+      },
+      {
+        "bounds": [
+          241,
+          965,
+          362,
+          1086
+        ],
+        "buildingCount": 0,
+        "column": 2,
+        "coverageFraction": 1,
+        "row": 8,
+        "density": 0.1947
+      },
+      {
+        "bounds": [
+          362,
+          965,
+          483,
+          1086
+        ],
+        "buildingCount": 0,
+        "column": 3,
+        "coverageFraction": 1,
+        "row": 8,
+        "density": 0.2878
+      },
+      {
+        "bounds": [
+          483,
+          965,
+          603,
+          1086
+        ],
+        "buildingCount": 0,
+        "column": 4,
+        "coverageFraction": 1,
+        "row": 8,
+        "density": 0.4271
+      },
+      {
+        "bounds": [
+          603,
+          965,
+          724,
+          1086
+        ],
+        "buildingCount": 1,
+        "column": 5,
+        "coverageFraction": 1,
+        "row": 8,
+        "density": 0.3617
+      },
+      {
+        "bounds": [
+          724,
+          965,
+          845,
+          1086
+        ],
+        "buildingCount": 0,
+        "column": 6,
+        "coverageFraction": 1,
+        "row": 8,
+        "density": 0.2854
+      },
+      {
+        "bounds": [
+          845,
+          965,
+          965,
+          1086
+        ],
+        "buildingCount": 0,
+        "column": 7,
+        "coverageFraction": 1,
+        "row": 8,
+        "density": 0.2549
+      },
+      {
+        "bounds": [
+          965,
+          965,
+          1086,
+          1086
+        ],
+        "buildingCount": 0,
+        "column": 8,
+        "coverageFraction": 1,
+        "row": 8,
+        "density": 0.2282
+      },
+      {
+        "bounds": [
+          1086,
+          965,
+          1207,
+          1086
+        ],
+        "buildingCount": 0,
+        "column": 9,
+        "coverageFraction": 1,
+        "row": 8,
+        "density": 0.1918
+      },
+      {
+        "bounds": [
+          1207,
+          965,
+          1327,
+          1086
+        ],
+        "buildingCount": 0,
+        "column": 10,
+        "coverageFraction": 1,
+        "row": 8,
+        "density": 0.1507
+      },
+      {
+        "bounds": [
+          1327,
+          965,
+          1448,
+          1086
+        ],
+        "buildingCount": 0,
+        "column": 11,
+        "coverageFraction": 1,
+        "row": 8,
+        "density": 0.1149
+      }
+    ],
+    "columns": 12,
+    "rows": 9
+  },
+  "terraces": {
+    "bands": [
+      {
+        "approximateWidth": 6,
+        "districtId": "D01",
+        "edgeStrength": 26.541,
+        "id": "D01-T1",
+        "kind": "terrace-contour",
+        "points": [
+          [
+            31,
+            292
+          ],
+          [
+            171,
+            294
+          ],
+          [
+            310,
+            297
+          ],
+          [
+            450,
+            302
+          ],
+          [
+            590,
+            295
+          ],
+          [
+            730,
+            305
+          ],
+          [
+            869,
+            297
+          ],
+          [
+            1009,
+            292
+          ]
+        ]
+      },
+      {
+        "approximateWidth": 6,
+        "districtId": "D01",
+        "edgeStrength": 27.089,
+        "id": "D01-T2",
+        "kind": "terrace-contour",
+        "points": [
+          [
+            61,
+            379
+          ],
+          [
+            188,
+            390
+          ],
+          [
+            315,
+            389
+          ],
+          [
+            442,
+            371
+          ],
+          [
+            570,
+            378
+          ],
+          [
+            697,
+            386
+          ],
+          [
+            824,
+            387
+          ],
+          [
+            951,
+            373
+          ]
+        ]
+      },
+      {
+        "approximateWidth": 6,
+        "districtId": "D01",
+        "edgeStrength": 28.746,
+        "id": "D01-T3",
+        "kind": "terrace-contour",
+        "points": [
+          [
+            138,
+            421
+          ],
+          [
+            250,
+            414
+          ],
+          [
+            362,
+            430
+          ],
+          [
+            474,
+            420
+          ],
+          [
+            585,
+            420
+          ],
+          [
+            697,
+            412
+          ],
+          [
+            809,
+            414
+          ],
+          [
+            921,
+            412
+          ]
+        ]
+      },
+      {
+        "approximateWidth": 6,
+        "districtId": "D02",
+        "edgeStrength": 24.095,
+        "id": "D02-T1",
+        "kind": "terrace-contour",
+        "points": [
+          [
+            1086,
+            331
+          ],
+          [
+            1206,
+            328
+          ],
+          [
+            1327,
+            325
+          ],
+          [
+            1447,
+            314
+          ]
+        ]
+      },
+      {
+        "approximateWidth": 6,
+        "districtId": "D02",
+        "edgeStrength": 19.617,
+        "id": "D02-T2",
+        "kind": "terrace-contour",
+        "points": [
+          [
+            1118,
+            361
+          ],
+          [
+            1283,
+            357
+          ],
+          [
+            1447,
+            356
+          ]
+        ]
+      },
+      {
+        "approximateWidth": 6,
+        "districtId": "D02",
+        "edgeStrength": 25.396,
+        "id": "D02-T3",
+        "kind": "terrace-contour",
+        "points": [
+          [
+            1185,
+            407
+          ],
+          [
+            1316,
+            402
+          ],
+          [
+            1447,
+            401
+          ]
+        ]
+      },
+      {
+        "approximateWidth": 6,
+        "districtId": "D03",
+        "edgeStrength": 28.467,
+        "id": "D03-T1",
+        "kind": "terrace-contour",
+        "points": [
+          [
+            987,
+            343
+          ],
+          [
+            1035,
+            337
+          ],
+          [
+            1082,
+            342
+          ]
+        ]
+      },
+      {
+        "approximateWidth": 6,
+        "districtId": "D03",
+        "edgeStrength": 29.26,
+        "id": "D03-T2",
+        "kind": "terrace-contour",
+        "points": [
+          [
+            1021,
+            825
+          ],
+          [
+            1148,
+            837
+          ],
+          [
+            1276,
+            818
+          ],
+          [
+            1403,
+            827
+          ]
+        ]
+      },
+      {
+        "approximateWidth": 6,
+        "districtId": "D03",
+        "edgeStrength": 26.417,
+        "id": "D03-T3",
+        "kind": "terrace-contour",
+        "points": [
+          [
+            1103,
+            875
+          ],
+          [
+            1118,
+            872
+          ],
+          [
+            1133,
+            868
+          ]
+        ]
+      },
+      {
+        "approximateWidth": 6,
+        "districtId": "D04",
+        "edgeStrength": 47.356,
+        "id": "D04-T1",
+        "kind": "terrace-contour",
+        "points": [
+          [
+            253,
+            508
+          ],
+          [
+            281,
+            496
+          ],
+          [
+            309,
+            501
+          ]
+        ]
+      },
+      {
+        "approximateWidth": 6,
+        "districtId": "D04",
+        "edgeStrength": 28.122,
+        "id": "D04-T2",
+        "kind": "terrace-contour",
+        "points": [
+          [
+            211,
+            561
+          ],
+          [
+            324,
+            548
+          ],
+          [
+            437,
+            552
+          ],
+          [
+            550,
+            560
+          ],
+          [
+            663,
+            548
+          ],
+          [
+            776,
+            568
+          ]
+        ]
+      },
+      {
+        "approximateWidth": 6,
+        "districtId": "D04",
+        "edgeStrength": 28.006,
+        "id": "D04-T3",
+        "kind": "terrace-contour",
+        "points": [
+          [
+            301,
+            645
+          ],
+          [
+            426,
+            639
+          ],
+          [
+            551,
+            638
+          ],
+          [
+            676,
+            645
+          ],
+          [
+            801,
+            656
+          ]
+        ]
+      },
+      {
+        "approximateWidth": 6,
+        "districtId": "D05",
+        "edgeStrength": 26.42,
+        "id": "D05-T1",
+        "kind": "terrace-contour",
+        "points": [
+          [
+            0,
+            616
+          ],
+          [
+            139,
+            620
+          ],
+          [
+            277,
+            635
+          ]
+        ]
+      },
+      {
+        "approximateWidth": 6,
+        "districtId": "D05",
+        "edgeStrength": 23.184,
+        "id": "D05-T2",
+        "kind": "terrace-contour",
+        "points": [
+          [
+            0,
+            817
+          ],
+          [
+            109,
+            829
+          ],
+          [
+            218,
+            833
+          ],
+          [
+            327,
+            820
+          ],
+          [
+            435,
+            828
+          ],
+          [
+            544,
+            837
+          ],
+          [
+            653,
+            833
+          ]
+        ]
+      },
+      {
+        "approximateWidth": 6,
+        "districtId": "D05",
+        "edgeStrength": 23.708,
+        "id": "D05-T3",
+        "kind": "terrace-contour",
+        "points": [
+          [
+            0,
+            931
+          ],
+          [
+            113,
+            940
+          ],
+          [
+            225,
+            946
+          ],
+          [
+            338,
+            935
+          ],
+          [
+            450,
+            945
+          ],
+          [
+            563,
+            946
+          ],
+          [
+            675,
+            951
+          ]
+        ]
+      },
+      {
+        "approximateWidth": 6,
+        "districtId": "D06",
+        "edgeStrength": 36.146,
+        "id": "D06-T1",
+        "kind": "terrace-contour",
+        "points": [
+          [
+            934,
+            807
+          ],
+          [
+            955,
+            808
+          ],
+          [
+            976,
+            802
+          ]
+        ]
+      },
+      {
+        "approximateWidth": 6,
+        "districtId": "D06",
+        "edgeStrength": 23.409,
+        "id": "D06-T2",
+        "kind": "terrace-contour",
+        "points": [
+          [
+            670,
+            879
+          ],
+          [
+            779,
+            877
+          ],
+          [
+            887,
+            874
+          ],
+          [
+            996,
+            868
+          ],
+          [
+            1104,
+            881
+          ]
+        ]
+      },
+      {
+        "approximateWidth": 6,
+        "districtId": "D06",
+        "edgeStrength": 22.137,
+        "id": "D06-T3",
+        "kind": "terrace-contour",
+        "points": [
+          [
+            680,
+            976
+          ],
+          [
+            790,
+            969
+          ],
+          [
+            899,
+            976
+          ],
+          [
+            1009,
+            986
+          ],
+          [
+            1118,
+            970
+          ],
+          [
+            1228,
+            967
+          ],
+          [
+            1337,
+            979
+          ],
+          [
+            1447,
+            966
+          ]
+        ]
+      }
+    ]
+  },
+  "palette": {
+    "foliage": {
+      "dominantSwatches": [
+        {
+          "fraction": 0.8561,
+          "hex": "#202010",
+          "pixelCount": 70818,
+          "rgb": [
+            32,
+            32,
+            16
+          ]
+        },
+        {
+          "fraction": 0.1264,
+          "hex": "#404030",
+          "pixelCount": 10455,
+          "rgb": [
+            64,
+            64,
+            48
+          ]
+        },
+        {
+          "fraction": 0.0151,
+          "hex": "#606040",
+          "pixelCount": 1246,
+          "rgb": [
+            96,
+            96,
+            64
+          ]
+        },
+        {
+          "fraction": 0.0023,
+          "hex": "#808060",
+          "pixelCount": 189,
+          "rgb": [
+            128,
+            128,
+            96
+          ]
+        },
+        {
+          "fraction": 0.0001,
+          "hex": "#001000",
+          "pixelCount": 9,
+          "rgb": [
+            0,
+            16,
+            0
+          ]
+        }
+      ],
+      "sampleCount": 293625,
+      "sampling": "green-hue master pixels inside the district union"
+    },
+    "rock": {
+      "dominantSwatches": [
+        {
+          "fraction": 0.665,
+          "hex": "#101010",
+          "pixelCount": 20811,
+          "rgb": [
+            16,
+            16,
+            16
+          ]
+        },
+        {
+          "fraction": 0.1721,
+          "hex": "#303020",
+          "pixelCount": 5386,
+          "rgb": [
+            48,
+            48,
+            32
+          ]
+        },
+        {
+          "fraction": 0.1099,
+          "hex": "#504030",
+          "pixelCount": 3439,
+          "rgb": [
+            80,
+            64,
+            48
+          ]
+        },
+        {
+          "fraction": 0.0436,
+          "hex": "#706050",
+          "pixelCount": 1364,
+          "rgb": [
+            112,
+            96,
+            80
+          ]
+        },
+        {
+          "fraction": 0.0094,
+          "hex": "#908060",
+          "pixelCount": 295,
+          "rgb": [
+            144,
+            128,
+            96
+          ]
+        }
+      ],
+      "sampleCount": 86565,
+      "sampling": "low-saturation master pixels outside building and vegetation zones"
+    },
+    "roof": {
+      "dominantSwatches": [
+        {
+          "fraction": 0.3396,
+          "hex": "#101010",
+          "pixelCount": 8975,
+          "rgb": [
+            16,
+            16,
+            16
+          ]
+        },
+        {
+          "fraction": 0.2808,
+          "hex": "#303020",
+          "pixelCount": 7421,
+          "rgb": [
+            48,
+            48,
+            32
+          ]
+        },
+        {
+          "fraction": 0.2357,
+          "hex": "#504030",
+          "pixelCount": 6228,
+          "rgb": [
+            80,
+            64,
+            48
+          ]
+        },
+        {
+          "fraction": 0.1165,
+          "hex": "#706040",
+          "pixelCount": 3079,
+          "rgb": [
+            112,
+            96,
+            64
+          ]
+        },
+        {
+          "fraction": 0.0273,
+          "hex": "#908060",
+          "pixelCount": 722,
+          "rgb": [
+            144,
+            128,
+            96
+          ]
+        }
+      ],
+      "sampleCount": 131712,
+      "sampling": "roof zone around registered and inferred building anchors"
+    },
+    "wall": {
+      "dominantSwatches": [
+        {
+          "fraction": 0.4145,
+          "hex": "#303020",
+          "pixelCount": 7019,
+          "rgb": [
+            48,
+            48,
+            32
+          ]
+        },
+        {
+          "fraction": 0.344,
+          "hex": "#504030",
+          "pixelCount": 5826,
+          "rgb": [
+            80,
+            64,
+            48
+          ]
+        },
+        {
+          "fraction": 0.1668,
+          "hex": "#706040",
+          "pixelCount": 2825,
+          "rgb": [
+            112,
+            96,
+            64
+          ]
+        },
+        {
+          "fraction": 0.0387,
+          "hex": "#908060",
+          "pixelCount": 655,
+          "rgb": [
+            144,
+            128,
+            96
+          ]
+        },
+        {
+          "fraction": 0.036,
+          "hex": "#201010",
+          "pixelCount": 610,
+          "rgb": [
+            32,
+            16,
+            16
+          ]
+        }
+      ],
+      "sampleCount": 105836,
+      "sampling": "wall zone around registered and inferred building anchors"
+    },
+    "water": {
+      "dominantSwatches": [
+        {
+          "fraction": 0.969,
+          "hex": "#102020",
+          "pixelCount": 594,
+          "rgb": [
+            16,
+            32,
+            32
+          ]
+        },
+        {
+          "fraction": 0.0277,
+          "hex": "#303030",
+          "pixelCount": 17,
+          "rgb": [
+            48,
+            48,
+            48
+          ]
+        },
+        {
+          "fraction": 0.0016,
+          "hex": "#90a0b0",
+          "pixelCount": 1,
+          "rgb": [
+            144,
+            160,
+            176
+          ]
+        },
+        {
+          "fraction": 0.0016,
+          "hex": "#405040",
+          "pixelCount": 1,
+          "rgb": [
+            64,
+            80,
+            64
+          ]
+        }
+      ],
+      "sampleCount": 1187,
+      "sampling": "master pixels inside registered inland-water authority"
+    }
+  },
+  "validation": {
+    "circulationConnectedComponents": 1,
+    "circulationEdgesByKind": {
+      "road": 14,
+      "stairs": 9,
+      "bridge": 8
+    },
+    "footprintCount": 45,
+    "footprintOutsideDistrictMaskCount": 0,
+    "paletteFamilies": 5,
+    "propertyChecks": [
+      "circulation graph is connected",
+      "road, stairs, and bridge edge kinds are present",
+      "footprint polygons stay within their assigned district masks",
+      "terrace-band points stay within their assigned district masks",
+      "all five material families publish dominant swatches"
+    ],
+    "terraceBandCount": 18
+  }
+}

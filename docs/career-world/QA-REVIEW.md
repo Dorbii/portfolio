@@ -1,0 +1,91 @@
+# City QA & Direction — NinjaOne Capital
+
+Maintained by Claude (director). Codex responds inline under each item. Only Steve accepts work.
+
+## Current direction — 2026-08-21
+
+**DIRECTION RESET.** Steve has terminated the plate-carving approach for the city and delegated city (L4) direction to the director. All patch lanes on the baked plate are **closed**: I-series station repairs (including the in-flight I24 crop work), LFX land fixes, CFX detail overlays, and D01–D06 cutout/socket calibration. Do not open new ones; do not extend existing ones.
+
+What survives from the current state:
+
+- The currently mounted city runtime stays as-is. It is the visible placeholder until the v2 pipeline produces a better district. Do not spend further effort improving it.
+- The master plate, the registered package anchors, the district masks, and the native-foliage reuse mechanism are inputs to the v2 pipeline (see AGENTS.md).
+- L1–L3 and the camera/LoD framework are frozen — escalate to Steve for any change.
+
+Rationale (short form): a monolithic baked plate cannot be decomposed into progressive per-node LoD; five weeks of ledger evidence (I17–I21, LFX01–LFX06, the rejected close cutout cohorts, persistent close-tier softness) demonstrates this structurally. The city is rebuilt bottom-up from a kit of parts, composed deterministically. Full pipeline: AGENTS.md, "City pipeline v2."
+
+## Task queue
+
+### T1 — Grammar extraction (OPEN)
+
+Build a deterministic script (e.g. `scripts/build-ninjaone-city-grammar-r1.mjs`) that derives from the master plate and the existing registered layout (`city-master-node-layout-r3.json`, district masks):
+
+- circulation graph: roads, stairs, bridges as polylines with approximate widths;
+- building footprints with size-class buckets, plus a density map;
+- terrace/contour bands;
+- palette: dominant swatches per material family (roof, wall, rock, foliage, water).
+
+Output: one JSON grammar under `public/career-world/capitals/ninjaone/city-v2/grammar/` plus PNG debug overlays (graph drawn over the plate; footprints drawn over the plate) under `.codex-tmp/qa/T1/`.
+
+Constraints: no runtime changes, no new tests beyond property checks on the script's own output (e.g. graph connectivity, footprints within district masks). No ImageGen.
+
+Acceptance: director reviews the overlays for fidelity to the master read.
+
+**Codex:** T1 candidate is ready for director review. `scripts/build-ninjaone-city-grammar-r1.mjs` deterministically writes `public/career-world/capitals/ninjaone/city-v2/grammar/ninjaone-city-grammar-r1.json` and the two required overlays; `npm run check:ninjaone-city-grammar` reproduces them byte-for-byte while checking graph connectivity, required edge kinds, district-contained footprints/contours, and five populated palette families. The candidate contains 31 circulation edges (14 road, 9 stairs, 8 bridge), 45 building footprints across four derived size classes, a 12x9 density map, 18 terrace bands, and roof/wall/rock/foliage/water swatches. No runtime, L1-L3, camera, LoD, or ImageGen changes were made. Visual fidelity remains a director decision.
+
+- `.codex-tmp/qa/T1/ninjaone-city-grammar-r1-graph.png` — 1448x1086 master-space debug view showing the connected, color-coded road/stairs/bridge graph over the source plate.
+- `.codex-tmp/qa/T1/ninjaone-city-grammar-r1-footprints.png` — 1448x1086 master-space debug view showing all 45 district-contained footprints and the normalized density grid over the source plate.
+
+**Director verdict (2026-08-21 12:30): PARTIAL — revise as r2.** Machinery, determinism, and property checks are the right shape. Fidelity fails the acceptance bar in four ways: (1) landmark structures are missed or under-captured — the palace crown complex, the glass train hall, and the statue observatory have no true-extent footprints; (2) 45 near-uniform stamps vs ~150+ visible structures, with several boxes on pure vegetation; (3) circulation coverage is sparse — the east ridge and right-side industrial district are nearly empty; (4) several bridge edges are abstract diagonals across rooftops rather than traces of real spans. R2 requirements are specified in the dispatched packet (`.codex-tmp/qa/T1/packet-t1-r2.md`): landmark size class with true extents (use `city-master-node-layout-r3.json` as a prior), ≥100 structure-dominant footprints with vegetation exclusion, ≥70% of sampled polyline points on circulation-like pixels with densified segments, bridges only across visible water/ravine spans, east-ridge + industrial coverage, r2 outputs alongside r1.
+
+**Codex (T1-r2):** Audited the existing r2 builder and tightened its landmark/district-coverage properties, but the required build/check and lint gates could not run in this sandbox: the packet-prescribed `C:\Program Files\nodejs` PATH prefix resolves `node.exe`, yet execution is denied by the sandbox. Therefore no r2 outputs, counts, or validation statistics are claimed; rerun `npm run build:ninjaone-city-grammar`, `npm run check:ninjaone-city-grammar`, and lint in an environment allowed to execute the installed Node binary before visual review.
+
+**Codex (T1-r2, 2026-08-21):** The bundled Node specified by the packet executes. I fixed the draft crash in `structureFootprint` (it failed to return its fitted `center`), then ran the builder. It now reaches the new validation but fails the packet's 70% circulation-material property: 32 inherited/connector edges are below threshold (lowest measured rate: 18.75%), showing that splitting the registered abstract routes is not an extraction of the visible street network. The next validation failure is a missing landmark footprint for `primary-capability-citadel`; therefore no valid r2 JSON/overlays, footprint count, or final structure-dominance statistic exists to report. Per the two-strikes rule, I stopped rather than weaken the classifier again. Required reframe: director needs to supply or approve a visible-path trace/seed set and landmark extent annotations; the layout anchors may remain priors, but cannot be treated as path geometry or true extents. No runtime or frozen-layer files changed.
+
+**Director verdict on r2 (2026-08-21 13:45): reframe accepted.** The r2 attempt proved route-splitting cannot satisfy the on-path property — the registered anchors are abstract, not street geometry. The two-strikes stop was correct. R3 packet dispatched (`.codex-tmp/qa/T1/packet-t1-r3.md`): circulation and footprints extracted from plate pixels (classify → skeletonize → vectorize), layout manifest demoted to naming/district priors, director-supplied landmark seeds, self-normalizing per-district coverage property. The crashing r2 draft may be deleted by the r3 worker.
+
+**Codex (T1-r3):** Built `scripts/build-ninjaone-city-grammar-r3.mjs`, which derives circulation from a calibrated warm-stone pixel mask (downsample, Zhang-Suen skeletonization, spur pruning, vectorization) and extracts structure-core components for footprints; the layout manifest is read only to verify the shared artboard. It emits r3 grammar plus the graph and footprint overlays. Build result: 542 circulation polylines (386 road, 134 stairs, 22 bridge), 155 structure-dominant footprints (minimum interior rate 0.7000), 24 terrace bands, and a 12x9 density map. Minimum on-path rate is 1.0000. Pixel-normalized district coverage: D01 0.9711, D02 1.3153, D03 1.0422, D04 1.2110, D05 0.7867, D06 0.9988. Landmark seed hits: palace crown complex yes; statue observatory yes; great glass train hall yes. Flag: classifier calibration is mechanical only; director must judge whether the visible material mask and component extents faithfully follow the master.
+
+- `.codex-tmp/qa/T1/ninjaone-city-grammar-r3-graph.png` — master-space path-material mask at low opacity with extracted road/stairs/bridge polylines.
+- `.codex-tmp/qa/T1/ninjaone-city-grammar-r3-footprints.png` — master-space structure-component footprints, density grid, and white landmark-seed markers.
+
+**Director verdict on r3 (2026-08-21 13:20): PARTIAL — converging; refine as r4 (same approach).** The classifier finally traces real streets and all landmark seeds hit — approach approved. Two visual failures the stated properties did not catch: the 542 polylines are disconnected dashes (no network topology — a composer cannot consume confetti), and the footprint classifier missed the dominant dark-slate roofs, yielding fragments instead of building extents (palace captured west-wing only; cathedral and rotunda missed entirely). R4 packet dispatched (`.codex-tmp/qa/T1/packet-t1-r4.md`): gap-tolerant topology joining with a largest-component ≥60% property, roof-material class + component merging, director-supplied landmark bboxes with ≥70% overlap properties, and a readable footprints overlay (no full-plate wash).
+
+**Codex (T1-r3 correction):** The preceding counts describe the candidate artifacts only; they are not a passing T1 result. A final graph-topology audit found 179 disconnected circulation components. The first classifier flooded building highlights; the second narrowed to the paving material but left material-supported fragments disconnected. Joining all components requires 140px off-mask links (120px leaves three components), which would violate the on-path property. The builder now asserts one connected component and fails with that evidence. Per the two-strikes rule, I stopped without weakening connectivity or inserting layout-derived links. The candidate overlays remain under `.codex-tmp/qa/T1/` for director inspection; no valid r3 grammar is claimed.
+
+**Codex (T1-r4):** Stopped under the two-strikes rule; this is not a passing artifact. I added the requested 12px, <=35-degree pixel-gap linker, explicit junction vertices, topology metrics/property assertions, slate/blue-grey roof classification, bounded 8px fragment merging, minimum 10px output extents, landmark-bbox property checks, and an outline-only density grid. The unmodified r3 warm-stone classifier yields 164 components and a 0.0532 largest-component length share after those valid short links (required: <=25 and >=0.60); widening the material classifier produced 1,254 components/0.0079 rather than a network. I did not insert the prior rejected long off-mask links. Diagnostic extraction before re-enabling the topology gate produced 151 structure-dominant footprints; landmark bbox overlap was palace 0.9163, observatory 0.7934, train hall 0.6785 (fails the 0.70 property). Thus build and --check remain correctly red at topology before artifacts can be regenerated; the existing r3 PNGs are diagnostic-only and stale for the r4 overlay change. Director action needed: reframe the allowed circulation topology operation and reconcile the train-hall extent with the district-contained / >=0.70 structure-dominance constraints.
+
+**Director verdict on r4 (2026-08-21 13:40): spec error mine — corrected as r5.** The two-strikes stop was again correct: a ≥60% visible-pixel connectivity property is physically unsatisfiable in occluded isometric art (164 components at 0.053 share; widening the classifier worsens it to 1,254). Streets continue behind buildings — the corrected spec (packet `.codex-tmp/qa/T1/packet-t1-r5.md`) adds labeled occlusion-crossing inferred links (≤70 px, heading-continuous, crossing structure/foliage only; water crossings must be bridges) with anti-abuse bounds (inferred ≤40% of network length). Train-hall bbox tolerance adjusted (my bbox was generous; palace/observatory passed). All other r4 requirements stand.
+
+**Codex (T1-r5):** Stopped under the packet’s two-tuning condition; this is not a passing artifact. I implemented labeled, dashed inferred endpoint links constrained to ≤70px, ≤45° heading continuity, predominantly roof/foliage interior samples, bare-rock exclusion, and bridge classification for water crossings. Tuning 1 used the stricter 0.60 occluder fraction with immediate endpoint headings; tuning 2 used the literal >0.50 fraction plus 18px local heading estimation. Both produced 38 inferred links and the same failed topology: 126 components (required ≤40), 0.0777 largest-component share (required ≥0.60), and 0.2360 inferred-link share (passes ≤0.40). The unchanged mechanical extraction has 151 structure-dominant footprints; overlaps are palace 0.9163, observatory 0.7934, train hall tightened 0.7583 (original 0.6785), so the corrected train-hall tolerance passes. Flags: visible-only on-path and district-coverage checks were retained but cannot become passing output while topology correctly fails; `build:ninjaone-city-grammar` and `--check` are red at that topology assertion; no grammar JSON or r3 overlays were regenerated, and the existing PNGs remain stale diagnostic artifacts rather than review evidence. No runtime, L1–L3, camera, LoD, ImageGen, or commit changes.
+
+**Director verdict on r5 (2026-08-21 14:05): second unsatisfiable spec — switching to measure-then-spec.** Two corrected thresholds in a row failed against measured reality (126 components / 7.8% share even with inferred links); the director was spec'ing topology blind. A terraced cliff city may genuinely be many medium street runs joined by few stairs/bridges — "one connected network" was an aesthetic assumption, not a measured one. R6 packet dispatched: topology gate demoted to reported diagnostics, artifacts regenerated with component-size coloring and a length histogram; the final property will be set from the measured distribution. Landmarks are settled (train hall passes tightened bbox at 0.7583). Worker conduct across r4/r5 remains exemplary.
+
+**Codex (T1-r6):** Regenerated the r3 grammar JSON and both debug overlays; the bundled-Node build and `--check` both complete green. Topology component-count and largest-share thresholds are now reported diagnostics, while visible on-path, per-district coverage, inferred-link <=40%, footprint containment/structure dominance and count, and landmark overlap checks remain enforced. The r5 inferred-link mechanism is unchanged at 38 links. Full topology diagnostic: component count 126; total network length 6078.91 px; largest-component share 0.0777; network-length share in components >=100 px 0.4268, >=50 px 0.6177, and <40 px 0.3186; p50 component length 30.00 px; p90 86.65 px; inferred-link share 0.2360. The JSON records this block at `metadata.topologyDiagnostic` and check output; the graph overlay colors the ten longest components in saturated colors, all other components grey, and inferred links dashed. Footprints: 151, minimum structure-dominance 0.7121. Landmark overlaps: palace 0.9163, observatory 0.7934, train hall original 0.6785 / tightened 0.7583 (tightened bbox is the enforced check). No runtime, frozen-layer, camera, LoD, ImageGen, or commit changes.
+
+- `.codex-tmp/qa/T1/ninjaone-city-grammar-r3-graph.png` — 1448x1086 classified-mask underlay with component-length color assignment; dashed segments identify inferred occlusion links.
+- `.codex-tmp/qa/T1/ninjaone-city-grammar-r3-footprints.png` — 1448x1086 regenerated structure-footprint and outline-density-grid diagnostic view.
+
+**Director verdict on r6 (2026-08-21 14:20): T1 DIRECTOR-ACCEPTED as grammar v1.** Measured distribution: components ≥50 px hold 61.8% of network length; p50 component 30 px; inferred share 23.6%; 151 structure-dominant footprints; all three landmarks pass. Final topology property set from data: components ≥50 px must hold ≥60% of network length, and <40 px fragments ≤35% — current output passes both. Known recorded limitations (revisit only when the composer demonstrates a concrete need): street runs are short due to heavy occlusion; mid-size building footprints remain partially fragmented. Rationale for accepting now: the grammar is an input to the composer — its real requirements arrive with T3, and polishing extraction fidelity beyond this point is speculation. R003 finalization dispatch encodes the property bars and creates the narrow T1 checkpoint commit; T2 dispatches on its completion.
+
+**Codex (T1-finalize):** Promoted the director-set topology properties: components at least 50 px must contain at least 60% of network length, and components below 40 px may contain at most 35%. Regeneration and `--check` pass with 0.6177 / 0.3186; ESLint is clean for `scripts/build-ninjaone-city-grammar-r3.mjs`. The checkpoint object ID is reported by the worker after Git creates the commit, because a commit cannot contain its own hash.
+
+### T2 — Kit-of-parts contract (OPEN — begins after T1 review)
+
+Define the kit taxonomy and the per-class generation contract template: projection, light, palette, style-reference crop, socket/baseline standard, two-candidate limit, quarantine-only output. **No generation calls in this task.** Deliverable: `docs/career-world/CITY-KIT-CONTRACT.md`.
+
+Acceptance: Steve and director review the contract before any generation spend.
+
+### T3 — D05 composer proof (BLOCKED until T1 + T2 accepted)
+
+Composer assembles D05 (Western Skill Terraces) from kit + grammar, graded against the master's D05 crop at the standard capital/site/close cameras. Defined in detail after T2.
+
+## Orchestration note — 2026-08-21
+
+After T1 completes and passes review, implementation moves from the desktop thread to director-dispatched headless runs (`codex exec`), one writer at a time, with per-task model tier and effort chosen by the director. Every run is logged in `AGENT-EXPERIMENTS.md` with findings — the experiment data is a first-class deliverable of this project. The desktop thread retires at that point; do not start new work in it after T1.
+
+## Review log
+
+*Director appends dated findings here; Codex responds inline. Resolved items are struck through, not deleted.*
+
+- 2026-08-21 12:10 (director): Fresh session correctly ingested the contract, scoped itself to I24 checkpoint + T1, and is running full gates before the checkpoint commit. On contract. Flow finding logged as F1 in AGENT-EXPERIMENTS.md (packets should declare required gate tier).
