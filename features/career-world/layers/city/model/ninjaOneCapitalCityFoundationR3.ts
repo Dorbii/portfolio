@@ -17,19 +17,23 @@ export type NinjaOneCapitalCityRuntimeAssetId =
   | "CFX01"
   | "CFX02"
   | "D01L02"
+  | "D02L02"
   | "D03L02"
   | "D03L03"
+  | "D04L02"
+  | "D04W02"
   | "D05L02"
   | "D05L03"
   | "I20"
   | "I21"
   | "LFX06"
+  | "S14D04"
   | "WFX01";
 
 export interface NinjaOneCapitalCityRuntimeAsset {
   readonly asset: NinjaOneCapitalCityArtifact;
   readonly id: NinjaOneCapitalCityRuntimeAssetId;
-  readonly layerId: "L4_0" | "L4_1" | "L4_2" | "L4_4";
+  readonly layerId: "L4_0" | "L4_1" | "L4_2" | "L4_3" | "L4_4";
   readonly placement?: {
     readonly anchor: Pair;
     readonly baseSize: Pair;
@@ -71,7 +75,9 @@ const contextLayer = layerByRole.get("capital-composite-context-with-D06-exclusi
 const waterCoverage = manifest.verification.inlandWaterCoverageFraction;
 const progressiveWaterExclusion = manifest.authority.progressiveDetailWaterExclusion;
 const d01ContextExclusion = manifest.authority.progressiveDistrictContextExclusions.D01;
+const d02ContextExclusion = manifest.authority.progressiveDistrictContextExclusions.D02;
 const d03ContextExclusion = manifest.authority.progressiveDistrictContextExclusions.D03;
+const d04ContextExclusion = manifest.authority.progressiveDistrictContextExclusions.D04;
 const d05ContextExclusion = manifest.authority.progressiveDistrictContextExclusions.D05;
 const rawRuntimeAssets = manifest.runtimeAssets as unknown as readonly (
   Omit<NinjaOneCapitalCityRuntimeAsset, "asset" | "placement"> & {
@@ -104,13 +110,17 @@ const expectedRuntimeAssetContract = Object.freeze({
   CFX01: Object.freeze({ layerId: "L4_4", tiers: "site,close" }),
   CFX02: Object.freeze({ layerId: "L4_4", tiers: "close" }),
   D01L02: Object.freeze({ layerId: "L4_1", tiers: "site,close" }),
+  D02L02: Object.freeze({ layerId: "L4_1", tiers: "site,close" }),
   D03L02: Object.freeze({ layerId: "L4_1", tiers: "site,close" }),
   D03L03: Object.freeze({ layerId: "L4_1", tiers: "site,close" }),
+  D04L02: Object.freeze({ layerId: "L4_1", tiers: "site,close" }),
+  D04W02: Object.freeze({ layerId: "L4_0", tiers: "site,close" }),
   D05L02: Object.freeze({ layerId: "L4_1", tiers: "site,close" }),
   D05L03: Object.freeze({ layerId: "L4_1", tiers: "site,close" }),
   I20: Object.freeze({ layerId: "L4_2", tiers: "capital" }),
   I21: Object.freeze({ layerId: "L4_2", tiers: "site,close" }),
   LFX06: Object.freeze({ layerId: "L4_1", tiers: "capital,site,close" }),
+  S14D04: Object.freeze({ layerId: "L4_3", tiers: "site,close" }),
   WFX01: Object.freeze({ layerId: "L4_0", tiers: "site,close" }),
 } as const);
 
@@ -138,6 +148,15 @@ if (
   || d01ContextExclusion.hardRevealFraction > 0.99
   || d01ContextExclusion.contactFraction < 0.02
   || d01ContextExclusion.contactFraction > 0.06
+  || d02ContextExclusion.method
+    !== "continuous-D02-context-exclusion-plus-city-owned-L4_1-grounding"
+  || d02ContextExclusion.mask.dimensions.join(",") !== "1448,1086"
+  || d02ContextExclusion.contactLayer.dimensions.join(",") !== "1448,1086"
+  || d02ContextExclusion.hardRevealFraction < 0.9
+  || d02ContextExclusion.hardRevealFraction > 0.94
+  || d02ContextExclusion.contactFraction < 0.02
+  || d02ContextExclusion.contactFraction > 0.06
+  || d02ContextExclusion.outsideDistrictContactPixels > 512
   || d03ContextExclusion.method
     !== "continuous-D03-context-exclusion-plus-city-owned-L4_1-grounding"
   || d03ContextExclusion.mask.dimensions.join(",") !== "1448,1086"
@@ -149,6 +168,19 @@ if (
   || d03ContextExclusion.contactFraction > 0.08
   || d03ContextExclusion.terrainIntegrationFraction < 0.02
   || d03ContextExclusion.terrainIntegrationFraction > 0.1
+  || d04ContextExclusion.method
+    !== "continuous-D04-context-exclusion-plus-city-owned-L4_0-L4_1-and-L4_3-detail"
+  || d04ContextExclusion.mask.dimensions.join(",") !== "1448,1086"
+  || d04ContextExclusion.contactLayer.dimensions.join(",") !== "1448,1086"
+  || d04ContextExclusion.waterDetailLayer.dimensions.join(",") !== "1448,1086"
+  || d04ContextExclusion.gatewayLayer.dimensions.join(",") !== "1318,1193"
+  || d04ContextExclusion.hardRevealFraction < 0.9
+  || d04ContextExclusion.hardRevealFraction > 0.94
+  || d04ContextExclusion.contactFraction < 0.015
+  || d04ContextExclusion.contactFraction > 0.06
+  || d04ContextExclusion.outsideDistrictContactPixels > 256
+  || d04ContextExclusion.waterDetailPixels < 50
+  || d04ContextExclusion.waterDetailPixels > 200
   || d05ContextExclusion.method
     !== "continuous-D05-context-exclusion-plus-city-owned-L4_1-grounding"
   || d05ContextExclusion.mask.dimensions.join(",") !== "1448,1086"
@@ -171,7 +203,8 @@ if (
       || runtimeAsset.layerId !== expected.layerId
       || runtimeAsset.tiers.join(",") !== expected.tiers
       || runtimeAsset.asset.path.includes("/_review/")
-      || (id === "I20" || id === "I21") !== Boolean(runtimeAsset.placement)
+      || (id === "I20" || id === "I21" || id === "S14D04")
+        !== Boolean(runtimeAsset.placement)
       || (runtimeAsset.placement !== undefined && (
         !Number.isFinite(runtimeAsset.placement.scale)
         || runtimeAsset.placement.scale <= 0
@@ -200,9 +233,17 @@ export const NINJAONE_CAPITAL_CITY_R3_D01_CONTEXT_EXCLUSION_MASK = artifact(
   d01ContextExclusion.mask,
   "city-foundation-r3.progressiveDistrictContextExclusions.D01.mask",
 );
+export const NINJAONE_CAPITAL_CITY_R3_D02_CONTEXT_EXCLUSION_MASK = artifact(
+  d02ContextExclusion.mask,
+  "city-foundation-r3.progressiveDistrictContextExclusions.D02.mask",
+);
 export const NINJAONE_CAPITAL_CITY_R3_D03_CONTEXT_EXCLUSION_MASK = artifact(
   d03ContextExclusion.mask,
   "city-foundation-r3.progressiveDistrictContextExclusions.D03.mask",
+);
+export const NINJAONE_CAPITAL_CITY_R3_D04_CONTEXT_EXCLUSION_MASK = artifact(
+  d04ContextExclusion.mask,
+  "city-foundation-r3.progressiveDistrictContextExclusions.D04.mask",
 );
 export const NINJAONE_CAPITAL_CITY_R3_D05_CONTEXT_EXCLUSION_MASK = artifact(
   d05ContextExclusion.mask,

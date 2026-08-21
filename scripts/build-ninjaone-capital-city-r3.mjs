@@ -43,6 +43,18 @@ const source = Object.freeze({
     ROOT,
     "art-source/career-world/ninjaone-capital/city-r3/landscape/D01L02-crown-grounding-and-circulation-r1-alpha.png",
   ),
+  d02DistrictMask: path.join(
+    ROOT,
+    "art-source/career-world/ninjaone-capital/city-r3/districts/D02-dojo-ridge-mask.png",
+  ),
+  d02ContextExclusionMask: path.join(
+    ROOT,
+    "art-source/career-world/ninjaone-capital/city-r3/authority/D02M02-dojo-ridge-full-context-exclusion-r1.png",
+  ),
+  d02GroundingAndCirculation: path.join(
+    ROOT,
+    "art-source/career-world/ninjaone-capital/city-r3/landscape/D02L02-dojo-ridge-grounding-and-circulation-r1-alpha.png",
+  ),
   d03DistrictMask: path.join(
     ROOT,
     "art-source/career-world/ninjaone-capital/city-r3/districts/D03-eastern-industry-mask.png",
@@ -58,6 +70,26 @@ const source = Object.freeze({
   d03TerrainIntegrationDetail: path.join(
     ROOT,
     "art-source/career-world/ninjaone-capital/city-r3/detail/D03L03-city-terrain-integration-detail-r1-alpha.png",
+  ),
+  d04DistrictMask: path.join(
+    ROOT,
+    "art-source/career-world/ninjaone-capital/city-r3/districts/D04-central-lake-terraces-mask.png",
+  ),
+  d04ContextExclusionMask: path.join(
+    ROOT,
+    "art-source/career-world/ninjaone-capital/city-r3/authority/D04M02-central-lake-full-context-exclusion-r1.png",
+  ),
+  d04GroundingAndCirculation: path.join(
+    ROOT,
+    "art-source/career-world/ninjaone-capital/city-r3/landscape/D04L02-central-lake-grounding-and-circulation-r1-alpha.png",
+  ),
+  d04BridgeWaterDetail: path.join(
+    ROOT,
+    "art-source/career-world/ninjaone-capital/city-r3/water-interaction/D04W02-S14-bridge-water-contact-detail-r1-alpha.png",
+  ),
+  d04CompactGateway: path.join(
+    ROOT,
+    "art-source/career-world/ninjaone-capital/city-r3/architecture/S14-D04-compact-water-gateway-r2-alpha.png",
   ),
   d05DistrictMask: path.join(
     ROOT,
@@ -142,6 +174,14 @@ const outputs = Object.freeze({
     outputRoot,
     "landscape/D01L02-crown-grounding-and-circulation-r1-alpha.png",
   ),
+  d02ContextExclusionMask: path.join(
+    outputRoot,
+    "authority/D02M02-dojo-ridge-full-context-exclusion-r1.png",
+  ),
+  d02GroundingAndCirculation: path.join(
+    outputRoot,
+    "landscape/D02L02-dojo-ridge-grounding-and-circulation-r1-alpha.png",
+  ),
   d03ContextExclusionMask: path.join(
     outputRoot,
     "authority/D03M02-city-full-context-exclusion-r1.png",
@@ -153,6 +193,22 @@ const outputs = Object.freeze({
   d03TerrainIntegrationDetail: path.join(
     outputRoot,
     "detail/D03L03-city-terrain-integration-detail-r1-alpha.png",
+  ),
+  d04ContextExclusionMask: path.join(
+    outputRoot,
+    "authority/D04M02-central-lake-full-context-exclusion-r1.png",
+  ),
+  d04GroundingAndCirculation: path.join(
+    outputRoot,
+    "landscape/D04L02-central-lake-grounding-and-circulation-r1-alpha.png",
+  ),
+  d04BridgeWaterDetail: path.join(
+    outputRoot,
+    "water-interaction/D04W02-S14-bridge-water-contact-detail-r1-alpha.png",
+  ),
+  d04CompactGateway: path.join(
+    outputRoot,
+    "architecture/S14-D04-compact-water-gateway-r2-alpha.png",
   ),
   d05ContextExclusionMask: path.join(
     outputRoot,
@@ -195,8 +251,15 @@ async function singleChannel(file) {
 }
 
 async function writePng(file, pipeline) {
+  const encoded = await pipeline.png({ compressionLevel: 9, palette: false }).toBuffer();
+  return writeBytesIfChanged(file, encoded);
+}
+
+async function writeBytesIfChanged(file, bytes) {
   await mkdir(path.dirname(file), { recursive: true });
-  return pipeline.png({ compressionLevel: 9, palette: false }).toFile(file);
+  const existing = await readFile(file).catch(() => null);
+  if (existing?.equals(bytes)) return;
+  await writeFile(file, bytes);
 }
 
 async function artifact(file) {
@@ -401,10 +464,17 @@ const [
   d01DistrictMask,
   d01ContextExclusionMask,
   d01GroundingAndCirculation,
+  d02DistrictMask,
+  d02ContextExclusionMask,
+  d02GroundingAndCirculation,
   d03DistrictMask,
   d03ContextExclusionMask,
   d03GroundContact,
   d03TerrainIntegrationDetail,
+  d04DistrictMask,
+  d04ContextExclusionMask,
+  d04GroundingAndCirculation,
+  d04BridgeWaterDetail,
   d05DistrictMask,
   d05ContextExclusionMask,
   d05GroundIntegration,
@@ -420,16 +490,25 @@ const [
     singleChannel(source.d01DistrictMask),
     singleChannel(source.d01ContextExclusionMask),
     imageMetadata(source.d01GroundingAndCirculation),
+    singleChannel(source.d02DistrictMask),
+    singleChannel(source.d02ContextExclusionMask),
+    imageMetadata(source.d02GroundingAndCirculation),
     singleChannel(source.d03DistrictMask),
     singleChannel(source.d03ContextExclusionMask),
     imageMetadata(source.d03GroundContact),
     imageMetadata(source.d03TerrainIntegrationDetail),
+    singleChannel(source.d04DistrictMask),
+    singleChannel(source.d04ContextExclusionMask),
+    imageMetadata(source.d04GroundingAndCirculation),
+    imageMetadata(source.d04BridgeWaterDetail),
     singleChannel(source.d05DistrictMask),
     singleChannel(source.d05ContextExclusionMask),
     imageMetadata(source.d05GroundIntegration),
     imageMetadata(source.d05TerrainIntegrationDetail),
     singleChannel(source.d06DistrictMask),
   ]);
+const d04CompactGatewayBytes = await readFile(source.d04CompactGateway);
+const d04CompactGatewayMetadata = await sharp(d04CompactGatewayBytes).metadata();
 const cleanedWater = await cleanConnectedWaterMask(rawLiveWater);
 const liveWater = cleanedWater.mask;
 await writePng(outputs.waterRegistrationMask, sharp(liveWater, {
@@ -496,6 +575,70 @@ if (
 }
 await mkdir(path.dirname(outputs.d01GroundingAndCirculation), { recursive: true });
 await copyFile(source.d01GroundingAndCirculation, outputs.d01GroundingAndCirculation);
+
+let d02RegisteredPixels = 0;
+let d02RegisteredLandPixels = 0;
+let d02HardRevealPixels = 0;
+let d02OutsideSupportPixels = 0;
+for (let index = 0; index < PIXELS; index += 1) {
+  if (d02DistrictMask[index] > 0) d02RegisteredPixels += 1;
+  if (d02DistrictMask[index] > 0 && registeredParentLand[index] >= 64) {
+    d02RegisteredLandPixels += 1;
+  }
+  if (d02ContextExclusionMask[index] > 0 && d02DistrictMask[index] === 0) {
+    d02OutsideSupportPixels += 1;
+  }
+  if (d02ContextExclusionMask[index] >= 240) d02HardRevealPixels += 1;
+}
+const d02HardRevealFraction = d02HardRevealPixels / d02RegisteredPixels;
+if (
+  d02OutsideSupportPixels !== 0
+  || d02HardRevealFraction < 0.9
+  || d02HardRevealFraction > 0.94
+) {
+  throw new TypeError("The accepted D02 land-first context exclusion violates its registered support.");
+}
+await copyFile(source.d02ContextExclusionMask, outputs.d02ContextExclusionMask);
+
+const d02GroundingRgba = await sharp(d02GroundingAndCirculation.bytes)
+  .ensureAlpha()
+  .raw()
+  .toBuffer();
+let d02GroundingPixels = 0;
+let d02GroundingMaximumAlpha = 0;
+let d02GroundingOutsideSupportPixels = 0;
+let d02GroundingOutsideLandPixels = 0;
+let d02GroundingWaterPixels = 0;
+for (let index = 0; index < PIXELS; index += 1) {
+  const alpha = d02GroundingRgba[index * 4 + 3];
+  if (alpha === 0) continue;
+  d02GroundingPixels += 1;
+  d02GroundingMaximumAlpha = Math.max(d02GroundingMaximumAlpha, alpha);
+  if (d02DistrictMask[index] === 0) d02GroundingOutsideSupportPixels += 1;
+  if (registeredParentLand[index] < 64) d02GroundingOutsideLandPixels += 1;
+  if (rawLiveWater[index] >= 240) d02GroundingWaterPixels += 1;
+}
+const d02GroundingFraction = d02GroundingPixels / d02RegisteredLandPixels;
+const d02GroundingCornerAlpha = [
+  d02GroundingRgba[3],
+  d02GroundingRgba[(WIDTH - 1) * 4 + 3],
+  d02GroundingRgba[(PIXELS - WIDTH) * 4 + 3],
+  d02GroundingRgba[(PIXELS - 1) * 4 + 3],
+];
+if (
+  d02GroundingAndCirculation.metadata.channels !== 4
+  || d02GroundingCornerAlpha.some((alpha) => alpha !== 0)
+  || d02GroundingOutsideSupportPixels > 512
+  || d02GroundingOutsideLandPixels !== 0
+  || d02GroundingWaterPixels !== 0
+  || d02GroundingMaximumAlpha > 220
+  || d02GroundingFraction < 0.02
+  || d02GroundingFraction > 0.06
+) {
+  throw new TypeError("The accepted D02 grounding layer violates city/land ownership.");
+}
+await mkdir(path.dirname(outputs.d02GroundingAndCirculation), { recursive: true });
+await copyFile(source.d02GroundingAndCirculation, outputs.d02GroundingAndCirculation);
 
 let d03RegisteredPixels = 0;
 let d03HardRevealPixels = 0;
@@ -593,6 +736,124 @@ if (
 }
 await mkdir(path.dirname(outputs.d03TerrainIntegrationDetail), { recursive: true });
 await copyFile(source.d03TerrainIntegrationDetail, outputs.d03TerrainIntegrationDetail);
+
+let d04RegisteredPixels = 0;
+let d04HardRevealPixels = 0;
+let d04OutsideSupportPixels = 0;
+for (let index = 0; index < PIXELS; index += 1) {
+  if (d04DistrictMask[index] > 0) d04RegisteredPixels += 1;
+  if (d04ContextExclusionMask[index] > 0 && d04DistrictMask[index] === 0) {
+    d04OutsideSupportPixels += 1;
+  }
+  if (d04ContextExclusionMask[index] >= 240) d04HardRevealPixels += 1;
+}
+const d04HardRevealFraction = d04HardRevealPixels / d04RegisteredPixels;
+if (
+  d04OutsideSupportPixels !== 0
+  || d04HardRevealFraction < 0.9
+  || d04HardRevealFraction > 0.94
+) {
+  throw new TypeError("The accepted D04 land-first context exclusion violates its registered support.");
+}
+await copyFile(source.d04ContextExclusionMask, outputs.d04ContextExclusionMask);
+
+const d04GroundingRgba = await sharp(d04GroundingAndCirculation.bytes)
+  .ensureAlpha()
+  .raw()
+  .toBuffer();
+let d04GroundingPixels = 0;
+let d04GroundingMaximumAlpha = 0;
+let d04GroundingOutsideSupportPixels = 0;
+let d04GroundingOutsideLandPixels = 0;
+let d04GroundingWaterPixels = 0;
+for (let index = 0; index < PIXELS; index += 1) {
+  const alpha = d04GroundingRgba[index * 4 + 3];
+  if (alpha === 0) continue;
+  d04GroundingPixels += 1;
+  d04GroundingMaximumAlpha = Math.max(d04GroundingMaximumAlpha, alpha);
+  if (d04DistrictMask[index] === 0) d04GroundingOutsideSupportPixels += 1;
+  if (liveLand[index] < 64) d04GroundingOutsideLandPixels += 1;
+  if (rawLiveWater[index] >= 240) d04GroundingWaterPixels += 1;
+}
+const d04GroundingFraction = d04GroundingPixels / d04RegisteredPixels;
+const d04GroundingCornerAlpha = [
+  d04GroundingRgba[3],
+  d04GroundingRgba[(WIDTH - 1) * 4 + 3],
+  d04GroundingRgba[(PIXELS - WIDTH) * 4 + 3],
+  d04GroundingRgba[(PIXELS - 1) * 4 + 3],
+];
+if (
+  d04GroundingAndCirculation.metadata.channels !== 4
+  || d04GroundingCornerAlpha.some((alpha) => alpha !== 0)
+  || d04GroundingOutsideSupportPixels > 256
+  || d04GroundingOutsideLandPixels !== 0
+  || d04GroundingWaterPixels !== 0
+  || d04GroundingMaximumAlpha > 220
+  || d04GroundingFraction < 0.015
+  || d04GroundingFraction > 0.06
+) {
+  throw new TypeError("The accepted D04 grounding layer violates city/land ownership.");
+}
+await mkdir(path.dirname(outputs.d04GroundingAndCirculation), { recursive: true });
+await copyFile(source.d04GroundingAndCirculation, outputs.d04GroundingAndCirculation);
+
+const d04BridgeWaterRgba = await sharp(d04BridgeWaterDetail.bytes)
+  .ensureAlpha()
+  .raw()
+  .toBuffer();
+let d04BridgeWaterPixels = 0;
+let d04BridgeWaterMaximumAlpha = 0;
+let d04BridgeWaterOutsideSupportPixels = 0;
+let d04BridgeWaterOutsideWaterPixels = 0;
+for (let index = 0; index < PIXELS; index += 1) {
+  const alpha = d04BridgeWaterRgba[index * 4 + 3];
+  if (alpha === 0) continue;
+  d04BridgeWaterPixels += 1;
+  d04BridgeWaterMaximumAlpha = Math.max(d04BridgeWaterMaximumAlpha, alpha);
+  if (d04DistrictMask[index] === 0) d04BridgeWaterOutsideSupportPixels += 1;
+  if (rawLiveWater[index] < 128) d04BridgeWaterOutsideWaterPixels += 1;
+}
+const d04BridgeWaterCornerAlpha = [
+  d04BridgeWaterRgba[3],
+  d04BridgeWaterRgba[(WIDTH - 1) * 4 + 3],
+  d04BridgeWaterRgba[(PIXELS - WIDTH) * 4 + 3],
+  d04BridgeWaterRgba[(PIXELS - 1) * 4 + 3],
+];
+if (
+  d04BridgeWaterDetail.metadata.channels !== 4
+  || d04BridgeWaterCornerAlpha.some((alpha) => alpha !== 0)
+  || d04BridgeWaterPixels < 50
+  || d04BridgeWaterPixels > 200
+  || d04BridgeWaterMaximumAlpha > 150
+  || d04BridgeWaterOutsideSupportPixels !== 0
+  || d04BridgeWaterOutsideWaterPixels !== 0
+) {
+  throw new TypeError("The accepted D04 bridge-water detail violates water ownership.");
+}
+await mkdir(path.dirname(outputs.d04BridgeWaterDetail), { recursive: true });
+await copyFile(source.d04BridgeWaterDetail, outputs.d04BridgeWaterDetail);
+
+const d04CompactGatewayRgba = await sharp(d04CompactGatewayBytes)
+  .ensureAlpha()
+  .raw()
+  .toBuffer();
+const d04CompactGatewayPixels = 1318 * 1193;
+const d04CompactGatewayCornerAlpha = [
+  d04CompactGatewayRgba[3],
+  d04CompactGatewayRgba[(1318 - 1) * 4 + 3],
+  d04CompactGatewayRgba[(d04CompactGatewayPixels - 1318) * 4 + 3],
+  d04CompactGatewayRgba[(d04CompactGatewayPixels - 1) * 4 + 3],
+];
+if (
+  d04CompactGatewayMetadata.width !== 1318
+  || d04CompactGatewayMetadata.height !== 1193
+  || d04CompactGatewayMetadata.channels !== 4
+  || d04CompactGatewayCornerAlpha.some((alpha) => alpha !== 0)
+) {
+  throw new TypeError("The accepted D04 compact gateway violates its registered asset contract.");
+}
+await mkdir(path.dirname(outputs.d04CompactGateway), { recursive: true });
+await copyFile(source.d04CompactGateway, outputs.d04CompactGateway);
 
 let d05RegisteredPixels = 0;
 let d05HardRevealPixels = 0;
@@ -795,7 +1056,6 @@ const d02RegisteredNativeFoliageInstanceIds = Object.freeze([
   "c1-native-conifer-041-instance",
   "c1-native-conifer-042-instance",
   "c1-native-conifer-053-instance",
-  "c1-native-conifer-054-instance",
   "c1-native-conifer-055-instance",
   "c1-native-conifer-060-instance",
   "c1-native-conifer-063-instance",
@@ -820,7 +1080,7 @@ const d03RegisteredNativeFoliageInstanceIds = Object.freeze([
   "c2-native-conifer-110-instance",
 ]);
 await mkdir(path.dirname(outputs.nativeFoliageReuseManifest), { recursive: true });
-await writeFile(outputs.nativeFoliageReuseManifest, `${JSON.stringify({
+await writeBytesIfChanged(outputs.nativeFoliageReuseManifest, Buffer.from(`${JSON.stringify({
   schemaVersion: 1,
   id: "career-world/capitals/ninjaone/city-native-foliage-reuse@r1",
   sourceContext: "/career-world/capitals/ninjaone/city-r3/foundation/city-context-capital-without-d06-r1-alpha.png",
@@ -842,7 +1102,7 @@ await writeFile(outputs.nativeFoliageReuseManifest, `${JSON.stringify({
       instances: d03RegisteredNativeFoliageInstanceIds.map((id) => ({ id })),
     },
   },
-}, null, 2)}\n`, "utf8");
+}, null, 2)}\n`, "utf8"));
 let waterPixels = 0;
 let coveredWaterPixels = 0;
 let transparentPixels = 0;
@@ -899,6 +1159,14 @@ const manifest = {
         contactFraction: d01GroundingFraction,
         contactLayer: await artifact(outputs.d01GroundingAndCirculation),
       },
+      D02: {
+        method: "continuous-D02-context-exclusion-plus-city-owned-L4_1-grounding",
+        hardRevealFraction: d02HardRevealFraction,
+        mask: await artifact(outputs.d02ContextExclusionMask),
+        contactFraction: d02GroundingFraction,
+        outsideDistrictContactPixels: d02GroundingOutsideSupportPixels,
+        contactLayer: await artifact(outputs.d02GroundingAndCirculation),
+      },
       D03: {
         method: "continuous-D03-context-exclusion-plus-city-owned-L4_1-grounding",
         hardRevealFraction: d03HardRevealFraction,
@@ -907,6 +1175,17 @@ const manifest = {
         contactLayer: await artifact(outputs.d03GroundContact),
         terrainIntegrationFraction: d03TerrainIntegrationFraction,
         terrainIntegrationLayer: await artifact(outputs.d03TerrainIntegrationDetail),
+      },
+      D04: {
+        method: "continuous-D04-context-exclusion-plus-city-owned-L4_0-L4_1-and-L4_3-detail",
+        hardRevealFraction: d04HardRevealFraction,
+        mask: await artifact(outputs.d04ContextExclusionMask),
+        contactFraction: d04GroundingFraction,
+        outsideDistrictContactPixels: d04GroundingOutsideSupportPixels,
+        contactLayer: await artifact(outputs.d04GroundingAndCirculation),
+        waterDetailPixels: d04BridgeWaterPixels,
+        waterDetailLayer: await artifact(outputs.d04BridgeWaterDetail),
+        gatewayLayer: await artifact(outputs.d04CompactGateway),
       },
       D05: {
         method: "continuous-D05-context-exclusion-plus-city-owned-L4_1-grounding",
@@ -939,6 +1218,13 @@ const manifest = {
       asset: await artifact(outputs.d01GroundingAndCirculation),
     },
     {
+      id: "D02L02",
+      layerId: "L4_1",
+      role: "dojo-ridge-grounding-and-circulation",
+      tiers: ["site", "close"],
+      asset: await artifact(outputs.d02GroundingAndCirculation),
+    },
+    {
       id: "D03L02",
       layerId: "L4_1",
       role: "eastern-industry-ground-contact-platforms",
@@ -951,6 +1237,28 @@ const manifest = {
       role: "eastern-industry-terrain-integration-detail",
       tiers: ["site", "close"],
       asset: await artifact(outputs.d03TerrainIntegrationDetail),
+    },
+    {
+      id: "D04W02",
+      layerId: "L4_0",
+      role: "central-lake-bridge-water-contact-detail",
+      tiers: ["site", "close"],
+      asset: await artifact(outputs.d04BridgeWaterDetail),
+    },
+    {
+      id: "D04L02",
+      layerId: "L4_1",
+      role: "central-lake-grounding-and-circulation",
+      tiers: ["site", "close"],
+      asset: await artifact(outputs.d04GroundingAndCirculation),
+    },
+    {
+      id: "S14D04",
+      layerId: "L4_3",
+      role: "compact-central-lake-water-gateway",
+      tiers: ["site", "close"],
+      placement: { anchor: [794, 731], baseSize: [114, 114 * 1193 / 1318], scale: 1 },
+      asset: await artifact(outputs.d04CompactGateway),
     },
     {
       id: "D05L02",
@@ -1026,7 +1334,10 @@ const manifest = {
   sourceHashes,
 };
 await mkdir(path.dirname(outputs.manifest), { recursive: true });
-await writeFile(outputs.manifest, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+await writeBytesIfChanged(
+  outputs.manifest,
+  Buffer.from(`${JSON.stringify(manifest, null, 2)}\n`, "utf8"),
+);
 
 console.log(JSON.stringify({
   manifest: path.relative(ROOT, outputs.manifest).replaceAll("\\", "/"),

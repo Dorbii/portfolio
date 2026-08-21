@@ -813,3 +813,53 @@ Checkpoint the free-camera LoD fix, then run a reversible D06 station-scale/cont
 
 - Stage and commit only the D01 production unit; leave all `_review` files untracked. Then audit D02 and D04 against the same full-reveal/native-land decision before requesting any new asset. D06 station/water/undercroft cleanup remains after those dry districts.
 - The dev server remains on port 3000. Do not declare the overall city complete until D02/D04/D06, full-to-close LoD truth, close asset bleed, cold-entry performance, and final whole-city visual review all pass.
+
+## Crash-safe checkpoint — 2026-08-20 23:30 CDT
+
+### D02/D04 diagnosis is live-proven; repair assets are active
+
+- D01 is committed as `52ab955 checkpoint: integrate D01 with native land`. The worktree contains only obsolete untracked `_review` evidence copies; no tracked production changes are currently pending.
+- Fixed runtime captures prove D02 and D04 have the same remaining failure class: sharp independent nodes sit over blurry baked district architecture, cliffs, and forest. D02 site mounts S13/I02; close adds 13 existing native-foliage instances. D04 site mounts S04/S02; close adds eight existing native-foliage instances. The existing trees do not solve the mismatch because the baked plate remains underneath them.
+- D02 and D04 now have separate high/xHigh lanes for full-context exclusion masks, land-owned grounding, existing-tree evidence, and D04's missing independent S14 gateway. The gateway lane is a materially different compact concept-scale approach: twin portal supports, a slim elevated deck, transparent undercroft, and narrow bank contacts. It does not repair or reuse the previously rejected broad S14 candidate.
+- The D02 mask worker found a Director packet contradiction, not an art blocker. I02's socket center lies below the exact D02 authority, so requiring a hard-white 73px neighborhood there violated exact containment. The 95-99% hard-white threshold also conflicted with a 7-8-step inward feather capped at 36 alpha units per pixel. The amended contract preserves exact D02 geometry, ignores unsupported anchor pixels, requires only support-intersecting node/contact coverage, retains the smooth inward feather, and accepts the authority's achievable 90-94% hard-white range.
+- User confirmed black regions outside the fixed world viewport are out of scope. Do not spend repair effort on them or classify them as world-plane bleed.
+
+### Exact continuation
+
+- Wait for the D02/D04 masks, D02 grounding, D02 foliage audit, and compact S14 gateway. Independently verify dimensions, alpha, district/land/water ownership, perspective, contact geometry, and proofs before copying anything to `_review`.
+- Mount D02 full reveal plus grounding beneath S13/I02, retain architecture/transport ownership independently, suppress its generic shadow only after authored grounding is present, and capture fixed site/close proof. Generate no additional D02 foliage unless the evidence lane identifies actually qualified existing instances.
+- Mount D04 full reveal plus S04/S02/S14 and inspect the exact missing L4_1 land and L4_0 water-contact fabric. Only then issue narrowly scoped grounding/water-detail asset packets. Preserve authoritative L2 land and L3 water, and keep S14 support out of the deep channel.
+- D06 remains next, followed by full-to-close LoD truth, cold-entry performance, close-detail bleed, and whole-city visual acceptance. Keep port 3000 alive and do not claim the overall goal complete.
+
+## Crash-safe checkpoint — 2026-08-21 00:16 CDT
+
+### D02 is production-integrated; D04 is in live review assembly
+
+- D02M02 and D02L02 are promoted to tracked art-source/public authority and landscape paths with hashes `d392f4c...` and `7f2ac0a...`. The R3 builder validates D02's exact parent exclusion, 90-94% hard reveal, 2-6% registered-land contact footprint, alpha/corner limits, zero hard-water/unowned-land overlap, and the accepted bounded I02 contact extension.
+- D02's I02 anchor is 41.11px outside the old D02 mask; that was the root of repeated impossible contact gates. The accepted correction keeps the context mask exact, allows only a 35.903px city-owned L4_1 contact extension inside I02's own footprint and registered land, and changes no other candidate pixels. Live D02 site/close reports production-only paths, D02L02 on L4_1, S13 on L4_3, I02 on L4_2, zero procedural shadows, zero site foliage, and 12 shared native-tree instances at close.
+- The D02 foliage audit found no defensible new placements. One legacy registration, `c1-native-conifer-054-instance`, had zero D02 canopy overlap and was removed. The remaining close cohort continues to use the existing shared R4 land-tree atlases; no filler or generated trees were added.
+- D02's former atomic-two-silhouette assertion is classified stale/superseded design intent. The replacement preserves both calibrated sockets and their independent L4_2/L4_3 ownership while requiring full native-land reveal, L4_1 grounding below nodes, water/land containment, progressive site/close routing, and no procedural shadow. Focused foundation/LoD tests pass `44/44`; typecheck and lint pass.
+- D04M02 live review cleanly removes the baked central-lake plate and reveals native cliffs/water. The compact S14 gateway review candidate is independently mounted at `[794,731]`, width114, with a fully transparent undercroft, 11px runtime deck, zero deep-channel obstruction, and two bank-local supports. Candidate 2 was rejected for baked checker; candidate 1 passed the Director-amended bridge-aware 28% overlap cap at 25.576% while retaining every stricter water/opening gate.
+- D04W02 is mounted in review on L4_0: 97 low-alpha pixels, max alpha79, entirely within D04 registered water and 20px of S14 support/deck proximity. It adds only support ripples/under-deck water contact. The D04L02 xHigh grounding lane is still active for S04/S02 contacts and S14 bank approaches; two ImageGen calls/candidates are exhausted and deterministic cleanup/verification is underway.
+
+### Exact continuation
+
+- Wait for D04L02 final. Reject checker residue, broad pads, generated trees/buildings, water overlap, excessive S14 approaches, or anything outside registered land/authorized socket extensions. Mount below S04/S02/S14 and capture fixed D04 site/close.
+- If D04 live proof passes, promote D04M02/D04L02/D04W02/S14 to production R3 manifest paths, make S14 placement manifest-driven, suppress D04 procedural shadows only after authored grounding exists, replace only stale baked-S14/atomic-cutout tests, run the complete gate stack, and commit D02+D04 together because their renderer/test changes currently share files.
+- Then repair D06 station/undercroft/water integration with the train still absent. Finish with full-to-close LoD, performance, close asset-bleed, and whole-city visual audits before opening the dev server for user review.
+
+## Crash-safe checkpoint — 2026-08-21 00:47 CDT
+
+### D02 and D04 are production-integrated and live-proven
+
+- D02 remains production-only after correcting its L4_1 render order: the parent context is now cut out first, D02L02 is composited above the revealed native land, and S13/I02 render above that. A durable test now requires `context < D02L02 < nodes`. Fresh D02 site/close capture reports zero review paths, zero procedural shadows, no site foliage, and 12 existing R4 native-tree instances at close.
+- D04M02, D04L02, D04W02, and the compact S14 gateway are promoted to tracked source/public paths with hashes `4c75a7ef...`, `30d4865d...`, `7eeab3c4...`, and `9bf76fc0...`. Runtime now consumes manifest-declared production paths only and declares S14 placement at anchor `[794,731]`, width `114`.
+- D04 live site/close preserves the native central cliffs, lake, and channel. S04/S02 receive only sparse L4_1 contact fabric; S14 remains an independent L4_3 gateway with an open undercroft; D04W02 adds 97 low-alpha water-contact pixels on L4_0. Generic procedural node shadows are suppressed because authored grounding is present. Close adds eight existing WebGL2 native-tree nodes; no new/generated foliage was introduced.
+- Test-policy classification: the prior D04 atomic/baked-S14 intent is stale and superseded by the accepted land-first, independent-layer decision. Preserved invariants now include the two dry sockets, exact mask containment, 90-94% hard reveal, live-land/water ownership, authored layer order, manifest placement, S14 deep-channel clearance, progressive site/close routing, no review-path bleed, and no duplicate procedural shadows.
+- Gates are green: deterministic R3 builder, focused foundation/LoD tests `45/45`, typecheck, lint, and `git diff --check`. Fresh production runtime proof reports zero `/_review/` references at D02/D04 site and close. The dev server was restarted on port 3000 after a Windows file-handle issue; the builder now skips byte-identical outputs, and the prior manifest was backed up under `.codex-tmp/city-restart-r1/backups/` before its exact replacement.
+
+### Exact continuation
+
+- Run the full repository test suite and production build, stage only the D02/D04 production unit plus shared renderer/model/builder/tests/handoff, and commit the checkpoint. Leave obsolete `_review` evidence files unstaged.
+- Repair and re-audit D06 with the train absent: verify I20/I21/I17 ownership and scale progression, open undercroft, support width, water-under-bridge detail, land reveal, and close overlap/bleed. Generate a new asset only if a specific defect remains after current assets/layers are isolated.
+- Finish the required world -> territory -> capital -> site -> close truth pass, cold-entry performance measurement, close-detail asset-bleed isolation, and whole-city comparison. Only then tell the user the port-3000 view is ready for final review; black page regions outside the fixed viewport remain explicitly out of scope.

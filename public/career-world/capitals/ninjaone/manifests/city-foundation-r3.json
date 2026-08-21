@@ -91,6 +91,32 @@
           "sha256": "a3568ec9b6cd2e751a21dfef290705b1502573831764a03317ecb14ffc74eb34"
         }
       },
+      "D02": {
+        "method": "continuous-D02-context-exclusion-plus-city-owned-L4_1-grounding",
+        "hardRevealFraction": 0.9199801636498884,
+        "mask": {
+          "decodedBytes": 1572528,
+          "dimensions": [
+            1448,
+            1086
+          ],
+          "encodedBytes": 2591,
+          "path": "/career-world/capitals/ninjaone/city-r3/authority/D02M02-dojo-ridge-full-context-exclusion-r1.png",
+          "sha256": "d392f4c0066b3c15455eec8c54639eda0518e5b52d3537f839cbea93a224844f"
+        },
+        "contactFraction": 0.03823448825566045,
+        "outsideDistrictContactPixels": 429,
+        "contactLayer": {
+          "decodedBytes": 6290112,
+          "dimensions": [
+            1448,
+            1086
+          ],
+          "encodedBytes": 10957,
+          "path": "/career-world/capitals/ninjaone/city-r3/landscape/D02L02-dojo-ridge-grounding-and-circulation-r1-alpha.png",
+          "sha256": "7f2ac0a7416234a7e30976b7e5807f3ffa58432185812fc4e4c7a86a68b5248d"
+        }
+      },
       "D03": {
         "method": "continuous-D03-context-exclusion-plus-city-owned-L4_1-grounding",
         "hardRevealFraction": 0.9391985529022188,
@@ -125,6 +151,53 @@
           "encodedBytes": 35398,
           "path": "/career-world/capitals/ninjaone/city-r3/detail/D03L03-city-terrain-integration-detail-r1-alpha.png",
           "sha256": "e4e975372ff6ee116b50a922afc79f7852fad892c737ca4fc5e9e0995c9ab3e7"
+        }
+      },
+      "D04": {
+        "method": "continuous-D04-context-exclusion-plus-city-owned-L4_0-L4_1-and-L4_3-detail",
+        "hardRevealFraction": 0.9138518789248098,
+        "mask": {
+          "decodedBytes": 1572528,
+          "dimensions": [
+            1448,
+            1086
+          ],
+          "encodedBytes": 3769,
+          "path": "/career-world/capitals/ninjaone/city-r3/authority/D04M02-central-lake-full-context-exclusion-r1.png",
+          "sha256": "4c75a7ef6890ef7ea693d6959bf6517bb4f14fe110389e65072733410c175e68"
+        },
+        "contactFraction": 0.016074691829750472,
+        "outsideDistrictContactPixels": 150,
+        "contactLayer": {
+          "decodedBytes": 6290112,
+          "dimensions": [
+            1448,
+            1086
+          ],
+          "encodedBytes": 19981,
+          "path": "/career-world/capitals/ninjaone/city-r3/landscape/D04L02-central-lake-grounding-and-circulation-r1-alpha.png",
+          "sha256": "30d4865dabcb300bd5f8346ee81381215596055fbefd9a5689c1437d2201bedd"
+        },
+        "waterDetailPixels": 97,
+        "waterDetailLayer": {
+          "decodedBytes": 6290112,
+          "dimensions": [
+            1448,
+            1086
+          ],
+          "encodedBytes": 6665,
+          "path": "/career-world/capitals/ninjaone/city-r3/water-interaction/D04W02-S14-bridge-water-contact-detail-r1-alpha.png",
+          "sha256": "7eeab3c43cec6b338bd8a1ea4f31184ae72d0ae91d631d31df4f1d132a916bdf"
+        },
+        "gatewayLayer": {
+          "decodedBytes": 6289496,
+          "dimensions": [
+            1318,
+            1193
+          ],
+          "encodedBytes": 446422,
+          "path": "/career-world/capitals/ninjaone/city-r3/architecture/S14-D04-compact-water-gateway-r2-alpha.png",
+          "sha256": "9bf76fc093d3360ebdc2409a9cf32f8b3ee5b36a48b66fde9d98fe0a13050ee8"
         }
       },
       "D05": {
@@ -223,6 +296,25 @@
       }
     },
     {
+      "id": "D02L02",
+      "layerId": "L4_1",
+      "role": "dojo-ridge-grounding-and-circulation",
+      "tiers": [
+        "site",
+        "close"
+      ],
+      "asset": {
+        "decodedBytes": 6290112,
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "encodedBytes": 10957,
+        "path": "/career-world/capitals/ninjaone/city-r3/landscape/D02L02-dojo-ridge-grounding-and-circulation-r1-alpha.png",
+        "sha256": "7f2ac0a7416234a7e30976b7e5807f3ffa58432185812fc4e4c7a86a68b5248d"
+      }
+    },
+    {
       "id": "D03L02",
       "layerId": "L4_1",
       "role": "eastern-industry-ground-contact-platforms",
@@ -258,6 +350,74 @@
         "encodedBytes": 35398,
         "path": "/career-world/capitals/ninjaone/city-r3/detail/D03L03-city-terrain-integration-detail-r1-alpha.png",
         "sha256": "e4e975372ff6ee116b50a922afc79f7852fad892c737ca4fc5e9e0995c9ab3e7"
+      }
+    },
+    {
+      "id": "D04W02",
+      "layerId": "L4_0",
+      "role": "central-lake-bridge-water-contact-detail",
+      "tiers": [
+        "site",
+        "close"
+      ],
+      "asset": {
+        "decodedBytes": 6290112,
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "encodedBytes": 6665,
+        "path": "/career-world/capitals/ninjaone/city-r3/water-interaction/D04W02-S14-bridge-water-contact-detail-r1-alpha.png",
+        "sha256": "7eeab3c43cec6b338bd8a1ea4f31184ae72d0ae91d631d31df4f1d132a916bdf"
+      }
+    },
+    {
+      "id": "D04L02",
+      "layerId": "L4_1",
+      "role": "central-lake-grounding-and-circulation",
+      "tiers": [
+        "site",
+        "close"
+      ],
+      "asset": {
+        "decodedBytes": 6290112,
+        "dimensions": [
+          1448,
+          1086
+        ],
+        "encodedBytes": 19981,
+        "path": "/career-world/capitals/ninjaone/city-r3/landscape/D04L02-central-lake-grounding-and-circulation-r1-alpha.png",
+        "sha256": "30d4865dabcb300bd5f8346ee81381215596055fbefd9a5689c1437d2201bedd"
+      }
+    },
+    {
+      "id": "S14D04",
+      "layerId": "L4_3",
+      "role": "compact-central-lake-water-gateway",
+      "tiers": [
+        "site",
+        "close"
+      ],
+      "placement": {
+        "anchor": [
+          794,
+          731
+        ],
+        "baseSize": [
+          114,
+          103.18816388467374
+        ],
+        "scale": 1
+      },
+      "asset": {
+        "decodedBytes": 6289496,
+        "dimensions": [
+          1318,
+          1193
+        ],
+        "encodedBytes": 446422,
+        "path": "/career-world/capitals/ninjaone/city-r3/architecture/S14-D04-compact-water-gateway-r2-alpha.png",
+        "sha256": "9bf76fc093d3360ebdc2409a9cf32f8b3ee5b36a48b66fde9d98fe0a13050ee8"
       }
     },
     {
@@ -473,10 +633,18 @@
     "d01DistrictMask": "596e66e0289863fa39c4deecc1e45a1ab5da1e6c7c2b50d07307eb397392aed2",
     "d01ContextExclusionMask": "58cba9b60d03ff592566bec9338d4a7e93fa23465c505fd3163f1574f371d4c1",
     "d01GroundingAndCirculation": "a3568ec9b6cd2e751a21dfef290705b1502573831764a03317ecb14ffc74eb34",
+    "d02DistrictMask": "e1572686514d8a5167d3068e70ea24be04bf5ede4e1b5df54696553eb93decae",
+    "d02ContextExclusionMask": "d392f4c0066b3c15455eec8c54639eda0518e5b52d3537f839cbea93a224844f",
+    "d02GroundingAndCirculation": "7f2ac0a7416234a7e30976b7e5807f3ffa58432185812fc4e4c7a86a68b5248d",
     "d03DistrictMask": "872bde51347a8fddf3e6644bc25d49144639002d9c75da46a1ebf45b3b250e04",
     "d03ContextExclusionMask": "260a5fe73ebe31035b8ae4e73a6f6294486aeb47d06f130837c7a009ffc29a45",
     "d03GroundContact": "32c324ef0f5e6a21a46716ef8a9acc1a98c71cedd3d088dc75d7172341437778",
     "d03TerrainIntegrationDetail": "e4e975372ff6ee116b50a922afc79f7852fad892c737ca4fc5e9e0995c9ab3e7",
+    "d04DistrictMask": "3c830943858fc71633e45a5d3909c9be3141b2a094e1afc435f1a0ed75e681a5",
+    "d04ContextExclusionMask": "4c75a7ef6890ef7ea693d6959bf6517bb4f14fe110389e65072733410c175e68",
+    "d04GroundingAndCirculation": "30d4865dabcb300bd5f8346ee81381215596055fbefd9a5689c1437d2201bedd",
+    "d04BridgeWaterDetail": "7eeab3c43cec6b338bd8a1ea4f31184ae72d0ae91d631d31df4f1d132a916bdf",
+    "d04CompactGateway": "9bf76fc093d3360ebdc2409a9cf32f8b3ee5b36a48b66fde9d98fe0a13050ee8",
     "d05DistrictMask": "1078c69efe56c446786dca236bc68d834f8153b01fd604799b70ea5e5be1aa18",
     "d05ContextExclusionMask": "f24b8e7ea8c2a9658fc55e0880aa8d102b6d7909c9621ebb15b5f949e032b929",
     "d05GroundIntegration": "bf56f85f373eef3356fcae11d5d3f658db278eb868b7251a46029ed43bb80167",

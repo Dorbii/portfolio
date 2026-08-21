@@ -120,7 +120,9 @@ export function NinjaOneCapitalAssetNodes({
           / node.asset.source.dimensions[0];
         const ownsLargeFootprint = node.layerId === "L4_2" || node.layerId === "L4_3";
         const usesAuthoredGrounding = node.districtId === "D01"
+          || node.districtId === "D02"
           || node.districtId === "D03"
+          || node.districtId === "D04"
           || node.districtId === "D05";
         const isD06ProofNode = NINJAONE_CAPITAL_D06_STATION_PROOF.nodeIds.includes(node.id);
         const isD06IntrinsicAlphaNode = node.id

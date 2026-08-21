@@ -367,7 +367,7 @@ test("D03 calibrated silhouettes do not repaint registered inland water", async 
   }
 });
 
-test("D04 site and close promote only the two dry-fabric sockets", () => {
+test("D04 site and close keep the two dry-fabric sockets independently registered", () => {
   for (const tier of ["site", "close"]) {
     const nodes = ninjaOneCapitalVisibleDistrictDetailNodes(
       NINJAONE_CAPITAL_CITY_PROOF_CAMERAS[`d04-${tier}`],
@@ -389,11 +389,6 @@ test("D04 site and close promote only the two dry-fabric sockets", () => {
     assert.ok(nodes.every((node) => (
       ninjaOneCapitalCityAssetVariant(node, tier).path.includes(`/${tier}/`)
     )));
-    assert.equal(
-      nodes.some(({ assetId }) => assetId === "S14"),
-      false,
-      "D04 must preserve the cohesive baked S14 gateway until a conforming replacement exists",
-    );
   }
 });
 
@@ -813,7 +808,7 @@ test("D05 progressively reveals native land before independently owned grounding
   assert.ok(nodeIndex > integrationIndex);
   assert.match(
     nodeRenderer,
-    /usesAuthoredGrounding = node\.districtId === "D01"[\s\S]*?node\.districtId === "D03"[\s\S]*?node\.districtId === "D05"/,
+    /usesAuthoredGrounding = node\.districtId === "D01"[\s\S]*?node\.districtId === "D02"[\s\S]*?node\.districtId === "D03"[\s\S]*?node\.districtId === "D04"[\s\S]*?node\.districtId === "D05"/,
   );
   assert.match(nodeRenderer, /ownsLargeFootprint && !usesAuthoredGrounding/);
   assert.match(
@@ -878,15 +873,29 @@ test("D01 independently owns native-land reveal, grounding, and six architecture
   }
 });
 
-test("D02 detail atomically replaces its two registered sockets without a district plate", async () => {
-  const renderer = await readFile(new URL(
-    "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
-    import.meta.url,
-  ), "utf8");
-  assert.match(renderer, /d02DistrictDetailVisible = \(tier === "site" \|\| tier === "close"\)/);
+test("D02 independently owns native-land reveal, grounding, and two detail layers", async () => {
+  const [renderer, nodeRenderer] = await Promise.all([
+    readFile(new URL(
+      "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
+      import.meta.url,
+    ), "utf8"),
+    readFile(new URL(
+      "../features/career-world/layers/city/rendering/NinjaOneCapitalAssetNodes.tsx",
+      import.meta.url,
+    ), "utf8"),
+  ]);
+  assert.match(renderer, /d02DistrictInFocus = \(tier === "site" \|\| tier === "close"\)/);
+  assert.match(renderer, /d02DistrictLandscapeVisible = d02DistrictInFocus && landscapeVisible/);
+  assert.match(renderer, /d02DistrictDetailVisible = d02DistrictInFocus/);
   assert.match(renderer, /id="ninjaone-capital-city-r3-d02-detail-cutout"/);
+  assert.match(renderer, /NINJAONE_CAPITAL_CITY_R3_D02_CONTEXT_EXCLUSION_MASK\.path/);
+  assert.match(renderer, /data-city-asset-id="D02L02"[\s\S]*?data-city-child-layer="L4_1"/);
   assert.match(renderer, /focusedDistrict="D02"/);
   assert.match(renderer, /layerIds=\{d02DistrictDetailLayerIds\}/);
+  assert.match(
+    nodeRenderer,
+    /usesAuthoredGrounding = node\.districtId === "D01"[\s\S]*?node\.districtId === "D02"[\s\S]*?node\.districtId === "D03"/,
+  );
   assert.doesNotMatch(renderer, /D02-dojo-ridge-plate/);
 });
 
@@ -911,17 +920,19 @@ test("D03 independently owns native-land reveal, grounding, and four architectur
   assert.match(renderer, /focusedDistrict="D03"/);
   assert.match(
     nodeRenderer,
-    /usesAuthoredGrounding = node\.districtId === "D01"[\s\S]*?node\.districtId === "D03"[\s\S]*?node\.districtId === "D05"/,
+    /usesAuthoredGrounding = node\.districtId === "D01"[\s\S]*?node\.districtId === "D02"[\s\S]*?node\.districtId === "D03"[\s\S]*?node\.districtId === "D05"/,
   );
   assert.doesNotMatch(renderer, /D03-eastern-industry-plate/);
 });
 
-test("D04 detail replaces only two dry-fabric silhouettes and preserves the baked S14 gateway", async () => {
+test("D04 independently owns native-land reveal, dry nodes, and the compact S14 gateway", async () => {
   const renderer = await readFile(new URL(
     "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
     import.meta.url,
   ), "utf8");
-  assert.match(renderer, /d04DistrictDetailVisible = \(tier === "site" \|\| tier === "close"\)/);
+  assert.match(renderer, /d04DistrictInFocus = \(tier === "site" \|\| tier === "close"\)/);
+  assert.match(renderer, /d04DistrictLandscapeVisible = d04DistrictInFocus && landscapeVisible/);
+  assert.match(renderer, /d04DistrictArchitectureVisible = d04DistrictInFocus && architectureVisible/);
   assert.match(renderer, /id="ninjaone-capital-city-r3-d04-detail-cutout"/);
   assert.match(renderer, /id="ninjaone-capital-city-r3-d04-context-clip"/);
   assert.match(renderer, /id="ninjaone-capital-city-r3-d04-dry-fabric-clip"/);
@@ -929,6 +940,12 @@ test("D04 detail replaces only two dry-fabric silhouettes and preserves the bake
   assert.match(renderer, /<feFuncR tableValues="1 0" type="discrete"/);
   assert.match(renderer, /<g mask="url\(#ninjaone-capital-city-r3-d04-dry-fabric-clip\)">/);
   assert.match(renderer, /focusedDistrict="D04"/);
+  assert.match(renderer, /data-city-asset-id="D04W02"[\s\S]*?data-city-runtime-status="manifest-declared"/);
+  assert.match(renderer, /data-city-asset-id="D04L02"[\s\S]*?data-city-runtime-status="manifest-declared"/);
+  assert.match(renderer, /data-city-asset-id="S14"[\s\S]*?data-city-child-layer="L4_3"/);
+  assert.match(renderer, /data-city-asset-id="S14"[\s\S]*?data-city-runtime-status="manifest-declared"/);
+  assert.match(renderer, /D04_S14_COMPACT_GATEWAY_REVIEW/);
+  assert.doesNotMatch(renderer, /D04_[A-Z0-9_]+_REVIEW\s*=\s*"\/career-world\/.*\/_review\//);
   assert.doesNotMatch(renderer, /D04-central-lake-terraces-plate/);
 });
 
