@@ -202,6 +202,11 @@ Steve's test: a skill building is valid only for a recruiter-searchable technica
 - **Setup:** lamp+bollard, crates+barrels, bench+signpost, utility beacon; prop-scale measure-then-declare; "metalwork never magenta" prompt rule from the G3 lesson; ≤8 calls. Final generation group.
 - **Verdict: PASS — 4/4 at 5 calls, and F12 closed its loop.** The worker promoted the magenta-bleed lesson into an actual gate (22/22 now), which caught real pink contamination on bench candidate A; candidate B fixed it under the named-defect protocol. Prop-vs-building scale ratios verified sane (lamp 2.5 vs compact 13.3 master px). Kit status: 20 entries banked + 5 in flight (G3-r02). Two potential composer-demand fill-ins deferred per F9: road-curve-right, narrow slab.
 
+### R026 — 2026-08-21 — T3c-r5: dusk grade + foliage + diagonals (codex exec, gpt-5.6-terra, effort=high)
+
+- **Verdict: PASS — presentable to the owner.** Director picks: **medium grade** (gain .72 / sat .92 / floor #101418 / warm-mask emission boost — the composed side now lives in the master's tonal register) and **muted medallions** (near-invisible in-context; muted is safer on exposed runs). Foliage: 79 deterministic native placements pass the coverage floor, but the floor itself was computed from a high-specificity palette sample that likely under-measures the master's true forest density (F9/F15 family — proxy under-measurement); composed forest reads sparser than master. Diagonals: h045 installed; NW stair honestly withheld (no in-tolerance run); heading histogram says h135/NE would service only +24.5% of off-axis length — deferred, circulation is largely occluded at true density anyway. Honest flag carried: full-suite gate unverified (worker hung on the known slow tests) — must pass before the runtime-swap lane ships.
+- **Residual demands (non-blocking, incremental lanes):** forest density pass with corrected master sampling; compact/standard variant breadth; h135/NE if a future district demands them.
+
 ## Findings backlog (flow improvements to fold into future packets)
 
 - F1: Task packets must declare required gate tier (focused / full / none) — otherwise workers default to maximal ceremony. (From R000.)

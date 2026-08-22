@@ -18,7 +18,13 @@ const HEADING_TOLERANCE_DEGREES = 7.5;
 const RUN_ENDPOINT_TOLERANCE = 8;
 const MAX_TILE_GAP_MASTER_PX = 4;
 const WORLD_LIGHT = Object.freeze([-0.42, -0.36, 0.83]);
-const GRADE = Object.freeze({ gain: 1.08, offset: 8, saturation: 1.04 });
+const GRADE_PROFILES = Object.freeze({
+  subtle: Object.freeze({ id: "subtle", gain: 0.80, shadowFloor: [16, 20, 24], saturation: 0.94, greenSaturation: 0.90, coolShadowBlue: 3, warmThreshold: 30, warmGain: 1.02 }),
+  medium: Object.freeze({ id: "medium", gain: 0.72, shadowFloor: [16, 20, 24], saturation: 0.92, greenSaturation: 0.90, coolShadowBlue: 4, warmThreshold: 30, warmGain: 1.06 }),
+  strong: Object.freeze({ id: "strong", gain: 0.64, shadowFloor: [16, 20, 24], saturation: 0.89, greenSaturation: 0.88, coolShadowBlue: 5, warmThreshold: 30, warmGain: 1.10 }),
+});
+const RECOMMENDED_GRADE = GRADE_PROFILES.medium;
+const DUSK_CROP = Object.freeze({ left: 160, top: 350, width: 420, height: 430 });
 const CITY_WORLD_ORIGIN = Object.freeze([0.125, 0]);
 const CITY_WORLD_SPAN = Object.freeze([0.25, 1 / 3]);
 const S10_ISOLATION_CROP = Object.freeze({ left: 220, top: 543, width: 350, height: 332 });
@@ -40,14 +46,16 @@ const files = Object.freeze({
   foliageManifest: "public/career-world/capitals/ninjaone/environment/manifests/foliage-native-r4.json",
   geology: "public/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-close-r8.webp",
   surfaceDetail: "public/career-world/capitals/ninjaone/environment/plates/surface-detail/ninjaone-environment-surface-detail-close-r1.webp",
-  manifest: ".codex-tmp/qa/T3/t3c-r4c/d05-placements-r4c.json",
-  ungraded: ".codex-tmp/qa/T3/t3c-r4c/d05-composed-ungraded-r4c.png",
-  graded: ".codex-tmp/qa/T3/t3c-r4c/d05-composed-graded-r4c.png",
-  capital: ".codex-tmp/qa/T3/t3c-r4c/d05-composed-capital-scale-r4c.png",
-  comparison: ".codex-tmp/qa/T3/t3c-r4c/d05-composed-vs-master-r4c.png",
-  cleanTerrainComparison: ".codex-tmp/qa/T3/t3c-r4c/d05-composed-clean-standalone-r4c.png",
-  passIsolation: ".codex-tmp/qa/T3/t3c-r4c/s10-pass-isolation-strip-r4c-pre-fix.png",
-  s10Final: ".codex-tmp/qa/T3/t3c-r4c/s10-final-fixed-r4c.png",
+  manifest: ".codex-tmp/qa/T3/t3c-r5/d05-placements-r5.json",
+  ungraded: ".codex-tmp/qa/T3/t3c-r5/d05-composed-ungraded-r5.png",
+  graded: ".codex-tmp/qa/T3/t3c-r5/d05-composed-graded-r5.png",
+  capital: ".codex-tmp/qa/T3/t3c-r5/d05-composed-capital-scale-r5.png",
+  comparison: ".codex-tmp/qa/T3/t3c-r5/d05-composed-vs-master-r5.png",
+  cleanTerrainComparison: ".codex-tmp/qa/T3/t3c-r5/d05-composed-clean-standalone-r5.png",
+  gradeCandidates: ".codex-tmp/qa/T3/t3c-r5/d05-dusk-grade-candidates-r5.png",
+  diagonalCandidates: ".codex-tmp/qa/T3/t3c-r5/d05-h045-medallion-candidates-r5.png",
+  passIsolation: ".codex-tmp/qa/T3/t3c-r5/s10-pass-isolation-strip-r5-pre-fix.png",
+  s10Final: ".codex-tmp/qa/T3/t3c-r5/s10-final-fixed-r5.png",
 });
 
 const kitFiles = Object.freeze({
@@ -59,10 +67,12 @@ const kitFiles = Object.freeze({
   cliff: ".codex-tmp/quarantine/city-v2/T3b-g1/n1-k2-ground-cliff-transition-west-taper-r01/processed-a.kit.json",
   roadH000: ".codex-tmp/quarantine/city-v2/T3b-g1/n1-k2-circulation-road-straight-h000-r02/processed-a.kit.json",
   roadH090: ".codex-tmp/quarantine/city-v2/T3b-g1/n1-k2-circulation-road-straight-h090-r01/processed-a.kit.json",
+  roadH045: ".codex-tmp/quarantine/city-v2/T3b-g5/n1-k2-circulation-road-straight-h045-r01/processed-a.kit.json",
   roadCurveLeft: ".codex-tmp/quarantine/city-v2/T3b-g1/n1-k2-circulation-road-curve-left-r01/processed-a.kit.json",
   roadJunction: ".codex-tmp/quarantine/city-v2/T3b-g1/n1-k2-circulation-road-junction-t-r01/processed-b.kit.json",
   stairLeft: ".codex-tmp/quarantine/city-v2/T3b-g1/n1-k2-circulation-stair-run-ascend-left-r01/processed-a.kit.json",
   stairRight: ".codex-tmp/quarantine/city-v2/T3b-g1/n1-k2-circulation-stair-run-ascend-right-r01/processed-b.kit.json",
+  stairDiagNw: ".codex-tmp/quarantine/city-v2/T3b-g5/n1-k2-circulation-stair-run-diag-nw-r01/processed-b.kit.json",
   compact02: ".codex-tmp/quarantine/city-v2/T3b-g2/n1-k2-building-compact-var02-h000-r01/processed-a.kit.json",
   compact03: ".codex-tmp/quarantine/city-v2/T3b-g2/n1-k2-building-compact-var03-h000-r01/processed-a.kit.json",
   standard01: ".codex-tmp/quarantine/city-v2/T3b-g2/n1-k2-building-standard-var01-h000-r01/processed-a.kit.json",
@@ -412,7 +422,9 @@ function buildCirculation(sourcePlacements, kit) {
   const runs = sourcePlacements.filter((placement) => placement.family === "circulation");
   const placements = [];
   const coverage = [];
-  let totalSegmentLength = 0; let mismatchedSegmentLength = 0; let rightHandBends = 0; let shortRunClipCount = 0;
+  const selectedDiagonalAxes = Object.freeze({ roadH045: kit.roadH045.metadata.routeAxisMapping.packetPcaHeadingDegrees, stairDiagNw: kit.stairDiagNw.metadata.routeAxisMapping.packetPcaHeadingDegrees });
+  const headingHistogram = { totalSegmentLength: 0, offAxisLength: 0, baseAxisLength: 0, h045ServiceableLength: 0, diagNwServiceableLength: 0, h135OrNeDemandLength: 0, otherDemandLength: 0, bins: [] };
+  let rightHandBends = 0; let shortRunClipCount = 0;
   const endpointDegree = new Map();
   for (const run of runs.filter((entry) => entry.kind === "road")) for (const point of [run.masterFootprint[0], run.masterFootprint.at(-1)]) endpointDegree.set(pointKey(point), (endpointDegree.get(pointKey(point)) ?? 0) + 1);
   for (const run of runs) {
@@ -421,13 +433,25 @@ function buildCirculation(sourcePlacements, kit) {
     for (let segmentIndex = 1; segmentIndex < run.masterFootprint.length; segmentIndex += 1) {
       const start = run.masterFootprint[segmentIndex - 1]; const end = run.masterFootprint[segmentIndex];
       const length = distance(start, end); const degrees = headingDegrees(start, end);
-      let kitKey;
-      if (run.kind === "stairs") kitKey = ((end[0] - start[0]) * (end[1] - start[1]) < 0) ? "stairLeft" : "stairRight";
-      else kitKey = axisDifference(degrees, 90) < axisDifference(degrees, 0) ? "roadH090" : "roadH000";
-      const axis = kitKey === "roadH090" ? 90 : 0;
-      const mismatch = run.kind === "road" ? axisDifference(degrees, axis) : Math.min(axisDifference(degrees, 0), axisDifference(degrees, 90));
-      totalSegmentLength += length;
-      if (mismatch > HEADING_TOLERANCE_DEGREES) mismatchedSegmentLength += length;
+      const baseAxis = axisDifference(degrees, 90) < axisDifference(degrees, 0) ? 90 : 0;
+      const baseMismatch = axisDifference(degrees, baseAxis);
+      const h045Mismatch = axisDifference(degrees, selectedDiagonalAxes.roadH045);
+      const diagNwMismatch = axisDifference(degrees, selectedDiagonalAxes.stairDiagNw);
+      const offAxis = baseMismatch > HEADING_TOLERANCE_DEGREES;
+      let kitKey; let axis; let service = "base-axis";
+      if (run.kind === "road" && h045Mismatch <= HEADING_TOLERANCE_DEGREES) { kitKey = "roadH045"; axis = selectedDiagonalAxes.roadH045; service = "h045"; }
+      else if (run.kind === "stairs" && diagNwMismatch <= HEADING_TOLERANCE_DEGREES) { kitKey = "stairDiagNw"; axis = selectedDiagonalAxes.stairDiagNw; service = "diag-nw"; }
+      else if (run.kind === "stairs") { kitKey = ((end[0] - start[0]) * (end[1] - start[1]) < 0) ? "stairLeft" : "stairRight"; axis = baseAxis; }
+      else { kitKey = baseAxis === 90 ? "roadH090" : "roadH000"; axis = baseAxis; }
+      const mismatch = axisDifference(degrees, axis);
+      headingHistogram.totalSegmentLength += length;
+      if (!offAxis) headingHistogram.baseAxisLength += length;
+      else if (service === "h045") headingHistogram.h045ServiceableLength += length;
+      else if (service === "diag-nw") headingHistogram.diagNwServiceableLength += length;
+      else if (axisDifference(degrees, 135) <= 22.5 || (run.kind === "stairs" && axisDifference(degrees, 45) <= 22.5)) headingHistogram.h135OrNeDemandLength += length;
+      else headingHistogram.otherDemandLength += length;
+      if (offAxis) headingHistogram.offAxisLength += length;
+      headingHistogram.bins.push({ kind: run.kind, degrees: round(degrees), lengthMasterPx: round(length), baseAxisMismatchDegrees: round(baseMismatch), selectedKitKey: kitKey, selectedAxisDegrees: round(axis), selectedAxisMismatchDegrees: round(mismatch), service });
       const span = socketSpan(kit[kitKey]);
       const clipShortRun = runLength < span;
       const count = Math.max(1, Math.ceil(length / Math.max(1, span - 2)));
@@ -454,7 +478,85 @@ function buildCirculation(sourcePlacements, kit) {
       if (!placements.some((placement) => placement.id === id)) placements.push(makePlacement({ id, kit: kit.roadJunction, family: "circulation", className: "road-junction", anchor: nearestInMask(globalMask, point), sourceFootprint: [point], source: { kind: "road", junctionDegree: endpointDegree.get(pointKey(point)) }, zBias: -4980 }));
     }
   }
-  return { placements, coverage, headingMismatchLengthShare: round(mismatchedSegmentLength / totalSegmentLength, 4), rightHandBends, shortRunClipCount };
+  const offAxisLength = headingHistogram.offAxisLength;
+  return { placements, coverage, headingMismatchLengthShare: round((headingHistogram.h135OrNeDemandLength + headingHistogram.otherDemandLength) / headingHistogram.totalSegmentLength, 4), headingHistogram: { ...headingHistogram, totalSegmentLength: round(headingHistogram.totalSegmentLength), offAxisLength: round(offAxisLength), baseAxisLength: round(headingHistogram.baseAxisLength), h045ServiceableLength: round(headingHistogram.h045ServiceableLength), diagNwServiceableLength: round(headingHistogram.diagNwServiceableLength), h135OrNeDemandLength: round(headingHistogram.h135OrNeDemandLength), otherDemandLength: round(headingHistogram.otherDemandLength), offAxisServiceableShare: round((headingHistogram.h045ServiceableLength + headingHistogram.diagNwServiceableLength) / offAxisLength, 4), offAxisH135OrNeDemandShare: round(headingHistogram.h135OrNeDemandLength / offAxisLength, 4), offAxisOtherDemandShare: round(headingHistogram.otherDemandLength / offAxisLength, 4), selectedDiagonalAxes }, rightHandBends, shortRunClipCount };
+}
+
+function distanceToBounds(point, bounds) {
+  const dx = Math.max(bounds[0] - point[0], 0, point[0] - bounds[2]);
+  const dy = Math.max(bounds[1] - point[1], 0, point[1] - bounds[3]);
+  return Math.hypot(dx, dy);
+}
+function stableIndex(id, length) {
+  return Number.parseInt(sha256(id).slice(0, 8), 16) % length;
+}
+function masterFoliagePixel(red, green, blue) {
+  return green >= red && green - red <= 6 && green - blue >= 16 && red < 40;
+}
+async function measureMasterFoliageCoverage() {
+  const width = D05_BOUNDS[2] - D05_BOUNDS[0]; const height = D05_BOUNDS[3] - D05_BOUNDS[1];
+  const { data } = await sharp(absolute(files.master)).extract({ left: D05_BOUNDS[0], top: D05_BOUNDS[1], width, height }).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  let districtPixels = 0; let foliagePixels = 0;
+  for (let y = 0; y < height; y += 1) for (let x = 0; x < width; x += 1) {
+    if (!maskAt(globalMask, [x + D05_BOUNDS[0], y + D05_BOUNDS[1]])) continue;
+    districtPixels += 1;
+    const index = (y * width + x) * 3;
+    if (masterFoliagePixel(data[index], data[index + 1], data[index + 2])) foliagePixels += 1;
+  }
+  return { method: "high-specificity conifer palette classifier (green >= red, green-red <= 6, green-blue >= 16, red < 40) inside the binary D05 mask; broad green terrain is intentionally excluded", masterFoliagePixels: foliagePixels, districtPixels, fraction: round(foliagePixels / districtPixels, 6) };
+}
+async function makeFoliageKit({ id, instance, resource, manifestBytes }) {
+  const [left, top, width, height] = instance.canopyAtlasRect;
+  const resourcePath = path.posix.join("public", publicPath(resource.path));
+  const imageBytes = await sharp(absolute(resourcePath)).extract({ left, top, width, height }).ensureAlpha().png().toBuffer();
+  const targetWidthMasterPx = instance.artboardBounds.span[0] / 1440 * MASTER[0];
+  const ppm = width / targetWidthMasterPx;
+  const baselineY = height * instance.pivotYPercent / 100;
+  const metadata = {
+    id: `native-foliage-${id}`,
+    canvas: [width, height],
+    nativePixelsPerMasterPixel: ppm,
+    masterFootprintSize: [round(width / ppm), round(height / ppm)],
+    groundSocket: { sortPoint: [width / 2, baselineY], baselineY, footprintPolygon: [[width * 0.42, baselineY - 3], [width * 0.58, baselineY - 3], [width * 0.58, baselineY], [width * 0.42, baselineY]], connectionSockets: [], terraceCompatibility: { mode: "level-pad", bandDelta: 0 } },
+  };
+  return { key: id, sidecarPath: files.foliageManifest, metadata, imagePath: resourcePath, imageBytes, alphaBounds: [0, 0, width - 1, height - 1], sidecarSha256: sha256(manifestBytes), imageSha256: sha256(imageBytes), nativeReuse: { instanceId: instance.id, atlasResourceId: resource.id, canopyAtlasRect: instance.canopyAtlasRect, pivotYPercent: instance.pivotYPercent } };
+}
+async function buildFoliage({ occupancy, buildingCandidates, buildings, kit }) {
+  const foliageManifest = await loadJson(files.foliageManifest);
+  const manifestBytes = await readFile(absolute(files.foliageManifest));
+  const resources = new Map(foliageManifest.resources.map((resource) => [resource.id, resource]));
+  const sourceInstances = foliageManifest.instances.filter((instance) => instance.species === "native-conifer").sort((left, right) => left.id.localeCompare(right.id));
+  assert(sourceInstances.length > 0, "The native foliage manifest has no conifer instances to reuse.");
+  const skipped = occupancy.skipped.map((skip) => buildingCandidates.find((candidate) => candidate.id === skip.id)).filter(Boolean).map((candidate) => ({ id: `foliage-slot-${candidate.id}`, role: "unbuilt-slot", point: bottomSortPoint(candidate.sourceFootprint) }));
+  const gaps = [];
+  const edges = [];
+  const forestFallback = [];
+  for (let y = D05_BOUNDS[1] + 24; y < D05_BOUNDS[3] - 12; y += 38) for (let x = D05_BOUNDS[0] + 20; x < D05_BOUNDS[2] - 12; x += 42) {
+    const point = [x, y];
+    if (!maskAt(globalMask, point)) continue;
+    const nearestBuilding = Math.min(...buildings.map((building) => distanceToBounds(point, building.renderedBoundsMasterPx)));
+    const edge = [8, 12, 16, 20].some((offset) => !maskAt(globalMask, [x - offset, y]) || !maskAt(globalMask, [x + offset, y]) || !maskAt(globalMask, [x, y - offset]) || !maskAt(globalMask, [x, y + offset]));
+    if (nearestBuilding > 20 && nearestBuilding < 104) gaps.push({ id: `foliage-gap-${x}-${y}`, role: "building-gap-over-20-master-px", point });
+    if (edge && nearestBuilding > 10) edges.push({ id: `foliage-edge-${x}-${y}`, role: "district-edge", point });
+    if (nearestBuilding > 12) forestFallback.push({ id: `foliage-forest-${x}-${y}`, role: "district-edge-forest-continuity", point });
+  }
+  for (let y = D05_BOUNDS[1] + 12; y < D05_BOUNDS[3] - 8; y += 26) {
+    const inside = [];
+    for (let x = D05_BOUNDS[0]; x < D05_BOUNDS[2]; x += 1) if (maskAt(globalMask, [x, y])) inside.push(x);
+    if (inside.length >= 16) for (const x of [inside[0] + 8, inside.at(-1) - 8]) edges.push({ id: `foliage-edge-contour-${x}-${y}`, role: "district-edge", point: [x, y] });
+  }
+  const candidates = [...new Map([...skipped, ...edges.slice(0, 40), ...gaps.slice(0, 50), ...forestFallback.slice(0, 45)].map((candidate) => [pointKey(candidate.point), candidate])).values()];
+  assert(skipped.length === 13, `Expected the 13 rejected building placements, found ${skipped.length}.`);
+  const placements = [];
+  for (const candidate of candidates) {
+    const instance = sourceInstances[stableIndex(candidate.id, sourceInstances.length)];
+    const resource = resources.get(instance.atlasResourceId);
+    assert(resource, `${instance.id} has no native foliage atlas resource.`);
+    const key = candidate.id;
+    kit[key] = await makeFoliageKit({ id: candidate.id, instance, resource, manifestBytes });
+    placements.push(makePlacement({ id: candidate.id, kit: kit[key], family: "foliage", className: "native-conifer", anchor: nearestInMask(globalMask, candidate.point), sourceFootprint: [candidate.point], source: { placementRule: candidate.role, deterministicSeed: candidate.id, nativeReuse: kit[key].nativeReuse } }));
+  }
+  return { placements, masterCoverage: await measureMasterFoliageCoverage(), sourceInstanceCount: sourceInstances.length, candidateCounts: { unbuiltSlots: skipped.length, gapsOver20MasterPx: gaps.length, districtEdges: edges.length, districtEdgeForestContinuity: forestFallback.length }, resources: [...new Set(placements.map((placement) => placement.nativeReuse.atlasResourceId))] };
 }
 
 function densityAt(grammar, point) {
@@ -644,17 +746,46 @@ async function verifyCityLayerInsideMask(cityLayer) {
   assert(outsidePixels === 0, `The city layer has ${outsidePixels} rendered pixels outside the D05 mask.`);
   return { maximumPlacementOverhangMasterPx: 0, outsideRenderedPixels: outsidePixels, allowedMasterPx: 4 };
 }
-async function globalGrade(ungraded) {
-  const { data, info } = await sharp(ungraded).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+async function globalGrade(input, profile = RECOMMENDED_GRADE) {
+  const { data, info } = await sharp(input).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   for (let index = 0; index < data.length; index += 4) {
     if (data[index + 3] === 0) { data[index] = 0; data[index + 1] = 0; data[index + 2] = 0; continue; }
-    const luminance = data[index] * 0.2126 + data[index + 1] * 0.7152 + data[index + 2] * 0.0722;
+    const original = [data[index], data[index + 1], data[index + 2]];
+    const luminance = original[0] * 0.2126 + original[1] * 0.7152 + original[2] * 0.0722;
+    const warmMask = clamp((original[0] - (original[1] + original[2]) / 2 - profile.warmThreshold) / 80, 0, 1);
+    const greenMask = clamp((original[1] - Math.max(original[0], original[2]) * 0.92) / 80, 0, 1);
     for (let channel = 0; channel < 3; channel += 1) {
-      const saturated = luminance + (data[index + channel] - luminance) * GRADE.saturation;
-      data[index + channel] = clamp(Math.round(saturated * GRADE.gain + GRADE.offset), 0, 255);
+      const saturation = profile.saturation * (1 - greenMask) + profile.saturation * profile.greenSaturation * greenMask;
+      const saturated = luminance + (original[channel] - luminance) * saturation;
+      const gain = profile.gain * (1 - warmMask) + profile.warmGain * warmMask;
+      const cooled = saturated * gain + (channel === 2 ? profile.coolShadowBlue * (1 - warmMask) : 0);
+      data[index + channel] = clamp(Math.round(Math.max(profile.shadowFloor[channel], cooled)), 0, 255);
     }
   }
   return sharp(data, { raw: info }).png({ compressionLevel: 9, adaptiveFiltering: false, palette: false }).toBuffer();
+}
+async function labeledPanel(label, image) {
+  const metadata = await sharp(image).metadata();
+  const title = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${metadata.width}" height="28"><rect width="100%" height="100%" fill="#101418"/><text x="10" y="19" fill="#d9d5c7" font-family="sans-serif" font-size="15">${label}</text></svg>`);
+  return sharp({ create: { width: metadata.width, height: metadata.height + 28, channels: 4, background: { r: 16, g: 20, b: 24, alpha: 1 } } }).composite([{ input: title, left: 0, top: 0 }, { input: image, left: 0, top: 28 }]).png({ compressionLevel: 9, adaptiveFiltering: false, palette: false }).toBuffer();
+}
+async function renderCandidateStrip(entries, crop = DUSK_CROP) {
+  const panels = await Promise.all(entries.map(async ({ label, image }) => labeledPanel(label, await sharp(image).extract(crop).png().toBuffer())));
+  const metadata = await Promise.all(panels.map((panel) => sharp(panel).metadata()));
+  return sharp({ create: { width: metadata.reduce((sum, entry) => sum + entry.width, 0), height: Math.max(...metadata.map((entry) => entry.height)), channels: 4, background: { r: 16, g: 20, b: 24, alpha: 1 } } }).composite(panels.map((input, index) => ({ input, left: metadata.slice(0, index).reduce((sum, entry) => sum + entry.width, 0), top: 0 }))).png({ compressionLevel: 9, adaptiveFiltering: false, palette: false }).toBuffer();
+}
+async function measureAddedFoliageCoverage(foliageLayer, masterCoverage) {
+  const { data, info } = await sharp(foliageLayer).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  let coveredPixels = 0; let districtPixels = 0;
+  for (let y = 0; y < info.height; y += 1) for (let x = 0; x < info.width; x += 1) {
+    if (!maskAt(globalMask, [D05_BOUNDS[0] + x / SCALE, D05_BOUNDS[1] + y / SCALE])) continue;
+    districtPixels += 1;
+    if (data[(y * info.width + x) * 4 + 3] >= 128) coveredPixels += 1;
+  }
+  const fraction = coveredPixels / districtPixels;
+  const targetFraction = masterCoverage.fraction * 0.70;
+  assert(fraction >= targetFraction, `Added foliage coverage ${(fraction * 100).toFixed(2)}% is below the 70%-of-master target ${(targetFraction * 100).toFixed(2)}%.`);
+  return { method: "added native-conifer alpha >= 128 inside the binary D05 mask at composer resolution, compared against the documented master dark-green classifier", coveredPixels, districtPixels, fraction: round(fraction, 6), masterFraction: masterCoverage.fraction, targetFraction: round(targetFraction, 6), targetMet: true };
 }
 async function verifyBuildingPlacementSolidity(buildings, kit) {
   const checks = [];
@@ -806,6 +937,10 @@ function verifyProperties({ grammar, sourcePlacements, buildingCandidates, build
     const widths = kit[key].metadata.groundSocket.connectionSockets.map((socket) => socket.widthMasterPx);
     assert(widths.length >= 2 && widths.every((width) => Math.abs(width - ROAD_WIDTH_MASTER_PX) <= 0.001), `${kit[key].metadata.id} is outside the 14px road family.`);
   }
+  const h045Widths = kit.roadH045.metadata.groundSocket.connectionSockets.map((socket) => socket.widthMasterPx);
+  assert(h045Widths.length === 2 && h045Widths.every((width) => Math.abs(width - ROAD_WIDTH_MASTER_PX) <= 0.001), `${kit.roadH045.metadata.id} is outside the 14px diagonal-road family.`);
+  const diagNwWidths = kit.stairDiagNw.metadata.groundSocket.connectionSockets.map((socket) => socket.widthMasterPx);
+  assert(diagNwWidths.length === 2 && diagNwWidths.every((width) => Math.abs(width - ROAD_WIDTH_MASTER_PX) <= 0.5), `${kit.stairDiagNw.metadata.id} exceeds the accepted diagonal-stair socket measurement tolerance.`);
   for (const placement of ordered) assert(placement.districtMaskClip.maximumRenderedOverhangMasterPx <= 4, `${placement.id} exceeds the D05 mask by more than 4px.`);
   for (const prop of props) assert(buildings.every((building) => boundsOverlapArea(prop.renderedBoundsMasterPx, building.renderedBoundsMasterPx) === 0), `${prop.id} overlaps an accepted building rendered bound.`);
   const expected = sortPlacements(ordered);
@@ -826,39 +961,53 @@ async function build() {
   const adjacencyEdges = buildingCandidates.adjacencyEdges.filter(([leftId, rightId]) => buildings.some((placement) => placement.id === leftId) && buildings.some((placement) => placement.id === rightId));
   const ground = buildGround(sourceManifest.placements, kit);
   const circulation = buildCirculation(sourceManifest.placements, kit);
+  const foliage = await buildFoliage({ occupancy, buildingCandidates: buildingCandidates.placements, buildings, kit });
   const props = buildProps(circulation.placements, ground, buildings, grammar, kit);
-  const ordered = sortPlacements([...ground, ...circulation.placements, ...buildings, ...props]).map((placement, renderOrder) => ({ ...placement, renderOrder }));
+  const ordered = sortPlacements([...ground, ...circulation.placements, ...buildings, ...foliage.placements, ...props]).map((placement, renderOrder) => ({ ...placement, renderOrder }));
   verifyProperties({ grammar, sourcePlacements: sourceManifest.placements, buildingCandidates: buildingCandidates.placements, buildings, adjacencyEdges, circulation, ordered, kit, masterOverlap, props });
   const cityLayer = await renderCityLayer(ordered, kit);
   const districtMaskProperty = await verifyCityLayerInsideMask(cityLayer);
   const f16FinalRowCoverage = PASS_ISOLATION ? null : await verifyFinalBuildingRowCoverage(buildings, kit, cityLayer);
-  const gradedCityLayer = await globalGrade(cityLayer);
   const nativeEnvironment = await renderNativeEnvironmentUnderlay();
   const ungraded = await renderOverCleanTerrain(nativeEnvironment.bytes, cityLayer);
-  const graded = await renderOverCleanTerrain(nativeEnvironment.bytes, gradedCityLayer);
+  const gradeCandidates = await Promise.all(Object.values(GRADE_PROFILES).map(async (profile) => ({ label: `${profile.id} gain ${profile.gain}`, image: await globalGrade(ungraded, profile) })));
+  const graded = gradeCandidates.find((candidate) => candidate.label.startsWith(RECOMMENDED_GRADE.id)).image;
+  const foliageLayer = await renderCityLayer(foliage.placements, kit, { disabledPasses: new Set(["cast-shadow", "contact-shading-band"]) });
+  const foliageCoverage = await measureAddedFoliageCoverage(foliageLayer, foliage.masterCoverage);
+  const mutedH045 = { ...kit.roadH045, imagePath: ".codex-tmp/quarantine/city-v2/T3b-g5/n1-k2-circulation-road-straight-h045-r01/processed-a-muted.png", imageBytes: await readFile(absolute(".codex-tmp/quarantine/city-v2/T3b-g5/n1-k2-circulation-road-straight-h045-r01/processed-a-muted.png")) };
+  mutedH045.imageSha256 = sha256(mutedH045.imageBytes);
+  const mutedKit = { ...kit, roadH045: mutedH045 };
+  const mutedCityLayer = await renderCityLayer(ordered, mutedKit);
+  const mutedGraded = await globalGrade(await renderOverCleanTerrain(nativeEnvironment.bytes, mutedCityLayer), RECOMMENDED_GRADE);
   const capital = await renderCapital(graded);
   const comparison = await renderComparison(graded);
   const cleanTerrainComparison = await renderCleanTerrainComparison(nativeEnvironment.bytes, graded);
   const s10Final = await cropS10(graded);
+  const gradeCandidateStrip = await renderCandidateStrip(gradeCandidates);
+  const firstH045 = ordered.find((placement) => placement.assetId === kit.roadH045.metadata.id);
+  assert(firstH045, "No h045 tile was placed for the medallion comparison.");
+  const [h045X, h045Y] = localMaster(firstH045.masterAnchor);
+  const diagonalCrop = { left: clamp(Math.round(h045X - 130), 0, WIDTH - 260), top: clamp(Math.round(h045Y - 130), 0, HEIGHT - 260), width: 260, height: 260 };
+  const diagonalCandidateStrip = await renderCandidateStrip([{ label: "h045-A original", image: graded }, { label: "h045-A muted", image: mutedGraded }], diagonalCrop);
   const repeatCityLayer = await renderCityLayer(ordered, kit);
   const repeatUngraded = await renderOverCleanTerrain(nativeEnvironment.bytes, repeatCityLayer);
-  const repeatGraded = await renderOverCleanTerrain(nativeEnvironment.bytes, await globalGrade(repeatCityLayer));
+  const repeatGraded = await globalGrade(repeatUngraded, RECOMMENDED_GRADE);
   assert(cityLayer.equals(repeatCityLayer) && ungraded.equals(repeatUngraded) && graded.equals(repeatGraded), "Two in-process composition rebuilds are not byte-identical.");
   const passIsolationOutputs = PASS_ISOLATION ? await renderPassIsolation(ordered, kit, nativeEnvironment.bytes) : [];
   const buildingOverlapStats = renderedBoundsOverlapStats(buildings);
   const statistics = {
-    placements: { total: ordered.length, ground: ground.length, circulationParts: circulation.placements.length, buildingCandidates: buildingCandidates.placements.length, buildings: buildings.length, namedBuildings: buildings.filter((placement) => placement.namedSkill).length, props: props.length },
+    placements: { total: ordered.length, ground: ground.length, circulationParts: circulation.placements.length, buildingCandidates: buildingCandidates.placements.length, buildings: buildings.length, nativeFoliage: foliage.placements.length, namedBuildings: buildings.filter((placement) => placement.namedSkill).length, props: props.length },
     sourceRuns: circulation.coverage.reduce((counts, run) => ({ ...counts, [run.kind]: (counts[run.kind] ?? 0) + 1 }), {}),
     zSort: { placementCount: ordered.length, violations: 0 },
     adjacency: { thresholdMasterPx: 40, edges: adjacencyEdges.length, identicalVariantViolations: 0 },
     buildingRenderedBoundsOverlap: buildingOverlapStats,
     occupancy: { priority: ["named", "large", "standard", "compact"], masterMeasuredOverlap: masterOverlap, maximumOverlapShareOfCandidate: masterOverlap.directionalCandidateOverlapShare.p90, namedAnchorsAlwaysPlaced: true, survivingPlacementCount: buildings.length, skipped: occupancy.skipped },
-    circulation: { roadRibbonWidthMasterPx: ROAD_WIDTH_MASTER_PX, fullyTiledRuns: circulation.coverage.length, maximumGapMasterPx: Math.max(...circulation.coverage.map((run) => run.maximumUntiledGapMasterPx)), headingMismatchLengthShare: circulation.headingMismatchLengthShare, rightHandBendsUsingLeftAsset: circulation.rightHandBends, shortRunModulesAlphaClipped: circulation.shortRunClipCount },
+    circulation: { roadRibbonWidthMasterPx: ROAD_WIDTH_MASTER_PX, fullyTiledRuns: circulation.coverage.length, maximumGapMasterPx: Math.max(...circulation.coverage.map((run) => run.maximumUntiledGapMasterPx)), headingMismatchLengthShare: circulation.headingMismatchLengthShare, headingHistogram: circulation.headingHistogram, rightHandBendsUsingLeftAsset: circulation.rightHandBends, shortRunModulesAlphaClipped: circulation.shortRunClipCount },
   };
   const buildingScaleChecks = buildings.map((placement) => ({ id: placement.id, assetId: placement.assetId, authority: placement.displayWidthAuthority, targetMasterPx: placement.displayWidthTargetMasterPx, renderedMasterPx: placement.renderedWidthMasterPx, errorRatio: round(Math.abs(placement.renderedWidthMasterPx - placement.displayWidthTargetMasterPx) / placement.displayWidthTargetMasterPx, 4), withinTenPercent: Math.abs(placement.renderedWidthMasterPx - placement.displayWidthTargetMasterPx) / placement.displayWidthTargetMasterPx <= 0.10 }));
   const sidecarScaleMappings = summarizeScaleMappings(kit);
   const demands = [
-    { rank: 1, id: "diagonal-heading-family", evidence: `${round(circulation.headingMismatchLengthShare * 100, 2)}% of run length is more than 7.5 degrees from the available h000/h090 axes`, requiredKit: "additional diagonal road, stair, wall, and slab heading variants" },
+    { rank: 1, id: "remaining-diagonal-heading-family", evidence: `${round(circulation.headingHistogram.offAxisH135OrNeDemandShare * 100, 2)}% of off-axis run length requires h135 road and/or NE stair counterparts after h045/diag-NW integration`, requiredKit: "h135 road and NE stair variants, then heading-aware wall and slab variants" },
     { rank: 2, id: "generic-large-building", evidence: `${buildings.filter((placement) => placement.genericLargeUsesStandardKit).length} surviving unnamed large footprints remain standard-class silhouette substitutions even though their scale target is p75`, requiredKit: "at least two reusable large background buildings" },
     { rank: 3, id: "retaining-wall-seam-language", evidence: "repeated rectangular wall faces remain visible over the registered native environment underlay", requiredKit: "continuous band modules plus heading-aware wall transitions" },
     { rank: 4, id: "occupancy-density", evidence: `${buildings.length}/32 candidates survive the master-measured p90 directional overlap cap; named anchors all remain authoritative`, requiredKit: "no new kit decision; director visual review of the native-density composition" },
@@ -866,30 +1015,32 @@ async function build() {
   if (circulation.rightHandBends > 0) demands.unshift({ rank: 1, id: "right-hand-road-curve", evidence: `${circulation.rightHandBends} right-hand bends currently substitute the selected left-hand curve`, requiredKit: "road-curve right-handed counterpart" });
   const manifest = {
     schemaVersion: 2,
-    id: "ninjaone-d05-real-kit-composition-r4c",
+    id: "ninjaone-d05-real-kit-composition-r5",
     status: "director-review-candidate",
     source: { grammar: files.grammar, grammarSha256: sha256(await readFile(absolute(files.grammar))), placementsR1: files.sourcePlacements, placementsR1Sha256: sha256(await readFile(absolute(files.sourcePlacements))), layout: files.layout, layoutSha256: sha256(await readFile(absolute(files.layout))), mask: files.mask, master: files.master },
     masterBounds: D05_BOUNDS,
-    output: { scale: SCALE, dimensions: [WIDTH, HEIGHT], nativeEnvironmentUnderlay: { ...nativeEnvironment.registration, opacity: 1 }, ungraded: files.ungraded, graded: files.graded, capitalScale: { path: files.capital, dimensions: MASTER, districtOffset: D05_BOUNDS.slice(0, 2) }, comparisonProof: files.comparison, cleanStandaloneProof: files.cleanTerrainComparison, s10FinalProof: files.s10Final },
+    output: { scale: SCALE, dimensions: [WIDTH, HEIGHT], nativeEnvironmentUnderlay: { ...nativeEnvironment.registration, opacity: 1 }, ungraded: files.ungraded, graded: files.graded, capitalScale: { path: files.capital, dimensions: MASTER, districtOffset: D05_BOUNDS.slice(0, 2) }, comparisonProof: files.comparison, cleanStandaloneProof: files.cleanTerrainComparison, gradeCandidatesProof: files.gradeCandidates, diagonalCandidatesProof: files.diagonalCandidates, s10FinalProof: files.s10Final },
     worldLight: { direction: WORLD_LIGHT, shadowDirectionScreen: [0.42, 0.36], softBlurOutputPx: { tallParts: 2.6, lowParts: 1.5 } },
     contactShading: { opacity: 0.52, blurOutputPx: 1.4, source: "each part contactPolygon" },
     ghostArtifact: { r2ObservedRegion: "2x proof x300-420 y640-760", cause: "registered S10 Databricks Works red-brick sprite at structure-125, visually doubled against the r2 baked-master underlay rather than a stray asset or provenance load", resolution: "clean registered L2/L3 underlay leaves the single full-opacity S10 placement legible; no named asset was removed" },
     chromaFringeCleanup: { scope: "secondary edge cleanup", policy: "discard only alpha <=160 pixels where red and blue both dominate green before shadow and composition" },
     opacityDrawPath,
     f16FinalRowCoverage,
-    globalGrade: GRADE,
+    globalGrade: { recommended: RECOMMENDED_GRADE, candidates: Object.values(GRADE_PROFILES) },
+    foliageInfill: { placementCount: foliage.placements.length, candidateCounts: foliage.candidateCounts, sourceInstanceCount: foliage.sourceInstanceCount, atlasResources: foliage.resources, masterCoverage: foliage.masterCoverage, achievedCoverage: foliageCoverage },
     displayWidthAuthority,
     sidecarScaleMappings,
     buildingScaleChecks,
     districtMaskProperty,
     endCapPolicy: { appliesWhen: "run length is shorter than the selected module socket span", method: "deterministic sprite-alpha crop between perpendicular run-boundary planes", clippedModuleCount: circulation.shortRunClipCount },
     runCoverage: circulation.coverage,
+    headingHistogram: circulation.headingHistogram,
     buildingAdjacencyEdges: adjacencyEdges,
     composerDemands: demands,
     placements: ordered,
     statistics,
   };
-  return { manifestBytes: Buffer.from(`${JSON.stringify(manifest, null, 2)}\n`), ungraded, graded, capital, comparison, cleanTerrainComparison, s10Final, passIsolationOutputs, statistics, demands };
+  return { manifestBytes: Buffer.from(`${JSON.stringify(manifest, null, 2)}\n`), ungraded, graded, capital, comparison, cleanTerrainComparison, gradeCandidateStrip, diagonalCandidateStrip, s10Final, passIsolationOutputs, statistics, demands };
 }
 
 async function compare(file, actual) {
@@ -898,7 +1049,7 @@ async function compare(file, actual) {
 }
 async function main() {
   const result = await build();
-  const outputs = [[files.manifest, result.manifestBytes], [files.ungraded, result.ungraded], [files.graded, result.graded], [files.capital, result.capital], [files.comparison, result.comparison], [files.cleanTerrainComparison, result.cleanTerrainComparison], [files.s10Final, result.s10Final], ...result.passIsolationOutputs];
+  const outputs = [[files.manifest, result.manifestBytes], [files.ungraded, result.ungraded], [files.graded, result.graded], [files.capital, result.capital], [files.comparison, result.comparison], [files.cleanTerrainComparison, result.cleanTerrainComparison], [files.gradeCandidates, result.gradeCandidateStrip], [files.diagonalCandidates, result.diagonalCandidateStrip], [files.s10Final, result.s10Final], ...result.passIsolationOutputs];
   if (CHECK_ONLY) await Promise.all(outputs.map(([file, bytes]) => compare(file, bytes)));
   else {
     await Promise.all([...new Set(outputs.map(([file]) => path.dirname(absolute(file))))].map((directory) => mkdir(directory, { recursive: true })));
