@@ -12,11 +12,11 @@ import {
   NINJAONE_CAPITAL_CITY_R3_D02_CONTEXT_EXCLUSION_MASK,
   NINJAONE_CAPITAL_CITY_R3_D03_CONTEXT_EXCLUSION_MASK,
   NINJAONE_CAPITAL_CITY_R3_D04_CONTEXT_EXCLUSION_MASK,
-  NINJAONE_CAPITAL_CITY_R3_D05_CONTEXT_EXCLUSION_MASK,
   NINJAONE_CAPITAL_CITY_R3_PROGRESSIVE_WATER_EXCLUSION_MASK,
   NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS,
   NINJAONE_CAPITAL_CITY_R3_WATER_INTERACTION,
 } from "../model/ninjaOneCapitalCityFoundationR3";
+import { NINJAONE_CAPITAL_D05_CONCEPT } from "../model/ninjaOneCapitalD05Concept";
 import {
   NINJAONE_CAPITAL_CITY_DETAIL_POLICY,
   ninjaOneCapitalCityUsesFreeCameraDetailCohort,
@@ -90,16 +90,6 @@ const D04_S14_REVIEW_HEIGHT = NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.S14D04
   .placement!.baseSize[1] * NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.S14D04.placement!.scale;
 const D04_S14_REVIEW_ANCHOR = NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.S14D04
   .placement!.anchor;
-const D05_CONTEXT_EXCLUSION_REVIEW =
-  NINJAONE_CAPITAL_CITY_R3_D05_CONTEXT_EXCLUSION_MASK.path;
-const D05_GROUND_INTEGRATION_REVIEW =
-  NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L02.asset.path;
-const D05_TERRAIN_INTEGRATION_DETAIL_REVIEW =
-  NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L03.asset.path;
-const D05_TERRACE_MASS_REVIEW =
-  NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L04.asset.path;
-const D05_TERRACE_MASS_PLACEMENT =
-  NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L04.placement!;
 
 function ProgressiveDistrictAssetNodes({
   camera,
@@ -177,6 +167,7 @@ export function NinjaOneCapitalCityR3({
 }) {
   const [width, height] = NINJAONE_CAPITAL_CITY_R3_ARTBOARD;
   if (tier === "world" || tier === "territory") return null;
+  const d05Transform = `translate(${NINJAONE_CAPITAL_D05_CONCEPT.transform.offset.join(" ")}) scale(${NINJAONE_CAPITAL_D05_CONCEPT.transform.scale.join(" ")})`;
 
   const waterInteractionVisible = isEnvironmentLayerEffectivelyVisible(
     visibility,
@@ -222,9 +213,6 @@ export function NinjaOneCapitalCityR3({
   const d01DistrictInFocus = siteAssetsMounted && progressiveDistrict === "D01";
   const d01DistrictLandscapeVisible = d01DistrictInFocus && landscapeVisible;
   const d01DistrictArchitectureVisible = d01DistrictInFocus && architectureVisible;
-  const d05DistrictInFocus = siteAssetsMounted && progressiveDistrict === "D05";
-  const d05DistrictLandscapeVisible = d05DistrictInFocus && landscapeVisible;
-  const d05DistrictArchitectureVisible = d05DistrictInFocus && architectureVisible;
   const d02DistrictInFocus = siteAssetsMounted && progressiveDistrict === "D02";
   const d02DistrictLandscapeVisible = d02DistrictInFocus && landscapeVisible;
   const d02DistrictDetailLayerIds = [
@@ -250,11 +238,9 @@ export function NinjaOneCapitalCityR3({
         ? "url(#ninjaone-capital-city-r3-d03-detail-cutout)"
         : d04DistrictLandscapeVisible
           ? "url(#ninjaone-capital-city-r3-d04-detail-cutout)"
-          : d05DistrictLandscapeVisible
-            ? "url(#ninjaone-capital-city-r3-d05-detail-cutout)"
-            : registeredDetailVisible
-              ? "url(#ninjaone-capital-city-r3-registered-detail-cutout)"
-              : undefined;
+          : registeredDetailVisible
+            ? "url(#ninjaone-capital-city-r3-registered-detail-cutout)"
+            : undefined;
   const d06StationBase = tier === "capital"
     ? D06_CAPITAL_REVIEW_BASE
     : D06_SITE_CLOSE_REVIEW_BASE;
@@ -265,9 +251,11 @@ export function NinjaOneCapitalCityR3({
     <g
       data-city-r3-cohort={tier}
       data-city-r3-foliage-policy="reuse-L2-registered-trees-no-supplemental-urban-atlas"
-      data-city-r3-representation={progressiveDistrictFocused
-        ? `registered-context-plus-progressive-${progressiveDistrict}`
-        : "registered-context-plus-atomic-D06"}
+      data-city-r3-representation={progressiveDistrict === "D05"
+        ? "registered-context-with-d05-concept"
+        : progressiveDistrictFocused
+          ? `registered-context-with-d05-concept-plus-progressive-${progressiveDistrict}`
+          : "registered-context-with-d05-concept-plus-atomic-D06"}
       data-city-r3-train-status="deferred-during-terrain-polish"
     >
       <defs>
@@ -315,6 +303,48 @@ export function NinjaOneCapitalCityR3({
             <feFuncB tableValues="1 0" type="discrete" />
           </feComponentTransfer>
         </filter>
+      </defs>
+      <defs>
+        <mask
+          height={height}
+          id="ninjaone-capital-city-d05-concept-context-cutout"
+          maskUnits="userSpaceOnUse"
+          style={{ maskType: "luminance" }}
+          width={width}
+          x={0}
+          y={0}
+        >
+          <rect fill="#fff" height={height} width={width} />
+          <image
+            filter="url(#ninjaone-capital-city-r3-inverse-district-exclusion)"
+            height={NINJAONE_CAPITAL_D05_CONCEPT.usableMask.dimensions[1]}
+            href={NINJAONE_CAPITAL_D05_CONCEPT.usableMask.path}
+            preserveAspectRatio="none"
+            transform={d05Transform}
+            width={NINJAONE_CAPITAL_D05_CONCEPT.usableMask.dimensions[0]}
+            x={0}
+            y={0}
+          />
+        </mask>
+        <mask
+          height={height}
+          id="ninjaone-capital-city-d05-concept-usable-mask"
+          maskUnits="userSpaceOnUse"
+          style={{ maskType: "luminance" }}
+          width={width}
+          x={0}
+          y={0}
+        >
+          <image
+            height={NINJAONE_CAPITAL_D05_CONCEPT.usableMask.dimensions[1]}
+            href={NINJAONE_CAPITAL_D05_CONCEPT.usableMask.path}
+            preserveAspectRatio="none"
+            transform={d05Transform}
+            width={NINJAONE_CAPITAL_D05_CONCEPT.usableMask.dimensions[0]}
+            x={0}
+            y={0}
+          />
+        </mask>
       </defs>
       {registeredDetailVisible ? (
         <defs>
@@ -481,29 +511,6 @@ export function NinjaOneCapitalCityR3({
           </mask>
         </defs>
       ) : null}
-      {d05DistrictLandscapeVisible ? (
-        <defs>
-          <mask
-            height={height}
-            id="ninjaone-capital-city-r3-d05-detail-cutout"
-            maskUnits="userSpaceOnUse"
-            style={{ maskType: "luminance" }}
-            width={width}
-            x={0}
-            y={0}
-          >
-            <rect fill="#fff" height={height} width={width} />
-            <image
-              filter="url(#ninjaone-capital-city-r3-inverse-district-exclusion)"
-              height={height}
-              href={D05_CONTEXT_EXCLUSION_REVIEW}
-              opacity={siteProgress}
-              preserveAspectRatio="none"
-              width={width}
-            />
-          </mask>
-        </defs>
-      ) : null}
       {nativeFoliageVisible ? (
         <defs>
           <mask
@@ -577,14 +584,30 @@ export function NinjaOneCapitalCityR3({
           y={CITY_UPPER_REAR_RIDGE_UNDERLAY_SOURCE_WINDOW.origin[1]}
         />
       ) : null}
+      <g mask="url(#ninjaone-capital-city-d05-concept-context-cutout)">
+        <image
+          className="ninjaone-capital-city__r3-image"
+          data-city-cohort-ownership="L4-capital-composite"
+          height={height}
+          href={NINJAONE_CAPITAL_CITY_R3_CONTEXT.path}
+          mask={contextCutoutMask}
+          preserveAspectRatio="none"
+          width={width}
+        />
+      </g>
       <image
-        className="ninjaone-capital-city__r3-image"
-        data-city-cohort-ownership="L4-capital-composite"
-        height={height}
-        href={NINJAONE_CAPITAL_CITY_R3_CONTEXT.path}
-        mask={contextCutoutMask}
+        className="ninjaone-capital-city__d05-concept"
+        data-city-concept-id={NINJAONE_CAPITAL_D05_CONCEPT.id}
+        data-city-district="D05"
+        data-city-representation-class="approved-concept-plate"
+        height={NINJAONE_CAPITAL_D05_CONCEPT.plate.dimensions[1]}
+        href={NINJAONE_CAPITAL_D05_CONCEPT.plate.path}
+        mask="url(#ninjaone-capital-city-d05-concept-usable-mask)"
         preserveAspectRatio="none"
-        width={width}
+        transform={d05Transform}
+        width={NINJAONE_CAPITAL_D05_CONCEPT.plate.dimensions[0]}
+        x={0}
+        y={0}
       />
       {d01DistrictLandscapeVisible ? (
         <image
@@ -672,47 +695,6 @@ export function NinjaOneCapitalCityR3({
           width={width}
         />
       ) : null}
-      {d05DistrictLandscapeVisible ? (
-        <image
-          className="ninjaone-capital-city__r3-d05-ground-integration"
-          data-city-asset-id="D05L02"
-          data-city-child-layer="L4_1"
-          data-city-runtime-status="manifest-declared"
-          height={height}
-          href={D05_GROUND_INTEGRATION_REVIEW}
-          opacity={siteProgress}
-          preserveAspectRatio="none"
-          width={width}
-        />
-      ) : null}
-      {d05DistrictLandscapeVisible ? (
-        <image
-          className="ninjaone-capital-city__r3-d05-terrain-integration"
-          data-city-asset-id="D05L03"
-          data-city-child-layer="L4_1"
-          data-city-runtime-status="manifest-declared"
-          height={height}
-          href={D05_TERRAIN_INTEGRATION_DETAIL_REVIEW}
-          opacity={siteProgress * (0.54 + closeProgress * 0.08)}
-          preserveAspectRatio="none"
-          width={width}
-        />
-      ) : null}
-      {d05DistrictLandscapeVisible ? (
-        <image
-          className="ninjaone-capital-city__r3-d05-terrace-mass"
-          data-city-asset-id="D05L04"
-          data-city-child-layer="L4_1"
-          data-city-runtime-status="manifest-declared"
-          height={D05_TERRACE_MASS_PLACEMENT.baseSize[1] * D05_TERRACE_MASS_PLACEMENT.scale}
-          href={D05_TERRACE_MASS_REVIEW}
-          opacity={siteProgress}
-          preserveAspectRatio="none"
-          width={D05_TERRACE_MASS_PLACEMENT.baseSize[0] * D05_TERRACE_MASS_PLACEMENT.scale}
-          x={D05_TERRACE_MASS_PLACEMENT.anchor[0]}
-          y={D05_TERRACE_MASS_PLACEMENT.anchor[1]}
-        />
-      ) : null}
       {d01DistrictArchitectureVisible ? (
         <g mask="url(#ninjaone-capital-city-r3-d01-context-clip)">
           <ProgressiveDistrictAssetNodes
@@ -726,18 +708,6 @@ export function NinjaOneCapitalCityR3({
             siteOpacity={siteNodeOpacity}
           />
         </g>
-      ) : null}
-      {d05DistrictArchitectureVisible ? (
-        <ProgressiveDistrictAssetNodes
-          camera={camera}
-          closeMounted={closeAssetsMounted}
-          closeOpacity={closeNodeOpacity}
-          district="D05"
-          layerIds={["L4_3"]}
-          light={light}
-          siteMounted={siteAssetsMounted}
-          siteOpacity={siteNodeOpacity}
-        />
       ) : null}
       {d02DistrictDetailVisible ? (
         <ProgressiveDistrictAssetNodes

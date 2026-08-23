@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
@@ -21,6 +22,10 @@ import {
   NINJAONE_CAPITAL_D05_DETAIL_DISPLAY_WIDTHS,
   NINJAONE_CAPITAL_CITY_LAYER_NODES,
 } from "../features/career-world/layers/city/model/ninjaOneCapitalCityLayer.ts";
+import {
+  NINJAONE_CAPITAL_D05_CONCEPT,
+  NINJAONE_CAPITAL_D05_CONCEPT_ANCHORS,
+} from "../features/career-world/layers/city/model/ninjaOneCapitalD05Concept.ts";
 import {
   NINJAONE_CAPITAL_CITY_R3_CONTEXT,
   NINJAONE_CAPITAL_CITY_R3_PROGRESSIVE_WATER_EXCLUSION_MASK,
@@ -808,53 +813,70 @@ test("city proof renderer fills the viewport and locks fixed proof zoom", async 
   assert.match(scene, /resolveNinjaOneCapitalDetailState\(/);
 });
 
-test("D05 progressively reveals native land before independently owned grounding and buildings", async () => {
-  const [renderer, nodeRenderer] = await Promise.all([
-    readFile(new URL(
-      "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
-      import.meta.url,
-    ), "utf8"),
-    readFile(new URL(
-      "../features/career-world/layers/city/rendering/NinjaOneCapitalAssetNodes.tsx",
-      import.meta.url,
-    ), "utf8"),
+test("D05 concept promotion preserves registration, mask, provenance, and anchors", async () => {
+  const [plateBytes, maskBytes, registrationBytes, provenanceBytes] = await Promise.all([
+    readFile(new URL(`../public${NINJAONE_CAPITAL_D05_CONCEPT.plate.path}`, import.meta.url)),
+    readFile(new URL(`../public${NINJAONE_CAPITAL_D05_CONCEPT.usableMask.path}`, import.meta.url)),
+    readFile(new URL(`../public${NINJAONE_CAPITAL_D05_CONCEPT.registrationPath}`, import.meta.url)),
+    readFile(new URL(`../public${NINJAONE_CAPITAL_D05_CONCEPT.provenancePath}`, import.meta.url)),
   ]);
-  assert.match(renderer, /d05DistrictInFocus = siteAssetsMounted && progressiveDistrict === "D05"/);
-  assert.match(renderer, /d05DistrictLandscapeVisible = d05DistrictInFocus && landscapeVisible/);
-  assert.match(renderer, /d05DistrictArchitectureVisible = d05DistrictInFocus && architectureVisible/);
-  assert.match(renderer, /progressiveDistrict = focusDistrict \?\? \(siteAssetsMounted \? preloadDistrict : null\)/);
-  assert.match(renderer, /siteNodeOpacity = siteProgress \* \(1 - closeProgress\)/);
-  assert.match(renderer, /closeNodeOpacity = siteProgress \* closeProgress/);
-  assert.match(renderer, /siteMounted && siteOpacity > 0/);
-  assert.match(renderer, /closeMounted && closeOpacity > 0/);
-  assert.match(renderer, /id="ninjaone-capital-city-r3-d05-detail-cutout"/);
-  assert.match(renderer, /NINJAONE_CAPITAL_CITY_R3_D05_CONTEXT_EXCLUSION_MASK\.path/);
-  assert.match(
-    renderer,
-    /href=\{D05_CONTEXT_EXCLUSION_REVIEW\}[\s\S]*?opacity=\{siteProgress\}/,
+  const registration = JSON.parse(registrationBytes.toString("utf8"));
+  const provenance = JSON.parse(provenanceBytes.toString("utf8"));
+  const [plateMetadata, mask] = await Promise.all([
+    sharp(plateBytes).metadata(),
+    sharp(maskBytes).greyscale().raw().toBuffer({ resolveWithObject: true }),
+  ]);
+  const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
+
+  assert.deepEqual(
+    [plateMetadata.width, plateMetadata.height],
+    NINJAONE_CAPITAL_D05_CONCEPT.plate.dimensions,
   );
-  assert.match(renderer, /data-city-asset-id="D05L02"[\s\S]*?data-city-child-layer="L4_1"/);
-  assert.match(renderer, /data-city-asset-id="D05L03"[\s\S]*?data-city-child-layer="L4_1"/);
-  assert.match(renderer, /data-city-asset-id="D05L04"[\s\S]*?data-city-child-layer="L4_1"/);
-  const contactIndex = renderer.indexOf('data-city-asset-id="D05L02"');
-  const integrationIndex = renderer.indexOf('data-city-asset-id="D05L03"');
-  const terraceMassIndex = renderer.indexOf('data-city-asset-id="D05L04"');
-  const nodeIndex = renderer.indexOf('district="D05"', terraceMassIndex);
-  assert.ok(contactIndex >= 0);
-  assert.ok(integrationIndex > contactIndex);
-  assert.ok(terraceMassIndex > integrationIndex);
-  assert.ok(nodeIndex > terraceMassIndex);
-  assert.match(
-    nodeRenderer,
-    /usesAuthoredGrounding = node\.districtId === "D01"[\s\S]*?node\.districtId === "D02"[\s\S]*?node\.districtId === "D03"[\s\S]*?node\.districtId === "D04"[\s\S]*?node\.districtId === "D05"/,
+  assert.deepEqual(
+    [mask.info.width, mask.info.height],
+    NINJAONE_CAPITAL_D05_CONCEPT.usableMask.dimensions,
   );
-  assert.match(nodeRenderer, /ownsLargeFootprint && !usesAuthoredGrounding/);
-  assert.match(
-    renderer,
-    /focusDistrict === null \|\| focusDistrict === "D06"/,
+  assert.deepEqual(mask.info.channels, 1);
+  assert.deepEqual([...new Set(mask.data)].sort((left, right) => left - right), [0, 255]);
+  assert.equal(sha256(plateBytes), registration.plate.sha256);
+  assert.equal(sha256(maskBytes), registration.districtMask.sha256);
+  assert.equal(provenance.artifacts.plate.sha256, registration.plate.sha256);
+  assert.equal(provenance.artifacts.usableMask.sha256, registration.districtMask.sha256);
+  assert.deepEqual(
+    NINJAONE_CAPITAL_D05_CONCEPT.masterBounds,
+    registration.normalizationTransform.referenceToMasterArtboard.destinationBounds,
   );
-  assert.doesNotMatch(renderer, /D05-western-skill-terraces-plate/);
-  assert.doesNotMatch(renderer, /D05L01/);
+  assert.deepEqual(
+    NINJAONE_CAPITAL_D05_CONCEPT_ANCHORS,
+    registration.anchors.map((anchor) => ({
+      id: anchor.id,
+      label: anchor.name,
+      masterPoint: anchor.masterArtboardSpace.center,
+    })),
+  );
+
+  const { offset, scale } = registration.normalizationTransform
+    .candidateToMasterArtboardComposed;
+  for (const [index, anchor] of registration.anchors.entries()) {
+    const [candidateX, candidateY] = anchor.candidatePixelSpace.center;
+    const [masterX, masterY] = NINJAONE_CAPITAL_D05_CONCEPT_ANCHORS[index].masterPoint;
+    assert.ok(Math.abs(masterX - (candidateX * scale[0] + offset[0])) < 0.001);
+    assert.ok(Math.abs(masterY - (candidateY * scale[1] + offset[1])) < 0.001);
+    assert.ok(mask.data[Math.floor(candidateY) * mask.info.width + Math.floor(candidateX)] > 0);
+  }
+});
+
+test("city node data preserves manifest ids and explicit role classifications", async () => {
+  const layout = JSON.parse(await readFile(new URL(
+    "../public/career-world/capitals/ninjaone/manifests/city-master-node-layout-r3.json",
+    import.meta.url,
+  ), "utf8"));
+  const runtimeNodesById = new Map(NINJAONE_CAPITAL_CITY_LAYER_NODES.map((node) => [node.id, node]));
+  for (const manifestNode of layout.nodes) {
+    const runtimeNode = runtimeNodesById.get(manifestNode.id);
+    assert.ok(runtimeNode, `missing runtime node ${manifestNode.id}`);
+    assert.equal(runtimeNode.role, manifestNode.role);
+  }
 });
 
 test("D01 independently owns native-land reveal, grounding, and six architecture nodes", async () => {
@@ -903,7 +925,7 @@ test("D01 independently owns native-land reveal, grounding, and six architecture
   assert.ok(landscapeIndex < contextIndex, "L4_1 must remain below the city context");
   assert.ok(contextIndex < groundingIndex, "D01 full-artboard L4_1 must follow the cut parent context");
   assert.ok(groundingIndex < d01RenderIndex, "D01 L4_3 must remain above authored L4_1 grounding");
-  for (const district of ["D02", "D03", "D04", "D05"]) {
+  for (const district of ["D02", "D03", "D04"]) {
     assert.ok(
       contextIndex < renderer.lastIndexOf(`district=\"${district}\"`),
       `${district} progressive L4_3 must remain above L4_1 and context`,

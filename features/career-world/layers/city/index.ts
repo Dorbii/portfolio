@@ -1,5 +1,10 @@
 export { NinjaOneCapitalCityLayer } from "./authority/NinjaOneCapitalCityLayer";
 export {
+  NINJAONE_CAPITAL_D05_CONCEPT,
+  NINJAONE_CAPITAL_D05_CONCEPT_ANCHORS,
+  type NinjaOneCapitalD05ConceptAnchor,
+} from "./model/ninjaOneCapitalD05Concept";
+export {
   NINJAONE_CAPITAL_CITY_LAYER_ARTBOARD,
   NINJAONE_CAPITAL_CITY_LAYER_AUTHORITY_ID,
   NINJAONE_CAPITAL_CITY_LAYER_CAMERA,

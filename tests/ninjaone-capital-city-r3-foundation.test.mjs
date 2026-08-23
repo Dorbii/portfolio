@@ -573,7 +573,7 @@ test("D04 reveals native land and adds only localized grounding, water contact, 
   );
 });
 
-test("D05 reveals native land and keeps grounding inside reversible L4_1 ownership", async () => {
+test("legacy D05 grounding artifacts remain inside reversible L4_1 ownership", async () => {
   const [exclusion, contact, integration, terraceMass, district, land, water] = await Promise.all([
     grayscale(`../public${NINJAONE_CAPITAL_CITY_R3_D05_CONTEXT_EXCLUSION_MASK.path}`),
     rgba(NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.D05L02.asset.path),
@@ -697,18 +697,6 @@ test("D05 reveals native land and keeps grounding inside reversible L4_1 ownersh
     integration.data[(integration.info.width * integration.info.height - 1) * 4 + 3],
   ], [0, 0, 0, 0]);
 
-  const rendererSource = await readFile(new URL(
-    "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
-    import.meta.url,
-  ), "utf8");
-  const contactIndex = rendererSource.indexOf('data-city-asset-id="D05L02"');
-  const integrationIndex = rendererSource.indexOf('data-city-asset-id="D05L03"');
-  const terraceMassIndex = rendererSource.indexOf('data-city-asset-id="D05L04"');
-  const d05NodeIndex = rendererSource.indexOf('district="D05"', terraceMassIndex);
-  assert.ok(contactIndex >= 0);
-  assert.ok(integrationIndex > contactIndex);
-  assert.ok(terraceMassIndex > integrationIndex);
-  assert.ok(d05NodeIndex > terraceMassIndex);
 });
 
 test("progressive city detail uses the byte-exact accepted live-water authority", async () => {

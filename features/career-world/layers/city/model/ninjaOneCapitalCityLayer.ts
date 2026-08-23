@@ -78,6 +78,7 @@ interface CityNodeSource {
   readonly minimumTier: CityAssetTier;
   readonly motion?: "rail-eastbound";
   readonly representationClass: NinjaOneCapitalCityNodeRepresentationClass;
+  readonly role?: "landmark" | "skill";
   readonly visibleTiers?: readonly CityAssetTier[];
   readonly zBias: number;
 }
@@ -90,6 +91,7 @@ interface MasterLayoutNode {
   readonly layerId: CityLayerId;
   readonly minimumTier: CityAssetTier;
   readonly motion?: "rail-eastbound";
+  readonly role?: "landmark" | "skill";
   readonly visibleTiers?: readonly CityAssetTier[];
   readonly zBias: number;
 }

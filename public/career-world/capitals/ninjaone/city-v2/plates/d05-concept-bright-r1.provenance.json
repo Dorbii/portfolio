@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/capitals/ninjaone/city-v2/d05-concept-bright@r1",
+  "status": "runtime",
+  "source": {
+    "path": ".codex-tmp/quarantine/city-v2/T3d-v3/candidates/candidate-a-raw.png",
+    "sha256": "8d2b3b1d4e72f885ccdff89184fa1822b8d54b93b5ed8fc6dd915365830ace93",
+    "dimensions": [1271, 1237]
+  },
+  "artifacts": {
+    "plate": {
+      "path": "/career-world/capitals/ninjaone/city-v2/plates/d05-concept-bright-r1.png",
+      "sha256": "8d2b3b1d4e72f885ccdff89184fa1822b8d54b93b5ed8fc6dd915365830ace93"
+    },
+    "usableMask": {
+      "path": "/career-world/capitals/ninjaone/city-v2/plates/d05-concept-bright-usable-mask-r1.png",
+      "sha256": "a4d90e0f0bef30c876b6e83d6e17081aede38a3092bd74fe3025fe5c900a05f1"
+    },
+    "registration": {
+      "id": "ninjaone-d05-candidate-a-registration@r1",
+      "path": "/career-world/capitals/ninjaone/city-v2/plates/d05-candidate-a-registration-r1.json",
+      "sha256": "02d729009e031f37503790c6aa3e01b27b19ce2d27f29f35e378d44bc8c5f6bd"
+    }
+  },
+  "registrationReference": {
+    "transform": "normalizationTransform.candidateToMasterArtboardComposed",
+    "districtMask": "districtMask",
+    "anchors": "anchors[].masterArtboardSpace.center"
+  }
+}
