@@ -595,19 +595,25 @@ export function NinjaOneCapitalCityR3({
           width={width}
         />
       </g>
+      {/* Positioned via x/y/width/height into the registered master rect rather than a
+          transform: a transform on this element would shift the userSpaceOnUse mask's
+          coordinate space, applying the registration transform to the mask twice. */}
       <image
         className="ninjaone-capital-city__d05-concept"
         data-city-concept-id={NINJAONE_CAPITAL_D05_CONCEPT.id}
         data-city-district="D05"
         data-city-representation-class="approved-concept-plate"
-        height={NINJAONE_CAPITAL_D05_CONCEPT.plate.dimensions[1]}
+        height={
+          NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[3] - NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[1]
+        }
         href={NINJAONE_CAPITAL_D05_CONCEPT.plate.path}
         mask="url(#ninjaone-capital-city-d05-concept-usable-mask)"
         preserveAspectRatio="none"
-        transform={d05Transform}
-        width={NINJAONE_CAPITAL_D05_CONCEPT.plate.dimensions[0]}
-        x={0}
-        y={0}
+        width={
+          NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[2] - NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[0]
+        }
+        x={NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[0]}
+        y={NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[1]}
       />
       {d01DistrictLandscapeVisible ? (
         <image
