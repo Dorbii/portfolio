@@ -106,8 +106,16 @@ const MAX_WHEEL_ZOOM_SCALE = 1.28;
 const MIN_WHEEL_ZOOM_SCALE = 1 / MAX_WHEEL_ZOOM_SCALE;
 // NinjaOne follows the world camera floor. Site and close detail now arrive at
 // local spans instead of using an early zoom clamp as a substitute for LoD.
+// Owner-approved art-resolving cap (2026-08-24): the interactive wheel stops at
+// ~3x plate magnification instead of the mathematical 0.04 floor (~4.2x), so
+// the free camera never displays detail no source image resolves. Proof/test
+// cameras still use the unclamped camera floor.
+const INTERACTIVE_ART_RESOLVING_MINIMUM_SPAN = Math.max(
+  0.055,
+  DETAIL_POLICY.cameraMinimumSpan,
+);
 const NINJAONE_CAPITAL_INTERACTIVE_MINIMUM_SPAN =
-  DETAIL_POLICY.cameraMinimumSpan;
+  INTERACTIVE_ART_RESOLVING_MINIMUM_SPAN;
 const LIVE_PROJECT_STRUCTURES = Object.freeze(
   PROJECT_STRUCTURES.filter(({ id }) => id !== KAIZEN_NEIGHBORHOOD_OWNER_ID),
 );
@@ -145,7 +153,7 @@ function interactiveCameraMinimumSpan(camera: CameraView): number {
   ));
   return centeredOnCapital
     ? NINJAONE_CAPITAL_INTERACTIVE_MINIMUM_SPAN
-    : DETAIL_POLICY.cameraMinimumSpan;
+    : INTERACTIVE_ART_RESOLVING_MINIMUM_SPAN;
 }
 
 function projectPresentationAnchor(project: ProjectStructure) {

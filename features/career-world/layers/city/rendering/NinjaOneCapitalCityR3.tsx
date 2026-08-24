@@ -396,15 +396,15 @@ export function NinjaOneCapitalCityR3({
           <feOffset in="ninjaone-d05-shimmer-noise" result="ninjaone-d05-shimmer-wind">
             <animate
               attributeName="dx"
-              dur="7s"
+              dur="11s"
               repeatCount="indefinite"
-              values="0;14;0"
+              values="0;10;0"
             />
             <animate
               attributeName="dy"
-              dur="5s"
+              dur="8s"
               repeatCount="indefinite"
-              values="0;6;0"
+              values="0;4;0"
             />
           </feOffset>
           <feDisplacementMap
@@ -416,9 +416,9 @@ export function NinjaOneCapitalCityR3({
           >
             <animate
               attributeName="scale"
-              dur="4.5s"
+              dur="7s"
               repeatCount="indefinite"
-              values="2;5;2"
+              values="1.5;3.2;1.5"
             />
           </feDisplacementMap>
         </filter>
