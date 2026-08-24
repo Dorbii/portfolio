@@ -343,9 +343,12 @@ export function WorldScene({
     detailState.tier.id,
     focusedCityDistrict,
   );
+  // The bright city plates read as ghosts at partial opacity (the old dusk
+  // master tolerated a slow emergence), so the fade must complete by the time
+  // the capital framing settles (~0.39 territoryToCapital).
   const cityPresentationOpacity = cityProofView
     ? 1
-    : Math.min(1, Math.max(0, 0.15 + detailState.territoryToCapital * 1.35));
+    : Math.min(1, Math.max(0, 0.15 + detailState.territoryToCapital * 2.2));
   const focusIsDetailedNinjaOneCapital = (
     showNinjaOneCapital
     && detailState.tier.id !== "world"
