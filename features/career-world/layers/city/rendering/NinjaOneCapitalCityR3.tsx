@@ -183,7 +183,7 @@ export function NinjaOneCapitalCityR3({
   // T6a foliage wind-shimmer: a displaced copy of the plate, revealed only
   // through the derived canopy mask (1.7% coverage, 16px architecture standoff).
   const D05_FOLIAGE_SHIMMER_MASK_PATH =
-    "/career-world/capitals/ninjaone/city-v2/plates/d05-foliage-shimmer-mask-r1.png";
+    "/career-world/capitals/ninjaone/city-v2/plates/d05-foliage-shimmer-mask-r2.png";
   const D05_FOLIAGE_SHIMMER_MASK_DIMENSIONS: readonly [number, number] = [1305, 1205];
   // Owner-directed cutover (2026-08-23): the legacy dusk city art is unmounted
   // from the live view while its assets stay on disk until the bright rebuild
