@@ -790,7 +790,10 @@ test("CFX01 progressively adds parent-derived fabric detail through site and clo
     "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
     import.meta.url,
   ), "utf8");
-  assert.match(rendererSource, /closeFabricVisible = siteAssetsMounted[\s\S]*?visibility, "L4_4"/);
+  // Owner-directed cutover (2026-08-23): legacy city art is gated off in the
+  // live view while assets remain on disk.
+  assert.match(rendererSource, /const LEGACY_CITY_ART_VISIBLE = false/);
+  assert.match(rendererSource, /closeFabricVisible = LEGACY_CITY_ART_VISIBLE && siteAssetsMounted[\s\S]*?visibility, "L4_4"/);
   assert.match(rendererSource, /NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS\.CFX01\.asset\.path/);
   assert.match(rendererSource, /data-city-asset-id="CFX01"/);
   assert.match(rendererSource, /opacity=\{siteProgress \* \(0\.48 \+ closeProgress \* 0\.52\)\}/);
@@ -829,7 +832,7 @@ test("CFX02 preloads and progressively reveals registered central architecture d
     "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
     import.meta.url,
   ), "utf8");
-  assert.match(rendererSource, /centralArchitectureDetailVisible = closeAssetsMounted && progressiveDistrict === null[\s\S]*?visibility, "L4_4"/);
+  assert.match(rendererSource, /centralArchitectureDetailVisible = LEGACY_CITY_ART_VISIBLE[\s\S]*?closeAssetsMounted && progressiveDistrict === null[\s\S]*?visibility, "L4_4"/);
   assert.match(rendererSource, /NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS\.CFX02\.asset\.path/);
   assert.match(rendererSource, /data-city-asset-id="CFX02"/);
   assert.match(rendererSource, /data-city-asset-id="CFX02"[\s\S]*?opacity=\{closeProgress\}/);
@@ -1027,7 +1030,7 @@ test("close city foliage reuses native conifers only when L2 needs a city fallba
   assert.match(authoritySource, /nativeFoliageFallback=\{nativeFoliageFallback\}/);
   assert.match(
     rendererSource,
-    /nativeFoliageVisible = nativeFoliageFallback && closeAssetsMounted[\s\S]*?visibility, "L4_6"/,
+    /nativeFoliageVisible = LEGACY_CITY_ART_VISIBLE[\s\S]*?nativeFoliageFallback && closeAssetsMounted[\s\S]*?visibility, "L4_6"/,
   );
   assert.match(foliageSource, /selectNinjaOneEnvironmentFoliageInstances/);
   assert.match(foliageSource, /L2-native-conifer-atlas-reuse/);

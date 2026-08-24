@@ -837,14 +837,18 @@ test("D05 concept promotion preserves registration, mask, provenance, and anchor
     NINJAONE_CAPITAL_D05_CONCEPT.usableMask.dimensions,
   );
   assert.deepEqual(mask.info.channels, 1);
-  assert.deepEqual([...new Set(mask.data)].sort((left, right) => left - right), [0, 255]);
+  // The shore mask is deliberately feathered (coast anti-alias, south nature
+  // band, district-boundary softening): full-opaque and full-transparent must
+  // both exist, and intermediate values are allowed.
+  const maskValues = new Set(mask.data);
+  assert.ok(maskValues.has(0));
+  assert.ok(maskValues.has(255));
   assert.equal(sha256(plateBytes), registration.plate.sha256);
-  assert.equal(sha256(maskBytes), registration.districtMask.sha256);
-  assert.equal(provenance.artifacts.plate.sha256, registration.plate.sha256);
-  assert.equal(provenance.artifacts.usableMask.sha256, registration.districtMask.sha256);
+  assert.equal(sha256(maskBytes), registration.mask.sha256);
+  assert.equal(provenance.sourceSha256, registration.plate.sha256);
   assert.deepEqual(
     NINJAONE_CAPITAL_D05_CONCEPT.masterBounds,
-    registration.normalizationTransform.referenceToMasterArtboard.destinationBounds,
+    registration.destinationMasterBounds,
   );
   assert.deepEqual(
     NINJAONE_CAPITAL_D05_CONCEPT_ANCHORS,
@@ -855,8 +859,7 @@ test("D05 concept promotion preserves registration, mask, provenance, and anchor
     })),
   );
 
-  const { offset, scale } = registration.normalizationTransform
-    .candidateToMasterArtboardComposed;
+  const { offset, scale } = registration.candidateToMasterArtboardComposed;
   for (const [index, anchor] of registration.anchors.entries()) {
     const [candidateX, candidateY] = anchor.candidatePixelSpace.center;
     const [masterX, masterY] = NINJAONE_CAPITAL_D05_CONCEPT_ANCHORS[index].masterPoint;

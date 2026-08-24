@@ -168,24 +168,44 @@ export function NinjaOneCapitalCityR3({
   const [width, height] = NINJAONE_CAPITAL_CITY_R3_ARTBOARD;
   if (tier === "world" || tier === "territory") return null;
   const d05Transform = `translate(${NINJAONE_CAPITAL_D05_CONCEPT.transform.offset.join(" ")}) scale(${NINJAONE_CAPITAL_D05_CONCEPT.transform.scale.join(" ")})`;
+  // The shore plate's registered bounds overhang the city artboard (west coast,
+  // south nature band), so the D05 mask regions must span the union of both.
+  const d05MaskRegion = {
+    x: Math.min(0, NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[0]),
+    y: Math.min(0, NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[1]),
+    width:
+      Math.max(width, NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[2])
+      - Math.min(0, NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[0]),
+    height:
+      Math.max(height, NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[3])
+      - Math.min(0, NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[1]),
+  };
+  // Owner-directed cutover (2026-08-23): the legacy dusk city art is unmounted
+  // from the live view while its assets stay on disk until the bright rebuild
+  // fully replaces it. Flip to true to restore the old composite for reference.
+  const LEGACY_CITY_ART_VISIBLE = false;
 
-  const waterInteractionVisible = isEnvironmentLayerEffectivelyVisible(
-    visibility,
-    "L4_0",
-  );
+  const waterInteractionVisible = LEGACY_CITY_ART_VISIBLE
+    && isEnvironmentLayerEffectivelyVisible(
+      visibility,
+      "L4_0",
+    );
   const waterDetailVisible = waterInteractionVisible && siteAssetsMounted;
-  const landscapeVisible = isEnvironmentLayerEffectivelyVisible(
-    visibility,
-    "L4_1",
-  );
-  const transportationVisible = isEnvironmentLayerEffectivelyVisible(
-    visibility,
-    "L4_2",
-  );
-  const architectureVisible = isEnvironmentLayerEffectivelyVisible(
-    visibility,
-    "L4_3",
-  );
+  const landscapeVisible = LEGACY_CITY_ART_VISIBLE
+    && isEnvironmentLayerEffectivelyVisible(
+      visibility,
+      "L4_1",
+    );
+  const transportationVisible = LEGACY_CITY_ART_VISIBLE
+    && isEnvironmentLayerEffectivelyVisible(
+      visibility,
+      "L4_2",
+    );
+  const architectureVisible = LEGACY_CITY_ART_VISIBLE
+    && isEnvironmentLayerEffectivelyVisible(
+      visibility,
+      "L4_3",
+    );
   const progressiveDistrict = focusDistrict ?? (siteAssetsMounted ? preloadDistrict : null);
   const progressiveDistrictFocused = progressiveDistrict === "D01"
     || progressiveDistrict === "D02"
@@ -194,12 +214,14 @@ export function NinjaOneCapitalCityR3({
     || progressiveDistrict === "D05";
   const siteNodeOpacity = siteProgress * (1 - closeProgress);
   const closeNodeOpacity = siteProgress * closeProgress;
-  const closeFabricVisible = siteAssetsMounted
+  const closeFabricVisible = LEGACY_CITY_ART_VISIBLE && siteAssetsMounted
     && !progressiveDistrictFocused
     && isEnvironmentLayerEffectivelyVisible(visibility, "L4_4");
-  const centralArchitectureDetailVisible = closeAssetsMounted && progressiveDistrict === null
+  const centralArchitectureDetailVisible = LEGACY_CITY_ART_VISIBLE
+    && closeAssetsMounted && progressiveDistrict === null
     && isEnvironmentLayerEffectivelyVisible(visibility, "L4_4");
-  const nativeFoliageVisible = nativeFoliageFallback && closeAssetsMounted
+  const nativeFoliageVisible = LEGACY_CITY_ART_VISIBLE
+    && nativeFoliageFallback && closeAssetsMounted
     && isEnvironmentLayerEffectivelyVisible(visibility, "L4_6");
   const registeredDetailLayerIds = [
     ...(architectureVisible ? ["L4_3" as const] : []),
@@ -306,15 +328,21 @@ export function NinjaOneCapitalCityR3({
       </defs>
       <defs>
         <mask
-          height={height}
+          height={d05MaskRegion.height}
           id="ninjaone-capital-city-d05-concept-context-cutout"
           maskUnits="userSpaceOnUse"
           style={{ maskType: "luminance" }}
-          width={width}
-          x={0}
-          y={0}
+          width={d05MaskRegion.width}
+          x={d05MaskRegion.x}
+          y={d05MaskRegion.y}
         >
-          <rect fill="#fff" height={height} width={width} />
+          <rect
+            fill="#fff"
+            height={d05MaskRegion.height}
+            width={d05MaskRegion.width}
+            x={d05MaskRegion.x}
+            y={d05MaskRegion.y}
+          />
           <image
             filter="url(#ninjaone-capital-city-r3-inverse-district-exclusion)"
             height={NINJAONE_CAPITAL_D05_CONCEPT.usableMask.dimensions[1]}
@@ -327,13 +355,13 @@ export function NinjaOneCapitalCityR3({
           />
         </mask>
         <mask
-          height={height}
+          height={d05MaskRegion.height}
           id="ninjaone-capital-city-d05-concept-usable-mask"
           maskUnits="userSpaceOnUse"
           style={{ maskType: "luminance" }}
-          width={width}
-          x={0}
-          y={0}
+          width={d05MaskRegion.width}
+          x={d05MaskRegion.x}
+          y={d05MaskRegion.y}
         >
           <image
             height={NINJAONE_CAPITAL_D05_CONCEPT.usableMask.dimensions[1]}
@@ -584,17 +612,19 @@ export function NinjaOneCapitalCityR3({
           y={CITY_UPPER_REAR_RIDGE_UNDERLAY_SOURCE_WINDOW.origin[1]}
         />
       ) : null}
-      <g mask="url(#ninjaone-capital-city-d05-concept-context-cutout)">
-        <image
-          className="ninjaone-capital-city__r3-image"
-          data-city-cohort-ownership="L4-capital-composite"
-          height={height}
-          href={NINJAONE_CAPITAL_CITY_R3_CONTEXT.path}
-          mask={contextCutoutMask}
-          preserveAspectRatio="none"
-          width={width}
-        />
-      </g>
+      {LEGACY_CITY_ART_VISIBLE ? (
+        <g mask="url(#ninjaone-capital-city-d05-concept-context-cutout)">
+          <image
+            className="ninjaone-capital-city__r3-image"
+            data-city-cohort-ownership="L4-capital-composite"
+            height={height}
+            href={NINJAONE_CAPITAL_CITY_R3_CONTEXT.path}
+            mask={contextCutoutMask}
+            preserveAspectRatio="none"
+            width={width}
+          />
+        </g>
+      ) : null}
       {/* Positioned via x/y/width/height into the registered master rect rather than a
           transform: a transform on this element would shift the userSpaceOnUse mask's
           coordinate space, applying the registration transform to the mask twice. */}
