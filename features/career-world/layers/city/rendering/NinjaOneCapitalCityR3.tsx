@@ -392,21 +392,35 @@ export function NinjaOneCapitalCityR3({
             result="ninjaone-d05-shimmer-noise"
             seed={7}
             type="fractalNoise"
-          >
+          />
+          <feOffset in="ninjaone-d05-shimmer-noise" result="ninjaone-d05-shimmer-wind">
             <animate
-              attributeName="baseFrequency"
-              dur="6s"
+              attributeName="dx"
+              dur="7s"
               repeatCount="indefinite"
-              values="0.012 0.02;0.0126 0.0212;0.012 0.02"
+              values="0;14;0"
             />
-          </feTurbulence>
+            <animate
+              attributeName="dy"
+              dur="5s"
+              repeatCount="indefinite"
+              values="0;6;0"
+            />
+          </feOffset>
           <feDisplacementMap
             in="SourceGraphic"
-            in2="ninjaone-d05-shimmer-noise"
-            scale={3}
+            in2="ninjaone-d05-shimmer-wind"
+            scale={4}
             xChannelSelector="R"
             yChannelSelector="G"
-          />
+          >
+            <animate
+              attributeName="scale"
+              dur="4.5s"
+              repeatCount="indefinite"
+              values="2;5;2"
+            />
+          </feDisplacementMap>
         </filter>
         <mask
           height={d05MaskRegion.height}
