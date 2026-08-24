@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "id": "s10-sprite-r1",
+  "canonicalSkillId": "S10",
+  "name": "red tiered works",
+  "source": {
+    "plate": "public/career-world/capitals/ninjaone/city-v2/plates/d05-shore-bright-r1.png",
+    "plateSha256": "167da12d18b4f7883f60d15c02befb925e5e4636b1b67f18ed7ec49758706531",
+    "registration": "public/career-world/capitals/ninjaone/city-v2/plates/d05-shore-a-registration-r3.json",
+    "registrationSha256": "3a0bb33eebad68780a16ff3e9f9d33cde95892925b33ce7ee69c2809f0c02426",
+    "referenceCrop": "references/s10-reference-4x.png",
+    "referenceCropSha256": "eafb46b5f34acde3466f04ace146f6fe95037c9acda89a134591d15fd3f500b1",
+    "candidateFootprintBbox": [
+      423,
+      347,
+      612,
+      588
+    ],
+    "masterFootprintBbox": [
+      41.496552,
+      668.426556,
+      180.675862,
+      845.826556
+    ]
+  },
+  "generation": {
+    "tool": "built-in image_gen",
+    "candidate": "B",
+    "prompt": "Use case: stylized-concept. Asset type: canonical high-resolution animation-ready game building sprite. Image 1 is the supplied registered 4x plate crop and is the identity authority. Image 2 is candidate A and is a sharpness, composition, and mechanically legible detail reference only. Generate a fresh image; do not merely recolor or repair Image 2. Recreate the SAME complete building: preserve its silhouette, proportions, tiering, material vocabulary, facade rhythm, iconography, 72-degree orthographic high-oblique projection, south-southeast bearing, and upper-left warm late-day light direction. Make it sharper and more resolved, in the bright inviting Career World register: vibrant but controlled materials, readable shadow detail, warm lit windows and forge accents. Isolate exactly one complete building, centered with generous padding, on a perfectly flat solid pure-magenta #FF00FF background. The background must be featureless and uniform. No terrain, vegetation, neighboring buildings, labels, text, watermark, ground plane, contact patch, or baked cast/drop shadow. Keep animation-ready features separated and mechanically legible. Metalwork is never magenta or pink. Nothing may touch or be cropped by the canvas edge. Render at the maximum available output resolution. Preserve the unmistakable three progressively smaller oxide-red stepped masonry tiers and their industrial top works. Keep strong block seams, recessed hot forge bands, rail or crane articulation, chimney mouths and banner poles. Red-orange masonry is allowed; magenta or pink metalwork is forbidden. Candidate A passed mechanical gates but failed visual review because its chimney smoke plume was chroma-pink. This must be a fresh generation under the same identity and sprite contract. Any smoke, steam, or plume must be pale neutral grey-white — never pink, magenta, or violet-tinted. Prefer NO plume at all over a tinted one.",
+    "raw": "raw/s10-raw-b.png",
+    "rawSha256": "3fd84d28207777ff42eeeac73b80b76a1999428dbf46e85583dd8cceb0778ca8",
+    "rawDimensions": [
+      1254,
+      1254
+    ]
+  },
+  "chromaKey": {
+    "algorithm": "global-tight-core-plus-connected-fringe-magenta-v2",
+    "coreToleranceChebyshev": 64,
+    "fringeToleranceChebyshev": 140,
+    "connectedFringeExpansionMetric": "manhattan",
+    "connectedFringeExpansionRadius": 2,
+    "previousConnectedFringeExpansionRadius": 1,
+    "parameterChange": "+1",
+    "tuningRationale": "T8a3 director-authorized uniform +1 connected-fringe expansion for an isolated keying-fringe matte artifact.",
+    "padPixels": 32,
+    "keyedPixels": 945487,
+    "partialPixels": 1348,
+    "fringeCleanup": {
+      "algorithm": "nearest-opaque-within-4px",
+      "recoloredPartialPixels": 1348,
+      "discardedIsolatedPartialPixels": 0
+    }
+  },
+  "output": {
+    "path": "sprites/s10-sprite-r1.png",
+    "sha256": "b11a17566d51ba52f1ca0adef2faac7d528d8164979452cb38dc41a3989d54a3",
+    "nativePixels": [
+      978,
+      1145
+    ],
+    "alphaBounds": [
+      32,
+      32,
+      946,
+      1113
+    ],
+    "subjectPixels": [
+      914,
+      1081
+    ],
+    "impliedPixelsPerMasterUnit": {
+      "x": 6.567068050560102,
+      "y": 6.093573844419392,
+      "limiting": 6.093573844419392,
+      "plateBaseline": 1.32
+    }
+  },
+  "gates": {
+    "mechanical": {
+      "png8BitSrgbRgba": true,
+      "alphaCoverage": 0.5599423116421536,
+      "alphaCoverageRange": [
+        0.08,
+        0.75
+      ],
+      "borderOpaquePixels": 0,
+      "cornerOpaquePixels": 0,
+      "transparentRgbViolations": 0,
+      "partialAlphaPixels": 1348,
+      "partialAlphaNearOpaqueRate": 1,
+      "visibleMagentaMattePixels": 0,
+      "pass": true
+    },
+    "f12InteriorMagentaClusters": {
+      "thresholdPixels": 16,
+      "clusters": [],
+      "pass": true
+    },
+    "f16Solidity": {
+      "sourceOpaquePixels": 625850,
+      "retainedOpaquePixels": 625850,
+      "opaqueCoverage": 1,
+      "lowRows": 0,
+      "highRows": 1080,
+      "scanlineOscillationRatio": 0,
+      "pass": true
+    },
+    "f17PlumeHue": {
+      "required": true,
+      "visualInspection": {
+        "inspected": true,
+        "effectDetected": false,
+        "regions": [],
+        "visualRead": "No smoke, steam, plume, glow cloud, or detached atmospheric effect is visible on candidate B."
+      },
+      "upperRegionSurvey": {
+        "definition": "upper 35% of nontransparent subject bounds; informational only because architecture and residual matte are not plume pixels",
+        "bounds": [
+          32,
+          32,
+          946,
+          411
+        ],
+        "alphaPixels": 147282,
+        "magentaFamilyPixels": 537,
+        "maxMagentaSaturation": 0.9821428571428572
+      },
+      "effectRegions": [],
+      "magentaFamilyHueDegrees": [
+        285,
+        345
+      ],
+      "minimumSaturation": 0.08,
+      "minimumValue": 0.2,
+      "effectRegionMagentaFamilyTintPixels": 0,
+      "pass": true
+    },
+    "transparentMargin": {
+      "pixels": 32,
+      "pass": true
+    },
+    "visualIdentity": "PASS: same oxide-red stepped works, three-tier block rhythm and top chimney read; no smoke, steam, or plume is visible.",
+    "humanReview": "required"
+  }
+}

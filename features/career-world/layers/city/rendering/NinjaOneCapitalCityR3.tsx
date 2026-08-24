@@ -17,6 +17,7 @@ import {
   NINJAONE_CAPITAL_CITY_R3_WATER_INTERACTION,
 } from "../model/ninjaOneCapitalCityFoundationR3";
 import { NINJAONE_CAPITAL_D05_CONCEPT } from "../model/ninjaOneCapitalD05Concept";
+import { NINJAONE_CAPITAL_D05_SKILL_SPRITES } from "../model/ninjaOneCapitalD05SkillSprites";
 import {
   NINJAONE_CAPITAL_CITY_DETAIL_POLICY,
   ninjaOneCapitalCityUsesFreeCameraDetailCohort,
@@ -422,6 +423,17 @@ export function NinjaOneCapitalCityR3({
             />
           </feDisplacementMap>
         </filter>
+        <filter
+          colorInterpolationFilters="sRGB"
+          height={d05MaskRegion.height}
+          id="ninjaone-capital-city-d05-skill-sprite-shadow"
+          filterUnits="userSpaceOnUse"
+          width={d05MaskRegion.width}
+          x={d05MaskRegion.x}
+          y={d05MaskRegion.y}
+        >
+          <feGaussianBlur stdDeviation={3} />
+        </filter>
         <mask
           height={d05MaskRegion.height}
           id="ninjaone-capital-city-d05-foliage-shimmer-mask"
@@ -730,6 +742,35 @@ export function NinjaOneCapitalCityR3({
           y={NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[1]}
         />
       </g>
+      {siteAssetsMounted ? [...NINJAONE_CAPITAL_D05_SKILL_SPRITES]
+        .sort((left, right) => left.zBaseline - right.zBaseline)
+        .map((sprite) => (
+        <g
+          key={sprite.id}
+          opacity={siteProgress}
+        >
+          <ellipse
+            cx={sprite.masterFootprintBbox[0] + sprite.mountRect.width * 0.5}
+            cy={sprite.zBaseline}
+            fill="#000"
+            filter="url(#ninjaone-capital-city-d05-skill-sprite-shadow)"
+            opacity={0.28}
+            rx={sprite.mountRect.width * 0.5}
+            ry={sprite.mountRect.width * 0.09}
+          />
+          <image
+            className="ninjaone-capital-city__skill-sprite"
+            data-city-skill-anchor={sprite.id}
+            data-city-sprite-id={sprite.id}
+            height={sprite.imageMountRect.height}
+            href={sprite.path}
+            preserveAspectRatio="none"
+            width={sprite.imageMountRect.width}
+            x={sprite.imageMountRect.x}
+            y={sprite.imageMountRect.y}
+          />
+        </g>
+        )) : null}
       {d01DistrictLandscapeVisible ? (
         <image
           className="ninjaone-capital-city__r3-d01-grounding"

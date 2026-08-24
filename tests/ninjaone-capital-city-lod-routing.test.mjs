@@ -27,6 +27,9 @@ import {
   NINJAONE_CAPITAL_D05_CONCEPT_ANCHORS,
 } from "../features/career-world/layers/city/model/ninjaOneCapitalD05Concept.ts";
 import {
+  NINJAONE_CAPITAL_D05_SKILL_SPRITES,
+} from "../features/career-world/layers/city/model/ninjaOneCapitalD05SkillSprites.ts";
+import {
   NINJAONE_CAPITAL_CITY_R3_CONTEXT,
   NINJAONE_CAPITAL_CITY_R3_PROGRESSIVE_WATER_EXCLUSION_MASK,
 } from "../features/career-world/layers/city/model/ninjaOneCapitalCityFoundationR3.ts";
@@ -866,6 +869,48 @@ test("D05 concept promotion preserves registration, mask, provenance, and anchor
     assert.ok(Math.abs(masterX - (candidateX * scale[0] + offset[0])) < 0.001);
     assert.ok(Math.abs(masterY - (candidateY * scale[1] + offset[1])) < 0.001);
     assert.ok(mask.data[Math.floor(candidateY) * mask.info.width + Math.floor(candidateX)] > 0);
+  }
+});
+
+test("D05 skill-sprite promotion preserves provenance, registration mounts, and the S18 hold", async () => {
+  const renderer = await readFile(new URL(
+    "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
+    import.meta.url,
+  ), "utf8");
+  const extendedD05Bounds = [-270, 413, 691, 1300];
+  const mountedIds = NINJAONE_CAPITAL_D05_SKILL_SPRITES.map(({ id }) => id);
+
+  assert.deepEqual(mountedIds, ["S15", "S10", "S01", "S11"]);
+  assert.deepEqual(
+    [...NINJAONE_CAPITAL_D05_SKILL_SPRITES]
+      .sort((left, right) => left.zBaseline - right.zBaseline)
+      .map(({ id }) => id),
+    mountedIds,
+    "sprites must be mounted in ascending registered footprint baseline order",
+  );
+  assert.doesNotMatch(renderer, /s18-sprite-r1|data-city-sprite-id="S18"/i);
+
+  for (const sprite of NINJAONE_CAPITAL_D05_SKILL_SPRITES) {
+    const [left, top, right, bottom] = extendedD05Bounds;
+    const [mountLeft, mountTop, mountRight, mountBottom] = [
+      sprite.mountRect.x,
+      sprite.mountRect.y,
+      sprite.mountRect.x + sprite.mountRect.width,
+      sprite.mountRect.y + sprite.mountRect.height,
+    ];
+    const provenance = JSON.parse((await readFile(new URL(
+      `../public/career-world/capitals/ninjaone/city-v2/sprites/${sprite.id.toLowerCase()}-sprite-r1.provenance.json`,
+      import.meta.url,
+    ), "utf8")).toString("utf8"));
+    const spriteBytes = await readFile(new URL(`../public${sprite.path}`, import.meta.url));
+
+    assert.equal(
+      createHash("sha256").update(spriteBytes).digest("hex"),
+      provenance.output.sha256,
+      `${sprite.id} promoted PNG must match its provenance`,
+    );
+    assert.ok(mountLeft >= left && mountTop >= top && mountRight <= right && mountBottom <= bottom,
+      `${sprite.id} subject mount rect must stay within extended D05 bounds`);
   }
 });
 

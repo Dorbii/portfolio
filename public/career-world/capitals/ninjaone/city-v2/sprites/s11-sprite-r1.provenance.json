@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "id": "s11-sprite-r1",
+  "canonicalSkillId": "S11",
+  "name": "whale-crane warehouse",
+  "source": {
+    "plate": "public/career-world/capitals/ninjaone/city-v2/plates/d05-shore-bright-r1.png",
+    "plateSha256": "167da12d18b4f7883f60d15c02befb925e5e4636b1b67f18ed7ec49758706531",
+    "registration": "public/career-world/capitals/ninjaone/city-v2/plates/d05-shore-a-registration-r3.json",
+    "registrationSha256": "3a0bb33eebad68780a16ff3e9f9d33cde95892925b33ce7ee69c2809f0c02426",
+    "referenceCrop": "references/s11-reference-4x.png",
+    "referenceCropSha256": "6893db78cecc8f2a1f96d3783997da7ef8b2ad0c414a0692eaeb10104dbfce42",
+    "candidateFootprintBbox": [
+      922,
+      596,
+      1276,
+      845
+    ],
+    "masterFootprintBbox": [
+      408.959387,
+      851.715353,
+      669.644444,
+      1035.004149
+    ]
+  },
+  "generation": {
+    "tool": "built-in image_gen",
+    "candidate": "C",
+    "prompt": "Use case: stylized-concept. Asset type: canonical high-resolution animation-ready game building sprite. Image 1 is the supplied registered 4x plate crop and is the identity authority. Image 2 is candidate B and is a sharpness, composition, and mechanically legible detail reference only. Generate a fresh image; do not merely recolor or repair Image 2. Recreate the SAME complete building: preserve its silhouette, proportions, tiering, material vocabulary, facade rhythm, iconography, 72-degree orthographic high-oblique projection, south-southeast bearing, and upper-left warm late-day light direction. Make it sharper and more resolved, in the bright inviting Career World register: vibrant but controlled materials, readable shadow detail, warm lit windows and forge accents. Isolate exactly one complete building, centered with generous padding, on a perfectly flat solid pure-magenta #FF00FF background. The background must be featureless and uniform. No terrain, vegetation, neighboring buildings, labels, text, watermark, ground plane, contact patch, or baked cast/drop shadow. Keep animation-ready features separated and mechanically legible. Metalwork is never magenta or pink. Nothing may touch or be cropped by the canvas edge. Render at the maximum available output resolution. Preserve the long low multi-bay warehouse, broad loading doors, steel-blue container forms, and structurally attached end crane with a clearly readable three-dimensional whale counterweight. Articulate the crane arm, pivot, cable, whale tail and fins so they can animate independently later. Replacement after candidate B retained one visible matte pixel. Generate a fresh complete building from the plate reference. Use NO magenta, pink, purple, fuchsia, violet, or chroma-colored pixels anywhere on the building, crane, cable, whale, metalwork, ornaments, smoke, or edge highlights. All crane and whale surfaces must be bronze, dark iron, slate blue, or neutral warm-lit metal with clean edges against the exact flat #FF00FF background. Any smoke, steam, or plume must be pale neutral grey-white — never pink, magenta, or violet-tinted. Prefer NO plume at all over a tinted one.",
+    "raw": "raw/s11-raw-c.png",
+    "rawSha256": "c6831a66f73a1965791ce54596d059212a09d618529524e99dce13de7e5cabf7",
+    "rawDimensions": [
+      1457,
+      1080
+    ]
+  },
+  "chromaKey": {
+    "algorithm": "global-tight-core-plus-connected-fringe-magenta-v2",
+    "coreToleranceChebyshev": 64,
+    "fringeToleranceChebyshev": 140,
+    "connectedFringeExpansionMetric": "manhattan",
+    "connectedFringeExpansionRadius": 2,
+    "previousConnectedFringeExpansionRadius": 1,
+    "parameterChange": "+1",
+    "tuningRationale": "T8a3 director-authorized uniform +1 connected-fringe expansion for an isolated keying-fringe matte artifact.",
+    "padPixels": 32,
+    "keyedPixels": 821091,
+    "partialPixels": 2726,
+    "fringeCleanup": {
+      "algorithm": "nearest-opaque-within-4px",
+      "recoloredPartialPixels": 2726,
+      "discardedIsolatedPartialPixels": 0
+    }
+  },
+  "output": {
+    "path": "sprites/s11-sprite-r1.png",
+    "sha256": "0d6dadc072d2e37eb7e683dca34a9800b5f24c22ff8c4cf0dc605623b5a2a707",
+    "nativePixels": [
+      1377,
+      1078
+    ],
+    "alphaBounds": [
+      32,
+      32,
+      1345,
+      1046
+    ],
+    "subjectPixels": [
+      1313,
+      1014
+    ],
+    "impliedPixelsPerMasterUnit": {
+      "x": 5.03672905194562,
+      "y": 5.532253046170917,
+      "limiting": 5.03672905194562,
+      "plateBaseline": 1.32
+    }
+  },
+  "gates": {
+    "mechanical": {
+      "png8BitSrgbRgba": true,
+      "alphaCoverage": 0.5069158976722002,
+      "alphaCoverageRange": [
+        0.08,
+        0.75
+      ],
+      "borderOpaquePixels": 0,
+      "cornerOpaquePixels": 0,
+      "transparentRgbViolations": 0,
+      "partialAlphaPixels": 2726,
+      "partialAlphaNearOpaqueRate": 1,
+      "visibleMagentaMattePixels": 0,
+      "pass": true
+    },
+    "f12InteriorMagentaClusters": {
+      "thresholdPixels": 16,
+      "clusters": [],
+      "pass": true
+    },
+    "f16Solidity": {
+      "sourceOpaquePixels": 750026,
+      "retainedOpaquePixels": 750026,
+      "opaqueCoverage": 1,
+      "lowRows": 0,
+      "highRows": 1013,
+      "scanlineOscillationRatio": 0,
+      "pass": true
+    },
+    "f17PlumeHue": {
+      "required": true,
+      "visualInspection": {
+        "inspected": true,
+        "effectDetected": false,
+        "regions": [],
+        "visualRead": "No smoke, steam, plume, glow cloud, or detached atmospheric effect is visible on candidate C."
+      },
+      "upperRegionSurvey": {
+        "definition": "upper 35% of nontransparent subject bounds; informational only because architecture and residual matte are not plume pixels",
+        "bounds": [
+          32,
+          32,
+          1345,
+          387
+        ],
+        "alphaPixels": 165316,
+        "magentaFamilyPixels": 2868,
+        "maxMagentaSaturation": 1
+      },
+      "effectRegions": [],
+      "magentaFamilyHueDegrees": [
+        285,
+        345
+      ],
+      "minimumSaturation": 0.08,
+      "minimumValue": 0.2,
+      "effectRegionMagentaFamilyTintPixels": 0,
+      "pass": true
+    },
+    "transparentMargin": {
+      "pixels": 32,
+      "pass": true
+    },
+    "visualIdentity": "PASS: same long low glazed warehouse and right-end crane read; whale counterweight and crane joints are clear; no smoke, steam, or plume is visible.",
+    "humanReview": "required"
+  }
+}
