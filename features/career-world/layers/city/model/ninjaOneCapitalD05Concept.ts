@@ -1,11 +1,11 @@
-import registration from "../../../../../public/career-world/capitals/ninjaone/city-v2/plates/d05-shore-a-registration-r1.json" with { type: "json" };
+import registration from "../../../../../public/career-world/capitals/ninjaone/city-v2/plates/d05-shore-a-registration-r2.json" with { type: "json" };
 import type { Pair } from "../../../shared/camera";
 
 const PLATE_PATH = "/career-world/capitals/ninjaone/city-v2/plates/d05-shore-bright-r1.png";
 const USABLE_MASK_PATH =
-  "/career-world/capitals/ninjaone/city-v2/plates/d05-shore-bright-usable-mask-r1.png";
+  "/career-world/capitals/ninjaone/city-v2/plates/d05-shore-bright-usable-mask-r2.png";
 const REGISTRATION_PATH =
-  "/career-world/capitals/ninjaone/city-v2/plates/d05-shore-a-registration-r1.json";
+  "/career-world/capitals/ninjaone/city-v2/plates/d05-shore-a-registration-r2.json";
 const PROVENANCE_PATH =
   "/career-world/capitals/ninjaone/city-v2/plates/d05-shore-bright-r1.provenance.json";
 

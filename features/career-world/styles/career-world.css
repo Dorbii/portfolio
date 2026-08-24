@@ -1572,3 +1572,13 @@ g[data-owner-id="project-kaizen-agent"].ambient-structure {
     animation: none;
   }
 }
+
+.ninjaone-capital-city__d05-foliage-shimmer {
+  filter: url("#ninjaone-capital-city-d05-foliage-shimmer-filter");
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ninjaone-capital-city__d05-foliage-shimmer {
+    display: none;
+  }
+}
