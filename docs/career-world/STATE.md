@@ -1,58 +1,43 @@
 # Career World — current state
 
-**Read this file first.** It is the resume entry point for a new director thread. It is *rewritten* each director tick, never appended — it holds only what is true right now. The permanent record lives in `QA-REVIEW.md` (task queue + verdicts), `AGENT-EXPERIMENTS.md` (run ledger + findings F1–F21), and `NINJAONE-CITY-RESTART-HANDOFF.md` (crash-safe checkpoints). Do not read those three to resume — consult them only when a specific question needs them.
+**Read this file first.** It is the resume entry point for a new director thread — rewritten each tick, never appended. Permanent record: `QA-REVIEW.md` (task queue + verdicts), `AGENT-EXPERIMENTS.md` (runs + findings F1–F24), `NINJAONE-CITY-RESTART-HANDOFF.md` (old checkpoints). Do not read those to resume; consult them for specific questions. Never resume from the Career World Console artifact (4.7MB; content duplicated here).
 
-Last updated: 2026-08-24 · branch `codex/career-world-rebuild` · head `7d1d6d5`
+Last updated: 2026-08-25 late night · branch `codex/career-world-rebuild` · head `9754477`
 
-## What is live
+## Where things stand (one paragraph)
 
-- **D05 (Western Skill Terraces) is the only rebuilt district.** Bright concept plate mounted at extended shore bounds `[-270,413,691,1300]` through a feathered usable mask; all legacy dusk city art is gated off behind `LEGACY_CITY_ART_VISIBLE=false` (assets retained on disk).
-- **All five skill sprites live at their registered anchors** — S01, S10, S11, S15, and S18 (accepted 2026-08-24 after despill; the S18 saga is closed: solidity brief + boundary despill is the recipe for openwork silhouettes). Sprites scale from the F19 registration bboxes (plate-truth) and cover their painted counterparts exactly.
-- **OWNER DESIGN INTENT (Steve, 2026-08-25, explicit): "I wanted everything to be crisp."** Uniform detail across the whole scene at every tier; the crisp-sprites-over-soft-plate behavior was never the goal and is retired with the crossfade. Judge all future district work against uniform crispness, not hero-vs-fabric contrast.
-- **ADOPTED STRATEGY (Steve, 2026-08-25): downsample-from-canon.** Recorded in AGENTS.md ("Canon-pyramid amendment"). One canonical artwork per subject; every zoom tier is a deterministic downsample of one authored max-res district image (Maps semantics — zoom never swaps content). Driven by Steve's zoom-morph complaint: plate and sprite were independent renditions of the same buildings, and the fabric had no high-res tier at all.
-- **Current state (2026-08-25 evening, head `b9c73f3`):** anchor-and-cover plate B is MOUNTED as the D05 composition authority (owner-accepted with a recorded coast-refinement debt — docks/shore dressing return in a later pass); all five despilled sprites sit exactly on their painted counterparts (one-authority rule: sprite mounts derive from the mounted plate's registration, property-guarded); mask r3 has the registered-water coast cut + 48 master px inland feather (edge property recalibrated to eye scale). Suite 211/0/2 at head.
-- **T9a probe PASSED both eye gates (drift p90 0.000, 2.73 px/master, seam invisible at 2x) → OWNER GO on the pyramid.** T9b full canon authoring is RUNNING: ~9-tile grid over the district, probe recipe verbatim, despilled sprites composited in as canonical hero renditions, tier derivation by downsample; cap 14 calls. Next after it reports: owner canon review → T9c mount (runtime serves the pyramid, sprite overlay retires until the animation pass) → zoom-floor recalibration question to Steve (frozen camera policy).
-- **Standing debts:** coast refinement (owner ask, post-pyramid); bright-district-vs-dark-world register reconciliation (world-level, env art frozen L2, Steve's call).
-- **Foliage** is baked into plates plus a derived-mask wind-shimmer layer (4.76% coverage, reduced-motion safe). Per-tree sprites were rejected.
-- **Interactive zoom floor is capped at 0.055** (~3× plate magnification) so the camera cannot outrun the art's resolving power. Proof cameras are unaffected.
-- Gates: full suite **211 pass / 0 fail / 2 skipped verified at head `f0d4780`** (2026-08-24); focused 59/59 + F20 live screenshot pass at the sprite mount. Console artifact is at tick #40, current with this state.
+**The D05 canon pyramid is LIVE and owner-reviewed.** One canonical district image (`public/career-world/capitals/ninjaone/city-v2/canon/d05-canon-r1.png`, 2619×2417, ~2.7 px/master, 9 stitched tiles, heroes composited from the five signed-off despilled sprites) serves capital/intermediate/close tiers by downsample through registration `d05-anchor-cover-registration-r3.json` + mask r3. The runtime sprite overlay is retired (sprite PNGs remain on disk as canon sources + future animation overlays). Steve flew it, verdict "vibrant and honestly fantastic," and filed 15 review observations now being fixed.
 
-## Blocked on Steve — nothing proceeds on these without a ruling
+## IN FLIGHT RIGHT NOW — first thing a new thread checks
 
-1. **S18 wheel mill.** Ten candidates (C–L) across six packets have failed on chroma artifacts; the other four sprites passed the same workflow in ≤2 calls each. Lane is suspended. Options: (a) hold — S18 stays plate-rendered, current live state, costs nothing; (b) authorize a bounded deterministic despill along the existing alpha boundary (needs an explicit F17 ruling — it touches generated pixels but cannot reclassify any pixel as background); (c) re-brief without the dominant wheel (contradicts "the wheel is the event loop", not recommended).
-2. **Low priority, parked:** per-tier variants for the two 96 MiB 4× terrain globals (192 of 336 MiB capital static — an L1/L2/LoD policy call); the close-geology 2× experiment (~71 MiB saving, needs visual sign-off); which district regenerates next.
+**T10a-canon-fix-tiles** (sol · high, ≤9 ImageGen calls) was dispatched as a background `codex exec`; a new thread won't get its completion notification. Check `.codex-tmp/qa/T9/canon-fix-tiles-run.log` (tail) and QA-REVIEW.md for `**Codex (T10a-canon-fix-tiles):**`. Its scope: regenerate hero-bearing tiles from sprite-composited scaffolds (fixes the systematic sprites-over-baked-buildings defect — T9b skipped the erase-under step, director spec gap), plus owner paint fixes on their tiles (S10 ground entrance; see-through shore house; dead-end walkway; cutoff chapel — via re-stitch if it's an overlap casualty), plus re-stitch with feather 120→40 master px with a ghost-check at 1.5x stretch. Output: quarantine `d05-canon-r2` + before/after crops per fix under `.codex-tmp/qa/T10a/`.
+
+**T10b (NOT YET DISPATCHED — next action after T10a passes director review):** terra · high, zero ImageGen. Scope: (1) zoom floor `0.055 → 0.0825` in `features/career-world/composition/WorldScene.tsx` (`INTERACTIVE_ART_RESOLVING_MINIMUM_SPAN`) — **owner-ruled**, canon 1:1, comment updated to cite the canon; (2) fix tier-serving thresholds (bug found live: the capital tier serves at close range where the full canon should — element measured 2617 CSS px serving `d05-canon-capital-r1`); (3) shimmer classifier tweak so mossy masonry stops shimmering; (4) remount canon r2 + re-derived tiers. Then director F20 (verify each of Steve's 15 items at the framings he shot), full suite, commit, console tick.
+
+Dispatch form: `codex exec --sandbox workspace-write -c model=gpt-5.6-terra -c model_reasoning_effort=high "$(cat <packet>)" > <log> 2>&1` (sol for generation lanes). Bundled Node for workers (F5): `~/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node.exe`.
+
+## Owner rulings tonight (all recorded in QA-REVIEW)
+
+- Canon accepted ("the seams are pretty flawless") → mounted.
+- Zoom floor SET at canon 1:1 (0.0825) after being shown both experiences live (hot-swapped tier in-browser). Deep-soft zone given up; optional future "core ring" (~10–14 calls, city core at ~5.5 px/master) buys deeper zoom back if wanted — demand-driven, not scheduled.
+- Full review scope confirmed: every logged defect gets worked ("even this version has defects").
+- Review keepers for future district packets: organic building placement (the headland cottage), shimmer effect quality, vibrant register.
+
+## Review disposition (Steve's 15 observations)
+
+- Sprites-over-baked-buildings ×3, S10 entrance, shore house hole, walkway dead-end, cutoff chapel, ghosting → **T10a (in flight)**.
+- Max-zoom blur, tier mis-serving, shimmer-on-masonry → **T10b (queued)**.
+- Shore quality → **shore polish pass, separately scheduled, needs Steve's creative brief (docks — he liked the old dock look; canon brought some back)**.
+- Crane arm fading at district boundary → parked; next district's regeneration covers it.
+
+## Standing debts & parked
+
+Shore/docks pass (owner ask). Bright-district-vs-dark-world register reconciliation (world-level; env art frozen L2; Steve's call). 96 MiB 4x terrain-global per-tier variants. Which district regenerates second (the pipeline-payoff measurement — recipe now proven end-to-end: grammar → scale-gated anchor-and-cover → canon tiles → pyramid mount). Owner-endorsed future phases: animation grammar ("the wheel is the event loop"), findings-ledger essay (agent-side perspective; Steve's vault is open for research — see memory).
 
 ## Settled — do not reopen
 
-- **Plate-carving is terminated.** A monolithic baked plate cannot decompose into per-node LoD.
-- **Fabric tiling for the close tier is dead** (T7a/T7b/T7c measured it; Steve ruled "agreed for now" 2026-08-24 — reopening starts from those measurements).
-- **Chroma-key extension for enclosed pockets is permanently closed** (T8a6: every uniform predicate regressed accepted sprites).
-- **Per-tree sprite foliage is rejected** — it re-risks the r5 "stickered" read.
-- **Register is bright and inviting, not moody.** The master plate is authority for forms and vocabulary, not for its dark value floor.
-- **L1–L3 (ocean, terrain, inland water) plus camera and LoD are frozen.** No agent touches them; changes need Steve.
+Plate-carving dead. Runtime fabric tiling dead (canon *authoring* tiles are the correct home for that mechanism). Chroma key-extension dead (despill is the fix; F21 eye gate mandatory). Per-tree foliage dead. One canonical artwork per subject; tiers only by downsample (AGENTS.md Canon-pyramid amendment). One anchor authority per mounted plate. L1–L3 + camera/LoD frozen (zoom-floor change tonight is owner-authorized).
 
-## Standing rules that bite most often
+## Rules that bite
 
-- Only Steve accepts work. Workers never commit (F10) — the director verifies gates and commits.
-- Two same-shaped failures → propose a pipeline change, never a third patch.
-- Discard-don't-repair for generation outputs (F17, owner policy).
-- Every mount lane ends with a live-render screenshot before "mounted" is reported (F20) — no property test substitutes for eyes on geometric composition.
-- Mechanical gates are for mechanics only; visual acceptance is human-only. The chroma metric suite (Section 7 / F12) does **not** see fringe defects — three false negatives so far (F21).
-- Future district backdrops must carry the registered L3 water; masks cut to it.
-
-## Dispatch form
-
-```
-codex exec --sandbox workspace-write -c model=gpt-5.6-sol -c model_reasoning_effort=high "$(cat <packet>)" > <log> 2>&1
-```
-
-Tiers: `gpt-5.6-sol` for generation/judgement lanes, `gpt-5.6-terra` for mechanical lanes. Workers must call Node through the bundled runtime — `~/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node.exe` — because the sandbox denies the system Node (F5). Packets go in `.codex-tmp/qa/<T#>/packet-*.md`, logs beside them.
-
-## Future phases (owner-endorsed 2026-08-25, queued behind the canon pyramid)
-
-- **Animation grammar.** After D05's zoom/fidelity lands: deterministic effects layers (the shimmer pattern) giving each skill building motion derived from its technology's semantics — S18's recorded brief "the wheel is the event loop — it turns forever" is the template; whale crane lowers containers (Docker), gopher foundry chimneys puff on staggered concurrent schedules (goroutines). Steve: "this is exactly what I'm excited for as well, we should iterate on this at that time."
-- **Findings-ledger essay.** Distill F1–F23 into an argued piece on directing generative agent pipelines, written from the agent side of the interface — Steve endorsed it, noting the gap: many humans prescribe agent best practices, few agents report what actually works. Quiet-moment work, costs only tokens.
-
-## Next action when unblocked
-
-Steve rules on S18 and on the tiling STOP. Then the open lane is the next district's bright re-integration (backdrop must carry registered L3 water), using the proven recipe: compose scaffold → whole-plate generative integration → verify named anchors (F19) → mount → live screenshot.
+Only Steve accepts; workers never commit (F10); two strikes → reframe; F17 discard-don't-repair; F20 live screenshot before "mounted"; F21 metrics can't see fringe/visual defects — eyes gate; F22 scale gates on generation; F23 gate corrections audit retroactively; F24 deliver the experience being accepted, record acceptance framing, log owner misses at full fidelity (Steve explicitly wants blunt callouts).
