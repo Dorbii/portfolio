@@ -10,7 +10,7 @@ Last updated: 2026-08-24 · branch `codex/career-world-rebuild` · head `7d1d6d5
 - **Four skill sprites live at their registered anchors** — S01 gopher foundry, S10 Databricks works, S11 whale-crane warehouse, S15 OpenAPI archive — at 3.8–4.9× plate sharpness, mounted after plate + shimmer behind `siteAssetsMounted`. **S18 is deliberately absent**, enforced by a property test.
 - **Foliage** is baked into plates plus a derived-mask wind-shimmer layer (4.76% coverage, reduced-motion safe). Per-tree sprites were rejected.
 - **Interactive zoom floor is capped at 0.055** (~3× plate magnification) so the camera cannot outrun the art's resolving power. Proof cameras are unaffected.
-- Gates at last measurement: full suite 210 pass / 0 fail / 2 skipped (at the shore cutover); focused 59/59 + F20 live screenshot pass (at the sprite mount).
+- Gates: full suite **211 pass / 0 fail / 2 skipped verified at head `f0d4780`** (2026-08-24); focused 59/59 + F20 live screenshot pass at the sprite mount. Console artifact is at tick #40, current with this state.
 
 ## Blocked on Steve — nothing proceeds on these without a ruling
 
