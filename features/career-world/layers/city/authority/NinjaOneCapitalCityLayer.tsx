@@ -14,7 +14,7 @@ import {
   NINJAONE_CAPITAL_CITY_R3_WORLD_ORIGIN,
   NINJAONE_CAPITAL_CITY_R3_WORLD_SPAN,
 } from "../model/ninjaOneCapitalCityFoundationR3";
-import { NINJAONE_CAPITAL_D05_SKILL_SPRITE_PATHS } from "../model/ninjaOneCapitalD05SkillSprites";
+import { NINJAONE_CAPITAL_D05_CONCEPT } from "../model/ninjaOneCapitalD05Concept";
 import type { NinjaOneCapitalCityDistrictId } from "../model/ninjaOneCapitalCityRepresentations";
 import {
   ninjaOneCapitalCityAssetVariant,
@@ -67,8 +67,14 @@ export function NinjaOneCapitalCityLayer({
         preloadDistrict,
       ).map((node) => ninjaOneCapitalCityAssetVariant(node, tier).path)
     )));
-    if (preloadDistrict === "D05" && detailState.shouldLoadSiteAssets) {
-      NINJAONE_CAPITAL_D05_SKILL_SPRITE_PATHS.forEach((path) => paths.add(path));
+    if (preloadDistrict === "D05") {
+      paths.add(NINJAONE_CAPITAL_D05_CONCEPT.tiers.capital.path);
+      if (detailState.shouldLoadSiteAssets) {
+        paths.add(NINJAONE_CAPITAL_D05_CONCEPT.tiers.site.path);
+      }
+      if (detailState.shouldLoadCloseAssets) {
+        paths.add(NINJAONE_CAPITAL_D05_CONCEPT.tiers.close.path);
+      }
     }
     paths.forEach((path) => {
       void preloadImage(path).catch(() => undefined);

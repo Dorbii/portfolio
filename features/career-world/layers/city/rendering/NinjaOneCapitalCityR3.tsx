@@ -16,8 +16,10 @@ import {
   NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS,
   NINJAONE_CAPITAL_CITY_R3_WATER_INTERACTION,
 } from "../model/ninjaOneCapitalCityFoundationR3";
-import { NINJAONE_CAPITAL_D05_CONCEPT } from "../model/ninjaOneCapitalD05Concept";
-import { NINJAONE_CAPITAL_D05_SKILL_SPRITES } from "../model/ninjaOneCapitalD05SkillSprites";
+import {
+  NINJAONE_CAPITAL_D05_CONCEPT,
+  ninjaOneCapitalD05ConceptTier,
+} from "../model/ninjaOneCapitalD05Concept";
 import {
   NINJAONE_CAPITAL_CITY_DETAIL_POLICY,
   ninjaOneCapitalCityUsesFreeCameraDetailCohort,
@@ -168,6 +170,7 @@ export function NinjaOneCapitalCityR3({
 }) {
   const [width, height] = NINJAONE_CAPITAL_CITY_R3_ARTBOARD;
   if (tier === "world" || tier === "territory") return null;
+  const d05Tier = ninjaOneCapitalD05ConceptTier(tier);
   const d05Transform = `translate(${NINJAONE_CAPITAL_D05_CONCEPT.transform.offset.join(" ")}) scale(${NINJAONE_CAPITAL_D05_CONCEPT.transform.scale.join(" ")})`;
   // The shore plate's registered bounds overhang the city artboard (west coast,
   // south nature band), so the D05 mask regions must span the union of both.
@@ -181,11 +184,6 @@ export function NinjaOneCapitalCityR3({
       Math.max(height, NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[3])
       - Math.min(0, NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[1]),
   };
-  // T6a foliage wind-shimmer: a displaced copy of the plate, revealed only
-  // through the derived canopy mask (1.7% coverage, 16px architecture standoff).
-  const D05_FOLIAGE_SHIMMER_MASK_PATH =
-    "/career-world/capitals/ninjaone/city-v2/plates/d05-foliage-shimmer-mask-r2.png";
-  const D05_FOLIAGE_SHIMMER_MASK_DIMENSIONS: readonly [number, number] = [1305, 1205];
   // Owner-directed cutover (2026-08-23): the legacy dusk city art is unmounted
   // from the live view while its assets stay on disk until the bright rebuild
   // fully replaces it. Flip to true to restore the old composite for reference.
@@ -423,17 +421,6 @@ export function NinjaOneCapitalCityR3({
             />
           </feDisplacementMap>
         </filter>
-        <filter
-          colorInterpolationFilters="sRGB"
-          height={d05MaskRegion.height}
-          id="ninjaone-capital-city-d05-skill-sprite-shadow"
-          filterUnits="userSpaceOnUse"
-          width={d05MaskRegion.width}
-          x={d05MaskRegion.x}
-          y={d05MaskRegion.y}
-        >
-          <feGaussianBlur stdDeviation={3} />
-        </filter>
         <mask
           height={d05MaskRegion.height}
           id="ninjaone-capital-city-d05-foliage-shimmer-mask"
@@ -444,11 +431,11 @@ export function NinjaOneCapitalCityR3({
           y={d05MaskRegion.y}
         >
           <image
-            height={D05_FOLIAGE_SHIMMER_MASK_DIMENSIONS[1]}
-            href={D05_FOLIAGE_SHIMMER_MASK_PATH}
+            height={NINJAONE_CAPITAL_D05_CONCEPT.foliageShimmerMask.dimensions[1]}
+            href={NINJAONE_CAPITAL_D05_CONCEPT.foliageShimmerMask.path}
             preserveAspectRatio="none"
             transform={d05Transform}
-            width={D05_FOLIAGE_SHIMMER_MASK_DIMENSIONS[0]}
+            width={NINJAONE_CAPITAL_D05_CONCEPT.foliageShimmerMask.dimensions[0]}
             x={0}
             y={0}
           />
@@ -713,10 +700,11 @@ export function NinjaOneCapitalCityR3({
         data-city-concept-id={NINJAONE_CAPITAL_D05_CONCEPT.id}
         data-city-district="D05"
         data-city-representation-class="approved-concept-plate"
+        data-city-tier={d05Tier.id}
         height={
           NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[3] - NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[1]
         }
-        href={NINJAONE_CAPITAL_D05_CONCEPT.plate.path}
+        href={d05Tier.path}
         mask="url(#ninjaone-capital-city-d05-concept-usable-mask)"
         preserveAspectRatio="none"
         width={
@@ -732,7 +720,7 @@ export function NinjaOneCapitalCityR3({
           height={
             NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[3] - NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[1]
           }
-          href={NINJAONE_CAPITAL_D05_CONCEPT.plate.path}
+          href={d05Tier.path}
           mask="url(#ninjaone-capital-city-d05-foliage-shimmer-mask)"
           preserveAspectRatio="none"
           width={
@@ -742,35 +730,6 @@ export function NinjaOneCapitalCityR3({
           y={NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[1]}
         />
       </g>
-      {siteAssetsMounted ? [...NINJAONE_CAPITAL_D05_SKILL_SPRITES]
-        .sort((left, right) => left.zBaseline - right.zBaseline)
-        .map((sprite) => (
-        <g
-          key={sprite.id}
-          opacity={siteProgress}
-        >
-          <ellipse
-            cx={sprite.masterFootprintBbox[0] + sprite.mountRect.width * 0.5}
-            cy={sprite.zBaseline}
-            fill="#000"
-            filter="url(#ninjaone-capital-city-d05-skill-sprite-shadow)"
-            opacity={0.28}
-            rx={sprite.mountRect.width * 0.5}
-            ry={sprite.mountRect.width * 0.09}
-          />
-          <image
-            className="ninjaone-capital-city__skill-sprite"
-            data-city-skill-anchor={sprite.id}
-            data-city-sprite-id={sprite.id}
-            height={sprite.imageMountRect.height}
-            href={sprite.path}
-            preserveAspectRatio="none"
-            width={sprite.imageMountRect.width}
-            x={sprite.imageMountRect.x}
-            y={sprite.imageMountRect.y}
-          />
-        </g>
-        )) : null}
       {d01DistrictLandscapeVisible ? (
         <image
           className="ninjaone-capital-city__r3-d01-grounding"
