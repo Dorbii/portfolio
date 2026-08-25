@@ -1080,3 +1080,78 @@ Checkpoint the free-camera LoD fix, then run a reversible D06 station-scale/cont
 - Commit this green I24 unit only. Preserve all untracked `_review` assets and all quarantined evidence. Leave the fixed D06 close URL open on port 3000 for Steve.
 - Do not start more ImageGen or local district repair from this checkpoint. The next decision is a bounded two-part slice: (1) package WFX01/LFX06/CFX01/I24 as lossless tight crops and reprofile cold capital-to-close; (2) author one true D06 close architectural representation under a new exact asset contract, or explicitly accept I24 as the terminal station detail. That decision belongs after review, not inside the current audit.
 - After that bounded slice, run one final requirement-by-requirement whole-city audit against the master. The remaining city-wide visual gap should be recorded as source reauthoring if close cohorts still merely scale existing art; do not hide it with more overlays or claim concept parity without live evidence.
+
+## Crash-safe checkpoint — 2026-08-21 12:23 CDT
+
+### V2 T1 grammar candidate is ready for director review
+
+- Closed-lane crop packaging was verified and committed separately as `ca6ebde`; no further I-series/LFX/CFX/D01-D06 repair work was opened.
+- T1 adds deterministic `scripts/build-ninjaone-city-grammar-r1.mjs` and `public/career-world/capitals/ninjaone/city-v2/grammar/ninjaone-city-grammar-r1.json`; runtime, L1-L3, camera, and LoD files are unchanged.
+- Mechanical output: one connected 31-edge road/stairs/bridge graph, 45 mask-contained building footprints in four size classes, a 12x9 density map, 18 terrace bands, and five material palette families.
+- Debug evidence is `.codex-tmp/qa/T1/ninjaone-city-grammar-r1-{graph,footprints}.png`; both are 1448x1086 RGBA overlays. `npm run check:ninjaone-city-grammar` reproduces JSON and PNGs byte-for-byte.
+- Visual fidelity is unclaimed and awaits director overlay review in `QA-REVIEW.md`. Do not begin T2 before that review; after T1 passes review, the desktop lane retires in favor of director-dispatched headless runs.
+
+## Crash-safe checkpoint — 2026-08-21 T3c-r3
+
+- Rebuilt D05 composer proof without altering L1–L3: registered L2 terrain r6 detail crop plus the registered L3 water mask/surface replaces the baked-master underlay.
+- Occupancy priority named > large > standard > compact rejects overlap above 15% of candidate bounds: 8/32 buildings survive; 20 props have zero overlap with surviving building bounds.
+- The r2 pink/red region was the registered red-brick S10 sprite visually doubled against the baked master; r3 has one full-opacity S10 on the clean underlay. Low-alpha magenta edge residue is also suppressed.
+- Evidence: `.codex-tmp/qa/T3/t3c-r3/{d05-composed-graded-r3,d05-composed-capital-scale-r3,d05-composed-vs-master-r3,d05-composed-over-clean-terrain-r3}.png` and `d05-placements-r3.json`.
+- Bundled-Node build/check and scoped ESLint pass; no commit, runtime, camera, LoD, or frozen-layer change.
+- Next action: director reviews the clean-terrain proof and decides whether the 3/5 named-anchor occupancy conflict requires grammar/layout revision before a final candidate.
+
+## Crash-safe checkpoint — 2026-08-21 T3c-r4b
+
+- Composer emits only `.codex-tmp/qa/T3/t3c-r4b/` evidence: five PNG proofs plus `d05-placements-r4b.json`; no runtime, frozen-layer, kit, ImageGen, or commit change.
+- Current source already uses Sharp destination-space `resize`; the reported source-row rounded-destination loop is not present in this checkout.
+- Replaced r4's existence-only opaque-pixel assertion with a per-placed-building mapped-opaque-source solidity gate of >=0.98; all 19 pass, named S18/S01/S15/S10/S11 are 0.999912/0.999909/0.999910/0.999857/0.999899.
+- Bundled Node syntax/build/check and `git diff --check` pass. Next action: director visually reviews r4b proofs, including S10, against the scanline report; visual conformity remains unverified.
+
+## Crash-safe checkpoint — 2026-08-24 T8a2 skill-sprite continuation
+
+- Quarantine-only continuation used 4/4 ImageGen calls (3 scheduled + 1 reserve); 12 total across T8a/T8a2. No generated pixel was repaired.
+- S10-B is the only new valid selection: Section 7 `0` matte px, F12 `0` clusters, F16 `625850/625850`, no visible plume/effect, limiting scale `6.0936 px/master`.
+- S11-C preserves identity and has no plume but is discarded for exactly `1` visible matte pixel; F12/F16 otherwise pass.
+- S18-D is an octagonal-wheel F17 discard; reserve S18-E remains many-segmented rather than a simple hexagon and is also discarded before processing. Budget exhausted.
+- Aggregate remains `3/5`: S01-A, S10-B, S15-A pass mechanical gates; S11 and S18 remain blocked. S15 elaboration remains owner-review-only.
+- Proof: `.codex-tmp/quarantine/city-v2/T8a-skill-sprites/comparisons/skill-sprites-contact-sheet-r1.png`; exact records/discards/hue evidence are in `proof-manifest.json` and `REPORT.md`.
+- Next action: director reviews S10-B visually; any further S11/S18 generation requires new authorization.
+
+## Crash-safe checkpoint — 2026-08-24 T8a3 skill-sprites final
+
+- Uniform selected-run chroma key now uses Manhattan connected-fringe radius `2` (`+1` from prior default), recorded in every provenance record; no generated pixels were repaired.
+- Unchanged raw S11-C passes Section 7 `0` matte px, F12 `0` clusters, and F16 `750026/750026`; crane lines and whale counterweight cable remain continuous.
+- S18-F used the one scheduled corrective call; reserve unused. First-gate read: one left-flank wheel, exactly six straight outer rim segments and six vertices, on a long low asymmetric rustic working mill.
+- S18-F passes Section 7 `0` matte px, F12 `0` clusters, F16 `535320/535320`, no visible plume, and limiting scale `4.7703 px/master`.
+- Aggregate mechanical status is `5/5`; visual selection remains for director/owner review, and S15's prior elaboration flag remains open.
+- Proof: `.codex-tmp/qa/T8a3/skill-sprites-contact-sheet-r1.png`; exact prompts, hashes, gates, and 13-call history are in the T8a quarantine `REPORT.md` / `proof-manifest.json`.
+- No promotion, runtime, `public/`, frozen-layer, camera, LoD, or commit change; next action is director/owner visual review of the five final quarantine selections.
+
+## Crash-safe checkpoint — 2026-08-24 T8a4 S18 reference-authority regeneration
+
+- Owner-rejected S18-F was not repaired; both fresh calls used the registered S18 plate crop as the sole image authority.
+- S18-G passed materials/massing/wheel prominence but was discarded before processing for an eight-segment outer wheel boundary.
+- Reserve S18-H restores the stone-dominant grey masonry, slate/glass working halls, limited timber accents, and plate-prominent flank wheel; its outer rim has six straight segments and six vertices.
+- H passes Section 7 `0` matte px, F12 `0` clusters, F16 `615636/615636` with `0` oscillation, no visible effect, and limiting scale `5.8062 px/master`.
+- Budget exhausted at `2/2`; no repair, promotion, runtime, `public/`, frozen-layer, camera, LoD, or commit change.
+- Proof: `.codex-tmp/qa/T8a4-s18/skill-sprites-contact-sheet-r1.png`; exact prompts, hashes, attempts, and 15-call history are in the T8a quarantine `REPORT.md` / `proof-manifest.json`.
+- Next action: director/owner visual review of S18-H; worker mechanical pass is not visual acceptance.
+
+## Crash-safe checkpoint — 2026-08-24 T8a5 S18 Node final
+
+- Owner-directed round-wheel/Node-hub final used the plate crop as complete authority; animation provenance records “the wheel is the event loop — it turns forever.”
+- S18-I passed reference/material/massing, round-rim/hex-hub/confined-green, and automated radius-2/F12/F16/effect/scale metrics.
+- Direct keyed-output inspection exposed saturated magenta fringe slivers inside I's wheel assembly; I was discarded without repair and retained only as invalid quarantine evidence.
+- Reserve S18-J failed gate 1 before processing: monumental castle/tower drift, centered-showpiece wheel, and loss of the long low asymmetric mill-hall massing.
+- Budget exhausted at `2/2`; `proof-manifest.json` status is `failed`; no valid final S18 sprite was produced.
+- Proof: `.codex-tmp/qa/T8a5-s18/skill-sprites-contact-sheet-r1.png`; exact prompts, hashes, attempts, and 17-call history are in the T8a quarantine `REPORT.md` / `proof-manifest.json`.
+- No repair, promotion, runtime, `public/`, frozen-layer, camera, LoD, or commit change.
+- Next action: owner/director must authorize another bounded generation packet or a pipeline reframe.
+
+## Crash-safe checkpoint — 2026-08-24 T8a6 enclosed-chroma-key
+
+- BLOCKED: two uniform v3 enclosure predicates changed protected S01/S11/S15 outputs; both were rejected and v2 PNG hashes restored exactly.
+- The component reframe still left visible magenta wheel-spoke slivers in I at 2x; Section 7/F12/F16/scale are false-negative for this defect.
+- Proof: `.codex-tmp/quarantine/city-v2/T8a-skill-sprites/comparisons/s18-i-wheel-assembly-v3-2x.png`; raw I remains untouched.
+- No v3 promotion, repair, ImageGen, runtime, `public/`, frozen-layer, camera, LoD, or commit change.
+- Next action: new bounded S18 generation budget; no third deterministic-key tuning without director reframe.
