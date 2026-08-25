@@ -28,6 +28,7 @@ import {
 } from "../features/career-world/layers/city/model/ninjaOneCapitalD05Concept.ts";
 import {
   NINJAONE_CAPITAL_D05_SKILL_SPRITES,
+  NINJAONE_CAPITAL_D05_SKILL_SPRITE_PATHS,
 } from "../features/career-world/layers/city/model/ninjaOneCapitalD05SkillSprites.ts";
 import {
   NINJAONE_CAPITAL_CITY_R3_CONTEXT,
@@ -872,15 +873,11 @@ test("D05 concept promotion preserves registration, mask, provenance, and anchor
   }
 });
 
-test("D05 skill-sprite promotion preserves provenance, registration mounts, and the S18 hold", async () => {
-  const renderer = await readFile(new URL(
-    "../features/career-world/layers/city/rendering/NinjaOneCapitalCityR3.tsx",
-    import.meta.url,
-  ), "utf8");
+test("D05 skill-sprite promotion preserves five-sprite provenance, registration mounts, preload paths, and sort", async () => {
   const extendedD05Bounds = [-270, 413, 691, 1300];
   const mountedIds = NINJAONE_CAPITAL_D05_SKILL_SPRITES.map(({ id }) => id);
 
-  assert.deepEqual(mountedIds, ["S15", "S10", "S01", "S11"]);
+  assert.deepEqual(mountedIds, ["S15", "S10", "S01", "S18", "S11"]);
   assert.deepEqual(
     [...NINJAONE_CAPITAL_D05_SKILL_SPRITES]
       .sort((left, right) => left.zBaseline - right.zBaseline)
@@ -888,7 +885,19 @@ test("D05 skill-sprite promotion preserves provenance, registration mounts, and 
     mountedIds,
     "sprites must be mounted in ascending registered footprint baseline order",
   );
-  assert.doesNotMatch(renderer, /s18-sprite-r1|data-city-sprite-id="S18"/i);
+  const baselineViolations = NINJAONE_CAPITAL_D05_SKILL_SPRITES
+    .slice(1)
+    .filter((sprite, index) => (
+      sprite.zBaseline < NINJAONE_CAPITAL_D05_SKILL_SPRITES[index].zBaseline
+    ));
+  assert.equal(baselineViolations.length, 0, "no sprite may violate baseline z-sort order");
+  assert.deepEqual(
+    NINJAONE_CAPITAL_D05_SKILL_SPRITE_PATHS,
+    NINJAONE_CAPITAL_D05_SKILL_SPRITES.map(({ path }) => path),
+    "the D05 site preload path set must include every mounted sprite",
+  );
+  assert.equal(new Set(NINJAONE_CAPITAL_D05_SKILL_SPRITE_PATHS).size, 5);
+  assert.ok(mountedIds.includes("S18"));
 
   for (const sprite of NINJAONE_CAPITAL_D05_SKILL_SPRITES) {
     const [left, top, right, bottom] = extendedD05Bounds;

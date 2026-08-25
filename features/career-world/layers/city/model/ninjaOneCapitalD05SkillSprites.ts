@@ -3,6 +3,7 @@ import s01Provenance from "../../../../../public/career-world/capitals/ninjaone/
 import s10Provenance from "../../../../../public/career-world/capitals/ninjaone/city-v2/sprites/s10-sprite-r1.provenance.json" with { type: "json" };
 import s11Provenance from "../../../../../public/career-world/capitals/ninjaone/city-v2/sprites/s11-sprite-r1.provenance.json" with { type: "json" };
 import s15Provenance from "../../../../../public/career-world/capitals/ninjaone/city-v2/sprites/s15-sprite-r1.provenance.json" with { type: "json" };
+import s18Provenance from "../../../../../public/career-world/capitals/ninjaone/city-v2/sprites/s18-sprite-r1.provenance.json" with { type: "json" };
 
 type Bbox = readonly [number, number, number, number];
 type Dimensions = readonly [number, number];
@@ -77,6 +78,7 @@ export const NINJAONE_CAPITAL_D05_SKILL_SPRITES: readonly NinjaOneCapitalD05Skil
   defineSkillSprite(s15Provenance),
   defineSkillSprite(s10Provenance),
   defineSkillSprite(s01Provenance),
+  defineSkillSprite(s18Provenance),
   defineSkillSprite(s11Provenance),
 ]);
 

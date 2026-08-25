@@ -7,7 +7,8 @@ Last updated: 2026-08-24 · branch `codex/career-world-rebuild` · head `7d1d6d5
 ## What is live
 
 - **D05 (Western Skill Terraces) is the only rebuilt district.** Bright concept plate mounted at extended shore bounds `[-270,413,691,1300]` through a feathered usable mask; all legacy dusk city art is gated off behind `LEGACY_CITY_ART_VISIBLE=false` (assets retained on disk).
-- **Four skill sprites live at their registered anchors** — S01 gopher foundry, S10 Databricks works, S11 whale-crane warehouse, S15 OpenAPI archive — at 3.8–4.9× plate sharpness, mounted after plate + shimmer behind `siteAssetsMounted`. **S18 is deliberately absent**, enforced by a property test.
+- **All five skill sprites live at their registered anchors** — S01, S10, S11, S15, and S18 (accepted 2026-08-24 after despill; the S18 saga is closed: solidity brief + boundary despill is the recipe for openwork silhouettes). Sprites scale from the F19 registration bboxes (plate-truth) and cover their painted counterparts exactly.
+- **Active lane: D05 plate regeneration with scale gates (F22).** Steve's close-zoom read after the S18 mount exposed that candidate A's generic fabric is painted ~10x too dense / ~4x too small vs the grammar, heroes ~20% under registered widths — identity gates alone passed a beautiful miniature. Owner ruled "commit and regen." The regen lane gates hero widths to registered data and fabric scale/density to the grammar distribution; sprites remount unchanged afterward via the standard F19 re-verify.
 - **Foliage** is baked into plates plus a derived-mask wind-shimmer layer (4.76% coverage, reduced-motion safe). Per-tree sprites were rejected.
 - **Interactive zoom floor is capped at 0.055** (~3× plate magnification) so the camera cannot outrun the art's resolving power. Proof cameras are unaffected.
 - Gates: full suite **211 pass / 0 fail / 2 skipped verified at head `f0d4780`** (2026-08-24); focused 59/59 + F20 live screenshot pass at the sprite mount. Console artifact is at tick #40, current with this state.
@@ -15,13 +16,12 @@ Last updated: 2026-08-24 · branch `codex/career-world-rebuild` · head `7d1d6d5
 ## Blocked on Steve — nothing proceeds on these without a ruling
 
 1. **S18 wheel mill.** Ten candidates (C–L) across six packets have failed on chroma artifacts; the other four sprites passed the same workflow in ≤2 calls each. Lane is suspended. Options: (a) hold — S18 stays plate-rendered, current live state, costs nothing; (b) authorize a bounded deterministic despill along the existing alpha boundary (needs an explicit F17 ruling — it touches generated pixels but cannot reclassify any pixel as background); (c) re-brief without the dominant wheel (contradicts "the wheel is the event loop", not recommended).
-2. **Fabric tiling — director recommends STOP permanently.** Three probes agree: seam mismatch is ~10.5% MAD through masonry *and* nature, and near-plate-size tiles return only 1.46–1.72 px/unit because the generator's output cap doesn't scale with tile size. Sprites + the zoom cap are the close-tier answer. Awaiting "agreed" or pushback.
-3. **Low priority, parked:** per-tier variants for the two 96 MiB 4× terrain globals (192 of 336 MiB capital static — an L1/L2/LoD policy call); the close-geology 2× experiment (~71 MiB saving, needs visual sign-off); which district regenerates next.
+2. **Low priority, parked:** per-tier variants for the two 96 MiB 4× terrain globals (192 of 336 MiB capital static — an L1/L2/LoD policy call); the close-geology 2× experiment (~71 MiB saving, needs visual sign-off); which district regenerates next.
 
 ## Settled — do not reopen
 
 - **Plate-carving is terminated.** A monolithic baked plate cannot decompose into per-node LoD.
-- **Fabric tiling for the close tier is dead** (T7a/T7b/T7c measured it).
+- **Fabric tiling for the close tier is dead** (T7a/T7b/T7c measured it; Steve ruled "agreed for now" 2026-08-24 — reopening starts from those measurements).
 - **Chroma-key extension for enclosed pockets is permanently closed** (T8a6: every uniform predicate regressed accepted sprites).
 - **Per-tree sprite foliage is rejected** — it re-risks the r5 "stickered" read.
 - **Register is bright and inviting, not moody.** The master plate is authority for forms and vocabulary, not for its dark value floor.
