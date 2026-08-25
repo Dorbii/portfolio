@@ -54,7 +54,7 @@
   },
   "output": {
     "path": "sprites/s10-sprite-r1.png",
-    "sha256": "b11a17566d51ba52f1ca0adef2faac7d528d8164979452cb38dc41a3989d54a3",
+    "sha256": "ec72197bdd4d6fc29a8196cd10d2d385831f032b32bb20c4cab2de6fb0fb3cb3",
     "nativePixels": [
       978,
       1145
@@ -140,7 +140,62 @@
       "pixels": 32,
       "pass": true
     },
-    "visualIdentity": "PASS: same oxide-red stepped works, three-tier block rhythm and top chimney read; no smoke, steam, or plume is visible.",
-    "humanReview": "required"
+    "visualIdentity": "PASS: direct 2x full-boundary self-read finds chroma fringe removed with no visible grey or neutral replacement halo.",
+    "visualIdentityPass": true,
+    "humanReview": "required",
+    "limitingScale": {
+      "limiting": 6.093573844419392,
+      "expected": 6.093573844419392,
+      "byteIdenticalAlphaPreservesSubjectBounds": true,
+      "pass": true
+    },
+    "f21BoundaryDespill": {
+      "before": {
+        "edgePixels": 9649,
+        "contaminatedEdgePixels": 3087,
+        "contaminationRate": 0.31992952637579025
+      },
+      "after": {
+        "edgePixels": 9649,
+        "contaminatedEdgePixels": 3,
+        "contaminationRate": 0.00031091304798424707
+      },
+      "directVisualSelfRead": "PASS: full 2x boundary read finds chroma fringe removed with no visible grey or neutral halo.",
+      "proof": ".codex-tmp/qa/T8d-despill/s10-boundary-before-after-2x.png",
+      "pass": true
+    },
+    "despillAlphaInvariant": {
+      "byteIdentical": true,
+      "alphaBytes": 1119810,
+      "alphaSha256Before": "8e1d67a4663a02d24ec9559436acc6904ffe050e0b8cdbb97f44ea9bccc8954e",
+      "alphaSha256After": "8e1d67a4663a02d24ec9559436acc6904ffe050e0b8cdbb97f44ea9bccc8954e"
+    }
+  },
+  "despill": {
+    "algorithm": "despill-v1",
+    "id": "despill-v1-set-2",
+    "alphaBoundaryRadius": 3,
+    "boundaryMetric": "manhattan",
+    "magentaHueDegrees": [
+      285,
+      345
+    ],
+    "minimumSaturation": 0.24,
+    "neighborRadius": 7,
+    "neighborAlphaMinimum": 250,
+    "chromaBlend": 0.92,
+    "boundaryCandidates": 3087,
+    "recoloredPixels": 3087,
+    "noNeighborhoodPixels": 0,
+    "alphaInvariant": {
+      "byteIdentical": true,
+      "alphaBytes": 1119810,
+      "alphaSha256Before": "8e1d67a4663a02d24ec9559436acc6904ffe050e0b8cdbb97f44ea9bccc8954e",
+      "alphaSha256After": "8e1d67a4663a02d24ec9559436acc6904ffe050e0b8cdbb97f44ea9bccc8954e"
+    },
+    "inputSpriteSha256": "b11a17566d51ba52f1ca0adef2faac7d528d8164979452cb38dc41a3989d54a3",
+    "keyedBeforeSha256": "b11a17566d51ba52f1ca0adef2faac7d528d8164979452cb38dc41a3989d54a3",
+    "keyedAfterSha256": "ec72197bdd4d6fc29a8196cd10d2d385831f032b32bb20c4cab2de6fb0fb3cb3",
+    "retroactiveF21Audit": true
   }
 }

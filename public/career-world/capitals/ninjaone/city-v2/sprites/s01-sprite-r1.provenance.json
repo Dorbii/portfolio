@@ -54,7 +54,7 @@
   },
   "output": {
     "path": "sprites/s01-sprite-r1.png",
-    "sha256": "a429dd53f5025ae9fc00e7b743c36bbcce88ef11400885314e0f3acb0f4ff3ee",
+    "sha256": "baad5990f47ec56d72c4bb756cabe69e6b50c1fdd1b23679ce1e99894da597d3",
     "nativePixels": [
       1143,
       1194
@@ -88,7 +88,7 @@
       "cornerOpaquePixels": 0,
       "transparentRgbViolations": 0,
       "partialAlphaPixels": 2177,
-      "partialAlphaNearOpaqueRate": 1,
+      "partialAlphaNearOpaqueRate": 0.9995406522737712,
       "visibleMagentaMattePixels": 0,
       "pass": true
     },
@@ -140,7 +140,62 @@
       "pixels": 32,
       "pass": true
     },
-    "visualIdentity": "PASS: same gopher-faced blue dome, tall chimney, lateral foundry hardware and bright material read; sharper articulation.",
-    "humanReview": "required"
+    "visualIdentity": "PASS: direct 2x full-boundary self-read finds chroma fringe removed with no visible grey or neutral replacement halo.",
+    "visualIdentityPass": true,
+    "humanReview": "required",
+    "limitingScale": {
+      "limiting": 6.396326583982352,
+      "expected": 6.396326583982352,
+      "byteIdenticalAlphaPreservesSubjectBounds": true,
+      "pass": true
+    },
+    "f21BoundaryDespill": {
+      "before": {
+        "edgePixels": 16132,
+        "contaminatedEdgePixels": 4789,
+        "contaminationRate": 0.2968633771386065
+      },
+      "after": {
+        "edgePixels": 16132,
+        "contaminatedEdgePixels": 48,
+        "contaminationRate": 0.0029754525167369206
+      },
+      "directVisualSelfRead": "PASS: full 2x boundary read finds chroma fringe removed with no visible grey or neutral halo.",
+      "proof": ".codex-tmp/qa/T8d-despill/s01-boundary-before-after-2x.png",
+      "pass": true
+    },
+    "despillAlphaInvariant": {
+      "byteIdentical": true,
+      "alphaBytes": 1364742,
+      "alphaSha256Before": "3fa17da940222de96437b35f6bc16096970da6fb9d69c213a1be830a936bc713",
+      "alphaSha256After": "3fa17da940222de96437b35f6bc16096970da6fb9d69c213a1be830a936bc713"
+    }
+  },
+  "despill": {
+    "algorithm": "despill-v1",
+    "id": "despill-v1-set-2",
+    "alphaBoundaryRadius": 3,
+    "boundaryMetric": "manhattan",
+    "magentaHueDegrees": [
+      285,
+      345
+    ],
+    "minimumSaturation": 0.24,
+    "neighborRadius": 7,
+    "neighborAlphaMinimum": 250,
+    "chromaBlend": 0.92,
+    "boundaryCandidates": 4789,
+    "recoloredPixels": 4789,
+    "noNeighborhoodPixels": 0,
+    "alphaInvariant": {
+      "byteIdentical": true,
+      "alphaBytes": 1364742,
+      "alphaSha256Before": "3fa17da940222de96437b35f6bc16096970da6fb9d69c213a1be830a936bc713",
+      "alphaSha256After": "3fa17da940222de96437b35f6bc16096970da6fb9d69c213a1be830a936bc713"
+    },
+    "inputSpriteSha256": "a429dd53f5025ae9fc00e7b743c36bbcce88ef11400885314e0f3acb0f4ff3ee",
+    "keyedBeforeSha256": "a429dd53f5025ae9fc00e7b743c36bbcce88ef11400885314e0f3acb0f4ff3ee",
+    "keyedAfterSha256": "baad5990f47ec56d72c4bb756cabe69e6b50c1fdd1b23679ce1e99894da597d3",
+    "retroactiveF21Audit": true
   }
 }

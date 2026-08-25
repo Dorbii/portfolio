@@ -27,6 +27,15 @@ The master plate (`ninjaone-capital-master-r1.png`) and the current baked city c
 3. **Composer.** A deterministic offline script assembles districts from kit + grammar: baseline z-sort, enforced overlap/occlusion, cast shadows generated from the shared light, contact shading at every node–ground seam, then one global color grade over the composite. It outputs plates per LoD tier **and** per-node registrations, so close-tier sharpness is native and node swaps are manifest edits.
 4. **Runtime** mounts composer output only. LoD = which nodes at which resolution. No district-specific patch assets, no runtime carving.
 
+### Canon-pyramid amendment (owner-adopted 2026-08-25)
+
+The method evolved through evidence (see QA-REVIEW.md and AGENT-EXPERIMENTS.md F17–F23) into a **downsample-from-canon** architecture with two binding rules:
+
+- **One canonical artwork per subject.** Once a subject (named building, district) has accepted art, no later generation re-paints it as a separate rendition. Generation is *conditioned on* canon (composited into the scaffold — anchor-and-cover) and the canon always covers or replaces the repaint. Multiple independent generative renditions of the same subject are the root cause of the zoom-morph defect class and are forbidden.
+- **Every zoom tier is derived, never generated.** The authored artifact per district is one canonical maximum-resolution image (authored in overlapping generative tiles, feather-stitched offline, heroes composited in as canon); capital/territory tiers are deterministic downsamples of it. Zoom must have resolution-pyramid semantics — the same world at increasing detail, Google-Maps style — with no content swaps between tiers. The runtime serves the canon as a streamed tile pyramid.
+
+District sequence under this amendment: scale-correct anchor-and-cover base plate (composition authority) → overlapping high-res canon tiles re-detailing it → feather-stitch + hero composite → derive all tiers → mount pyramid. Gate authority: fabric/hero scale gates (F22), drift gates vs the composition authority (T7a method), seam/ghost judgment by owner eyes (F21/F20).
+
 ## Standing rules
 
 1. **Two strikes, then reframe.** If an approach fails twice for the same structural reason, stop and propose a pipeline change in QA-REVIEW.md. A third attempt at the same fix is a contract violation.
