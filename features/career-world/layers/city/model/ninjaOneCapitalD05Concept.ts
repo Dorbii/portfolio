@@ -1,13 +1,13 @@
-import registration from "../../../../../public/career-world/capitals/ninjaone/city-v2/plates/d05-shore-a-registration-r3.json" with { type: "json" };
+import registration from "../../../../../public/career-world/capitals/ninjaone/city-v2/plates/d05-anchor-cover-registration-r3.json" with { type: "json" };
 import type { Pair } from "../../../shared/camera";
 
-const PLATE_PATH = "/career-world/capitals/ninjaone/city-v2/plates/d05-shore-bright-r1.png";
+const PLATE_PATH = "/career-world/capitals/ninjaone/city-v2/plates/d05-anchor-cover-r1.png";
 const USABLE_MASK_PATH =
-  "/career-world/capitals/ninjaone/city-v2/plates/d05-shore-bright-usable-mask-r3.png";
+  "/career-world/capitals/ninjaone/city-v2/plates/d05-anchor-cover-usable-mask-r3.png";
 const REGISTRATION_PATH =
-  "/career-world/capitals/ninjaone/city-v2/plates/d05-shore-a-registration-r3.json";
+  "/career-world/capitals/ninjaone/city-v2/plates/d05-anchor-cover-registration-r3.json";
 const PROVENANCE_PATH =
-  "/career-world/capitals/ninjaone/city-v2/plates/d05-shore-bright-r1.provenance.json";
+  "/career-world/capitals/ninjaone/city-v2/plates/d05-anchor-cover-r3.provenance.json";
 
 export interface NinjaOneCapitalD05ConceptAnchor {
   readonly id: string;

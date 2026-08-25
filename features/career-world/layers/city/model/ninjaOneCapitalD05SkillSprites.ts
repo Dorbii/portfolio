@@ -1,4 +1,5 @@
-import registration from "../../../../../public/career-world/capitals/ninjaone/city-v2/plates/d05-shore-a-registration-r3.json" with { type: "json" };
+import registration from "../../../../../public/career-world/capitals/ninjaone/city-v2/plates/d05-anchor-cover-registration-r1.json" with { type: "json" };
+import { NINJAONE_CAPITAL_D05_CONCEPT } from "./ninjaOneCapitalD05Concept.ts";
 import s01Provenance from "../../../../../public/career-world/capitals/ninjaone/city-v2/sprites/s01-sprite-r1.provenance.json" with { type: "json" };
 import s10Provenance from "../../../../../public/career-world/capitals/ninjaone/city-v2/sprites/s10-sprite-r1.provenance.json" with { type: "json" };
 import s11Provenance from "../../../../../public/career-world/capitals/ninjaone/city-v2/sprites/s11-sprite-r1.provenance.json" with { type: "json" };
@@ -81,6 +82,10 @@ export const NINJAONE_CAPITAL_D05_SKILL_SPRITES: readonly NinjaOneCapitalD05Skil
   defineSkillSprite(s18Provenance),
   defineSkillSprite(s11Provenance),
 ]);
+
+/** The sprite mount geometry and mounted D05 plate share one registration authority. */
+export const NINJAONE_CAPITAL_D05_SKILL_SPRITE_REGISTRATION_PATH =
+  NINJAONE_CAPITAL_D05_CONCEPT.registrationPath;
 
 export const NINJAONE_CAPITAL_D05_SKILL_SPRITE_PATHS = Object.freeze(
   NINJAONE_CAPITAL_D05_SKILL_SPRITES.map(({ path }) => path),

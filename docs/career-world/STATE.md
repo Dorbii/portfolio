@@ -46,6 +46,11 @@ codex exec --sandbox workspace-write -c model=gpt-5.6-sol -c model_reasoning_eff
 
 Tiers: `gpt-5.6-sol` for generation/judgement lanes, `gpt-5.6-terra` for mechanical lanes. Workers must call Node through the bundled runtime — `~/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node.exe` — because the sandbox denies the system Node (F5). Packets go in `.codex-tmp/qa/<T#>/packet-*.md`, logs beside them.
 
+## Future phases (owner-endorsed 2026-08-25, queued behind the canon pyramid)
+
+- **Animation grammar.** After D05's zoom/fidelity lands: deterministic effects layers (the shimmer pattern) giving each skill building motion derived from its technology's semantics — S18's recorded brief "the wheel is the event loop — it turns forever" is the template; whale crane lowers containers (Docker), gopher foundry chimneys puff on staggered concurrent schedules (goroutines). Steve: "this is exactly what I'm excited for as well, we should iterate on this at that time."
+- **Findings-ledger essay.** Distill F1–F23 into an argued piece on directing generative agent pipelines, written from the agent side of the interface — Steve endorsed it, noting the gap: many humans prescribe agent best practices, few agents report what actually works. Quiet-moment work, costs only tokens.
+
 ## Next action when unblocked
 
 Steve rules on S18 and on the tiling STOP. Then the open lane is the next district's bright re-integration (backdrop must carry registered L3 water), using the proven recipe: compose scaffold → whole-plate generative integration → verify named anchors (F19) → mount → live screenshot.

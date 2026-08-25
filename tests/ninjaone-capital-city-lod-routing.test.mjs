@@ -29,6 +29,7 @@ import {
 import {
   NINJAONE_CAPITAL_D05_SKILL_SPRITES,
   NINJAONE_CAPITAL_D05_SKILL_SPRITE_PATHS,
+  NINJAONE_CAPITAL_D05_SKILL_SPRITE_REGISTRATION_PATH,
 } from "../features/career-world/layers/city/model/ninjaOneCapitalD05SkillSprites.ts";
 import {
   NINJAONE_CAPITAL_CITY_R3_CONTEXT,
@@ -849,7 +850,111 @@ test("D05 concept promotion preserves registration, mask, provenance, and anchor
   assert.ok(maskValues.has(255));
   assert.equal(sha256(plateBytes), registration.plate.sha256);
   assert.equal(sha256(maskBytes), registration.mask.sha256);
-  assert.equal(provenance.sourceSha256, registration.plate.sha256);
+  assert.equal(provenance.promotedPlate.sha256, registration.plate.sha256);
+  const maskInputs = provenance.sourceHashes.maskInputs;
+  assert.deepEqual(
+    registration.mask.previousR2Mask,
+    maskInputs.previousR2Mask,
+    "the mounted r3 mask must retain its r2 composition source hash record",
+  );
+  assert.deepEqual(
+    registration.mask.waterCutShorelineMask,
+    maskInputs.waterCutShorelineMask,
+    "the mounted r3 mask must retain its registered-water source hash record",
+  );
+  const [r2Mask, waterCutMask] = await Promise.all([
+    readFile(new URL(`../${maskInputs.previousR2Mask.path}`, import.meta.url)),
+    readFile(new URL(`../${maskInputs.waterCutShorelineMask.path}`, import.meta.url)),
+  ]);
+  assert.equal(sha256(r2Mask), maskInputs.previousR2Mask.sha256);
+  assert.equal(sha256(waterCutMask), maskInputs.waterCutShorelineMask.sha256);
+  const [r2Raw, waterCutRaw] = await Promise.all([
+    sharp(r2Mask).greyscale().raw().toBuffer({ resolveWithObject: true }),
+    sharp(waterCutMask).greyscale().raw().toBuffer({ resolveWithObject: true }),
+  ]);
+  assert.deepEqual(
+    [r2Raw.info.width, r2Raw.info.height],
+    NINJAONE_CAPITAL_D05_CONCEPT.usableMask.dimensions,
+  );
+  const feather = registration.mask.wideInlandFeather;
+  assert.equal(feather.method, "r2-composition-wide-master-space-inland-feather");
+  assert.equal(feather.northEastMasterPixels, 48);
+  const registeredWaterBytes = await readFile(new URL(
+    `../${registration.mask.registeredL3Water.path}`,
+    import.meta.url,
+  ));
+  assert.equal(sha256(registeredWaterBytes), registration.mask.registeredL3Water.sha256);
+  const registeredWaterRaw = await sharp(registeredWaterBytes).greyscale().raw().toBuffer({ resolveWithObject: true });
+  const candidateWater = new Uint8Array(mask.info.width * mask.info.height);
+  const { offset: registrationOffset, scale: registrationScale } = registration.candidateToMasterArtboardComposed;
+  for (let y = 0; y < mask.info.height; y += 1) for (let x = 0; x < mask.info.width; x += 1) {
+    const masterX = registrationOffset[0] + (x + 0.5) * registrationScale[0];
+    const masterY = registrationOffset[1] + (y + 0.5) * registrationScale[1];
+    if (masterX >= 0 && masterX < registeredWaterRaw.info.width && masterY >= 0 && masterY < registeredWaterRaw.info.height) {
+      candidateWater[y * mask.info.width + x] = registeredWaterRaw.data[Math.floor(masterY) * registeredWaterRaw.info.width + Math.floor(masterX)] >= 128 ? 1 : 0;
+    }
+  }
+  const nearRegisteredWater = (x, y) => {
+    const radius = feather.registeredWaterShorelineExclusionRawPixels;
+    for (let dy = -radius; dy <= radius; dy += 1) for (let dx = -radius; dx <= radius; dx += 1) {
+      const waterX = x + dx;
+      const waterY = y + dy;
+      if (waterX >= 0 && waterX < mask.info.width && waterY >= 0 && waterY < mask.info.height
+        && candidateWater[waterY * mask.info.width + waterX]) return true;
+    }
+    return false;
+  };
+  let registeredWaterCoastBandPixels = 0;
+  let registeredWaterCoastBandMaxDelta = 0;
+  for (let y = 0; y < mask.info.height; y += 1) for (let x = 0; x < mask.info.width; x += 1) {
+    const pixel = y * mask.info.width + x;
+    const north = Math.min(1, Math.max(0,
+      (y + 0.5) * registrationScale[1] / feather.northEastMasterPixels));
+    const east = Math.min(1, Math.max(0,
+      (mask.info.width - 0.5 - x) * registrationScale[0] / feather.northEastMasterPixels));
+    const south = y <= feather.southOpaqueRawY ? 1 : Math.max(0, Math.min(1,
+      (feather.southTransparentRawY - (y + 0.5))
+        / (feather.southTransparentRawY - feather.southOpaqueRawY)));
+    const wideInlandValue = Math.round(255 * north * east * south);
+    const retainedR2CoastPixel = nearRegisteredWater(x, y);
+    const expected = retainedR2CoastPixel
+      ? r2Raw.data[pixel]
+      : Math.min(waterCutRaw.data[pixel], wideInlandValue);
+    assert.equal(mask.data[pixel], expected);
+    if (!retainedR2CoastPixel || r2Raw.data[pixel] === 0 || r2Raw.data[pixel] === 255) continue;
+    registeredWaterCoastBandPixels += 1;
+    registeredWaterCoastBandMaxDelta = Math.max(
+      registeredWaterCoastBandMaxDelta,
+      Math.abs(mask.data[pixel] - r2Raw.data[pixel]),
+    );
+  }
+  assert.equal(provenance.maskDerivation.method, "r2-registered-water-composition-plus-wide-inland-feather");
+  assert.equal(registeredWaterCoastBandPixels, provenance.maskDerivation.metrics.registeredWaterCoastBand.pixels);
+  assert.equal(registeredWaterCoastBandMaxDelta, 0);
+  assert.equal(provenance.maskDerivation.metrics.registeredWaterCoastBand.maxAlphaDeltaVsR2, 0);
+  const hardEdge = provenance.maskDerivation.metrics.hardEdge;
+  assert.equal(hardEdge.minimumStraightRunMasterPixels, 40);
+  assert.equal(hardEdge.minimumDropDistanceMasterPixels, 24);
+  assert.equal(hardEdge.rapidDropSamples, 0);
+  assert.ok(hardEdge.directions.every((direction) => direction.maximumCheckedDropDistanceMasterPixels < 24));
+  assert.ok(hardEdge.directions.every((direction) => direction.longestStraightMasterRun > 40));
+  const candidateBytes = await readFile(new URL(
+    `../${provenance.sourceHashes.candidateBRaw.path}`,
+    import.meta.url,
+  ));
+  assert.equal(
+    sha256(candidateBytes),
+    provenance.sourceHashes.candidateBRaw.sha256,
+    "the promoted authority must retain its accepted quarantine source chain",
+  );
+  assert.equal(provenance.sourceHashes.candidateBRaw.sha256, registration.plate.sha256);
+  for (const [id, source] of Object.entries(provenance.sourceHashes.despilledSprites)) {
+    const spriteBytes = await readFile(new URL(`../${source.path}`, import.meta.url));
+    assert.equal(sha256(spriteBytes), source.sha256, `${id} source hash must retain the anchor-cover input chain`);
+  }
+  assert.ok(provenance.t4dR3Prompts.path.endsWith("prompts.json"));
+  assert.ok(provenance.ownerAcceptanceNote.length > 0);
+  assert.ok(provenance.coastRefinementDebt.length > 0);
   assert.deepEqual(
     NINJAONE_CAPITAL_D05_CONCEPT.masterBounds,
     registration.destinationMasterBounds,
@@ -873,8 +978,18 @@ test("D05 concept promotion preserves registration, mask, provenance, and anchor
   }
 });
 
-test("D05 skill-sprite promotion preserves five-sprite provenance, registration mounts, preload paths, and sort", async () => {
-  const extendedD05Bounds = [-270, 413, 691, 1300];
+test("D05 skill sprites share the mounted plate registration and preserve provenance, bounds, preload paths, and sort", async () => {
+  assert.equal(
+    NINJAONE_CAPITAL_D05_SKILL_SPRITE_REGISTRATION_PATH,
+    NINJAONE_CAPITAL_D05_CONCEPT.registrationPath,
+    "sprite mount geometry must use the registration that mounts the D05 plate",
+  );
+  const registration = JSON.parse(await readFile(new URL(
+    `../public${NINJAONE_CAPITAL_D05_SKILL_SPRITE_REGISTRATION_PATH}`,
+    import.meta.url,
+  ), "utf8"));
+  const extendedD05Bounds = registration.destinationMasterBounds;
+  const anchorsById = new Map(registration.anchors.map((anchor) => [anchor.id, anchor]));
   const mountedIds = NINJAONE_CAPITAL_D05_SKILL_SPRITES.map(({ id }) => id);
 
   assert.deepEqual(mountedIds, ["S15", "S10", "S01", "S18", "S11"]);
@@ -900,6 +1015,8 @@ test("D05 skill-sprite promotion preserves five-sprite provenance, registration 
   assert.ok(mountedIds.includes("S18"));
 
   for (const sprite of NINJAONE_CAPITAL_D05_SKILL_SPRITES) {
+    const anchor = anchorsById.get(sprite.id);
+    assert.ok(anchor, `${sprite.id} must have a mounted-plate registration anchor`);
     const [left, top, right, bottom] = extendedD05Bounds;
     const [mountLeft, mountTop, mountRight, mountBottom] = [
       sprite.mountRect.x,
@@ -912,12 +1029,25 @@ test("D05 skill-sprite promotion preserves five-sprite provenance, registration 
       import.meta.url,
     ), "utf8")).toString("utf8"));
     const spriteBytes = await readFile(new URL(`../public${sprite.path}`, import.meta.url));
+    const footprintBbox = anchor.masterArtboardSpace.footprintBbox;
+    const subjectWidth = sprite.subjectBbox[2] - sprite.subjectBbox[0];
+    const subjectHeight = sprite.subjectBbox[3] - sprite.subjectBbox[1];
+    const footprintWidth = footprintBbox[2] - footprintBbox[0];
+    const scale = footprintWidth / subjectWidth;
 
     assert.equal(
       createHash("sha256").update(spriteBytes).digest("hex"),
       provenance.output.sha256,
       `${sprite.id} promoted PNG must match its provenance`,
     );
+    assert.deepEqual(sprite.masterFootprintBbox, footprintBbox);
+    assert.deepEqual(sprite.mountRect, {
+      x: footprintBbox[0],
+      y: footprintBbox[3] - subjectHeight * scale,
+      width: footprintWidth,
+      height: subjectHeight * scale,
+    }, `${sprite.id} mount rect must derive from the mounted-plate footprint`);
+    assert.equal(sprite.zBaseline, footprintBbox[3]);
     assert.ok(mountLeft >= left && mountTop >= top && mountRight <= right && mountBottom <= bottom,
       `${sprite.id} subject mount rect must stay within extended D05 bounds`);
   }
