@@ -27,6 +27,7 @@ import {
   resolveNinjaOneCapitalDetailState,
   type NinjaOneCapitalCityProofViewId,
 } from "../layers/city";
+import { NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN } from "../layers/city/model/ninjaOneCapitalD05Concept";
 import {
   NinjaOneInlandHabitatCanvas,
   NinjaOneInlandWaterCanvas,
@@ -106,12 +107,12 @@ const MAX_WHEEL_ZOOM_SCALE = 1.28;
 const MIN_WHEEL_ZOOM_SCALE = 1 / MAX_WHEEL_ZOOM_SCALE;
 // NinjaOne follows the world camera floor. Site and close detail now arrive at
 // local spans instead of using an early zoom clamp as a substitute for LoD.
-// Owner-approved art-resolving cap (2026-08-24): the interactive wheel stops at
-// ~3x plate magnification instead of the mathematical 0.04 floor (~4.2x), so
-// the free camera never displays detail no source image resolves. Proof/test
-// cameras still use the unclamped camera floor.
+// Owner-approved canon-resolving cap (2026-08-25): the interactive wheel stops
+// at the D05 canon's 1:1 resolving power (2.72 px/master; about 2x plate
+// magnification), so the free camera never displays detail no canon source
+// resolves. Proof/test cameras still use the unclamped camera floor.
 const INTERACTIVE_ART_RESOLVING_MINIMUM_SPAN = Math.max(
-  0.055,
+  NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN,
   DETAIL_POLICY.cameraMinimumSpan,
 );
 const NINJAONE_CAPITAL_INTERACTIVE_MINIMUM_SPAN =

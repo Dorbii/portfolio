@@ -18,7 +18,7 @@ import {
 } from "../model/ninjaOneCapitalCityFoundationR3";
 import {
   NINJAONE_CAPITAL_D05_CONCEPT,
-  ninjaOneCapitalD05ConceptTier,
+  ninjaOneCapitalD05ConceptTierForSpan,
 } from "../model/ninjaOneCapitalD05Concept";
 import {
   NINJAONE_CAPITAL_CITY_DETAIL_POLICY,
@@ -170,7 +170,7 @@ export function NinjaOneCapitalCityR3({
 }) {
   const [width, height] = NINJAONE_CAPITAL_CITY_R3_ARTBOARD;
   if (tier === "world" || tier === "territory") return null;
-  const d05Tier = ninjaOneCapitalD05ConceptTier(tier);
+  const d05Tier = ninjaOneCapitalD05ConceptTierForSpan(Math.max(...camera.span));
   const d05Transform = `translate(${NINJAONE_CAPITAL_D05_CONCEPT.transform.offset.join(" ")}) scale(${NINJAONE_CAPITAL_D05_CONCEPT.transform.scale.join(" ")})`;
   // The shore plate's registered bounds overhang the city artboard (west coast,
   // south nature band), so the D05 mask regions must span the union of both.

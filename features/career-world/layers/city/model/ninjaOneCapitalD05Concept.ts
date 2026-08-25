@@ -41,10 +41,33 @@ const TIERS = Object.freeze({
   }),
 });
 
+// The owner-approved interactive floor presents the full canon at 1:1. The
+// capital derivative must never be enlarged past its native width; the
+// intermediate derivative occupies the remaining approach to that floor.
+export const NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN = 0.0825;
+
+export const NINJAONE_CAPITAL_D05_CONCEPT_TIER_MAXIMUM_SPANS = Object.freeze({
+  capital:
+    NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN
+    * TIERS.close.dimensions[0] / TIERS.capital.dimensions[0],
+  close: NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN,
+  site: NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN,
+});
+
 export function ninjaOneCapitalD05ConceptTier(
   tier: NinjaOneCapitalD05ConceptTier,
 ) {
   return TIERS[tier];
+}
+
+export function ninjaOneCapitalD05ConceptTierForSpan(span: number) {
+  if (span <= NINJAONE_CAPITAL_D05_CONCEPT_TIER_MAXIMUM_SPANS.close) {
+    return TIERS.close;
+  }
+  if (span <= NINJAONE_CAPITAL_D05_CONCEPT_TIER_MAXIMUM_SPANS.capital) {
+    return TIERS.site;
+  }
+  return TIERS.capital;
 }
 
 export const NINJAONE_CAPITAL_D05_CONCEPT = Object.freeze({

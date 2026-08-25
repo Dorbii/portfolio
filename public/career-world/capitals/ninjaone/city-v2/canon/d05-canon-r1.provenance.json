@@ -67,27 +67,32 @@
   },
   "foliageShimmer": {
     "path": "public/career-world/capitals/ninjaone/city-v2/canon/d05-canon-foliage-shimmer-mask-r2.png",
-    "sha256": "aaf149b37caba20da41ade4af77bb649d0b7fd992126a3f88faa661533036581",
+    "sha256": "7c6f7bc6263085763c42ae68280e86b87dbd8ad4a45043c77b7f9aa672c8081f",
     "sourceTier": "capital",
     "recipe": ".codex-tmp/quarantine/city-v2/T9d-shimmer-tighten/build-d05-canon-foliage-shimmer-mask-r2.mjs",
     "t6bParameterDeltas": {
       "foliageTone": {
-        "hueDegrees": { "from": [36, 125], "to": [52, 96] },
-        "saturationMinimum": { "from": 0.2, "to": 0.36 },
+        "hueDegrees": { "from": [36, 125], "to": [56, 92] },
+        "saturationMinimum": { "from": 0.2, "to": 0.4 },
         "valueRange": [0.055, 0.39]
       },
       "componentMinimumPixels": { "from": 10, "to": 40 },
       "architectureStandoffRawPixels": 7,
-      "unchangedSafety": "water 4px, meadow 4px, architecture/roof/road 7px; usable-mask r3 proportional clipping; 1px expansion and sigma 1.1 feather"
+      "unchangedSafety": "water 4px, meadow 4px, architecture/roof/road 7px; usable-mask r3 proportional clipping; 1px expansion and sigma 1.1 feather",
+      "t10bMasonrySpecificity": {
+        "hueDegrees": { "from": [52, 96], "to": [56, 92] },
+        "saturationMinimum": { "from": 0.36, "to": 0.4 },
+        "intent": "exclude mossy masonry without changing the safety buffers"
+      }
     },
     "resolves": {
-      "taskId": "T9c-canon-mount",
-      "flag": "T6b recipe on canon capital tier over-collected at 22.6375% non-zero coverage against the 5-12% sanity band"
+      "taskId": "T10b-runtime-polish",
+      "flag": "owner-reported mossy masonry shimmer; tightened the T9d foliage predicate while preserving the 8-12% coverage band"
     },
-    "coveragePercent": 11.706,
-    "opaqueCoveragePercent": 5.9422,
-    "finalComponents": 463,
-    "regionCount": 1
+    "coveragePercent": 9.0894,
+    "opaqueCoveragePercent": 4.5407,
+    "finalComponents": 398,
+    "regionCount": 3
   },
   "ownerSignOffVerbatim": "the seams are pretty flawless so if thats the case mount it."
 }

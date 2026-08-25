@@ -23,8 +23,11 @@ import {
   NINJAONE_CAPITAL_CITY_LAYER_NODES,
 } from "../features/career-world/layers/city/model/ninjaOneCapitalCityLayer.ts";
 import {
+  NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN,
   NINJAONE_CAPITAL_D05_CONCEPT,
+  NINJAONE_CAPITAL_D05_CONCEPT_TIER_MAXIMUM_SPANS,
   ninjaOneCapitalD05ConceptTier,
+  ninjaOneCapitalD05ConceptTierForSpan,
 } from "../features/career-world/layers/city/model/ninjaOneCapitalD05Concept.ts";
 import {
   NINJAONE_CAPITAL_CITY_R3_CONTEXT,
@@ -866,6 +869,27 @@ test("D05 canon pyramid serves capital, site, and close through one registered g
   assert.equal(sha256(shimmerMaskBytes), provenance.foliageShimmer.sha256);
 });
 
+test("D05 canon serving preserves native source resolution at the owner-approved floor", () => {
+  const floorSpan = NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN;
+  const capitalMaximumSpan = NINJAONE_CAPITAL_D05_CONCEPT_TIER_MAXIMUM_SPANS.capital;
+  const capitalNativeWidth = NINJAONE_CAPITAL_D05_CONCEPT.tiers.capital.dimensions[0];
+  const fullCanonNativeWidth = NINJAONE_CAPITAL_D05_CONCEPT.tiers.close.dimensions[0];
+
+  assert.equal(ninjaOneCapitalD05ConceptTierForSpan(floorSpan), NINJAONE_CAPITAL_D05_CONCEPT.tiers.close);
+  assert.equal(
+    ninjaOneCapitalD05ConceptTierForSpan((floorSpan + capitalMaximumSpan) * 0.5),
+    NINJAONE_CAPITAL_D05_CONCEPT.tiers.site,
+  );
+  assert.equal(
+    ninjaOneCapitalD05ConceptTierForSpan(capitalMaximumSpan * (1 + 1e-9)),
+    NINJAONE_CAPITAL_D05_CONCEPT.tiers.capital,
+  );
+  assert.ok(
+    capitalMaximumSpan * capitalNativeWidth >= floorSpan * fullCanonNativeWidth,
+    "capital derivative must not be stretched beyond its native width",
+  );
+});
+
 test("D05 canon shimmer keeps the T6b single-channel derived-mask contract", async () => {
   const [bytes, provenanceBytes] = await Promise.all([
     readFile(new URL(
@@ -883,8 +907,12 @@ test("D05 canon shimmer keeps the T6b single-channel derived-mask contract", asy
   assert.ok(data.some((value) => value === 255));
   assert.ok(coveragePercent >= 8 && coveragePercent <= 12, `shimmer coverage ${coveragePercent}% must remain in the T6b sanity band`);
   assert.equal(coveragePercent, provenance.foliageShimmer.coveragePercent);
-  assert.equal(provenance.foliageShimmer.resolves.taskId, "T9c-canon-mount");
+  assert.equal(provenance.foliageShimmer.resolves.taskId, "T10b-runtime-polish");
   assert.equal(provenance.foliageShimmer.t6bParameterDeltas.architectureStandoffRawPixels, 7);
+  assert.deepEqual(
+    provenance.foliageShimmer.t6bParameterDeltas.t10bMasonrySpecificity.hueDegrees,
+    { from: [52, 96], to: [56, 92] },
+  );
 });
 
 test("city node data preserves manifest ids and explicit role classifications", async () => {
