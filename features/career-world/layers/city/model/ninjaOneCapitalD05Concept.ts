@@ -1,16 +1,16 @@
-import registration from "../../../../../public/career-world/capitals/ninjaone/city-v2/plates/d05-anchor-cover-registration-r3.json" with { type: "json" };
+import registration from "../../../../../public/career-world/capitals/ninjaone/city-v2/plates/d05-anchor-cover-registration-r4.json" with { type: "json" };
 import type { Pair } from "../../../shared/camera";
 
 const PLATE_PATH = "/career-world/capitals/ninjaone/city-v2/plates/d05-anchor-cover-r1.png";
 const CANON_ROOT = "/career-world/capitals/ninjaone/city-v2/canon";
 const USABLE_MASK_PATH =
-  "/career-world/capitals/ninjaone/city-v2/plates/d05-anchor-cover-usable-mask-r3.png";
+  "/career-world/capitals/ninjaone/city-v2/plates/d05-anchor-cover-usable-mask-r4.png";
 const REGISTRATION_PATH =
-  "/career-world/capitals/ninjaone/city-v2/plates/d05-anchor-cover-registration-r3.json";
+  "/career-world/capitals/ninjaone/city-v2/plates/d05-anchor-cover-registration-r4.json";
 const PROVENANCE_PATH =
-  `${CANON_ROOT}/d05-canon-r1.provenance.json`;
+  `${CANON_ROOT}/d05-canon-r4.provenance.json`;
 const FOLIAGE_SHIMMER_MASK_PATH =
-  `${CANON_ROOT}/d05-canon-foliage-shimmer-mask-r2.png`;
+  `${CANON_ROOT}/d05-canon-foliage-shimmer-mask-r4.png`;
 
 export type NinjaOneCapitalD05ConceptTier = "capital" | "site" | "close";
 
@@ -23,21 +23,21 @@ export interface NinjaOneCapitalD05ConceptAnchor {
 const TIERS = Object.freeze({
   capital: Object.freeze({
     id: "capital",
-    path: `${CANON_ROOT}/d05-canon-capital-r1.png`,
+    path: `${CANON_ROOT}/d05-canon-capital-r4.png`,
     dimensions: Object.freeze([1305, 1205] as Pair),
-    sha256: "84ebf439c506a694436a5dc3a3d02f63bb513ca631be3ea0dd4c41390db7b81d",
+    sha256: "41960d120f1d4f8a3e6991849a683f917dc3866125a8c68751694e54a3e4820f",
   }),
   site: Object.freeze({
     id: "site",
-    path: `${CANON_ROOT}/d05-canon-intermediate-r1.png`,
+    path: `${CANON_ROOT}/d05-canon-intermediate-r4.png`,
     dimensions: Object.freeze([2610, 2410] as Pair),
-    sha256: "199df38d01262d2d52ab5502d3026efcbf1424df2ba708e385860fd3f58b9233",
+    sha256: "420bcd434d6092be79fbbb8ccfcfcc67a52ad5a3e313714e606573de0353bdcb",
   }),
   close: Object.freeze({
     id: "close",
-    path: `${CANON_ROOT}/d05-canon-r1.png`,
-    dimensions: Object.freeze([2619, 2417] as Pair),
-    sha256: "d5f43e19e0fdd0cd4e22a6822d4f2f4f685de3ea0bc9a2d0c3ece2153d57cab2",
+    path: `${CANON_ROOT}/d05-canon-r4.png`,
+    dimensions: Object.freeze([2621, 2419] as Pair),
+    sha256: "84df8cf38eea9179a5f5d35a049176584087119e260c84b087317393d1ec75ea",
   }),
 });
 

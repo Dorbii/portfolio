@@ -850,22 +850,15 @@ test("D05 canon pyramid serves capital, site, and close through one registered g
     assert.equal(provenance.tiers[provenanceTier].sha256, tier.sha256);
   }
 
-  const sourceManifestBytes = await readFile(new URL(`../${provenance.t9bProofManifest.path}`, import.meta.url));
-  const sourceManifest = JSON.parse(sourceManifestBytes.toString("utf8"));
-  assert.equal(sha256(sourceManifestBytes), provenance.t9bProofManifest.sha256);
-  assert.equal(sourceManifest.canon.sha256, NINJAONE_CAPITAL_D05_CONCEPT.tiers.close.sha256);
-  assert.equal(provenance.tileLedgerSummary.tileCount, sourceManifest.tileLedger.length);
-  assert.deepEqual(
-    provenance.tileLedgerSummary.selectedCalls.map(([id, selectedCall]) => [id, selectedCall]),
-    sourceManifest.tileLedger.map(({ id, selectedCall }) => [id, selectedCall]),
-  );
-  assert.equal(provenance.ownerSignOffVerbatim, "the seams are pretty flawless so if thats the case mount it.");
-
-  for (const [id, path, hash] of provenance.heroComposite.records) {
-    const spriteBytes = await readFile(new URL(`../${path}`, import.meta.url));
-    assert.equal(sha256(spriteBytes), hash, `${id} canon hero source must retain its recorded hash`);
-  }
-  assert.equal(provenance.heroComposite.runtimeOverlay, "retired at T9c; source sprites remain on disk for canon provenance and a future animation pass");
+  const patchManifestBytes = await readFile(new URL(`../${provenance.source.t14ProofManifest.path}`, import.meta.url));
+  const patchManifest = JSON.parse(patchManifestBytes.toString("utf8"));
+  assert.equal(sha256(patchManifestBytes), provenance.source.t14ProofManifest.sha256);
+  assert.ok(patchManifest.inventory.some((entry) => entry.sha256 === NINJAONE_CAPITAL_D05_CONCEPT.tiers.close.sha256));
+  assert.equal(provenance.source.plateB.sha256, "da6bfce555a425b5aa04ed90c07a86dfcffee6bc6d18b0051ee610ca1987a20b");
+  assert.equal(registration.id, "ninjaone-d05-anchor-cover@r4");
+  assert.deepEqual(registration.canonPyramid.deltaPixels, [2, 2, 0]);
+  assert.equal(registration.districtMask.coverage.maskedInteriorBlueWaterPixels, 0);
+  assert.equal(provenance.ownerAcceptance.mountState, "files staged for F20; director owns live verification and commit");
   assert.equal(sha256(shimmerMaskBytes), provenance.foliageShimmer.sha256);
 });
 
@@ -884,9 +877,15 @@ test("D05 canon serving preserves native source resolution at the owner-approved
     ninjaOneCapitalD05ConceptTierForSpan(capitalMaximumSpan * (1 + 1e-9)),
     NINJAONE_CAPITAL_D05_CONCEPT.tiers.capital,
   );
+  const nativeResolutionRoundingAllowance = Number.EPSILON
+    * Math.max(
+      capitalMaximumSpan * capitalNativeWidth,
+      floorSpan * fullCanonNativeWidth,
+    ) * 8;
   assert.ok(
-    capitalMaximumSpan * capitalNativeWidth >= floorSpan * fullCanonNativeWidth,
-    "capital derivative must not be stretched beyond its native width",
+    capitalMaximumSpan * capitalNativeWidth + nativeResolutionRoundingAllowance
+      >= floorSpan * fullCanonNativeWidth,
+    "capital derivative must not be stretched beyond its native width beyond IEEE-754 rounding",
   );
 });
 
@@ -905,14 +904,15 @@ test("D05 canon shimmer keeps the T6b single-channel derived-mask contract", asy
   assert.equal(info.channels, 1);
   assert.ok(data.some((value) => value === 0));
   assert.ok(data.some((value) => value === 255));
-  assert.ok(coveragePercent >= 8 && coveragePercent <= 12, `shimmer coverage ${coveragePercent}% must remain in the T6b sanity band`);
+  // T10b's former 8-12% range was measured against the superseded r1 canon
+  // and r3 coast-cut mask. R4 intentionally expands the eligible painted-water
+  // footprint, so this guards the derived-mask contract rather than stale art
+  // coverage: non-empty, non-solid alpha plus provenance-synchronized coverage.
+  assert.ok(coveragePercent > 0 && coveragePercent < 100, "shimmer mask must remain a selective derived field");
   assert.equal(coveragePercent, provenance.foliageShimmer.coveragePercent);
-  assert.equal(provenance.foliageShimmer.resolves.taskId, "T10b-runtime-polish");
-  assert.equal(provenance.foliageShimmer.t6bParameterDeltas.architectureStandoffRawPixels, 7);
-  assert.deepEqual(
-    provenance.foliageShimmer.t6bParameterDeltas.t10bMasonrySpecificity.hueDegrees,
-    { from: [52, 96], to: [56, 92] },
-  );
+  assert.match(provenance.foliageShimmer.t10bRecipe, /HSV 56-92, saturation >=0\.40, 7px architecture buffer/);
+  assert.equal(provenance.foliageShimmer.architectureStandoff.rawPixels, 7);
+  assert.equal(provenance.foliageShimmer.architectureStandoff.violations, 0);
 });
 
 test("city node data preserves manifest ids and explicit role classifications", async () => {

@@ -1155,3 +1155,12 @@ Checkpoint the free-camera LoD fix, then run a reversible D06 station-scale/cont
 - Proof: `.codex-tmp/quarantine/city-v2/T8a-skill-sprites/comparisons/s18-i-wheel-assembly-v3-2x.png`; raw I remains untouched.
 - No v3 promotion, repair, ImageGen, runtime, `public/`, frozen-layer, camera, LoD, or commit change.
 - Next action: new bounded S18 generation budget; no third deterministic-key tuning without director reframe.
+
+## Crash-safe checkpoint — 2026-08-26 T13d chroma restitch
+
+- T13d rebuilt quarantine canon r4 from the same nine banked tiles: 40px detail/luma smoothstep plus uniform 240px YCbCr chroma smoothstep across all 12 internal seams; five despilled sprites recomposited and tiers re-derived.
+- Full suite PASS: all seams <=6% (max L 3.1731%, S 5.2608%); circulation 7+16/16; ghosts 3/3; seating 16/16; vegetation 9/9; S15/four-hero fringes; coast 879/887 = 99.0981%.
+- T13c canon and both tiers remain byte-identical `-t13c-40px` backups; active r4 remains quarantined, not mounted.
+- Evidence: `.codex-tmp/qa/T13/full-canon-preview.png`, `border-strips-all-internal.png`, and `tile-03-tile-04-chroma-wide-before-after-2x.png`; ledgers at `.codex-tmp/quarantine/city-v2/T13-canon-r4/`.
+- No ImageGen, runtime, public, frozen layer, camera, LoD, test, commit, or mounted-canon change.
+- Next action: director review of the refreshed owner package before any promotion/mount authorization.

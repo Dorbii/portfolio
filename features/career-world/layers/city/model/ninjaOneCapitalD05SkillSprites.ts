@@ -1,4 +1,4 @@
-import registration from "../../../../../public/career-world/capitals/ninjaone/city-v2/plates/d05-anchor-cover-registration-r1.json" with { type: "json" };
+import registration from "../../../../../public/career-world/capitals/ninjaone/city-v2/plates/d05-anchor-cover-registration-r4.json" with { type: "json" };
 import { NINJAONE_CAPITAL_D05_CONCEPT } from "./ninjaOneCapitalD05Concept.ts";
 import s01Provenance from "../../../../../public/career-world/capitals/ninjaone/city-v2/sprites/s01-sprite-r1.provenance.json" with { type: "json" };
 import s10Provenance from "../../../../../public/career-world/capitals/ninjaone/city-v2/sprites/s10-sprite-r1.provenance.json" with { type: "json" };

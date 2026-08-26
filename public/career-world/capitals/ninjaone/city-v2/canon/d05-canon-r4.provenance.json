@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 2,
+  "taskId": "T16-canon-r4-mount",
+  "status": "owner-authorized-files-staged-for-F20",
+  "lineage": "T12 naturalized plate B -> T13/T13b/T13c/T13d canon r4 -> T14 owner-accepted patches",
+  "source": {
+    "plateB": {
+      "path": ".codex-tmp/quarantine/city-v2/T12-naturalize-r2/d05-base-naturalized-r2.png",
+      "sha256": "da6bfce555a425b5aa04ed90c07a86dfcffee6bc6d18b0051ee610ca1987a20b",
+      "dimensions": [
+        1305,
+        1205,
+        3
+      ]
+    },
+    "t14ProofManifest": {
+      "path": ".codex-tmp/quarantine/city-v2/T14-canon-r4-patches/proof-manifest.json",
+      "sha256": "9368b86f9a2ab39c8d632085fb31f637933169400252ad4d25cf0b60b24fa0a1"
+    },
+    "t14PatchLedger": {
+      "path": ".codex-tmp/quarantine/city-v2/T14-canon-r4-patches/patch-ledger.json",
+      "sha256": "5c8cf2a435b4e8c754b39230a1f165c5682e4698f08fa3aa7f1b6e4933f407f1"
+    }
+  },
+  "registration": {
+    "path": "public/career-world/capitals/ninjaone/city-v2/plates/d05-anchor-cover-registration-r4.json",
+    "sha256": "d1710e4deb7ef8244dc84a522ae20f32d9515c4ff3018fe4a741b4397087865a",
+    "destinationMasterBounds": [
+      -270,
+      413,
+      691,
+      1300
+    ],
+    "priorR3Sha256": "74913d608dd4a80a0deca82486d1e33d2e5c118ea2b1d4076012cff43fa5f8b6"
+  },
+  "tiers": {
+    "capital": {
+      "path": "public/career-world/capitals/ninjaone/city-v2/canon/d05-canon-capital-r4.png",
+      "dimensions": [
+        1305,
+        1205,
+        3
+      ],
+      "sha256": "41960d120f1d4f8a3e6991849a683f917dc3866125a8c68751694e54a3e4820f",
+      "derivation": "T14 deterministic downsample from patched r4 canon"
+    },
+    "site": {
+      "path": "public/career-world/capitals/ninjaone/city-v2/canon/d05-canon-intermediate-r4.png",
+      "dimensions": [
+        2610,
+        2410,
+        3
+      ],
+      "sha256": "420bcd434d6092be79fbbb8ccfcfcc67a52ad5a3e313714e606573de0353bdcb",
+      "derivation": "T14 deterministic downsample from patched r4 canon"
+    },
+    "close": {
+      "path": "public/career-world/capitals/ninjaone/city-v2/canon/d05-canon-r4.png",
+      "dimensions": [
+        2621,
+        2419,
+        3
+      ],
+      "sha256": "84df8cf38eea9179a5f5d35a049176584087119e260c84b087317393d1ec75ea",
+      "derivation": "T14 patched canonical maximum-resolution artwork"
+    }
+  },
+  "foliageShimmer": {
+    "path": "public/career-world/capitals/ninjaone/city-v2/canon/d05-canon-foliage-shimmer-mask-r4.png",
+    "sha256": "5150255f73fad8eab22b42bc113b2db4beddcb7d77a2add2ec1d368e900e41fe",
+    "sourceTier": "capital",
+    "sourceTierSha256": "41960d120f1d4f8a3e6991849a683f917dc3866125a8c68751694e54a3e4820f",
+    "recipe": ".codex-tmp/qa/T16/build-d05-canon-foliage-shimmer-mask-r4.mjs",
+    "t10bRecipe": "HSV 56-92, saturation >=0.40, 7px architecture buffer; source algorithm copied without threshold changes",
+    "coveragePercent": 21.7526,
+    "opaqueCoveragePercent": 10.4634,
+    "finalComponents": 861,
+    "regionCount": 1,
+    "architectureStandoff": {
+      "rawPixels": 7,
+      "bufferedPixels": 562236,
+      "violations": 0
+    }
+  },
+  "ownerAcceptance": {
+    "citations": [
+      "QA-REVIEW.md: Owner (canon r4 acceptance review, round 2), 2026-08-26: both T14 patches accepted; canon r4 art-complete.",
+      "QA-REVIEW.md: owner mount authorization, 2026-08-26: yeah go for the mount.",
+      "STATE.md: owner-amended ocean-inclusive mask scope, 2026-08-26."
+    ],
+    "mountState": "files staged for F20; director owns live verification and commit"
+  }
+}
