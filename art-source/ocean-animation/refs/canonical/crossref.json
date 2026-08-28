@@ -1,0 +1,65 @@
+[
+  {
+    "id": "S",
+    "file": "refs/canonical/S.png",
+    "pack_a_label": "(not in pack A)",
+    "pack_b_label": "00_selected_source",
+    "agree": false
+  },
+  {
+    "id": "C1",
+    "file": "refs/canonical/C1.png",
+    "pack_a_label": "windy_open_ocean_swell_moderate_whitecaps",
+    "pack_b_label": "calm_long_rolling_swell",
+    "agree": false
+  },
+  {
+    "id": "C2",
+    "file": "refs/canonical/C2.png",
+    "pack_a_label": "windy_rolling_surf_turquoise_breakers",
+    "pack_b_label": "windy_churning_whitewater",
+    "agree": true
+  },
+  {
+    "id": "C3",
+    "file": "refs/canonical/C3.png",
+    "pack_a_label": "heavy_cliff_impact_localized_spray",
+    "pack_b_label": "heavy_localized_cliff_impacts",
+    "agree": true
+  },
+  {
+    "id": "C4",
+    "file": "refs/canonical/C4.png",
+    "pack_a_label": "receding_whitewater_and_backwash",
+    "pack_b_label": "foam_backwash_and_dissipation",
+    "agree": false
+  },
+  {
+    "id": "C5",
+    "file": "refs/canonical/C5.png",
+    "pack_a_label": "long_period_parallel_swell_train",
+    "pack_b_label": "windy_organized_wave_trains",
+    "agree": false
+  },
+  {
+    "id": "C6",
+    "file": "refs/canonical/C6.png",
+    "pack_a_label": "bright_turquoise_shore_break_and_foam",
+    "pack_b_label": "windy_approaching_breakers",
+    "agree": false
+  },
+  {
+    "id": "C7",
+    "file": "refs/canonical/C7.png",
+    "pack_a_label": "extreme_storm_surf_and_major_spray",
+    "pack_b_label": "heavy_peak_storm_surf",
+    "agree": false
+  },
+  {
+    "id": "C8",
+    "file": "refs/canonical/C8.png",
+    "pack_a_label": "calm_recovery_and_foam_dissipation",
+    "pack_b_label": "calm_gentle_shore_wash",
+    "agree": true
+  }
+]

@@ -1,0 +1,41 @@
+# Generated. Everything here rebuilds from src/ + refs/canonical/:
+#
+#   python reproduce.py             masks, wave fields, clips, sheets, validation
+#   python closeup.py build|render  the 2.4x magnified study
+#   python newscene.py init|render  an arbitrary new plate
+#
+# Kept out of git because the renders are ~100 MB each and the solver cache runs
+# to hundreds of MB, none of which is source.
+#
+# NOTE: '#' only starts a comment at the START of a line. A trailing comment is
+# part of the pattern, which silently matches nothing.
+
+# eikonal + precompute cache, keyed on wave families
+work/
+
+# derived from refs/canonical/S.png by build_plates.py
+masks/
+
+# the delivered mp4 / webp / gif
+outputs/
+
+# per-iteration proof renders
+previews/
+
+# generated sheets
+contactsheets/
+
+# study workspaces
+closeup/
+scenes/
+
+*.zip
+
+# Diagnostics: the JSON is small and several scripts read it back, so it stays;
+# the image and video dumps do not.
+diagnostics/**
+!diagnostics/
+!diagnostics/*.json
+
+__pycache__/
+*.py[cod]

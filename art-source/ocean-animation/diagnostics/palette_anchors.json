@@ -1,0 +1,101 @@
+{
+  "S": {
+    "abyss_p02": "#09273f",
+    "deep_p15": "#0f3854",
+    "mid_p50": "#205372",
+    "bright_p90": "#7aa4b8",
+    "most_turquoise_p99": "#308597",
+    "turquoise_p95": "#2a778b",
+    "foam_dense_p90": "#f8f9f8",
+    "foam_mean": "#c8d6dc",
+    "foam_thin_p10": "#97b0bf"
+  },
+  "C1": {
+    "abyss_p02": "#022239",
+    "deep_p15": "#07314c",
+    "mid_p50": "#144763",
+    "bright_p90": "#5c8aa1",
+    "most_turquoise_p99": "#196e7b",
+    "turquoise_p95": "#196676",
+    "foam_dense_p90": "#f8f9f6",
+    "foam_mean": "#c2d0d6",
+    "foam_thin_p10": "#94adbc"
+  },
+  "C2": {
+    "abyss_p02": "#051a2a",
+    "deep_p15": "#0c2d40",
+    "mid_p50": "#245066",
+    "bright_p90": "#7b9db1",
+    "most_turquoise_p99": "#2a767e",
+    "turquoise_p95": "#2a6e79",
+    "foam_dense_p90": "#fafaf9",
+    "foam_mean": "#ccd5dc",
+    "foam_thin_p10": "#98adbe"
+  },
+  "C3": {
+    "abyss_p02": "#041523",
+    "deep_p15": "#0c2538",
+    "mid_p50": "#23465e",
+    "bright_p90": "#82a8ba",
+    "most_turquoise_p99": "#26808d",
+    "turquoise_p95": "#2f7a8a",
+    "foam_dense_p90": "#f3f4f5",
+    "foam_mean": "#c6d1d9",
+    "foam_thin_p10": "#98aebe"
+  },
+  "C4": {
+    "abyss_p02": "#031b2f",
+    "deep_p15": "#092942",
+    "mid_p50": "#174561",
+    "bright_p90": "#759aab",
+    "most_turquoise_p99": "#217183",
+    "turquoise_p95": "#20687c",
+    "foam_dense_p90": "#f2f3f2",
+    "foam_mean": "#c2cfd5",
+    "foam_thin_p10": "#95adbc"
+  },
+  "C5": {
+    "abyss_p02": "#00111f",
+    "deep_p15": "#021c2e",
+    "mid_p50": "#0b2d46",
+    "bright_p90": "#4a6e8b",
+    "most_turquoise_p99": "#1c5373",
+    "turquoise_p95": "#215477",
+    "foam_dense_p90": "#fafaf6",
+    "foam_mean": "#cfd5d6",
+    "foam_thin_p10": "#9eafbd"
+  },
+  "C6": {
+    "abyss_p02": "#0c2834",
+    "deep_p15": "#133e4b",
+    "mid_p50": "#2b5c6b",
+    "bright_p90": "#7aa2ae",
+    "most_turquoise_p99": "#0f8481",
+    "turquoise_p95": "#187879",
+    "foam_dense_p90": "#f9f9f6",
+    "foam_mean": "#cdd7d8",
+    "foam_thin_p10": "#99b2bc"
+  },
+  "C7": {
+    "abyss_p02": "#081b27",
+    "deep_p15": "#0e2c3b",
+    "mid_p50": "#234a5b",
+    "bright_p90": "#6f8e9c",
+    "most_turquoise_p99": "#266870",
+    "turquoise_p95": "#26626c",
+    "foam_dense_p90": "#efede9",
+    "foam_mean": "#cacecf",
+    "foam_thin_p10": "#a2b1bb"
+  },
+  "C8": {
+    "abyss_p02": "#012330",
+    "deep_p15": "#062d3c",
+    "mid_p50": "#123b4d",
+    "bright_p90": "#567380",
+    "most_turquoise_p99": "#194f5c",
+    "turquoise_p95": "#154858",
+    "foam_dense_p90": "#e0e3e1",
+    "foam_mean": "#bcc5c8",
+    "foam_thin_p10": "#9eafba"
+  }
+}

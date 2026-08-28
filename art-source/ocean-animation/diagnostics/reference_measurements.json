@@ -1,0 +1,697 @@
+{
+  "S": {
+    "size": [
+      1075,
+      1463
+    ],
+    "water_fraction": 0.3573,
+    "foam_fraction_of_water": 0.1432,
+    "mean_water_luma": 0.3794,
+    "water_luma_std": 0.2133,
+    "palette": [
+      {
+        "hex": "#1e506e",
+        "rgb": [
+          31,
+          81,
+          111
+        ],
+        "share": 0.2774
+      },
+      {
+        "hex": "#0f3752",
+        "rgb": [
+          16,
+          56,
+          83
+        ],
+        "share": 0.2631
+      },
+      {
+        "hex": "#376c8a",
+        "rgb": [
+          56,
+          109,
+          139
+        ],
+        "share": 0.1923
+      },
+      {
+        "hex": "#6490a6",
+        "rgb": [
+          100,
+          144,
+          166
+        ],
+        "share": 0.1082
+      },
+      {
+        "hex": "#9eb8c6",
+        "rgb": [
+          158,
+          185,
+          198
+        ],
+        "share": 0.0828
+      },
+      {
+        "hex": "#dce5e8",
+        "rgb": [
+          220,
+          229,
+          233
+        ],
+        "share": 0.0761
+      }
+    ],
+    "deep_mean": "#2a5b77",
+    "mid_mean": "#2f5f7b",
+    "shallow_mean": "#618093",
+    "open_water_px": 315772,
+    "spectrum": {
+      "windows": 65,
+      "propagation_deg": 85.0,
+      "crest_line_deg": 175.0,
+      "wavelength_px": 22.9,
+      "wavelength_mean_px": 13.6,
+      "anisotropy": 3.02
+    }
+  },
+  "C1": {
+    "size": [
+      1060,
+      1484
+    ],
+    "water_fraction": 0.3576,
+    "foam_fraction_of_water": 0.038,
+    "mean_water_luma": 0.278,
+    "water_luma_std": 0.1462,
+    "palette": [
+      {
+        "hex": "#124560",
+        "rgb": [
+          18,
+          69,
+          97
+        ],
+        "share": 0.3091
+      },
+      {
+        "hex": "#07314a",
+        "rgb": [
+          8,
+          49,
+          74
+        ],
+        "share": 0.2877
+      },
+      {
+        "hex": "#235b78",
+        "rgb": [
+          35,
+          91,
+          120
+        ],
+        "share": 0.2158
+      },
+      {
+        "hex": "#427691",
+        "rgb": [
+          67,
+          118,
+          146
+        ],
+        "share": 0.1103
+      },
+      {
+        "hex": "#7a9dae",
+        "rgb": [
+          123,
+          157,
+          175
+        ],
+        "share": 0.0508
+      },
+      {
+        "hex": "#ced9dc",
+        "rgb": [
+          206,
+          217,
+          221
+        ],
+        "share": 0.0263
+      }
+    ],
+    "deep_mean": "#245470",
+    "mid_mean": "#1c4d69",
+    "shallow_mean": "#2c576d",
+    "open_water_px": 324793,
+    "spectrum": {
+      "windows": 74,
+      "propagation_deg": 68.0,
+      "crest_line_deg": 158.0,
+      "wavelength_px": 44.4,
+      "wavelength_mean_px": 17.4,
+      "anisotropy": 4.426
+    }
+  },
+  "C2": {
+    "size": [
+      1060,
+      1484
+    ],
+    "water_fraction": 0.3615,
+    "foam_fraction_of_water": 0.2087,
+    "mean_water_luma": 0.4071,
+    "water_luma_std": 0.2489,
+    "palette": [
+      {
+        "hex": "#0d2d3f",
+        "rgb": [
+          13,
+          45,
+          64
+        ],
+        "share": 0.2373
+      },
+      {
+        "hex": "#214b61",
+        "rgb": [
+          33,
+          75,
+          97
+        ],
+        "share": 0.2345
+      },
+      {
+        "hex": "#3f6b81",
+        "rgb": [
+          63,
+          107,
+          130
+        ],
+        "share": 0.1844
+      },
+      {
+        "hex": "#6d8ea2",
+        "rgb": [
+          109,
+          142,
+          162
+        ],
+        "share": 0.1285
+      },
+      {
+        "hex": "#e3e6e9",
+        "rgb": [
+          227,
+          231,
+          234
+        ],
+        "share": 0.1104
+      },
+      {
+        "hex": "#a6b8c4",
+        "rgb": [
+          166,
+          184,
+          197
+        ],
+        "share": 0.1051
+      }
+    ],
+    "deep_mean": "#42687a",
+    "mid_mean": "#406477",
+    "shallow_mean": "#6c8493",
+    "open_water_px": 336495,
+    "spectrum": {
+      "windows": 88,
+      "propagation_deg": 85.0,
+      "crest_line_deg": 175.0,
+      "wavelength_px": 31.4,
+      "wavelength_mean_px": 15.3,
+      "anisotropy": 3.102
+    }
+  },
+  "C3": {
+    "size": [
+      1060,
+      1484
+    ],
+    "water_fraction": 0.3566,
+    "foam_fraction_of_water": 0.2498,
+    "mean_water_luma": 0.4144,
+    "water_luma_std": 0.2644,
+    "palette": [
+      {
+        "hex": "#0e273a",
+        "rgb": [
+          14,
+          40,
+          59
+        ],
+        "share": 0.2708
+      },
+      {
+        "hex": "#254860",
+        "rgb": [
+          37,
+          72,
+          96
+        ],
+        "share": 0.2152
+      },
+      {
+        "hex": "#476f85",
+        "rgb": [
+          72,
+          112,
+          134
+        ],
+        "share": 0.1472
+      },
+      {
+        "hex": "#7797a9",
+        "rgb": [
+          119,
+          152,
+          169
+        ],
+        "share": 0.1259
+      },
+      {
+        "hex": "#abbdc9",
+        "rgb": [
+          171,
+          190,
+          201
+        ],
+        "share": 0.1229
+      },
+      {
+        "hex": "#dee3e7",
+        "rgb": [
+          223,
+          228,
+          231
+        ],
+        "share": 0.1179
+      }
+    ],
+    "deep_mean": "#395a6f",
+    "mid_mean": "#426276",
+    "shallow_mean": "#768795",
+    "open_water_px": 319832,
+    "spectrum": {
+      "windows": 74,
+      "propagation_deg": 95.0,
+      "crest_line_deg": 5.0,
+      "wavelength_px": 19.4,
+      "wavelength_mean_px": 12.3,
+      "anisotropy": 2.991
+    }
+  },
+  "C4": {
+    "size": [
+      1060,
+      1484
+    ],
+    "water_fraction": 0.3561,
+    "foam_fraction_of_water": 0.1497,
+    "mean_water_luma": 0.3482,
+    "water_luma_std": 0.2267,
+    "palette": [
+      {
+        "hex": "#15425d",
+        "rgb": [
+          22,
+          66,
+          94
+        ],
+        "share": 0.2668
+      },
+      {
+        "hex": "#092941",
+        "rgb": [
+          10,
+          41,
+          65
+        ],
+        "share": 0.2548
+      },
+      {
+        "hex": "#2f6079",
+        "rgb": [
+          48,
+          97,
+          122
+        ],
+        "share": 0.1721
+      },
+      {
+        "hex": "#5d8497",
+        "rgb": [
+          94,
+          132,
+          151
+        ],
+        "share": 0.1224
+      },
+      {
+        "hex": "#95adb9",
+        "rgb": [
+          149,
+          173,
+          185
+        ],
+        "share": 0.0975
+      },
+      {
+        "hex": "#d3dbdf",
+        "rgb": [
+          211,
+          220,
+          223
+        ],
+        "share": 0.0865
+      }
+    ],
+    "deep_mean": "#2f5a72",
+    "mid_mean": "#2c556e",
+    "shallow_mean": "#5a7485",
+    "open_water_px": 318480,
+    "spectrum": {
+      "windows": 67,
+      "propagation_deg": 95.0,
+      "crest_line_deg": 5.0,
+      "wavelength_px": 10.5,
+      "wavelength_mean_px": 9.5,
+      "anisotropy": 2.413
+    }
+  },
+  "C5": {
+    "size": [
+      1060,
+      1484
+    ],
+    "water_fraction": 0.3696,
+    "foam_fraction_of_water": 0.034,
+    "mean_water_luma": 0.2069,
+    "water_luma_std": 0.1595,
+    "palette": [
+      {
+        "hex": "#031c2e",
+        "rgb": [
+          3,
+          29,
+          47
+        ],
+        "share": 0.3221
+      },
+      {
+        "hex": "#0b2e47",
+        "rgb": [
+          12,
+          46,
+          71
+        ],
+        "share": 0.3023
+      },
+      {
+        "hex": "#1d4362",
+        "rgb": [
+          29,
+          68,
+          99
+        ],
+        "share": 0.1942
+      },
+      {
+        "hex": "#3c6280",
+        "rgb": [
+          60,
+          98,
+          129
+        ],
+        "share": 0.1061
+      },
+      {
+        "hex": "#798f9e",
+        "rgb": [
+          121,
+          143,
+          159
+        ],
+        "share": 0.0444
+      },
+      {
+        "hex": "#d2d7d7",
+        "rgb": [
+          210,
+          215,
+          216
+        ],
+        "share": 0.031
+      }
+    ],
+    "deep_mean": "#173851",
+    "mid_mean": "#15354e",
+    "shallow_mean": "#29465a",
+    "open_water_px": 335372,
+    "spectrum": {
+      "windows": 73,
+      "propagation_deg": 58.0,
+      "crest_line_deg": 148.0,
+      "wavelength_px": 44.4,
+      "wavelength_mean_px": 20.4,
+      "anisotropy": 4.563
+    }
+  },
+  "C6": {
+    "size": [
+      1060,
+      1484
+    ],
+    "water_fraction": 0.3489,
+    "foam_fraction_of_water": 0.2297,
+    "mean_water_luma": 0.4532,
+    "water_luma_std": 0.2371,
+    "palette": [
+      {
+        "hex": "#143e4b",
+        "rgb": [
+          21,
+          62,
+          75
+        ],
+        "share": 0.245
+      },
+      {
+        "hex": "#295b6a",
+        "rgb": [
+          42,
+          92,
+          107
+        ],
+        "share": 0.2308
+      },
+      {
+        "hex": "#4d7987",
+        "rgb": [
+          77,
+          121,
+          136
+        ],
+        "share": 0.1713
+      },
+      {
+        "hex": "#799ba6",
+        "rgb": [
+          122,
+          155,
+          167
+        ],
+        "share": 0.1344
+      },
+      {
+        "hex": "#e5e8e7",
+        "rgb": [
+          229,
+          233,
+          231
+        ],
+        "share": 0.1149
+      },
+      {
+        "hex": "#afc0c4",
+        "rgb": [
+          175,
+          192,
+          197
+        ],
+        "share": 0.1036
+      }
+    ],
+    "deep_mean": "#497883",
+    "mid_mean": "#4e7784",
+    "shallow_mean": "#6d8790",
+    "open_water_px": 248958,
+    "spectrum": {
+      "windows": 31,
+      "propagation_deg": 95.0,
+      "crest_line_deg": 5.0,
+      "wavelength_px": 15.7,
+      "wavelength_mean_px": 11.6,
+      "anisotropy": 2.629
+    }
+  },
+  "C7": {
+    "size": [
+      1060,
+      1484
+    ],
+    "water_fraction": 0.3259,
+    "foam_fraction_of_water": 0.2395,
+    "mean_water_luma": 0.4312,
+    "water_luma_std": 0.2479,
+    "palette": [
+      {
+        "hex": "#102e3c",
+        "rgb": [
+          16,
+          47,
+          61
+        ],
+        "share": 0.2384
+      },
+      {
+        "hex": "#254d5d",
+        "rgb": [
+          38,
+          77,
+          94
+        ],
+        "share": 0.2105
+      },
+      {
+        "hex": "#4a6d7d",
+        "rgb": [
+          75,
+          109,
+          125
+        ],
+        "share": 0.1574
+      },
+      {
+        "hex": "#abb5ba",
+        "rgb": [
+          172,
+          182,
+          187
+        ],
+        "share": 0.1349
+      },
+      {
+        "hex": "#d9dad8",
+        "rgb": [
+          218,
+          219,
+          217
+        ],
+        "share": 0.1305
+      },
+      {
+        "hex": "#7a919c",
+        "rgb": [
+          122,
+          145,
+          156
+        ],
+        "share": 0.1282
+      }
+    ],
+    "deep_mean": "#183748",
+    "mid_mean": "#385968",
+    "shallow_mean": "#7a8c94",
+    "open_water_px": 172730,
+    "spectrum": null
+  },
+  "C8": {
+    "size": [
+      1060,
+      1484
+    ],
+    "water_fraction": 0.3353,
+    "foam_fraction_of_water": 0.0367,
+    "mean_water_luma": 0.2533,
+    "water_luma_std": 0.1501,
+    "palette": [
+      {
+        "hex": "#062e3d",
+        "rgb": [
+          7,
+          46,
+          61
+        ],
+        "share": 0.3309
+      },
+      {
+        "hex": "#133c4f",
+        "rgb": [
+          20,
+          61,
+          79
+        ],
+        "share": 0.2987
+      },
+      {
+        "hex": "#284f61",
+        "rgb": [
+          41,
+          79,
+          98
+        ],
+        "share": 0.1816
+      },
+      {
+        "hex": "#4d6a77",
+        "rgb": [
+          78,
+          107,
+          120
+        ],
+        "share": 0.0878
+      },
+      {
+        "hex": "#7c9099",
+        "rgb": [
+          125,
+          145,
+          154
+        ],
+        "share": 0.0596
+      },
+      {
+        "hex": "#b6bfc3",
+        "rgb": [
+          182,
+          192,
+          195
+        ],
+        "share": 0.0414
+      }
+    ],
+    "deep_mean": "#173d4f",
+    "mid_mean": "#1c4253",
+    "shallow_mean": "#365765",
+    "open_water_px": 295166,
+    "spectrum": {
+      "windows": 43,
+      "propagation_deg": 85.0,
+      "crest_line_deg": 175.0,
+      "wavelength_px": 11.0,
+      "wavelength_mean_px": 9.8,
+      "anisotropy": 2.108
+    }
+  }
+}
