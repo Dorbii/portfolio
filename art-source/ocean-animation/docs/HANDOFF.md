@@ -275,7 +275,29 @@ Nothing under `features/` has been touched yet.
 
 ---
 
-## 10. If picking this up cold
+## 10. What is and is not in git
+
+Committed: `src/`, `docs/`, `refs/canonical/` (the resolved stable IDs — the two
+supplied packs labelled the same images contradictorily), `requirements.txt`, and
+the small JSON that scripts read back.
+
+**Not** committed, and not on disk after cleanup either — all of it regenerates:
+
+| gone | rebuild with |
+|---|---|
+| `work/` (solver + precompute cache) | any run; automatic |
+| `masks/` | `python build_plates.py` |
+| `outputs/`, `contactsheets/` | `python render.py all` |
+| `closeup/` | `python closeup.py build && python closeup.py render all` |
+| `scenes/` | `python newscene.py init <name> <plate>` |
+| `previews/`, `diagnostics/*.png` | the relevant probe script |
+
+The iteration log cites diagnostic images (`diagnostics/ablation.png`,
+`stage1_*.png`, and others) as evidence. Those paths are **not tracked** — the
+findings are written out in text with their numbers, and the images regenerate.
+Do not treat a missing image as a broken reference.
+
+## 11. If picking this up cold
 
 1. `python render.py all` then `validate.py` on each — confirm the baseline still
    passes before changing anything.
