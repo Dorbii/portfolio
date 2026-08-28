@@ -10,7 +10,7 @@ const tiers = Object.freeze({
     id: "territory-register" as const,
     path: "/career-world/capitals/ninjaone/city-v2/derived/d06-territory-register-r1.png",
     dimensions: Object.freeze([1063, 413] as Pair),
-    sha256: "27771f80ec031a5c3f61d7afc59b4449d9367bf53083258dcf3a4904311b2852",
+    sha256: "5b5b024f0c953cafbcef445ef52c2c5dbc32208dcbf6e4eb4a71ca61ae6ba9e3",
   }),
   capital: Object.freeze({
     id: "capital" as const,
