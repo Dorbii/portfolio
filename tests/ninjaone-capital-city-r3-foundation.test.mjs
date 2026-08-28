@@ -960,7 +960,7 @@ test("territory keeps the city plate preload-only until capital detail", async (
   const manifest = JSON.parse(manifestSource);
   assert.match(
     authoritySource,
-    /detailState\.tier\.id === "world"\s*\|\| detailState\.tier\.id === "territory"/,
+    /detailState\.tier\.id === "world"\s*\|\| detailState\.territoryToCapital <= 0/,
   );
   assert.equal(
     manifest.lod.territory,
