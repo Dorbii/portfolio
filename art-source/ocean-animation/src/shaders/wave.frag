@@ -6,6 +6,7 @@ in vec2 uv;
 layout(location = 0) out vec4 outGeom;   // h, dhdx, dhdy, breaking
 layout(location = 1) out vec4 outFlow;   // flow.xy (px/s), crestness, whitecap
 layout(location = 2) out vec4 outSwell;  // primary-swell-only gradient, for the specular
+layout(location = 3) out vec4 outPath;   // stroke path (one train), form envelope, group envelope
 
 #include "common.glsl"
 
@@ -16,11 +17,14 @@ uniform float uSetCycles;               // set cycles per loop
 uniform float uBreakGamma;              // H/d threshold
 uniform float uWhitecapSteep;           // deep-water whitecap steepness threshold
 uniform float uAmpL, uHarmL;            // long swell: fills the 200-600 px band
-uniform float uDirWander;               // slow spatial variation of wave direction
+uniform float uDirWander;               // slow spatial variation of wave direction (superseded)
+uniform float uDirBend;                 // bounded additive phase bend: curvature without decorrelation
+uniform float uRegionDepth, uRegionContrast;  // large-scale weather: how much the sea varies place to place
 uniform float uFormBend, uFormGroup, uFormFine;  // curvature, group variance, finer train
 uniform float uChopGain;
 uniform float uJitter;                  // crest-spacing jitter, radians
 uniform float uStokes;                  // shoreward drift gain
+uniform float uStokesDeep;              // fraction of that drift surviving in deep water
 uniform float uBackwash;                // seaward pull gain
 uniform float uPeriodP, uPeriodS, uPeriodC;
 uniform vec3  uHarmM;   // primary harmonic wavenumber ratios
@@ -57,15 +61,39 @@ void addSpread(inout Acc acc, float S, float kmag, vec2 dir, vec2 perpD, float k
     // second origin would do. It has to vary SLOWLY compared with the wavelength
     // for the slowly-varying-direction approximation to hold, hence the 900 px
     // scale: over one wavelength the direction is effectively constant.
+    // Variance as an additive PHASE BEND, not a direction rotation.
+    //
+    // Rotating the direction multiplies the accumulated eikonal phase by cos(dl),
+    // and S is not a plane-wave phase k*(x.d) -- it is the solved phase, growing
+    // without bound across the domain (to 96 rad for the primary band and 466 for
+    // the chop). So a slow, small direction wander becomes a LARGE phase error
+    // that grows with distance from the origin, and it fragments the train into
+    // fine interference exactly where S is biggest. Measured on the height field:
+    // dirWander 9 deg put 62% of the variance below 8 px; at 0 deg it is 31%, and
+    // the water goes from lichen mottle to readable undulation.
+    //
+    // An additive bend was tried as the bounded replacement and does NOT fix it:
+    // at uDirBend 2.4 the fine share is 50% and at 4.0 it is 68%, both visibly
+    // mottled. The reason is the same either way -- ANY spatial phase
+    // perturbation applied across many components decorrelates them from each
+    // other, and the sum of decorrelated trains is interference. Only a single
+    // train survives bending, which is why hPath (one cosine, coarse bend) draws
+    // clean curves while the summed height field cannot.
+    //
+    // So both are shipped at zero. The crest curvature that remains is the real
+    // one: refraction, already carried by the solved phase field. Both uniforms
+    // stay wired so the two negative results stay reproducible.
     float wander = (noiseAt(px, 900.0) - 0.5) * 2.0 * uDirWander
                  + (noiseAt(px + vec2(413.0, 77.0), 380.0) - 0.5) * uDirWander * 0.45;
+    float dirBend = ((noiseAt(px, 900.0) - 0.5) * 2.0
+                   + (noiseAt(px + vec2(413.0, 77.0), 380.0) - 0.5) * 0.9) * uDirBend;
     float dl = radians(deltaDeg + wander);
     float cs = cos(dl), sn = sin(dl);
     float w  = (6.28318530718 / period) * sqrt(m);
     float n  = max(1.0, floor(w * uLoop / 6.28318530718 + 0.5));
     w = 6.28318530718 * n / uLoop;
 
-    float th = S * m * cs + k0 * m * sn * dot(px, perpD) + jitterPhase - w * uTime;
+    float th = S * m * cs + k0 * m * sn * dot(px, perpD) + dirBend * m + jitterPhase - w * uTime;
     float a  = amp * ampScale;
     float k  = kmag * m;
     vec2  kd = normalize(dir * (kmag * m * cs) + perpD * (k0 * m * sn) + vec2(1e-6));
@@ -158,7 +186,14 @@ void main()
     // modulation of the same phase field makes it travel correctly for free:
     // phase_env = S*mg - w*mg/2*t  moves at (w*mg/2)/(k*mg) = c/2.
     float w0 = 6.28318530718 / uPeriodP;
-    float mg1 = uGroupScale, mg2 = uGroupScale * 0.61;
+    // mg2 is an exact HARMONIC of mg1, not an arbitrary fraction. The loop
+    // quantisation below floors at n=1, so any envelope frequency below one loop
+    // cycle is forced UP to it: at mg2 = 0.61*mg1 both envelopes landed on the
+    // same forced frequency, moving identically and unable to beat against each
+    // other, and both at 1.2x-3.4x the crest speed instead of 0.5x. Doubling mg1
+    // puts mg2 exactly on n=2 whenever mg1 sits on n=1, so both travel at a true
+    // c/2 and their beat is real.
+    float mg1 = uGroupScale, mg2 = uGroupScale * 2.0;
     float wg1 = w0 * mg1 * 0.5, wg2 = w0 * mg2 * 0.5;
     wg1 = 6.28318530718 * max(1.0, floor(wg1 * uLoop / 6.28318530718 + 0.5)) / uLoop;
     wg2 = 6.28318530718 * max(1.0, floor(wg2 * uLoop / 6.28318530718 + 0.5)) / uLoop;
@@ -253,6 +288,31 @@ void main()
     hn = clamp(hs, -1.0, 1.0);
     acc.h = hn * (2.15 * sigma);
     acc.g *= dsharp;
+
+    // ---- regional energy ---------------------------------------------------
+    // Measured against the plate in 64 px blocks, this sea varied about HALF as
+    // much from place to place as the plate does: sd across blocks 0.067 vs
+    // 0.120 in luma, 0.016 vs 0.024 in local contrast, 0.078 vs 0.162 in foam
+    // coverage. Every mechanism was right ON AVERAGE and applied evenly
+    // everywhere, which is what reads as one treatment brushed over the whole
+    // sea instead of a sea with weather in it. It is also why fixing mechanisms
+    // one at a time kept moving the numbers ~30% and then stalling.
+    //
+    // ONE field drives amplitude and slope here, and breaking, whitecapping,
+    // foam and tone downstream, so a region is coherently calm or coherently
+    // rough rather than each layer being independently average.
+    //
+    // This MUST be applied after the RMS normalisation. Scaling the component
+    // amplitudes going in does exactly nothing: acc.h scales by k, acc.energy by
+    // k^2, sigma by k, and hn = acc.h / (2.15 sigma) comes out identical -- the
+    // same silent no-op shape as the stacked offshore foam gates.
+    float rE = noise4(px + loopScroll(uDirDeep, 2.5, 880.0), 880.0).r * 0.62
+             + noise4(px + vec2(517.0, 233.0) + loopScroll(uDirDeep, 1.5, 360.0), 360.0).g * 0.38;
+    rE = clamp((rE - 0.5) * uRegionContrast + 0.5, 0.0, 1.0);
+    float regionAmp = mix(1.0 - uRegionDepth, 1.0 + uRegionDepth, rE);
+    hn = clamp(hn * regionAmp, -1.0, 1.0);
+    acc.g *= regionAmp;
+    acc.h = hn * (2.15 * sigma);
     // Swell-only height, normalised by the swell's OWN rms. Broad tonal
     // structure -- troughs, the rising face, the lip -- has to be driven by
     // this and not by the full band, or the shading follows the chop and the
@@ -329,8 +389,22 @@ void main()
     // pre-cap value, and the short chop components dominate it, so the whole sea
     // saturated into a white blanket at high energy.
     float totalSteep = length(acc.g);
+    // Gating on slope AND sstep(0.50,0.96,hn) multiplied two sparse, essentially
+    // INDEPENDENT conditions -- measured correlation between hn and slope
+    // offshore is -0.008. Slope alone runs 0.0255 mean out there and the crest
+    // gate alone 0.0511, but their product is 0.0036: a 7x cut that left deep
+    // water with no whitecaps, therefore no foam injection, therefore no foam at
+    // all (persistence measured 0.001). The offshore foam-suppression uniforms
+    // were then irrelevant -- there was nothing there to suppress, which is why
+    // sweeping them across a 3x range changed the render by exactly zero.
+    //
+    // Whitecapping is a slope phenomenon. Keep a mild preference for the upper
+    // front face, where a spilling crest actually shows, but never gate it on
+    // being at the peak: slope is smallest exactly there.
+    float frontFace = clamp(-dot(normalize(acc.g + vec2(1e-5)), dirP), 0.0, 1.0);
     float whitecap = sstep(uWhitecapSteep, uWhitecapSteep * 1.75, totalSteep)
-                   * sstep(0.50, 0.96, hn) * water;
+                   * (0.40 + 0.60 * frontFace)
+                   * sstep(-0.35, 0.35, hn) * water;
     // run-up wash: the shallowest water is white whenever the surface is up,
     // independent of whether a crest is formally "breaking" there
     float swashZone = 1.0 - sstep(0.6, 6.5, depth);
@@ -355,7 +429,16 @@ void main()
     }
     float shallow = 1.0 - sstep(2.0, 30.0, depth);
     vec2 flow = acc.orb * (0.75 + 1.35 * shallow);
-    flow += dirP * (uStokes * acc.amp * 0.9);
+    // Stokes drift only means anything where waves are shoaling. Applied flat at
+    // every depth it was a conveyor belt aimed at the coast: acc.amp is a SUM of
+    // amplitudes (order 12 here), not a 0..1 weight, so uStokes 2.6 produced
+    // ~28 px/s of steady onshore transport in deep water. Measured, the offshore
+    // surface flow ran 42 px/s with an onshore component of 0.69 -- about 29 px/s
+    // net, which carries foam 435 px into the land over one 15 s loop. That is
+    // what reads as foam streaking unnaturally at the shore: offshore foam is
+    // being marched in rather than drifting and dispersing.
+    float stokesDepth = mix(uStokesDeep, 1.0, shallow);
+    flow += dirP * (uStokes * acc.amp * 0.9 * stokesDepth);
     // Backwash: in the trough, shallow water drains seaward along the normal.
     // Confined to the genuine swash zone. Spread over the whole 30-px-deep band
     // it was transporting surf-zone foam ~240 px out to sea over the foam's
@@ -392,8 +475,9 @@ void main()
     // variance has two sources and neither was in this field.
     //
     // BEND -- slow spatial phase, so crests curve instead of running straight.
-    float bend = ((noise4(px, 540.0).r - 0.5) * 1.6
-                + (noise4(px + vec2(211.0, 83.0), 210.0).g - 0.5) * 0.6) * uFormBend;
+    float bendCoarse = (noise4(px, 540.0).r - 0.5) * 1.6 * uFormBend;
+    float bend = bendCoarse
+               + (noise4(px + vec2(211.0, 83.0), 210.0).g - 0.5) * 0.6 * uFormBend;
     // GROUPS -- the envelope waxes and wanes ALONG a crest, so it reads as a run
     // of separate strokes of different lengths rather than one continuous line.
     float formEnv = mix(1.0, clamp(groupEnv, 0.15, 1.9), uFormGroup);
@@ -414,4 +498,17 @@ void main()
     // NOT multiplied by dsharp: that factor is built from the full hn, chop
     // included, so it would smuggle the high frequencies straight back in.
     outSwell = vec4(acc.gSwell, hnSwell, bphase);
+
+    // ---- stroke path -------------------------------------------------------
+    // ONE cosine of the solved phase field, carrying only the coarse bend. The
+    // crest stroke is contoured from this rather than from hForm, because hForm
+    // sums a sub-harmonic at comparable amplitude (ampL 1.05 against a primary
+    // of 1.0) and the level set of a beat breaks up wherever its components
+    // cancel -- measured at 2.18x the boundary a clean band of that width would
+    // have, which is the cauliflower edge. This field is smooth by construction,
+    // runs unbroken across the frame, and refracts because SP already does.
+    // The variance the reference draws belongs in the stroke's alpha and width;
+    // put it in the field and it displaces the path instead.
+    float hPath = cos(SP + bendCoarse - wF * uTime);
+    outPath = vec4(hPath, formEnv, groupEnv, rE);
 }

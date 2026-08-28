@@ -10,6 +10,7 @@ uniform float uLoop;        // loop period, seconds
 // texA : ampP, ampS, ampC, focus
 uniform sampler2D texP, texG, texD, texM, texA;
 uniform sampler2D texNoise;     // tileable fbm, 4 octaves in rgba
+uniform sampler2D texNoiseF;    // small, flat companion for FINE lookups
 
 float hash11(float p){ p = fract(p*0.1031); p *= p+33.33; p *= p+p; return fract(p); }
 
@@ -19,6 +20,15 @@ float noiseAt(vec2 px, float scale){
 }
 vec4 noise4(vec2 px, float scale){
     return texture(texNoise, px/scale);
+}
+// Fine lookups must come from the small texture. On the 512^2 one a lookup at
+// scale S runs at 512/S texels per screen pixel -- 13x minified at the lace
+// scale -- so the mipmap averages the detail away before it can be drawn.
+float noiseFineAt(vec2 px, float scale){
+    return texture(texNoiseF, px/scale).r;
+}
+vec4 noiseFine4(vec2 px, float scale){
+    return texture(texNoiseF, px/scale);
 }
 // smooth periodic-in-time scalar, exactly loop-safe
 float loopSin(float t, float cycles, float phase){

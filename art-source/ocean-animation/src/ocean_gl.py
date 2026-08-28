@@ -32,6 +32,14 @@ def _src(name):
     return txt
 
 
+
+def _omega(period, loop):
+    """Angular frequency, quantised to the loop exactly as wave.frag does."""
+    import math
+    w = 2.0 * math.pi / float(period)
+    n = max(1.0, math.floor(w * loop / (2.0 * math.pi) + 0.5))
+    return float(2.0 * math.pi * n / loop)
+
 class OceanRenderer:
     def __init__(self, preset, verbose=True, flat_ocean=False, bare=False):
         self.p = preset
@@ -99,6 +107,8 @@ class OceanRenderer:
         self.texA = self._tex(np.stack([ex['ampP'], ex['ampS'], ex['ampC'], ex['focus']], -1), 4)
         self.texImpact = self._tex(np.stack([ex['impact']] * 4, -1), 4)
         self.texNoise = self._tex(ex['noise'], 4, repeat=True, mipmap=True)
+        # Small, flat companion for fine-scale lookups -- see tileable_fbm_fine.
+        self.texNoiseF = self._tex(ex['noise_fine'], 4, repeat=True, mipmap=True)
 
         plate = np.asarray(Image.open(os.path.join(MASKS, 'land_plate.png')).convert('RGB'))
         clean = np.asarray(Image.open(os.path.join(MASKS, 'clean_water_plate.png')).convert('RGB'))
@@ -114,7 +124,11 @@ class OceanRenderer:
 
     def _make_targets(self):
         self.tGeom, self.tFlow, self.tSwell = self._rt(), self._rt(), self._rt()
-        self.fboWave = self.ctx.framebuffer(color_attachments=[self.tGeom, self.tFlow, self.tSwell])
+        # The stroke PATH field, kept apart from the summed form on purpose: the
+        # crest line is contoured from one train, so it stays smooth and unbroken.
+        self.tPath = self._rt()
+        self.fboWave = self.ctx.framebuffer(
+            color_attachments=[self.tGeom, self.tFlow, self.tSwell, self.tPath])
         self.foam = [self._rt(), self._rt()]
         self.fboFoam = [self.ctx.framebuffer(color_attachments=[t]) for t in self.foam]
         self.spray = [self._rt(), self._rt()]
@@ -141,7 +155,8 @@ class OceanRenderer:
 
     def _bind_common(self, prog, t):
         units = [(self.texP, 'texP'), (self.texG, 'texG'), (self.texD, 'texD'),
-                 (self.texM, 'texM'), (self.texA, 'texA'), (self.texNoise, 'texNoise')]
+                 (self.texM, 'texM'), (self.texA, 'texA'), (self.texNoise, 'texNoise'),
+                 (self.texNoiseF, 'texNoiseF')]
         for i, (tex, name) in enumerate(units):
             self._bindtex(prog, tex, name, i)
         dd = self.p['families']['primary'][0]
@@ -163,7 +178,7 @@ class OceanRenderer:
         self._set(prog, uAmpP=p['ampP'], uAmpS=p['ampS'], uAmpC=p['ampC'],
                   uSteep=p['steep'], uSetMix=p['setMix'], uSetCycles=p['setCycles'],
                   uBreakGamma=p['breakGamma'], uWhitecapSteep=p['whitecapSteep'],
-                  uChopGain=p['chopGain'], uJitter=p['jitter'], uStokes=p['stokes'],
+                  uChopGain=p['chopGain'], uJitter=p['jitter'], uStokes=p['stokes'], uStokesDeep=float(p.get('stokesDeep', 1.0)),
                   uBackwash=p['backwash'],
                   uPeriodP=p['families']['primary'][1],
                   uPeriodS=p['families']['secondary'][1],
@@ -172,6 +187,9 @@ class OceanRenderer:
                   uHarmA=tuple(p.get('harmA', (1.0, 0.30, 0.12))),
                   uAmpL=float(p.get('ampL', 0.0)), uHarmL=float(p.get('harmL', 0.42)),
                   uDirWander=float(p.get('dirWander', 0.0)),
+                  uDirBend=float(p.get('dirBend', 0.0)),
+                  uRegionDepth=float(p.get('regionDepth', 0.0)),
+                  uRegionContrast=float(p.get('regionContrast', 1.0)),
                   uFormBend=float(p.get('formBend', 0.0)),
                   uFormGroup=float(p.get('formGroup', 0.0)),
                   uFormFine=float(p.get('formFine', 0.0)),
@@ -192,6 +210,7 @@ class OceanRenderer:
                   uInjBreak=p['injBreak'], uInjWhitecap=p['injWhitecap'],
                   uInjShore=p['injShore'], uRelax=p['foamRelax'],
                   uDiffuse=p['foamDiffuse'], uFoamBlend=p['foamBlend'],
+                  uFoamDeepFade=float(p.get('foamDeepFade', 0.93)),
                   uFirst=1.0 if first else 0.0)
         self.fboFoam[1 - self.cur].use()
         vao.render(moderngl.TRIANGLES)
@@ -219,7 +238,8 @@ class OceanRenderer:
                                          (self.foam[self.cur], 'texFoam'),
                                          (self.spray[self.cur], 'texSpray'),
                                          (self.texPlate, 'texPlate'), (self.texClean, 'texClean'),
-                                         (self.tSwell, 'texSwell')]):
+                                         (self.tSwell, 'texSwell'),
+                                         (self.tPath, 'texPath')]):
             self._bindtex(prog, tex, name, n + i)
         c = p['palette']
         self._set(prog, cAbyss=c['abyss'], cDeep=c['deep'], cMid=c['mid'], cShallow=c['shallow'],
@@ -277,7 +297,19 @@ class OceanRenderer:
                   uPreBreak=p['preBreak'], uFaceTeal=p['faceTeal'], uLipGain=p['lipGain'],
                   uFoamDeep=p['foamDeep'], uFoamDeepThr=p['foamDeepThr'],
                   uFoamVeil=p['foamVeil'],
-                  uGlitter=p['glitter'])
+                  uGlitter=p['glitter'],
+                  uAbyssMix=float(p.get('abyssMix', 0.62)),
+                  uOmegaS=_omega(p['families']['secondary'][1], p['loop']),
+                  uFormBend=float(p['formBend']),
+                  uWispLevel=float(p.get('wispLevel', 0.55)),
+                  uWispW=float(p.get('wispW', 1.6)),
+                  uWispGain=float(p.get('wispGain', 0.0)),
+                  uWispSharp=float(p.get('wispSharp', 6.0)),
+                  uCrossTrain=float(p.get('crossTrain', 0.0)),
+                  uRegionTone=float(p.get('regionTone', 0.0)),
+                  uTroughDark=float(p.get('troughDark', 0.0)),
+                  uCrestTeal=float(p.get('crestTeal', 0.0)),
+                  uRegionFoam=float(p.get('regionFoam', 0.0)))
         self.fboOut.use(); self.ctx.viewport = (0, 0, self.W, self.H)
         vao.render(moderngl.TRIANGLES)
         buf = self.fboOut.read(components=3, dtype='f1')

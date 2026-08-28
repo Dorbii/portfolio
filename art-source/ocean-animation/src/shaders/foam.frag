@@ -14,6 +14,7 @@ uniform float uInjBreak, uInjWhitecap, uInjShore;
 uniform float uRelax;        // seconds for material coords to relax back
 uniform float uDiffuse;
 uniform float uFoamBlend;   // per-step weight of the diffused neighbourhood
+uniform float uFoamDeepFade; // how hard offshore whitecap injection is cut
 uniform float uFirst;        // 1.0 on the very first step
 
 void main()
@@ -66,7 +67,17 @@ void main()
     // transient streak on one crest; letting it build with the same persistence
     // as shore whitewater grew solid white slabs that read as ice floes.
     float depthPx = max(texture(texP, uv).w, 0.35);
-    float deepFade = 1.0 - 0.93 * smoothstep(15.0, 38.0, depthPx);
+    // This is ONE of three multiplicative suppressions of offshore foam. The
+    // others are the persistence cut (tauP -> 0.18x above) and the render
+    // threshold (uFoamDeepThr). Each alone is enough to zero the result, so
+    // sweeping any one of them changes the render by nothing -- injWhitecap was
+    // measured across a 17x range with byte-identical output, and the offshore
+    // suppression trio across 3x likewise.
+    //
+    // Keep the anti-slab mechanism where it belongs: SHORT LIFETIME offshore, so
+    // whitecap foam is a transient streak that cannot accumulate into the ice
+    // floes this was written to stop. Do not also refuse to create it.
+    float deepFade = 1.0 - uFoamDeepFade * smoothstep(15.0, 38.0, depthPx);
     float inj = breaking * uInjBreak
               + whitecap * uInjWhitecap * deepFade
               + shoreZone * uInjShore * (0.22 + 0.78 * clamp(hn, 0.0, 1.0)) * (0.30 + 0.70 * breaking);

@@ -6,7 +6,7 @@ out vec4 fragColor;
 
 #include "common.glsl"
 
-uniform sampler2D texGeom, texFlow, texFoam, texSpray, texPlate, texClean, texSwell;
+uniform sampler2D texGeom, texFlow, texFoam, texSpray, texPlate, texClean, texSwell, texPath;
 
 uniform vec3  cAbyss, cDeep, cMid, cShallow, cFoamThin, cFoamBody, cFoamDense, cSun;
 uniform vec3  cSky;
@@ -23,6 +23,13 @@ uniform float uCrestLineFloor, uLaceLineThr, uFoamSolid;
 uniform float uPosterize, uBands, uBandSoft;
 uniform float uSprayGain;
 uniform float uExposure, uSat, uVigMix;
+uniform float uAbyssMix;   // how far deep water reaches toward the abyss colour
+uniform float uRegionTone, uRegionFoam;
+uniform float uTroughDark, uCrestTeal;  // depth in the troughs, teal on the crests  // how far regional weather moves tone and foam
+uniform float uOmegaS;      // secondary train angular frequency, loop-quantised
+uniform float uWispLevel, uWispW, uWispGain, uWispSharp;  // thin filaments along the foam field's level sets
+uniform float uFormBend;    // same crest curvature the wave pass uses
+uniform float uCrossTrain;  // weight of the second stroke train
 uniform float uDeepEnd, uShallowEnd;
 uniform float uRippleGain;
 uniform float uTealDepth;   // depth (px) over which the shallow teal wash fades out
@@ -69,7 +76,14 @@ vec3 depthRamp(float d)
 {
     vec3 c = mix(cShallow, cMid, sstep(0.0, uShallowEnd, d));
     c = mix(c, cDeep, sstep(uShallowEnd * 0.9, uDeepEnd, d));
-    c = mix(c, cAbyss, sstep(uDeepEnd, uDeepEnd * 2.4, d) * 0.62);
+    // The abyss blend was capped at 0.62, which put the ramp's floor at luma
+    // 0.208 for the windy palette. The reference keeps 23.7% of its water BELOW
+    // 0.200, so the base colour could not reach where a quarter of the plate's
+    // water lives -- every dark pixel we had came from shading multipliers on a
+    // too-light base, which is why the sea read flat and mid-toned. Measured:
+    // our water matched the reference's MEAN luma exactly (0.3550 both) while
+    // its std was 0.178 against 0.210, compressed at both ends.
+    c = mix(c, cAbyss, sstep(uDeepEnd, uDeepEnd * 2.4, d) * uAbyssMix);
     return c;
 }
 
@@ -150,7 +164,7 @@ float licField(vec2 px0, float scale, float stepPx, int steps)
     return acc / max(wsum, 1e-4);
 }
 
-float laceField(vec2 mat, vec2 fdir)
+float laceField(vec2 mat, vec2 fdir, out float fineTex)
 {
     // Anisotropic lookup: compressed along the current, stretched across it, so
     // the filigree reads as flow-stretched streaks rather than isotropic blobs.
@@ -174,10 +188,14 @@ float laceField(vec2 mat, vec2 fdir)
     float o2 = max(uLaceScale * 0.50, 9.0);
     float o3 = max(uLaceScale * 0.28, 5.5);
     float o4 = max(uLaceScale * 0.16, 4.0);
-    float a = noiseAt(m, uLaceScale);
-    float b = noiseAt(m * 1.03 + vec2(71.0, 19.0), o2);
-    float c = noiseAt(m * 1.07 + vec2(143.0, 87.0), o3);
-    float e = noiseAt(m * 1.11 + vec2(37.0, 211.0), o4);
+    // From the FINE texture. On the 512^2 one these four land at 13x, 26x, 46x
+    // and 80x minification, so the mipmap averages them to almost nothing before
+    // the filigree is drawn -- which is why the water measured 0.49 of the
+    // plate's energy at 4 px features while matching it at 128 px.
+    float a = noiseFineAt(m, uLaceScale);
+    float b = noiseFineAt(m * 1.03 + vec2(71.0, 19.0), o2);
+    float c = noiseFineAt(m * 1.07 + vec2(143.0, 87.0), o3);
+    float e = noiseFineAt(m * 1.11 + vec2(37.0, 211.0), o4);
     // Weighted toward the FINE octaves, then contrast-stretched. Averaging four
     // roughly-uniform noises collapses the variance (sigma ~0.095), so the
     // erosion modulation was dominated by the 24-54 px octaves -- which set the
@@ -189,8 +207,19 @@ float laceField(vec2 mat, vec2 fdir)
     // this project explicitly set out to avoid. perimeter/sqrt(area) rewards
     // stippling, so it is not a usable optimisation target. Coarse-weighted and
     // unstretched is what actually reads as whitewater.
-    float f = a * 0.34 + b * 0.28 + c * 0.23 + e * 0.15;
-    return clamp((f - 0.5) * uLaceContrast + 0.5, 0.0, 1.0);
+    // Both recorded negative results above -- fine-weighted gives stipple,
+    // coarse-weighted gives blobs -- are consequences of taking the filament's
+    // PATH from a field that mixes scales. No weighting fixes that: the ridge of
+    // a sum wanders wherever the small octaves push it. Measured on the crest
+    // stroke, the same defect cost 2.18x the boundary-per-unit-stroke a clean
+    // band of that width would have, against 1.46x for a single train.
+    //
+    // So separate them, exactly as the crest stroke now does. The PATH is the
+    // ridge of ONE smooth octave, which is a long connected curve. The fine
+    // octaves become fineTex and modulate the filament's strength ALONG its
+    // length, where they cannot displace it.
+    fineTex = clamp((b * 0.45 + c * 0.33 + e * 0.22 - 0.5) * uLaceContrast + 0.5, 0.0, 1.0);
+    return clamp((a - 0.5) * uLaceContrast + 0.5, 0.0, 1.0);
 }
 
 void main()
@@ -205,6 +234,12 @@ void main()
 
     vec4 geom = texture(texGeom, uv);
     float hn = geom.x;                 // normalised surface height, -1..1
+    // Large-scale weather from the wave pass. The height field already varies
+    // regionally -- block sd of |hn| measures 0.120, matching the plate's luma
+    // variation of 0.120 -- but none of it reached the picture, because tone is
+    // driven by bathymetry and the foam threshold is the same everywhere. The
+    // variation existed and was thrown away here.
+    float regionE = texture(texPath, uv).w;
     vec2 gr = geom.yz;                 // macro gradient (swell + chop, no ripple)
     float breaking = geom.w;
     vec4 flow4 = texture(texFlow, uv);
@@ -227,11 +262,11 @@ void main()
 
     vec2 rp = px + loopScroll(uDirDeep, 22.0, 118.0);
     vec2 e = vec2(1.25, 0.0);
-    float r0 = noiseAt(rp, 118.0), r1 = noiseAt(rp * 1.0 + 57.0, 47.0);
-    float rx = (noiseAt(rp + e.xy, 118.0) - noiseAt(rp - e.xy, 118.0)) * 0.7
-             + (noiseAt(rp + e.xy * 0.6 + 57.0, 47.0) - noiseAt(rp - e.xy * 0.6 + 57.0, 47.0)) * 0.3;
-    float ry = (noiseAt(rp + e.yx, 118.0) - noiseAt(rp - e.yx, 118.0)) * 0.7
-             + (noiseAt(rp + e.yx * 0.6 + 57.0, 47.0) - noiseAt(rp - e.yx * 0.6 + 57.0, 47.0)) * 0.3;
+    float r0 = noiseFineAt(rp, 118.0), r1 = noiseFineAt(rp * 1.0 + 57.0, 47.0);
+    float rx = (noiseFineAt(rp + e.xy, 118.0) - noiseFineAt(rp - e.xy, 118.0)) * 0.7
+             + (noiseFineAt(rp + e.xy * 0.6 + 57.0, 47.0) - noiseFineAt(rp - e.xy * 0.6 + 57.0, 47.0)) * 0.3;
+    float ry = (noiseFineAt(rp + e.yx, 118.0) - noiseFineAt(rp - e.yx, 118.0)) * 0.7
+             + (noiseFineAt(rp + e.yx * 0.6 + 57.0, 47.0) - noiseFineAt(rp - e.yx * 0.6 + 57.0, 47.0)) * 0.3;
     vec3 Nd = normalize(vec3(-(gr.x + rx * uRippleGain) * uSlope,
                              -(gr.y + ry * uRippleGain) * uSlope, 1.0));
 
@@ -498,10 +533,13 @@ void main()
     // at wavelet scale instead of letting it carry per-pixel variation
     vec2 ee = vec2(2.4, 0.0);
     float fs1 = uFineScale, fs2 = uFineScale * 0.40;
-    float fgx = (noiseAt(mq + ee.xy, fs1) - noiseAt(mq - ee.xy, fs1)) * 0.60
-              + (noiseAt(mq * 1.7 + ee.xy + 19.0, fs2) - noiseAt(mq * 1.7 - ee.xy + 19.0, fs2)) * 0.40;
-    float fgy = (noiseAt(mq + ee.yx, fs1) - noiseAt(mq - ee.yx, fs1)) * 0.60
-              + (noiseAt(mq * 1.7 + ee.yx + 19.0, fs2) - noiseAt(mq * 1.7 - ee.yx + 19.0, fs2)) * 0.40;
+    // Fine texture: fs1 34 and fs2 13.6 are minified 15x and 38x on the 512^2
+    // one, so this relief -- the dominant fine term in open water -- was being
+    // averaged flat before it reached the normal.
+    float fgx = (noiseFineAt(mq + ee.xy, fs1) - noiseFineAt(mq - ee.xy, fs1)) * 0.60
+              + (noiseFineAt(mq * 1.7 + ee.xy + 19.0, fs2) - noiseFineAt(mq * 1.7 - ee.xy + 19.0, fs2)) * 0.40;
+    float fgy = (noiseFineAt(mq + ee.yx, fs1) - noiseFineAt(mq - ee.yx, fs1)) * 0.60
+              + (noiseFineAt(mq * 1.7 + ee.yx + 19.0, fs2) - noiseFineAt(mq * 1.7 - ee.yx + 19.0, fs2)) * 0.40;
     vec3 Nf = normalize(vec3(-fgx * uFineGain, -fgy * uFineGain, 1.0));
     // PATCHY, not uniform. Every layer in this renderer -- relief, chop crests,
     // streaks, foam -- had been applied evenly across the whole sea, and the
@@ -660,10 +698,38 @@ void main()
     // hatching, not drawing.
     // Sampled on the lifted surface: seen obliquely, the foam line on a crest
     // sits above that crest's plan position by its own height.
-    float hnL = texture(texGeom, uv + vec2(0.0, liftPx * hn) / uRes).x;
-    float crestLine = contourLine(hnL, uCrestLevel, uCrestLineW) * (0.10 + 0.90 * facing);
+    // Contoured from the PATH field, not the summed height. Contouring hn (or
+    // hForm) shreds the stroke: both are sums of trains at comparable amplitude,
+    // and a beat's level set breaks wherever its components cancel. Measured at
+    // 2.18x the boundary-per-unit-stroke a clean band of this width would have,
+    // against 1.46x for the single train -- that difference is the cauliflower
+    // edge, and it is why the sea read as mottled rather than drawn.
+    vec4 PA = texture(texPath, uv + vec2(0.0, liftPx * hn) / uRes);
+    float hPath = PA.x, formEnv = PA.y, groupEnv = PA.z;
+    // Width carries the wave's state; the path never does.
+    float strokeW = uCrestLineW * mix(0.62, 1.30, clamp(groupEnv, 0.0, 1.6) / 1.6);
+    float crestLine = contourLine(hPath, uCrestLevel, strokeW) * (0.10 + 0.90 * facing);
+    // A SECOND clean train, drawn separately rather than summed into the first.
+    // One train gives smooth unbroken strokes -- and perfectly regular ones,
+    // which is what made the sea read as evenly-spaced corduroy once dirWander
+    // was removed. Summing the trains before contouring is what shredded the
+    // stroke in the first place (2.18x the boundary of a clean band). Drawing
+    // each train's own contour and taking the union keeps every stroke smooth
+    // while making their SPACING irregular, because two regular grids at
+    // different angles and wavelengths interleave irregularly.
+    float SSp = texture(texP, uv).y;
+    float bend2 = (noiseAt(px + vec2(313.0, 91.0), 640.0) - 0.5) * 1.6 * uFormBend;
+    float hPath2 = cos(SSp + bend2 - uOmegaS * uTime);
+    float crestLine2 = contourLine(hPath2, uCrestLevel, strokeW * 0.78)
+                     * (0.10 + 0.90 * facing) * uCrossTrain;
+    crestLine = max(crestLine, crestLine2);
+    // Waxing and waning ALONG the crest, so a run reads as separate strokes of
+    // different lengths rather than one unbroken rule across the frame. This is
+    // the variance the reference has, applied where it cannot bend the path.
+    float alongVary = 0.30 + 0.70 * sstep(0.26, 0.82,
+        formEnv * (0.55 + 0.75 * noiseAt(px + loopScroll(uDirDeep, 8.0, 300.0), 300.0)));
     float lineGate = clamp(breaking * 1.35 + whitecap * 1.0 + uCrestLineFloor, 0.0, 1.0);
-    float lineA = crestLine * lineGate;
+    float lineA = crestLine * lineGate * alongVary;
     base = mix(base, mix(cFoamThin, cFoamDense, 0.55), lineA * uCrestGain * (1.0 - uBare));
 
     // a soft residual edge underneath, so the stroke sits on something
@@ -677,7 +743,8 @@ void main()
     // ---- foam -------------------------------------------------------------
     float fresh = F.r, persist = F.g;
     vec2 fdir = normalize(flow4.xy + vec2(1e-4));
-    float lace = laceField(F.ba, fdir);
+    float laceTex;
+    float lace = laceField(F.ba, fdir, laceTex);
     // Reference foam blobs measure ~20:1 elongated (perimeter/sqrt(area) of
     // 8.3-9.6 against 3.54 for a disc): they are thin sinuous FILAMENTS, not
     // patches. Eroding with a smooth field just makes round holes and round
@@ -686,6 +753,8 @@ void main()
     // concentrated along its mid-level contours -- long branching strands.
     float ridge = 1.0 - abs(lace * 2.0 - 1.0);
     ridge = pow(clamp(ridge, 0.0, 1.0), uLaceRidge);
+    // Strength varies along the filament; its position never does.
+    ridge *= 0.45 + 0.55 * laceTex;
     float carve = mix(lace, 1.0 - ridge, uFilament);
     // Blend the isotropic carve with a flow-aligned line integral. The integral
     // is what makes foam form continuous streaks instead of disconnected patches.
@@ -720,6 +789,8 @@ void main()
     // whitecap p95 is 0.00, yet the composite was painting solid sheets there.
     float surfZone = 1.0 - sstep(uFoamDeep, uFoamDeep * 2.4, depth);
     float thrF = uFoamThrFresh * mix(uFoamDeepThr, 1.0, surfZone);
+    // Foam gathers where the sea is working and thins where it is not.
+    thrF *= mix(1.0 + uRegionFoam, 1.0 - uRegionFoam, regionE);
     float carved = cover * (1.0 - uFoamErodeK * erode * clamp(carve * 1.15 - 0.10, 0.0, 1.0));
     float foamA = sstep(thrF, thrF + uFoamSoft, carved);
     // Solidify. The erosion field varies more widely than the threshold, so the
@@ -780,6 +851,36 @@ void main()
     foamCol = mix(foamCol, mix(foamCol, base, 0.55), uFoamAer * thinF);
     base = mix(base, foamCol, foamA * water * uFoamMass * aer);
 
+    // ---- foam WISPS ---------------------------------------------------------
+    // Thin bright lines along the foam field's own level sets. Thresholding gives
+    // soft masses; the reference's open water is smooth blue crossed by hair-fine
+    // bright filaments -- maximum contrast for minimum area, and the thing the eye
+    // reads as water rather than cloth. Measured, our fine detail is nearly
+    // per-pixel noise (neighbour correlation 0.193 against the plate's 0.583)
+    // while the foam FIELD is smooth (0.657): the structure exists in the
+    // simulation and was being thrown away by thresholding it into blobs.
+    // Same contour trick that fixed the crest stroke, on a field that advects,
+    // so the line follows the flow and curves with it instead of running straight.
+    // RIDGE, not level set. contourLine draws where a field crosses a level, so a
+    // blob returns a closed ring with a dark middle -- which is exactly why the
+    // first version read as outlines and soap suds rather than strokes.
+    // Subtracting a blurred copy of the same field leaves its SPINE positive, so
+    // the stroke runs down the middle of each wisp and is solid.
+    vec2 wo = vec2(uWispW) / uRes;
+    float cb = texture(texFoam, uv + vec2( wo.x, 0.0)).g
+             + texture(texFoam, uv + vec2(-wo.x, 0.0)).g
+             + texture(texFoam, uv + vec2(0.0,  wo.y)).g
+             + texture(texFoam, uv + vec2(0.0, -wo.y)).g
+             + texture(texFoam, uv + vec2( wo.x * 0.7,  wo.y * 0.7)).g
+             + texture(texFoam, uv + vec2(-wo.x * 0.7,  wo.y * 0.7)).g
+             + texture(texFoam, uv + vec2( wo.x * 0.7, -wo.y * 0.7)).g
+             + texture(texFoam, uv + vec2(-wo.x * 0.7, -wo.y * 0.7)).g;
+    cb *= 0.125;
+    float wisp = clamp((cover - cb) * uWispSharp, 0.0, 1.0);
+    wisp *= sstep(thrF * 0.10, thrF * 0.60, cover) * (1.0 - foamA * 0.55);
+    base = mix(base, mix(cFoamBody, cFoamDense, 0.55),
+               clamp(wisp * uWispGain, 0.0, 1.0) * water * (1.0 - uBare));
+
     // ---- lace LINES --------------------------------------------------------
     // The tangled net of foam near the shore is drawn, not filled: constant-width
     // strokes along the contours of the advected lace field, so they ride with the
@@ -806,6 +907,20 @@ void main()
     }
 
     // ---- assemble ---------------------------------------------------------
+    // Calm stretches sit darker and glassier; worked stretches are paler from
+    // aeration and scattered sky. One field, so they agree with the foam.
+    base *= mix(1.0 - uRegionTone, 1.0 + uRegionTone, regionE);
+
+    // ---- colour with height -------------------------------------------------
+    // The plate couples brightness to TEALNESS at +0.440; we were at +0.323, and
+    // its darkest water sits at rgb (0.055,0.154,0.232) against our
+    // (0.071,0.178,0.267) -- about 25% lighter in every channel. So: troughs go
+    // deeper and crests go teal, both keyed to the wave height that already
+    // exists rather than to another noise field.
+    float hUp = clamp(hn * 0.5 + 0.5, 0.0, 1.0);
+    base *= mix(1.0 - uTroughDark, 1.0, sstep(0.06, 0.62, hUp));
+    base += vec3(-0.55, 0.62, 0.30) * (uCrestTeal * sstep(0.42, 0.96, hUp));
+    base = max(base, vec3(0.0));
     vec3 wcol = base * mix(1.0, vig, uVigMix * (1.0 - uBare));
     wcol *= uExposure;
     float wl = dot(wcol, LUMA);

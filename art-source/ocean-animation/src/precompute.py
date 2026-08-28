@@ -114,6 +114,39 @@ def tileable_fbm(size=512, seed=11):
     return out
 
 
+def tileable_fbm_fine(size=64, seed=29):
+    """A SECOND noise texture, small and flat, for fine-scale lookups.
+
+    noiseAt(px, S) samples the 512^2 texture at 512/S texels per screen pixel, so
+    every lookup below scale 512 is minified -- 13x at the lace scale, 47x at the
+    finest. The mipmap then averages the detail away, which is correct (it is what
+    stopped the 1-4 px aliasing) but leaves nothing at fine scales. Measured
+    against the plate, the render matched at 128 px features and fell to 0.63 at
+    64 px, 0.62 at 16 px and 0.49 at 4 px, with a spectral slope of -2.15 against
+    the plate's -1.96. That uniform fine-scale deficit IS the blurriness.
+
+    64 texels means a lookup at scale ~48 lands near one texel per pixel, so the
+    detail survives. The flatter beta gives it real fine content rather than the
+    ~25-texel features the big texture carries.
+    """
+    rng = np.random.default_rng(seed)
+    fy = np.fft.fftfreq(size)[:, None]
+    fx = np.fft.fftfreq(size)[None, :]
+    r = np.sqrt(fx * fx + fy * fy)
+    r[0, 0] = 1e-6
+    out = np.zeros((size, size, 4), np.float32)
+    betas = [1.45, 1.30, 1.60, 1.35]
+    for c in range(4):
+        w = rng.normal(size=(size, size))
+        F = np.fft.fft2(w) * (r ** (-betas[c] / 2.0))
+        F[0, 0] = 0
+        a = np.real(np.fft.ifft2(F))
+        a = (a - a.mean()) / (a.std() + 1e-9)
+        a = 0.5 + 0.5 * np.tanh(a * 0.62)
+        out[..., c] = a.astype(np.float32)
+    return out
+
+
 def _famkey(families):
     parts = []
     for n in sorted(families):
@@ -141,13 +174,14 @@ def build(families, force=False):
     dirP_deep = families['primary'][0]
     impact, sites = impact_sites(sdf, water, np.array(dirP_deep) / np.linalg.norm(dirP_deep))
     noise = tileable_fbm()
+    noise_fine = tileable_fbm_fine()
 
     out = dict(ampP=np.clip(ampP, 0.3, 3.2).astype(np.float32),
                ampS=np.clip(ampS, 0.3, 3.2).astype(np.float32),
                ampC=np.clip(ampC, 0.3, 2.2).astype(np.float32),
                focus=focus.astype(np.float32),
                impact=impact.astype(np.float32),
-               noise=noise)
+               noise=noise, noise_fine=noise_fine)
     np.savez_compressed(cache, sites=np.array(sites, dtype=object), **out)
     print(f'   precompute: ampP {out["ampP"].min():.2f}..{out["ampP"].max():.2f}  '
           f'focus {focus.min():.2f}..{focus.max():.2f}')
