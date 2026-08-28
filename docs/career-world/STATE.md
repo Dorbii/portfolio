@@ -64,7 +64,7 @@ F27 baseline-calibrated gates (coast); structural-vs-terrain drift; 240px chroma
 
 ## Standing debts & parked
 
-Shore/docks creative brief (owner). Shimmer tuning ladder (owner: concept accepted, "needs tweaks"; coverage 21.75%). Ocean far-field r7. Water-effects panel + trials → commit path once owner blesses water. 96 MiB terrain-global variants. Ocean life sub-layer (fish/boats — out of scope for now). Animation grammar phase (train + wheel + all heroes). Findings-ledger essay.
+Shore/docks creative brief (owner). LoD transition lane (owner note 2026-08-28: territory→capital is a hard pop, no crossfade; plus hard rectangular tier boundaries where sharp canon meets blurry territory terrain — evidence `.codex-tmp/qa/LOD-NOTE/`; fix = zoom-band opacity crossfade + canon-edge blend band; L-sensitive, needs owner go). Shimmer tuning ladder (owner: concept accepted, "needs tweaks"; coverage 21.75%). Ocean far-field r7. Water-effects panel + trials → commit path once owner blesses water. 96 MiB terrain-global variants. Ocean life sub-layer (fish/boats — out of scope for now). Animation grammar phase (train + wheel + all heroes). Findings-ledger essay.
 
 ## Rules that bite (unchanged + tonight's additions)
 
