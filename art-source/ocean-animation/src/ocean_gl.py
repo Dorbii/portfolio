@@ -179,6 +179,8 @@ class OceanRenderer:
                   uSteep=p['steep'], uSetMix=p['setMix'], uSetCycles=p['setCycles'],
                   uBreakGamma=p['breakGamma'], uWhitecapSteep=p['whitecapSteep'],
                   uChopGain=p['chopGain'], uJitter=p['jitter'], uStokes=p['stokes'], uStokesDeep=float(p.get('stokesDeep', 1.0)),
+                  uCurlScale=float(p.get('curlScale', 110.0)),
+                  uCurlGain=float(p.get('curlGain', 0.0)),
                   uBackwash=p['backwash'],
                   uPeriodP=p['families']['primary'][1],
                   uPeriodS=p['families']['secondary'][1],
@@ -206,11 +208,16 @@ class OceanRenderer:
         self._bindtex(prog, self.tGeom, 'texGeom', n)
         self._bindtex(prog, self.tFlow, 'texFlow', n + 1)
         self._bindtex(prog, self.foam[self.cur], 'texPrev', n + 2)
+        self._bindtex(prog, self.tPath, 'texPath', n + 3)
         self._set(prog, uDt=dt, uTauFresh=p['tauFresh'], uTauPersist=p['tauPersist'],
                   uInjBreak=p['injBreak'], uInjWhitecap=p['injWhitecap'],
                   uInjShore=p['injShore'], uRelax=p['foamRelax'],
                   uDiffuse=p['foamDiffuse'], uFoamBlend=p['foamBlend'],
                   uFoamDeepFade=float(p.get('foamDeepFade', 0.93)),
+                  uInjFilament=float(p.get('injFilament', 0.0)),
+                  uInjCrestW=float(p.get('injCrestW', 5.0)),
+                  uInjCrestLevel=float(p.get('injCrestLevel', 0.35)),
+                  uInjCrestBoost=float(p.get('injCrestBoost', 9.0)),
                   uFirst=1.0 if first else 0.0)
         self.fboFoam[1 - self.cur].use()
         vao.render(moderngl.TRIANGLES)
@@ -315,6 +322,8 @@ class OceanRenderer:
                   uRegionTone=float(p.get('regionTone', 0.0)),
                   uTroughDark=float(p.get('troughDark', 0.0)),
                   uCrestTeal=float(p.get('crestTeal', 0.0)),
+                  uShadeSmooth=float(p.get('shadeSmooth', 3.0)),
+                  uShadeSmoothMix=float(p.get('shadeSmoothMix', 0.0)),
                   uRegionFoam=float(p.get('regionFoam', 0.0)))
         self.fboOut.use(); self.ctx.viewport = (0, 0, self.W, self.H)
         vao.render(moderngl.TRIANGLES)

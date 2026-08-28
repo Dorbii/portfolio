@@ -38,6 +38,15 @@ float loopSin(float t, float cycles, float phase){
 float sstep(float a, float b, float x){ return smoothstep(a, b, x); }
 
 // ---------------------------------------------------------------------------
+float contourLine(float f, float level, float widthPx)
+{
+    float d = f - level;
+    float g = length(vec2(dFdx(f), dFdy(f))) + 1e-7;
+    return 1.0 - smoothstep(0.0, widthPx * g, abs(d));
+}
+
+
+// ---------------------------------------------------------------------------
 // MARKS, not fields.
 //
 // Everything soft in this renderer is a smoothstep of a smooth field, which is

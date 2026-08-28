@@ -35,7 +35,7 @@ COMMON = dict(
     chopCrest=0.10, chopGlint=0.70, chopW=3.4,
     # Sky reflection and gloss. The gloss lobe is deliberately far tighter than
     # the diffuse one: broad is haze, tight is a highlight.
-    skyMix=0.24, fresnelP=13.0, glossGain=0.55, glossShin=52.0,
+    skyMix=0.24, fresnelP=13.0, glossGain=0.55, glossShin=34.0,
     chopShade=0.55,
     # Fine surface relief: shading only, never in the height field.
     fineScale=34.0, fineGain=2.3, fineShade=0.18, fineGloss=0.10, fineSpeed=17.0,
@@ -109,12 +109,22 @@ COMMON = dict(
     regionDepth=0.45, regionContrast=1.9, regionTone=0.16, regionFoam=0.55,
     # Troughs go deeper, crests go teal. See composite.frag.
     troughDark=0.30, crestTeal=0.11,
+    # Band-limit the shading normal so the body is smooth. See composite.frag.
+    shadeSmooth=5.0, shadeSmoothMix=1.0,
     # Variance in the DRAWN wave form: bend makes crests curve, group makes them
     # wax and wane along their length so they read as separate strokes.
     formBend=0.70, formGroup=0.85, formFine=0.42,
     sprayRise=26.0, sprayFall=16.0,
     # Fraction of the shoreward Stokes drift surviving in deep water. See wave.frag.
     stokesDeep=0.18,
+    # EXPERIMENT: divergence-free shear folding foam into filaments. 0 disables.
+    curlScale=110.0, curlGain=0.0,
+    # EXPERIMENT: foam born along the crest LINE rather than in patches.
+    # Marginal: foam does organise onto the crest lines and the thinness measure
+    # moves toward the plate (0.919 -> 0.819 against 0.788) with coverage landing
+    # on it, but neighbour coherence dips (0.281 -> 0.258) and it reads noisier.
+    # Left off; the machinery stays for a later pass.
+    injFilament=0.0, injCrestW=5.0, injCrestLevel=0.35, injCrestBoost=9.0,
 )
 
 PRESETS = {}

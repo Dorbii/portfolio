@@ -25,6 +25,7 @@ uniform float uChopGain;
 uniform float uJitter;                  // crest-spacing jitter, radians
 uniform float uStokes;                  // shoreward drift gain
 uniform float uStokesDeep;              // fraction of that drift surviving in deep water
+uniform float uCurlScale, uCurlGain;    // divergence-free shear that folds foam into filaments
 uniform float uBackwash;                // seaward pull gain
 uniform float uPeriodP, uPeriodS, uPeriodC;
 uniform vec3  uHarmM;   // primary harmonic wavenumber ratios
@@ -452,6 +453,32 @@ void main()
     vec4 nc = noise4(px + loopScroll(vec2(0.0, 1.0), 6.0, 320.0), 320.0);
     vec4 nc2 = noise4(px + loopScroll(vec2(1.0, 0.0), 5.0, 320.0), 320.0);
     flow += vec2(nc.g - 0.5, nc2.b - 0.5) * (7.0 + 20.0 * breaking) * (0.35 + 0.65 * shallow);
+
+    // ---- curl shear ---------------------------------------------------------
+    // Foam is drawn into filaments by velocity SHEAR, and this flow has almost
+    // none at small scale. The turbulence above is deliberately coarse (320 px)
+    // because fine random shear scrambled the foam's material coordinates -- and
+    // it does, because random noise is not divergence-free: it has sources and
+    // sinks, so foam piles into some cells and is torn out of others.
+    //
+    // The curl of a scalar potential has neither. It can only stretch, fold and
+    // rotate, which is exactly the operation that turns a patch into a filament.
+    // That matters because the plate's fine foam is a CONNECTED BRANCHING
+    // network, and the stamped-mark experiment showed independent shapes cannot
+    // make one -- it has to be a continuous field folded by the flow.
+    vec2 ce = vec2(1.6, 0.0);
+    float cs1 = uCurlScale;
+    vec2 cp1 = px + loopScroll(uDirDeep, 4.0, cs1);
+    float g1x = noise4(cp1 + ce.xy, cs1).r - noise4(cp1 - ce.xy, cs1).r;
+    float g1y = noise4(cp1 + ce.yx, cs1).r - noise4(cp1 - ce.yx, cs1).r;
+    float cs2 = uCurlScale * 0.42;
+    vec2 cp2 = px + loopScroll(uDirDeep, 3.0, cs2) + vec2(83.0, 41.0);
+    float g2x = noise4(cp2 + ce.xy, cs2).g - noise4(cp2 - ce.xy, cs2).g;
+    float g2y = noise4(cp2 + ce.yx, cs2).g - noise4(cp2 - ce.yx, cs2).g;
+    // curl of a 2-D scalar potential: (dpsi/dy, -dpsi/dx)
+    vec2 curl = vec2(g1y, -g1x) * (cs1 / (2.0 * ce.x))
+              + vec2(g2y, -g2x) * (cs2 / (2.0 * ce.x)) * 0.65;
+    flow += curl * uCurlGain * (0.40 + 0.60 * shallow);
 
     outGeom = vec4(hn, acc.g.x, acc.g.y, clamp(breaking, 0.0, 1.0));
     // ---- clean wave FORM, for shading only ---------------------------------

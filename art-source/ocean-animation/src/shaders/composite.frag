@@ -25,7 +25,8 @@ uniform float uSprayGain;
 uniform float uExposure, uSat, uVigMix;
 uniform float uAbyssMix;   // how far deep water reaches toward the abyss colour
 uniform float uRegionTone, uRegionFoam;
-uniform float uTroughDark, uCrestTeal;  // depth in the troughs, teal on the crests  // how far regional weather moves tone and foam
+uniform float uTroughDark, uCrestTeal;
+uniform float uShadeSmooth, uShadeSmoothMix;  // band-limit the shading normal  // depth in the troughs, teal on the crests  // how far regional weather moves tone and foam
 uniform float uOmegaS;      // secondary train angular frequency, loop-quantised
 uniform float uWispLevel, uWispW, uWispGain, uWispSharp;
 uniform float uMarkCell, uMarkLen, uMarkWid, uMarkDensity, uMarkWander, uMarkGain;  // thin filaments along the foam field's level sets
@@ -65,13 +66,6 @@ const vec3 LUMA = vec3(0.299, 0.587, 0.114);
 // fixed number of pixels wide wherever it runs, instead of fat where the field
 // is flat and hairline where it is steep -- which is what makes it read as drawn
 // rather than thresholded.
-// ---------------------------------------------------------------------------
-float contourLine(float f, float level, float widthPx)
-{
-    float d = f - level;
-    float g = length(vec2(dFdx(f), dFdy(f))) + 1e-7;
-    return 1.0 - smoothstep(0.0, widthPx * g, abs(d));
-}
 
 vec3 depthRamp(float d)
 {
@@ -259,6 +253,26 @@ void main()
     vec2 grS = SW.xy;
     float hnS = SW.z;        // swell-only height, chop-free
     float bphase = SW.w;     // 0 offshore -> 1 at collapse
+    // ---- band-limited shading normal ---------------------------------------
+    // The mottle is the SHADING, not any drawn layer: rendered with slope 0 the
+    // water is smooth, and it stays mottled with every style layer stripped and
+    // with the chop family removed. Ns is built from the swell gradient, which
+    // still carries enough fine structure that the diffuse term breaks into the
+    // 4-8 px patches that read as blocky mottle at 1:1.
+    //
+    // The plate is smooth water crossed by thin bright filaments. So the broad
+    // tone gets a band-limited normal, and the detail is DRAWN on top rather
+    // than shaded in -- which is the one thing that has worked all session.
+    vec2 sso = vec2(uShadeSmooth) / uRes;
+    vec2 gsm = texture(texSwell, uv + vec2( sso.x, 0.0)).xy
+             + texture(texSwell, uv + vec2(-sso.x, 0.0)).xy
+             + texture(texSwell, uv + vec2(0.0,  sso.y)).xy
+             + texture(texSwell, uv + vec2(0.0, -sso.y)).xy
+             + texture(texSwell, uv + sso * 0.7).xy
+             + texture(texSwell, uv - sso * 0.7).xy
+             + texture(texSwell, uv + vec2(sso.x, -sso.y) * 0.7).xy
+             + texture(texSwell, uv + vec2(-sso.x, sso.y) * 0.7).xy;
+    grS = mix(grS, gsm * 0.125, uShadeSmoothMix);
     vec3 Ns = normalize(vec3(-grS.x * uSlope, -grS.y * uSlope, 1.0));
 
     vec2 rp = px + loopScroll(uDirDeep, 22.0, 118.0);
@@ -268,8 +282,27 @@ void main()
              + (noiseFineAt(rp + e.xy * 0.6 + 57.0, 47.0) - noiseFineAt(rp - e.xy * 0.6 + 57.0, 47.0)) * 0.3;
     float ry = (noiseFineAt(rp + e.yx, 118.0) - noiseFineAt(rp - e.yx, 118.0)) * 0.7
              + (noiseFineAt(rp + e.yx * 0.6 + 57.0, 47.0) - noiseFineAt(rp - e.yx * 0.6 + 57.0, 47.0)) * 0.3;
-    vec3 Nd = normalize(vec3(-(gr.x + rx * uRippleGain) * uSlope,
-                             -(gr.y + ry * uRippleGain) * uSlope, 1.0));
+    // Band-limited gradient for the SPECULAR normals. Isolation put the mottle
+    // here and nowhere else: rendered with gloss, spec and sheen all zero the
+    // water body is smooth, and it stays mottled with every drawn layer stripped,
+    // with the chop family removed, and with each specular term zeroed on its own.
+    // The cause is the lobe exponent -- gloss runs pow(dot(N,H), 114) against a
+    // normal built from the full-frequency gradient, so any pixel-scale wobble in
+    // that gradient becomes a hard on/off highlight. That is the 4-8 px blocky
+    // mottle, and it is why sharpening amplified it and denoising removed our
+    // only fine content along with it.
+    vec2 gso = vec2(uShadeSmooth) / uRes;
+    vec2 grSm = texture(texGeom, uv + vec2( gso.x, 0.0)).yz
+              + texture(texGeom, uv + vec2(-gso.x, 0.0)).yz
+              + texture(texGeom, uv + vec2(0.0,  gso.y)).yz
+              + texture(texGeom, uv + vec2(0.0, -gso.y)).yz
+              + texture(texGeom, uv + gso * 0.7).yz
+              + texture(texGeom, uv - gso * 0.7).yz
+              + texture(texGeom, uv + vec2(gso.x, -gso.y) * 0.7).yz
+              + texture(texGeom, uv + vec2(-gso.x, gso.y) * 0.7).yz;
+    vec2 grL = mix(gr, grSm * 0.125, uShadeSmoothMix);
+    vec3 Nd = normalize(vec3(-(grL.x + rx * uRippleGain) * uSlope,
+                             -(grL.y + ry * uRippleGain) * uSlope, 1.0));
 
     vec3 L = normalize(vec3(-0.62, -0.55, 0.56));     // sun, upper-left, measured
     // This is a 2.5D view, not a plan view: the camera looks at the water plane

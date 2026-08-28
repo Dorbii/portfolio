@@ -7,7 +7,7 @@ out vec4 outFoam;
 
 #include "common.glsl"
 
-uniform sampler2D texGeom, texFlow, texPrev;
+uniform sampler2D texGeom, texFlow, texPrev, texPath;
 uniform float uDt;
 uniform float uTauFresh, uTauPersist;
 uniform float uInjBreak, uInjWhitecap, uInjShore;
@@ -15,6 +15,7 @@ uniform float uRelax;        // seconds for material coords to relax back
 uniform float uDiffuse;
 uniform float uFoamBlend;   // per-step weight of the diffused neighbourhood
 uniform float uFoamDeepFade; // how hard offshore whitecap injection is cut
+uniform float uInjFilament, uInjCrestW, uInjCrestLevel, uInjCrestBoost;
 uniform float uFirst;        // 1.0 on the very first step
 
 void main()
@@ -78,8 +79,22 @@ void main()
     // whitecap foam is a transient streak that cannot accumulate into the ice
     // floes this was written to stop. Do not also refuse to create it.
     float deepFade = 1.0 - uFoamDeepFade * smoothstep(15.0, 38.0, depthPx);
-    float inj = breaking * uInjBreak
-              + whitecap * uInjWhitecap * deepFade
+    // ---- filamentary injection ---------------------------------------------
+    // Foam is BORN at breaking crests, and a crest is a LINE. Injecting on the
+    // broad `breaking` and `whitecap` fields makes it born as a patch, and a
+    // patch stays a patch: measured, foam lives 6.4 s here, while real filaments
+    // are folded out of surface material over minutes of circulation. Shear
+    // cannot make a filament from a blob in six seconds -- adding divergence-free
+    // curl shear moved neighbour coherence 0.281 to 0.293 and nothing else, and
+    // cutting the diffusion so shear could act made the foam field WORSE (0.543
+    // to 0.328), because the diffusion was what kept it smooth.
+    //
+    // So the filament has to be there at birth. Gate injection by the crest
+    // contour and boost to compensate for the smaller area it covers.
+    float hPath = texture(texPath, uv).x;
+    float crestLine = contourLine(hPath, uInjCrestLevel, uInjCrestW);
+    float lineGate = mix(1.0, crestLine * uInjCrestBoost, uInjFilament);
+    float inj = (breaking * uInjBreak + whitecap * uInjWhitecap * deepFade) * lineGate
               + shoreZone * uInjShore * (0.22 + 0.78 * clamp(hn, 0.0, 1.0)) * (0.30 + 0.70 * breaking);
     inj *= water;
 
