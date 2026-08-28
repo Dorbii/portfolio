@@ -71,6 +71,16 @@ COMMON = dict(
     crossTrain=0.62,
     # Hair-fine filaments along the foam field's level sets. See composite.frag.
     wispLevel=0.55, wispW=3.0, wispGain=1.30, wispSharp=7.0,
+    # NEGATIVE RESULT, kept reproducible behind markGain 0. Stamped capsule marks
+    # with real edges DO close the spectral gap (fine-band energy 0.45 -> 0.89 of
+    # the plate) but read wrong at every setting: dense and small gives scratchy
+    # hatching and collapses neighbour coherence to 0.03, sparse and large reads
+    # as debris floating on the surface. The plate's fine foam is a CONNECTED
+    # BRANCHING network of variable width, and a population of independent stamps
+    # cannot make one however it is tuned. The ridge of a continuous advected
+    # field (the wisps) is the shape that can.
+    markCell=7.0, markLen=4.2, markWid=1.1, markDensity=0.55, markWander=0.55,
+    markGain=0.0,
     posterize=0.07, bands=22.0, bandSoft=0.42,
     # How far deep water reaches toward the abyss colour. See composite.frag.
     abyssMix=0.95,

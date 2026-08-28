@@ -27,7 +27,8 @@ uniform float uAbyssMix;   // how far deep water reaches toward the abyss colour
 uniform float uRegionTone, uRegionFoam;
 uniform float uTroughDark, uCrestTeal;  // depth in the troughs, teal on the crests  // how far regional weather moves tone and foam
 uniform float uOmegaS;      // secondary train angular frequency, loop-quantised
-uniform float uWispLevel, uWispW, uWispGain, uWispSharp;  // thin filaments along the foam field's level sets
+uniform float uWispLevel, uWispW, uWispGain, uWispSharp;
+uniform float uMarkCell, uMarkLen, uMarkWid, uMarkDensity, uMarkWander, uMarkGain;  // thin filaments along the foam field's level sets
 uniform float uFormBend;    // same crest curvature the wave pass uses
 uniform float uCrossTrain;  // weight of the second stroke train
 uniform float uDeepEnd, uShallowEnd;
@@ -880,6 +881,21 @@ void main()
     wisp *= sstep(thrF * 0.10, thrF * 0.60, cover) * (1.0 - foamA * 0.55);
     base = mix(base, mix(cFoamBody, cFoamDense, 0.55),
                clamp(wisp * uWispGain, 0.0, 1.0) * water * (1.0 - uBare));
+
+    // ---- foam MARKS ---------------------------------------------------------
+    // Stamped shapes rather than another thresholded field. Placed in the foam's
+    // material coordinates so they advect with the water, oriented along the
+    // local flow, and gated by how much foam is actually there -- dense in the
+    // surf, sparse flecks offshore, absent in clear water.
+    float markGate = sstep(thrF * 0.08, thrF * 0.75, cover);
+    float marksF = markField(F.ba, fdir, uMarkCell, uMarkLen, uMarkWid,
+                             uMarkDensity, uMarkWander, 11.0);
+    float marksC = markField(F.ba * 1.9 + vec2(37.0, 91.0), fdir, uMarkCell * 0.55,
+                             uMarkLen * 0.5, uMarkWid * 0.72,
+                             uMarkDensity * 0.85, uMarkWander * 1.5, 61.0);
+    float marks = max(marksF, marksC * 0.8) * markGate * (1.0 - foamA * 0.45);
+    base = mix(base, mix(cFoamBody, cFoamDense, 0.7),
+               clamp(marks * uMarkGain, 0.0, 1.0) * water * (1.0 - uBare));
 
     // ---- lace LINES --------------------------------------------------------
     // The tangled net of foam near the shore is drawn, not filled: constant-width
