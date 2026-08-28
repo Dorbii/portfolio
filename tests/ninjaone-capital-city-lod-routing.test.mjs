@@ -26,13 +26,19 @@ import {
   NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN,
   NINJAONE_CAPITAL_D05_CONCEPT,
   NINJAONE_CAPITAL_D05_CONCEPT_TIER_MAXIMUM_SPANS,
+  ninjaOneCapitalD05WaterEffectTuning,
   ninjaOneCapitalD05ConceptTier,
   ninjaOneCapitalD05ConceptTierForSpan,
+  ninjaOneCapitalD05ConceptTierWeights,
 } from "../features/career-world/layers/city/model/ninjaOneCapitalD05Concept.ts";
 import {
   NINJAONE_CAPITAL_CITY_R3_CONTEXT,
   NINJAONE_CAPITAL_CITY_R3_PROGRESSIVE_WATER_EXCLUSION_MASK,
 } from "../features/career-world/layers/city/model/ninjaOneCapitalCityFoundationR3.ts";
+import {
+  NINJAONE_CAPITAL_D06_CANON,
+  ninjaOneCapitalD06CanonTierWeights,
+} from "../features/career-world/layers/city/model/ninjaOneCapitalD06Canon.ts";
 import {
   constrainNinjaOneCapitalCityProofCamera,
   NINJAONE_CAPITAL_CITY_DETAIL_POLICY,
@@ -817,14 +823,20 @@ test("city proof renderer fills the viewport and locks fixed proof zoom", async 
 });
 
 test("D05 canon pyramid serves capital, site, and close through one registered geometry", async () => {
-  const [registrationBytes, provenanceBytes, usableMaskBytes, shimmerMaskBytes] = await Promise.all([
+  const [registrationBytes, provenanceBytes, t47ProvenanceBytes, t47R1ProvenanceBytes, t48AuditBytes, usableMaskBytes, shimmerMaskBytes] = await Promise.all([
     readFile(new URL(`../public${NINJAONE_CAPITAL_D05_CONCEPT.registrationPath}`, import.meta.url)),
     readFile(new URL(`../public${NINJAONE_CAPITAL_D05_CONCEPT.provenancePath}`, import.meta.url)),
+    readFile(new URL("../public/career-world/capitals/ninjaone/city-v2/canon/d05-canon-ocean-removal-r2.provenance.json", import.meta.url)),
+    readFile(new URL("../public/career-world/capitals/ninjaone/city-v2/canon/d05-canon-ocean-removal-r1.provenance.json", import.meta.url)),
+    readFile(new URL("../public/career-world/capitals/ninjaone/city-v2/derived/territory-register-r1.provenance.json", import.meta.url)),
     readFile(new URL(`../public${NINJAONE_CAPITAL_D05_CONCEPT.usableMask.path}`, import.meta.url)),
     readFile(new URL(`../public${NINJAONE_CAPITAL_D05_CONCEPT.foliageShimmerMask.path}`, import.meta.url)),
   ]);
   const registration = JSON.parse(registrationBytes.toString("utf8"));
   const provenance = JSON.parse(provenanceBytes.toString("utf8"));
+  const t47Provenance = JSON.parse(t47ProvenanceBytes.toString("utf8"));
+  const t47R1Provenance = JSON.parse(t47R1ProvenanceBytes.toString("utf8"));
+  const t48Audit = JSON.parse(t48AuditBytes.toString("utf8"));
   const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
   const tiers = [
     ["capital", "capital"],
@@ -846,20 +858,93 @@ test("D05 canon pyramid serves capital, site, and close through one registered g
     assert.equal(NINJAONE_CAPITAL_D05_CONCEPT.tiers[zoomTier], tier);
     assert.deepEqual([metadata.width, metadata.height], tier.dimensions);
     assert.equal(sha256(tierBytes), tier.sha256);
-    assert.equal(provenance.tiers[provenanceTier].path, `public${tier.path}`);
-    assert.equal(provenance.tiers[provenanceTier].sha256, tier.sha256);
+    assert.equal(t47Provenance.tiers[provenanceTier].candidate.sha256, tier.sha256);
+    assert.deepEqual(t47Provenance.tiers[provenanceTier].candidate.dimensions.slice(0, 2), tier.dimensions);
   }
+  const d05Derived = t48Audit.entries.find(({ id }) => id === "d05");
+  const d06Derived = t48Audit.entries.find(({ id }) => id === "d06");
+  assert.equal(d05Derived.sourceSha256, NINJAONE_CAPITAL_D05_CONCEPT.tiers.capital.sha256);
+  assert.equal(d05Derived.outputSha256, NINJAONE_CAPITAL_D05_CONCEPT.tiers.territoryRegister.sha256);
+  assert.equal(d06Derived.outputSha256, NINJAONE_CAPITAL_D06_CANON.tiers.territoryRegister.sha256);
+  assert.ok(d05Derived.outputFrequencyEnergy <= t48Audit.analysis.targetFrequencyEnergyCeiling);
+  assert.ok(d06Derived.outputFrequencyEnergy <= t48Audit.analysis.targetFrequencyEnergyCeiling);
 
   const patchManifestBytes = await readFile(new URL(`../${provenance.source.t14ProofManifest.path}`, import.meta.url));
   const patchManifest = JSON.parse(patchManifestBytes.toString("utf8"));
   assert.equal(sha256(patchManifestBytes), provenance.source.t14ProofManifest.sha256);
-  assert.ok(patchManifest.inventory.some((entry) => entry.sha256 === NINJAONE_CAPITAL_D05_CONCEPT.tiers.close.sha256));
+  assert.ok(patchManifest.inventory.some((entry) => entry.sha256 === provenance.boundaryPainting.parentCloseSha256));
+  const boundaryReport = JSON.parse(await readFile(new URL(`../${provenance.boundaryPainting.reportPath}`, import.meta.url), "utf8"));
+  assert.equal(boundaryReport.outputs.d05.close, provenance.seamExtension.parentCloseSha256);
+  assert.deepEqual(boundaryReport.changedExtentMaster.d05Intersection, provenance.boundaryPainting.changedExtentMaster);
+  const seamExtensionReport = JSON.parse(await readFile(new URL(`../${provenance.seamExtension.reportPath}`, import.meta.url), "utf8"));
+  assert.equal(seamExtensionReport.derivatives.d05.close.sha256, t47R1Provenance.sourceHashAudit.close);
+  assert.equal(t47R1Provenance.tiers.close.candidate.sha256, t47Provenance.sourceHashAudit.close);
+  assert.equal(boundaryReport.changedExtentMaster.outsideStripChangedPixels, 0);
   assert.equal(provenance.source.plateB.sha256, "da6bfce555a425b5aa04ed90c07a86dfcffee6bc6d18b0051ee610ca1987a20b");
   assert.equal(registration.id, "ninjaone-d05-anchor-cover@r4");
   assert.deepEqual(registration.canonPyramid.deltaPixels, [2, 2, 0]);
   assert.equal(registration.districtMask.coverage.maskedInteriorBlueWaterPixels, 0);
   assert.equal(provenance.ownerAcceptance.mountState, "files staged for F20; director owns live verification and commit");
   assert.equal(sha256(shimmerMaskBytes), provenance.foliageShimmer.sha256);
+});
+
+test("D06 layered composition recomposites the registered terrain base and byte-exact structure overlay", async () => {
+  const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
+  const registrationBytes = await readFile(new URL(
+    `../public${NINJAONE_CAPITAL_D06_CANON.structureOverlayRegistration.path}`,
+    import.meta.url,
+  ));
+  const registration = JSON.parse(registrationBytes.toString("utf8"));
+  const [baseBytes, overlayBytes, compositeBytes, waterBytes] = await Promise.all([
+    readFile(new URL(`../${registration.composition.terrainBase.path}`, import.meta.url)),
+    readFile(new URL(`../${registration.composition.overlay.path}`, import.meta.url)),
+    readFile(new URL(`../public${NINJAONE_CAPITAL_D06_CANON.tiers.close.path}`, import.meta.url)),
+    readFile(new URL(`../public${NINJAONE_CAPITAL_D06_CANON.paintedWaterMask.path}`, import.meta.url)),
+  ]);
+  const [base, overlay, composite, water] = await Promise.all([
+    sharp(baseBytes).removeAlpha().raw().toBuffer({ resolveWithObject: true }),
+    sharp(overlayBytes).ensureAlpha().raw().toBuffer({ resolveWithObject: true }),
+    sharp(compositeBytes).removeAlpha().raw().toBuffer({ resolveWithObject: true }),
+    sharp(waterBytes).greyscale().raw().toBuffer({ resolveWithObject: true }),
+  ]);
+
+  assert.equal(sha256(registrationBytes), NINJAONE_CAPITAL_D06_CANON.structureOverlayRegistration.sha256);
+  assert.deepEqual([overlay.info.width, overlay.info.height], registration.coordinateSpace.dimensions);
+  assert.deepEqual([base.info.width, base.info.height], registration.coordinateSpace.dimensions);
+  assert.deepEqual([composite.info.width, composite.info.height], registration.coordinateSpace.dimensions);
+  assert.equal(sha256(baseBytes), registration.composition.terrainBase.sha256);
+  assert.equal(sha256(overlayBytes), registration.composition.overlay.sha256);
+  assert.equal(sha256(compositeBytes), registration.composition.restComposite.sha256);
+
+  let transparentPixels = 0;
+  let opaquePixels = 0;
+  let nonBinaryAlphaPixels = 0;
+  let recompositeMismatches = 0;
+  let classifiedWaterThroughOpenings = 0;
+  for (let pixel = 0; pixel < overlay.info.width * overlay.info.height; pixel += 1) {
+    const alpha = overlay.data[pixel * 4 + 3];
+    if (alpha === 0) transparentPixels += 1;
+    else if (alpha === 255) opaquePixels += 1;
+    else nonBinaryAlphaPixels += 1;
+    if (alpha === 0 && water.data[pixel] > 0) classifiedWaterThroughOpenings += 1;
+    for (let channel = 0; channel < 3; channel += 1) {
+      const expected = alpha === 255 ? overlay.data[pixel * 4 + channel] : base.data[pixel * 3 + channel];
+      if (composite.data[pixel * 3 + channel] !== expected) recompositeMismatches += 1;
+    }
+  }
+  assert.ok(transparentPixels > 0);
+  assert.ok(opaquePixels > 0);
+  assert.equal(nonBinaryAlphaPixels, 0);
+  assert.equal(recompositeMismatches, 0);
+  assert.ok(classifiedWaterThroughOpenings > 0);
+
+  for (const carried of registration.carriedStatics) {
+    const bytes = await readFile(new URL(`../${carried.sourcePath}`, import.meta.url));
+    assert.equal(sha256(bytes), carried.sourceSha256);
+    assert.equal(carried.coordinateSpace, registration.coordinateSpace.id);
+  }
+  const routeBytes = await readFile(new URL(`../${registration.route.path}`, import.meta.url));
+  assert.equal(sha256(routeBytes), registration.route.sha256);
 });
 
 test("D05 canon serving preserves native source resolution at the owner-approved floor", () => {
@@ -887,6 +972,17 @@ test("D05 canon serving preserves native source resolution at the owner-approved
       >= floorSpan * fullCanonNativeWidth,
     "capital derivative must not be stretched beyond its native width beyond IEEE-754 rounding",
   );
+
+  for (const tierWeights of [
+    ninjaOneCapitalD05ConceptTierWeights({ capitalToSite: 0.5, siteToClose: 0 }),
+    ninjaOneCapitalD05ConceptTierWeights({ capitalToSite: 1, siteToClose: 0.5 }),
+    ninjaOneCapitalD06CanonTierWeights({ capitalToSite: 0.5, siteToClose: 0 }),
+    ninjaOneCapitalD06CanonTierWeights({ capitalToSite: 1, siteToClose: 0.5 }),
+  ]) {
+    assert.equal(tierWeights.length, 2, "transition bands must retain both source tiers");
+    assert.ok(tierWeights.every(({ opacity }) => opacity > 0 && opacity < 1));
+    assert.equal(tierWeights.reduce((total, { opacity }) => total + opacity, 0), 1);
+  }
 });
 
 test("D05 canon shimmer keeps the T6b single-channel derived-mask contract", async () => {
@@ -913,6 +1009,70 @@ test("D05 canon shimmer keeps the T6b single-channel derived-mask contract", asy
   assert.match(provenance.foliageShimmer.t10bRecipe, /HSV 56-92, saturation >=0\.40, 7px architecture buffer/);
   assert.equal(provenance.foliageShimmer.architectureStandoff.rawPixels, 7);
   assert.equal(provenance.foliageShimmer.architectureStandoff.violations, 0);
+});
+
+test("D05 canon water effects preserve derived masks, standoff, and bounded live tuning", async () => {
+  const effects = NINJAONE_CAPITAL_D05_CONCEPT.waterEffects;
+  const [sparkleBytes, foamBytes, crestBytes, directionBytes, phaseBytes, normalBytes, sdfBytes, rampBytes, manifestBytes] = await Promise.all([
+    readFile(new URL(`../public${effects.sparkle.maskPath}`, import.meta.url)),
+    readFile(new URL(`../public${effects.foam.maskPath}`, import.meta.url)),
+    readFile(new URL(`../public${effects.crest.maskPath}`, import.meta.url)),
+    readFile(new URL(`../public${effects.crest.directionFieldPath}`, import.meta.url)),
+    readFile(new URL(`../public${effects.crest.wavePhaseFieldPath}`, import.meta.url)),
+    readFile(new URL(`../public${effects.crest.pseudoNormalFieldPath}`, import.meta.url)),
+    readFile(new URL(`../public${effects.foam.shoreSdfPath}`, import.meta.url)),
+    readFile(new URL(`../public${effects.crest.rampLutPath}`, import.meta.url)),
+    readFile(new URL(`../public${effects.provenancePath}`, import.meta.url)),
+  ]);
+  const manifest = JSON.parse(manifestBytes.toString("utf8"));
+  const maskBytes = [sparkleBytes, foamBytes, crestBytes];
+  const maskMetadata = await Promise.all(maskBytes.map(async (bytes) => sharp(bytes).metadata()));
+  const maskSamples = await Promise.all(maskBytes.map(async (bytes) => (
+    sharp(bytes).greyscale().raw().toBuffer({ resolveWithObject: true })
+  )));
+  const directionMetadata = await sharp(directionBytes).metadata();
+  const [phaseMetadata, normalMetadata, sdfMetadata, rampMetadata] = await Promise.all([
+    sharp(phaseBytes).metadata(), sharp(normalBytes).metadata(),
+    sharp(sdfBytes).metadata(), sharp(rampBytes).metadata(),
+  ]);
+
+  for (let index = 0; index < maskMetadata.length; index += 1) {
+    assert.deepEqual(
+      [maskMetadata[index].width, maskMetadata[index].height, maskMetadata[index].channels],
+      [...effects.fieldDimensions, 1],
+    );
+    assert.ok(maskSamples[index].data.some((value) => value > 0), "effect mask must be non-empty");
+    assert.ok(maskSamples[index].data.some((value) => value === 0), "effect mask must stay selective");
+  }
+  assert.deepEqual(
+    [directionMetadata.width, directionMetadata.height, directionMetadata.channels],
+    [...effects.fieldDimensions, 3],
+  );
+  assert.deepEqual([phaseMetadata.width, phaseMetadata.height, phaseMetadata.channels], [...effects.fieldDimensions, 1]);
+  assert.deepEqual([normalMetadata.width, normalMetadata.height, normalMetadata.channels], [...effects.fieldDimensions, 3]);
+  assert.deepEqual([sdfMetadata.width, sdfMetadata.height, sdfMetadata.channels], [...effects.fieldDimensions, 1]);
+  assert.deepEqual([rampMetadata.width, rampMetadata.height, rampMetadata.channels], [256, 1, 3]);
+  assert.deepEqual(effects.dimensions, NINJAONE_CAPITAL_D05_CONCEPT.tiers.close.dimensions);
+  assert.equal(effects.sourcePath, NINJAONE_CAPITAL_D05_CONCEPT.tiers.close.path);
+  assert.equal(manifest.safety.standoffRawPixels, 7);
+  assert.equal(manifest.safety.violations, 0);
+  const periods = manifest.sparkle.glints.map(({ periodSeconds }) => periodSeconds);
+  assert.equal(new Set(periods).size, periods.length, "glints must not share discrete period buckets");
+  assert.ok(manifest.sparkle.glints.every(({ dutyCycle }) => dutyCycle >= 0.3 && dutyCycle <= 0.5));
+  assert.ok(manifest.sparkle.glints.every(({ offset }) => offset >= 0 && offset < 1));
+  assert.equal(manifest.crest.wavePhaseField.path, effects.crest.wavePhaseFieldPath);
+  assert.equal(manifest.foam.shoreSdf.path, effects.foam.shoreSdfPath);
+  assert.equal(manifest.crest.directionField.path, effects.crest.directionFieldPath);
+  assert.ok(Number.isFinite(manifest.crest.travelDirection.x));
+  assert.ok(Number.isFinite(manifest.crest.travelDirection.y));
+  assert.deepEqual(
+    ninjaOneCapitalD05WaterEffectTuning("?city-water.opacity=0.5&city-water.shoreRamp=1&water-effects.sparkle=1.25&water-effects.foam=-1&water-effects.crest=9"),
+    { cityWaterOpacity: 0.5, cityWaterShoreRamp: 1, sparkle: 1.25, foam: 0, crest: 2, relight: 1, cycling: 1, swell: 1 },
+  );
+  assert.deepEqual(
+    ninjaOneCapitalD05WaterEffectTuning("?water-effects.relight=-1&water-effects.cycling=9"),
+    { cityWaterOpacity: 0, cityWaterShoreRamp: 0, sparkle: 1, foam: 1, crest: 1, relight: 0, cycling: 2, swell: 1 },
+  );
 });
 
 test("city node data preserves manifest ids and explicit role classifications", async () => {

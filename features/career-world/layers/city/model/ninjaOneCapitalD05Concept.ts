@@ -1,5 +1,10 @@
 import registration from "../../../../../public/career-world/capitals/ninjaone/city-v2/plates/d05-anchor-cover-registration-r4.json" with { type: "json" };
+import waterEffects from "../../../../../public/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-effects-runtime-r5.json" with { type: "json" };
 import type { Pair } from "../../../shared/camera";
+import {
+  normalizeWaterTuning,
+  readWaterTuningUrlOverrides,
+} from "../../../shared/waterTuning.ts";
 
 const PLATE_PATH = "/career-world/capitals/ninjaone/city-v2/plates/d05-anchor-cover-r1.png";
 const CANON_ROOT = "/career-world/capitals/ninjaone/city-v2/canon";
@@ -12,7 +17,7 @@ const PROVENANCE_PATH =
 const FOLIAGE_SHIMMER_MASK_PATH =
   `${CANON_ROOT}/d05-canon-foliage-shimmer-mask-r4.png`;
 
-export type NinjaOneCapitalD05ConceptTier = "capital" | "site" | "close";
+export type NinjaOneCapitalD05ConceptTier = "territoryRegister" | "capital" | "site" | "close";
 
 export interface NinjaOneCapitalD05ConceptAnchor {
   readonly id: string;
@@ -21,23 +26,29 @@ export interface NinjaOneCapitalD05ConceptAnchor {
 }
 
 const TIERS = Object.freeze({
+  territoryRegister: Object.freeze({
+    id: "territory-register",
+    path: "/career-world/capitals/ninjaone/city-v2/derived/d05-territory-register-r1.png",
+    dimensions: Object.freeze([1305, 1205] as Pair),
+    sha256: "20760e651d8190b8b9d135621496558bf0d6a19ef292cd076cda6eaf48c04f01",
+  }),
   capital: Object.freeze({
     id: "capital",
     path: `${CANON_ROOT}/d05-canon-capital-r4.png`,
     dimensions: Object.freeze([1305, 1205] as Pair),
-    sha256: "41960d120f1d4f8a3e6991849a683f917dc3866125a8c68751694e54a3e4820f",
+    sha256: "5dd70a26ae325cdb2b1f026e3038df89e8e58ceb1eddaec13fc9d8d6c2ed16c0",
   }),
   site: Object.freeze({
     id: "site",
     path: `${CANON_ROOT}/d05-canon-intermediate-r4.png`,
     dimensions: Object.freeze([2610, 2410] as Pair),
-    sha256: "420bcd434d6092be79fbbb8ccfcfcc67a52ad5a3e313714e606573de0353bdcb",
+    sha256: "8437bedb27bd9dc309f1d200f79445a4cd13ac87249703e8619ba3247199cb97",
   }),
   close: Object.freeze({
     id: "close",
     path: `${CANON_ROOT}/d05-canon-r4.png`,
     dimensions: Object.freeze([2621, 2419] as Pair),
-    sha256: "84df8cf38eea9179a5f5d35a049176584087119e260c84b087317393d1ec75ea",
+    sha256: "89f802ed868738f915cc3195383923b1c3e1cc095ad18a9d895db9ddf4ac27ac",
   }),
 });
 
@@ -69,6 +80,38 @@ export function ninjaOneCapitalD05ConceptTierForSpan(span: number) {
   }
   return TIERS.capital;
 }
+
+export function ninjaOneCapitalD05ConceptTierWeights({
+  capitalToSite,
+  siteToClose,
+}: {
+  readonly capitalToSite: number;
+  readonly siteToClose: number;
+}) {
+  return Object.freeze([
+    Object.freeze({ opacity: 1 - capitalToSite, tier: TIERS.capital }),
+    Object.freeze({ opacity: capitalToSite * (1 - siteToClose), tier: TIERS.site }),
+    Object.freeze({ opacity: capitalToSite * siteToClose, tier: TIERS.close }),
+  ].filter(({ opacity }) => opacity > 0));
+}
+
+export function ninjaOneCapitalD05WaterEffectTuning(search = "") {
+  const tuning = normalizeWaterTuning(readWaterTuningUrlOverrides(search));
+  return Object.freeze({
+    cityWaterOpacity: tuning.cityWaterOpacity,
+    cityWaterShoreRamp: tuning.cityWaterShoreRamp,
+    sparkle: tuning.effectSparkle,
+    foam: tuning.foam,
+    crest: tuning.crest,
+    cycling: tuning.cycling,
+    relight: tuning.relight,
+    swell: tuning.swell,
+  });
+}
+
+export type NinjaOneCapitalD05WaterEffectTuning = ReturnType<
+  typeof ninjaOneCapitalD05WaterEffectTuning
+>;
 
 export const NINJAONE_CAPITAL_D05_CONCEPT = Object.freeze({
   id: registration.id,
@@ -110,6 +153,39 @@ export const NINJAONE_CAPITAL_D05_CONCEPT = Object.freeze({
   foliageShimmerMask: Object.freeze({
     dimensions: Object.freeze([1305, 1205] as Pair),
     path: FOLIAGE_SHIMMER_MASK_PATH,
+  }),
+  waterEffects: Object.freeze({
+    // The registered D05 logical extent stays at the plate dimensions, while
+    // the composite keeps a full-canon backing store for a crisp SVG overlay.
+    dimensions: TIERS.close.dimensions,
+    fieldDimensions: Object.freeze([1305, 1205] as Pair),
+    sourcePath: `${CANON_ROOT}/d05-canon-r4.png`,
+    waterMaskPath: waterEffects.waterMaskPath,
+    sparkle: Object.freeze({
+      maskPath: waterEffects.sparkle.maskPath,
+      phaseFieldPath: waterEffects.sparkle.phaseFieldPath,
+      // Compatibility aliases keep the r1 SVG definitions inert while r2 owns
+      // the actual local canvas composite.
+      frames: Object.freeze([waterEffects.sparkle.maskPath]),
+      loopSeconds: 1,
+    }),
+    foam: Object.freeze({
+      maskPath: waterEffects.foam.maskPath,
+      shoreSdfPath: waterEffects.foam.shoreSdfPath,
+    }),
+    foamMaskPath: waterEffects.foam.maskPath,
+    crest: Object.freeze({
+      maskPath: waterEffects.crest.maskPath,
+      directionFieldPath: waterEffects.crest.directionFieldPath,
+      pseudoNormalFieldPath: waterEffects.crest.pseudoNormalFieldPath,
+      rampLutPath: waterEffects.crest.rampLutPath,
+      travelDirection: Object.freeze([
+        waterEffects.crest.travelDirection[0],
+        waterEffects.crest.travelDirection[1],
+      ] as Pair),
+      wavePhaseFieldPath: waterEffects.crest.wavePhaseFieldPath,
+    }),
+    provenancePath: waterEffects.provenancePath,
   }),
 });
 
