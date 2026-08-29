@@ -101,6 +101,12 @@ interface PassProgram {
   readonly uniforms: Map<string, WebGLUniformLocation>;
 }
 
+/** Development switches, read from the query string: ?water.<name>. */
+function hasWaterFlag(name: string): boolean {
+  if (typeof window === "undefined") return false;
+  return new URLSearchParams(window.location.search).has(`water.${name}`);
+}
+
 function percentile95(values: readonly number[]): number {
   if (values.length === 0) return 0;
   const sorted = [...values].sort((left, right) => left - right);
@@ -225,7 +231,13 @@ export class WaterSurfaceRenderer {
       antialias: false,
       depth: false,
       premultipliedAlpha: false,
-      preserveDrawingBuffer: false,
+      // Off by default: keeping the drawing buffer costs bandwidth on every
+      // frame. On with ?water.capture, which is what makes the rendered water
+      // MEASURABLE from the page -- drawImage of a discarded buffer returns
+      // transparent, so without this the only way to judge the live layer is to
+      // look at a screenshot, and looking is exactly what kept being wrong about
+      // this water.
+      preserveDrawingBuffer: hasWaterFlag("capture"),
       powerPreference: "high-performance",
     });
 
@@ -648,7 +660,35 @@ export class WaterSurfaceRenderer {
       22,
       weatherLerp(OCEAN_PASS_STATES.composite, "uDetailLam", this.state.weather, 0) * zc,
     );
+    // The wide shot needs a wider tonal range than the close-up does, and it has
+    // to get it from depth, because it has nothing else left: with the swell
+    // unresolvable the only structure in open water is the bathymetry.
+    //
+    // The palette was tuned looking INTO water from a cliff, where the darkest
+    // note is a trough a few metres down. Seen from orbit the same sea is nearly
+    // black past the shelf and the shelf itself is bright, and that contrast is
+    // most of what makes a coastline legible on a map. Measured on the wide shot
+    // before this, luma ran 44 to 89 of 255 -- a fifth of the range, which is
+    // why it read as one flat blue however the coast was drawn.
+    // Most of the darkening is NOT conditional on the zoom. The palette was
+    // tuned against a reference plate, not against this world's art, and this
+    // world is a muted olive relief on a near-black backdrop -- the tuned blue
+    // is a good deal louder than anything else on the page. Carrying the deep
+    // end down at every zoom also keeps the sea one sea: a colour that changed
+    // this much on approach would be the camera changing the water rather than
+    // revealing it.
+    const wideShot = 1 - waveDetail;
     const fade: Readonly<Record<string, number>> = {
+      cAbyss: 0.70 - 0.25 * wideShot,
+      cDeep: 0.84 - 0.16 * wideShot,
+      cMid: 0.90 - 0.10 * wideShot,
+      uSat: 0.88,
+      // With the swell gone and the deep end dark, the open sea has one field
+      // left that can vary it: the large-scale weather the wave pass already
+      // carries, which decides where the sea is working and where it is glassy.
+      // At close range it is a whisper under everything else; out here it is the
+      // only thing between a dark ocean and a flat fill, so it is worth more.
+      uRegionTone: 1 + 1.4 * wideShot,
       uAmpS: smoothstep(4, 8, lamS),
       uAmpC: smoothstep(4, 8, lamC),
       // The primary train is not faded by amplitude: it dominates the spectrum,
@@ -747,7 +787,9 @@ export class WaterSurfaceRenderer {
     set1("uLoop", OCEAN_LOOP_SECONDS);
     set1("uG", TUNED_G);
     set1("uFlatOcean", 0);
-    set1("uBare", new URLSearchParams(window.location.search).has("water.bare") ? 1 : 0);
+    // Strips every drawn layer, leaving geometry and base colour: the ablation
+    // switch the offline renderer uses to judge the water body on its own.
+    set1("uBare", hasWaterFlag("bare") ? 1 : 0);
     // How much of the open-water wave field the picture can resolve. One lever,
     // applied inside the wave pass after the RMS normalisation, so every term
     // downstream of the height field quietens in step. See wave.frag.
