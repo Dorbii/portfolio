@@ -123,6 +123,20 @@ def main():
     amb = ~(water_core | land_core)
     water = water_core | (amb & (wp_S > 0.52))
 
+    # An AUTHORITATIVE mask beats inference whenever one exists. The live world
+    # ships one per water body, and inference is exactly what this file's own
+    # docstring warns about: segmenting the world coastline from colour put 43.2%
+    # water against a true 47%, i.e. it called ~4% of real water land, and land
+    # zeroes the shoreline distance there -- a false shoal, and surf in open sea.
+    override = os.environ.get('OCEAN_WATER_MASK')
+    if override:
+        wm = np.asarray(Image.open(override).convert('L'))
+        if wm.shape != water.shape:
+            raise SystemExit(f'OCEAN_WATER_MASK is {wm.shape}, plate is {water.shape}')
+        water = wm > 127
+        print(f'  water mask taken from {os.path.basename(override)} '
+              f'(authoritative) -- coverage {water.mean()*100:.2f}%')
+
     # tidy: drop specks, close pinholes, keep the one ocean component,
     # but DO NOT fill holes -- the holes are sea stacks and must stay land.
     water = ndi.binary_closing(water, np.ones((5, 5)))

@@ -40,3 +40,6 @@ diagnostics/**
 
 __pycache__/
 *.py[cod]
+
+# baked world fields: large, and reproduce from src + the live coast authority
+scenes/world/baked/

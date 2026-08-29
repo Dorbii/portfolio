@@ -233,6 +233,57 @@ PX_SCALED = (
 )
 
 
+# ---------------------------------------------------------------------------
+# WORLD-anchored vs SCREEN-anchored.
+#
+# PX_SCALED above treats every length alike, which is right for a magnification
+# study (closeup.py) and wrong for a camera. In the live world the ocean is drawn
+# across a 25x zoom range, and the two kinds of length behave differently:
+#
+#   world-anchored  a wave is a physical object. Its wavelength, height, the
+#                   depth it feels and the speed it drifts are properties of the
+#                   sea, so they scale with the camera. Zooming in shows a bigger
+#                   wave, not a different one.
+#   screen-anchored a drawn stroke is a mark on the picture. A crest line wants
+#                   to be ~3-4 px wherever it is drawn; scaled with the world it
+#                   goes sub-pixel close in and becomes a fat band at world view.
+#
+# Getting this wrong is invisible at one zoom, which is exactly why it had to be
+# settled before any of this reaches the live layer.
+WORLD_SCALED = (
+    'ampP', 'ampS', 'ampC',                        # wave height
+    'detailLam',                                   # detail wavelength
+    'reliefLift',                                  # crest stands proud of the plane
+    'foamDeep', 'tealDepth', 'deepEnd', 'shallowEnd', 'subDepth',
+    'stokes', 'backwash',                          # water speed, px/s
+    'sprayRise', 'spraySpread', 'sprayFall',
+    'foamDiffuse',                                 # foam field radius
+    'curlScale',
+)
+
+SCREEN_FIXED = (
+    'crestLineW', 'laceLineW', 'chopW', 'shadowStep',
+    'laceScale', 'streakScale', 'streakW', 'fineScale',
+    'streakSpeed', 'fineSpeed',                    # texture scroll, not water
+    'wispW', 'shadeSmooth', 'injCrestW',
+    'markCell', 'markLen', 'markWid',
+    'licScale', 'licStep', 'licNoise', 'licSpeed',
+)
+
+
+def at_camera(name, z):
+    """The same sea seen by a camera z times closer.
+
+    Only the world-anchored lengths move. Contrast zoomed(), which scales every
+    length and is a magnification of the whole picture rather than a camera.
+    """
+    p = dict(PRESETS[name])
+    for k in WORLD_SCALED:
+        if k in p:
+            p[k] = p[k] * z
+    return p
+
+
 def zoomed(name, z):
     """A preset for the same sea rendered z times larger.
 
