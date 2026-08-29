@@ -11,7 +11,7 @@
  *   node scripts/capture-ocean-comparison.mjs --out live.png --flags water.raw=1
  */
 import { spawn } from "node:child_process";
-import { mkdir, mkdtemp, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
@@ -156,6 +156,15 @@ async function main() {
       `(() => { const r = document.querySelector('${CANVAS}').getBoundingClientRect();
         return { x: r.x, y: r.y, width: r.width, height: r.height }; })()`);
     await screenshot(connection, sessionId, out, { ...rect, scale: 1 });
+    // Write the camera the app ACTUALLY settled on, beside the image.
+    //
+    // --span is a request, not a promise: the zoom loop walks in bounded steps
+    // and the app clamps, so asking for 0.05 can land on 0.0825. Analysis that
+    // assumes the requested span crops the wrong region of the world and then
+    // reports statistics for water that is really the city. Read this file.
+    await writeFile(`${out}.camera.json`, JSON.stringify({
+      origin: camera.origin, span: camera.span, canvas: rect, url, frames,
+    }, null, 1));
     const probe = flags.some((f) => f.startsWith("water.probe"))
       ? await evaluate(connection, sessionId,
         `JSON.stringify(window.__oceanProbe ? window.__oceanProbe() : null)`)
