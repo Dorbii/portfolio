@@ -89,9 +89,23 @@ export const OCEAN_PASS_SAMPLERS: Partial<Record<OceanPassName, Record<string, n
  * framebuffer, which is also what forces them to: multiple render targets must
  * agree on size.
  */
-const SIM_MAX_PIXELS = 8_000_000;
+// Six full-size RGBA16F targets and two quarter-size ones is 52 bytes per pixel
+// of viewport, so this ceiling is worth about 340 MB of GPU memory -- the same
+// order as the painted plates it replaced, which decoded to well over 200 MB
+// before the territory coast field was counted. It binds only on displays
+// larger than roughly 1700 by 950 CSS pixels at ratio 2.
+const SIM_MAX_PIXELS = 6_500_000;
 
-/** Linear scale of the foam and spray state relative to the wave targets. */
+/**
+ * Linear scale of the SPRAY state. Spray is a ballistic plume with no crisp
+ * edge of its own, so it costs a quarter of the pixels and loses nothing.
+ *
+ * Foam is not here on purpose. Whitewater is the crispest thing in the picture,
+ * and the composite draws its edges by contouring the foam field on the foam's
+ * own MATERIAL coordinates -- halve those and the lace, the wisps and the
+ * eroded boundary all smear, which is most of what separated this from the
+ * reference clip.
+ */
 const STATE_SCALE = 0.5;
 
 /** Wave-pass outputs, which are render targets one moment and inputs the next. */
@@ -527,7 +541,7 @@ export class WaterSurfaceRenderer {
     this.bindTarget("texFoam", targets.foam[this.current]);
     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers.foam[1 - this.current]);
     gl.drawBuffers([gl.COLOR_ATTACHMENT0]);
-    this.usePass("foam", this.stateSize, time, dt);
+    this.usePass("foam", size, time, dt);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
     // --- spray ------------------------------------------------------------
@@ -657,19 +671,16 @@ export class WaterSurfaceRenderer {
       0,
     );
     const line = smoothstep(4, 10, strokesPerWave);
-    // How many crests the viewport holds. This is the number the drawn stroke
-    // has to answer to, and it is the one quantity a fixed plate could never
-    // vary: the tuned close-up holds four or five, and a bold line down each of
-    // them reads as surf. The same treatment on a viewport holding twenty-five
-    // evenly-spaced crests is corrugation -- fluted glass, not water -- because
-    // regularity is invisible at four repeats and unmissable at twenty-five.
+    // Whether a crest is big enough to carry a drawn stroke.
     //
-    // So the part of the stroke that is drawn unconditionally goes away as the
-    // count climbs, and what is left is the part gated on breaking and
-    // whitecapping. That is the offline shader's own stated intent ("only where
-    // the wave is actually doing something"), which the floor quietly overrode.
-    const crestsAcross = this.canvas.width / Math.max(lamP, 1e-3);
-    const fewCrests = 1 - smoothstep(5, 13, crestsAcross);
+    // This was keyed on how many crests the viewport holds, which was wrong: at
+    // one wavelength a wider monitor holds more of them, so a large display at
+    // the TUNED scale had its stroke work stripped and went soft -- the drawing
+    // stopped for a reason that has nothing to do with the water. The question
+    // is only ever how big one wave is on screen. Below about fifty pixels a
+    // line down every crest is corrugation; by a hundred, which is the scale the
+    // presets were tuned at, it is surf.
+    const boldCrest = smoothstep(50, 110, lamP);
     // Whether an individual wave is a thing the picture can show at all.
     //
     // At world zoom the swell is four or five screen pixels from crest to
@@ -750,8 +761,8 @@ export class WaterSurfaceRenderer {
       uDetailGloss: detailWave,
       uDetailTrough: detailWave,
       uCrestGain: line,
-      uCrestLineFloor: line * fewCrests,
-      uCrossTrain: line * fewCrests,
+      uCrestLineFloor: line * boldCrest,
+      uCrossTrain: line * boldCrest,
       uLaceLineGain: line,
       uWispGain: line,
       uStreakGain: line,
@@ -761,8 +772,8 @@ export class WaterSurfaceRenderer {
       // running along every ridge of a regular surface is exactly how ribbed
       // glass is drawn. It keeps its tuned weight where the crest count is
       // low and comes down as the sea fills with repeats.
-      uGlossGain: mix(0.45, 1, fewCrests),
-      uSheen: mix(0.5, 1, fewCrests),
+      uGlossGain: mix(0.45, 1, boldCrest),
+      uSheen: mix(0.5, 1, boldCrest),
     };
 
     for (const name of PASS_ORDER) {
@@ -916,14 +927,14 @@ export class WaterSurfaceRenderer {
     const stateWidth = Math.max(1, Math.round(width * STATE_SCALE));
     const stateHeight = Math.max(1, Math.round(height * STATE_SCALE));
     this.stateSize = [stateWidth, stateHeight];
-    const state = (): WebGLTexture => target(stateWidth, stateHeight);
+    const spray = (): WebGLTexture => target(stateWidth, stateHeight);
     const targets = {
       geom: target(width, height),
       flow: target(width, height),
       swell: target(width, height),
       path: target(width, height),
-      foam: [state(), state()] as [WebGLTexture, WebGLTexture],
-      spray: [state(), state()] as [WebGLTexture, WebGLTexture],
+      foam: [target(width, height), target(width, height)] as [WebGLTexture, WebGLTexture],
+      spray: [spray(), spray()] as [WebGLTexture, WebGLTexture],
     };
 
     const attach = (textures: readonly WebGLTexture[]): WebGLFramebuffer => {
