@@ -1,48 +1,12 @@
+import { WATER_SURFACE_UNIFORM_DECLARATIONS } from "../uniform-contract";
+
 export const WATER_SHADER_COMMON = `
 precision highp float;
 
 in vec2 v_uv;
 out vec4 outColor;
 
-uniform float u_time;
-uniform vec2 u_resolution;
-uniform vec2 u_cameraOrigin;
-uniform vec2 u_cameraSpan;
-uniform vec2 u_wind;
-uniform vec2 u_coastTexel;
-uniform vec2 u_coastMaterialTexel;
-uniform vec2 u_inlandWaterOverrideOrigin;
-uniform vec2 u_inlandWaterOverrideSpan;
-uniform float u_motion;
-uniform float u_waveStrength;
-uniform float u_waveDensity;
-uniform float u_weather;
-uniform float u_opacity;
-uniform float u_detailScale;
-uniform float u_coastalAmbience;
-uniform float u_territoryLod;
-uniform float u_capitalLod;
-uniform float u_siteLod;
-uniform vec2 u_microFrequency;
-uniform float u_territoryLineStrength;
-uniform float u_territoryNormalStrength;
-uniform vec3 u_lightDirection;
-uniform vec3 u_deepColor;
-uniform vec3 u_bodyColor;
-uniform vec3 u_swellColor;
-uniform vec3 u_shallowColor;
-uniform vec3 u_substrateColor;
-uniform vec3 u_highlightColor;
-uniform vec3 u_foamColor;
-uniform vec3 u_stormColor;
-
-uniform sampler2D u_worldAlbedo;
-uniform sampler2D u_directionalAlbedo;
-uniform sampler2D u_macroHeight;
-uniform sampler2D u_microHeight;
-uniform sampler2D u_coastGeometry;
-uniform sampler2D u_coastMaterial;
-uniform sampler2D u_inlandWaterOverride;
+${WATER_SURFACE_UNIFORM_DECLARATIONS}
 
 float saturate(float value) {
   return clamp(value, 0.0, 1.0);
