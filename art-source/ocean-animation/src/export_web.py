@@ -125,6 +125,17 @@ def screen_anchor_noise(common):
     Converting inside the lookup rather than at each of the twenty-odd call sites
     means no constant can be missed, and at the closest camera (uZc near 1) every
     one of them still means exactly what it meant when it was tuned.
+
+    TRIED AND REVERTED (2026-08-29): world-anchoring wave.frag's noise while
+    leaving composite.frag screen-anchored, on the argument that a patch of rough
+    sea is a physical object and only the drawn marks are marks. It is the better
+    argument and it loses to the measurement. At the capital camera it bought the
+    wavelength band (13.4 -> 15.6 against the plate's 15.9) and almost nothing at
+    the scales that actually read as weather -- 300 tuned px went 9.7 -> 10.3
+    against a target of 19.2, and 700 did not move at all. At the world camera it
+    put the diamond lattice straight back: a regular plaid over the whole ocean.
+    So the large-scale life the sea is missing does NOT come from these lookups,
+    and whatever does supply it in the plate has still to be found.
     """
     for tex in ('texNoise', 'texNoiseF'):
         for swizzle in (').r;', ');'):
