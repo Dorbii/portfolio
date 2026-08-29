@@ -447,7 +447,13 @@ test("close detail mounts additive layers only and page visibility suspends runt
   assert.match(scene, /rootMargin: "192px 0px"/);
   assert.match(waterCanvas, /controllerRef\.current\?\.setActive\(active\)/);
   assert.match(waterController, /setActive\(active: boolean\)/);
-  assert.match(waterController, /Math\.min\(\s*0\.05/);
+  // A long stall must not advect foam half a screen, so the shipping path caps
+  // the step at 50 ms. ?water.capture relaxes it deliberately: a hidden page
+  // gets its timers clamped to one second, and a capture of a simulation that
+  // has advanced a twentieth of real time is a confident picture of the wrong
+  // thing. The relaxation has to stay gated on that flag.
+  assert.match(waterController, /this\.captureWhileHidden \? 1\.5 : 0\.05/);
+  assert.match(waterController, /water\.capture/);
   assert.doesNotMatch(nativeDetail, /HydrologyAdmission|hydrologyAdmission/);
 });
 

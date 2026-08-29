@@ -4,6 +4,21 @@ import type { WorldLight } from "../../../shared/lighting";
 import type { WaterSurfaceState } from "../model/state";
 import { WaterSurfaceRenderer } from "./WaterSurfaceRenderer";
 
+/**
+ * Keeps the clock running while the page reports itself hidden.
+ *
+ * Only for ?water.capture, whose purpose is measuring the live layer from
+ * outside. Foam and spray are INTEGRATED over seconds, so a paused simulation
+ * renders water that has never had any surf in it -- and a capture flag that
+ * cannot capture a running simulation is worse than none, because it returns a
+ * confident picture of the wrong thing. Headless preview panes report hidden
+ * while still compositing, which is exactly where this bites.
+ */
+function capturesWhileHidden(): boolean {
+  if (typeof window === "undefined") return false;
+  return new URLSearchParams(window.location.search).has("water.capture");
+}
+
 const CAMERA_SETTLE_DURATION_MS = 180;
 const OCEAN_FRAME_INTERVAL_MS = 1000 / 30;
 const FRAME_INTERVAL_TOLERANCE_MS = 2;
@@ -19,6 +34,7 @@ export class WaterSurfaceController {
   private elapsedSeconds = 0;
   private lastTimestamp = 0;
   private viewSignature = "";
+  private readonly captureWhileHidden = capturesWhileHidden();
 
   constructor(
     renderer: WaterSurfaceRenderer,
@@ -115,7 +131,7 @@ export class WaterSurfaceController {
 
   private readonly tick = (timestamp: number): void => {
     this.frameRequest = 0;
-    if (!this.running || document.hidden) {
+    if (!this.running || (document.hidden && !this.captureWhileHidden)) {
       return;
     }
 
@@ -132,17 +148,32 @@ export class WaterSurfaceController {
     // so the step needs the interval as well as the clock.
     let step = 0;
     if (this.lastTimestamp > 0) {
-      step = Math.min(0.05, Math.max(0, (timestamp - this.lastTimestamp) / 1000));
-      this.elapsedSeconds += step;
+      const raw = (timestamp - this.lastTimestamp) / 1000;
+      step = Math.min(this.captureWhileHidden ? 1.5 : 0.05, Math.max(0, raw));
+      if (!this.captureWhileHidden || !document.hidden) this.elapsedSeconds += step;
     }
     this.lastTimestamp = timestamp;
+    if (this.captureWhileHidden && document.hidden) {
+      // Browsers clamp timers on a hidden page to one second, and the step is
+      // capped at 50 ms so a long stall cannot advect foam half a screen. Those
+      // two together advance the simulation twenty times slower than real time,
+      // which is its own kind of lie: the capture would show a sea that has had
+      // a quarter-second of surf in it. Catch up in whole frames instead.
+      const frames = Math.min(45, Math.round(step / (OCEAN_FRAME_INTERVAL_MS / 1000)));
+      for (let i = 0; i < frames; i += 1) {
+        this.elapsedSeconds += OCEAN_FRAME_INTERVAL_MS / 1000;
+        this.renderer.render(this.elapsedSeconds, OCEAN_FRAME_INTERVAL_MS / 1000);
+      }
+      this.schedule();
+      return;
+    }
     this.renderer.render(this.elapsedSeconds, step);
     this.schedule();
   };
 
   private readonly handleVisibility = (): void => {
     this.lastTimestamp = 0;
-    if (document.hidden && this.frameRequest) {
+    if (document.hidden && !this.captureWhileHidden && this.frameRequest) {
       cancelAnimationFrame(this.frameRequest);
       this.frameRequest = 0;
     } else if (this.running) {
@@ -151,9 +182,18 @@ export class WaterSurfaceController {
   };
 
   private schedule(): void {
-    if (!this.frameRequest && this.running && !document.hidden) {
-      this.frameRequest = requestAnimationFrame(this.tick);
+    if (this.frameRequest || !this.running) return;
+    if (document.hidden) {
+      if (!this.captureWhileHidden) return;
+      // A hidden page gets no animation frames at all, so drive the clock off a
+      // timer instead. Only reachable under ?water.capture.
+      this.frameRequest = window.setTimeout(
+        () => this.tick(performance.now()),
+        OCEAN_FRAME_INTERVAL_MS,
+      ) as unknown as number;
+      return;
     }
+    this.frameRequest = requestAnimationFrame(this.tick);
   }
 
   private suspendContinuousAnimationForCameraMotion(): void {
