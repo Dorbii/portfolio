@@ -31,6 +31,11 @@ if os.environ.get('WCP') == '1':
               f'>0.1 {(a>0.1).mean()*100:6.2f}%  >0.5 {(a>0.5).mean()*100:6.2f}%')
     print('-- offline worldcoast z=1, same channels the live probe reports --')
     stat('geom.hn', g[..., 0]); stat('geom.breaking', g[..., 3])
+    # The SHADING comes from the gradient, not the height. A field baked at 11
+    # samples a wave and then magnified 9.6x has interpolated gradients; one
+    # computed at 115 samples a wave does not. That difference would cost
+    # contrast uniformly at every depth, while leaving hn's distribution intact.
+    stat('geom.|grad h|', np.hypot(g[..., 1], g[..., 2]))
     stat('foam.fresh', fm[..., 0]); stat('foam.persist', fm[..., 1])
     stat('spray', sp[..., 0])
 else:

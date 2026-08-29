@@ -25,6 +25,30 @@ def group_velocity(k, depth, omega):
     return n * omega / np.maximum(k, 1e-8)
 
 
+# ---------------------------------------------------------------------------
+# TUNED pixels, not scene pixels.
+#
+# Every hardcoded length below was measured on the plate, where one scene pixel
+# WAS one tuned pixel and the swell spanned 115 of them. The world is baked at
+# twelve world pixels a wave, so the same numbers there mean something 9.6x
+# larger relative to the waves they shape: ray_focus's 9 px smoothing became
+# three quarters of a wavelength, and since focus MULTIPLIES the primary
+# amplitude the sea came out modulated by blobs the size of its own waves. That
+# is a picture that reads as paint rather than water, and no amount of shader
+# work downstream can undo it -- the blobs are baked into the field.
+#
+# So the constants are written in tuned pixels and converted here. On the plate
+# the factor is exactly 1 and nothing changes.
+def _px(tuned):
+    """A tuned-pixel length in this scene's own pixels."""
+    return tuned * wf.G / 130.0
+
+
+def _win(tuned):
+    """The same, as a whole number of pixels for a window half-width."""
+    return max(1, int(round(_px(tuned))))
+
+
 def shoaling_amp(k, depth, period, water, focus_gain=0.55):
     omega = 2.0 * np.pi / period
     k0 = omega * omega / wf.G
@@ -39,7 +63,7 @@ def ray_focus(direction_field, water, gain=0.55):
     dx = direction_field[..., 0]
     dy = direction_field[..., 1]
     div = np.gradient(dx, axis=1) + np.gradient(dy, axis=0)
-    conv = -ndi.gaussian_filter(div, 9.0)
+    conv = -ndi.gaussian_filter(div, _px(9.0))
     s = np.percentile(np.abs(conv[water]), 97) + 1e-9
     f = np.exp(np.clip(conv / s, -1.4, 1.8) * gain)
     return np.clip(f, 0.45, 2.4).astype(np.float32)
@@ -48,20 +72,24 @@ def ray_focus(direction_field, water, gain=0.55):
 def impact_sites(sdf, water, dirP, n_sites=54, sigma=13.0, seed=7):
     """Discrete, exposure-weighted burst sites along the coastline."""
     H, W = sdf.shape
-    gy, gx = np.gradient(ndi.gaussian_filter(sdf, 3.0))
+    # Site COUNT is a density along the coast, so it scales the other way:
+    # the world's shoreline is 9.6x longer in wavelengths than the plate's.
+    n_sites = max(1, int(round(n_sites / max(wf.G / 130.0, 1e-6))))
+    sigma = _px(sigma)
+    gy, gx = np.gradient(ndi.gaussian_filter(sdf, _px(3.0)))
     mag = np.hypot(gx, gy) + 1e-6
     nx, ny = gx / mag, gy / mag                    # shore normal, points seaward
 
     exposure = np.clip(-(nx * dirP[0] + ny * dirP[1]), 0.0, 1.0)
 
     # protruding rock: negative Laplacian of the SDF
-    lap = ndi.laplace(ndi.gaussian_filter(sdf, 6.0))
+    lap = ndi.laplace(ndi.gaussian_filter(sdf, _px(6.0)))
     protrude = np.clip(-lap, 0.0, None)
     protrude /= (np.percentile(protrude[water], 99.5) + 1e-9)
 
-    band = (sdf > 0.5) & (sdf < 16.0) & water
+    band = (sdf > _px(0.5)) & (sdf < _px(16.0)) & water
     score = exposure * (0.35 + 0.95 * np.clip(protrude, 0, 2.0))
-    score = ndi.gaussian_filter(np.where(band, score, 0.0), 5.0)
+    score = ndi.gaussian_filter(np.where(band, score, 0.0), _px(5.0))
     score[~band] = 0.0
 
     # greedy non-maximum suppression -> well separated sites
@@ -74,9 +102,10 @@ def impact_sites(sdf, water, dirP, n_sites=54, sigma=13.0, seed=7):
         if s[y, x] <= 1e-6:
             break
         ys.append(y); xs.append(x); ws.append(float(score[y, x]))
-        yy, xx = np.ogrid[max(0, y - 60):min(H, y + 61), max(0, x - 60):min(W, x + 61)]
+        r, sep = _win(60.0), _px(34.0)
+        yy, xx = np.ogrid[max(0, y - r):min(H, y + r + 1), max(0, x - r):min(W, x + r + 1)]
         d2 = (yy - y) ** 2 + (xx - x) ** 2
-        s[max(0, y - 60):min(H, y + 61), max(0, x - 60):min(W, x + 61)] *= np.clip(d2 / (34.0 ** 2), 0.0, 1.0)
+        s[max(0, y - r):min(H, y + r + 1), max(0, x - r):min(W, x + r + 1)] *= np.clip(d2 / (sep ** 2), 0.0, 1.0)
 
     ws = np.array(ws) if ws else np.array([1.0])
     ws = ws / (ws.max() + 1e-9)
@@ -84,8 +113,9 @@ def impact_sites(sdf, water, dirP, n_sites=54, sigma=13.0, seed=7):
     for y, x, w in zip(ys, xs, ws):
         # per-site strength jitter so the coast never fires uniformly
         w = float(w) * (0.45 + 0.75 * rng.random())
-        y0, y1 = max(0, y - 46), min(H, y + 47)
-        x0, x1 = max(0, x - 46), min(W, x + 47)
+        gw = _win(46.0)
+        y0, y1 = max(0, y - gw), min(H, y + gw + 1)
+        x0, x1 = max(0, x - gw), min(W, x + gw + 1)
         yy, xx = np.ogrid[y0:y1, x0:x1]
         g = np.exp(-((yy - y) ** 2 + (xx - x) ** 2) / (2 * sigma * sigma))
         m[y0:y1, x0:x1] = np.maximum(m[y0:y1, x0:x1], (g * w).astype(np.float32))
@@ -169,7 +199,8 @@ def build(families, force=False):
     ampS = shoaling_amp(S['k'], depth, S['period'], water) * (0.55 + 0.45 * focus)
     ampC = shoaling_amp(C['k'], depth, C['period'], water)
     for a in (ampP, ampS, ampC):
-        a /= np.percentile(a[water & (sdf > 120)], 55) if (water & (sdf > 120)).any() else 1.0
+        deep = water & (sdf > _px(120.0))
+        a /= np.percentile(a[deep], 55) if deep.any() else 1.0
 
     dirP_deep = families['primary'][0]
     impact, sites = impact_sites(sdf, water, np.array(dirP_deep) / np.linalg.norm(dirP_deep))

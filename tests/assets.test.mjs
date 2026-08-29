@@ -1560,10 +1560,15 @@ test("the solved ocean fields are the accepted checkpoint", async () => {
   // so a change here is a change to the sea itself and should be deliberate:
   // re-bake with bake_world.py, re-encode with encode_world.py, and update
   // these hashes in the same commit that changes the water.
+  //
+  // Both bake and encode read WORLD_LAMBDA. Setting it for one and not the
+  // other writes a texture at one scale and a manifest claiming another, which
+  // is silent -- the pixels are fine and every length derived from them is
+  // wrong. Run them with the same environment.
   const acceptedAssets = [
     [
       "public/career-world/layers/ocean/fields/ocean-flow-r2.png",
-      "F81A32E90EF66BC1E98EB3E213FDB0499112E98871A40BBB9FA0937464CB3F69",
+      "CA925341D0A535E4796DB40CC9888EBD071A5E2186587AC57DB294E086EF6305",
     ],
     [
       "public/career-world/layers/ocean/fields/ocean-noise-fine-r2.png",

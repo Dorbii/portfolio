@@ -648,6 +648,37 @@ export class WaterSurfaceRenderer {
     const framebuffers = this.framebuffers;
     if (!framebuffers) return out;
     read(framebuffers.wave, gl.COLOR_ATTACHMENT0, "geom", ["hn", "dhdx", "dhdy", "breaking"]);
+    // The SHADING is driven by the gradient, not the height. A field baked at
+    // eleven samples a wave and magnified has interpolated gradients; one solved
+    // at a hundred and fifteen does not. That costs contrast at every depth
+    // while leaving hn's own distribution intact, so the height matching is not
+    // evidence that the shading will.
+    {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers.wave);
+      gl.readBuffer(gl.COLOR_ATTACHMENT0);
+      gl.readPixels(0, 0, w, h, gl.RGBA, gl.FLOAT, pixels);
+      const values: number[] = [];
+      let sum = 0;
+      let peak = 0;
+      for (let i = 0; i < pixels.length; i += 4 * 7) {
+        const value = Math.hypot(pixels[i + 1], pixels[i + 2]);
+        if (!Number.isFinite(value)) continue;
+        values.push(value);
+        sum += value;
+        if (value > peak) peak = value;
+      }
+      values.sort((left, right) => left - right);
+      const at = (q: number): number => values[Math.floor((values.length - 1) * q)] ?? 0;
+      out["geom.|grad h|"] = {
+        mean: sum / Math.max(1, values.length),
+        p50: at(0.5),
+        p95: at(0.95),
+        p99: at(0.99),
+        max: peak,
+        over01: values.filter((value) => value > 0.1).length / Math.max(1, values.length),
+        over05: values.filter((value) => value > 0.5).length / Math.max(1, values.length),
+      };
+    }
     read(framebuffers.wave, gl.COLOR_ATTACHMENT1, "flow", ["vx", "vy", "hForm", "whitecap"]);
     read(framebuffers.wave, gl.COLOR_ATTACHMENT3, "path", ["hPath", "formEnv", "groupEnv", "rE"]);
     read(framebuffers.foam[this.current], gl.COLOR_ATTACHMENT0, "foam",
