@@ -790,29 +790,19 @@ export class WaterSurfaceRenderer {
       45,
       weatherLerp(OCEAN_PASS_STATES.composite, "uDetailLam", this.state.weather, 0) * zc,
     );
-    // The wide shot needs a wider tonal range than the close-up does, and it has
-    // to get it from depth, because it has nothing else left: with the swell
-    // unresolvable the only structure in open water is the bathymetry.
+    // The palette is the tuned one, at every zoom. There is deliberately no
+    // cAbyss/cDeep/cMid/uSat entry in the table below.
     //
-    // The palette was tuned looking INTO water from a cliff, where the darkest
-    // note is a trough a few metres down. Seen from orbit the same sea is nearly
-    // black past the shelf and the shelf itself is bright, and that contrast is
-    // most of what makes a coastline legible on a map. Measured on the wide shot
-    // before this, luma ran 44 to 89 of 255 -- a fifth of the range, which is
-    // why it read as one flat blue however the coast was drawn.
-    // Most of the darkening is NOT conditional on the zoom. The palette was
-    // tuned against a reference plate, not against this world's art, and this
-    // world is a muted olive relief on a near-black backdrop -- the tuned blue
-    // is a good deal louder than anything else on the page. Carrying the deep
-    // end down at every zoom also keeps the sea one sea: a colour that changed
-    // this much on approach would be the camera changing the water rather than
-    // revealing it.
+    // There used to be, and the argument for it was measured on captures of a
+    // sea that had never run: the preview pane reports itself hidden, foam and
+    // spray are INTEGRATED, so every frame behind that reasoning was water with
+    // no surf in it. The luma range those numbers reported as evidence of a flat
+    // blue was the flatness of a simulation that had not stepped. Darkening the
+    // whole palette to fix it made the picture worse in the one way the
+    // measurement could not see, and ?water.capture exists now so that class of
+    // reasoning cannot be made again.
     const wideShot = 1 - waveDetail;
     const fade: Readonly<Record<string, number>> = {
-      cAbyss: 0.70 - 0.25 * wideShot,
-      cDeep: 0.84 - 0.16 * wideShot,
-      cMid: 0.90 - 0.10 * wideShot,
-      uSat: 0.88,
       // With the swell gone and the deep end dark, the open sea has one field
       // left that can vary it: the large-scale weather the wave pass already
       // carries, which decides where the sea is working and where it is glassy.
