@@ -537,9 +537,9 @@ void main()
     float sp = uSpread;
     vec2 gBefore = acc.g;
     float hBefore = acc.h, eBefore = acc.energy;
-    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * uHarmA.x * setEnv, uHarmM.x,  0.00 * sp, uPeriodP, j1,       shP);
-    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * 0.54 * setEnv,     0.92,     -0.62 * sp, uPeriodP, j2,       shP);
-    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * 0.47 * setEnv,     1.09,      0.72 * sp, uPeriodP, j3,       shP);
+    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * uHarmA.x, uHarmM.x,  0.00 * sp, uPeriodP, j1,       shP);
+    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * 0.54,               0.92,     -0.62 * sp, uPeriodP, j2,       shP);
+    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * 0.47,               1.09,      0.72 * sp, uPeriodP, j3,       shP);
     // The sun sheen must read the large-scale surface only. Evaluating a
     // pow(dot(N,H), 24) lobe against a normal that still carries the secondary
     // train and the chop was, by ablation, 64% of all high-frequency mottling in
@@ -560,13 +560,13 @@ void main()
     // distance -- so it contributes almost nothing through the surface normal;
     // it reads as broad TONE, and the broad tonal terms are driven by the swell
     // height captured here. Added after it, it was worth 2% of spectral energy.
-    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * uAmpL * setEnv, uHarmL,        0.22 * sp, uPeriodP, j1 * 0.7, shP);
+    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * uAmpL, uHarmL,        0.22 * sp, uPeriodP, j1 * 0.7, shP);
     addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * uAmpL * 0.55,   uHarmL * 1.53, -0.34 * sp, uPeriodP, j2 * 0.6, shP);
 
     acc.gSwell = acc.g - gBefore;
     float hSwellRaw = acc.h - hBefore;
     float eSwell = max(acc.energy - eBefore, 1e-9);
-    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * uHarmA.y * setEnv, uHarmM.y,  0.30 * sp, uPeriodP, j2 * 1.3, shP);
+    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * uHarmA.y, uHarmM.y,  0.30 * sp, uPeriodP, j2 * 1.3, shP);
     addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * uHarmA.z,          uHarmM.z, -0.45 * sp, uPeriodP, j3 * 0.8, shP);
 
 
@@ -643,6 +643,23 @@ void main()
     // coastline is legible from any altitude; it is the one piece of white a
     // wide shot of an ocean should have, and it is what makes the coast read as
     // a coast rather than as a cut-out.
+    // ---- wave sets, applied where scaling survives -------------------------
+    // setEnv used to multiply the component amplitudes going into the sum, and
+    // there it did almost nothing. The primary band carries nearly all the
+    // energy, so sigma scales with the envelope too, and hn = acc.h/(2.15 sigma)
+    // divides it straight back out. The mechanism that makes waves arrive in
+    // SETS -- the one thing that stops a swell being a corrugation -- was being
+    // normalised away, and only showed up in the drawn form, which is applied
+    // afterwards and kept its groups.
+    //
+    // Same trap as the regional energy field, in a place nobody had checked. It
+    // is invisible on a plate four crests wide and unmissable across twenty.
+    hn = clamp(hn * setEnv, -1.0, 1.0);
+    acc.g *= setEnv;
+    acc.gSwell *= setEnv;
+    hSwellRaw *= setEnv;
+    acc.orb *= setEnv;
+
     float openVis = mix(uOpenWaveVis, 1.0, 1.0 - sstep(8.0, 40.0, depth));
     hn *= openVis;
     acc.g *= openVis;
@@ -659,7 +676,7 @@ void main()
     // Significant wave height from the spectrum (Hs = 4*sigma), not the plain
     // sum of amplitudes -- summing |a_i| overstates H by ~25% and pushed the
     // breaking threshold out into genuinely deep water during big sets.
-    float Hloc = 2.83 * sqrt(max(acc.energy, 1e-6)) * (0.55 + 0.45 * setEnv);
+    float Hloc = 2.83 * sqrt(max(acc.energy, 1e-6)) * setEnv * (0.55 + 0.45 * setEnv);
     float gamma = Hloc / depth;
     // ---- break PHASE -------------------------------------------------
     // How far this_ water column has progressed toward collapse: the clock for

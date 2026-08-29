@@ -71,14 +71,28 @@ export const OCEAN_PASS_SAMPLERS: Partial<Record<OceanPassName, Record<string, n
   });
 
 /**
- * Ceiling on the simulation buffers. Eight RGBA16F targets at eight bytes a
- * pixel is 64 bytes per pixel of viewport, so an uncapped 4K canvas would ask
- * for over half a gigabyte. Capping the water's pixel ratio rather than
- * splitting the passes across two resolutions keeps `uv` meaning one thing
- * everywhere, which matters because the composite reads neighbouring texels of
- * the wave targets to band-limit its shading normals.
+ * The water renders at the SAME pixel ratio as the land it sits beside.
+ *
+ * This was capped at two megapixels to bound the memory of eight float render
+ * targets, and the cap bound hard: on a 1704 px viewport the land drew at ratio
+ * 2.0 and the water at 1.107, so the water was upscaled 55% and every crisp
+ * stroke in it turned to smear. Against sharp illustrated land that does not
+ * read as soft water, it reads as a different and worse material -- and no
+ * amount of tuning inside the shader can recover resolution that was never
+ * rendered.
+ *
+ * The memory comes back from the two stateful passes instead. Foam and spray
+ * are advected and diffused fields with no hard edges of their own -- the crisp
+ * boundaries around them are drawn in the composite, at full resolution, by
+ * contouring them -- so they cost a quarter of the pixels and lose nothing that
+ * reaches the picture. The wave targets stay full-size and share one
+ * framebuffer, which is also what forces them to: multiple render targets must
+ * agree on size.
  */
-const SIM_MAX_PIXELS = 2_000_000;
+const SIM_MAX_PIXELS = 8_000_000;
+
+/** Linear scale of the foam and spray state relative to the wave targets. */
+const STATE_SCALE = 0.5;
 
 /** Wave-pass outputs, which are render targets one moment and inputs the next. */
 const WAVE_TARGET_UNITS = ["texGeom", "texFlow", "texSwell", "texPath"] as const;
@@ -170,6 +184,10 @@ function loopOmega(period: number): number {
   const raw = (2 * Math.PI) / period;
   const n = Math.max(1, Math.floor((raw * OCEAN_LOOP_SECONDS) / (2 * Math.PI) + 0.5));
   return (2 * Math.PI * n) / OCEAN_LOOP_SECONDS;
+}
+
+function mix(low: number, high: number, t: number): number {
+  return low + (high - low) * t;
 }
 
 function smoothstep(edge0: number, edge1: number, value: number): number {
@@ -294,6 +312,7 @@ export class WaterSurfaceRenderer {
     spray: [WebGLFramebuffer, WebGLFramebuffer];
   } | null = null;
   private current = 0;
+  private stateSize: [number, number] = [1, 1];
   private firstStep = true;
 
   private camera: CameraView = { origin: [0, 0], span: [1, 1] };
@@ -508,13 +527,13 @@ export class WaterSurfaceRenderer {
     this.bindTarget("texFoam", targets.foam[this.current]);
     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers.foam[1 - this.current]);
     gl.drawBuffers([gl.COLOR_ATTACHMENT0]);
-    this.usePass("foam", size, time, dt);
+    this.usePass("foam", this.stateSize, time, dt);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
     // --- spray ------------------------------------------------------------
     this.bindTarget("texSpray", targets.spray[this.current]);
     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers.spray[1 - this.current]);
-    this.usePass("spray", size, time, dt);
+    this.usePass("spray", this.stateSize, time, dt);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
     this.current = 1 - this.current;
@@ -638,6 +657,19 @@ export class WaterSurfaceRenderer {
       0,
     );
     const line = smoothstep(4, 10, strokesPerWave);
+    // How many crests the viewport holds. This is the number the drawn stroke
+    // has to answer to, and it is the one quantity a fixed plate could never
+    // vary: the tuned close-up holds four or five, and a bold line down each of
+    // them reads as surf. The same treatment on a viewport holding twenty-five
+    // evenly-spaced crests is corrugation -- fluted glass, not water -- because
+    // regularity is invisible at four repeats and unmissable at twenty-five.
+    //
+    // So the part of the stroke that is drawn unconditionally goes away as the
+    // count climbs, and what is left is the part gated on breaking and
+    // whitecapping. That is the offline shader's own stated intent ("only where
+    // the wave is actually doing something"), which the floor quietly overrode.
+    const crestsAcross = this.canvas.width / Math.max(lamP, 1e-3);
+    const fewCrests = 1 - smoothstep(5, 13, crestsAcross);
     // Whether an individual wave is a thing the picture can show at all.
     //
     // At world zoom the swell is four or five screen pixels from crest to
@@ -718,16 +750,19 @@ export class WaterSurfaceRenderer {
       uDetailGloss: detailWave,
       uDetailTrough: detailWave,
       uCrestGain: line,
-      // The floor is what draws a stroke on every crest whether or not it is
-      // doing anything, so it is the single biggest contributor to the hatching
-      // and has to reach zero, not just fade.
-      uCrestLineFloor: line * line,
-      uCrossTrain: line,
+      uCrestLineFloor: line * fewCrests,
+      uCrossTrain: line * fewCrests,
       uLaceLineGain: line,
       uWispGain: line,
       uStreakGain: line,
       uChopCrest: line,
       uChopGlint: line,
+      // The specular is the other half of the corrugated look: a tight lobe
+      // running along every ridge of a regular surface is exactly how ribbed
+      // glass is drawn. It keeps its tuned weight where the crest count is
+      // low and comes down as the sea fills with repeats.
+      uGlossGain: mix(0.45, 1, fewCrests),
+      uSheen: mix(0.5, 1, fewCrests),
     };
 
     for (const name of PASS_ORDER) {
@@ -822,9 +857,12 @@ export class WaterSurfaceRenderer {
   // ------------------------------------------------------------------ targets
   private resize(): void {
     const bounds = this.canvas.getBoundingClientRect();
+    // The same ceiling the land uses. Water drawn at a lower ratio than the art
+    // it borders does not look like softer water, it looks like a lower-quality
+    // layer, and the coastline is where the two meet on every frame.
     const requested = Math.min(
       (window.devicePixelRatio || 1) * this.renderScale,
-      DETAIL_POLICY.renderScale.maximumAnimatedWaterDevicePixelRatio,
+      DETAIL_POLICY.renderScale.maximumDevicePixelRatio,
     );
     const cssWidth = Math.max(1, bounds.width);
     const cssHeight = Math.max(1, bounds.height);
@@ -832,6 +870,7 @@ export class WaterSurfaceRenderer {
       requested,
       Math.sqrt(SIM_MAX_PIXELS / (cssWidth * cssHeight)),
     );
+
     this.pixelRatio = Math.max(0.5, capped);
     const width = Math.max(1, Math.round(cssWidth * this.pixelRatio));
     const height = Math.max(1, Math.round(cssHeight * this.pixelRatio));
@@ -852,7 +891,7 @@ export class WaterSurfaceRenderer {
     const gl = this.gl;
     this.releaseTargets();
 
-    const target = (): WebGLTexture => {
+    const target = (w: number, h: number): WebGLTexture => {
       const texture = gl.createTexture();
       if (!texture) throw new Error("WebGL could not allocate a water target.");
       gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -860,8 +899,8 @@ export class WaterSurfaceRenderer {
         gl.TEXTURE_2D,
         0,
         gl.RGBA16F,
-        width,
-        height,
+        w,
+        h,
         0,
         gl.RGBA,
         gl.HALF_FLOAT,
@@ -874,13 +913,17 @@ export class WaterSurfaceRenderer {
       return texture;
     };
 
+    const stateWidth = Math.max(1, Math.round(width * STATE_SCALE));
+    const stateHeight = Math.max(1, Math.round(height * STATE_SCALE));
+    this.stateSize = [stateWidth, stateHeight];
+    const state = (): WebGLTexture => target(stateWidth, stateHeight);
     const targets = {
-      geom: target(),
-      flow: target(),
-      swell: target(),
-      path: target(),
-      foam: [target(), target()] as [WebGLTexture, WebGLTexture],
-      spray: [target(), target()] as [WebGLTexture, WebGLTexture],
+      geom: target(width, height),
+      flow: target(width, height),
+      swell: target(width, height),
+      path: target(width, height),
+      foam: [state(), state()] as [WebGLTexture, WebGLTexture],
+      spray: [state(), state()] as [WebGLTexture, WebGLTexture],
     };
 
     const attach = (textures: readonly WebGLTexture[]): WebGLFramebuffer => {

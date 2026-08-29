@@ -221,9 +221,17 @@ test("animated water resizes only when its observer or LOD requests it", async (
     assert.match(renderer, /private resizePending = true/);
     assert.match(renderer, /if \(this\.resizePending\) \{\s*this\.resize\(\);\s*this\.resizePending = false;/);
     assert.match(renderer, /requestResize\(\): void \{\s*this\.resizePending = true;/);
-    assert.match(renderer, /maximumAnimatedWaterDevicePixelRatio/);
     assert.doesNotMatch(renderer, /const gl = this\.gl;\s*this\.resize\(\);/);
   }
+  // The ocean draws at the LAND's pixel ratio, not the lower animated-water one.
+  // It shares a coastline with the land art on every frame, and water rendered
+  // at a lower resolution than the art it borders does not read as softer
+  // water -- it reads as a lower-quality layer. Measured at 6.2 ms average
+  // against a 33 ms budget, so the animated-layer argument for a lower ceiling
+  // does not apply to this renderer. The inland water keeps the animated cap.
+  assert.match(openWaterRenderer, /DETAIL_POLICY\.renderScale\.maximumDevicePixelRatio/);
+  assert.doesNotMatch(openWaterRenderer, /maximumAnimatedWaterDevicePixelRatio/);
+  assert.match(inlandRenderer, /maximumAnimatedWaterDevicePixelRatio/);
   for (const controller of [openWaterController, inlandController]) {
     assert.match(controller, /new ResizeObserver\(\(\) => \{\s*this\.renderer\.requestResize\(\);\s*if \(!this\.resizeFrameRequest\) \{/);
     assert.match(controller, /this\.resizeFrameRequest = requestAnimationFrame\(\(\) => \{\s*this\.resizeFrameRequest = 0;\s*this\.renderOnce\(\);/);
