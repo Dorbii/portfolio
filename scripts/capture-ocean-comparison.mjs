@@ -125,6 +125,23 @@ async function main() {
     // capturing. Measuring water statistics through the land art biases exactly
     // the band that matters: near the shore the water canvas is partly
     // transparent, so surf-zone pixels pick up whatever is painted underneath.
+    // --show turns layers ON the same way --hide turns them off.
+    if (args.show) {
+      const ids = args.show.split(",").map((v) => v.trim()).filter(Boolean);
+      const shown = await evaluate(connection, sessionId, `(() => {
+        const want = ${JSON.stringify(ids)};
+        const rows = [...document.querySelectorAll('[data-layer-inspector] label')];
+        const done = [];
+        for (const id of want) {
+          const row = rows.find((r) => r.textContent.trim().startsWith(id));
+          const box = row && row.querySelector('input');
+          if (box && !box.checked && !box.disabled) { box.click(); done.push(id); }
+        }
+        return done.join(',');
+      })()`);
+      console.log("showed layers:", shown || "(none)");
+      await delay(600);
+    }
     if (args.hide) {
       const ids = args.hide.split(",").map((v) => v.trim()).filter(Boolean);
       const hidden = await evaluate(connection, sessionId, `(() => {
@@ -155,7 +172,20 @@ async function main() {
     const rect = await evaluate(connection, sessionId,
       `(() => { const r = document.querySelector('${CANVAS}').getBoundingClientRect();
         return { x: r.x, y: r.y, width: r.width, height: r.height }; })()`);
-    await screenshot(connection, sessionId, out, { ...rect, scale: 1 });
+    if (args["canvas-only"]) {
+      // The water canvas's OWN pixels, before the page composites anything over
+      // them. A page screenshot cannot separate "the sea has no surf" from "the
+      // surf is drawn and then painted over by a layer above it", and those need
+      // opposite fixes. Needs ?water.capture for preserveDrawingBuffer.
+      const dataUrl = await evaluate(connection, sessionId,
+        `document.querySelector('${CANVAS}').toDataURL('image/png')`);
+      if (typeof dataUrl !== "string" || !dataUrl.startsWith("data:image/png")) {
+        throw new Error("water canvas returned no pixels -- is ?water.capture set?");
+      }
+      await writeFile(out, Buffer.from(dataUrl.split(",")[1], "base64"));
+    } else {
+      await screenshot(connection, sessionId, out, { ...rect, scale: 1 });
+    }
     // Write the camera the app ACTUALLY settled on, beside the image.
     //
     // --span is a request, not a promise: the zoom loop walks in bounded steps
