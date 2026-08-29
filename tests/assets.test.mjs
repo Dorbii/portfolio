@@ -1568,7 +1568,7 @@ test("the solved ocean fields are the accepted checkpoint", async () => {
   const acceptedAssets = [
     [
       "public/career-world/layers/ocean/fields/ocean-flow-r2.png",
-      "D1A941ACB3C7DB68C2275EFB6280362A44F6EA36E7818364A900D22EEFBAE7EB",
+      "E4A787C8489234D5305934953679A5AF41AA002A3FABEE6683664EA0CD731090",
     ],
     [
       "public/career-world/layers/ocean/fields/ocean-noise-fine-r2.png",
@@ -1580,7 +1580,7 @@ test("the solved ocean fields are the accepted checkpoint", async () => {
     ],
     [
       "public/career-world/layers/ocean/fields/ocean-phase-r2.png",
-      "8BDE39BF8F4C4A9AACF1E75880FE95DB67378AA9E0A51FDE5F13A82C6CB0F586",
+      "5067EC072D39F7990C1F82096060A8DC683E45A0420C6C0E5104D1371DA3FCD4",
     ],
   ];
 

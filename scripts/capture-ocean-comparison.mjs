@@ -89,8 +89,17 @@ async function main() {
   const settle = Number(args.settle ?? 12);
   const [width, height] = (args.viewport ?? "1722x1082").split("x").map(Number);
   const flags = (args.flags ?? "").split(",").filter(Boolean);
-  const query = ["water.capture=1", ...flags].join("&");
-  const url = `${args.url ?? "http://localhost:3000/"}?${query}`;
+  // Merge into whatever query the base URL already has. Concatenating with "?"
+  // produced ".../?layers=1?water.capture=1", where water.capture is not a
+  // parameter at all -- so preserveDrawingBuffer stayed off and --canvas-only
+  // silently returned a fully transparent image, which reads exactly like a sea
+  // that rendered nothing.
+  const target = new URL(args.url ?? "http://localhost:3000/");
+  for (const flag of ["water.capture=1", ...flags]) {
+    const [key, value = "1"] = flag.split("=");
+    target.searchParams.set(key, value);
+  }
+  const url = target.toString();
 
   await mkdir(path.dirname(out), { recursive: true });
   const executable = await firstAccessible(browserCandidates());
@@ -169,8 +178,13 @@ async function main() {
     await delay(settle * 1000);
     const frames = await evaluate(connection, sessionId, `window.__oceanFrames`);
     const camera = await readCamera(connection, sessionId);
+    // Fall back to the viewport when the water canvas is gone -- hiding L1
+    // unmounts it, and that capture (the land alone) is exactly the one needed
+    // to ask what the ocean's mask is missing.
     const rect = await evaluate(connection, sessionId,
-      `(() => { const r = document.querySelector('${CANVAS}').getBoundingClientRect();
+      `(() => { const el = document.querySelector('${CANVAS}')
+          ?? document.querySelector('.career-world__viewport');
+        const r = el.getBoundingClientRect();
         return { x: r.x, y: r.y, width: r.width, height: r.height }; })()`);
     if (args["canvas-only"]) {
       // The water canvas's OWN pixels, before the page composites anything over
