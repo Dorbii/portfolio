@@ -121,6 +121,27 @@ async function main() {
       }
     });
     await navigate(connection, sessionId, url);
+    // --hide L2,L3,L4 turns those layers off through the layer inspector before
+    // capturing. Measuring water statistics through the land art biases exactly
+    // the band that matters: near the shore the water canvas is partly
+    // transparent, so surf-zone pixels pick up whatever is painted underneath.
+    if (args.hide) {
+      const ids = args.hide.split(",").map((v) => v.trim()).filter(Boolean);
+      const hidden = await evaluate(connection, sessionId, `(() => {
+        const want = ${JSON.stringify(ids)};
+        const rows = [...document.querySelectorAll('[data-layer-inspector] label')];
+        const done = [];
+        for (const id of want) {
+          const row = rows.find((r) => r.textContent.trim().startsWith(id)
+            && !/^${"$"}/.test(id));
+          const box = row && row.querySelector('input');
+          if (box && box.checked && !box.disabled) { box.click(); done.push(id); }
+        }
+        return done.join(',');
+      })()`);
+      console.log("hid layers:", hidden || "(none)");
+      await delay(600);
+    }
     const anchor = (args.anchor ?? "0.5,0.5").split(",").map(Number);
     if (args.span) await setSpan(connection, sessionId, Number(args.span), anchor);
 

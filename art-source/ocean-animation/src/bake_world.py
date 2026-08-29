@@ -23,7 +23,10 @@ import numpy as np
 
 SRC = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(SRC)
-WS = os.path.join(ROOT, 'scenes', 'world')
+# OCEAN_WORLD_SCENE lets a DENSER world be baked without disturbing the
+# shipping one. Density is the whole point: the surf zone is 60 tuned px, which
+# at twelve world px a wave is six texels for the entire breaking process.
+WS = os.path.join(ROOT, 'scenes', os.environ.get('OCEAN_WORLD_SCENE', 'world'))
 LAMBDA_WORLD = float(os.environ.get('WORLD_LAMBDA', 5.0))
 
 

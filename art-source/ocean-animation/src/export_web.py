@@ -46,7 +46,12 @@ REPO = os.path.dirname(os.path.dirname(ROOT))
 LAYER = os.path.join(REPO, 'features', 'career-world', 'layers', 'ocean')
 OUT = os.path.join(LAYER, 'rendering', 'shaders', 'generated')
 MODEL = os.path.join(LAYER, 'model', 'generated')
-META = os.path.join(ROOT, 'scenes', 'world', 'textures', 'world-fields-r2.json')
+# OCEAN_WORLD_SCENE must match whatever bake_world/encode_world were run with.
+# The manifest carries lambdaWorld, kMax, depthMax and the plane-wave constants;
+# reading the wrong one emits a shader that decodes correct pixels with the
+# wrong scale, which is silent and total.
+META = os.path.join(ROOT, 'scenes', os.environ.get('OCEAN_WORLD_SCENE', 'world'),
+                    'textures', 'world-fields-r2.json')
 
 sys.path.insert(0, SRC)
 import presets as P

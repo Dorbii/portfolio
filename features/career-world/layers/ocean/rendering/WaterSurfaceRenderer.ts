@@ -361,6 +361,15 @@ export class WaterSurfaceRenderer {
    * and get an answer rather than an opinion.
    */
   private readonly rawMode = hasWaterFlag("raw");
+  /** ?water.foam32 -- keep the foam buffer's material coordinates in full floats. */
+  private readonly foamFull = hasWaterFlag("foam32");
+  /** ?water.markScale=<0..1> -- how far drawn marks follow the water, not the screen. */
+  private readonly markAnchor = (() => {
+    if (typeof window === "undefined") return 0;
+    const raw = new URLSearchParams(window.location.search).get("water.markScale");
+    const value = raw === null ? 0 : Number(raw);
+    return Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 0;
+  })();
   private presetsDirty = true;
 
   private readonly timerExtension: GpuTimerQueryExtension | null;
@@ -683,6 +692,33 @@ export class WaterSurfaceRenderer {
     read(framebuffers.wave, gl.COLOR_ATTACHMENT3, "path", ["hPath", "formEnv", "groupEnv", "rE"]);
     read(framebuffers.foam[this.current], gl.COLOR_ATTACHMENT0, "foam",
          ["fresh", "persist", "matX", "matY"]);
+    // Spray is airborne whitewater and the other thing that can put white
+    // offshore. It runs at STATE_SCALE, so it is read at its own size.
+    {
+      const [sw, sh] = this.stateSize;
+      const spray = new Float32Array(sw * sh * 4);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers.spray[this.current]);
+      gl.readBuffer(gl.COLOR_ATTACHMENT0);
+      gl.readPixels(0, 0, sw, sh, gl.RGBA, gl.FLOAT, spray);
+      const values: number[] = [];
+      let sum = 0;
+      let peak = 0;
+      for (let i = 0; i < spray.length; i += 4) {
+        const value = spray[i];
+        if (!Number.isFinite(value)) continue;
+        values.push(value);
+        sum += value;
+        if (value > peak) peak = value;
+      }
+      values.sort((left, right) => left - right);
+      const at = (q: number): number => values[Math.floor((values.length - 1) * q)] ?? 0;
+      out["spray.a"] = {
+        mean: sum / Math.max(1, values.length),
+        p50: at(0.5), p95: at(0.95), p99: at(0.99), max: peak,
+        over01: values.filter((v) => v > 0.1).length / Math.max(1, values.length),
+        over05: values.filter((v) => v > 0.5).length / Math.max(1, values.length),
+      };
+    }
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     return out;
   }
@@ -833,7 +869,29 @@ export class WaterSurfaceRenderer {
     // measurement could not see, and ?water.capture exists now so that class of
     // reasoning cannot be made again.
     const wideShot = 1 - waveDetail;
+    // How much the drawn MARKS grow with the camera.
+    //
+    // Stroke and foam-line widths are screen-anchored: a crest line holds ~4 px
+    // wherever it is drawn. That is right for a fixed render and wrong across a
+    // 25x zoom range, because the WAVES grow and the marks do not, so the number
+    // of marks per wave halves every time the camera doubles. Measured: rendering
+    // the offline plate treatment at the live layer's pixel density, on the same
+    // water, drops its own whitewater from 24.6% to 10.2% -- 2.4x, from
+    // resolution alone. That is the picture going from surf to a wash as you
+    // zoom in, and no amount of foam will fix it, because the foam is there and
+    // is being drawn too thin.
+    //
+    // 0 leaves them screen-anchored, 1 pins them to the water so a wave carries
+    // the same marks at every zoom. ?water.markScale sweeps it.
+    const markScale = Math.pow(Math.max(zc, 1e-3), this.markAnchor);
     const fade: Readonly<Record<string, number>> = {
+      uInjCrestW: markScale,
+      uCrestLineW: markScale,
+      uLaceLineW: markScale,
+      uChopW: markScale,
+      uStreakW: markScale,
+      uWispW: markScale,
+      uShadowStep: markScale,
       // With the swell gone and the deep end dark, the open sea has one field
       // left that can vary it: the large-scale weather the wave pass already
       // carries, which decides where the sea is working and where it is glassy.
@@ -1004,19 +1062,26 @@ export class WaterSurfaceRenderer {
     const gl = this.gl;
     this.releaseTargets();
 
-    const target = (w: number, h: number): WebGLTexture => {
+    const target = (w: number, h: number, full = false): WebGLTexture => {
       const texture = gl.createTexture();
       if (!texture) throw new Error("WebGL could not allocate a water target.");
       gl.bindTexture(gl.TEXTURE_2D, texture);
+      // The foam buffer carries MATERIAL COORDINATES in .ba, and the lace, the
+      // wisps and the eroded boundary are all contoured from them -- which is
+      // what turns a foam field into painted whitewater rather than a wash. They
+      // are stored as offsets because the absolute values reach five figures,
+      // but under a heavy sea the offsets themselves run to hundreds of tuned
+      // pixels within a foam lifetime, and half-float precision degrades with
+      // magnitude. The offline renderer uses 32-bit floats throughout.
       gl.texImage2D(
         gl.TEXTURE_2D,
         0,
-        gl.RGBA16F,
+        full ? gl.RGBA32F : gl.RGBA16F,
         w,
         h,
         0,
         gl.RGBA,
-        gl.HALF_FLOAT,
+        full ? gl.FLOAT : gl.HALF_FLOAT,
         null,
       );
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -1035,7 +1100,8 @@ export class WaterSurfaceRenderer {
       flow: target(width, height),
       swell: target(width, height),
       path: target(width, height),
-      foam: [target(width, height), target(width, height)] as [WebGLTexture, WebGLTexture],
+      foam: [target(width, height, this.foamFull), target(width, height, this.foamFull)] as
+        [WebGLTexture, WebGLTexture],
       spray: [spray(), spray()] as [WebGLTexture, WebGLTexture],
     };
 

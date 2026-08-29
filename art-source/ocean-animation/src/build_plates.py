@@ -27,6 +27,12 @@ DIAG = os.path.join(ROOT, 'diagnostics')
 os.makedirs(MASKS, exist_ok=True)
 os.makedirs(DIAG, exist_ok=True)
 
+# Scene pixels per TUNED pixel. The plate was authored where these were the
+# same thing and the swell spanned 115 of them; a world baked at 24 world px
+# a wave is 4.8 tuned px to the pixel. Any length here that shapes the WATER
+# rather than the picture has to be written in tuned px and converted.
+OCEAN_G = float(os.environ.get('OCEAN_G', 130.0))
+
 GUTTER = 6          # painted frame edge, left/top/bottom, excluded from everything
 
 
@@ -237,10 +243,24 @@ def main():
 
     # bathymetry: shoals to zero at the coast, exponential shelf seaward.
     # sea stacks shoal the water around themselves for free (they are land in the SDF).
+    # NOTE: SHELF stays in scene pixels deliberately. precompute renormalises
+    # the profile afterwards, and measured against a like-for-like scene the
+    # two agree to 1% everywhere outside the smoothing kernel above. Changing
+    # it would break an agreement that currently holds.
     SHELF = 105.0        # px e-folding length of the shelf
     DMAX = 9.0           # metres at deep water
     depth = DMAX * (1.0 - np.exp(-np.maximum(sdf, 0.0) / SHELF))
-    depth = ndi.gaussian_filter(depth, 7.0).astype(np.float32)
+    # Seven TUNED pixels, not seven scene pixels.
+    #
+    # This smoothing sits on the steepest part of the profile, where the shelf
+    # rises out of the shore, and that is the part BREAKING is gated on. Written
+    # in scene pixels it was 7 tuned px on the plate and 33 on the world -- so
+    # the live sea's water was up to 2.2x too deep inside the surf zone, the
+    # depth gate never opened, and the energy that should have broken on the
+    # shore went offshore as whitecaps instead. Measured against a like-for-like
+    # scene, the depth profiles agreed everywhere beyond 30 tuned px and
+    # diverged sharply inside it, which is this kernel's width exactly.
+    depth = ndi.gaussian_filter(depth, 7.0 * OCEAN_G / 130.0).astype(np.float32)
     depth[~water] = 0.0
 
     # Two distinct bands. The land-side one is deliberately narrow: it is the

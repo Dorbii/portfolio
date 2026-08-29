@@ -39,8 +39,9 @@ import numpy as np
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BAKED = os.path.join(ROOT, 'scenes', 'world', 'baked')
-OUT = os.path.join(ROOT, 'scenes', 'world', 'textures')
+_SCENE = os.environ.get('OCEAN_WORLD_SCENE', 'world')
+BAKED = os.path.join(ROOT, 'scenes', _SCENE, 'baked')
+OUT = os.path.join(ROOT, 'scenes', _SCENE, 'textures')
 # Where the live layer reads them from.
 LIVE = os.path.join(os.path.dirname(os.path.dirname(ROOT)),
                     'public', 'career-world', 'layers', 'ocean', 'fields')

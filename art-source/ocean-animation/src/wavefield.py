@@ -36,7 +36,11 @@ G = float(os.environ.get('OCEAN_G', 130.0))   # picture-space gravity, px/s^2
 # keeps a sensible width instead of collapsing onto the shoreline.
 DEPTH_SCALE = float(os.environ.get('OCEAN_DEPTH', 105.0))  # depth of the open sea, px
 SHELF = float(os.environ.get('OCEAN_SHELF', 230.0))        # e-folding length of the shelf, px
-MIN_DEPTH = 0.55     # px, keeps the dispersion solve finite at the waterline
+MIN_DEPTH = 0.55     # TUNED px, keeps the dispersion solve finite at the waterline
+
+# Scene pixels per TUNED pixel. The plate was authored where these were the same
+# thing; a world baked at 24 world px a wave is 4.8 tuned px to the pixel.
+PX = G / 130.0
 
 
 def bathymetry():
@@ -44,8 +48,19 @@ def bathymetry():
     sdf = np.load(os.path.join(MASKS, 'shore_sdf.npy'))
     water = np.load(os.path.join(MASKS, 'water_soft.npy')) > 0.5
     d = DEPTH_SCALE * (1.0 - np.exp(-np.maximum(sdf, 0.0) / SHELF))
-    d = ndi.gaussian_filter(d, 6.0)
-    d = np.maximum(d, MIN_DEPTH)
+    # Six TUNED px, and a waterline floor in tuned px too.
+    #
+    # This kernel sits on the steepest part of the shelf, which is the part
+    # BREAKING is gated on -- and breaking is what puts whitewater on a shore.
+    # Written in scene pixels it was 6 tuned px on the plate and 29 on the world,
+    # so the live sea's water was up to 2.2x too deep inside the surf zone, the
+    # depth gate stayed shut, and the energy that should have broken went
+    # offshore as whitecaps instead. Measured against a like-for-like scene the
+    # depth profiles agreed to 1% beyond 30 tuned px and diverged sharply inside
+    # it, which is this kernel's width. DEPTH_SCALE and SHELF need no conversion:
+    # they arrive already scaled, from OCEAN_DEPTH and OCEAN_SHELF.
+    d = ndi.gaussian_filter(d, 6.0 * PX)
+    d = np.maximum(d, MIN_DEPTH * PX)
     return d.astype(np.float32), water, sdf
 
 
