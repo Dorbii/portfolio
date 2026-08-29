@@ -9,7 +9,7 @@ conclusions were superseded that day.
 
 ---
 
-## 1. Where this stands (2026-08-28)
+## 1. Where this stands (2026-08-29)
 
 Two things exist now:
 
@@ -43,16 +43,77 @@ are gitignored (large, reproducible). The bake is valid because **the owner
 confirms the coast SHAPE is canon**; the world's placeholder colours and texture
 are not.
 
-**Not done, in dependency order:**
+**The port is DONE and live.** Commits `b6f0a8e` `9eb3b81` `541799e`.
 
-1. **Framebuffers in `WaterSurfaceRenderer.ts`.** It is a single stateless
-   `drawArrays` today with no render targets at all, so foam persistence and
-   material coordinates have nowhere to live. The only genuinely new plumbing;
-   everything else is translation.
-2. **Translate `wave.frag` + `composite.frag` to WebGL2**, sampling the two
-   textures instead of solving, with the world/screen parameter split applied.
-3. **Weather scalar** over the one fixed phase field, replacing three switchable
-   presets (see below).
+Four passes a frame -- wave, foam, spray, composite -- in
+`features/career-world/layers/ocean/`. The shaders and the preset table are
+GENERATED from `src/shaders/` and `src/presets.py` by `src/export_web.py`; do not
+edit anything under `rendering/shaders/generated/` or `model/generated/`. Tune
+offline, where a frame can be measured in numpy, and re-run the export. Every
+substitution in that script asserts its anchor matched exactly once, so an
+offline edit that moves an anchor breaks the export rather than quietly emitting
+a shader that compiles and renders the wrong thing.
+
+Assets: 2.69 MB of solved fields replaced 40.3 MB of painted plates, which are
+deleted along with their builders and their T30-T33 gate scripts.
+
+### The three decisions the port turns on
+
+**Units: tuned plate pixels.** Everything is evaluated in the units the presets
+were tuned in, fixed to the world and independent of the camera, so a wave keeps
+its wavelength, steepness and depth at every zoom -- and so does every
+hard-coded length in the offline shaders, including the ones nobody wrote down
+as a parameter. Screen pixels were tried on paper first and are worse: they put
+the camera factor on the breaking criterion and the surf-zone width, where
+getting one wrong changes the physics rather than the styling. `uZc` (screen px
+per tuned px) appears in exactly two small tables in the renderer, both drawing
+rather than physics.
+
+**Noise is screen-anchored, waves are world-anchored.** The same split, applied
+inside `noiseAt` rather than at the call sites. A scale of 640 was 38% of the
+tuned plate and is 1.7% of a world, so at the wide shot the tileable texture
+repeated sixty times across the viewport and drew a diamond lattice.
+
+**`uOpenWaveVis` is the resolvability lever.** At the wide shot the swell is
+three screen pixels crest to crest, and shading, whitecapping and drawing each
+one puts a light/dark pair on every wave in the sea. Attenuating the height
+field after the RMS normalisation -- where scaling survives -- is the one place
+that reaches tone, breaking, foam and stroke together. The shore keeps its surf
+at any altitude. It is 1.0 offline and nothing there changes.
+
+### Two bugs that cost hours; do not reintroduce them
+
+- **Screen uv is bottom-left; the world fields are image-space, top row first.**
+  The missing flip mirrored the entire ocean -- a coastline that nearly fits and
+  does not. Verified with a magenta-over-land-art overlay, which is the check to
+  repeat if registration is ever in doubt.
+- **`texPrev` had no sampler unit**, so it defaulted to unit 0 and the foam pass
+  advected the phase texture as its own history. The renderer now refuses to
+  start if any uniform the compiler kept is written by nobody, and
+  `tests/water-uniform-contract.test.mjs` checks the same invariant without a
+  GPU. That check found this within a minute of existing.
+
+### Measuring the live layer
+
+`?water.capture` turns on `preserveDrawingBuffer`, which is what makes the
+rendered water readable from the page -- without it `drawImage` returns
+transparent and the only way to judge the layer is to look at a screenshot.
+`?water.bare` strips every drawn layer, leaving geometry and base colour, which
+is how the woven-fabric cause was isolated. Looking is exactly what kept being
+wrong about this water; keep measuring.
+
+### Open
+
+- **Art direction at map scale.** The wide shot is a dark ocean with a shelf
+  band and large-scale weather (luma p10-p90 spans 18 of 255, up from 10). The
+  bathymetry shelf is ~10 screen px at world zoom, which is narrow for a map:
+  widening it is a bake parameter (`OCEAN_SHELF`), and it trades against
+  refraction, since a shelf wide enough to read as colour is also wide enough to
+  bend every wave around the whole island.
+- **The surf line rings the whole coast** at roughly even weight. It should
+  favour windward shores and break into runs -- the same fault the offline work
+  fixed once already, arriving again because the wide shot re-exposes it.
+- **Fine-detail coherence** remains 0.285 against the plate's 0.583 (see 1A).
 
 ### Five findings only the real world coast could surface
 
