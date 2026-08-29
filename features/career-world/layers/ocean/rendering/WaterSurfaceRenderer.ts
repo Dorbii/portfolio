@@ -651,13 +651,19 @@ export class WaterSurfaceRenderer {
     // slow large-scale mottle from wind and current, and surf as a thin line on
     // the shore. That is what is left when this reaches zero, and the waves come
     // back as the camera closes in -- revealed, not switched on.
-    const waveDetail = smoothstep(8, 22, lamP);
+    // The band is where it is because of what the swell is worth on screen at
+    // each tier, not because of a number that felt right: below about twenty
+    // pixels a crest is a stripe rather than a wave, and by fifty it carries the
+    // tonal structure the whole treatment is built on. With the world baked at
+    // twelve pixels a swell that puts the wide shot below the floor and the
+    // territory approach across the ramp, which is where detail should arrive.
+    const waveDetail = smoothstep(20, 45, lamP);
     this.openWaveVis = waveDetail;
     // The detail-wave family is a separate, shorter train drawn for shading
     // only, so it needs its own answer to the same question.
     const detailWave = smoothstep(
-      8,
-      22,
+      20,
+      45,
       weatherLerp(OCEAN_PASS_STATES.composite, "uDetailLam", this.state.weather, 0) * zc,
     );
     // The wide shot needs a wider tonal range than the close-up does, and it has

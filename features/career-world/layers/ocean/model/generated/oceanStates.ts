@@ -27,7 +27,7 @@ export const OCEAN_FAMILIES = Object.freeze({
 // shaders are evaluated in tuned plate pixels, so the sea itself is
 // camera-independent; only these two small sets cross between the picture
 // and the screen. See the adapter comment in any generated shader.
-export const OCEAN_TUNED_PER_WORLD = 23.047164;
+export const OCEAN_TUNED_PER_WORLD = 9.602985;
 
 // A tuned length consumed as a screen offset: multiply by uZc.
 export const OCEAN_TUNED_TO_SCREEN: ReadonlySet<string> = new Set(["uDiffuse", "uReliefLift"]);
