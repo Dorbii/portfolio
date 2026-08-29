@@ -396,6 +396,141 @@ which is the frame they mean something in.
 
 ---
 
+## 1C. 2026-08-29 evening: four defects that were in the picture all along
+
+Commit: `085a185`. Owner report: *"Still seeing coastline boundary issues along
+with the paint look still being here, a lack of depth that light reflection and
+shadows provide and I see very little variance/wave animations with the wave
+crashing back into the ocean or against the coast."*
+
+Four of those complaints landed on real bugs. None of them was in the shading.
+
+### The shoreline distance field had no zero in it
+
+`build_plates.py` wrote `where(water, d_water, -d_land)` from two Euclidean
+distance transforms. A water pixel's distance to the nearest LAND pixel is at
+least 1, and a land pixel's to the nearest WATER pixel is at least 1, so the
+field jumped -1 to +1 with a two-pixel dead band between. **There was not one
+pixel in the entire world where `|sdf| < 1`** -- verified directly on the .npy:
+`|sdf|<1: 0`, smallest positive exactly `1.0`, largest negative exactly `-1.0`,
+values quantised to the EDT lattice (1, sqrt2, 2, sqrt5).
+
+The water's own coverage is `smoothstep(-0.6, 0.6, sdf)` in WORLD pixels. That
+alpha ramp could therefore never take an intermediate value at a texel centre,
+and at the closest camera one world pixel is twelve screen pixels. What it drew
+is the blocky coastline the owner reported three times: a hard edge following the
+pixel lattice, with square corners, that the painted land underneath does not
+have.
+
+Fixed by a half-pixel shift (which puts the crossing between the two centres,
+where the boundary is) plus sub-pixel placement from the gradient of a lightly
+smoothed coverage, blended over 1.5 px so the far field stays exactly the EDT
+that the shelf and the surf-zone widths were measured against. **Water coverage
+unchanged to five decimal places; no point of the coast moves more than 1.03 px;
+axis-alignment of the boundary normal 0.077 -> 0.038.** Chain to re-run:
+`build_plates` -> clear `scenes/world/work/` -> `bake_world` -> `encode_world`
+-> `export_web`. The solve caches on families, not on the coastline, so a stale
+`work/` silently bakes the old coast.
+
+### The foam material coordinates were half floats
+
+They are stored as OFFSETS already (`mat - px`, with `backPx` handling the
+reprojection) because the absolute values reach five figures. But the offset
+itself grows for as long as a parcel of foam survives, and half-float spacing
+grows with magnitude: 1 unit at 1024, 2 at 2048, 4 at 4096 -- against lace and
+mark strokes a fraction of a tuned pixel wide, which are CONTOURED from those
+coordinates. Past roughly a thousand tuned pixels of drift the contour quantises
+onto an axis-aligned lattice and the foam accumulating inside each cell saturates
+it. **What that draws is a grey rectangular slab with square corners lying on
+open water, and it grows the longer the page is left open.** That is the owner's
+"random white lines that seem wrong".
+
+A/B at one camera: at 14 s a faint rectangle outline, at 45 s a solid slab, and
+at 45 s with RGBA32F it is completely absent. The fix existed behind
+`?water.foam32` and shipped OFF, because the capture that judged it ran fourteen
+seconds and the offsets had not grown yet. **Any measurement of an INTEGRATED
+field needs a settle long enough for that integration to reach steady state, and
+"long enough" for a material coordinate is not the same as for foam density.**
+Now the default; `?water.mat16` restores the old buffers. Spray got it too --
+same scheme, and it is no longer switched off. Costs 20 bytes per viewport pixel.
+
+### The cast shadow marched a fixed number of SCREEN pixels
+
+`uShadowStep` was excluded from `TUNED_TO_SCREEN` on the reasoning that it is
+"already written against uRes" -- which is the reason it BELONGS there.
+`uReliefLift` and `uDiffuse` are written against uRes too, and that is exactly
+what makes them tuned lengths consumed as screen offsets. The test is not how the
+value is spelt in the shader, it is whether the thing being measured is a mark on
+the picture or a distance in the water. Unconverted, the three taps reached 0.14
+of a wavelength at the camera it was tuned at, **0.44 at the territory approach
+-- the far side of the same wave, so it shades the crest instead of the trough --
+and 1.7 wavelengths at world zoom.** A shadow sampled in antiphase does not
+weaken, it inverts, and it inverts at the swell's own spacing.
+
+### Coastal ambience defaulted off
+
+`DEFAULT_ENVIRONMENT_LAYER_VISIBILITY.L1_2 = false`, and L1_2 owns "wet shoreline
+contact, swash, breakers, and foam". The flag predates there being a spray pass
+to switch on; the pass runs every frame either way and only `uSprayGain` was
+zeroed. The default view was a sea that stopped at the rock instead of meeting
+it. Now on.
+
+### Also
+
+`uCrossTrain` was gated on `boldCrest`, which is zero for every camera wider than
+about span 0.13 -- the whole world and territory range. The shader that draws the
+cross train says its purpose is to make stroke SPACING irregular, because one
+regular grid is corduroy and two interleaved are not. The anti-corduroy term was
+switched off exactly where the corduroy shows. Now gated on `line` alone.
+Measured on its own: orientation concentration 0.159 -> 0.148, i.e. real but
+small. And `sunXY` now comes from `uLightDirection` rather than a second spelling
+of the offline sun; they agree to one degree today, so that is correctness
+against a future light change, not a fix.
+
+### Ruled out this session, with numbers
+
+- **Opening the LoD gates** (`?water.raw` at territory, after the above landed):
+  orientation 0.230 -> 0.209, and the picture reads as MORE ribbed, not less --
+  the crest-line floor returns and draws a stroke down every crest. The gate is
+  doing its job. Do not open `uCrestLineFloor`, `uGlossGain` or `uSheen`.
+- **Weather.** The live default is 0.34 on a calm->heavy scale and the reference
+  clip is `heavy_crashing_surf`, i.e. 1.0. Sweeping 0.34 -> 0.70 -> 1.00 moves
+  luma sd 23.15 -> 24.57 -> 24.99, whitewater 0.41% -> 0.49% -> 0.51%, and
+  orientation not at all. The three frames are visually the same sea. **This is
+  the PINNED list working as designed** -- everything that shapes a crest is
+  fixed to the baked state, so weather moves amplitudes and thresholds only.
+- **Un-pinning `uSpread`.** It is safe to un-pin: the spread is an analytic
+  angular offset on the shared solved phase (`th = S*m*cos(dl) + k0*m*sin(dl) *
+  dot(px, perp)`), continuous in `dl`, needing no re-solve and tearing nothing --
+  so its place in PINNED is an over-application of the rule. But 27 deg -> 38 deg
+  at weather 1.0 moves orientation 0.237 -> 0.225 and nothing else. Reverted: not
+  worth weakening a documented invariant for a 5% number.
+- **The sdf decode order.** `flowAt` hardware-bilinears the ENCODED signed-sqrt
+  and squares afterwards, which is not the same as interpolating the decoded
+  distance -- the argument `phaseAt` already makes for the phase, never made for
+  its sibling. Real, and small: rms 0.19 world px within `|sdf|<1`, max 0.30,
+  `waterSoft` differing by more than 0.05 on 0.99% of pixels, coverage identical.
+  **It is NOT the blocky coast**; the missing zero crossing was.
+
+### What is still open
+
+The sea reads as long parallel diagonal bands at every zoom. That survives all
+six changes above, the LoD gates being opened, the full weather range and a 41%
+wider directional spread. It is therefore not in the drawing and not in the
+tuning -- it is the height field. Seven components on ONE solved phase field
+sharing one direction family is a narrowband sea, and a narrowband sea is regular
+by construction. `wave.frag`'s own regional-energy comment says the same thing
+from the other side (block sd of luma 0.067 against the plate's 0.120), and
+`uRegionTone` sits at 0.16, roughly half what closing that gap would need.
+
+Two candidates, neither tested: raise the regional field's authority (one
+uniform, but it is tuned offline and has to be re-exported), or give the primary
+train more than seven directions. The scale-resolved deficit is unchanged from
+1B: 300 / 700 / 1500 tuned px at 9.7 / 3.4 / 0.4 against the plate's
+19.2 / 13.5 / 4.6.
+
+---
+
 ## 2. Running it
 
 ```bash
@@ -413,6 +548,31 @@ python closeup.py build && python closeup.py render all    # 2.4x magnified stud
 python newscene.py init  harbour ../path/to/plate.png      # an unrelated plate
 python newscene.py render harbour heavy_crashing_surf
 ```
+
+**The shipping world.** Nothing drove this end to end and it had to be
+reconstructed from `build_dense_world.py`, which builds a DENSER copy rather than
+the one that ships. Anything touching the coastline, the bathymetry or the solve
+needs all five steps, in order:
+
+```bash
+cd src
+export OCEAN_ROOT=../scenes/world PYTHONPATH=. OCEAN_CALM_REFS=
+export OCEAN_WATER_MASK=../scenes/world/city_coast_water_mask_r1.png
+export OCEAN_G=13.537503 OCEAN_DEPTH=10.934099 OCEAN_SHELF=23.951140
+python build_plates.py                 # masks, shoreline SDF, bathymetry
+rm -rf ../scenes/world/work            # THE SOLVE CACHE KEYS ON FAMILIES, NOT
+                                       # ON THE COASTLINE -- a stale work/ will
+                                       # print "cached" and bake the old coast
+OCEAN_WORLD_SCENE=world WORLD_LAMBDA=12 python bake_world.py
+OCEAN_WORLD_SCENE=world python encode_world.py
+OCEAN_WORLD_SCENE=world python export_web.py
+```
+
+`OCEAN_G` is `WORLD_LAMBDA * 2pi / T^2` for `T = 2.36`, and `bake_world` derives
+it again itself; it is set here only because `build_plates` runs first and needs
+the same value. Re-encoding changes the two field PNGs, so
+`tests/assets.test.mjs` checkpoint hashes have to be updated in the same commit.
+Editing only the offline SHADERS or the presets needs `export_web.py` alone.
 
 ---
 
