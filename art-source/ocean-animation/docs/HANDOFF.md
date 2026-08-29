@@ -2,37 +2,219 @@
 
 Everything a fresh session needs. Read this before changing anything.
 
-`docs/03-iteration-log.md` is the full narrative (1100 lines); this is the distillate.
+`docs/03-iteration-log.md` is the full narrative; this is the distillate.
+Sections 1 and 1A are current. Sections 2–11 predate 2026-08-28 and remain
+accurate about the offline renderer, but read 1A first — several of their
+conclusions were superseded that day.
 
 ---
 
-## 1. What this is, and where it stands
+## 1. Where this stands (2026-08-28)
 
-Three seamless-looping ocean animations over one fixed painted plate — a 2.5D
-oblique cliffside settlement — each holding a single sea state for its whole
-duration. A GPU height-field renderer (moderngl / GLSL, headless OpenGL 3.3),
-no 3-D scene, no image morphing. The land plate is returned untouched wherever
-the water mask is zero.
+Two things exist now:
 
-**All three pass every objective check, and all three Stage-1 gates pass.**
+1. **The offline renderer** — three seamless-looping sea states over a fixed
+   painted plate. All three pass Stage-1 and every objective check.
+2. **A replacement of the live portfolio water layer**, in progress. The owner's
+   direction: replace ALL water logic and assets in
+   `features/career-world/layers/ocean/` with this work. Not augment — replace.
 
-| clip | foam % of water | water luma | crest travel | loop seam | land Δ |
-|------|-----------------|------------|--------------|-----------|--------|
-| calm_swell | 6.3 % | 0.326 | 11.2 ± 1.2, ncc 0.92 | 1.25 | 4 |
-| windy_rolling_surf | 10.7 % | 0.372 | 14.6 ± 3.4, ncc 0.92 | 1.14 | 4 |
-| heavy_crashing_surf | 10.0 % | 0.352 | 11.3 ± 0.0, ncc 0.93 | 1.23 | 5 |
+### The port, precisely
 
-Land delta is against a codec noise floor of 5 measured on a static clip;
-renderer-level delta vs the plate is exactly **0**.
+Commits: `d028d44` `7c94913` `42cbf52` `6bf0972` `8f189a5` `5ec78e1`.
 
-Stage-1 (bare wave field, no coast/foam/shading): crest phase speed within
-1.6–4.5 % of theory, **0 backward steps in 299** for all three.
+**Done.** The world wave field is solved and encoded as two web textures,
+1.61 MB replacing 22.57 MB of painted water assets:
 
-**Status: physically sound, stylistically not there.** The owner's assessment is
-that the physics is the good part and the remaining gap is style — specifically a
-"mottled / painted" read versus the concept art's crisp flowing water. An agentic
-review scored an earlier version 7–7.5/10 and confirmed the causal sequence now
-reads (swell → lip → impact → whitewater → residue).
+| texture | R | G | B | A |
+|---|---|---|---|---|
+| `ocean-phase-r1.png` | residual phase hi byte | residual phase lo byte | wavenumber | depth |
+| `ocean-flow-r1.png` | wave dir x | wave dir y | shore distance | water mask |
+
+Shader reconstruction is one line:
+
+```glsl
+float S = (hi * 256.0 + lo) / 65535.0 * 1007.9864 - 89.3782
+        + 1.263546 * dot(worldPx, vec2(0.508849, 0.860856));
+```
+
+Regenerate with `python bake_world.py && python encode_world.py`. Both outputs
+are gitignored (large, reproducible). The bake is valid because **the owner
+confirms the coast SHAPE is canon**; the world's placeholder colours and texture
+are not.
+
+**Not done, in dependency order:**
+
+1. **Framebuffers in `WaterSurfaceRenderer.ts`.** It is a single stateless
+   `drawArrays` today with no render targets at all, so foam persistence and
+   material coordinates have nowhere to live. The only genuinely new plumbing;
+   everything else is translation.
+2. **Translate `wave.frag` + `composite.frag` to WebGL2**, sampling the two
+   textures instead of solving, with the world/screen parameter split applied.
+3. **Weather scalar** over the one fixed phase field, replacing three switchable
+   presets (see below).
+
+### Five findings only the real world coast could surface
+
+None were visible on the tuned plate. Each would have been baked in wrong by
+porting straight from it.
+
+- **Authoritative masks beat inference.** Segmenting the world coast from colour
+  gave 43.2 % water against a true 47 % — it called ~4 % of real water *land*,
+  and land zeroes the shoreline distance there, which is the false-shoal defect
+  `build_plates.py`'s own docstring warns about. `OCEAN_WATER_MASK` takes the
+  live layer's authority instead. Verified the only water then dropped is 3.8 %
+  across six disconnected inland lakes, which the ocean layer should not own.
+- **World- vs screen-anchored parameters.** `PX_SCALED` treats every length
+  alike, which is right for a magnification study and wrong for a camera. A wave
+  is a physical object and scales with the camera; a drawn stroke is a mark on
+  the picture and wants ~3–4 px at every zoom. Split into `WORLD_SCALED` /
+  `SCREEN_FIXED` with `at_camera()`. Invisible at one zoom, wrong across 25.
+- **Only the primary swell can be a baked asset.** At world resolution primary is
+  4.74 px (4.7 samples/wave), secondary 2.61 px, chop 0.96 px. The latter two are
+  sub-pixel and must be generated in screen space — which is also the only zoom
+  where they should be visible. The LoD split falls out of the numbers.
+- **Scale.** The swell is ~5 world px. At the closest camera (span 0.04, ~24×)
+  that reads near 120 screen px; at world zoom 4.8 px, correctly fine texture. It
+  also keeps the sea in deep water almost everywhere, so waves stay straight
+  offshore and refract only at the coast.
+- **Palette: REJECTED direction, recorded.** The world's old authored water
+  measures luma p50 0.151 / sat p50 0.184 against our 0.166–0.431 / 0.689–0.854,
+  and re-anchoring to it looked far better against the placeholder world art. The
+  owner's call: that asset is being replaced, so it has no authority over what
+  replaces it. **The palette tuned in this session stands unchanged.**
+  `worldpalette.py` is kept, marked rejected, unused.
+
+### Weather: do not rotate the presets
+
+The three presets use different wave *families* — different directions and
+periods — so they are different eikonal solves. They cannot be crossfaded; the
+phase field would tear and crests would break and re-form. Rotation means a hard
+cut.
+
+Instead: **one baked phase field, one continuous weather scalar** driving only
+the energy parameters (amplitude, steepness, foam injection, whitecap threshold,
+spray, colour depth). Those interpolate cleanly because they are numbers on a
+fixed geometry. The cost is that swell direction becomes fixed per coastline,
+which is physically fine — real swell direction changes over hours — and is what
+makes the bake viable at all. It is also what makes a rare hero wave possible
+later: the same scalar spiking, not a fourth preset.
+
+---
+
+## 1A. What changed on 2026-08-28
+
+The day's work was almost entirely one complaint: the water read
+"grainy / mottled / like fabric" rather than liquid. **It was found and fixed.**
+
+### The mottle was the specular lobe
+
+Isolated by ablation, and the chain matters because each step looked like an
+answer:
+
+- `slope 0` → smooth. So it is a shading term.
+- every drawn layer stripped → still mottled.
+- chop family removed → still mottled.
+- each specular term zeroed *individually* → still mottled.
+- **gloss + spec + sheen zeroed together → smooth.**
+
+Gloss runs `pow(dot(N,H), 114)` against a normal built from the *full-frequency*
+gradient. At that exponent any pixel-scale wobble flips the highlight fully on or
+off — the 4–8 px blocky mottle. Fixed by giving the specular normals a
+band-limited gradient (`shadeSmooth` 5 px) and widening the lobe 52 → 34.
+
+This retroactively explains three earlier failures: sharpening amplified it
+(noise), denoising removed it *and* our only fine content (that content was the
+blob edges), and supersampling halved the fine-band energy for the same reason.
+
+### Other fixes that landed
+
+- **Crest stroke from a single-train path field.** Contouring the summed height
+  is contouring a beat, whose level sets break wherever components cancel —
+  2.18× the boundary-per-unit-stroke of a clean band, against 1.46× for one
+  train. That is the cauliflower edge.
+- **`dirWander` removed.** Spatial phase perturbation across many components
+  decorrelates them: 62 % of the height field's variance below 8 px, against 31 %
+  at zero. The additive-bend replacement was no better (50 % / 68 %).
+- **Group velocity.** Loop quantisation floored every envelope frequency, so all
+  six ran at 1.2–3.4× crest speed instead of 0.5×, and both envelopes in each
+  state landed on the *same* forced frequency so they could not beat. Groups
+  outran the waves instead of sliding back through them, so crests never got born
+  or died — invisible in a still, obvious in motion. Groups were also 960–1576 px
+  wide against ~450 px of visible water.
+- **Offshore foam was gated four times over** — `whitecapSteep` above what the
+  slope field reaches, `deepFade`, `tauP`, `foamDeepThr`. Each alone zeroes the
+  result, so sweeping any one produced byte-identical output across a 17× range.
+  Whitecapping is now gated on slope and front face rather than slope AND crest
+  height, which were uncorrelated (−0.008) and whose product ran 7× below either.
+- **Stokes drift tapered with depth.** Applied flat it was 28 px/s of onshore
+  transport in deep water, carrying foam 435 px into the coast per loop.
+- **Colour keyed to wave height** — troughs deepen, crests go teal.
+- **Energy ordering restored.** Verification caught `heavy` reading *less*
+  energetic than `windy`, from my own ratio-scaling of `injWhitecap`.
+
+### The remaining gap, precisely
+
+Fine-detail coherence: neighbouring-pixel correlation of the high-frequency
+residual is **0.285 against the plate's 0.583**. Everything else sits at
+0.78–0.94 of the plate. At 4× magnification the plate is smooth water crossed by
+hair-thin bright filaments; ours is chunky 4–8 px blobs.
+
+Three experiments, all negative, which together narrow it:
+
+- **Stamped capsule marks** (`markGain 0`, machinery kept). Closes the spectral
+  gap — fine-band energy 0.45 → 0.89, the only thing that has ever moved it — but
+  reads as hatching when dense and floating debris when sparse, with no usable
+  setting between. A connected branching network is not a population of
+  independent shapes; that is topological, not tuning.
+- **Curl shear** (`curlGain 0`). Divergence-free and correct, but foam lives
+  6.4 s here while real filaments are folded over minutes. Shear cannot make a
+  filament from a blob in that time. Cutting the diffusion so shear could act
+  made the foam field *worse*, 0.543 → 0.328.
+- **Filamentary injection along the crest contour** (`injFilament 0`). Thinness
+  moves toward the plate (0.919 → 0.819 against 0.788) with coverage landing on
+  it, but coherence dips and it reads noisier. Closest of the three; worth
+  another pass.
+
+**Supersampling ruled out aliasing**: rendering at 2× and averaging down *halved*
+the fine-band energy, so our fine energy is the hard edges of chunky blobs, not
+sub-pixel detail. `supersample.py` keeps the harness.
+
+### Measurement discipline — the important part
+
+**Instruments disagreed with the owner's eye repeatedly, and the eye was right
+every time.** Statistics that matched while the picture was obviously wrong: mean
+luma (exactly), high-frequency energy (0.0855 vs 0.0843), foam fragmentation
+(8613 pieces vs 8678), local contrast, glint density.
+
+Statistics that *inverted* — said we were better when we were worse:
+
+- spectral peakiness said the plate was more regular than us (137 vs 101)
+- orientation spread said we were less parallel (0.733 vs 0.574)
+- a coastal-foam coverage number said we were under when we were over
+
+All for the same reason: our fine content is noise, and noise skews every texture
+statistic in whichever direction that statistic happens to look.
+
+**Only two measures never disagreed with the eye:**
+
+- **lag-1 correlation** of the fine detail (ours 0.285, plate 0.583)
+- **the local-contrast map** (`busy_map.py`), looked at rather than reduced
+
+Use those two. Treat any other aggregate texture statistic as untrusted until it
+has been changed deliberately in both directions with the picture checked.
+
+### New tools from this day
+
+| script | what it is for |
+|---|---|
+| `busy_map.py` | local-contrast map + busy share by distance from shore + block-to-block variation |
+| `bake_world.py` | solve the world wave field; reports which families are resolvable |
+| `encode_world.py` | pack the solved field into the two web textures, with round-trip check |
+| `worldcoast.py` | render a crop of the real world coast at a camera scale |
+| `supersample.py` | render at 2× and average down |
+| `look.py` | quick still of a state (crop + full frame) |
+| `crest_source.py`, `path_field.py`, `stroke_path.py` | which field a stroke should be contoured from |
 
 ---
 
@@ -198,6 +380,12 @@ the metric when it disagrees with the picture.
 
 ## 7. The open problem, precisely
 
+> **SUPERSEDED 2026-08-28.** This section names orientation coherence as the
+> open problem. That was one symptom of the specular-lobe mottle, which is now
+> fixed (see 1A). The open problem is narrower: fine-detail coherence 0.285
+> against the plate 0.583, i.e. we do not make hair-thin filaments. Three
+> approaches have been tried and recorded as negative results.
+
 The render reads as painted/mottled; the concept art reads as flowing water.
 Measured, the difference is **not** brightness, saturation, hue, spectrum in any
 band, foam coverage, foam connectivity, foam run length, edge sharpness, pixel
@@ -249,6 +437,11 @@ has repeatedly destroyed good behaviour while improving something else:
 ---
 
 ## 9. Portfolio integration
+
+> **SUPERSEDED 2026-08-28.** This section predates looking at the live layer.
+> It is not "a model swap": the live renderer has no framebuffers and no phase
+> field, and the world is a map with a 25x zoom range rather than a plate. See
+> section 1 for the actual port state and remaining work.
 
 The owner owns this work and has asked for it to replace the ocean, river and all
 water in `features/career-world/`. Another agent works the rest of that repo.
