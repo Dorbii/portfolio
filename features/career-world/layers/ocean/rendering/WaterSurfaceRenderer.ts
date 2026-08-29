@@ -89,11 +89,13 @@ export const OCEAN_PASS_SAMPLERS: Partial<Record<OceanPassName, Record<string, n
  * framebuffer, which is also what forces them to: multiple render targets must
  * agree on size.
  */
-// Six full-size RGBA16F targets and two quarter-size ones is 52 bytes per pixel
-// of viewport, so this ceiling is worth about 340 MB of GPU memory -- the same
-// order as the painted plates it replaced, which decoded to well over 200 MB
-// before the territory coast field was counted. It binds only on displays
-// larger than roughly 1700 by 950 CSS pixels at ratio 2.
+// Four full-size RGBA16F targets, two full-size RGBA32F (the foam pair, which
+// carries material coordinates -- see the target allocator) and two quarter-size
+// RGBA32F is 72 bytes per pixel of viewport, so this ceiling is worth about
+// 470 MB of GPU memory -- the same order as the painted plates it replaced,
+// which decoded to well over 200 MB before the territory coast field was
+// counted. It binds only on displays larger than roughly 1700 by 950 CSS pixels
+// at ratio 2.
 const SIM_MAX_PIXELS = 6_500_000;
 
 /**
@@ -361,8 +363,22 @@ export class WaterSurfaceRenderer {
    * and get an answer rather than an opinion.
    */
   private readonly rawMode = hasWaterFlag("raw");
-  /** ?water.foam32 -- keep the foam buffer's material coordinates in full floats. */
-  private readonly foamFull = hasWaterFlag("foam32");
+  /**
+   * ?water.mat16 -- put the material coordinates back in half floats.
+   *
+   * Diagnostic only. Half floats were the default until a 45-second capture
+   * showed what a 14-second one could not: the material offsets grow for as long
+   * as a parcel of foam survives, half-float spacing grows with magnitude, and
+   * the lace and the marks are CONTOURED from those coordinates. Past about a
+   * thousand tuned pixels of drift the spacing exceeds the width of the strokes
+   * being drawn, the contour quantises onto an axis-aligned lattice, and the
+   * foam accumulating inside each cell saturates it. What that draws is a grey
+   * rectangular slab lying on open water, with straight edges and square
+   * corners, which grows the longer the page is left open -- the "random white
+   * lines that seem wrong". Measuring this needs a page that has been running a
+   * while, which is why it survived a short capture and why the flag is kept.
+   */
+  private readonly matHalf = hasWaterFlag("mat16");
   /** ?water.markScale=<0..1> -- how far drawn marks follow the water, not the screen. */
   private readonly markAnchor = (() => {
     if (typeof window === "undefined") return 0;
@@ -891,7 +907,6 @@ export class WaterSurfaceRenderer {
       uChopW: markScale,
       uStreakW: markScale,
       uWispW: markScale,
-      uShadowStep: markScale,
       // With the swell gone and the deep end dark, the open sea has one field
       // left that can vary it: the large-scale weather the wave pass already
       // carries, which decides where the sea is working and where it is glassy.
@@ -922,7 +937,18 @@ export class WaterSurfaceRenderer {
       uDetailTrough: detailWave,
       uCrestGain: line,
       uCrestLineFloor: line * boldCrest,
-      uCrossTrain: line * boldCrest,
+      // NOT boldCrest. The floor above is an unconditional stroke down every
+      // crest, so it is exactly the corrugation boldCrest exists to hold back.
+      // The cross train is the opposite term: a second contour at a different
+      // angle and wavelength whose whole purpose, per the shader that draws it,
+      // is to make the spacing of the strokes irregular -- two regular grids
+      // interleave irregularly, one regular grid is corduroy. Gating it on the
+      // same scalar switched the fix off wherever the symptom appears, and the
+      // symptom is what Steve keeps seeing: below a hundred screen pixels a
+      // wave, which is the whole world and territory range, the sea was drawn
+      // with one train and read as parallel diagonal ribbing. `line` alone is
+      // the honest question here -- is there room across a wave for the stroke.
+      uCrossTrain: line,
       uLaceLineGain: line,
       uWispGain: line,
       uStreakGain: line,
@@ -1066,13 +1092,18 @@ export class WaterSurfaceRenderer {
       const texture = gl.createTexture();
       if (!texture) throw new Error("WebGL could not allocate a water target.");
       gl.bindTexture(gl.TEXTURE_2D, texture);
-      // The foam buffer carries MATERIAL COORDINATES in .ba, and the lace, the
-      // wisps and the eroded boundary are all contoured from them -- which is
-      // what turns a foam field into painted whitewater rather than a wash. They
-      // are stored as offsets because the absolute values reach five figures,
-      // but under a heavy sea the offsets themselves run to hundreds of tuned
-      // pixels within a foam lifetime, and half-float precision degrades with
-      // magnitude. The offline renderer uses 32-bit floats throughout.
+      // The foam and spray buffers carry MATERIAL COORDINATES in .ba, and the
+      // lace, the wisps, the marks and the eroded boundary are all contoured
+      // from them -- which is what turns a foam field into painted whitewater
+      // rather than a wash. They are stored as offsets because the absolute
+      // values reach five figures, but the offsets themselves grow for as long
+      // as the parcel survives, and half-float spacing grows with magnitude:
+      // one unit at 1024, two at 2048, four at 4096, against strokes a fraction
+      // of a tuned pixel wide. That is not a subtle loss of quality. It puts a
+      // grey rectangular slab on the open sea, and this comment used to end by
+      // noting the offline renderer uses 32-bit floats throughout -- which was
+      // the answer, sitting behind a flag that shipped off because the capture
+      // that judged it was too short for the offsets to have grown.
       gl.texImage2D(
         gl.TEXTURE_2D,
         0,
@@ -1094,13 +1125,13 @@ export class WaterSurfaceRenderer {
     const stateWidth = Math.max(1, Math.round(width * STATE_SCALE));
     const stateHeight = Math.max(1, Math.round(height * STATE_SCALE));
     this.stateSize = [stateWidth, stateHeight];
-    const spray = (): WebGLTexture => target(stateWidth, stateHeight);
+    const spray = (): WebGLTexture => target(stateWidth, stateHeight, !this.matHalf);
     const targets = {
       geom: target(width, height),
       flow: target(width, height),
       swell: target(width, height),
       path: target(width, height),
-      foam: [target(width, height, this.foamFull), target(width, height, this.foamFull)] as
+      foam: [target(width, height, !this.matHalf), target(width, height, !this.matHalf)] as
         [WebGLTexture, WebGLTexture],
       spray: [spray(), spray()] as [WebGLTexture, WebGLTexture],
     };

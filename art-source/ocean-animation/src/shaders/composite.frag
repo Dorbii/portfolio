@@ -437,7 +437,12 @@ void main()
     // behind it, so sample the height a short way toward the sun: if that point
     // stands higher than here, this pixel is in its shadow. That single term is
     // what turns a foam band into a wave with a body.
-    vec2 sunXY = normalize(vec2(-0.62, -0.55));
+    // The march direction is the SUN's, so it must be the same sun the frame is
+    // lit by. Spelling the offline sun's xy out again let the two disagree the
+    // moment the shared world light moved, and a shadow that does not run with
+    // the highlight is worse than no shadow: the wave gets a dark side and a lit
+    // side that are not opposite, which reads as dirt rather than as form.
+    vec2 sunXY = normalize(L.xy);
     float shadow = 0.0;
     for (int i = 1; i <= 3; ++i) {
         float off = float(i) * uShadowStep;

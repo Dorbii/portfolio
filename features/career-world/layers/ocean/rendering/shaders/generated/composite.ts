@@ -162,18 +162,18 @@ uniform float uPeriodP, uPeriodS, uPeriodC;
 
 const vec2  WORLD_SIZE   = vec2(1672.0, 941.0);
 const vec2  WORLD_TEXEL  = vec2(0.000598086, 0.001062699);
-const float PHASE_LO     = -34.363090;
-const float PHASE_SPAN   = 426.661481;
+const float PHASE_LO     = -34.145245;
+const float PHASE_SPAN   = 428.266464;
 const float PHASE_K0     = 0.52619541;
-const vec2  PHASE_DIR    = vec2(0.50584859, 0.86262228);
-const float FIELD_KMAX   = 1.37072349;
+const vec2  PHASE_DIR    = vec2(0.50560084, 0.86276752);
+const float FIELD_KMAX   = 1.44074571;
 const float FIELD_DMAX   = 10.93409824;
 const float FIELD_FMAX   = 2.40000010;
 const float FIELD_SDFMAX = 32.0000;
 // Tuned pixels per world pixel: the ratio of the two gravities, which is what
 // sets how many pixels a wave of a given period spans. The world was baked at
-// 12.0 px for the primary swell; the presets were tuned at 115.2.
-const float TUNED_PER_WORLD = 9.602985;
+// 5.0 px for the primary swell; the presets were tuned at 115.2.
+const float TUNED_PER_WORLD = 23.047164;
 const vec2  TUNED_SIZE = WORLD_SIZE * TUNED_PER_WORLD;
 
 // Screen uv has its origin at the BOTTOM left; the world fields are image-space,
@@ -761,7 +761,12 @@ void main()
     // behind it, so sample_ the height a short_ way toward the sun: if that point
     // stands higher than here, this_ pixel is in its shadow. That single term is
     // what turns a foam band into a wave with a body.
-    vec2 sunXY = normalize(vec2(-0.62, -0.55));
+    // The march direction is the SUN's, so it must be the same sun the frame is
+    // lit by. Spelling the offline sun's xy out again let the two disagree the
+    // moment the shared world light moved, and a shadow that does not run with
+    // the highlight is worse than no shadow: the wave gets a dark side and a lit
+    // side that are not opposite, which reads as dirt rather than as form.
+    vec2 sunXY = normalize(L.xy);
     float shadow = 0.0;
     for (int i = 1; i <= 3; ++i) {
         float off = float(i) * uShadowStep;

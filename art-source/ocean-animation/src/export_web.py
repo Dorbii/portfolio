@@ -646,6 +646,17 @@ ORDER = ('calm_swell', 'windy_rolling_surf', 'heavy_crashing_surf')
 TUNED_TO_SCREEN = {
     'uReliefLift',    # how far a crest rides up-screen; uv + vec2(0, liftPx*hn)/uRes
     'uDiffuse',       # foam neighbourhood radius; vec2 d = uDiffuse / uRes
+    # How far toward the sun the cast shadow looks for a crest that occludes this
+    # one. That is a question about the WAVE -- does the swell in front of me
+    # stand higher than I do -- so the answer has to be a wave length, not a
+    # screen length. Left unconverted it marched a fixed 7 px at every zoom: 0.14
+    # of a wavelength at the closest camera, which is what it was tuned at, but
+    # 0.44 at the territory approach, where it samples the far side of the same
+    # wave and shades the crest instead of the trough, and 1.7 wavelengths at
+    # world zoom, where it samples an unrelated wave two crests away. A shadow
+    # sampled in antiphase does not just weaken -- it inverts, and it inverts at
+    # exactly the swell's own spacing, which draws a regular stripe over the sea.
+    'uShadowStep',
 }
 # A screen length CONSUMED AS A LOOKUP COORDINATE. These index noise fields or
 # march along them in `px`, which is tuned, so a screen width has to be converted
@@ -653,8 +664,15 @@ TUNED_TO_SCREEN = {
 #
 # Deliberately NOT here: crestLineW, laceLineW, chopW, streakW and injCrestW all
 # feed contourLine, which divides by the screen-space gradient and is therefore
-# already a screen width wherever it is drawn; shadowStep, wispW and shadeSmooth
-# are already written against uRes.
+# already a screen width wherever it is drawn; wispW and shadeSmooth are widths
+# of a DRAWN MARK on a screen-space buffer and are meant to hold their pixels.
+#
+# "Written against uRes" was once the reason shadowStep was excluded, and it is
+# the reason it belongs in the table above instead: reliefLift and diffuse are
+# written against uRes too, and that is precisely what makes them tuned lengths
+# consumed as screen offsets. The test is not how the value is spelt in the
+# shader, it is whether the thing being measured is a mark on the picture or a
+# distance in the water.
 SCREEN_TO_TUNED = {
     # licField marches `px` directly and markField stamps on a material
     # coordinate, so neither goes through the noise helpers that now convert.

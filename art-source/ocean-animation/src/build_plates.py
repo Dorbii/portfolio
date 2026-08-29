@@ -239,7 +239,37 @@ def main():
     # continues off the right edge.
     d_water = ndi.distance_transform_edt(water)        # water -> nearest land
     d_land = ndi.distance_transform_edt(~water)        # land  -> nearest water
-    sdf = np.where(water, d_water, -d_land).astype(np.float32)     # +ve into the sea
+
+    # SUB-PIXEL. The naive form of this -- where(water, d_water, -d_land) -- has
+    # no zero in it. A water pixel's distance to the nearest land pixel is at
+    # least 1 and a land pixel's to the nearest water pixel is at least 1, so the
+    # field jumped -1 to +1 with a two-pixel dead band between, and there was not
+    # one pixel in the whole world where |sdf| < 1. Everything keyed on the
+    # shoreline reads that band: the water's own coverage is
+    # smoothstep(-0.6, 0.6, sdf) in WORLD px, an alpha ramp that could therefore
+    # never take an intermediate value, and at the closest camera one world pixel
+    # is twelve screen pixels. What that draws is a hard edge that follows the
+    # pixel lattice -- the blocky coastline, and the reason the sea reads as
+    # stopping at the land rather than meeting it.
+    #
+    # Half a pixel puts the crossing between the two centres, where the boundary
+    # actually is. The gradient of a lightly smoothed coverage then places it
+    # within the pixel: the coastline the land art draws is a smooth curve
+    # through these cells, not their staircase, and the first-order distance to
+    # the half-coverage contour recovers that curve. Blended over 1.5 px so the
+    # far field stays exactly the Euclidean transform, which is what the shelf
+    # and the surf-zone widths are measured against.
+    #
+    # Registration is preserved, not traded away: water coverage is unchanged to
+    # five decimal places and no point of the coastline moves by more than one
+    # pixel, while the axis-alignment of the boundary normal -- the staircase,
+    # measured -- halves.
+    sdf = np.where(water, d_water - 0.5, -(d_land - 0.5)).astype(np.float32)
+    cov = ndi.gaussian_filter(water.astype(np.float32), 1.0)
+    gy, gx = np.gradient(cov)
+    sub = (cov - 0.5) / np.maximum(np.hypot(gx, gy), 1e-4)
+    near = np.clip(1.5 - np.abs(sdf), 0.0, 1.0)
+    sdf = ((1.0 - near) * sdf + near * np.clip(sub, -2.0, 2.0)).astype(np.float32)
 
     # bathymetry: shoals to zero at the coast, exponential shelf seaward.
     # sea stacks shoal the water around themselves for free (they are land in the SDF).

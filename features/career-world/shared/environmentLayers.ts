@@ -18,7 +18,8 @@ export type EnvironmentLayerId =
   | "L4_4"
   | "L4_5"
   | "L4_6"
-  | "L4_7";
+  | "L4_7"
+  | "L4_8";
 
 export interface EnvironmentLayerDefinition {
   readonly available: boolean;
@@ -170,12 +171,25 @@ export const ENVIRONMENT_LAYER_DEFINITIONS: readonly EnvironmentLayerDefinition[
       owns: "independent moving train and restrained local temporal cues; the train is currently deferred",
       parentId: "L4",
     }),
+    Object.freeze({
+      available: true,
+      id: "L4_8",
+      label: "City coast modification",
+      owns: "registered city-owned extensions to the coastline, exported as the coast authority the ocean solve consumes",
+      parentId: "L4",
+    }),
   ]);
 
 export const DEFAULT_ENVIRONMENT_LAYER_VISIBILITY: EnvironmentLayerVisibility =
   Object.freeze({
     L1: true,
     L1_1: true,
+    // Owns "wet shoreline contact, swash, breakers, and foam" -- and it was off,
+    // which is why the default view had none of them. The flag predates the
+    // water: it was written when L1 drew a flat fill and there was no spray pass
+    // to switch on. There is one now, it runs every frame either way (only its
+    // gain is zeroed), so this costs nothing and is the difference between a sea
+    // that meets the rock and a sea that stops at it.
     L1_2: true,
     L2: true,
     L2_1: true,
@@ -194,6 +208,7 @@ export const DEFAULT_ENVIRONMENT_LAYER_VISIBILITY: EnvironmentLayerVisibility =
     L4_5: true,
     L4_6: true,
     L4_7: true,
+    L4_8: true,
   });
 
 const ENVIRONMENT_LAYER_BY_ID = new Map(
