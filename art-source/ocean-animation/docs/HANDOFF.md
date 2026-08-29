@@ -3,9 +3,10 @@
 Everything a fresh session needs. Read this before changing anything.
 
 `docs/03-iteration-log.md` is the full narrative; this is the distillate.
-Sections 1 and 1A are current. Sections 2–11 predate 2026-08-28 and remain
-accurate about the offline renderer, but read 1A first — several of their
-conclusions were superseded that day.
+Sections 1, 1A and 1B are current — **read 1B first**, it is the live layer's
+present state and carries the list of hypotheses already eliminated. Sections
+2–11 predate 2026-08-28 and remain accurate about the offline renderer, but
+several of their conclusions were superseded that day.
 
 ---
 
@@ -276,6 +277,122 @@ has been changed deliberately in both directions with the picture checked.
 | `supersample.py` | render at 2× and average down |
 | `look.py` | quick still of a state (crop + full frame) |
 | `crest_source.py`, `path_field.py`, `stroke_path.py` | which field a stroke should be contoured from |
+
+---
+
+## 1B. 2026-08-29 session: the "reads as paint" investigation
+
+**Status: the live sea still reads as paint rather than water at all three zoom
+tiers. Three real bugs were found and fixed; none of them was the cause. The
+next step is a like-for-like scene (below).**
+
+Commits: `08c0b86` `0d02e8e` `7bf7f3c`.
+
+### Fixed
+
+- **The primary train shoaled on the wrong wavenumber.** The phase texture
+  carries `|grad S|` from the eikonal solve. That is the right k for the wave's
+  GEOMETRY and the wrong one for its AMPLITUDE: where rays cross, the phase
+  gradient collapses while the water is still the depth it always was, so
+  Green's law answered a 2.6x-too-small k with a 43% amplitude deficit -- on the
+  focus caustics, where the biggest waves are. `shoalAmp` takes the depth-solved
+  `dispersionK` now, as the secondary and chop always did. 8.18% off the offline
+  field -> 0.63%.
+- **The palette darkening is gone**, at the owner's direction ("the one for the
+  mvp was perfect"). It had been calibrated on captures of a sea that had never
+  run. luma 62.4 -> 75.8 against the plate's 95.5.
+- **Bake constants were in scene pixels, not tuned pixels.** `ray_focus` smoothed
+  with `gaussian_filter(div, 9.0)` -- 9 px meant 0.08 of a wavelength on the
+  plate and 0.75 on the world. focus MULTIPLIES the primary amplitude and swings
+  5.2x, so the sea was modulated by amplitude blobs the size of its own waves at
+  every zoom. Five more constants in `impact_sites` had it too, and its site
+  COUNT is a density (54 -> 519). `precompute._px()` converts them now; on the
+  plate the factor is exactly 1.
+
+### Ruled out, with numbers -- do not re-investigate without new evidence
+
+| hypothesis | measurement that killed it |
+|---|---|
+| the LoD fade table | every gain is 1.0 from `region` inward; `?water.raw` confirms (white 0.69% vs 0.64%) |
+| the picture is blurred | live carries MORE fine spectral energy than offline (1.0% vs 0.3% in the 2.5-6 px band) |
+| noise mipmapping differs | offline builds mipmaps too, anisotropy 8 |
+| the noise textures differ | byte-identical; both breaking gates evaluate to the same mean |
+| bake resolution costs the shading | `\|grad h\|` matches: mean 0.3064 vs 0.3075, p95 0.81 vs 0.87 |
+| weather default 0.34 vs baked 0.5 | matching it moves luma by 1.7 |
+| the painted-plate blend | `uPlateInfluence` and `uPlateTint` are 0.0 in all three presets |
+| `facing` is broken | it reads `acc.g`, the wave-surface gradient -- the front face of each wave, not the coast's aspect. It was never supposed to vary windward vs lee |
+| foam reprojection blurs it | the live layer steps 30/s against the offline's 48, so it blurs LESS |
+| the deep-water amplitude normaliser | the 55th-percentile divisor measures 0.9995 -- it really is the identity |
+
+### Where it actually stands
+
+Depth-matched (same sdf bands), weather-matched, at the tuned wave scale:
+
+| band | offline z=1 luma/sd/white | live luma/sd/white |
+|---|---|---|
+| surf 0-60 | 132.8 / 67.2 / 30.2% | 89.5 / 43.5 / 5.7% |
+| shelf 60-230 | 82.3 / 38.4 / 4.4% | 78.6 / 30.2 / 1.6% |
+| deep >230 | 89.8 / 43.1 / 6.4% | 76.7 / 28.4 / 1.1% |
+
+Average brightness is close. RANGE is not: contrast uniformly ~1.4x low at every
+depth, whitecaps 3-6x low, driven by 4-9x less of the sea breaking.
+
+**The one quantity that can differ invisibly is `acc.energy`.** `hn` is
+normalised by `sigma = sqrt(energy*0.5)`, so the height field and its gradient
+can match the offline exactly while `Hloc`, `breakDepth` and the breaking gate
+all collapse. Live `hn` p95 is 0.6875 against 0.7725 -- 11% lower, which
+compounds hard through `crestness`'s threshold and `shallowGate`'s.
+
+That 11% CANNOT currently be attributed, because `worldcoast` is a different
+scene with different bathymetry, and 8-11% is exactly what two different
+coastlines would give. Every comparison in this section inherits that caveat.
+
+### The next step: a like-for-like scene
+
+Build a scene that IS the live camera's region -- crop the world art and masks to
+it, upsample so one scene pixel is one tuned pixel, OVERWRITE the derived masks
+with the world's own (so mask inference cannot add its own error, per the
+false-shoal warning in `build_plates.py`), then solve all three families at
+1666x937. Compare against a live capture at the same camera. Every remaining
+difference is then the port, with nowhere left to hide.
+
+### Instruments built this session -- use these before looking
+
+- `?water.raw` bypasses the LoD fade table. It is the only part of the live layer
+  no offline render can vouch for, because it is not the offline renderer's.
+  Check anything blamed on the fades here first.
+- `?water.probe` reads the wave pass's own channels off the GPU -- `breaking`,
+  `whitecap`, the crest path, `|grad h|`, the foam buffer. None of them reach the
+  composite, so NO screenshot can show them. `src/wc_probe.py` prints the
+  offline's same numbers.
+- `scripts/capture-ocean-comparison.mjs` captures the live layer with the
+  simulation actually running, and refuses to write a frame that never stepped.
+  `--span` and `--anchor` frame it; the anchor is a world uv the zoom holds fixed.
+- `src/world_ref.py` renders the offline one PIXEL REGISTERED against a
+  whole-world capture. `src/wc_bare.py` is offline geometry with foam and spray
+  off, to pair with `?water.bare`. `src/negative_compare.py` does the difference
+  and the per-depth-band statistics.
+
+### Two traps this session walked into
+
+- **`bake_world.py` and `encode_world.py` both read `WORLD_LAMBDA`.** Setting it
+  for one and not the other writes textures at one scale and a manifest claiming
+  another. It is silent: the pixels are right and every length derived from them
+  is wrong. Run them with the same environment.
+- **A tolerance that cannot fail is not a test.** `verify_port.py` gated two
+  [0,1] mask fields on `max <= 1.01` and `max <= 0.60`. The shore band reported
+  PASS while sitting at 90% of its own magnitude from the reference. Masks are
+  judged on the mean now.
+
+### A frame error in the bake, not the port
+
+`build_plates.py` writes the shore band with the plate's constants (-13..+46) in
+whatever pixels its scene uses. On `scenes/world` those are world px, so the
+baked band is 9.6x wider than the wave-relative width it was tuned at -- which is
+why an offline render of the whole world rings every coast in a white halo.
+**That render is therefore not a valid target; `worldcoast` at z=1 is**, because
+scene px are tuned px there. The live layer applies the constants in tuned px,
+which is the frame they mean something in.
 
 ---
 
