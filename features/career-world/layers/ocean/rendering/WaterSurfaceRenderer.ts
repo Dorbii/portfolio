@@ -293,7 +293,7 @@ export class WaterSurfaceRenderer {
       loadImage(OCEAN_FIELD_ASSETS.noiseFine),
     ]);
 
-    return new WaterSurfaceRenderer(canvas, gl, light, {
+    const renderer = new WaterSurfaceRenderer(canvas, gl, light, {
       // NEAREST is not an optimisation here, it is correctness: the red and
       // green channels are the high and low bytes of one 16-bit phase residual,
       // and hardware bilinear would interpolate them independently. The shader
@@ -303,6 +303,14 @@ export class WaterSurfaceRenderer {
       texNoise: createTexture(gl, noise, "repeat"),
       texNoiseF: createTexture(gl, noiseFine, "repeat"),
     });
+    // ?water.probe -- hand the intermediate targets to whatever is measuring
+    // from outside. Off by default: it reads the whole framebuffer back and
+    // stalls the pipeline, which is fine for a measurement and not for a page.
+    if (hasWaterFlag("probe")) {
+      (window as unknown as { __oceanProbe?: () => unknown }).__oceanProbe =
+        () => renderer.probeFields();
+    }
+    return renderer;
   }
 
   readonly canvas: HTMLCanvasElement;
@@ -341,6 +349,18 @@ export class WaterSurfaceRenderer {
   private renderScale = 1;
   private zc = 1;
   private openWaveVis = 1;
+  /**
+   * ?water.raw -- draw the sea with the LoD policy switched off.
+   *
+   * Everything below syncPresetUniforms' `fade` table is MINE, not the offline
+   * renderer's, so it is the one part of the live layer that no offline render
+   * can vouch for. With it bypassed the live shaders run on the preset values
+   * the plate was tuned at, which makes a capture of the whole world directly
+   * comparable, pixel for pixel, with the offline renderer on the same scene.
+   * That is the only way to ask "is this the port, or is this my LoD policy?"
+   * and get an answer rather than an opinion.
+   */
+  private readonly rawMode = hasWaterFlag("raw");
   private presetsDirty = true;
 
   private readonly timerExtension: GpuTimerQueryExtension | null;
@@ -575,6 +595,67 @@ export class WaterSurfaceRenderer {
     }
   }
 
+  /**
+   * Read the wave pass's own channels back off the GPU.
+   *
+   * Everything the foam pass injects from -- breaking, whitecap, the crest path
+   * -- is an intermediate render target. None of it is in the composite, so no
+   * screenshot can show it, and when the live layer makes a fifth of the offline
+   * renderer's whitewater the picture cannot say whether the waves are failing
+   * to BREAK or the foam is failing to SURVIVE. Those need opposite fixes.
+   *
+   * Statistics rather than pixels: the question is always "how much of this
+   * field is above the threshold the next stage tests it against".
+   */
+  probeFields(): Record<string, Record<string, number>> {
+    const gl = this.gl;
+    const [w, h] = [this.canvas.width, this.canvas.height];
+    const out: Record<string, Record<string, number>> = {};
+    const pixels = new Float32Array(w * h * 4);
+    const read = (
+      framebuffer: WebGLFramebuffer,
+      attachment: number,
+      label: string,
+      names: readonly string[],
+    ): void => {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+      gl.readBuffer(attachment);
+      gl.readPixels(0, 0, w, h, gl.RGBA, gl.FLOAT, pixels);
+      for (let c = 0; c < 4; c += 1) {
+        const values: number[] = [];
+        let sum = 0;
+        let peak = 0;
+        for (let i = c; i < pixels.length; i += 4 * 7) {
+          const value = pixels[i];
+          if (!Number.isFinite(value)) continue;
+          values.push(value);
+          sum += value;
+          if (value > peak) peak = value;
+        }
+        values.sort((left, right) => left - right);
+        const at = (q: number): number => values[Math.floor((values.length - 1) * q)] ?? 0;
+        out[`${label}.${names[c]}`] = {
+          mean: sum / Math.max(1, values.length),
+          p50: at(0.5),
+          p95: at(0.95),
+          p99: at(0.99),
+          max: peak,
+          over01: values.filter((value) => value > 0.1).length / Math.max(1, values.length),
+          over05: values.filter((value) => value > 0.5).length / Math.max(1, values.length),
+        };
+      }
+    };
+    const framebuffers = this.framebuffers;
+    if (!framebuffers) return out;
+    read(framebuffers.wave, gl.COLOR_ATTACHMENT0, "geom", ["hn", "dhdx", "dhdy", "breaking"]);
+    read(framebuffers.wave, gl.COLOR_ATTACHMENT1, "flow", ["vx", "vy", "hForm", "whitecap"]);
+    read(framebuffers.wave, gl.COLOR_ATTACHMENT3, "path", ["hPath", "formEnv", "groupEnv", "rE"]);
+    read(framebuffers.foam[this.current], gl.COLOR_ATTACHMENT0, "foam",
+         ["fresh", "persist", "matX", "matY"]);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    return out;
+  }
+
   getRenderInfo(): WaterRenderInfo {
     const gl = this.gl;
     return Object.freeze({
@@ -701,7 +782,7 @@ export class WaterSurfaceRenderer {
     // twelve pixels a swell that puts the wide shot below the floor and the
     // territory approach across the ramp, which is where detail should arrive.
     const waveDetail = smoothstep(20, 45, lamP);
-    this.openWaveVis = waveDetail;
+    this.openWaveVis = this.rawMode ? 1 : waveDetail;
     // The detail-wave family is a separate, shorter train drawn for shading
     // only, so it needs its own answer to the same question.
     const detailWave = smoothstep(
@@ -791,7 +872,7 @@ export class WaterSurfaceRenderer {
           : OCEAN_SCREEN_TO_TUNED.has(uniformName)
             ? 1 / zc
             : 1;
-        const gain = fade[uniformName] ?? 1;
+        const gain = this.rawMode ? 1 : (fade[uniformName] ?? 1);
         if (components === 1) {
           let value = weatherLerp(states, uniformName, this.state.weather, 0)
             * scale * gain;

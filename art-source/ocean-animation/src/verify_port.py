@@ -27,12 +27,22 @@ LIVE = os.path.join(os.path.dirname(os.path.dirname(ROOT)),
 META = os.path.join(WS, 'textures', 'world-fields-r2.json')
 
 
-def report(name, want, got, mask, tol, units=''):
+def report(name, want, got, mask, tol, units='', mean_tol=None):
+    """Gate on the max unless mean_tol is given, in which case gate on the mean.
+
+    A [0,1] mask disagreeing by 1.0 on one edge pixel is resampling, not a port
+    bug, so those are judged on the mean -- but the tolerance still has to be
+    able to FAIL. Two of these once read `tol=1.01` and `tol=0.60` against fields
+    that cannot exceed 1.0, which is not a loose test, it is no test: they
+    reported PASS while the shore band sat 90% of its own magnitude away from the
+    reference.
+    """
     err = np.abs(got - want)[mask]
     rel = err / (np.abs(want)[mask].mean() + 1e-9)
-    ok = err.max() <= tol
+    ok = err.mean() <= mean_tol if mean_tol is not None else err.max() <= tol
+    gate = f'mean<={mean_tol}' if mean_tol is not None else f'max<={tol}'
     print(f'  {"PASS" if ok else "FAIL"}  {name:<26} max |err| {err.max():9.5f}{units}'
-          f'   mean {err.mean():8.5f}   ({rel.mean() * 100:.2f}% of typical)')
+          f'   mean {err.mean():8.5f}   ({rel.mean() * 100:5.2f}% of typical)  [{gate}]')
     return ok
 
 
@@ -109,22 +119,35 @@ def main():
         return k
 
     dd = np.maximum(depth_live, 0.35)
-    ampP_live = np.clip(shoal(k_live, dd, 2.36) * focus_live, 0.3, 3.2)
+    # Green's law takes the DEPTH-solved wavenumber, not the stored |grad S|.
+    # See the fieldA comment in export_web.py: they part company on the focus
+    # caustics, which is exactly where the surf is.
+    ampP_live = np.clip(shoal(dispersion_k(2.36, dd), dd, 2.36) * focus_live, 0.3, 3.2)
     ampS_live = np.clip(shoal(dispersion_k(1.78, dd), dd, 1.78) * (0.55 + 0.45 * focus_live), 0.3, 3.2)
     ampC_live = np.clip(shoal(dispersion_k(1.04, dd), dd, 1.04), 0.3, 2.2)
-    ok.append(report('shoaling amp, primary', extra['ampP'], ampP_live, water, 0.10))
-    ok.append(report('shoaling amp, secondary', extra['ampS'], ampS_live, water, 0.15))
-    ok.append(report('shoaling amp, chop', extra['ampC'], ampC_live, water, 0.15))
+    ok.append(report('shoaling amp, primary', extra['ampP'], ampP_live, water, 0.10, mean_tol=0.02))
+    ok.append(report('shoaling amp, secondary', extra['ampS'], ampS_live, water, 0.15, mean_tol=0.02))
+    ok.append(report('shoaling amp, chop', extra['ampC'], ampC_live, water, 0.15, mean_tol=0.02))
 
     ws = np.load(os.path.join(WS, 'masks', 'water_soft.npy'))
     t = np.clip((sdf_live + 0.6) / 1.2, 0, 1)
-    ok.append(report('soft water mask', ws, t * t * (3 - 2 * t), np.ones_like(water, bool), 0.60))
+    ok.append(report('soft water mask', ws, t * t * (3 - 2 * t),
+                     np.ones_like(water, bool), 0.60, mean_tol=0.005))
 
+    # The band's 46/26/13/8 are PLATE constants -- tuned where a scene pixel was a
+    # tuned pixel and the swell was 115 of them across. build_plates applies them
+    # in whatever pixels its scene happens to use, so the copy baked for
+    # scenes/world spans -13..+46 WORLD px: 9.6x wider than the wave-relative
+    # width it was tuned at, which is why the offline world render rings every
+    # coast in a white halo. The live layer applies them in tuned pixels, which is
+    # the frame they mean something in. So the reference is rebuilt here in tuned
+    # pixels rather than loaded -- comparing against the baked copy would test the
+    # bake's frame error, not the port.
     tuned = 130.0 * T * T / (2 * np.pi) / lam_world
-    shore_ref = np.load(os.path.join(WS, 'masks', 'shore_band_soft.npy'))
-    st = sdf_live * tuned
-    shore_live = np.clip((46.0 - st) / 26.0, 0, 1) * np.clip((st + 13.0) / 8.0, 0, 1)
-    ok.append(report('shore band', shore_ref, shore_live, np.ones_like(water, bool), 1.01))
+    def band(st):
+        return np.clip((46.0 - st) / 26.0, 0, 1) * np.clip((st + 13.0) / 8.0, 0, 1)
+    ok.append(report('shore band', band(sdf * tuned), band(sdf_live * tuned),
+                     np.ones_like(water, bool), 1.01, mean_tol=0.02))
 
     print('\n' + ('every reconstructed field matches the offline precompute'
                   if all(ok) else 'A FIELD DISAGREES -- the port is dropping something'))

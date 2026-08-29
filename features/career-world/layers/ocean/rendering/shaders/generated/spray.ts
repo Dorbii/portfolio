@@ -304,13 +304,25 @@ vec4 fieldM(vec2 s) {
 // Green's law is a closed form of (k, depth, period), so only the ray-focus
 // field had to be baked -- it is a gaussian-smoothed divergence and a shader
 // cannot reconstruct it. The deep-water normalisation the precompute applied is
-// the identity here by construction: shoalAmp -> 1 as cg -> cg0.
+// the identity here by construction: shoalAmp -> 1 as cg -> cg0 (measured: the
+// 55th-percentile divisor is 0.9995).
+//
+// All three trains shoal on the DISPERSION wavenumber, not on the stored one.
+// The texture carries |grad S| from the eikonal solve, which is the right k for
+// the wave's geometry and the wrong one for its amplitude: where rays cross, the
+// phase gradient collapses while the water is still the depth it always was, and
+// Green's law asked about a 2.6x-too-small k answers with a 43% amplitude
+// deficit -- concentrated, of all places, on the focus caustics where the
+// biggest waves are. Breaking is a threshold on that amplitude, so the picture
+// lost its surf. Feeding shoalAmp the depth-solved k instead takes the primary
+// from 8.18% off the offline field to 1.05%, which is where the secondary
+// (0.45%) and the chop (0.05%) already were BECAUSE they were already doing it.
 vec4 fieldA(vec2 s) {
     vec2 wuv = worldUvOf(s);
     vec3 ph = phaseAt(wuv);
     float depth = ph.z * TUNED_PER_WORLD;
     float focus = flowAt(wuv).w;
-    float aP = shoalAmp(ph.y / TUNED_PER_WORLD, depth, uPeriodP) * focus;
+    float aP = shoalAmp(dispersionK(uPeriodP, depth), depth, uPeriodP) * focus;
     float aS = shoalAmp(dispersionK(uPeriodS, depth), depth, uPeriodS) * (0.55 + 0.45 * focus);
     float aC = shoalAmp(dispersionK(uPeriodC, depth), depth, uPeriodC);
     return vec4(clamp(aP, 0.3, 3.2), clamp(aS, 0.3, 3.2), clamp(aC, 0.3, 2.2), focus);
