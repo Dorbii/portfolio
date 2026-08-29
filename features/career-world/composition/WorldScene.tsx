@@ -3,6 +3,7 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type KeyboardEvent,
@@ -68,6 +69,7 @@ import {
   DevelopmentOverlay,
   EnvironmentLayerInspector,
   PerformanceProbe,
+  WaterTuningPanel,
 } from "../development";
 import {
   interpolateCameraView,
@@ -85,6 +87,11 @@ import {
   isEnvironmentLayerEffectivelyVisible,
   type EnvironmentLayerId,
 } from "../shared/environmentLayers";
+import {
+  normalizeWaterTuning,
+  readWaterTuningUrlOverrides,
+  type WaterTuning,
+} from "../shared/waterTuning";
 
 interface WorldSceneProps {
   readonly cityVisualIntent: boolean;
@@ -94,6 +101,7 @@ interface WorldSceneProps {
   readonly enablePerformanceProbe: boolean;
   readonly environmentProof: boolean;
   readonly initialView: "world" | "ninjaone-capital";
+  readonly layerInspector: boolean;
 }
 
 interface DragState {
@@ -288,8 +296,10 @@ export function WorldScene({
   enablePerformanceProbe,
   environmentProof,
   initialView,
+  layerInspector,
 }: WorldSceneProps) {
-  const capitalLayerInspection = initialView === "ninjaone-capital";
+  const capitalLayerInspection = initialView === "ninjaone-capital"
+    || layerInspector;
   const showNinjaOneCapital = !environmentProof;
   const initialCamera = cityProofView
     ? NINJAONE_CAPITAL_CITY_PROOF_CAMERAS[cityProofView]
@@ -324,6 +334,11 @@ export function WorldScene({
   const [ninjaOneGeologyReady, setNinjaOneGeologyReady] = useState(false);
   const [renderState, setRenderState] =
     useState<WaterRenderState>("loading");
+  const [waterTuning, setWaterTuning] = useState<WaterTuning>(() => (
+    normalizeWaterTuning(readWaterTuningUrlOverrides(
+      typeof window === "undefined" ? "" : window.location.search,
+    ))
+  ));
   const [showTopography, setShowTopography] = useState(false);
   const [showTerritoryQa, setShowTerritoryQa] = useState(false);
   const [showGrid, setShowGrid] = useState(false);
@@ -336,6 +351,21 @@ export function WorldScene({
     camera,
     cityProofView ? NINJAONE_CAPITAL_CITY_PROOF_TIERS[cityProofView] : null,
   );
+  const oceanWaterTuning = useMemo(() => Object.freeze({
+    opacity: waterTuning.oceanOpacity,
+    timeScale: waterTuning.oceanTimeScale,
+    weather: waterTuning.oceanWeather,
+  }), [waterTuning]);
+  const d05WaterEffectTuning = useMemo(() => Object.freeze({
+    cityWaterOpacity: waterTuning.cityWaterOpacity,
+    cityWaterShoreRamp: waterTuning.cityWaterShoreRamp,
+    crest: waterTuning.crest,
+    cycling: waterTuning.cycling,
+    foam: waterTuning.foam,
+    relight: waterTuning.relight,
+    sparkle: waterTuning.effectSparkle,
+    swell: waterTuning.swell,
+  }), [waterTuning]);
   const forcedCityDistrict = cityProofView
     ? ninjaOneCapitalCityProofDistrict(cityProofView)
     : null;
@@ -711,6 +741,7 @@ export function WorldScene({
           detailState={detailState}
           light={WORLD_LIGHT}
           onRenderStateChange={setRenderState}
+          tuning={oceanWaterTuning}
         />
       ) : null}
       {terrainAuthorityVisible ? (
@@ -793,6 +824,7 @@ export function WorldScene({
           preloadDistrict={cameraCityDistrict}
           presentationOpacity={cityPresentationOpacity}
           visibility={environmentLayerVisibility}
+          waterEffectTuning={d05WaterEffectTuning}
         />
       ) : null}
       {enableDevelopmentTools
@@ -836,6 +868,11 @@ export function WorldScene({
           visibility={environmentLayerVisibility}
         />
       ) : null}
+      <WaterTuningPanel
+        enabled={enableDevelopmentTools}
+        onChange={setWaterTuning}
+        tuning={waterTuning}
+      />
       <PerformanceProbe enabled={enableDevelopmentTools || enablePerformanceProbe} />
     </div>
   );

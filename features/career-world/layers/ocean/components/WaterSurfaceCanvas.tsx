@@ -6,6 +6,7 @@ import type { DetailState } from "../../../shared/lod";
 import type { WorldLight } from "../../../shared/lighting";
 import { WaterSurfaceController } from "../rendering/WaterSurfaceController";
 import { WaterSurfaceRenderer } from "../rendering/WaterSurfaceRenderer";
+import type { WaterSurfaceState } from "../model/state";
 
 export type WaterRenderState = "loading" | "ready" | "fallback";
 
@@ -16,6 +17,28 @@ interface WaterSurfaceCanvasProps {
   readonly detailState: DetailState;
   readonly light: WorldLight;
   readonly onRenderStateChange?: (state: WaterRenderState) => void;
+  readonly tuning?: Pick<
+    WaterSurfaceState,
+    "weather" | "timeScale" | "opacity"
+  >;
+}
+
+/**
+ * Reduced motion stops the clock rather than stripping layers.
+ *
+ * The old water was a stack of additive effects and could be quietened by
+ * turning several of them off. This one is a single simulation, and the terms
+ * that read as movement are the same ones that give the sea its form, so there
+ * is nothing to subtract: a still frame of it is a picture of water. Freezing
+ * the clock is both the honest reading of the preference and the only one that
+ * leaves the surface intact.
+ */
+function stillWaterForReducedMotion(
+  tuning: WaterSurfaceCanvasProps["tuning"],
+  reduceMotion: boolean,
+): Partial<WaterSurfaceState> {
+  if (!tuning || !reduceMotion) return tuning ?? {};
+  return Object.freeze({ ...tuning, timeScale: 0 });
 }
 
 export function WaterSurfaceCanvas({
@@ -25,11 +48,14 @@ export function WaterSurfaceCanvas({
   detailState,
   light,
   onRenderStateChange,
+  tuning,
 }: WaterSurfaceCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const controllerRef = useRef<WaterSurfaceController | null>(null);
   const statusCallbackRef = useRef(onRenderStateChange);
   const sceneRef = useRef({ active, camera, coastalAmbience, detailState, light });
+  const tuningRef = useRef(tuning);
+  const reduceMotionRef = useRef(false);
 
   useEffect(() => {
     statusCallbackRef.current = onRenderStateChange;
@@ -46,6 +72,14 @@ export function WaterSurfaceCanvas({
   useEffect(() => {
     controllerRef.current?.setCoastalAmbience(coastalAmbience);
   }, [coastalAmbience]);
+
+  useEffect(() => {
+    tuningRef.current = tuning;
+    controllerRef.current?.setState(stillWaterForReducedMotion(
+      tuning,
+      reduceMotionRef.current,
+    ));
+  }, [tuning]);
 
   useLayoutEffect(() => {
     controllerRef.current?.setView(camera, detailState);
@@ -76,6 +110,7 @@ export function WaterSurfaceCanvas({
         const reduceMotion = window.matchMedia(
           "(prefers-reduced-motion: reduce)",
         ).matches;
+        reduceMotionRef.current = reduceMotion;
         localController = new WaterSurfaceController(renderer, {
           reduceMotion,
         });
@@ -84,6 +119,10 @@ export function WaterSurfaceCanvas({
         localController.setView(scene.camera, scene.detailState);
         localController.setLight(scene.light);
         localController.setCoastalAmbience(scene.coastalAmbience);
+        localController.setState(stillWaterForReducedMotion(
+          tuningRef.current,
+          reduceMotion,
+        ));
         localController.setActive(scene.active);
         canvas.dataset.renderState = "ready";
         delete canvas.dataset.renderError;

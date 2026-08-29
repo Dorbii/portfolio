@@ -62,10 +62,18 @@ export async function loadImage(path: string): Promise<HTMLImageElement> {
   });
 }
 
+/**
+ * `mipmapped` is the default and is right for anything sampled at an arbitrary
+ * scale. `linear` and `nearest` skip the mip chain, which matters for two kinds
+ * of texture: one whose channels are not a colour (a packed 16-bit field cannot
+ * be averaged — the low byte is a sawtooth and averaging it is meaningless), and
+ * one that is never minified.
+ */
 export function createTexture(
   gl: WebGL2RenderingContext,
   image: HTMLImageElement,
   wrap: "clamp" | "repeat" | "mirror",
+  filter: "mipmapped" | "linear" | "nearest" = "mipmapped",
 ): WebGLTexture {
   const texture = gl.createTexture();
   if (!texture) {
@@ -89,9 +97,24 @@ export function createTexture(
       : gl.CLAMP_TO_EDGE;
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrapMode);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrapMode);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-  gl.generateMipmap(gl.TEXTURE_2D);
+  const point = filter === "nearest";
+  gl.texParameteri(
+    gl.TEXTURE_2D,
+    gl.TEXTURE_MIN_FILTER,
+    point
+      ? gl.NEAREST
+      : filter === "linear"
+        ? gl.LINEAR
+        : gl.LINEAR_MIPMAP_LINEAR,
+  );
+  gl.texParameteri(
+    gl.TEXTURE_2D,
+    gl.TEXTURE_MAG_FILTER,
+    point ? gl.NEAREST : gl.LINEAR,
+  );
+  if (filter === "mipmapped") {
+    gl.generateMipmap(gl.TEXTURE_2D);
+  }
   gl.bindTexture(gl.TEXTURE_2D, null);
   return texture;
 }

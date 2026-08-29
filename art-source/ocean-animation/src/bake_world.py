@@ -11,10 +11,15 @@ texture rather than visible swell. It also keeps the sea in deep water almost
 everywhere (d/lambda ~0.9), so waves stay straight offshore and refract only at
 the coast -- the contour-following look came from a wavelength large enough to
 feel the whole basin.
+
+precompute.build is used rather than wavefield.build because the live shader also
+needs the ray-focus field (a gaussian-smoothed divergence, not something a shader
+can reconstruct) and the two tileable noise textures, which have to be the SAME
+noise the offline renderer was tuned against or every scale-dependent constant in
+composite.frag is tuned for a different field.
 """
 import os, sys
 import numpy as np
-from PIL import Image
 
 SRC = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(SRC)
@@ -31,12 +36,12 @@ def main():
     os.environ['OCEAN_DEPTH'] = str(105.0 * G / 130.0)
     os.environ['OCEAN_SHELF'] = str(230.0 * G / 130.0)
     sys.path.insert(0, SRC)
-    import presets, wavefield
+    import presets, precompute
     p = presets.PRESETS['windy_rolling_surf']
     print(f'world bake: lambda {LAMBDA_WORLD} px  ->  OCEAN_G {G:.4f}  '
           f'depth {float(os.environ["OCEAN_DEPTH"]):.2f}px  shelf {float(os.environ["OCEAN_SHELF"]):.2f}px')
-    fields, depth, water, sdf = wavefield.build(p['families'])
-    out = os.path.join(ROOT, 'scenes', 'world', 'baked')
+    fields, depth, water, sdf, extra, _sites = precompute.build(p['families'])
+    out = os.path.join(WS, 'baked')
     os.makedirs(out, exist_ok=True)
     print()
     print(f'{"family":10s}{"lambda (world px)":>20}{"samples/wave":>15}  verdict')
@@ -56,7 +61,11 @@ def main():
                                 dir=d.astype(np.float32))
     np.savez_compressed(os.path.join(out, 'bathymetry.npz'),
                         depth=depth.astype(np.float32), sdf=sdf.astype(np.float32),
-                        water=water.astype(np.uint8))
+                        water=water.astype(np.uint8),
+                        focus=extra['focus'].astype(np.float32))
+    np.savez_compressed(os.path.join(out, 'noise.npz'),
+                        noise=extra['noise'].astype(np.float32),
+                        noise_fine=extra['noise_fine'].astype(np.float32))
     print('wrote', out)
 
 

@@ -1,68 +1,80 @@
 import { defineLayerDetailContract } from "../../../shared/lod";
+import { OCEAN_WORLD_FIELDS } from "./generated/worldFields";
 
-const WORLD_ALBEDO =
-  "/career-world/layers/ocean/surface-motion/textures/water-surface-world-lod-r2-3840x2160.png";
-const DIRECTIONAL_ALBEDO =
-  "/career-world/layers/ocean/surface-motion/textures/water-surface-reference-r2-3840x2160.png";
-const MACRO_HEIGHT =
-  "/career-world/layers/ocean/surface-motion/fields/water-height-macro-r1-1024x1024.png";
-const MICRO_HEIGHT =
-  "/career-world/layers/ocean/surface-motion/fields/water-height-micro-r1-1024x1024.png";
-const COAST_GEOMETRY_WORLD =
-  "/career-world/layers/ocean/authority/fields/coast-geometry-r5.png";
-const COAST_GEOMETRY_TERRITORY =
-  "/career-world/layers/ocean/authority/fields/coast-geometry-r5-4x.png";
+const FIELDS = "/career-world/layers/ocean/fields";
 
-export const WATER_TERRITORY_DETAIL = Object.freeze({
-  fixedWorldFrequency: Object.freeze([12.5, 10.6] as const),
-  lineStrength: 0.16,
-  normalStrength: 5.4,
+/**
+ * Four textures, 2.69 MB, replacing 40.3 MB of painted water plates.
+ *
+ * The water is not painted any more: it is solved. The eikonal phase field for
+ * the whole coastline was solved once offline against the live coast authority
+ * and baked here, because the coastline is fixed once set — so the phase field
+ * is an ASSET, not a runtime cost. Everything else the renderer needs is either
+ * derived from these in closed form or generated in screen space.
+ *
+ * `phase` must be sampled NEAREST. Its red and green channels are the high and
+ * low bytes of a 16-bit phase residual, and hardware bilinear would interpolate
+ * those two bytes independently — the low byte is a sawtooth, so every wrap
+ * would spike the reconstructed phase by up to 256 quantisation steps. The
+ * shader decodes four texels and interpolates the decoded values instead.
+ *
+ * The two noise textures are the exact fields the offline renderer was tuned
+ * against. Regenerating them from a different seed would silently invalidate
+ * every scale-dependent constant in the composite pass.
+ */
+export const OCEAN_FIELD_ASSETS = Object.freeze({
+  /** RG = phase residual (16 bit), B = |k|, A = depth. NEAREST. */
+  phase: `${FIELDS}/ocean-phase-r2.png`,
+  /** RG = wave direction, B = signed sdf (square-root encoded), A = ray focus. */
+  flow: `${FIELDS}/ocean-flow-r2.png`,
+  /** Tileable 4-octave fbm, one octave per channel. */
+  noise: `${FIELDS}/ocean-noise-r2.png`,
+  /** Small flat companion, for lookups the big texture's mipmap would erase. */
+  noiseFine: `${FIELDS}/ocean-noise-fine-r2.png`,
 });
 
-export const WATER_ASSETS = Object.freeze({
-  worldAlbedo: WORLD_ALBEDO,
-  directionalAlbedo: DIRECTIONAL_ALBEDO,
-  macroHeight: MACRO_HEIGHT,
-  microHeight: MICRO_HEIGHT,
-  coastGeometry: Object.freeze({
-    world: COAST_GEOMETRY_WORLD,
-    territory: COAST_GEOMETRY_TERRITORY,
-  }),
-  coastMaterial:
-    "/career-world/layers/ocean/authority/fields/coast-material-field-r6.png",
-});
+export const OCEAN_FIELD_DIMENSIONS = Object.freeze(
+  OCEAN_WORLD_FIELDS.world as readonly [number, number],
+);
 
 export const WATER_DETAIL_CONTRACT = defineLayerDetailContract({
   layer: "ocean",
   sources: [
     {
-      id: "world-albedo",
+      id: "world-phase-field",
       kind: "registered-raster",
       minimumTier: "world",
-      path: WORLD_ALBEDO,
-      dimensions: [3840, 2160],
+      path: OCEAN_FIELD_ASSETS.phase,
+      dimensions: OCEAN_FIELD_DIMENSIONS,
       worldBounds: {
         origin: [0, 0],
         span: [1, 1],
       },
     },
     {
-      id: "territory-line-field",
+      id: "world-flow-field",
+      kind: "registered-raster",
+      minimumTier: "world",
+      path: OCEAN_FIELD_ASSETS.flow,
+      dimensions: OCEAN_FIELD_DIMENSIONS,
+      worldBounds: {
+        origin: [0, 0],
+        span: [1, 1],
+      },
+    },
+    {
+      // The secondary train and the wind chop are sub-pixel at world resolution
+      // — 2.6 and 1.0 samples per wave against the primary swell's 4.7 — so they
+      // cannot be baked and are laid down analytically in screen space, fading
+      // in only at the zoom that can resolve them.
+      id: "territory-short-wave-trains",
       kind: "world-procedural",
       minimumTier: "territory",
-      path: MICRO_HEIGHT,
-      fixedWorldFrequency: WATER_TERRITORY_DETAIL.fixedWorldFrequency,
-    },
-    {
-      id: "territory-coast-geometry",
-      kind: "registered-raster",
-      minimumTier: "territory",
-      path: COAST_GEOMETRY_TERRITORY,
-      dimensions: [6688, 3764],
-      worldBounds: {
-        origin: [0, 0],
-        span: [1, 1],
-      },
+      path: OCEAN_FIELD_ASSETS.noiseFine,
+      fixedWorldFrequency: [
+        OCEAN_FIELD_DIMENSIONS[0] / 66,
+        OCEAN_FIELD_DIMENSIONS[1] / 66,
+      ],
     },
   ],
 });

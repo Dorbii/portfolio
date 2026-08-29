@@ -5,6 +5,8 @@ import type { WaterSurfaceState } from "../model/state";
 import { WaterSurfaceRenderer } from "./WaterSurfaceRenderer";
 
 const CAMERA_SETTLE_DURATION_MS = 180;
+const OCEAN_FRAME_INTERVAL_MS = 1000 / 30;
+const FRAME_INTERVAL_TOLERANCE_MS = 2;
 
 export class WaterSurfaceController {
   private readonly renderer: WaterSurfaceRenderer;
@@ -16,6 +18,7 @@ export class WaterSurfaceController {
   private running = false;
   private elapsedSeconds = 0;
   private lastTimestamp = 0;
+  private viewSignature = "";
 
   constructor(
     renderer: WaterSurfaceRenderer,
@@ -39,6 +42,17 @@ export class WaterSurfaceController {
   }
 
   setView(camera: CameraView, detailState: DetailState): void {
+    const viewSignature = [
+      ...camera.origin,
+      ...camera.span,
+      detailState.renderScale,
+      detailState.shouldLoadTerritoryAssets,
+    ].join(",");
+    // WorldScene can re-publish an equivalent DetailState while other scene
+    // work settles. That is not camera motion: cancelling the rAF chain here
+    // turns an otherwise cheap ocean into an intermittently rendered surface.
+    if (viewSignature === this.viewSignature) return;
+    this.viewSignature = viewSignature;
     this.renderer.setView(camera, detailState);
     this.suspendContinuousAnimationForCameraMotion();
     // Camera-dependent transparency sits above the DOM land plate. Render the
@@ -105,14 +119,24 @@ export class WaterSurfaceController {
       return;
     }
 
+    if (
+      this.lastTimestamp > 0
+      && timestamp - this.lastTimestamp
+        < OCEAN_FRAME_INTERVAL_MS - FRAME_INTERVAL_TOLERANCE_MS
+    ) {
+      this.schedule();
+      return;
+    }
+
+    // The wave field is a function of time, but foam and spray are integrated,
+    // so the step needs the interval as well as the clock.
+    let step = 0;
     if (this.lastTimestamp > 0) {
-      this.elapsedSeconds += Math.min(
-        0.05,
-        Math.max(0, (timestamp - this.lastTimestamp) / 1000),
-      );
+      step = Math.min(0.05, Math.max(0, (timestamp - this.lastTimestamp) / 1000));
+      this.elapsedSeconds += step;
     }
     this.lastTimestamp = timestamp;
-    this.renderer.render(this.elapsedSeconds);
+    this.renderer.render(this.elapsedSeconds, step);
     this.schedule();
   };
 
@@ -155,8 +179,11 @@ export class WaterSurfaceController {
     }
   }
 
+  // A still frame: the wave field is redrawn at the current clock, but foam and
+  // spray are not advanced, so repainting for a resize or a camera nudge cannot
+  // age the surf.
   private renderOnce(): void {
-    this.renderer.render(this.elapsedSeconds);
+    this.renderer.render(this.elapsedSeconds, 0);
   }
 
   private renderIfIdle(): void {
