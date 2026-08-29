@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
@@ -10,6 +11,7 @@ import {
   NINJAONE_ENVIRONMENT_FOLIAGE_INSTANCES,
   NINJAONE_ENVIRONMENT_FOLIAGE_RESOURCES,
   NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES,
+  NINJAONE_ENVIRONMENT_GEOLOGY_TRANSITION_SOURCES,
   NINJAONE_ENVIRONMENT_GRID_CELLS,
   NINJAONE_ENVIRONMENT_LAYER_ORDER,
   NINJAONE_ENVIRONMENT_LOD_LAYERS,
@@ -24,6 +26,7 @@ import {
   NINJAONE_ENVIRONMENT_TRAIL_SOURCES,
   NINJAONE_ENVIRONMENT_WORLD_ORIGIN,
   NINJAONE_ENVIRONMENT_WORLD_SPAN,
+  ninjaOneEnvironmentGeologyTierWeights,
 } from "../features/career-world/layers/terrain/model/ninjaOneEnvironmentProof.ts";
 import {
   NINJAONE_ENVIRONMENT_NATIVE_MAX_ANIMATED_NODES,
@@ -120,6 +123,7 @@ test("zoom tiers retain one authored terrain geometry without detached asset sub
 test("registered plates retain one 4:3 geometry and transparent layering", async () => {
   const tieredSources = [
     [NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES, ["territory", "capital", "site", "close"]],
+    [NINJAONE_ENVIRONMENT_GEOLOGY_TRANSITION_SOURCES, ["territory", "capital", "site", "close"]],
     [NINJAONE_ENVIRONMENT_STATIC_FOLIAGE_SOURCES, ["territory", "capital", "site", "close"]],
     [NINJAONE_ENVIRONMENT_SECONDARY_RELIEF_SOURCES, ["capital", "site", "close"]],
     [NINJAONE_ENVIRONMENT_TERTIARY_RELIEF_SOURCES, ["site", "close"]],
@@ -163,8 +167,79 @@ test("regional terrain detail uses one coherent cohort and a registered contact 
   );
   assert.deepEqual(contactMask.dimensions, [1440, 1080]);
   assert.deepEqual(contactMask.contactEdges, ["left", "right", "bottom"]);
-  assert.equal(contactMask.shape, "deterministic-multiscale-irregular");
+  assert.match(contactMask.shape, /wide.*irregular/u);
   assert.equal((await sharp(runtimeAssetFile(contactMask.path)).metadata()).format, "png");
+});
+
+test("interim terrain transition is wide, reversible, and pixel-bounded", async () => {
+  const [environment, treatment, d06Registration, d06Provenance] = await Promise.all([
+    readJson("public/career-world/capitals/ninjaone/environment/manifests/environment-proof-r1.json"),
+    readJson("public/career-world/capitals/ninjaone/environment/manifests/terrain-transition-interim-r1.json"),
+    readJson("public/career-world/capitals/ninjaone/city-v2/plates/d06-i16-registration-r10.json"),
+    readJson("public/career-world/capitals/ninjaone/city-v2/canon/d06-canon-r10.provenance.json"),
+  ]);
+  const contactMask = environment.layers.geology.contactMask;
+  assert.match(treatment.status, /^INTERIM-/u);
+  assert.equal(environment.layers.geology.transitionTreatment.id, treatment.id);
+  assert.ok(contactMask.featherPixels >= environment.registration.artboard[1] * 0.1);
+  assert.ok(
+    treatment.boundaryCensus.transitionWidths.median
+      >= treatment.boundaryCensus.previousTransitionWidths.median * 4,
+  );
+  assert.ok(
+    treatment.riverExit.blueBottomPixelsAfter
+      <= treatment.riverExit.blueBottomPixelsBefore * 0.005,
+  );
+  assert.ok(
+    Math.max(
+      treatment.patchBorders.topLeftRightLuminancePercent,
+      treatment.patchBorders.topLeftRightSaturationPercent,
+      treatment.patchBorders.bottomEffectiveCompositePercent,
+    ) <= treatment.patchBorders.limitPercent,
+  );
+
+  const [previous, current, support] = await Promise.all([
+    sharp(path.join(root, treatment.sources.previous)).ensureAlpha().raw().toBuffer(),
+    sharp(path.join(root, treatment.sources.current)).ensureAlpha().raw().toBuffer(),
+    sharp(runtimeAssetFile(treatment.changedPixelPolicy.affectedSupportMaskPath))
+      .greyscale().raw().toBuffer(),
+  ]);
+  assert.equal(previous.length, current.length);
+  assert.equal(support.length * 4, current.length);
+  let changedPixels = 0;
+  let outsideChangedPixels = 0;
+  for (let pixel = 0; pixel < support.length; pixel += 1) {
+    const index = pixel * 4;
+    assert.equal(current[index + 3], previous[index + 3], "T40 must preserve source alpha");
+    const changed = current[index] !== previous[index]
+      || current[index + 1] !== previous[index + 1]
+      || current[index + 2] !== previous[index + 2];
+    if (changed) changedPixels += 1;
+    if (changed && support[pixel] === 0) outsideChangedPixels += 1;
+  }
+  assert.ok(changedPixels > 0);
+  assert.equal(outsideChangedPixels, 0);
+  assert.equal(treatment.changedPixelPolicy.outsideChangedPixels, 0);
+
+  for (const tier of ["territory", "capital", "site", "close"]) {
+    const baseSize = await stat(runtimeAssetFile(NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES[tier].path));
+    const transitionSize = await stat(runtimeAssetFile(NINJAONE_ENVIRONMENT_GEOLOGY_TRANSITION_SOURCES[tier].path));
+    assert.ok(transitionSize.size < baseSize.size, `${tier} interim overlay must remain cheaper than its base plate`);
+  }
+
+  for (const protectedFile of treatment.protectedFiles) {
+    const actual = createHash("sha256")
+      .update(await readFile(path.join(root, protectedFile.path)))
+      .digest("hex");
+    const currentD06WaterPath = `public${d06Registration.paintedWaterMask.path}`;
+    if (protectedFile.path === currentD06WaterPath) {
+      assert.equal(protectedFile.sha256, d06Provenance.terrainRestoration.parentWaterMaskSha256);
+      assert.equal(actual, d06Registration.paintedWaterMask.sha256);
+      assert.equal(actual, d06Provenance.terrainRestoration.waterMaskSha256);
+      continue;
+    }
+    assert.equal(actual, protectedFile.sha256, `${protectedFile.path} changed during T40`);
+  }
 });
 
 test("environment registration does not expose a legacy static hydrology plate", async () => {
@@ -521,18 +596,19 @@ test("the root-selectable environment proof renders semantic terrain and suppres
     /ninjaone-environment-geology[^}]*filter:/,
     "the accepted authored terrain master must not be recolored by runtime CSS",
   );
-  // Superseded intent: accepted progressive LoD now blends registered geology
-  // sources with the same semantic weights used by the rest of the world plane.
-  assert.match(
-    geologyRenderer,
-    /opacity: 1 - detailState\.capitalToSite[\s\S]*?opacity: detailState\.capitalToSite \* \(1 - detailState\.siteToClose\)[\s\S]*?opacity: detailState\.capitalToSite \* detailState\.siteToClose/,
-    "authored land tiers must blend through the centralized semantic LoD weights",
-  );
-  assert.match(
-    geologyRenderer,
-    /sourceLayers\.map\(\(\{ opacity, source, tier \}\)[\s\S]*?opacity=\{opacity\}/,
-    "registered geology sources must consume their semantic LoD weight",
-  );
+  const geologyWeightScenarios = [
+    { capitalToSite: 0, siteToClose: 0, tierId: "capital" },
+    { capitalToSite: 0.5, siteToClose: 0, tierId: "site" },
+    { capitalToSite: 1, siteToClose: 0.5, tierId: "close" },
+    { capitalToSite: 1, siteToClose: 1, tierId: "close" },
+  ];
+  for (const scenario of geologyWeightScenarios) {
+    const weights = ninjaOneEnvironmentGeologyTierWeights(scenario);
+    assert.ok(weights.length >= 1);
+    assert.ok(weights.every(({ opacity }) => opacity > 0 && opacity <= 1));
+    assert.ok(Math.abs(weights.reduce((sum, { opacity }) => sum + opacity, 0) - 1) < 1e-9);
+    assert.equal(new Set(weights.map(({ tier }) => tier)).size, weights.length);
+  }
   assert.doesNotMatch(renderer, /ninjaone-inland-water-field-r1\.png/);
   assert.doesNotMatch(renderer, /wildlife/i);
   assert.doesNotMatch(renderer, /terrain-microdetail/);
@@ -541,7 +617,17 @@ test("the root-selectable environment proof renders semantic terrain and suppres
   assert.match(nativeBuilder, /VOID_MASK_TILE_IDS/);
   assert.match(nativeBuilder, /buildNinjaOneEnvironmentStaticTerrain/);
   assert.doesNotMatch(nativeBuilder, /master-detail-r2|detail-tiles-r3|registered-terrain-master/);
-  assert.match(waterRenderer, /\["worldAlbedo", WATER_ASSETS\.worldAlbedo/);
+  // The solved renderer supersedes every painted material path, T27d's banded
+  // reconstruction included: the water is no longer a texture reconstructed
+  // from offline bands, it is an eikonal phase field solved once against the
+  // coast authority and sampled through the camera.
+  assert.match(waterRenderer, /OCEAN_FIELD_ASSETS\.phase/);
+  assert.match(waterRenderer, /OCEAN_FIELD_ASSETS\.flow/);
+  assert.doesNotMatch(waterRenderer, /materialBands|worldAlbedo|macroHeight|microHeight/);
+  // The phase texture packs a 16-bit residual across two 8-bit channels, so
+  // hardware bilinear would interpolate the high and low bytes independently
+  // and spike the reconstructed phase at every low-byte wrap.
+  assert.match(waterRenderer, /texPhase: createTexture\([^)]*"nearest"\)/);
   assert.doesNotMatch(waterRenderer, /hydrology|ninjaOneStream|riverSurface/i);
   assert.doesNotMatch(nativeBuilder, /dynamicShadows:\s*Object\.freeze\(\{\s*enabled:\s*true/);
 });

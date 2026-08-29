@@ -3,13 +3,21 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import {
+  DEFAULT_WATER_SURFACE_STATE,
   normalizeWaterSurfaceState,
-  windVectorFromDegrees,
+  readWaterSurfaceUrlOverrides,
 } from "../features/career-world/layers/ocean/model/state.ts";
 import {
   CAREER_WORLD_WATER_REALISM_PROFILE,
   defineWaterRealismProfile,
 } from "../features/career-world/layers/ocean/model/profiles.ts";
+import { windVectorFromDegrees } from "../features/career-world/shared/weather.ts";
+import {
+  DEFAULT_WATER_TUNING,
+  normalizeWaterTuning,
+  readWaterTuningUrlOverrides,
+  serializeWaterTuning,
+} from "../features/career-world/shared/waterTuning.ts";
 import {
   advanceLodPresentationFade,
   DETAIL_POLICY,
@@ -26,52 +34,105 @@ import {
   WORLD_DESTINATION_POLICY,
 } from "../features/career-world/shared/lod.ts";
 
+// The ocean exposes three numbers, not thirty. Its three tuned sea states carry
+// ~170 uniforms between them, generated from the offline presets rather than
+// typed in here, so there is nothing left to dial one effect at a time -- what
+// remains is where on the calm/windy/heavy scale this world sits.
 test("water state clamps external inputs without changing its contract", () => {
   assert.deepEqual(
-    normalizeWaterSurfaceState({
-      motion: -3,
-      waveStrength: 9,
-      waveDensity: 7,
-      weather: 2,
-      opacity: 0,
-      detailScale: Number.NaN,
-      windDirectionDegrees: -90,
-    }),
+    normalizeWaterSurfaceState({ weather: -3, timeScale: 9, opacity: -1 }),
+    { weather: 0, timeScale: 3, opacity: 0.2 },
+  );
+  assert.deepEqual(
+    normalizeWaterSurfaceState({ weather: 9, timeScale: -1, opacity: 9 }),
+    { weather: 1, timeScale: 0, opacity: 1 },
+  );
+  assert.deepEqual(
+    normalizeWaterSurfaceState({ weather: Number.NaN, timeScale: "x" }),
     {
-      motion: 0,
-      waveStrength: 2,
-      waveDensity: 2,
-      weather: 1,
-      opacity: 0.2,
-      detailScale: 0.58,
-      windDirectionDegrees: 270,
+      weather: DEFAULT_WATER_SURFACE_STATE.weather,
+      timeScale: DEFAULT_WATER_SURFACE_STATE.timeScale,
+      opacity: DEFAULT_WATER_SURFACE_STATE.opacity,
     },
   );
+  assert.ok(Object.isFrozen(normalizeWaterSurfaceState()));
 });
 
 test("ocean realism profile is revisioned, deeply frozen, and range checked", () => {
   const profile = CAREER_WORLD_WATER_REALISM_PROFILE;
-  assert.equal(profile.id, "natural-ocean@r1");
-  assert.ok(Object.isFrozen(profile));
-  assert.ok(Object.isFrozen(profile.ocean));
-  assert.deepEqual(
-    normalizeWaterSurfaceState(),
-    {
-      detailScale: profile.ocean.detailScale,
-      motion: 0.68,
-      opacity: 1,
-      waveDensity: profile.ocean.waveDensity,
-      waveStrength: profile.ocean.waveStrength,
-      weather: profile.ocean.weather,
-      windDirectionDegrees: 24,
-    },
+  assert.match(profile.id, /^[a-z0-9-]+@r\d+$/);
+  assert.ok(Object.isFrozen(profile) && Object.isFrozen(profile.ocean));
+  assert.deepEqual(normalizeWaterSurfaceState(), {
+    weather: profile.ocean.weather,
+    timeScale: profile.ocean.timeScale,
+    opacity: DEFAULT_WATER_TUNING.oceanOpacity,
+  });
+  // Below the state the world field was baked from: the wide shot wants a
+  // restrained ambient sea that reveals its detail on approach.
+  assert.ok(profile.ocean.weather < 0.5);
+  assert.throws(
+    () => defineWaterRealismProfile({ id: "no-revision", ocean: profile.ocean }),
+    /revisioned stable id/,
   );
   assert.throws(
     () => defineWaterRealismProfile({
-      ...profile,
-      ocean: { ...profile.ocean, waveDensity: 4.01 },
+      id: "solved-ocean@r1",
+      ocean: { ...profile.ocean, weather: 1.01 },
     }),
-    /ocean\.waveDensity must be finite and between 0\.25 and 4/,
+    /ocean\.weather must be finite and between 0 and 1/,
+  );
+  assert.throws(
+    () => defineWaterRealismProfile({
+      id: "solved-ocean@r1",
+      ocean: { ...profile.ocean, timeScale: 3.01 },
+    }),
+    /ocean\.timeScale must be finite and between 0 and 3/,
+  );
+});
+
+test("water URL overrides are opt-in, numeric, and normalized by the state boundary", () => {
+  assert.deepEqual(
+    readWaterSurfaceUrlOverrides(
+      "?water.weather=0.8&water.timeScale=1.4&water.opacity=0.6&water.unknown=9",
+    ),
+    { weather: 0.8, timeScale: 1.4, opacity: 0.6 },
+  );
+  assert.deepEqual(
+    readWaterSurfaceUrlOverrides("?water.weather=nope&water.timeScale="),
+    {},
+  );
+  assert.equal(
+    normalizeWaterSurfaceState(readWaterSurfaceUrlOverrides("?water.weather=10")).weather,
+    1,
+  );
+});
+
+test("water tuning panel values clamp and serialize in one canonical order", () => {
+  const tuning = normalizeWaterTuning(readWaterTuningUrlOverrides(
+    "?water.weather=9&water.timeScale=-1&water.opacity=9"
+    + "&city-water.opacity=-1&city-water.shoreRamp=9"
+    + "&water-effects.foam=-1&water-effects.crest=1.15&water-effects.relight=9"
+    + "&water-effects.cycling=-1&water-effects.swell=9",
+  ));
+  assert.deepEqual(tuning, {
+    oceanWeather: 1,
+    oceanTimeScale: 0,
+    oceanOpacity: 1,
+    cityWaterOpacity: 0,
+    cityWaterShoreRamp: 1,
+    effectSparkle: 1,
+    foam: 0,
+    crest: 1.15,
+    relight: 2,
+    cycling: 0,
+    swell: 2,
+  });
+  assert.equal(
+    serializeWaterTuning(tuning),
+    "?water.weather=1&water.timeScale=0&water.opacity=1"
+    + "&city-water.opacity=0&city-water.shoreRamp=1"
+    + "&water-effects.sparkle=1&water-effects.foam=0&water-effects.crest=1.15"
+    + "&water-effects.relight=2&water-effects.cycling=0&water-effects.swell=2",
   );
 });
 

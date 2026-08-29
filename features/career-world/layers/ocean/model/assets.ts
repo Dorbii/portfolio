@@ -1,5 +1,5 @@
-import { defineLayerDetailContract } from "../../../shared/lod";
-import { OCEAN_WORLD_FIELDS } from "./generated/worldFields";
+import { defineLayerDetailContract } from "../../../shared/lod.ts";
+import { OCEAN_WORLD_FIELDS } from "./generated/worldFields.ts";
 
 const FIELDS = "/career-world/layers/ocean/fields";
 

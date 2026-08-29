@@ -1465,10 +1465,6 @@ test("generated asset manifests carry exact content hashes", async () => {
     root,
     "public/career-world/layers/ocean/authority/manifests/coast-geometry-r5.json",
   ), "utf8"));
-  const waterManifest = JSON.parse(await readFile(path.join(
-    root,
-    "public/career-world/layers/ocean/surface-motion/manifests/water-surface-world-lod-r2.json",
-  ), "utf8"));
   const coastMaterialManifest = JSON.parse(await readFile(path.join(
     root,
     "public/career-world/layers/ocean/authority/manifests/coast-material-field-r6.json",
@@ -1496,12 +1492,6 @@ test("generated asset manifests carry exact content hashes", async () => {
     coastManifest.detailTexture.sha256,
     await sha256(
       "public/career-world/layers/ocean/authority/fields/coast-geometry-r5-4x.png",
-    ),
-  );
-  assert.equal(
-    waterManifest.texture.sha256,
-    await sha256(
-      "public/career-world/layers/ocean/surface-motion/textures/water-surface-world-lod-r2-3840x2160.png",
     ),
   );
   assert.equal(
@@ -1564,23 +1554,28 @@ test("generated asset manifests carry exact content hashes", async () => {
   );
 });
 
-test("accepted Phase 3 water checkpoint remains immutable", async () => {
+test("the solved ocean fields are the accepted checkpoint", async () => {
+  // These four replace 40.3 MB of painted water plates. The phase field is an
+  // ASSET rather than a runtime cost because the coastline is fixed once set,
+  // so a change here is a change to the sea itself and should be deliberate:
+  // re-bake with bake_world.py, re-encode with encode_world.py, and update
+  // these hashes in the same commit that changes the water.
   const acceptedAssets = [
     [
-      "public/career-world/layers/ocean/surface-motion/textures/water-surface-world-lod-r2-3840x2160.png",
-      "57408A1192B5DAC45DB9BEA2713E558B7BFB751CAC714AAF59A8FD0DAF941896",
+      "public/career-world/layers/ocean/fields/ocean-flow-r2.png",
+      "C94B328052F06D0201E6D542C32AC75668FED6DC7AAFBCE3D9C4E76895BAF876",
     ],
     [
-      "public/career-world/layers/ocean/surface-motion/textures/water-surface-reference-r2-3840x2160.png",
-      "CD8786E2C4CF27A104CE8B53C037AB9BC5428CEF4B803A1D1F5F6BCC3AF2E9D1",
+      "public/career-world/layers/ocean/fields/ocean-noise-fine-r2.png",
+      "D032B31C204FF7F7451F34EA722CBCF4EDB6F7765511071E8512456616EADDE9",
     ],
     [
-      "public/career-world/layers/ocean/surface-motion/fields/water-height-macro-r1-1024x1024.png",
-      "0D47733EE33A3D6BBC1D667E2214AE937DB051341F2E2B62B73CA60FD987CDE5",
+      "public/career-world/layers/ocean/fields/ocean-noise-r2.png",
+      "C111F6D9F022DA282EFEF222C5E0FB83716E1264A855FB0DD2C0BBA1F58695C9",
     ],
     [
-      "public/career-world/layers/ocean/surface-motion/fields/water-height-micro-r1-1024x1024.png",
-      "6681E2DACCA2F5105A9F4C478B112D4C05F1479B9EAC26C02975295A71C6DCB3",
+      "public/career-world/layers/ocean/fields/ocean-phase-r2.png",
+      "20CEBBA2912D13BB81A33571CFA645D08A4FDC26570D308D754D574569E62005",
     ],
   ];
 

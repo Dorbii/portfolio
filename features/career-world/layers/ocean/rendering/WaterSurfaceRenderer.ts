@@ -1,12 +1,12 @@
-import type { CameraView } from "../../../shared/camera";
-import { DETAIL_POLICY, type DetailState } from "../../../shared/lod";
-import type { WorldLight } from "../../../shared/lighting";
+import type { CameraView } from "../../../shared/camera.ts";
+import { DETAIL_POLICY, type DetailState } from "../../../shared/lod.ts";
+import type { WorldLight } from "../../../shared/lighting.ts";
 import {
   createTexture,
   linkProgram,
   loadImage,
-} from "../../../shared/water/webgl";
-import { OCEAN_FIELD_ASSETS, OCEAN_FIELD_DIMENSIONS } from "../model/assets";
+} from "../../../shared/water/webgl.ts";
+import { OCEAN_FIELD_ASSETS, OCEAN_FIELD_DIMENSIONS } from "../model/assets.ts";
 import {
   OCEAN_FAMILIES,
   OCEAN_LOOP_SECONDS,
@@ -17,19 +17,19 @@ import {
   OCEAN_TUNED_TO_SCREEN,
   type OceanPassName,
   type OceanUniformValue,
-} from "../model/generated/oceanStates";
+} from "../model/generated/oceanStates.ts";
 import {
   normalizeWaterSurfaceState,
   readWaterSurfaceUrlOverrides,
   type WaterSurfaceState,
-} from "../model/state";
+} from "../model/state.ts";
 import {
   OCEAN_COMPOSITE_SHADER,
   OCEAN_FOAM_SHADER,
   OCEAN_SPRAY_SHADER,
   OCEAN_VERTEX_SHADER,
   OCEAN_WAVE_SHADER,
-} from "./shaders/generated";
+} from "./shaders/generated/index.ts";
 
 const PASS_ORDER = ["wave", "foam", "spray", "composite"] as const;
 
@@ -46,7 +46,7 @@ const PASS_SOURCE: Readonly<Record<OceanPassName, string>> = Object.freeze({
  * `texPrev` is unit 8 in the foam pass and unit 9 in the spray pass, which is
  * what keeps each ping-pong pair off the other's unit.
  */
-const UNIT = Object.freeze({
+export const OCEAN_SAMPLER_UNITS = Object.freeze({
   texPhase: 0,
   texFlowField: 1,
   texNoise: 2,
@@ -64,10 +64,10 @@ const UNIT = Object.freeze({
  * texture in each of them. Without this it would take sampler unit 0 by default
  * and the foam pass would advect the phase field instead of its own history.
  */
-const PASS_SAMPLERS: Partial<Record<OceanPassName, Record<string, number>>> =
+export const OCEAN_PASS_SAMPLERS: Partial<Record<OceanPassName, Record<string, number>>> =
   Object.freeze({
-    foam: { texPrev: UNIT.texFoam },
-    spray: { texPrev: UNIT.texSpray },
+    foam: { texPrev: OCEAN_SAMPLER_UNITS.texFoam },
+    spray: { texPrev: OCEAN_SAMPLER_UNITS.texSpray },
   });
 
 /**
@@ -372,8 +372,8 @@ export class WaterSurfaceRenderer {
         record(uniformName);
       }
       for (const uniformName of RUNTIME_UNIFORMS) record(uniformName);
-      for (const uniformName of Object.keys(UNIT)) record(uniformName);
-      for (const uniformName of Object.keys(PASS_SAMPLERS[name] ?? {})) {
+      for (const uniformName of Object.keys(OCEAN_SAMPLER_UNITS)) record(uniformName);
+      for (const uniformName of Object.keys(OCEAN_PASS_SAMPLERS[name] ?? {})) {
         record(uniformName);
       }
 
@@ -572,16 +572,16 @@ export class WaterSurfaceRenderer {
   private bindFields(): void {
     const gl = this.gl;
     for (const [name, texture] of Object.entries(this.fields)) {
-      gl.activeTexture(gl.TEXTURE0 + UNIT[name as keyof typeof UNIT]);
+      gl.activeTexture(gl.TEXTURE0 + OCEAN_SAMPLER_UNITS[name as keyof typeof OCEAN_SAMPLER_UNITS]);
       gl.bindTexture(gl.TEXTURE_2D, texture);
     }
     for (const [pass, { program, uniforms }] of this.passes.entries()) {
       gl.useProgram(program);
-      for (const [name, unit] of Object.entries(UNIT)) {
+      for (const [name, unit] of Object.entries(OCEAN_SAMPLER_UNITS)) {
         const location = uniforms.get(name);
         if (location) gl.uniform1i(location, unit);
       }
-      for (const [name, unit] of Object.entries(PASS_SAMPLERS[pass] ?? {})) {
+      for (const [name, unit] of Object.entries(OCEAN_PASS_SAMPLERS[pass] ?? {})) {
         const location = uniforms.get(name);
         if (location) gl.uniform1i(location, unit);
       }
@@ -589,11 +589,11 @@ export class WaterSurfaceRenderer {
   }
 
   private bindTarget(
-    name: keyof typeof UNIT,
+    name: keyof typeof OCEAN_SAMPLER_UNITS,
     texture: WebGLTexture | null,
   ): void {
     const gl = this.gl;
-    gl.activeTexture(gl.TEXTURE0 + UNIT[name]);
+    gl.activeTexture(gl.TEXTURE0 + OCEAN_SAMPLER_UNITS[name]);
     gl.bindTexture(gl.TEXTURE_2D, texture);
   }
 
@@ -986,7 +986,7 @@ export class WaterSurfaceRenderer {
 }
 
 /** Set every frame by the renderer rather than by the generated preset table. */
-const RUNTIME_UNIFORMS = [
+export const RUNTIME_UNIFORMS = [
   "uRes",
   "uOpenWaveVis",
   "uTime",
