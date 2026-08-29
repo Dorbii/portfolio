@@ -43,3 +43,6 @@ __pycache__/
 
 # baked world fields: large, and reproduce from src + the live coast authority
 scenes/world/baked/
+
+# encoded world textures: reproduce from bake_world.py + encode_world.py
+scenes/world/textures/
