@@ -694,9 +694,22 @@ float impactSite(vec2 s, vec2 shoreN, float sdf) {
               + flowAt(wuv + ty).z + flowAt(wuv - ty).z - 4.0 * sdf;
     float protrude = clamp(-lap / TUNED_PER_WORLD, 0.0, 2.0);
     float band = smoothstep(0.5, 3.0, sdf) * (1.0 - smoothstep(9.0, 16.0, sdf));
-    // A jittered lattice at the offline site spacing, so the coast fires at
-    // separated places the way the greedy non-maximum suppression made it.
-    const float cell = 90.0;
+    // A jittered lattice, so the coast fires at separated places the way the
+    // greedy non-maximum suppression made it.
+    //
+    // The cell was 90, which is the offline SITE SPACING -- and that was the
+    // wrong number to copy. precompute places its sites ALONG the coast: it
+    // scores the shoreline, takes the best, suppresses its neighbourhood, and
+    // repeats, so all fifty-four land on water's edge. This lattice is
+    // two-dimensional and the shore band is a thin curve through it, so at a 90
+    // px cell only the handful of cells the curve happens to cross contribute --
+    // about eight sites where the baked field has fifty-four.
+    //
+    // 28 is 90 scaled by the ratio that puts the same number of live cells in
+    // the band. Measured on the same coastline (impact_compare.py, sdf 0.5..26):
+    // the baked field crosses the spray gate of 0.33 on 10.41% of the band; this
+    // did so on 0.048%, and at cell 28 does so on 10.99%.
+    const float cell = 28.0;
     vec2 mp = worldPx(s) / cell;
     float acc = 0.0;
     for (int j = -1; j <= 1; ++j)
@@ -707,7 +720,13 @@ float impactSite(vec2 s, vec2 shoreN, float sdf) {
         float d = length((mp - (c + h.xy)) * cell) / 13.0;
         acc = max(acc, exp(-0.5 * d * d) * (0.45 + 0.75 * h.z));
     }
-    return clamp(acc * exposure * (0.35 + 0.95 * protrude) * band, 0.0, 1.0);
+    // ...and the score SELECTS the site rather than scaling it. The baked field
+    // chooses where sites go by exposure and protrusion and then draws each at
+    // full strength; multiplying by the same score instead meant a perfectly
+    // good site on a 0.3-scoring headland came out at 0.3 and never reached the
+    // gate. Two thirds of the 217x shortfall was this, one third the cell.
+    float score = exposure * (0.35 + 0.95 * protrude) * band;
+    return clamp(acc * smoothstep(0.06, 0.34, score), 0.0, 1.0);
 }
 '''
 
