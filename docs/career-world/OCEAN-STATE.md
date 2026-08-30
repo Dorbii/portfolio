@@ -42,6 +42,53 @@ went into comparing a change against itself because of it.
   mouth in r4, so the ocean field calls that ground land. Ground the terrain
   calls water and no layer paints: 0.389% of the inland window -> zero. `1840e4d`
 
+## The "not water" arc (2026-08-30)
+
+The owner's words: *"a solid mass of blue moving with static white on top ...
+0 reflection or shadow work is being conveyed."* Three things landed, and the
+order they were ruled out matters more than any of them.
+
+Ruled OUT with captures, each of which I had believed:
+
+- **Directional spread.** Ours measures anisotropy 1.73-2.28 against the
+  project's own reference plates at 2.47-3.78: we are LESS directional than the
+  target. The reference is MORE striped than ours and still reads as water, so
+  the corduroy is not the sin. `aniso.py` is the measurement -- angle, because
+  it is scale-free where a wavelength in pixels is not.
+- **The foam pass.** Strip it and the mottle stays.
+- **The reflection terms as a group.** Zero gloss, spec, sheen and sky together
+  and the mottle stays.
+
+The granularity is in the BODY SHADING: with everything drawn zeroed, the bare
+body still carried 39.3 of the full picture's 54.2. And bisecting THAT on open
+water found the floor -- every named term off -- was the best-looking water of
+the set. The style stack was not missing; it was doing the damage.
+
+- **The gloss lobe was haze.** Isolated, gloss alone made the grey-white cloud
+  blobs: p90 luma 111.5 against a floor of 77.5, in soft patches 50-100 px
+  across. composite.frag already says "broad is haze, tight is a highlight" and
+  34 is broad. 340 with double gain turns the clouds into discrete glints. `62c8090`
+- **fresnelP had the wrong sign.** `1 - pow(Ns.z, p)` is monotonically
+  INCREASING in p, so raising it to 13 to escape an older bug made it less
+  selective: flat water at Ns.z 0.94 evaluated to 0.55, mixing sky in at half
+  strength everywhere. 1.6 gives flat 0.09 against a tilted face 0.30. `62c8090`
+- **The crest stroke was being shredded.** `crestLine = contourLine(hPath, ...) *
+  (0.10 + 0.90 * facing)` and facing came off `geom.yz`, the macro gradient --
+  swell PLUS chop -- so a smooth contour was multiplied by a chop-frequency
+  number. Turning uCrestGain up 3x made more speckle, not more line, which is
+  what a shredded stroke does. This file already carried the correction, applied
+  to the shore stages and never to facing itself. `4922a86`
+- **uShadeSmooth was a screen length.** Fixed 5 px at every zoom: 5 tuned px in
+  the frame it was tuned in, 1.7 at the capital approach, ~35 at world. Same bug
+  uShadowStep already carried a comment about. `12fa748`
+
+**The remaining blocker is the foam pass.** With foam off, the crest strokes now
+draw as long continuous lines. With foam on, its granularity covers them and
+raising the crest gain only brightens the grain. So foam SHAPE -- the thing
+`foam_shape.py` has measured at elongation 15.5 against the reference's 33.3 --
+is now the single thing between here and the reference look, not one item on a
+list.
+
 ## Open
 
 - **Foam SHAPE still short.** Elongation 15.5 against the offline's 33.3, streak
