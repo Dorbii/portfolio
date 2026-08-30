@@ -35,8 +35,33 @@ COMMON = dict(
     chopCrest=0.10, chopGlint=0.70, chopW=3.4,
     # Sky reflection and gloss. The gloss lobe is deliberately far tighter than
     # the diffuse one: broad is haze, tight is a highlight.
-    skyMix=0.24, fresnelP=13.0, glossGain=0.55, glossShin=34.0,
-    chopShade=0.55,
+    #
+    # The intent above is right and 34 does not deliver it. Isolated on open
+    # water with every other term zeroed, the gloss term alone was the grey-white
+    # cloud blobs the owner has been calling static white on top: p90 luma 111.5
+    # against a floor of 77.5, in soft patches 50-100 px across. A lobe of 34 is
+    # BROAD -- it is haze by the comment's own definition -- and a broad lobe on a
+    # band-limited normal cannot make a highlight, only a cloud.
+    #
+    # Swept 34 / 136 / 340 / 680 at matched energy: the blobs resolve into
+    # discrete glints somewhere past 300, high-frequency energy falls 27.2 -> 24.7
+    # and p99 holds at 167 against 190, so the brightness is kept and merely
+    # concentrated where a highlight belongs. Gain doubles to pay for the energy
+    # narrowing the lobe throws away.
+    #
+    # fresnelP has the opposite sign error. `fres = 1 - pow(Ns.z, p)` is
+    # MONOTONICALLY INCREASING in p, so raising it to escape the old form's
+    # 0.000048 made the term less selective, not more: at 13, near-flat water
+    # with Ns.z 0.94 evaluates to 0.55, i.e. the sky mixed in at half strength
+    # everywhere. At 1.6 flat water gives 0.09 and a tilted face 0.30 -- a real
+    # slope discrimination instead of a wash.
+    skyMix=0.24, fresnelP=1.6, glossGain=1.10, glossShin=340.0,
+    # A lambert on the FULL-frequency normal, added so the surface would not read
+    # smooth between crests. Right intent, wrong scale: measured on the floor it
+    # costs 8.8% more high-frequency energy and returns dark grain, not form. The
+    # detail belongs in the drawn strokes, which is what this file's own notes say
+    # has worked all along.
+    chopShade=0.15,
     # Fine surface relief: shading only, never in the height field.
     fineScale=34.0, fineGain=2.3, fineShade=0.18, fineGloss=0.10, fineSpeed=17.0,
     foamErodeK=5.0, hueVary=2.0,
