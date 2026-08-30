@@ -89,6 +89,30 @@ raising the crest gain only brightens the grain. So foam SHAPE -- the thing
 is now the single thing between here and the reference look, not one item on a
 list.
 
+## Where the open sea stands (2026-08-30, end of the first autonomous loop)
+
+Against reference plate C5 at matched tuned-pixel density:
+
+                           ours    reference
+      foam coverage       2.11%        1.84%
+      elongation          10.93        12.41
+      fragments per 1k    13.28        14.26
+      streak reach         64.6        134.8
+      p50 luma             60.8         49.4
+      p10 luma             36.4         19.7
+      p90 luma            116.5        137.0
+
+Four close, three not. The three are two facts: streaks are half as long as they
+should be, and the tonal range is 80 against 117 because our darkest water is
+still 1.8x too light while our brightest is too dim.
+
+**Measure captures at the right scale.** Every capture lands at span 0.0825, not
+whatever was requested -- the app clamps -- and the frame is written at CSS scale,
+so zc is about 0.85 screen px per tuned px at that camera. Read it from the
+`.camera.json` beside the image; do not assume the request. Passing zc 2.86 when
+it was 0.85 made every foam number look 3.4x worse than it was and nearly buried
+a fix that had worked.
+
 ## Open
 
 - **Foam SHAPE still short.** Elongation 15.5 against the offline's 33.3, streak
