@@ -45,6 +45,85 @@ const MANIFEST_PATH = path.join(
     + "inland-water-r1.json",
 );
 const ARTBOARD_DIMENSIONS = Object.freeze([1440, 1080]);
+// The world masks the terrain and the ocean each read, sampled into this
+// script's field. WORLD_BOUNDS is the output crop's place in the world and has
+// to match authority/assets.ts NINJAONE_INLAND_TERRAIN_ERASE_MASK.worldBounds;
+// the assertion below fails loudly rather than silently sampling the wrong
+// coastline if either moves.
+const WORLD_LAND_MASK_PATH = "public/career-world/layers/terrain/authority/masks/world-land-mask-r4.png";
+const OCEAN_FLOW_FIELD_PATH = "public/career-world/layers/ocean/fields/ocean-flow-r2.png";
+const WORLD_BOUNDS = Object.freeze({
+  origin: Object.freeze([0.20833333333333334, 0.05185185185185185]),
+  span: Object.freeze([0.1, 0.28148148148148144]),
+});
+const OCEAN_SDF_MAX = 32;
+const HOLE_CLAIM_DILATION = 3;   // field px; ~0.3 world px, enough to kill a hairline
+
+async function claimUnownedTerrainWater(width, height) {
+  // Take the channel count from sharp rather than inferring it from the buffer
+  // length: a greyscale PNG can decode to one channel or to three, and guessing
+  // one when it is three indexes a third of the way into the image and samples
+  // an entirely different coastline. That is not a subtle failure but it is a
+  // silent one -- it claimed 7360 field px of a 40000 px hole and reported
+  // success.
+  const read = async (relative) => {
+    const { data, info } = await sharp(path.join(ROOT, relative))
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    return { data, width: info.width, height: info.height, channels: info.channels };
+  };
+  const land = await read(WORLD_LAND_MASK_PATH);
+  const flow = await read(OCEAN_FLOW_FIELD_PATH);
+  if (land.width !== flow.width || land.height !== flow.height) {
+    throw new Error(`land mask ${land.width}x${land.height} and ocean field `
+      + `${flow.width}x${flow.height} are not the same world`);
+  }
+  const [ox, oy] = WORLD_BOUNDS.origin;
+  const [sx, sy] = WORLD_BOUNDS.span;
+  const claim = new Uint8Array(width * height);
+  const oceanCovered = new Uint8Array(width * height);
+  let terrainWater = 0;
+  for (let y = 0; y < height; y += 1) {
+    const v = oy + ((y / FIELD_SCALE + 0.5) / (FIELD_CROP[3])) * sy;
+    const wy = Math.min(land.height - 1, Math.max(0, Math.round(v * land.height)));
+    for (let x = 0; x < width; x += 1) {
+      const u = ox + ((x / FIELD_SCALE + 0.5) / (FIELD_CROP[2])) * sx;
+      const wx = Math.min(land.width - 1, Math.max(0, Math.round(u * land.width)));
+      const w = wy * land.width + wx;
+      if (land.data[w * land.channels] >= 128) continue;      // 0 is water in r4
+      terrainWater += 1;
+      // the ocean's signed distance, decoded exactly as the shader decodes it
+      const e = (flow.data[w * flow.channels + 2] / 255) * 2 - 1;
+      if (Math.sign(e) * e * e * OCEAN_SDF_MAX > 0) {
+        oceanCovered[y * width + x] = 1;                       // the ocean has it
+        continue;
+      }
+      claim[y * width + x] = 1;
+    }
+  }
+  if (terrainWater === 0) {
+    throw new Error("no terrain water inside the inland window -- WORLD_BOUNDS is wrong");
+  }
+  console.log(`  land mask ${land.width}x${land.height}x${land.channels}, `
+    + `ocean field ${flow.width}x${flow.height}x${flow.channels}; `
+    + `terrain water in window ${terrainWater} field px, `
+    + `unowned by the ocean ${claim.reduce((a, b) => a + b, 0)}`);
+  // Grow a little so the claim overlaps its neighbours instead of abutting them.
+  let grown = claim;
+  for (let step = 0; step < HOLE_CLAIM_DILATION; step += 1) {
+    const next = Uint8Array.from(grown);
+    for (let y = 1; y < height - 1; y += 1) {
+      for (let x = 1; x < width - 1; x += 1) {
+        const i = y * width + x;
+        if (grown[i]) continue;
+        if (grown[i - 1] || grown[i + 1] || grown[i - width] || grown[i + width]) next[i] = 1;
+      }
+    }
+    grown = next;
+  }
+  return { claim: grown, oceanCovered };
+}
+
 const FIELD_SCALE = 3;
 const FIELD_CROP = Object.freeze([480, 168, 576, 912]);
 const FIELD_DIMENSIONS = Object.freeze([
@@ -770,6 +849,50 @@ export async function buildNinjaOneInlandWaterR1() {
     }
   }
 
+  // Everything the terrain carves that no other water layer paints.
+  //
+  // The coverage above is hand-authored -- a river centreline and a list of
+  // ellipse patches -- and the terrain's water is not: it is derived from
+  // world-land-mask-r4. So the two drift, and where the terrain has carved
+  // water that no ellipse reaches, the land art is erased, the ocean field
+  // does not claim it either, and the page's own background shows through. It
+  // reads as a black hole in the river, which is what it is.
+  //
+  // The ocean is right not to claim it. build_plates keeps one connected
+  // component so the eikonal solve has a single seeded ocean, and this river is
+  // dammed at its mouth in r4 -- a separate body, correctly inland. Measured on
+  // this window: the terrain calls 7.689% of it water, the ocean field covers
+  // 6.846%, the authored coverage 0.454%, and 0.389% -- 173 world px in 16
+  // components -- was covered by nothing at all. The largest is 13x16 world px,
+  // which at capital zoom is an 87x107 px hole.
+  //
+  // So take the complement rather than drawing it: terrain water minus ocean
+  // water, through the mechanism the authored patches already use. Derived from
+  // the same masks the terrain and the ocean read, it cannot drift from them.
+  // terrainEraseFeature is the gate on the mask's alpha -- coverage is
+  // `terrainEraseFeature * max(renderOwnership, terrainEraseOnly)` -- and it is
+  // NOT implied by closedMask, which the one-pixel closing widens past it. So a
+  // claimed pixel always gets the feature; only ground no layer held before also
+  // gets terrainEraseOnly, which routes it to the flat external-water material.
+  // Setting that on a pixel with real river material would flatten it.
+  const { claim: holeClaim, oceanCovered } = await claimUnownedTerrainWater(width, height);
+  let holeClaimed = 0;
+  let holeUnheld = 0;
+  for (let pixel = 0; pixel < closedMask.length; pixel += 1) {
+    if (!holeClaim[pixel]) continue;
+    if (terrainEraseFeature[pixel] && closedMask[pixel]) continue;
+    if (!closedMask[pixel]) {
+      terrainEraseOnly[pixel] = 1;
+      closedMask[pixel] = 1;
+      holeUnheld += 1;
+    }
+    terrainEraseFeature[pixel] = 1;
+    holeClaimed += 1;
+  }
+  console.log(`  unowned terrain water claimed: ${holeClaimed} field px`
+    + ` (${(100 * holeClaimed / closedMask.length).toFixed(4)}% of the window),`
+    + ` ${holeUnheld} of them held by no layer at all`);
+
   const waterFeature = closedMask;
   const landFeature = Uint8Array.from(closedMask, (value) => (value ? 0 : 1));
   const distanceToWater = chamferDistance(waterFeature, width, height);
@@ -858,7 +981,25 @@ export async function buildNinjaOneInlandWaterR1() {
       flowSumY += localFlowY;
       field[offset + 1] = Math.round(128 + clamp(localFlowX, -1, 1) * 127);
       field[offset + 2] = Math.round(128 + clamp(localFlowY, -1, 1) * 127);
-      const ownership = ownerPriority[pixel] > 0 ? inlandOwnership[pixel] : 1;
+      // A handoff may only give ground away to a layer that takes it.
+      //
+      // c1-north-river carries an oceanHandoff that ramps inlandOwnership from
+      // 0 to 1 over the last 200 units before the sea, on the assumption that
+      // the ocean paints the estuary. It does not: build_plates keeps one
+      // connected component so its eikonal solve has a single seeded ocean, and
+      // this river is dammed at its mouth in world-land-mask-r4, so the ocean
+      // field calls that ground land and draws nothing. Both layers stepped
+      // back from the same stretch of river and the page background showed
+      // through -- measured on the shipped mask, coverage 84, 106 and 158 of
+      // 255 going downstream from the mouth, which over a near-black backdrop
+      // is the black wedge in the river.
+      //
+      // So the ramp survives where the ocean really is, and yields to full
+      // inland ownership where it is not. Read from the ocean's own field, so
+      // it cannot drift from what that layer actually paints.
+      const ownership = oceanCovered[pixel]
+        ? (ownerPriority[pixel] > 0 ? inlandOwnership[pixel] : 1)
+        : 1;
       renderOwnership[pixel] = ownership;
       field[offset + 3] = Math.round(
         EXTERNAL_WATER_ALPHA

@@ -40,7 +40,7 @@
     ],
     "artboardScale": 3,
     "decodedBytes": 18911232,
-    "sha256": "305BFC21E552BAD4E6A3BBEFAA4E582B3E65D354354652575554A1567C654F7F",
+    "sha256": "7AE7A06829E367F3FC56BECC432E6C43E4F1B16C35B84F24A0A1942989FF8113",
     "channels": {
       "r": "signed bank distance over +/-24 artboard pixels; 0.5 is the water edge",
       "g": "downstream velocity x encoded as 0.5 + value * 0.5",
@@ -108,7 +108,7 @@
       912
     ],
     "decodedBytes": 2101248,
-    "sha256": "4667A357373C94D36B9A8F07552CE38C38347A2E4DFB2ACA74ABDDCC6F9BB7B2",
+    "sha256": "FADB11130E6743D821040A10D0A5D314F83B35DD9AECE5F91BD6280315021AE6",
     "artboardCrop": [
       480,
       168,
@@ -855,8 +855,8 @@
     "cascadeImpactPixels": 23563,
     "maximumCascadeImpact": 1,
     "meanFlowVector": [
-      0.029792348847328034,
-      0.23798475609673375
+      0.029794929629031765,
+      0.23797768345801093
     ],
     "maximumDecodedBytes": 25206784
   },
