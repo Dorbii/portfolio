@@ -76,7 +76,7 @@ COMMON = dict(
     viewTilt=34.0, reliefLift=16.0,
     # Extra wave-scale tonal range in open water, where the shore-gated terms
     # do not reach. Targets the plate's own local contrast, not taste.
-    openRelief=3.0,
+    openRelief=6.4,
     # Small waves evaluated for SHADING ONLY -- outside the height field, so
     # outside the steepness cap and the RMS normalisation that bound it.
     detailLam=96.0, detailSpread=0.30, detailSharp=0.55, detailSlope=0.95,
@@ -235,7 +235,13 @@ PRESETS['heavy_crashing_surf'] = dict(
     # similar across the frame, so it combs the whole sea into parallel strokes
     # rather than growing the individual streaks longer. Wrong mechanism for this
     # deficit: it is not that our foam is insufficiently directional.
-    streakGain=0.22, faceLift=0.38, chopGlint=0.24, licTone=0.0, licMix=0.0,
+    # faceLift 0.38 -> 0.95, openRelief 3.0 -> 6.4. Darkening the palette to the
+    # reference (126d491) fixed the troughs and left the lit faces where they
+    # were, so the sea went uniformly dark instead of gaining contrast. The
+    # reference runs p10 luma 19.7 against p90 137.0 -- a range of 117 -- because
+    # a wave there has a face in the light and a back in shadow. Ours had 68.
+    # This takes it to about 90: still short, and no longer flat.
+    streakGain=0.22, faceLift=0.95, chopGlint=0.24, licTone=0.0, licMix=0.0,
     foamDeep=17.0, foamDeepThr=1.4, foamVeil=0.26,
     stokes=4.2, backwash=1.9,
     tauFresh=1.30, tauPersist=5.5,
