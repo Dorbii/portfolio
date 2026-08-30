@@ -206,6 +206,11 @@ const vec2  TUNED_SIZE = WORLD_SIZE * TUNED_PER_WORLD;
 // at world zoom reads as a coastline that nearly fits and does not.
 vec2 worldUvOf(vec2 s) { return uCamOrigin + vec2(s.x, 1.0 - s.y) * uCamSpan; }
 
+// How far the two ANALYTIC trains' coordinates are warped, in tuned px. See
+// fieldP: they are plane waves because the world texture carries one solved
+// phase, and a plane wave is a grating.
+uniform float uTrainWarp;
+
 // The evaluation coordinate: tuned pixels, anchored to the world. Camera-
 // independent by construction, so no pattern keyed on it can swim when the
 // camera pans, and none of them needs to know the viewport at all.
@@ -284,9 +289,38 @@ vec4 fieldP(vec2 s) {
     // their refraction is confined to water shallower than they ever reach, and
     // resolvable at all only once the camera is close.
     vec2 px = worldPx(s);
-    float SS = deepK(uPeriodS) * dot(px, uDirSecond);
+    // DOMAIN WARP, and it is the difference between water and cloth.
+    //
+    // These two phases are the port's, not the solve's: the world texture has
+    // room for one solved field, so the secondary and the chop are generated
+    // here as k.x. A plane wave is the most regular object that can be put on a
+    // picture, and two of them crossing is a weave -- measured, silencing both
+    // takes the water's orientation coherence from 0.135 to 0.017 at the capital
+    // camera, an 87% drop, and what disappears with them is a fine diagonal
+    // hatching over the entire ocean. That hatching is the "reads as fabric"
+    // this_ water has been described as from the first day.
+    //
+    // wave.frag's own note says why a bend is safe HERE and was not safe there:
+    // "ANY spatial phase perturbation applied across many components
+    // decorrelates them from each other, and the sum of decorrelated trains is
+    // interference... Only a single train survives bending." The primary family
+    // is seven components summed, so uDirWander and uDirBend ship at zero. These
+    // are one component each. They are exactly the case that survives.
+    //
+    // Warping the COORDINATE rather than adding to the phase keeps the train a
+    // train: it is still a plane wave locally, with the same wavelength and the
+    // same steepness, and only its direction turns -- which is what refraction
+    // would have done to it if there had been a field to solve. The warp scale
+    // is many wavelengths (520 tuned px against the secondary's 66, 180 against
+    // the chop's 22), so the wave sees a slowly-varying_ direction and the
+    // slowly-varying_ approximation the whole accumulator rests on still holds.
+    vec2 wS = (vec2(noise4(px, 520.0).r, noise4(px + vec2(217.0, 83.0), 520.0).g)
+               - 0.5) * uTrainWarp;
+    vec2 wC = (vec2(noise4(px + vec2(61.0, 149.0), 180.0).b,
+                    noise4(px + vec2(401.0, 29.0), 180.0).r) - 0.5) * uTrainWarp * 0.42;
+    float SS = deepK(uPeriodS) * dot(px + wS, uDirSecond);
     vec2 dc = normalize(uDirDeep * 0.62 + uDirSecond * 0.38);
-    float SC = deepK(uPeriodC) * dot(px, dc);
+    float SC = deepK(uPeriodC) * dot(px + wC, dc);
     return vec4(SP, SS, SC, ph.z * TUNED_PER_WORLD);
 }
 

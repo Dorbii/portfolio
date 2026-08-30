@@ -140,6 +140,17 @@ const SCROLL_SECONDS = OCEAN_LOOP_SECONDS * OCEAN_SCROLL_LOOPS;
  */
 const LAND_ART_OBLIQUE_DEGREES = 18;
 
+/**
+ * Domain warp applied to the two analytic wave trains, in TUNED pixels.
+ *
+ * A world-anchored length, so it needs no camera conversion: the warp is part of
+ * the water, not part of the drawing. Roughly two thirds of the secondary
+ * train's wavelength, over a feature eight wavelengths across -- enough to turn
+ * the crests through about fifteen degrees and break the grating, gentle enough
+ * that each train is still locally a plane wave with its own steepness.
+ */
+const TRAIN_WARP_PX = 90;
+
 const STATE_SCALE = 0.5;
 
 /** Wave-pass outputs, which are render targets one moment and inputs the next. */
@@ -425,6 +436,35 @@ export class WaterSurfaceRenderer {
     if (raw === null) return null;
     const value = Number(raw);
     return Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : null;
+  })();
+  /**
+   * ?water.trains=p -- silence the two ANALYTIC trains.
+   *
+   * The world texture carries one solved phase field. The secondary and the chop
+   * are therefore generated as plane waves in the adapter -- literally k.x,
+   * perfectly straight and perfectly parallel over the whole ocean -- where the
+   * offline renderer solves all three. A plane wave is the most regular object
+   * that can be put on a picture, and two of them crossing is a weave. This
+   * turns them off so the question "is the fabric these" has an answer.
+   */
+  private readonly primaryOnly =
+    typeof window === "undefined"
+      ? false
+      : new URLSearchParams(window.location.search).get("water.trains") === "p";
+  /**
+   * ?water.trainWarp=<tuned px> -- how far the two analytic trains are warped.
+   *
+   * They are plane waves because the world texture carries one solved phase
+   * field, and two crossing plane waves are a weave. See fieldP in any generated
+   * shader for the measurement and for why bending these is safe where bending
+   * the primary family was not.
+   */
+  private readonly trainWarp = (() => {
+    if (typeof window === "undefined") return TRAIN_WARP_PX;
+    const raw = new URLSearchParams(window.location.search).get("water.trainWarp");
+    if (raw === null) return TRAIN_WARP_PX;
+    const value = Number(raw);
+    return Number.isFinite(value) ? Math.max(0, value) : TRAIN_WARP_PX;
   })();
   /** ?water.markScale=<0..1> -- how far drawn marks follow the water, not the screen. */
   private readonly markAnchor = (() => {
@@ -1013,8 +1053,8 @@ export class WaterSurfaceRenderer {
       // only thing between a dark ocean and a flat fill, so it is worth more.
       uViewTilt: viewTilt,
       uRegionTone: 1 + 1.4 * wideShot,
-      uAmpS: smoothstep(4, 8, lamS),
-      uAmpC: smoothstep(4, 8, lamC),
+      uAmpS: this.primaryOnly ? 0 : smoothstep(4, 8, lamS),
+      uAmpC: this.primaryOnly ? 0 : smoothstep(4, 8, lamC),
       // The primary train is not faded by amplitude: it dominates the spectrum,
       // and the height field is normalised by its own RMS, so scaling it is a
       // silent no-op -- the same shape of trap as scaling the component
@@ -1131,6 +1171,7 @@ export class WaterSurfaceRenderer {
     // applied inside the wave pass after the RMS normalisation, so every term
     // downstream of the height field quietens in step. See wave.frag.
     set1("uOpenWaveVis", this.openWaveVis);
+    set1("uTrainWarp", this.trainWarp);
     set2("uDirDeep", DIR_PRIMARY);
     set2("uDirSecond", DIR_SECONDARY);
     set1("uPeriodP", OCEAN_FAMILIES.primary.period);
@@ -1347,6 +1388,7 @@ export class WaterSurfaceRenderer {
 export const RUNTIME_UNIFORMS = [
   "uRes",
   "uOpenWaveVis",
+  "uTrainWarp",
   "uTime",
   "uLoop",
   "uScrollLoop",

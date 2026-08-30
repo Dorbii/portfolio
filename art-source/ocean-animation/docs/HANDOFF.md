@@ -765,6 +765,85 @@ the only way to render what the wide shot actually shows.
 
 ---
 
+## 1G. The fabric was two plane waves
+
+The owner has described this water as fabric, cloth, corduroy and "super long
+uniformed lines" since the first day, at every zoom. It was two plane waves.
+
+The world texture carries ONE solved phase field. The secondary train and the
+chop are therefore generated in the adapter as `k . x` -- literally a plane wave,
+perfectly straight and perfectly parallel over the entire ocean -- where the
+offline renderer solves all three. Two crossing plane waves are a weave, and
+they were drawing a fine regular diagonal hatch over every water pixel at every
+camera.
+
+`?water.trains=p` silences both. At the capital camera, on a 97%-water window:
+
+```
+  all three trains        luma sd 22.49   orientation coherence 0.135
+  plane-wave trains off   luma sd 22.35   orientation coherence 0.017
+```
+
+An 87% drop in directional coherence for no loss of contrast, and what
+disappears is the hatching. That flag ships as a diagnostic; silencing the trains
+is not the fix, because they carry the fine wave detail the close tiers need.
+
+### The fix the shader had already written down
+
+`wave.frag`, on why `uDirWander` and `uDirBend` ship at zero: *"ANY spatial phase
+perturbation applied across many components decorrelates them from each other,
+and the sum of decorrelated trains is interference... Only a single train
+survives bending, which is why hPath (one cosine, coarse bend) draws clean curves
+while the summed height field cannot."*
+
+The primary family is seven components summed, so bending it fails. **The
+secondary and the chop are one component each.** They are exactly the case the
+note says survives, and nobody had connected the two.
+
+So `fieldP` warps their COORDINATE rather than adding to their phase:
+
+```glsl
+vec2 wS = (vec2(noise4(px, 520.0).r, noise4(px + vec2(217,83), 520.0).g) - 0.5) * uTrainWarp;
+float SS = deepK(uPeriodS) * dot(px + wS, uDirSecond);
+```
+
+Warping the coordinate keeps each train a train: locally still a plane wave, same
+wavelength, same steepness, only its DIRECTION turning -- which is what
+refraction would have done to it if there had been a field to solve. The warp
+scale is many wavelengths (520 tuned px against the secondary's 66, 180 against
+the chop's 22), so the slowly-varying-direction approximation the accumulator
+rests on still holds.
+
+Swept live at the capital camera:
+
+```
+  warp   0 (as shipped)   luma sd 22.73   orient 0.144
+  warp  45                luma sd 22.70   orient 0.026
+  warp  90 (shipping)     luma sd 22.60   orient 0.013
+  warp 160                luma sd 22.44   orient 0.018
+```
+
+Ninety tuned pixels is about two thirds of the secondary's wavelength over a
+feature eight wavelengths across -- roughly fifteen degrees of crest turn. The
+hatching is gone, the wave structure and the foam bands stay, and the contrast is
+untouched. `?water.trainWarp=<tuned px>` sweeps it again.
+
+No regression at the wide shot, where the chop is already faded out entirely and
+the secondary is at 84%: span 1.0 measures orient 0.007 -> 0.013 and luma sd
+19.26 -> 19.36, both noise-level.
+
+### Why every earlier measurement missed it
+
+Orientation coherence was measured several times this month and read as "the sea
+is narrowband, and a narrowband sea is regular by construction". That is true and
+it is not what this was. A narrowband spectrum makes broad repeating BANDS at the
+wavelength; this was a hatch two orders finer, riding on top of them, and it came
+from the port rather than from the spectrum. The tell was there in section 1F --
+silencing the analytic trains moved coherence 0.104 -> 0.041 at the territory
+camera -- and it was recorded as a curiosity rather than followed.
+
+---
+
 ## 2. Running it
 
 ```bash
