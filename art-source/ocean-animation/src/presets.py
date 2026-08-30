@@ -90,8 +90,8 @@ COMMON = dict(
     detailWander=0.30,
 
     rippleGain=0.11, glitter=0.018, shadowStep=7.0,
-    crestLineW=3.8, crestLevel=0.55, laceLineW=3.6, laceLineGain=1.70, foamMass=0.96,
-    crestLineFloor=0.30, laceLineThr=0.24, foamSolid=0.07,
+    crestLineW=3.8, crestLevel=0.55, laceLineW=3.6, laceLineGain=1.70, foamMass=1.30,
+    crestLineFloor=0.30, laceLineThr=0.24, foamSolid=0.35,
     # Weight of the second, separately-drawn stroke train. See composite.frag.
     crossTrain=0.62,
     # Hair-fine filaments along the foam field's level sets. See composite.frag.
@@ -243,7 +243,12 @@ PRESETS['heavy_crashing_surf'] = dict(
     # We were never short of contrast. We are uniformly too bright: reference p50
     # 38.0 against our 60.8.
     streakGain=0.22, faceLift=0.55, chopGlint=0.24, licTone=0.0, licMix=0.0,
-    foamDeep=17.0, foamDeepThr=1.4, foamVeil=0.26,
+    # foamVeil 0.26 rendered every offshore whitecap at a quarter opacity, so
+    # away from the shore the sea was grey mush rather than white water on blue.
+    # C3 and C7 are white out there. foamDeepThr comes down with it: the offshore
+    # coverage threshold was raised 1.4x on top of the veil, suppressing the same
+    # thing twice.
+    foamDeep=17.0, foamDeepThr=0.70, foamVeil=0.99,
     stokes=4.2, backwash=1.9,
     tauFresh=1.30, tauPersist=5.5,
     # Injection down 3x from injBreak 52 / injWhitecap 10.0 / injShore 15.3, and
@@ -255,7 +260,11 @@ PRESETS['heavy_crashing_surf'] = dict(
     # 7.35% against 1.84%. That is what read as a busy granular field. At these
     # rates coverage is 1.96% and the shape numbers land with it -- elongation
     # 12.73 against 12.41, fragments per 1k px 13.23 against 14.26.
-    injBreak=17.6, injWhitecap=0.53, injShore=5.17,
+    # Retargeted from C5 to C3/C7, which are the plates for THIS sea state.
+    # heavy_crashing_surf was being matched against long_period_parallel_swell --
+    # the darkest, flattest, least foamy of the eight canonical references --
+    # and the heavy plates want 9-12% foam coverage where C5 wants 1.84%.
+    injBreak=70.4, injWhitecap=2.12, injShore=20.7,
     sprayLife=1.55, spraySpread=64.0, sprayInject=2.6, sprayGate=0.33, sprayGain=1.05,
     specGain=0.16, sheen=0.034, shadowGain=0.88, crestGain=0.66, troughGain=1.144, transGain=0.72, swash=0.52,
     foamThrFresh=0.154, foamThrOld=0.59, exposure=0.97,
