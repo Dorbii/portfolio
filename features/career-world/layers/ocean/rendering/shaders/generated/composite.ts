@@ -919,6 +919,7 @@ void main()
 
 
     vec4 F = texture(texFoam, uv);
+    F.ba += px;   // offset -> absolute; see the foam material write
 
     // ---- fine surface relief ------------------------------------------------
     // The source plate's water is corrugated at roughly 8-30 px with a lit side
@@ -1366,6 +1367,7 @@ void main()
 
     // ---- spray, the only thing allowed onto land --------------------------
     vec4 S = texture(texSpray, uv);
+    S.ba += px;   // offset -> absolute; see the spray material write
     float sd = S.r, sage = S.g;
     float sn = noiseAt(S.ba, 34.0) * 0.55 + noiseAt(S.ba * 1.09 + 41.0, 15.0) * 0.45;
     float sA = sd * sstep(0.28, 0.88, sn * 0.70 + 0.36) * (1.0 - 0.55 * sage);

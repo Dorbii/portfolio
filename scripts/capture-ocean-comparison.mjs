@@ -177,6 +177,13 @@ async function main() {
       `window.__oceanFrames = 0; (function tick(){ window.__oceanFrames++; requestAnimationFrame(tick); })(); true`);
     await delay(settle * 1000);
     const frames = await evaluate(connection, sessionId, `window.__oceanFrames`);
+    // --probe dumps the intermediate fields after the settle. Working out which
+    // driver is starved by looking at the rendered picture is guesswork; this
+    // reads the field the shader actually computed. Needs ?water.probe.
+    if (args.probe) {
+      console.log("PROBE " + await evaluate(connection, sessionId,
+        `JSON.stringify(window.__oceanProbe ? window.__oceanProbe() : null)`));
+    }
     const camera = await readCamera(connection, sessionId);
     // Fall back to the viewport when the water canvas is gone -- hiding L1
     // unmounts it, and that capture (the land alone) is exactly the one needed

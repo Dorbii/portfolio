@@ -578,6 +578,29 @@ def composite(meta):
     float sprayA = sA * sAllow;
     col = mix(col, sprayCol * mix(1.0, vig, uVigMix), sprayA);''',
             label='composite spray')
+    # The composite reads the material coordinate as an ABSOLUTE position, and
+    # live it is stored as an OFFSET. foam.frag and spray.frag were rewritten to
+    # store `mat - px` so half floats could hold five-figure world coordinates,
+    # and both reconstruct it on read -- but this file reads the same channels
+    # and nothing put px back.
+    #
+    # It is not a small error. laceField is the mechanism that makes foam
+    # filamentary rather than blobby, and it was being evaluated on a
+    # displacement of tens of tuned pixels, near-constant across the frame,
+    # instead of a world position of thousands. Measured against the offline
+    # renderer on the same coastline: whitewater coverage 1.38% against 9.25%,
+    # streak elongation 13.9 against 30.7 (a disc is 3.5), streak reach 64 tuned
+    # px against 272. Every injection, lifetime, threshold and drawing uniform
+    # swept against it saturated at the same 1.7%, because they were all
+    # multiplying a field with no structure left in it.
+    s = sub(s, '    vec4 F = texture(texFoam, uv);',
+            '    vec4 F = texture(texFoam, uv);\n'
+            '    F.ba += px;   // offset -> absolute; see the foam material write',
+            label='composite foam material read')
+    s = sub(s, '    vec4 S = texture(texSpray, uv);',
+            '    vec4 S = texture(texSpray, uv);\n'
+            '    S.ba += px;   // offset -> absolute; see the spray material write',
+            label='composite spray material read')
     s = sub(s, '    fragColor = vec4(clamp(col + dth, 0.0, 1.0), 1.0);',
             '''    // Coverage, not a plate: the land art is a DOM layer under this canvas and
     // must show through untouched. Spray is the one thing allowed onto it.

@@ -486,6 +486,24 @@ export class WaterSurfaceRenderer {
     }
     return out;
   })();
+  /**
+   * ?water.pixelRatio=<n> -- force the water's device-pixel ratio.
+   *
+   * Every drawn mark in this water is a width against uRes, and uRes is the
+   * BACKING STORE. So at ratio 2 a stroke tuned at four pixels is four device
+   * pixels, which is two CSS pixels, which is half the width the offline
+   * renderer draws it at -- and then the browser's downsample averages what is
+   * left against its darker neighbours. Measured at the capital camera: the
+   * water canvas carries 7.35% foam coverage and the page it lands in carries
+   * 1.38%, with only half the canvas's foam pixels still reading as foam.
+   */
+  private readonly pixelRatioOverride = (() => {
+    if (typeof window === "undefined") return null;
+    const raw = new URLSearchParams(window.location.search).get("water.pixelRatio");
+    if (raw === null) return null;
+    const value = Number(raw);
+    return Number.isFinite(value) && value > 0 ? value : null;
+  })();
   /** ?water.markScale=<0..1> -- how far drawn marks follow the water, not the screen. */
   private readonly markAnchor = (() => {
     if (typeof window === "undefined") return 0;
@@ -1229,7 +1247,7 @@ export class WaterSurfaceRenderer {
       Math.sqrt(SIM_MAX_PIXELS / (cssWidth * cssHeight)),
     );
 
-    this.pixelRatio = Math.max(0.5, capped);
+    this.pixelRatio = this.pixelRatioOverride ?? Math.max(0.5, capped);
     const width = Math.max(1, Math.round(cssWidth * this.pixelRatio));
     const height = Math.max(1, Math.round(cssHeight * this.pixelRatio));
 
