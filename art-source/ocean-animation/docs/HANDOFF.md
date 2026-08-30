@@ -604,6 +604,62 @@ tuned OPEN-WATER plate, which does not exist yet.
 
 ---
 
+## 1E. The tuned sea does not survive being stood back from
+
+The question behind two failed attempts at the wide shot -- a whitecap population
+and an open-wave floor -- was never asked directly: **does the tuned treatment,
+seen from the world camera, look like an ocean or like corduroy?** If it looks
+like an ocean the LoD fade is too aggressive; if it looks like corduroy the fade
+is right and the wide shot needs a different treatment, not a quieter one.
+
+`src/wide_target.py` answers it by construction rather than by opinion.
+`lfl_build.py` crops the world art and its authoritative mask to a camera and
+magnifies until one scene pixel is one TUNED pixel. Render that, downsample by
+the live camera's own `zc`, and the result is what the live layer would show at
+that camera **if it rendered at 1/zc supersampling** -- no fade, no port, no
+aliasing. Any difference from a live capture is the fade; any difference from a
+sea is the treatment.
+
+Built on 150x84 world px of the north coast, 80% open water, at
+`heavy_crashing_surf` -- the state the owner keeps comparing against:
+
+```
+python lfl_build.py wideopen 0.08971 0.4791 0.1594 heavy_crashing_surf
+python wide_target.py wideopen_heavy_crashing_surf 0.1061
+   1440x807 tuned px  ->  152x85 at zc 0.1061
+   open water   rgb (50, 91, 116)  luma 81.2 sd 37.35  bright>150  6.82%  orient 0.212
+   surf zone    rgb (91,128, 145)  luma 118.9 sd 55.42  bright>150 29.44%  orient 0.067
+```
+
+**It is corduroy.** Diagonal streaks across the whole open sea, orientation
+coherence 0.212 against 0.067 in the surf zone -- three times more directional in
+open water than where the waves are actually breaking, which is the signature
+exactly backwards from a real sea. And 6.8% of open-water pixels read bright,
+where Monahan puts whitecap coverage at 1-4% even at fifteen metres a second;
+those are drawn crest lines, not caps.
+
+So the answer is settled, and it is the second one:
+
+- **The LoD fade is correct.** Suppressing the swell at the wide shot is not an
+  over-correction, it is the only thing standing between the world map and the
+  picture above. The floor attempt reproduced this exactly, which is why it drew
+  a contour map.
+- **There is no dial setting that turns this treatment into a map ocean.** It is
+  a close-up treatment. Standing back from it does not simplify it; it turns its
+  crest strokes into a weave.
+- **The current wide shot -- flat blue mottle -- is closer to right than anything
+  tried since.** It is under-developed, not mis-developed, and what it is missing
+  is what the references list for that altitude: stirred structure rather than
+  isotropic mottle, whiteness at the physical 1-4% rather than 0.12%, and a
+  deeper less blue-dominant open-water palette (live sits at rgb (25, 84, 130)
+  against (50, 91, 116) here, and real deep sea is darker than both).
+
+The wide shot is therefore a SEPARATE TREATMENT sharing the same fields, not a
+level of detail of the close one, and the territory tier is the crossfade between
+two pictures rather than one picture with a dial on it.
+
+---
+
 ## 2. Running it
 
 ```bash
