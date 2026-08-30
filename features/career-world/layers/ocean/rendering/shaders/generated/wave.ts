@@ -9,6 +9,10 @@ precision highp sampler2D;
 // Screen pixels per tuned plate pixel. Declared ahead of everything because the
 // noise helpers below need it; see the field adapter for what it means.
 uniform float uZc;
+
+// The period the large-scale scroll fields close on, and the period the live
+// clock wraps at. A multiple of uLoop; see loopScroll.
+uniform float uScrollLoop;
 // Wave pass. Evaluates the Gerstner-style sum built on the eikonal phase fields
 // and emits surface geometry + the quantities the foam/spray passes need.
 in vec2 uv;
@@ -119,9 +123,29 @@ uniform float uBare;        // 1 = geometry only: no foam, no spray, no shallow 
 vec2 loopScroll(vec2 dir, float speed, float scale){
     // speed and scale are SCREEN px, matching the lookups above; the offset is
     // added to a tuned coordinate, so it converts back on the way out.
-    vec2 d = dir * (speed * uLoop);
+    //
+    // And the period is uScrollLoop, not uLoop. The travel has to land on a
+    // whole multiple of 'scale' or the field jumps when the clock wraps, and
+    // over ONE loop that lattice is coarser than the distance most of these
+    // fields were asked to cover: floor(d/scale + 0.5) returns zero for
+    // anything slower than half_ a tile per loop. Measured on the shipped
+    // constants, FIFTEEN of the eighteen large-scale fields -- the regional
+    // weather that decides where the sea is working, the breaking and swash
+    // patches, the glitter clustering, the calm field, the teal variation, the
+    // along-crest variation, both flow-noise fields -- travelled exactly no
+    // distance at all. The waves moved; the weather they move through was
+    // nailed to the world. At the wide shot, where the swell is deliberately
+    // faded out and that weather IS the picture, the sea did not move: measured
+    // 1.05 mean |dLuma| per half_ second against 29 at the two closer tiers.
+    //
+    // A longer scroll period makes the lattice fine enough to represent the
+    // speeds that were tuned. It costs nothing in seamlessness: every angular
+    // frequency is an exact multiple of 2pi/uLoop and therefore also of
+    // 2pi/(N*uLoop), so the clock can be wrapped on the longer period and the
+    // wave field is bit-for-bit as periodic as it was.
+    vec2 d = dir * (speed * uScrollLoop);
     vec2 q = floor(d / scale + 0.5) * scale;
-    return q * (uTime / uLoop) / uZc;
+    return q * (uTime / uScrollLoop) / uZc;
 }
 
 // ===========================================================================

@@ -148,9 +148,29 @@ def screen_anchor_noise(common):
     return q * (uTime / uLoop);""",
                """    // speed and scale are SCREEN px, matching the lookups above; the offset is
     // added to a tuned coordinate, so it converts back on the way out.
-    vec2 d = dir * (speed * uLoop);
+    //
+    // And the period is uScrollLoop, not uLoop. The travel has to land on a
+    // whole multiple of `scale` or the field jumps when the clock wraps, and
+    // over ONE loop that lattice is coarser than the distance most of these
+    // fields were asked to cover: floor(d/scale + 0.5) returns zero for
+    // anything slower than half a tile per loop. Measured on the shipped
+    // constants, FIFTEEN of the eighteen large-scale fields -- the regional
+    // weather that decides where the sea is working, the breaking and swash
+    // patches, the glitter clustering, the calm field, the teal variation, the
+    // along-crest variation, both flow-noise fields -- travelled exactly no
+    // distance at all. The waves moved; the weather they move through was
+    // nailed to the world. At the wide shot, where the swell is deliberately
+    // faded out and that weather IS the picture, the sea did not move: measured
+    // 1.05 mean |dLuma| per half second against 29 at the two closer tiers.
+    //
+    // A longer scroll period makes the lattice fine enough to represent the
+    // speeds that were tuned. It costs nothing in seamlessness: every angular
+    // frequency is an exact multiple of 2pi/uLoop and therefore also of
+    // 2pi/(N*uLoop), so the clock can be wrapped on the longer period and the
+    // wave field is bit-for-bit as periodic as it was.
+    vec2 d = dir * (speed * uScrollLoop);
     vec2 q = floor(d / scale + 0.5) * scale;
-    return q * (uTime / uLoop) / uZc;""", label='loopScroll units')
+    return q * (uTime / uScrollLoop) / uZc;""", label='loopScroll units')
 
 
 def raw(src, what):
@@ -391,6 +411,10 @@ precision highp sampler2D;
 // Screen pixels per tuned plate pixel. Declared ahead of everything because the
 // noise helpers below need it; see the field adapter for what it means.
 uniform float uZc;
+
+// The period the large-scale scroll fields close on, and the period the live
+// clock wraps at. A multiple of uLoop; see loopScroll.
+uniform float uScrollLoop;
 '''
 
 
@@ -617,7 +641,7 @@ ALIAS = {
     'composite': {'uShin': 'shininess', 'uSat': 'saturation'},
 }
 # Set by the renderer every frame, not by the preset table.
-RUNTIME = {'uRes', 'uTime', 'uLoop', 'uDt', 'uFirst', 'uG', 'uFlatOcean', 'uBare', 'uLightDirection',
+RUNTIME = {'uRes', 'uTime', 'uLoop', 'uScrollLoop', 'uDt', 'uFirst', 'uG', 'uFlatOcean', 'uBare', 'uLightDirection',
            'uOpenWaveVis',
            'uDirDeep', 'uDirSecond', 'uCamOrigin', 'uCamSpan', 'uPrevOrigin', 'uPrevSpan',
            'uZ', 'uZc', 'uOpacity',
@@ -633,6 +657,14 @@ PALETTE = {'cAbyss': 'abyss', 'cDeep': 'deep', 'cMid': 'mid', 'cShallow': 'shall
 PINNED = ('harmM', 'harmA', 'harmL', 'spread', 'groupScale', 'groupAcross',
           'setCycles', 'licSteps')
 ORDER = ('calm_swell', 'windy_rolling_surf', 'heavy_crashing_surf')
+
+# See loopScroll. Sixteen is the smallest power of two that lets every one of the
+# frozen fields travel at least one tile per period, and it keeps the slowest of
+# them -- the regional weather, 2.5 px/s intended -- within 50% of its tuned speed
+# instead of at zero. Larger costs clock precision for nothing: at 240 s the
+# fastest angular frequency reaches 1400 rad, where a float32 step is 1.2e-4 rad
+# against a phase quantisation of 1.5e-2.
+SCROLL_LOOPS = 16
 
 # ---------------------------------------------------------------------------
 # The camera conversion, in full. Everything is evaluated in tuned plate pixels
@@ -772,6 +804,15 @@ def preset_module(table):
         '// The loop period every angular frequency is quantised to. Kept from the',
         '// offline clip: it costs nothing here and preserves the exact tuned rates.',
         f'export const OCEAN_LOOP_SECONDS = {base["loop"]};',
+        '',
+        '// How many of those loops the large-scale scroll fields close on, and',
+        '// therefore what the clock wraps at. Every angular frequency is an exact',
+        '// multiple of 2*pi/loop and so also of 2*pi/(N*loop), which is what makes',
+        '// the longer wrap exactly as periodic for the wave field. See loopScroll:',
+        '// over a single loop the scroll lattice is coarser than the distances the',
+        '// weather fields were tuned to cover, and fifteen of the eighteen rounded',
+        '// to no motion at all.',
+        f'export const OCEAN_SCROLL_LOOPS = {SCROLL_LOOPS};',
         '',
         "// Primary direction and period are the baked solve's and cannot vary.",
         'export const OCEAN_FAMILIES = Object.freeze({',

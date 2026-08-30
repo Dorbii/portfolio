@@ -10,6 +10,7 @@ import { OCEAN_FIELD_ASSETS, OCEAN_FIELD_DIMENSIONS } from "../model/assets.ts";
 import {
   OCEAN_FAMILIES,
   OCEAN_LOOP_SECONDS,
+  OCEAN_SCROLL_LOOPS,
   OCEAN_PASS_STATES,
   OCEAN_PASS_UNIFORM_TYPES,
   OCEAN_SCREEN_TO_TUNED,
@@ -108,6 +109,13 @@ const SIM_MAX_PIXELS = 6_500_000;
  * eroded boundary all smear, which is most of what separated this from the
  * reference clip.
  */
+/**
+ * The period the clock wraps at: a whole number of wave loops, so the field is
+ * exactly as periodic as before, but long enough for the large-scale scroll
+ * fields to quantise onto their noise lattice instead of onto zero.
+ */
+const SCROLL_SECONDS = OCEAN_LOOP_SECONDS * OCEAN_SCROLL_LOOPS;
+
 const STATE_SCALE = 0.5;
 
 /** Wave-pass outputs, which are render targets one moment and inputs the next. */
@@ -552,7 +560,14 @@ export class WaterSurfaceRenderer {
     // whole wave field is loop-periodic and the clock can be wrapped rather than
     // left to grow. Left growing, cos(S - w*t) loses a usable fraction of a
     // radian after a few hours on the page.
-    const time = (elapsedSeconds * this.state.timeScale) % OCEAN_LOOP_SECONDS;
+    //
+    // Wrapped on SCROLL_LOOPS of them, not one. A multiple of an exact period is
+    // an exact period, so the waves do not notice -- but the large-scale scroll
+    // fields quantise their travel to the noise lattice over whatever period the
+    // clock closes on, and over a single loop that lattice rounded fifteen of
+    // the eighteen of them to no movement at all. See loopScroll in the
+    // generated shaders for the measurement.
+    const time = (elapsedSeconds * this.state.timeScale) % SCROLL_SECONDS;
     // The offline renderer takes two substeps per 24 fps frame. Here the clock
     // is whatever the browser gave us, clamped: a long stall must not advect
     // foam half a screen in one step.
@@ -1023,6 +1038,7 @@ export class WaterSurfaceRenderer {
     set2("uRes", size);
     set1("uTime", time);
     set1("uLoop", OCEAN_LOOP_SECONDS);
+    set1("uScrollLoop", SCROLL_SECONDS);
     set1("uG", TUNED_G);
     set1("uFlatOcean", 0);
     // Strips every drawn layer, leaving geometry and base colour: the ablation
@@ -1250,6 +1266,7 @@ export const RUNTIME_UNIFORMS = [
   "uOpenWaveVis",
   "uTime",
   "uLoop",
+  "uScrollLoop",
   "uDt",
   "uFirst",
   "uG",

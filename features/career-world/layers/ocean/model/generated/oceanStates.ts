@@ -16,6 +16,15 @@ export const OCEAN_BAKED_STATE = "windy_rolling_surf";
 // offline clip: it costs nothing here and preserves the exact tuned rates.
 export const OCEAN_LOOP_SECONDS = 15.0;
 
+// How many of those loops the large-scale scroll fields close on, and
+// therefore what the clock wraps at. Every angular frequency is an exact
+// multiple of 2*pi/loop and so also of 2*pi/(N*loop), which is what makes
+// the longer wrap exactly as periodic for the wave field. See loopScroll:
+// over a single loop the scroll lattice is coarser than the distances the
+// weather fields were tuned to cover, and fifteen of the eighteen rounded
+// to no motion at all.
+export const OCEAN_SCROLL_LOOPS = 16;
+
 // Primary direction and period are the baked solve's and cannot vary.
 export const OCEAN_FAMILIES = Object.freeze({
   primary: Object.freeze({ direction: Object.freeze([0.469, 0.883] as const), period: 2.36 }),
