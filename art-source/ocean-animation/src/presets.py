@@ -76,7 +76,7 @@ COMMON = dict(
     viewTilt=34.0, reliefLift=16.0,
     # Extra wave-scale tonal range in open water, where the shore-gated terms
     # do not reach. Targets the plate's own local contrast, not taste.
-    openRelief=6.4,
+    openRelief=1.21,
     # Small waves evaluated for SHADING ONLY -- outside the height field, so
     # outside the steepness cap and the RMS normalisation that bound it.
     detailLam=96.0, detailSpread=0.30, detailSharp=0.55, detailSlope=0.95,
@@ -175,7 +175,7 @@ PRESETS['calm_swell'] = dict(
     tauFresh=1.05, tauPersist=6.0,
     injBreak=15.3, injWhitecap=1.20, injShore=5.3,
     sprayLife=0.85, spraySpread=30.0, sprayInject=0.16, sprayGate=0.74, sprayGain=0.65,
-    specGain=0.15, sheen=0.030, crestGain=0.86, shadowGain=0.62, troughGain=0.74, transGain=0.42, swash=0.26,
+    specGain=0.15, sheen=0.030, crestGain=0.86, shadowGain=0.62, troughGain=0.962, transGain=0.42, swash=0.26,
     foamThrFresh=0.180, foamThrOld=0.61, exposure=0.97,
     palette=dict(abyss=hx('#0c2f44'), deep=hx('#16537e'), mid=hx('#27719f'),
                  shallow=hx('#2b7d90'), sky=hx('#7fb4cf'), foamThin=hx('#bccdd6'), foamBody=hx('#dfe9ed'),
@@ -235,13 +235,14 @@ PRESETS['heavy_crashing_surf'] = dict(
     # similar across the frame, so it combs the whole sea into parallel strokes
     # rather than growing the individual streaks longer. Wrong mechanism for this
     # deficit: it is not that our foam is insufficiently directional.
-    # faceLift 0.38 -> 0.95, openRelief 3.0 -> 6.4. Darkening the palette to the
-    # reference (126d491) fixed the troughs and left the lit faces where they
-    # were, so the sea went uniformly dark instead of gaining contrast. The
-    # reference runs p10 luma 19.7 against p90 137.0 -- a range of 117 -- because
-    # a wave there has a face in the light and a back in shadow. Ours had 68.
-    # This takes it to about 90: still short, and no longer flat.
-    streakGain=0.22, faceLift=0.95, chopGlint=0.24, licTone=0.0, licMix=0.0,
+    # faceLift 0.38 -> 0.55. The 0.95 this replaces, and the openRelief 6.4 below,
+    # were set to widen a tonal range that was never narrow: the reference's p10
+    # 19.7 against p90 137.0 was measured over its WHOLE frame, and a third of
+    # that frame is a cliff with trees on it. Masked to water, the reference runs
+    # p10 19.6 / p90 87.1, a range of 67.6 -- and ours was already 79.4, WIDER.
+    # We were never short of contrast. We are uniformly too bright: reference p50
+    # 38.0 against our 60.8.
+    streakGain=0.22, faceLift=0.55, chopGlint=0.24, licTone=0.0, licMix=0.0,
     foamDeep=17.0, foamDeepThr=1.4, foamVeil=0.26,
     stokes=4.2, backwash=1.9,
     tauFresh=1.30, tauPersist=5.5,
@@ -256,7 +257,7 @@ PRESETS['heavy_crashing_surf'] = dict(
     sprayLife=1.55, spraySpread=64.0, sprayInject=2.6, sprayGate=0.33, sprayGain=1.05,
     specGain=0.16, sheen=0.034, shadowGain=0.88, crestGain=0.66, troughGain=0.88, transGain=0.72, swash=0.52,
     foamThrFresh=0.154, foamThrOld=0.59, exposure=0.97,
-    # Darkened 75% of the way to the reference plate, hue preserved so the shore
+    # Darkened ALL the way to the reference plate, hue preserved so the shore
     # keeps its teal. Sampled on C5's water (664k px, foam excluded), the
     # reference runs p5 luma 16.8 / p35 30.2 / p85 71.9 -- its BRIGHTEST water is
     # about what our `deep` was, so the whole palette sat nearly two stops high:
@@ -264,8 +265,8 @@ PRESETS['heavy_crashing_surf'] = dict(
     # the reference the gap showed as p50 luma 78 against 49 and p10 51 against
     # 20, and no amount of troughGain or abyssMix could reach it -- swept to the
     # limit it stopped at p50 68.5, because the floor is the palette itself.
-    palette=dict(abyss=hx('#081f34'), deep=hx('#0e2f47'), mid=hx('#18425f'),
-                 shallow=hx('#18636d'), sky=hx('#74abc9'), foamThin=hx('#c0d1da'), foamBody=hx('#e4edf1'),
+    palette=dict(abyss=hx('#07192b'), deep=hx('#0b2436'), mid=hx('#123349'),
+                 shallow=hx('#165b65'), sky=hx('#74abc9'), foamThin=hx('#c0d1da'), foamBody=hx('#e4edf1'),
                  foamDense=hx('#f5fafa'), sun=hx('#fff4de')),
 )
 
