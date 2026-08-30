@@ -804,6 +804,9 @@ TUNED_TO_SCREEN = {
     # goes flat. Restoring the tuned radius at the close camera drops the base
     # body's high-frequency energy 39.3 -> 35.8 and visibly deepens it.
     'uShadeSmooth',
+    # How far along the crest a breaking event recruits. A distance along the
+    # WAVE, so it converts with the camera like every other one here.
+    'uInjCrestRun',
 }
 # A screen length CONSUMED AS A LOOKUP COORDINATE. These index noise fields or
 # march along them in `px`, which is tuned, so a screen width has to be converted

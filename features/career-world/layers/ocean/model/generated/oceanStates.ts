@@ -39,7 +39,7 @@ export const OCEAN_FAMILIES = Object.freeze({
 export const OCEAN_TUNED_PER_WORLD = 14.201886;
 
 // A tuned length consumed as a screen offset: multiply by uZc.
-export const OCEAN_TUNED_TO_SCREEN: ReadonlySet<string> = new Set(["uDiffuse", "uReliefLift", "uShadeSmooth", "uShadowStep"]);
+export const OCEAN_TUNED_TO_SCREEN: ReadonlySet<string> = new Set(["uDiffuse", "uInjCrestRun", "uReliefLift", "uShadeSmooth", "uShadowStep"]);
 
 // A screen length consumed as a lookup coordinate: divide by uZc.
 export const OCEAN_SCREEN_TO_TUNED: ReadonlySet<string> = new Set(["uLicNoise", "uLicScale", "uLicSpeed", "uLicStep", "uMarkCell", "uMarkLen", "uMarkWid"]);
@@ -152,8 +152,9 @@ const FOAM_CALM_SWELL: Readonly<Record<string, OceanUniformValue>> = Object.free
   uInjBreak: 15.3,
   uInjCrestBoost: 9.0,
   uInjCrestLevel: 0.35,
+  uInjCrestRun: 26.0,
   uInjCrestW: 5.0,
-  uInjFilament: 0.0,
+  uInjFilament: 0.7,
   uInjShore: 5.3,
   uInjWhitecap: 1.2,
   uRelax: 4.5,
@@ -168,8 +169,9 @@ const FOAM_WINDY_ROLLING_SURF: Readonly<Record<string, OceanUniformValue>> = Obj
   uInjBreak: 20.4,
   uInjCrestBoost: 9.0,
   uInjCrestLevel: 0.35,
+  uInjCrestRun: 26.0,
   uInjCrestW: 5.0,
-  uInjFilament: 0.0,
+  uInjFilament: 0.7,
   uInjShore: 7.8,
   uInjWhitecap: 1.6,
   uRelax: 4.5,
@@ -184,10 +186,11 @@ const FOAM_HEAVY_CRASHING_SURF: Readonly<Record<string, OceanUniformValue>> = Ob
   uInjBreak: 52.0,
   uInjCrestBoost: 9.0,
   uInjCrestLevel: 0.35,
+  uInjCrestRun: 26.0,
   uInjCrestW: 5.0,
-  uInjFilament: 0.0,
+  uInjFilament: 0.7,
   uInjShore: 15.3,
-  uInjWhitecap: 2.8,
+  uInjWhitecap: 1.55,
   uRelax: 4.5,
   uTauFresh: 1.3,
   uTauPersist: 5.5,
@@ -658,6 +661,7 @@ export const OCEAN_PASS_UNIFORM_TYPES: Readonly<Record<OceanPassName, Readonly<R
     uInjBreak: "float",
     uInjCrestBoost: "float",
     uInjCrestLevel: "float",
+    uInjCrestRun: "float",
     uInjCrestW: "float",
     uInjFilament: "float",
     uInjShore: "float",

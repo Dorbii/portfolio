@@ -149,7 +149,7 @@ COMMON = dict(
     # moves toward the plate (0.919 -> 0.819 against 0.788) with coverage landing
     # on it, but neighbour coherence dips (0.281 -> 0.258) and it reads noisier.
     # Left off; the machinery stays for a later pass.
-    injFilament=0.0, injCrestW=5.0, injCrestLevel=0.35, injCrestBoost=9.0,
+    injFilament=0.70, injCrestRun=26.0, injCrestW=5.0, injCrestLevel=0.35, injCrestBoost=9.0,
 )
 
 PRESETS = {}
@@ -239,7 +239,7 @@ PRESETS['heavy_crashing_surf'] = dict(
     foamDeep=17.0, foamDeepThr=1.4, foamVeil=0.26,
     stokes=4.2, backwash=1.9,
     tauFresh=1.30, tauPersist=5.5,
-    injBreak=52.0, injWhitecap=2.80, injShore=15.3,
+    injBreak=52.0, injWhitecap=1.55, injShore=15.3,
     sprayLife=1.55, spraySpread=64.0, sprayInject=2.6, sprayGate=0.33, sprayGain=1.05,
     specGain=0.16, sheen=0.034, shadowGain=0.88, crestGain=0.66, troughGain=0.88, transGain=0.72, swash=0.52,
     foamThrFresh=0.154, foamThrOld=0.59, exposure=0.97,

@@ -434,7 +434,7 @@ uniform float uRelax;        // seconds for material coords to relax back
 uniform float uDiffuse;
 uniform float uFoamBlend;   // per-step weight of the diffused neighbourhood
 uniform float uFoamDeepFade; // how hard offshore whitecap injection is cut
-uniform float uInjFilament, uInjCrestW, uInjCrestLevel, uInjCrestBoost;
+uniform float uInjFilament, uInjCrestW, uInjCrestLevel, uInjCrestBoost, uInjCrestRun;
 uniform float uFirst;        // 1.0 on the very first step
 
 void main()
@@ -514,6 +514,34 @@ void main()
     float hPath = texture(texPath, uv).x;
     float crestLine = contourLine(hPath, uInjCrestLevel, uInjCrestW);
     float lineGate = mix(1.0, crestLine * uInjCrestBoost, uInjFilament);
+    // A long_ line times a granular field is a row of dots.
+    //
+    // crestLine is a clean smooth contour of hPath -- one cosine -- and running
+    // it into 'breaking * uInjBreak + whitecap * uInjWhitecap' undid that
+    // immediately: whitecap is sparse and granular (mean 0.04, above 0.1 on 7.8%
+    // of pixels), so foam was BORN as dots sitting on a line rather than as the
+    // line. Nothing downstream can recover a run from that, which is why longer
+    // persistence, faster advection and the filament gate itself each moved
+    // measured streak reach by only a few tuned px against a reference at 134.8.
+    //
+    // A wave does not break at a point. It breaks along a stretch of its crest,
+    // and every part of that stretch makes foam. So let a trigger recruit along
+    // the crest TANGENT: take the strongest breaking within uInjCrestRun either
+    // way along the crest, and the run injects as a run. Across the tangent
+    // nothing is widened, so the filament stays as thin as the contour draws it.
+    vec2 tang = normalize(vec2(-uDirDeep.y, uDirDeep.x));
+    float wcRun = whitecap, brRun = breaking;
+    for (int i = 1; i <= 5; ++i) {
+        vec2 o = tang * (uInjCrestRun * float(i) / 5.0) / uRes;
+        vec4 fA = texture(texFlow, uv + o), fB = texture(texFlow, uv - o);
+        wcRun = max(wcRun, max(fA.w, fB.w));
+        brRun = max(brRun, max(texture(texGeom, uv + o).w, texture(texGeom, uv - o).w));
+    }
+    // Only where the stroke is actually being drawn: off the crest contour this_
+    // would smear breaking across open water.
+    float alongRun = mix(1.0, crestLine, uInjFilament);
+    breaking = mix(breaking, max(breaking, brRun), alongRun);
+    whitecap = mix(whitecap, max(whitecap, wcRun), alongRun);
     float inj = (breaking * uInjBreak + whitecap * uInjWhitecap * deepFade) * lineGate
               + shoreZone * uInjShore * (0.22 + 0.78 * clamp(hn, 0.0, 1.0)) * (0.30 + 0.70 * breaking);
     inj *= water;
