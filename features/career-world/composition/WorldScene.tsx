@@ -733,6 +733,13 @@ export function WorldScene({
       tabIndex={0}
     >
       <WorldBackdrop light={WORLD_LIGHT} />
+      {terrainAuthorityVisible ? (
+        <TerritoryLandform
+          camera={camera}
+          detailState={detailState}
+          suppressDetailedStreaming={ninjaOneEnvironmentOwnsCamera}
+        />
+      ) : null}
       {oceanAuthorityVisible ? (
         <WaterSurfaceCanvas
           active={isPageVisible && oceanMotionVisible}
@@ -742,13 +749,6 @@ export function WorldScene({
           light={WORLD_LIGHT}
           onRenderStateChange={setRenderState}
           tuning={oceanWaterTuning}
-        />
-      ) : null}
-      {terrainAuthorityVisible ? (
-        <TerritoryLandform
-          camera={camera}
-          detailState={detailState}
-          suppressDetailedStreaming={ninjaOneEnvironmentOwnsCamera}
         />
       ) : null}
       {showNinjaOneInlandWater && inlandWaterAuthorityVisible ? (
