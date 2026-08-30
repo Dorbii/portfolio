@@ -639,9 +639,29 @@ uniform vec2 uPrevOrigin, uPrevSpan;
 // -- the velocity is tuned px/s, which is a world velocity -- then land in the
 // previous frame's viewport. Exact for a 2-D pan/zoom, and the identity when the
 // camera is still.
+//
+// The y flip is the whole of it. worldUvOf writes
+//     wuv = origin + vec2(s.x, 1 - s.y) * span
+// because screen uv counts up from the bottom and the world fields are image
+// space, top row first. Inverting it therefore has to put the flip back, and for
+// a long time this did not: it undid the origin and the span and returned
+// (s.x, 1 - s.y), so every stateful pass read its own history from the
+// VERTICALLY MIRRORED pixel. With the camera still and the flow zero -- the case
+// the comment above calls the identity -- texPrev was sampled at (uv.x, 1-uv.y).
+//
+// Foam accumulates; that is the whole mechanism. Reading the accumulator upside
+// down means foam at the top of the screen builds from foam at the bottom, so it
+// cannot build coherently anywhere except across the middle. Measured against
+// the offline renderer on the same coastline: whitewater coverage 1.38% against
+// 9.25%, streak reach 64 tuned px against 272, and the spray buffer flat zero
+// everywhere because it uses this same helper. It also explains why every
+// injection, lifetime, threshold and offshore-suppression uniform swept against
+// the deficit moved it by nothing: the rate does not matter when the integrator
+// is reading the wrong pixel.
 vec2 reprojectBack(vec2 s, vec2 vel, float dt) {
     vec2 wuv = worldUvOf(s) - vel * dt / TUNED_SIZE;
-    return (wuv - uPrevOrigin) / uPrevSpan;
+    vec2 b = (wuv - uPrevOrigin) / uPrevSpan;
+    return vec2(b.x, 1.0 - b.y);
 }
 float insideView(vec2 b) {
     vec2 g = step(vec2(0.0), b) * step(b, vec2(1.0));

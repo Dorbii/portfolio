@@ -13,7 +13,25 @@ from PIL import Image
 
 SRC = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(SRC)
-TPW = 9.602985
+# Read from the world the live layer is actually running, not written down here.
+# This was a literal 9.602985 -- correct while the world was baked from
+# windy_rolling_surf, and wrong by a factor of 1.48 the moment it was re-baked
+# from heavy_crashing_surf, because tuned pixels per world pixel is a function of
+# the BAKED STATE's primary period. Every offline-vs-live comparison built after
+# that re-bake was therefore between two different scales of sea, which is not a
+# comparison at all. Same shape of defect as encode_world taking lambdaWorld from
+# its own environment: one number, two homes, and no way to notice.
+def _tuned_per_world():
+    meta = os.path.join(ROOT, 'scenes',
+                        os.environ.get('OCEAN_WORLD_SCENE', 'world'),
+                        'baked', 'bake.json')
+    import json
+    with open(meta, encoding='utf-8') as fh:
+        bake = json.load(fh)
+    return (130.0 * bake['primaryPeriod'] ** 2 / (2.0 * np.pi)) / bake['lambdaWorld']
+
+
+TPW = _tuned_per_world()
 W, H = 1672, 941
 
 if os.environ.get('LFLB') == '1':
