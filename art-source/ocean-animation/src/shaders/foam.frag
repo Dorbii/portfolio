@@ -16,6 +16,7 @@ uniform float uDiffuse;
 uniform float uFoamBlend;   // per-step weight of the diffused neighbourhood
 uniform float uFoamDeepFade; // how hard offshore whitecap injection is cut
 uniform float uInjFilament, uInjCrestW, uInjCrestLevel, uInjCrestBoost, uInjCrestRun;
+uniform float uInjPatch, uInjPatchScale;
 uniform float uFirst;        // 1.0 on the very first step
 
 void main()
@@ -109,6 +110,30 @@ void main()
     // the crest TANGENT: take the strongest breaking within uInjCrestRun either
     // way along the crest, and the run injects as a run. Across the tangent
     // nothing is widened, so the filament stays as thin as the contour draws it.
+    // Whitecapping is PATCHY, and this is what makes a sea read as a textile
+    // when it is not. A real crest does not break evenly along its whole length:
+    // most of it is unbroken water and a few stretches of it are white, and which
+    // stretches those are changes from crest to crest. Every band here broke the
+    // same amount for its whole run, edge to edge, at one spacing -- which is a
+    // weave.
+    //
+    // The composite already draws its stroke through exactly this idea
+    // (alongVary: "waxing and waning ALONG the crest, so a run reads as separate
+    // strokes of different lengths rather than one unbroken rule across the
+    // frame"). The injection had no equivalent, so the FOAM -- which is most of
+    // what the eye reads out here -- was uniform even where the stroke was not.
+    //
+    // Two scales, because one gives a single blotch size. formEnv carries the
+    // wave-group envelope, so a crest in a weak group breaks less than one in a
+    // strong group, and the noise scrolls with the swell so a patch belongs to
+    // the water rather than to the screen.
+    float formEnv = texture(texPath, uv).y;
+    float patchN = noiseAt(px + loopScroll(uDirDeep, 6.0, uInjPatchScale), uInjPatchScale) * 0.62
+                 + noiseAt(px * 1.7 + loopScroll(uDirDeep, 9.0, uInjPatchScale * 0.38) + 91.0,
+                           uInjPatchScale * 0.38) * 0.38;
+    float patch = smoothstep(uInjPatch, uInjPatch + 0.30, formEnv * (0.40 + 0.90 * patchN));
+    patch = mix(1.0, patch, uInjFilament);
+
     vec2 tang = normalize(vec2(-uDirDeep.y, uDirDeep.x));
     float wcRun = whitecap, brRun = breaking;
     for (int i = 1; i <= 5; ++i) {
@@ -122,7 +147,7 @@ void main()
     float alongRun = mix(1.0, crestLine, uInjFilament);
     breaking = mix(breaking, max(breaking, brRun), alongRun);
     whitecap = mix(whitecap, max(whitecap, wcRun), alongRun);
-    float inj = (breaking * uInjBreak + whitecap * uInjWhitecap * deepFade) * lineGate
+    float inj = (breaking * uInjBreak + whitecap * uInjWhitecap * deepFade) * lineGate * patch
               + shoreZone * uInjShore * (0.22 + 0.78 * clamp(hn, 0.0, 1.0)) * (0.30 + 0.70 * breaking);
     inj *= water;
 

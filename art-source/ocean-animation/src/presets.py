@@ -149,7 +149,7 @@ COMMON = dict(
     # moves toward the plate (0.919 -> 0.819 against 0.788) with coverage landing
     # on it, but neighbour coherence dips (0.281 -> 0.258) and it reads noisier.
     # Left off; the machinery stays for a later pass.
-    injFilament=0.70, injCrestRun=26.0, injCrestW=5.0, injCrestLevel=0.35, injCrestBoost=9.0,
+    injFilament=0.70, injCrestRun=26.0, injPatch=0.50, injPatchScale=420.0, injCrestW=5.0, injCrestLevel=0.35, injCrestBoost=9.0,
 )
 
 PRESETS = {}
@@ -246,14 +246,16 @@ PRESETS['heavy_crashing_surf'] = dict(
     foamDeep=17.0, foamDeepThr=1.4, foamVeil=0.26,
     stokes=4.2, backwash=1.9,
     tauFresh=1.30, tauPersist=5.5,
-    # Injection down 6.5x from injBreak 52 / injWhitecap 10.0 / injShore 15.3.
+    # Injection down 3x from injBreak 52 / injWhitecap 10.0 / injShore 15.3, and
+    # back up 2.2x from the 6.5x cut once injPatch started throwing most of it
+    # away -- what survives has to be strong enough to read.
     # Recruiting along the crest injects far more foam than gating at a point,
     # and left at the old rates it put SEVEN times the reference plate's foam on
     # the water: measured against C5 at matched tuned-pixel density, coverage
     # 7.35% against 1.84%. That is what read as a busy granular field. At these
     # rates coverage is 1.96% and the shape numbers land with it -- elongation
     # 12.73 against 12.41, fragments per 1k px 13.23 against 14.26.
-    injBreak=8.0, injWhitecap=0.24, injShore=2.35,
+    injBreak=17.6, injWhitecap=0.53, injShore=5.17,
     sprayLife=1.55, spraySpread=64.0, sprayInject=2.6, sprayGate=0.33, sprayGain=1.05,
     specGain=0.16, sheen=0.034, shadowGain=0.88, crestGain=0.66, troughGain=1.144, transGain=0.72, swash=0.52,
     foamThrFresh=0.154, foamThrOld=0.59, exposure=0.97,
