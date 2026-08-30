@@ -116,6 +116,30 @@ const SIM_MAX_PIXELS = 6_500_000;
  */
 const SCROLL_SECONDS = OCEAN_LOOP_SECONDS * OCEAN_SCROLL_LOOPS;
 
+/**
+ * Degrees off nadir that the world's own art is drawn at, where anything is
+ * drawn obliquely at all.
+ *
+ * This is not a number about water. It is the projection the rest of the world
+ * declares, and the water has to be lit for the same camera or its highlights
+ * land on facets no other layer believes in:
+ *
+ *   terrain-relief-r6.json      "projection": "orthographic-plan"       (nadir)
+ *   world-land-layout-r1.json   "projection": "orthographic-plan"       (nadir)
+ *   capital-structures-r1.json  "orthographic-high-oblique", pitch 72   (18 off nadir)
+ *   project/skill-structures    the same 72
+ *
+ * So the GROUND is plan view everywhere and the things STANDING on it are drawn
+ * 18 degrees off vertical, from the territory tier down. The water was using 34
+ * at every zoom -- measured off the offline plate, which is its own scene with
+ * its own camera, and then applied to a map. That is wrong by 34 degrees at the
+ * world tier, where the ground is flat-on, and by 16 at the capital, where the
+ * buildings standing in the water disagree with the water.
+ *
+ * tests/architecture.test.mjs holds this against the manifest.
+ */
+const LAND_ART_OBLIQUE_DEGREES = 18;
+
 const STATE_SCALE = 0.5;
 
 /** Wave-pass outputs, which are render targets one moment and inputs the next. */
@@ -387,6 +411,21 @@ export class WaterSurfaceRenderer {
    * while, which is why it survived a short capture and why the flag is kept.
    */
   private readonly matHalf = hasWaterFlag("mat16");
+  /**
+   * ?water.openWave=<0..1> -- force the open-water wave visibility.
+   *
+   * The one LoD lever that decides whether the wide shot has waves in it at all,
+   * separated from ?water.raw so it can be asked on its own. raw opens the crest
+   * stroke gates too, and those are measured to make the ribbing WORSE, so it
+   * cannot answer this question.
+   */
+  private readonly openWaveOverride = (() => {
+    if (typeof window === "undefined") return null;
+    const raw = new URLSearchParams(window.location.search).get("water.openWave");
+    if (raw === null) return null;
+    const value = Number(raw);
+    return Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : null;
+  })();
   /** ?water.markScale=<0..1> -- how far drawn marks follow the water, not the screen. */
   private readonly markAnchor = (() => {
     if (typeof window === "undefined") return 0;
@@ -879,8 +918,53 @@ export class WaterSurfaceRenderer {
     // tonal structure the whole treatment is built on. With the world baked at
     // twelve pixels a swell that puts the wide shot below the floor and the
     // territory approach across the ramp, which is where detail should arrive.
+    // How far the picture has turned from the map toward the scene.
+    //
+    // The tiers are not a smooth zoom through one projection: the world and the
+    // territory are drawn plan, and the oblique art -- structures, town fabric,
+    // the city canon -- arrives from the territory tier down. So the water's
+    // view vector walks the same path, nadir at the world and the land art's own
+    // 18 degrees by the capital, using the tier ramps every other layer reads
+    // rather than a second opinion derived from the span.
+    //
+    // liftPx = uReliefLift * sin(vt) rides on this too, which is the other half
+    // of the same mistake: crests were standing up-screen on a map that has no
+    // up-screen.
+    const detail = this.detailState;
+    const oblique = detail
+      ? Math.min(1, (detail.worldToTerritory + detail.territoryToCapital) * 0.5)
+      : 1;
+    // The preset is an ANGLE and the table below is a gain, so convert through
+    // the tuned value rather than assuming it: if the offline scene is ever
+    // re-measured, this follows it instead of silently meaning something else.
+    const tunedTilt = Math.max(1e-3, weatherLerp(
+      OCEAN_PASS_STATES.composite,
+      "uViewTilt",
+      this.state.weather,
+      0,
+    ));
+    const viewTilt = (LAND_ART_OBLIQUE_DEGREES * oblique) / tunedTilt;
     const waveDetail = smoothstep(20, 45, lamP);
-    this.openWaveVis = this.rawMode ? 1 : waveDetail;
+    // TRIED AND REVERTED. The wide shot's sea IS too plain -- measured against
+    // the tuned plate downsampled to this camera's own pixel density, luma sd
+    // 18.3 against 38.4 and 0.12% of pixels bright against 6.6% -- and putting
+    // the wave field back with a floor of 0.5 closes about half of both (28.9
+    // and 3.0%). It also draws, unmistakably, a contour map: long continuous
+    // arcs of white dashes running the length of the ocean and refracting round
+    // every headland. The numbers moved toward the target and the picture moved
+    // away from it.
+    //
+    // The mechanism is a coupling this file did not have: openWaveVis scales the
+    // height field, the height field sets `whitecap`, and `whitecap` is one of
+    // the terms in the composite's lineGate. So restoring the swell restores the
+    // CREST STROKES as well, through a path that has nothing to do with
+    // uCrestLineFloor, which was still zero throughout. Anything that lifts this
+    // scalar at the wide shot has to break that link first.
+    //
+    // The gap is real and is still open. It is not a missing wave field; it is
+    // that what remains when the waves go is colour and mottle, and neither of
+    // those is white. ?water.openWave sweeps it for the next attempt.
+    this.openWaveVis = this.openWaveOverride ?? (this.rawMode ? 1 : waveDetail);
     // The detail-wave family is a separate, shorter train drawn for shading
     // only, so it needs its own answer to the same question.
     const detailWave = smoothstep(
@@ -927,6 +1011,7 @@ export class WaterSurfaceRenderer {
       // carries, which decides where the sea is working and where it is glassy.
       // At close range it is a whisper under everything else; out here it is the
       // only thing between a dark ocean and a flat fill, so it is worth more.
+      uViewTilt: viewTilt,
       uRegionTone: 1 + 1.4 * wideShot,
       uAmpS: smoothstep(4, 8, lamS),
       uAmpC: smoothstep(4, 8, lamC),
@@ -952,18 +1037,16 @@ export class WaterSurfaceRenderer {
       uDetailTrough: detailWave,
       uCrestGain: line,
       uCrestLineFloor: line * boldCrest,
-      // NOT boldCrest. The floor above is an unconditional stroke down every
-      // crest, so it is exactly the corrugation boldCrest exists to hold back.
-      // The cross train is the opposite term: a second contour at a different
-      // angle and wavelength whose whole purpose, per the shader that draws it,
-      // is to make the spacing of the strokes irregular -- two regular grids
-      // interleave irregularly, one regular grid is corduroy. Gating it on the
-      // same scalar switched the fix off wherever the symptom appears, and the
-      // symptom is what Steve keeps seeing: below a hundred screen pixels a
-      // wave, which is the whole world and territory range, the sea was drawn
-      // with one train and read as parallel diagonal ribbing. `line` alone is
-      // the honest question here -- is there room across a wave for the stroke.
-      uCrossTrain: line,
+      // Gated on boldCrest, like the floor above, and the argument for taking it
+      // off was better than the measurement. It IS the anti-corduroy term -- two
+      // regular grids at different angles interleave irregularly where one is
+      // ribbing -- but ungating it bought 7% of the orientation coherence
+      // (0.159 -> 0.148) and put a SECOND family of drawn arcs across the middle
+      // of the zoom range, where `line` is partly on and the strokes are already
+      // the thing that reads as woven. Two stroke families at 12 to 25 pixels a
+      // wave is not less regular than one; it is twice as much drawing on a
+      // wave the picture cannot carry either way.
+      uCrossTrain: line * boldCrest,
       uLaceLineGain: line,
       uWispGain: line,
       uStreakGain: line,

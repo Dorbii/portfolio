@@ -27,7 +27,7 @@ test("composition and environment registries expose unique ordered layer contrac
   assert.ok(CAREER_WORLD_LAYER_ORDER.includes("ocean"));
   assert.ok(CAREER_WORLD_LAYER_ORDER.includes("terrain"));
   assert.equal(CAREER_WORLD_LAYER_ORDER.includes("environment"), false);
-  assert.equal(ENVIRONMENT_LAYER_DEFINITIONS.length, 20);
+  assert.equal(ENVIRONMENT_LAYER_DEFINITIONS.length, 21);
   assert.equal(
     ENVIRONMENT_LAYER_DEFINITIONS.some(({ id }) => id === "L3_3"),
     false,
@@ -186,6 +186,35 @@ test("one backdrop-owned light contract drives static and rendered layers", asyn
   assert.match(renderer, /setLight\(light: WorldLight\)/);
   assert.doesNotMatch(renderer, /WORLD_LIGHT/);
   assert.doesNotMatch(renderer, /\[-0\.42,\s*-0\.36,\s*0\.83\]/);
+});
+
+test("water is lit for the projection the world's own art declares", async () => {
+  const structures = await readJson(
+    "public/career-world/layers/structures/manifests/capital-structures-r1.json",
+  );
+  const relief = await readJson(
+    "public/career-world/layers/terrain/authority/manifests/terrain-relief-r6.json",
+  );
+  const renderer = await readFile(
+    path.join(featureLayers, "ocean", "rendering", "WaterSurfaceRenderer.ts"),
+    "utf8",
+  );
+
+  // The ground is plan view and the things standing on it are high oblique.
+  // Both halves matter: a water surface lit for one camera beside land drawn for
+  // another puts its highlights on facets no other layer believes in, and that
+  // is what a flat-looking sea IS.
+  assert.equal(relief.projection, "orthographic-plan");
+  assert.equal(structures.projection.type, "orthographic-high-oblique");
+  const offNadir = 90 - structures.projection.pitchDegreesFromHorizontal;
+  const declared = renderer.match(/const LAND_ART_OBLIQUE_DEGREES = (\d+(?:\.\d+)?);/);
+  assert.ok(declared, "the ocean renderer must name the land art's oblique angle");
+  assert.equal(Number(declared[1]), offNadir);
+
+  // And it must be a RAMP off the shared tier state, not a constant: nadir where
+  // the ground is plan, the land art's own angle where the oblique art is.
+  assert.match(renderer, /uViewTilt: viewTilt,/);
+  assert.match(renderer, /detail\.worldToTerritory \+ detail\.territoryToCapital/);
 });
 
 test("composition resolves semantic zoom once and passes it downward", async () => {
@@ -543,7 +572,7 @@ test("capital-detail land streaming follows the centralized LOD contract", async
   );
 });
 
-test("water zoom adds detail without suppressing world swell or bathymetry", async () => {
+test("water zoom preserves the coast path while the open field owns its detail", async () => {
   const openWater = await readFile(
     path.join(
       featureLayers,
@@ -575,7 +604,7 @@ test("water zoom adds detail without suppressing world swell or bathymetry", asy
     "utf8",
   );
 
-  assert.doesNotMatch(openWater, /u_siteLod/);
+  assert.match(openWater, /u_siteLod/);
   assert.match(coast, /u_siteLod/);
   assert.match(coast, /siteSwash/);
   assert.match(coast, /recedingBand/);
@@ -608,10 +637,6 @@ test("water zoom adds detail without suppressing world swell or bathymetry", asy
     "utf8",
   );
 
-  assert.match(
-    assets,
-    /directionalAlbedo:[\s\S]*DIRECTIONAL_ALBEDO/,
-  );
   assert.match(assets, /WATER_DETAIL_CONTRACT/);
   assert.match(
     assets,
@@ -641,63 +666,8 @@ test("water zoom adds detail without suppressing world swell or bathymetry", asy
   assert.match(landAssets, /terrain-relief-r6\.png/);
   assert.match(landAssets, /terrain-relief-r6-detail-4x\.png/);
   assert.match(landAssets, /terrain-contours-r4-detail-4x\.png/);
-  assert.match(openWater, /u_directionalAlbedo/);
-  assert.match(
-    openWater,
-    /microCoordinate\s*=\s*bodyUv\s*\*\s*u_microFrequency\s*\*\s*u_waveDensity/,
-  );
-  assert.match(
-    openWater,
-    /macroCoordinate\s*=\s*bodyUv\s*\*\s*vec2\(1\.72,\s*1\.34\)/,
-  );
-  assert.doesNotMatch(openWater, /u_territoryCoverage|territoryFrequency/);
-  assert.doesNotMatch(openWater, /\/\s*max\(viewSpan/);
-  assert.match(
-    openWater,
-    /texture\(\s*u_directionalAlbedo,\s*authoredUv,\s*-0\.35\s*\)/,
-  );
-  assert.match(
-    openWater,
-    /directionalFine[\s\S]*directionalBroad[\s\S]*directionalContrast/,
-  );
-  assert.match(
-    openWater,
-    /territoryLineDetail\s*=[\s\S]*territoryMix[\s\S]*u_detailScale/,
-  );
-  assert.match(
-    openWater,
-    /microGradient[\s\S]*u_territoryNormalStrength[\s\S]*territoryMix/,
-  );
-  assert.doesNotMatch(openWater, /transformWaterCoordinate\(/);
+  assert.doesNotMatch(openWater, /territoryLineDetail|directionalContrast|sampleChopBand|sampleWaveBand/);
   assert.doesNotMatch(openWater, /hydrology|basinRipple|lakeRipple|u_basinTextureOrigin/i);
-  assert.equal(
-    (openWater.match(/waveField \+= sampleWaveBand\(/g) ?? []).length,
-    3,
-    "three analytic bands should own swell height, slope, and crest trail",
-  );
-  assert.equal(
-    (openWater.match(/(?:float )?chopHeight (?:=|\+=) sampleChopBand\(/g) ?? []).length,
-    2,
-    "two height-only bands should add irregular chop without extra slope work",
-  );
-  assert.match(openWater, /float laggedSine/);
-  assert.match(openWater, /direction \* amplitude \* spatialFrequency/);
-  assert.match(openWater, /waveField\.w \* u_waveStrength/);
-  assert.match(openWater, /max\(0\.0, laggedCrest - crest \* 0\.46\)/);
-  assert.doesNotMatch(
-    openWater,
-    /sampleWaterBodyAtTime|rippleCenter|rippleFrequency|radialWave|lakeWave/,
-  );
-  assert.match(openWater, /openFoam/);
-  assert.match(openWater, /palette,\s*authored,\s*0\.7/);
-  assert.doesNotMatch(
-    openWater,
-    /semanticFrequency|territoryArtB/,
-  );
-  assert.doesNotMatch(
-    openWater,
-    /displacement\s*\*=\s*mix\(\s*1\.0,\s*viewSpan/,
-  );
   assert.match(coast, /coastProfileGradient/);
   assert.match(coast, /u_coastMaterialTexel/);
   assert.match(coast, /bathymetryLight/);
@@ -715,14 +685,7 @@ test("water zoom adds detail without suppressing world swell or bathymetry", asy
     1,
     "the ocean renderer should issue one fullscreen draw",
   );
-  assert.match(
-    renderer,
-    /createTexture\(this\.gl,\s*directionalAlbedo,\s*"clamp"\)/,
-  );
-  assert.match(
-    renderer,
-    /this\.textures\.directionalAlbedo\s*!==\s*undefined/,
-  );
+  assert.doesNotMatch(renderer, /directionalAlbedo/);
   assert.match(
     renderer,
     /DETAIL_POLICY\.renderScale\.maximumAnimatedWaterDevicePixelRatio/,

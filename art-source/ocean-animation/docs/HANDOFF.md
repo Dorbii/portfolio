@@ -531,6 +531,79 @@ train more than seven directions. The scale-resolved deficit is unchanged from
 
 ---
 
+## 1D. The projection, and what an ocean actually looks like from a map
+
+The owner, looking at the world tier: *"This view doesnt seem to be 2.5D this
+high up so just a birds eye view i guess?"* He is right, and the world's own
+manifests say so:
+
+| Layer | Manifest | Projection |
+|---|---|---|
+| Terrain relief | `terrain-relief-r6.json` | `orthographic-plan` — nadir |
+| World land layout | `world-land-layout-r1.json` | `orthographic-plan` — nadir |
+| Structures (capital / project / skill) | `capital-structures-r1.json` and siblings | `orthographic-high-oblique`, `pitchDegreesFromHorizontal: 72` = **18 off nadir** |
+| Town fabric | `town-fabric-r1.json` | `high-oblique-orthographic` |
+| **Water** | `oceanStates.ts` | **`uViewTilt` 34 off nadir, at every zoom** |
+
+So the GROUND is plan view everywhere, and the things STANDING on it are drawn
+eighteen degrees off vertical from the territory tier down. The water was lit for
+thirty-four at every camera -- measured off the offline plate, which is its own
+scene with its own camera, and then applied to a map. Wrong by 34 degrees at the
+world tier and by 16 at the capital, where buildings standing in the water
+disagree with the water they stand in.
+
+`composite.frag` argues the case against itself: *"This is a 2.5D view, not a
+plan view... A straight-down view vector puts every highlight on the wrong
+facets."* True at the capital. At the world tier it is the exact inverse of the
+truth, and `liftPx = uReliefLift * sin(vt)` rides on the same number -- crests
+were standing up-screen on a map that has no up-screen.
+
+`uViewTilt` now walks the tier ramps every other layer already reads
+(`worldToTerritory`, `territoryToCapital`): nadir at the world, the land art's
+own 18 by the capital. `tests/architecture.test.mjs` holds the constant against
+`capital-structures-r1.json` so the two cannot drift.
+
+### What the references say is visible at world zoom
+
+Researched because two attempts to fix the wide shot by intuition both made it
+worse -- see the reverted floor above, and the whitecap population before it.
+
+- **Individual waves are not visible.** Nothing in the satellite-imagery
+  literature resolves them. What is documented is colour, glint, whitecaps and
+  large-scale structure. Drawing waves there is not a simplification of reality,
+  it is a different picture.
+- **Whitecaps are 1-4% coverage and far sub-pixel.** Monahan and O'Muircheartaigh
+  (1980): W = 2.95e-6 * U10^3.52, so about 1% at 10 m/s and 4% at 15 m/s. They
+  average into a slight brightening and desaturation. They are never discrete
+  flecks, which is precisely why drawing them as cells read as snow.
+- **The visible structure is STIRRED, not mottled.** Eddies and fronts "stretch
+  and fold patches" into "narrow swirling bands", "wisps and spirals", at tens to
+  hundreds of km. Our `rE` field is isotropic value noise, which is the wrong
+  SHAPE, not the wrong amplitude. `uCurlGain` already exists and ships at 0 --
+  rejected at close zoom, where divergence-free curl shear moved neighbour
+  coherence 0.281 to 0.293 and nothing else. At the wide shot it is not a
+  refinement of the texture; it is the texture.
+- **Glint at nadir cannot be sharp.** Cox and Munk: mean square sea-surface slope
+  reaches (tan 6 degrees)^2 at 14 m/s. With the sun near 56 degrees elevation and
+  the view straight down, the half-vector sits ~28 degrees off vertical and
+  almost no facet is steep enough to return it. Glint from directly above is a
+  broad dim wash, not glitter -- so the specular WEIGHTS tuned at 34 degrees do
+  not transfer, and re-tuning them at the new angle is part of this work rather
+  than a follow-up.
+- Open water runs near-black in the deep sea to turquoise over shallows. Ours
+  sits at rgb (25, 84, 130): bright, and strongly blue-dominant, for open ocean.
+
+### A target that was not one
+
+Section 1C and the reverted floor quote "the tuned plate downsampled to world
+zoom" at luma sd 38.4 and 6.6% bright pixels. **Do not use those numbers.** The
+plate is a close-up cliff scene, so most of that contrast is surf against rock,
+not open ocean. It is the right IDEA -- stand back from the tuned sea and measure
+what survives -- and the wrong scene to do it on. A wide-shot target needs a
+tuned OPEN-WATER plate, which does not exist yet.
+
+---
+
 ## 2. Running it
 
 ```bash
