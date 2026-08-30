@@ -466,6 +466,26 @@ export class WaterSurfaceRenderer {
     const value = Number(raw);
     return Number.isFinite(value) ? Math.max(0, value) : TRAIN_WARP_PX;
   })();
+  /**
+   * ?water.u.<name>=<multiplier> -- scale any preset uniform, for one capture.
+   *
+   * There are 176 preset-driven bindings and adding a flag per uniform every
+   * time one needs sweeping is how this file grew three of them. Tuning is
+   * measurement, and a measurement needs the value to move without a re-export,
+   * so: ?water.u.uSwash=1.6 multiplies uSwash by 1.6 on top of everything else
+   * the table below does. Diagnostic only -- nothing reads it unless it is in
+   * the URL, and a tuned value belongs in the offline presets, not here.
+   */
+  private readonly uniformOverrides = (() => {
+    const out = new Map<string, number>();
+    if (typeof window === "undefined") return out;
+    for (const [key, raw] of new URLSearchParams(window.location.search)) {
+      if (!key.startsWith("water.u.")) continue;
+      const value = Number(raw);
+      if (Number.isFinite(value)) out.set(key.slice("water.u.".length), value);
+    }
+    return out;
+  })();
   /** ?water.markScale=<0..1> -- how far drawn marks follow the water, not the screen. */
   private readonly markAnchor = (() => {
     if (typeof window === "undefined") return 0;
@@ -1115,7 +1135,8 @@ export class WaterSurfaceRenderer {
           : OCEAN_SCREEN_TO_TUNED.has(uniformName)
             ? 1 / zc
             : 1;
-        const gain = this.rawMode ? 1 : (fade[uniformName] ?? 1);
+        const gain = (this.rawMode ? 1 : (fade[uniformName] ?? 1))
+          * (this.uniformOverrides.get(uniformName) ?? 1);
         if (components === 1) {
           let value = weatherLerp(states, uniformName, this.state.weather, 0)
             * scale * gain;

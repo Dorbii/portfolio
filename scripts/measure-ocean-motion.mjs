@@ -21,7 +21,7 @@ import path from "node:path";
 
 import {
   CdpConnection, browserCandidates, delay, evaluate, firstAccessible,
-  navigate, readCamera, resolveCdpWebSocket, screenshot,
+  navigate, readCamera, resolveCdpWebSocket,
 } from "./capture-ninjaone-environment-mvp.mjs";
 
 function parseArgs(argv) {
@@ -103,16 +103,41 @@ async function main() {
     if (args.span) await setSpan(connection, sessionId, Number(args.span), anchor);
     await delay(Number(args.settle ?? 12) * 1000);
 
-    // The water canvas's own pixels, so the still land underneath cannot dilute
-    // the answer. Needs ?water.capture for preserveDrawingBuffer.
+    // Without --page: the water canvas's own pixels, so the still land underneath
+    // cannot dilute the answer. Needs ?water.capture for preserveDrawingBuffer.
+    //
+    // --page grabs the COMPOSITE rather than the water canvas. A brightness
+    // statistic on the surf zone is not stable in one frame -- the surf pulses
+    // with the wave sets, and a sweep taken one frame per setting measures the
+    // phase it happened to land on, not the setting. Measured: the same
+    // configuration read 1.36% and 0.73% bright in the innermost band twenty
+    // minutes apart, and a four-point sweep clustered by capture batch instead
+    // of by the value being swept. Several frames over at least a wave period,
+    // averaged, is the smallest honest version.
+    const rect = await evaluate(connection, sessionId,
+      `(() => { const r = document.querySelector('.career-world__viewport')
+          .getBoundingClientRect();
+        return { x: r.x, y: r.y, width: r.width, height: r.height }; })()`);
     const shots = [];
     for (let i = 0; i < frames; i += 1) {
-      const dataUrl = await evaluate(connection, sessionId,
-        `document.querySelector('.career-world__water-canvas').toDataURL('image/png')`);
-      if (typeof dataUrl !== "string" || !dataUrl.startsWith("data:image/png")) {
-        throw new Error("water canvas returned no pixels -- is ?water.capture set?");
+      if (args.page) {
+        // Page.captureScreenshot directly; the shared helper writes to a file and
+        // this wants the bytes.
+        const shot = await connection.send("Page.captureScreenshot", {
+          captureBeyondViewport: false,
+          clip: { ...rect, scale: 1 },
+          format: "png",
+          fromSurface: true,
+        }, sessionId);
+        shots.push(Buffer.from(shot.data, "base64"));
+      } else {
+        const dataUrl = await evaluate(connection, sessionId,
+          `document.querySelector('.career-world__water-canvas').toDataURL('image/png')`);
+        if (typeof dataUrl !== "string" || !dataUrl.startsWith("data:image/png")) {
+          throw new Error("water canvas returned no pixels -- is ?water.capture set?");
+        }
+        shots.push(Buffer.from(dataUrl.split(",")[1], "base64"));
       }
-      shots.push(Buffer.from(dataUrl.split(",")[1], "base64"));
       if (i + 1 < frames) await delay(gapMs);
     }
     const camera = await readCamera(connection, sessionId);
