@@ -103,6 +103,18 @@ list.
   hand-authored (a centreline plus ellipse patches) while the terrain's water is
   derived, so the two drift and the drift is invisible until it is a hole.
 - **The one-water-authority contract** is agreed in principle and unwritten.
+- **The ocean FORCES the sun's elevation, and a day/night cycle will break it.**
+  `oceanSunDirection` takes the world light's azimuth and overrides the vertical
+  to a fixed 34 degrees above the water plane (`TUNED_SUN_VERTICAL`), because the
+  specular calibration -- lobe exponents, sheen, the half-vector against the view
+  tilt -- is tuned to that elevation. Today the two elevations differ by about a
+  degree so it costs nothing. Under a cycle the land goes to dusk while the sea
+  keeps a permanent mid-afternoon sun. The owner is planning that cycle
+  (2026-08-30), so this needs doing before it lands: honour the elevation and
+  re-derive the lobes across the range, rather than pinning one.
+- **Rejected, do not retry without new information:** `licMix` (the flow-aligned
+  line integral). See `758ae02` -- it combs the whole sea into parallel strokes
+  rather than lengthening individual streaks.
 
 ## Measuring this layer
 
