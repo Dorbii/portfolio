@@ -39,7 +39,7 @@ export const OCEAN_FAMILIES = Object.freeze({
 export const OCEAN_TUNED_PER_WORLD = 14.201886;
 
 // A tuned length consumed as a screen offset: multiply by uZc.
-export const OCEAN_TUNED_TO_SCREEN: ReadonlySet<string> = new Set(["uDiffuse", "uReliefLift", "uShadowStep"]);
+export const OCEAN_TUNED_TO_SCREEN: ReadonlySet<string> = new Set(["uDiffuse", "uReliefLift", "uShadeSmooth", "uShadowStep"]);
 
 // A screen length consumed as a lookup coordinate: divide by uZc.
 export const OCEAN_SCREEN_TO_TUNED: ReadonlySet<string> = new Set(["uLicNoise", "uLicScale", "uLicSpeed", "uLicStep", "uMarkCell", "uMarkLen", "uMarkWid"]);

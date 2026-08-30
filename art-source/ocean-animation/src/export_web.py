@@ -791,6 +791,19 @@ TUNED_TO_SCREEN = {
     # sampled in antiphase does not just weaken -- it inverts, and it inverts at
     # exactly the swell's own spacing, which draws a regular stripe over the sea.
     'uShadowStep',
+    # The radius the shading normals are band-limited over. Same argument as
+    # uShadowStep, and the same bug: the mottle this exists to remove is a
+    # property of the WAVE -- how much of a wavelength gets averaged before the
+    # diffuse and the gloss lobe read the slope -- so the radius has to be a wave
+    # length, not a screen length.
+    #
+    # Left unconverted it smoothed a fixed 5 px at every zoom. That is 5 tuned px
+    # in the offline frame it was tuned in, but only 1.7 at the capital approach
+    # and about 35 at world zoom: too little smoothing to band-limit anything
+    # where the owner is actually looking, and far too much where the sea then
+    # goes flat. Restoring the tuned radius at the close camera drops the base
+    # body's high-frequency energy 39.3 -> 35.8 and visibly deepens it.
+    'uShadeSmooth',
 }
 # A screen length CONSUMED AS A LOOKUP COORDINATE. These index noise fields or
 # march along them in `px`, which is tuned, so a screen width has to be converted
