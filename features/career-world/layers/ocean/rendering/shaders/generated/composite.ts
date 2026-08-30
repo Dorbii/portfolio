@@ -717,7 +717,23 @@ void main()
 
     float ndl = clamp(dot(Ns, L), -1.0, 1.0);
     float ndlDetail = clamp(dot(Nm, L), -1.0, 1.0);
-    float facing = clamp(-dot(normalize(gr + vec2(1e-5)), dirP), 0.0, 1.0);
+    // From the BAND-LIMITED swell gradient, not the macro one. This is the same
+    // correction the shore stages below already carry -- "multiplying every shape
+    // term by a speckled facing put the speckle straight back into terms that had
+    // just been given a clean field to read" -- and it was never applied to
+    // 'facing' itself, which every crest stroke is multiplied by.
+    //
+    // gr is geom.yz: swell PLUS chop. So facing swung between 0.1 and 1.0 at chop
+    // frequency, and crestLine is 'contourLine(hPath, ...) * (0.10 + 0.90 *
+    // facing)'. hPath is one clean cosine and contourLine gives it a smooth band;
+    // multiplying that band by a chop-frequency number shreds it into exactly the
+    // granular speckle the stroke exists to replace. Raising uCrestGain 3x on a
+    // clean base made more speckle, not more line, which is what a shredded
+    // stroke does when you turn it up.
+    //
+    // Whether a crest faces the swell is a property of the SWELL. The chop riding
+    // on it does not change which way the wave is going.
+    float facing = clamp(-dot(normalize(grS + vec2(1e-5)), dirP), 0.0, 1.0);
     float shallowT = 1.0 - sstep(2.5, 26.0, depth);
 
     // ---- tonal structure: deep troughs, lifted crest faces -----------------
