@@ -225,6 +225,16 @@ PRESETS['heavy_crashing_surf'] = dict(
     deepEnd=24.0, shallowEnd=9.0, tealDepth=29.0,
     breakGamma=0.66, whitecapSteep=0.240,
     preBreak=1.40, faceTeal=1.00, lipGain=1.00, foamErodeK=3.6,
+    # licMix STAYS 0, and this is why -- the base preset offers 0.85 and every
+    # state overrides it off with no reason recorded, so it looks like an obvious
+    # win going begging. It is not. Tried at 0.85 against the shape deficit
+    # (coverage now matches the reference at 1.86% against 1.84%, but streak reach
+    # is 19.9 tuned px against 134.8): reach moved only to 23.7 while coverage
+    # doubled to 3.96%, and the owner's screenshot of it live reads as BRUSHED
+    # METAL. The integral marches along the flow direction, which is globally
+    # similar across the frame, so it combs the whole sea into parallel strokes
+    # rather than growing the individual streaks longer. Wrong mechanism for this
+    # deficit: it is not that our foam is insufficiently directional.
     streakGain=0.22, faceLift=0.38, chopGlint=0.24, licTone=0.0, licMix=0.0,
     foamDeep=17.0, foamDeepThr=1.4, foamVeil=0.26,
     stokes=4.2, backwash=1.9,
