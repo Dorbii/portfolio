@@ -89,22 +89,28 @@ raising the crest gain only brightens the grain. So foam SHAPE -- the thing
 is now the single thing between here and the reference look, not one item on a
 list.
 
-## Where the open sea stands (2026-08-30, end of the first autonomous loop)
+## Where the open sea stands (2026-08-30, end of the autonomous loop)
 
-Against reference plate C5 at matched tuned-pixel density:
+Against reference plate C5, matched tuned-pixel density, **both sides masked to
+water**:
 
                            ours    reference
-      foam coverage       2.11%        1.84%
-      elongation          10.93        12.41
-      fragments per 1k    13.28        14.26
-      streak reach         64.6        134.8
-      p50 luma             60.8         49.4
-      p10 luma             36.4         19.7
-      p90 luma            116.5        137.0
+      foam coverage       1.17%        1.84%
+      elongation          11.19        12.41
+      fragments per 1k    15.35        14.26
+      streak reach         56.8        134.8
+      p10 luma             27.2         19.6
+      p50 luma             44.8         38.0
+      p90 luma             90.8         87.1
+      tonal range          63.6         67.6
 
-Four close, three not. The three are two facts: streaks are half as long as they
-should be, and the tonal range is 80 against 117 because our darkest water is
-still 1.8x too light while our brightest is too dim.
+Tone is close: p90 within 4%, range within 6%, median 18% bright. The one real
+outlier is streak reach at 42% of the reference.
+
+**Mask both sides to the same thing.** The reference plate is a third cliff and
+trees, and comparing its whole-frame percentiles against our open-sea capture
+invented a contrast deficit that did not exist -- ours was already the WIDER
+range. A commit was made on that mistake and retracted (d3bb39f).
 
 **Measure captures at the right scale.** Every capture lands at span 0.0825, not
 whatever was requested -- the app clamps -- and the frame is written at CSS scale,
