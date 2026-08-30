@@ -330,6 +330,24 @@ export class WaterSurfaceRenderer {
         "Ocean water needs EXT_color_buffer_float for its float render targets.",
       );
     }
+    // RGBA16F can be filtered LINEARLY as core WebGL2. RGBA32F cannot: that
+    // needs OES_texture_float_linear, and in WebGL an extension does nothing
+    // until getExtension is called for it -- being listed as available is not
+    // enough. A 32-bit target with a LINEAR filter and the extension unrequested
+    // is an INCOMPLETE texture, and every sample of it returns black.
+    //
+    // The foam and spray buffers moved to 32 bits earlier today to stop the
+    // material coordinates quantising into grey slabs, and that silently turned
+    // texture(texPrev, ...) into zero -- so the foam stopped accumulating
+    // entirely and every frame drew one frame's worth of injection. Measured:
+    // fresh settled at 0.0060 against the offline renderer's 0.0847 on the same
+    // box, and 0.0060 is exactly inj*dt. Thirty seconds of settle produced the
+    // same number as four.
+    //
+    // Where the extension is missing the material coordinates go back to half
+    // floats, which quantise but at least accumulate. Black foam is not a
+    // graceful degradation of anything.
+    const floatLinear = Boolean(gl.getExtension("OES_texture_float_linear"));
 
     const [phase, flow, noise, noiseFine] = await Promise.all([
       loadImage(OCEAN_FIELD_ASSETS.phase),
@@ -348,6 +366,10 @@ export class WaterSurfaceRenderer {
       texNoise: createTexture(gl, noise, "repeat"),
       texNoiseF: createTexture(gl, noiseFine, "repeat"),
     });
+    // Without OES_texture_float_linear the 32-bit buffers cannot be filtered and
+    // read as black, which is worse than the quantisation they were widened to
+    // avoid. Set before the first render, which is where the targets are made.
+    if (!floatLinear) renderer.matHalf = true;
     // ?water.probe -- hand the intermediate targets to whatever is measuring
     // from outside. Off by default: it reads the whole framebuffer back and
     // stalls the pipeline, which is fine for a measurement and not for a page.
@@ -421,7 +443,7 @@ export class WaterSurfaceRenderer {
    * lines that seem wrong". Measuring this needs a page that has been running a
    * while, which is why it survived a short capture and why the flag is kept.
    */
-  private readonly matHalf = hasWaterFlag("mat16");
+  private matHalf = hasWaterFlag("mat16");
   /**
    * ?water.openWave=<0..1> -- force the open-water wave visibility.
    *
