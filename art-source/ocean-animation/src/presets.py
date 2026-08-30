@@ -239,12 +239,27 @@ PRESETS['heavy_crashing_surf'] = dict(
     foamDeep=17.0, foamDeepThr=1.4, foamVeil=0.26,
     stokes=4.2, backwash=1.9,
     tauFresh=1.30, tauPersist=5.5,
-    injBreak=52.0, injWhitecap=1.55, injShore=15.3,
+    # Injection down 6.5x from injBreak 52 / injWhitecap 10.0 / injShore 15.3.
+    # Recruiting along the crest injects far more foam than gating at a point,
+    # and left at the old rates it put SEVEN times the reference plate's foam on
+    # the water: measured against C5 at matched tuned-pixel density, coverage
+    # 7.35% against 1.84%. That is what read as a busy granular field. At these
+    # rates coverage is 1.96% and the shape numbers land with it -- elongation
+    # 12.73 against 12.41, fragments per 1k px 13.23 against 14.26.
+    injBreak=8.0, injWhitecap=0.24, injShore=2.35,
     sprayLife=1.55, spraySpread=64.0, sprayInject=2.6, sprayGate=0.33, sprayGain=1.05,
     specGain=0.16, sheen=0.034, shadowGain=0.88, crestGain=0.66, troughGain=0.88, transGain=0.72, swash=0.52,
     foamThrFresh=0.154, foamThrOld=0.59, exposure=0.97,
-    palette=dict(abyss=hx('#0c304f'), deep=hx('#18517a'), mid=hx('#2870a0'),
-                 shallow=hx('#1d7a86'), sky=hx('#74abc9'), foamThin=hx('#c0d1da'), foamBody=hx('#e4edf1'),
+    # Darkened 75% of the way to the reference plate, hue preserved so the shore
+    # keeps its teal. Sampled on C5's water (664k px, foam excluded), the
+    # reference runs p5 luma 16.8 / p35 30.2 / p85 71.9 -- its BRIGHTEST water is
+    # about what our `deep` was, so the whole palette sat nearly two stops high:
+    # ours measured abyss 40.8, deep 68.6, mid 95.9, shallow 109.9. Live against
+    # the reference the gap showed as p50 luma 78 against 49 and p10 51 against
+    # 20, and no amount of troughGain or abyssMix could reach it -- swept to the
+    # limit it stopped at p50 68.5, because the floor is the palette itself.
+    palette=dict(abyss=hx('#081f34'), deep=hx('#0e2f47'), mid=hx('#18425f'),
+                 shallow=hx('#18636d'), sky=hx('#74abc9'), foamThin=hx('#c0d1da'), foamBody=hx('#e4edf1'),
                  foamDense=hx('#f5fafa'), sun=hx('#fff4de')),
 )
 
