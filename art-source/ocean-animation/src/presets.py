@@ -175,7 +175,7 @@ PRESETS['calm_swell'] = dict(
     tauFresh=1.05, tauPersist=6.0,
     injBreak=15.3, injWhitecap=1.20, injShore=5.3,
     sprayLife=0.85, spraySpread=30.0, sprayInject=0.16, sprayGate=0.74, sprayGain=0.65,
-    specGain=0.15, sheen=0.030, crestGain=0.86, shadowGain=0.62, troughGain=0.962, transGain=0.42, swash=0.26,
+    specGain=0.15, sheen=0.030, crestGain=0.86, shadowGain=0.62, troughGain=0.74, transGain=0.42, swash=0.26,
     foamThrFresh=0.180, foamThrOld=0.61, exposure=0.97,
     palette=dict(abyss=hx('#0c2f44'), deep=hx('#16537e'), mid=hx('#27719f'),
                  shallow=hx('#2b7d90'), sky=hx('#7fb4cf'), foamThin=hx('#bccdd6'), foamBody=hx('#dfe9ed'),
@@ -255,7 +255,7 @@ PRESETS['heavy_crashing_surf'] = dict(
     # 12.73 against 12.41, fragments per 1k px 13.23 against 14.26.
     injBreak=8.0, injWhitecap=0.24, injShore=2.35,
     sprayLife=1.55, spraySpread=64.0, sprayInject=2.6, sprayGate=0.33, sprayGain=1.05,
-    specGain=0.16, sheen=0.034, shadowGain=0.88, crestGain=0.66, troughGain=0.88, transGain=0.72, swash=0.52,
+    specGain=0.16, sheen=0.034, shadowGain=0.88, crestGain=0.66, troughGain=1.144, transGain=0.72, swash=0.52,
     foamThrFresh=0.154, foamThrOld=0.59, exposure=0.97,
     # Darkened ALL the way to the reference plate, hue preserved so the shore
     # keeps its teal. Sampled on C5's water (664k px, foam excluded), the
