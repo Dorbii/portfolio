@@ -5,16 +5,16 @@
 // they are different eikonal solves and cannot be crossfaded -- the phase field
 // would tear and crests would break and re-form. Everything that would move a
 // crest is therefore pinned to the state the world field was baked from
-// (windy_rolling_surf); weather interpolates only what is an amplitude, a threshold,
+// (heavy_crashing_surf); weather interpolates only what is an amplitude, a threshold,
 // a rate or a colour on that fixed geometry.
 
 export type OceanUniformValue = number | readonly number[];
 
-export const OCEAN_BAKED_STATE = "windy_rolling_surf";
+export const OCEAN_BAKED_STATE = "heavy_crashing_surf";
 
 // The loop period every angular frequency is quantised to. Kept from the
 // offline clip: it costs nothing here and preserves the exact tuned rates.
-export const OCEAN_LOOP_SECONDS = 15.0;
+export const OCEAN_LOOP_SECONDS = 17.0;
 
 // How many of those loops the large-scale scroll fields close on, and
 // therefore what the clock wraps at. Every angular frequency is an exact
@@ -27,16 +27,16 @@ export const OCEAN_SCROLL_LOOPS = 16;
 
 // Primary direction and period are the baked solve's and cannot vary.
 export const OCEAN_FAMILIES = Object.freeze({
-  primary: Object.freeze({ direction: Object.freeze([0.469, 0.883] as const), period: 2.36 }),
-  secondary: Object.freeze({ direction: Object.freeze([0.788, 0.616] as const), period: 1.78 }),
-  chop: Object.freeze({ direction: Object.freeze([0.259, 0.966] as const), period: 1.04 }),
+  primary: Object.freeze({ direction: Object.freeze([0.574, 0.819] as const), period: 2.87 }),
+  secondary: Object.freeze({ direction: Object.freeze([0.719, 0.695] as const), period: 2.05 }),
+  chop: Object.freeze({ direction: Object.freeze([0.375, 0.927] as const), period: 1.2 }),
 });
 
 // Screen pixels per tuned pixel at the closest camera, for reference. The
 // shaders are evaluated in tuned plate pixels, so the sea itself is
 // camera-independent; only these two small sets cross between the picture
 // and the screen. See the adapter comment in any generated shader.
-export const OCEAN_TUNED_PER_WORLD = 23.047164;
+export const OCEAN_TUNED_PER_WORLD = 14.201886;
 
 // A tuned length consumed as a screen offset: multiply by uZc.
 export const OCEAN_TUNED_TO_SCREEN: ReadonlySet<string> = new Set(["uDiffuse", "uReliefLift", "uShadowStep"]);
@@ -61,18 +61,18 @@ const WAVE_CALM_SWELL: Readonly<Record<string, OceanUniformValue>> = Object.free
   uFormBend: 0.7,
   uFormFine: 0.42,
   uFormGroup: 0.85,
-  uGroupAcross: 1.9,
+  uGroupAcross: 2.2,
   uGroupDepth: 0.58,
-  uGroupScale: 0.315,
-  uHarmA: Object.freeze([1.0, 0.3, 0.12] as const),
+  uGroupScale: 0.338,
+  uHarmA: Object.freeze([1.0, 0.36, 0.16] as const),
   uHarmL: 0.32,
-  uHarmM: Object.freeze([1.0, 1.78, 3.05] as const),
+  uHarmM: Object.freeze([1.0, 1.72, 2.95] as const),
   uJitter: 0.62,
   uRegionContrast: 1.9,
   uRegionDepth: 0.45,
-  uSetCycles: 3.0,
+  uSetCycles: 2.0,
   uSetMix: 0.5,
-  uSpread: 27.0,
+  uSpread: 38.0,
   uSteep: 0.54,
   uStokes: 1.5,
   uStokesDeep: 0.18,
@@ -94,18 +94,18 @@ const WAVE_WINDY_ROLLING_SURF: Readonly<Record<string, OceanUniformValue>> = Obj
   uFormBend: 0.7,
   uFormFine: 0.42,
   uFormGroup: 0.85,
-  uGroupAcross: 1.9,
+  uGroupAcross: 2.2,
   uGroupDepth: 0.62,
-  uGroupScale: 0.315,
-  uHarmA: Object.freeze([1.0, 0.3, 0.12] as const),
+  uGroupScale: 0.338,
+  uHarmA: Object.freeze([1.0, 0.36, 0.16] as const),
   uHarmL: 0.32,
-  uHarmM: Object.freeze([1.0, 1.78, 3.05] as const),
+  uHarmM: Object.freeze([1.0, 1.72, 2.95] as const),
   uJitter: 0.7,
   uRegionContrast: 1.9,
   uRegionDepth: 0.45,
-  uSetCycles: 3.0,
+  uSetCycles: 2.0,
   uSetMix: 0.6,
-  uSpread: 27.0,
+  uSpread: 38.0,
   uSteep: 0.66,
   uStokes: 2.6,
   uStokesDeep: 0.18,
@@ -127,18 +127,18 @@ const WAVE_HEAVY_CRASHING_SURF: Readonly<Record<string, OceanUniformValue>> = Ob
   uFormBend: 0.7,
   uFormFine: 0.42,
   uFormGroup: 0.85,
-  uGroupAcross: 1.9,
+  uGroupAcross: 2.2,
   uGroupDepth: 0.72,
-  uGroupScale: 0.315,
-  uHarmA: Object.freeze([1.0, 0.3, 0.12] as const),
+  uGroupScale: 0.338,
+  uHarmA: Object.freeze([1.0, 0.36, 0.16] as const),
   uHarmL: 0.32,
-  uHarmM: Object.freeze([1.0, 1.78, 3.05] as const),
+  uHarmM: Object.freeze([1.0, 1.72, 2.95] as const),
   uJitter: 0.78,
   uRegionContrast: 1.9,
   uRegionDepth: 0.45,
-  uSetCycles: 3.0,
+  uSetCycles: 2.0,
   uSetMix: 0.78,
-  uSpread: 27.0,
+  uSpread: 38.0,
   uSteep: 0.94,
   uStokes: 4.2,
   uStokesDeep: 0.18,

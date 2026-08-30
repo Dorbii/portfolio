@@ -50,6 +50,24 @@ REV = 'r2'
 SDF_CLAMP = 32.0        # world px; past this every field downstream is constant
 
 
+def _bake():
+    """What bake_world recorded, or nothing at all.
+
+    Taking lambdaWorld from this process's own WORLD_LAMBDA meant the manifest
+    could disagree with the fields it describes -- and lambdaWorld is the
+    denominator of TUNED_PER_WORLD, the conversion the whole port is evaluated
+    in, so disagreeing by a factor is not a small error and looks like nothing.
+    Fail closed instead: the bake states what it baked.
+    """
+    path = os.path.join(ROOT, 'scenes', _SCENE, 'baked', 'bake.json')
+    if not os.path.exists(path):
+        raise SystemExit(
+            f'encode_world: {path} is missing. Re-run bake_world.py -- it records '
+            'the state, the wavelength and the gravity this encode has to match.')
+    with open(path, encoding='utf-8') as fh:
+        return json.load(fh)
+
+
 def main():
     z = np.load(os.path.join(BAKED, 'primary.npz'))
     b = np.load(os.path.join(BAKED, 'bathymetry.npz'))
@@ -127,7 +145,7 @@ def main():
                 residualLo=lo, residualSpan=hi - lo,
                 planeK0=k0, planeDir=[d0[0], d0[1]],
                 kMax=kMax, depthMax=dMax, focusMax=fMax, sdfMax=sdfMax,
-                lambdaWorld=float(os.environ.get('WORLD_LAMBDA', 5.0)))
+                lambdaWorld=_bake()['lambdaWorld'])
     with open(os.path.join(OUT, f'world-fields-{REV}.json'), 'w', encoding='utf-8') as fh:
         json.dump(meta, fh, indent=2)
 

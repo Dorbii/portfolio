@@ -60,7 +60,13 @@ import presets as P
 # Everything downstream is calibrated to the wavelength this implies, so it is a
 # constant of the tuning, not a knob.
 OFFLINE_G = 130.0
-BAKED_STATE = 'windy_rolling_surf'
+# Must match bake_world.BAKED_STATE: this is the state the phase field was solved
+# from, and every pinned uniform is held at it. Moved from windy_rolling_surf on
+# 2026-08-29 -- the owner's reference has always been the heavy clip, and heavy's
+# primary period is 2.87s against windy's 2.36s, so its swell is 1.48x longer.
+# Weather could never reach that, because a period is geometry: turning the dial
+# to 1 was giving heavy's amplitudes and thresholds on windy's waves.
+BAKED_STATE = 'heavy_crashing_surf'
 _meta = json.load(open(META, encoding='utf-8'))
 _T = P.PRESETS[BAKED_STATE]['families']['primary'][1]
 # L0 = G T^2 / 2pi. The world was baked with G chosen to land the primary swell

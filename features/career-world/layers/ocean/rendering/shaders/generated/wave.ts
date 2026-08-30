@@ -190,18 +190,18 @@ uniform float uPeriodP, uPeriodS, uPeriodC;
 
 const vec2  WORLD_SIZE   = vec2(1672.0, 941.0);
 const vec2  WORLD_TEXEL  = vec2(0.000598086, 0.001062699);
-const float PHASE_LO     = -34.145245;
-const float PHASE_SPAN   = 428.266464;
-const float PHASE_K0     = 0.52619541;
-const vec2  PHASE_DIR    = vec2(0.50560084, 0.86276752);
-const float FIELD_KMAX   = 1.44074571;
-const float FIELD_DMAX   = 10.93409824;
+const float PHASE_LO     = -19.650136;
+const float PHASE_SPAN   = 385.294207;
+const float PHASE_K0     = 0.53293043;
+const vec2  PHASE_DIR    = vec2(0.58568742, 0.81053701);
+const float FIELD_KMAX   = 1.40839970;
+const float FIELD_DMAX   = 7.39338398;
 const float FIELD_FMAX   = 2.40000010;
 const float FIELD_SDFMAX = 32.0000;
 // Tuned pixels per world pixel: the ratio of the two gravities, which is what
 // sets how many pixels a wave of a given period spans. The world was baked at
-// 5.0 px for the primary swell; the presets were tuned at 115.2.
-const float TUNED_PER_WORLD = 23.047164;
+// 12.0 px for the primary swell; the presets were tuned at 170.4.
+const float TUNED_PER_WORLD = 14.201886;
 const vec2  TUNED_SIZE = WORLD_SIZE * TUNED_PER_WORLD;
 
 // Screen uv has its origin at the BOTTOM left; the world fields are image-space,

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { WATER_TUNING_DIALS } from "../features/career-world/shared/waterTuning.ts";
 import test from "node:test";
 import {
   OCEAN_COMPOSITE_SHADER,
@@ -84,12 +85,21 @@ test("each stateful pass reads its own previous frame, not another's texture", (
   assert.notEqual(OCEAN_SAMPLER_UNITS.texFoam, OCEAN_SAMPLER_UNITS.texSpray);
 });
 
-test("weather at 0.5 lands exactly on the state the world field was baked from", () => {
+test("the shipped weather default lands exactly on the state the world was baked from", () => {
   // The three presets were solved from different wave families, so they are
   // different eikonal solves and cannot be crossfaded. The world phase field is
-  // one of them, and the midpoint of the scalar has to be that one exactly --
-  // otherwise the shipped default is a sea whose energy belongs to no solve.
-  assert.equal(OCEAN_BAKED_STATE, "windy_rolling_surf");
+  // one of them, and the SHIPPED DEFAULT has to be that one exactly -- otherwise
+  // the sea everyone sees has energy belonging to no solve.
+  //
+  // This used to assert the midpoint and the middle state by name, which held
+  // only while those two happened to coincide. What matters is the relationship:
+  // wherever the dial rests by default, that is the sea that was solved.
+  const states = ["calm_swell", "windy_rolling_surf", "heavy_crashing_surf"];
+  const dial = WATER_TUNING_DIALS.find(({ key }) => key === "oceanWeather");
+  assert.ok(dial, "the ocean weather dial must exist");
+  const index = dial.defaultValue * (states.length - 1);
+  assert.equal(index, Math.round(index), "the default must land ON a state, not between two");
+  assert.equal(states[index], OCEAN_BAKED_STATE);
   for (const [pass, states] of Object.entries(OCEAN_PASS_STATES)) {
     assert.equal(states.length, 3, `${pass} should carry calm, windy and heavy`);
     for (const [name, value] of Object.entries(states[1])) {

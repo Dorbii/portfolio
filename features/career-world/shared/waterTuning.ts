@@ -4,7 +4,17 @@ export const WATER_TUNING_DIALS = Object.freeze([
   // in here, so there is nothing left to dial one effect at a time. What is left
   // is where on the calm/windy/heavy scale this world sits.
   Object.freeze({
-    defaultValue: 0.34,
+    // 1 is heavy_crashing_surf, which is the state the world phase field is
+    // solved from. It has to be the default for the same reason the scale exists
+    // at all: the three presets are three different eikonal solves and cannot be
+    // crossfaded, so everything that would move a crest is PINNED to the baked
+    // one and only amplitudes, thresholds and colour interpolate. Sitting at 0.34
+    // therefore did not give a calmer sea -- it gave calm-ish energy on heavy's
+    // geometry, a sea whose energy belongs to no solve, and it is why sweeping
+    // the dial across its whole range used to move the picture by almost nothing.
+    // Dial DOWN from here for a quieter day; that direction at least reads as a
+    // long swell running with less wind behind it.
+    defaultValue: 1,
     group: "ocean" as const,
     key: "oceanWeather" as const,
     maximum: 1,

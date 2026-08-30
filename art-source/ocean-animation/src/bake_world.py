@@ -18,6 +18,7 @@ can reconstruct) and the two tileable noise textures, which have to be the SAME
 noise the offline renderer was tuned against or every scale-dependent constant in
 composite.frag is tuned for a different field.
 """
+import json
 import os, sys
 import numpy as np
 
@@ -28,19 +29,44 @@ ROOT = os.path.dirname(SRC)
 # at twelve world px a wave is six texels for the entire breaking process.
 WS = os.path.join(ROOT, 'scenes', os.environ.get('OCEAN_WORLD_SCENE', 'world'))
 LAMBDA_WORLD = float(os.environ.get('WORLD_LAMBDA', 5.0))
+# Which sea the world IS. Everything that would move a crest -- the three
+# periods, their directions, the directional spread, the group and set envelopes
+# -- comes from one eikonal solve and cannot be crossfaded, so weather
+# interpolates amplitudes and thresholds on THIS state's geometry and no other.
+# The choice therefore has to be made here rather than at runtime, and it has to
+# agree with export_web.BAKED_STATE, which the export asserts.
+BAKED_STATE = os.environ.get('OCEAN_BAKED_STATE', 'heavy_crashing_surf')
 
 
 def main():
     os.environ['OCEAN_ROOT'] = WS
     os.environ['OCEAN_CALM_REFS'] = ''
-    T = 2.36                                   # primary period, seconds
+    sys.path.insert(0, SRC)
+    # presets ONLY, and the environment set before anything else is imported.
+    # wavefield reads OCEAN_G at module scope, so importing precompute here --
+    # which imports it -- freezes the picture-space gravity at its 130.0 default
+    # and the whole world silently solves at the offline plate's scale. That is
+    # exactly what happened on the first attempt at this: the log said
+    # "OCEAN_G 9.1537" from this function while the solve returned a primary of
+    # 133.9 world px against the 12.0 that had been asked for. The assertion
+    # below is there because the print was not enough to catch it.
+    import presets
+    p = presets.PRESETS[BAKED_STATE]
+    # The primary period is the state's, not a constant. It was written as 2.36
+    # here and read from the preset everywhere else, which is only invisible for
+    # as long as the baked state happens to be the one with that period.
+    T = p['families']['primary'][1]
     G = LAMBDA_WORLD * 2.0 * np.pi / (T * T)   # L0 = G T^2 / 2pi
     os.environ['OCEAN_G'] = str(G)
     os.environ['OCEAN_DEPTH'] = str(105.0 * G / 130.0)
     os.environ['OCEAN_SHELF'] = str(230.0 * G / 130.0)
-    sys.path.insert(0, SRC)
-    import presets, precompute
-    p = presets.PRESETS['windy_rolling_surf']
+    import precompute
+    import wavefield
+    if abs(wavefield.G - G) > 1e-6:
+        raise SystemExit(
+            f'bake_world: wavefield froze OCEAN_G at {wavefield.G} but this bake '
+            f'needs {G}. Something imported it before the environment was set.')
+    print(f'world bake: {BAKED_STATE}  T={T:.2f}s')
     print(f'world bake: lambda {LAMBDA_WORLD} px  ->  OCEAN_G {G:.4f}  '
           f'depth {float(os.environ["OCEAN_DEPTH"]):.2f}px  shelf {float(os.environ["OCEAN_SHELF"]):.2f}px')
     fields, depth, water, sdf, extra, _sites = precompute.build(p['families'])
@@ -57,11 +83,29 @@ def main():
         # and has to be generated in screen space when the camera is close enough
         # to resolve it -- which is also the only zoom where it should be visible.
         verdict = 'bake' if lam >= 3.0 else 'SCREEN-SPACE ONLY (sub-pixel at world scale)'
+        if name == 'primary' and not (0.5 * LAMBDA_WORLD < lam < 2.0 * LAMBDA_WORLD):
+            raise SystemExit(
+                f'bake_world: asked for a {LAMBDA_WORLD:g} px primary and solved a '
+                f'{lam:.1f} px one. Refraction moves the median a little; it does not '
+                f'move it that far, so the gravity the solve used is not the one '
+                f'computed here.')
         print(f'{name:10s}{lam:20.2f}{lam:15.1f}  {verdict}')
         if lam >= 3.0:
             np.savez_compressed(os.path.join(out, f'{name}.npz'),
                                 S=S.astype(np.float32), kmag=kmag.astype(np.float32),
                                 dir=d.astype(np.float32))
+    # What this bake IS, written down beside it.
+    #
+    # encode_world used to take lambdaWorld from its own WORLD_LAMBDA, which is a
+    # different process reading a different shell. Run it without the variable
+    # and the manifest records the 5.0 default while the fields on disk were
+    # solved at 12 -- and TUNED_PER_WORLD, which is the conversion the entire
+    # port is evaluated in, comes out 2.4x wrong with nothing to notice it. The
+    # bake is the only thing that knows these numbers, so the bake states them.
+    with open(os.path.join(out, 'bake.json'), 'w', encoding='utf-8') as fh:
+        json.dump({'state': BAKED_STATE, 'lambdaWorld': LAMBDA_WORLD,
+                   'primaryPeriod': T, 'oceanG': G}, fh, indent=2)
+
     np.savez_compressed(os.path.join(out, 'bathymetry.npz'),
                         depth=depth.astype(np.float32), sdf=sdf.astype(np.float32),
                         water=water.astype(np.uint8),

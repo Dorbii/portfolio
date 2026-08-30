@@ -7,16 +7,16 @@ export const OCEAN_WORLD_FIELDS = Object.freeze({
     1672,
     941
   ],
-  "residualLo": -34.14524534812881,
-  "residualSpan": 428.2664641477798,
-  "planeK0": 0.5261954069137573,
+  "residualLo": -19.650136354475535,
+  "residualSpan": 385.2942067776352,
+  "planeK0": 0.5329304337501526,
   "planeDir": [
-    0.5056008378103126,
-    0.8627675195587221
+    0.5856874235629977,
+    0.8105370083346828
   ],
-  "kMax": 1.4407457113265991,
-  "depthMax": 10.934098243713379,
+  "kMax": 1.4083997011184692,
+  "depthMax": 7.393383979797363,
   "focusMax": 2.4000000953674316,
   "sdfMax": 32.0,
-  "lambdaWorld": 5.0
+  "lambdaWorld": 12.0
 } as const);
