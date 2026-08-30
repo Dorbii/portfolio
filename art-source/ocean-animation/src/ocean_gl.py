@@ -178,8 +178,11 @@ class OceanRenderer:
         self._set(prog, uAmpP=p['ampP'], uAmpS=p['ampS'], uAmpC=p['ampC'],
                   uSteep=p['steep'], uSetMix=p['setMix'], uSetCycles=p['setCycles'],
                   uBreakGamma=p['breakGamma'], uWhitecapSteep=p['whitecapSteep'],
-                  # The live layer fades this with the camera; the plate is fixed, so 1.
-                  uOpenWaveVis=1.0,
+                  # The live layer fades this with the camera; the plate is fixed,
+                  # so 1 -- unless something is deliberately rendering what the
+                  # wide shot shows, which is the only way to judge that tier
+                  # offline at all.
+                  uOpenWaveVis=float(os.environ.get('OCEAN_OPEN_WAVE_VIS', 1.0)),
                   uChopGain=p['chopGain'], uJitter=p['jitter'], uStokes=p['stokes'], uStokesDeep=float(p.get('stokesDeep', 1.0)),
                   uCurlScale=float(p.get('curlScale', 110.0)),
                   uCurlGain=float(p.get('curlGain', 0.0)),

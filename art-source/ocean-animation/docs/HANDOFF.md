@@ -660,6 +660,111 @@ two pictures rather than one picture with a dial on it.
 
 ---
 
+## 1F. The wide shot's problem is ALIASING, not detail
+
+The owner, on being shown that the wide-shot target was derived by downsampling
+the close treatment: *"if youre just downsampling from close detail shouldnt we
+work the other way close detail to world view?"* He is right, and following it
+found both the real deficit and the real mechanism.
+
+### Every still statistic said our water and the reference are the same
+
+Orientation coherence versus scale, on the world bake's open water and on the
+reference clip, both at `heavy_crashing_surf`:
+
+```
+factor      world bake      MVP plate
+1.00          0.102           0.128
+0.50          0.200           0.219
+0.25          0.322           0.333
+0.106         0.316           0.442
+0.05          0.302           0.530
+```
+
+Both get MORE directional the further back you stand -- so the coherence was
+always there and the fine detail was hiding it, exactly as the owner said. But
+**the plate is more of a grating at map scale than we are**, and it carries less
+contrast (luma sd 30 against 37). On both of my metrics the thing he approves of
+scores worse than the thing he is complaining about. **Coherence at map scale is
+not the defect, and neither is contrast.** Two more measurements that do not
+discriminate; see section 6.
+
+### Motion does discriminate, and by a factor of four
+
+Mean |dLuma| per half second over water, the statistic from
+`scripts/measure-ocean-motion.mjs` and `src/wide_motion.py`:
+
+```
+                          full density   at the world camera   kept
+  heavy_crashing_surf.mp4     30.7              24.4            80%
+  live layer                  28.5 (capital)     6.4            22%
+```
+
+At the density it was tuned at, our water matches the reference almost exactly.
+Downsample 9.4x and the reference barely loses any movement while we lose
+four fifths of ours. Averaging destroys motion that lives in fine detail and
+preserves motion that lives at large scales, so **the reference sea moves at
+large scales and ours moves in its texture.** That is the "static pattern with a
+shimmer on it" the owner has been describing since the beginning, in a number.
+
+Offline, on `wideopen` (150x84 world px, 80% open water), open water only:
+
+```
+  openWaveVis 0 (as shipped)    2.27      the fade costs 91% of the sea's motion
+  openWaveVis 1 (no fade)      25.23      against 24.4 for the reference
+```
+
+### The decoupling: right diagnosis, and it still failed
+
+`openVis` scaled the height AND its gradient. Slope is height times wavenumber,
+so it lives an octave up: at twelve screen pixels a wave you can still see the
+swell as broad light and dark, and you cannot see its facets. So the height was
+left alone and only `acc.g` faded -- which also closes the trap that killed the
+previous attempt, since `acc.g` sets `totalSteep`, `totalSteep` sets `whitecap`,
+and `whitecap` is a term in the composite's `lineGate`. No slope, no whitecap, no
+strokes.
+
+It worked on every number and on the offline picture. Open-water motion 2.27 ->
+8.71, live world 6.36 -> **19.36** against the reference's 24.4, and the offline
+render at the world camera had no arcs at all: broad tonal swell, white confined
+to the coast. The territory configuration that broke the last attempt was clean
+too.
+
+**And the live world view came back as dense diagonal corduroy.** Worse than
+before the change.
+
+### Why, and it is the finding
+
+The offline picture is a 1440x807 render averaged down to 152x85. **It is
+supersampled 9.4x. The live layer is not.** `wide_target.py`'s own docstring says
+so -- "what the live layer would show at that camera IF it rendered at 1/zc
+supersampling" -- and it was then used as though it predicted the live frame. It
+does not. It predicts the live frame's *content*; the live frame also has all the
+ALIASING that the supersample removes.
+
+So the wide shot's problem was never that the swell is wrong to show. It is that
+the swell is being POINT-SAMPLED at twelve screen pixels a wave, and everything
+finer than that -- the secondary train at 6.9, the chop at 2.5, every harmonic
+above m=1 -- folds back into the frame as a regular weave. Fading the whole field
+to zero removes the aliasing, and takes the motion with it. That is the trade the
+current LoD makes, and it is a crude stand-in for the operation actually wanted:
+
+**Band-limit the field, do not switch it off.** `addSpread` already takes each
+component's wavenumber multiplier `m`, so each component's screen wavelength is
+`lamP * zc / m` and each can be attenuated on ITS OWN resolvability rather than
+all of them on the primary's. The chop and the high harmonics fade first, the
+long swell survives longest, and what is left at the wide shot is smooth moving
+tone -- which is both what a correct mip chain would give and what the ocean
+references describe. It is also the one construction consistent with every
+measurement above: it keeps the large-scale motion (the deficit) and removes the
+sub-pixel content (the aliasing).
+
+Reverted rather than tuned around, per the criterion stated before the attempt.
+Kept: `src/wide_motion.py`, and `OCEAN_OPEN_WAVE_VIS` in `ocean_gl.py`, which is
+the only way to render what the wide shot actually shows.
+
+---
+
 ## 2. Running it
 
 ```bash
