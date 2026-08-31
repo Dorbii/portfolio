@@ -16,6 +16,7 @@ uniform float uDiffuse;
 uniform float uFoamBlend;   // per-step weight of the diffused neighbourhood
 uniform float uFoamDeepFade; // how hard offshore whitecap injection is cut
 uniform float uFoamDeepTau;  // deep-water persistence multiplier (the anti-slab cut)
+uniform float uBreakVis;     // breaker resolvability at this camera; see wave.frag
 uniform float uInjFilament, uInjCrestW, uInjCrestLevel, uInjCrestBoost, uInjCrestRun;
 uniform float uInjPatch, uInjPatchScale;
 uniform float uFirst;        // 1.0 on the very first step
@@ -154,8 +155,21 @@ void main()
     float alongRun = mix(1.0, crestLine, uInjFilament);
     breaking = mix(breaking, max(breaking, brRun), alongRun);
     whitecap = mix(whitecap, max(whitecap, wcRun), alongRun);
+    // The shore band is 46 TUNED px wide -- at map zooms that is most of the
+    // visible water around a coast, and its unconditional floor injection
+    // painted foam dashes over the whole shelf after every other source was
+    // gated (this was the LAST author of the capital-tier fabric, found by
+    // elimination). The immediate swash line keeps its foam at every zoom;
+    // the wider band fades with breaker resolvability like breaking itself.
+    // The ribbon window is written against LIVE depths: the world bake's
+    // depth channel tops out near 18 tuned px (the offline plate reaches
+    // 105), so a 9-px window called most of the shelf "waterline" and the
+    // gate never closed -- the probe showed fresh foam injecting on 9.4% of
+    // the water with breaking AND whitecap both reading zero.
+    float shoreVis = mix(uBreakVis, 1.0, 1.0 - sstep(1.0, 3.2, depthPx));
     float inj = (breaking * uInjBreak + whitecap * uInjWhitecap * deepFade) * lineGate * patch
-              + shoreZone * uInjShore * (0.22 + 0.78 * clamp(hn, 0.0, 1.0)) * (0.30 + 0.70 * breaking);
+              + shoreZone * uInjShore * shoreVis
+                * (0.22 + 0.78 * clamp(hn, 0.0, 1.0)) * (0.30 + 0.70 * breaking);
     inj *= water;
 
     // saturating accumulation: repeated breaking builds a real sheet of

@@ -91,6 +91,32 @@ variation), injPatchScale 420→640, injWhitecap 2.12→4.5, crestLineFloor
 0.30→0.05. Live before/after at the identical camera: the stripe weave breaks
 into dark water between distinct white masses; tone p50 56.9 vs C3's 55.8.
 
+## The capital-tier crosshatch — state of the bisection (2026-08-31 late)
+
+The owner sees a woven dash-grid at capital/territory zooms. Established with
+the validated instruments above, in order:
+
+- NOT stale serving (a second dev server on :3001 WAS stale and was killed,
+  but :3000 reproduces the hatch).
+- NOT the fine wave trains: uSecVis/uChopVis (runtime, exported) fade the
+  secondary/chop by their own screen wavelength — verified at span 0.20.
+- NOT breaking or whitecapping: uBreakVis gates both (probe reads them ~zero
+  at span 0.42) — breakers consolidate into the ungated swash ribbon.
+- LARGELY FOAM, but not only: zeroing injBreak+injWhitecap+injShore live
+  removes the fat ribbon and masses; a pale dash-grid persists.
+- The residual grid also survives sky/gloss/glitter/ripple/fineGloss zeroed
+  on top of no-injection.
+- `water.bare=1` kills the dash grid (so it IS drawn-layer content, findable
+  by stacking the floor and adding groups back) and exposes the uBare leak
+  (white foam scribbles in bare mode).
+
+Next session: stack ONE floor capture (bare + all injections zeroed), then
+add drawn groups back one at a time at span 0.42. The dash-grid's author is
+inside the drawn layers and now has nowhere to hide. Fix the uBare foam leak
+in the same pass. The shoreVis ribbon window in foam.frag was retuned against
+a depth-units misreading — re-derive it from the probe's actual depthPx
+distribution before trusting it.
+
 ## Open — the owner's direction, and the order I would take it
 
 **The direction (owner, 2026-08-30 night), in his words: "it needs to feel
@@ -232,13 +258,28 @@ Anything magenta is a hole. This found the river gap immediately after a
 distance-averaged alpha profile had suggested a 60px translucent band along every
 coastline that did not exist — the average was measuring coastline roughness.
 
-### Ablation
+### Ablation — read this whole section, the mechanism has classes
 
-To find which term is responsible for a look, zero the others with
-`?water.u.<uniform>=<multiplier>` and capture. Note it is a MULTIPLIER, so a
-uniform already at 0 cannot be raised this way — that needs a preset change and
-an export. Working down to a floor with every named term off, and then adding
-groups back one at a time, is what located the gloss haze.
+`?water.u.<uniform>=<multiplier>` multiplies PRESET-DRIVEN uniforms only (the
+~170 that come from oceanStates.ts). It does NOT touch RUNTIME uniforms —
+uOpacity, uOpenWaveVis, uSecVis, uChopVis, uBreakVis, uZc, and the rest of
+RUNTIME_UNIFORMS in WaterSurfaceRenderer.ts — those overrides are silently
+ignored, and half a night (2026-08-31) went into "null results" that were the
+mechanism, not the water. Before trusting any null, prove the override bites:
+`water.u.uExposure=0.25` visibly darkens the sea in one capture. It is a
+MULTIPLIER, so a uniform already at 0 cannot be raised — that needs an export.
+
+Other validated instruments, all confirmed working 2026-08-31:
+- `water.bare=1` — the built-in floor: strips drawn layers to geometry+base.
+  KNOWN LEAK: thin white foam scribbles survive bare (some bright term is
+  missing its (1-uBare) gate — find and fix it while bisecting).
+- `?water.probe=1` + capture `--probe 1` — per-channel field stats off the
+  GPU. This is what proved breaking/whitecap were truly gated while foam kept
+  arriving (the injShore floor), and it beats any amount of theorising.
+- `?layers=1` + capture `--hide L1_2` etc. — layer-inspector hides; L1_1
+  "Ocean motion" off shows the water's static frame.
+- Two dev servers on one tree serve stale module graphs: `netstat` for 3000
+  AND 3001 before believing any "nothing changed".
 
 ### Tools
 

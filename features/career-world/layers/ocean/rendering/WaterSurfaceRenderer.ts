@@ -418,6 +418,7 @@ export class WaterSurfaceRenderer {
   private openWaveVis = 1;
   private secVis = 1;
   private chopVis = 1;
+  private breakVis = 1;
   /**
    * ?water.raw -- draw the sea with the LoD policy switched off.
    *
@@ -1057,6 +1058,12 @@ export class WaterSurfaceRenderer {
     // plate, whose camera resolves everything.
     this.secVis = smoothstep(8, 18, tunedWavelength(OCEAN_FAMILIES.secondary.period) * zc);
     this.chopVis = smoothstep(8, 18, tunedWavelength(OCEAN_FAMILIES.chop.period) * zc);
+    // A breaking dash is ~60 tuned px of whitewater. On the capital's wide
+    // shallow shelf the deep-water attenuation never applies (depth-gated by
+    // design), so at map zooms every shelf crest broke in 5-10 screen-px
+    // dashes -- surf as fabric. Unresolvable breakers consolidate into the
+    // swash ribbon, which wave.frag leaves ungated.
+    this.breakVis = smoothstep(10, 24, 60 * zc);
     // TRIED AND REVERTED. The wide shot's sea IS too plain -- measured against
     // the tuned plate downsampled to this camera's own pixel density, luma sd
     // 18.3 against 38.4 and 0.12% of pixels bright against 6.6% -- and putting
@@ -1247,6 +1254,7 @@ export class WaterSurfaceRenderer {
     // Per-family resolvability; see the derivation beside waveDetail.
     set1("uSecVis", this.secVis);
     set1("uChopVis", this.chopVis);
+    set1("uBreakVis", this.breakVis);
     set1("uTrainWarp", this.trainWarp);
     set2("uDirDeep", DIR_PRIMARY);
     set2("uDirSecond", DIR_SECONDARY);
@@ -1466,6 +1474,7 @@ export const RUNTIME_UNIFORMS = [
   "uOpenWaveVis",
   "uSecVis",
   "uChopVis",
+  "uBreakVis",
   "uTrainWarp",
   "uTime",
   "uLoop",

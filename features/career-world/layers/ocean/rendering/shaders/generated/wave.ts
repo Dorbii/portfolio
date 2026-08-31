@@ -410,6 +410,13 @@ uniform float uAmpP, uAmpS, uAmpC;      // base amplitudes, px
 // live layer computes these from each family's own screen wavelength; the
 // offline plate pins both to 1.
 uniform float uSecVis, uChopVis;
+// And the same rule for BREAKERS: a breaking dash is a few tens of tuned px
+// long_, and on the capital's wide shallow shelf the deep-water attenuation
+// never applies (it is depth-gated on purpose). At map zooms every crest on
+// the shelf broke in 5-10 screen-px dashes -- surf rendered as fabric. An
+// unresolvable breaker consolidates into the swash ribbon at the waterline,
+// which this_ deliberately does NOT gate. Offline pins 1.
+uniform float uBreakVis;
 uniform float uSteep;                   // Gerstner sharpening 0..1
 uniform float uSetMix;                  // depth of the wave-set envelope
 uniform float uSetCycles;               // set cycles per loop
@@ -838,6 +845,7 @@ void main()
     float reach = noise4(px + loopScroll(uDirDeep, 6.0, 620.0), 620.0).g;
     breaking *= sstep(0.30, 0.72, patch_);
     breaking *= 0.20 + 0.80 * sstep(0.34, 0.74, reach);
+    breaking *= uBreakVis;
 
     // Whitecapping keyed on the TOTAL surface slope, which is the physical
     // criterion. Using the per-component a*k was wrong twice over: it read the
@@ -879,7 +887,7 @@ void main()
     float wcExcess = max(totalSteep * groupGate - uWhitecapSteep, 0.0);
     float whitecap = clamp(uWhitecapGain * wcExcess * wcExcess, 0.0, 1.0)
                    * (0.40 + 0.60 * frontFace)
-                   * sstep(-0.35, 0.35, hn) * water;
+                   * sstep(-0.35, 0.35, hn) * water * uBreakVis;
     // run-up wash: the shallowest water is white whenever the surface is up,
     // independent of whether a crest is formally "breaking" there
     float swashZone = 1.0 - sstep(0.6, 6.5, depth);

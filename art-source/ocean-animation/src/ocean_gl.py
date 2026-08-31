@@ -183,7 +183,7 @@ class OceanRenderer:
                   # The plate camera resolves every family; the live layer
                   # computes these per camera. Never leave them unbound -- a
                   # GL-default 0 silently deletes two of the three trains.
-                  uSecVis=1.0, uChopVis=1.0,
+                  uSecVis=1.0, uChopVis=1.0, uBreakVis=1.0,
                   # The live layer fades this with the camera; the plate is fixed,
                   # so 1 -- unless something is deliberately rendering what the
                   # wide shot shows, which is the only way to judge that tier
@@ -226,6 +226,7 @@ class OceanRenderer:
                   uDiffuse=p['foamDiffuse'], uFoamBlend=p['foamBlend'],
                   uFoamDeepFade=float(p.get('foamDeepFade', 0.93)),
                   uFoamDeepTau=float(p.get('foamDeepTau', 0.18)),
+                  uBreakVis=1.0,
                   uInjFilament=float(p.get('injFilament', 0.0)),
                   uInjCrestW=float(p.get('injCrestW', 5.0)),
                   uInjCrestLevel=float(p.get('injCrestLevel', 0.35)),
