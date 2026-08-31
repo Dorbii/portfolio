@@ -100,17 +100,12 @@ language. The open sea wants to read as PAINT: mostly flat dark water, waves
 and foam as few, large, deliberately drawn shapes — the way C3's own painter
 handled open water.
 
-1. **The diagonal banding lives in the BASE COLOUR, below every gain.**
-   Established by a live floor test (2026-08-30 night): with faceLift,
-   shadowGain, crestGain, transGain, troughGain, sheen, specGain, chopGlint,
-   streakGain, licTone AND reliefLift all zeroed at once, the light/dark
-   diagonal banding is still fully present
-   (`diagnostics/codexref/painted_floor2.png`). The palette mapping itself is
-   keyed per-crest on the wave field. Do NOT spend another session sweeping
-   gain uniforms — rebuild the deep-water base colour to be flat/group-scale,
-   with per-crest tone allowed only inside events and the surf zone. This is
-   the composition pass the style direction requires, and it is shader work in
-   composite.frag, not tuning.
+1. **DONE (`ef3a988`): the open sea is paint.** The banding lived in the base
+   colour painters, below every gain — composite.frag now gates them all with
+   ONE factor, `openPaint`: full strength at events and the surf zone, floored
+   at `openPaint=0.25` (heavy state) on the open sea. Other states keep 1.0.
+   Tune the floor, never re-scatter the painters. Live proof:
+   `diagnostics/codexref/paint_live.png`.
 2. **Foam threads, not blobs.** `1067416` made whitecapping rare and
    group-clustered (the fabric-density is broken), but C3's open-water foam is
    thin curving THREADS and ours fattens into blobs; as drawn shapes the
