@@ -447,6 +447,7 @@ uniform float uFoamBlend;   // per-step weight of the diffused neighbourhood
 uniform float uFoamDeepFade; // how hard offshore whitecap injection is cut
 uniform float uFoamDeepTau;  // deep-water persistence multiplier (the anti-slab cut)
 uniform float uBreakVis;     // breaker resolvability at this_ camera; see wave.frag
+uniform float uShoreFloor;   // shore injection that arrives with NO wave breaking there
 uniform float uInjFilament, uInjCrestW, uInjCrestLevel, uInjCrestBoost, uInjCrestRun;
 uniform float uInjPatch, uInjPatchScale;
 uniform float uFirst;        // 1.0 on the very first step
@@ -620,9 +621,27 @@ void main()
     // 18 px shelf and 60% beyond 46. Measure the asset, never infer the
     // units from a symptom.
     float shoreVis = mix(uBreakVis, 1.0, 1.0 - sstep(2.0, 7.0, depthPx));
+    // THE COAST IS NOT A FOAM GUTTER. That 0.30 was a floor: three tenths of
+    // the shore injection arrived everywhere along the band whether or not a
+    // wave was breaking there, so foam accumulated into a continuous white rim
+    // following the coastline exactly -- the owner's "dense foam around the
+    // coast... it needs to look like the water splashes on the cliff, not
+    // collecting foam on the edge". This file's own note about the teal band
+    // says the same thing about constant-width bands: they read as an outline
+    // drawn around the land.
+    //
+    // Water hits a shore in BURSTS, at the places a wave happens to be
+    // arriving, and the rest of the coast is dark between them. So the floor
+    // drops to a trace (uShoreFloor), breaking carries the rest, and a
+    // travelling noise along the shore clumps it further -- a set arrives HERE,
+    // then over THERE, and never everywhere at once.
+    float coastPatch = 0.20 + 1.35 * sstep(0.34, 0.78,
+        noiseAt(px + loopScroll(uDirDeep, 7.0, 260.0), 260.0) * 0.66
+      + noiseAt(px * 2.3 + vec2(77.0, 31.0), 110.0) * 0.34);
     float inj = (breaking * uInjBreak + whitecap * uInjWhitecap * deepFade) * lineGate * patch_
-              + shoreZone * uInjShore * shoreVis
-                * (0.22 + 0.78 * clamp(hn, 0.0, 1.0)) * (0.30 + 0.70 * breaking);
+              + shoreZone * uInjShore * shoreVis * coastPatch
+                * (0.22 + 0.78 * clamp(hn, 0.0, 1.0))
+                * (uShoreFloor + (1.0 - uShoreFloor) * breaking);
     inj *= water;
 
     // saturating accumulation: repeated breaking builds a real sheet of

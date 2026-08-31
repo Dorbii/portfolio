@@ -185,6 +185,7 @@ class OceanRenderer:
                   # GL-default 0 silently deletes two of the three trains.
                   uSecVis=1.0, uChopVis=1.0, uBreakVis=1.0, uFlowScale=1.0,
                   uShortSurf=float(p.get('shortSurf', 1.0)),
+                  uShoreFloor=float(p.get('shoreFloor', 0.30)),
                   # The live layer fades this with the camera; the plate is fixed,
                   # so 1 -- unless something is deliberately rendering what the
                   # wide shot shows, which is the only way to judge that tier
@@ -285,6 +286,7 @@ class OceanRenderer:
                   uCrestGroup=float(p.get('crestGroup', 0.0)),
                   uSeabedMix=float(p.get('seabedMix', 0.0)),
                   uFoamRead=float(p.get('foamRead', 1.0)),
+                  uLineGroup=float(p.get('lineGroup', 0.0)),
                   uSeabedDepth=float(p.get('seabedDepth', 20.0)),
                   uSeabedScale=float(p.get('seabedScale', 95.0)),
                   uPaintBands=float(p.get('paintBands', 6.0)),

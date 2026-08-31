@@ -33,6 +33,7 @@ uniform float uFoamEdge;    // drawn rim around every foam shape
 uniform float uCrestGroup;  // how far per-crest painting is gated by the group envelope
 uniform float uSeabedMix, uSeabedDepth, uSeabedScale;  // the bottom, seen through the water
 uniform float uFoamRead;    // radius (px) the foam field is read at, so its edges are curves
+uniform float uLineGroup;   // how far the crest-line floor is chosen by the group envelope
 uniform float uSprayGain;
 uniform float uExposure, uSat, uVigMix;
 uniform float uAbyssMix;   // how far deep water reaches toward the abyss colour
@@ -905,7 +906,24 @@ void main()
     // coming OUT of it.
     float peakT = sstep(0.45, 0.95, hn) * eventW;
     base = mix(base, cShallow * 1.25, clamp(peakT * uEventTeal, 0.0, 0.70) * (1.0 - uBare));
-    float lineGate = clamp(breaking * 1.35 + whitecap * 1.0 + uCrestLineFloor, 0.0, 1.0);
+    // A FEW crests get a drawn line, not all of them and not none.
+    //
+    // The floor was 0.30 once and put a stroke on every crest, which is
+    // hatching; cutting it to 0.05 removed the hatching and, with breaking now
+    // deliberately rare, left the sea with almost no long drawn marks at all.
+    // Measured against the capital's art, that is the whole remaining gap:
+    // edge coherence 0.399 against 0.483, and four separate mechanisms
+    // (stronger crest gain, anisotropic lace, the line integral, flow streaks)
+    // each moved it by 0.01 or less, because none of them draws a LINE.
+    //
+    // The group envelope chooses which crests are worth drawing, so the sea
+    // gets a handful of long continuous strokes where it is working and clean
+    // water elsewhere -- which is how the concept art draws a wave, and the
+    // same "two thirds of it in one third of the groups" that gates everything
+    // else here.
+    float lineSel = mix(1.0, sstep(1.02, 1.42, bankG), uLineGroup);
+    float lineGate = clamp(breaking * 1.35 + whitecap * 1.0
+                         + uCrestLineFloor * lineSel, 0.0, 1.0);
     float lineA = crestLine * lineGate * alongVary;
     // The event's arc draws toward SOLID white; the quiet sea's residual
     // strokes keep the old thin mix.

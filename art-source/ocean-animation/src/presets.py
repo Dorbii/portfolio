@@ -123,7 +123,7 @@ COMMON = dict(
     # The paint pass (composite.frag). 0 = off; the live state turns it on.
     paintMix=0.0, paintBands=6.0, paintEdge=0.28, paintEdgeW=1.8, foamEdge=0.0, crestGroup=0.0,
     # The seabed seen through the water; 0 = off.
-    seabedMix=0.0, seabedDepth=20.0, seabedScale=95.0, foamRead=1.0, shortSurf=1.0,
+    seabedMix=0.0, seabedDepth=20.0, seabedScale=95.0, foamRead=1.0, shortSurf=1.0, lineGroup=0.0, shoreFloor=0.30,
     # How far deep water reaches toward the abyss colour. See composite.frag.
     abyssMix=0.95,
     # Primary-family harmonics. Chosen by the Stage-1 crest tracker, not by eye:
@@ -432,7 +432,7 @@ PRESETS['heavy_crashing_surf'] = dict(
     # over the rocks, which is the effect that was wanted.
     seabedMix=0.55, seabedDepth=36.0, seabedScale=95.0,
     # Foam read at 1.8 px so its boundaries are curves, not dither.
-    foamRead=1.8, shortSurf=0.22,
+    foamRead=1.8, shortSurf=0.22, lineGroup=1.0, shoreFloor=0.07,
     # THE FOAM SPECKLE WAS THE CARVE, not the coverage. Reading the foam field
     # smoothed helped a little and no more, because the erosion that follows it
     # -- a lace ridge evaluated per pixel at 40 px -- puts the pixel structure
