@@ -420,6 +420,7 @@ uniform float uShadowGain, uShadowStep;
 uniform float uCrestLineW, uCrestLevel, uLaceLineW, uLaceLineGain, uFoamMass;
 uniform float uCrestLineFloor, uLaceLineThr, uFoamSolid;
 uniform float uPosterize, uBands, uBandSoft;
+uniform float uBandEdge, uBandEdgeW;  // painted accent drawn on each tonal step
 uniform float uSprayGain;
 uniform float uExposure, uSat, uVigMix;
 uniform float uAbyssMix;   // how far deep water reaches toward the abyss colour
@@ -1462,6 +1463,26 @@ void main()
         float f = fract(x);
         float snapped = (floor(x) + smoothstep(0.5 - uBandSoft, 0.5 + uBandSoft, f)) / bands;
         base *= mix(1.0, snapped / L, uPosterize);
+
+        // PAINTED NOISE. The owner's synthesis, and the answer to a measured
+        // problem: procedural water cannot be tuned into painted art, because
+        // noise and paint differ in KIND -- measured against the land art in
+        // the same frame, the sea carried 54% more pixel-scale energy, less
+        // form-scale structure, and less coherent edges. So keep the noise for
+        // WHERE things are, and change what is DRAWN: quantise the tone into a
+        // few flat steps (above) and then draw the boundary between them.
+        //
+        // That accent is the whole trick. An illustration defines a form with
+        // an edge; a gradient defines nothing. The band boundary is a level set
+        // of a smooth field, so it runs as a long_ coherent curve -- which is
+        // exactly the statistic the land art has and the sea lacked -- and it
+        // arrives at FORM scale rather than pixel scale, because the bands are
+        // few. Width is screen-constant via the derivative, like every other
+        // mark in this_ file.
+        float d = abs(f - 0.5);
+        float gw = length(vec2(dFdx(x), dFdy(x))) + 1e-6;
+        float edge = 1.0 - smoothstep(0.0, uBandEdgeW * gw, d);
+        base *= 1.0 - uBandEdge * edge * water * (1.0 - uBare);
     }
 
     // ---- assemble ---------------------------------------------------------

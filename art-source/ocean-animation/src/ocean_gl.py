@@ -276,6 +276,8 @@ class OceanRenderer:
                   uSlope=p['slope'], uSpecGain=p['specGain'], uShin=p['shininess'],
                   uSheen=p['sheen'], uCrestGain=p['crestGain'], uTroughGain=p['troughGain'],
                   uOpenPaint=float(p.get('openPaint', 1.0)),
+                  uBandEdge=float(p.get('bandEdge', 0.0)),
+                  uBandEdgeW=float(p.get('bandEdgeW', 1.7)),
                   uFacetGain=float(p.get('facetGain', 0.0)),
                   uFacetScale=float(p.get('facetScale', 8.0)),
                   uEventStroke=float(p.get('eventStroke', 0.0)),

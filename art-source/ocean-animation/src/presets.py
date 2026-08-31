@@ -17,7 +17,11 @@ def hx(h):
 COMMON = dict(
     slope=1.90, shininess=13.0, plateInfluence=0.06, plateTint=0.03,
     foamSoft=0.130, laceScale=40.0, laceGain=1.0, foamBaseErode=0.62, laceContrast=1.20, laceRidge=1.6, filament=0.46,
-    saturation=0.95,
+    # Measured against the land art in the same frame: the sea ran sat 0.59
+    # against the land's 0.46 and the world source art's own 0.21 -- a
+    # jewel-toned sea in a muted olive-slate illustration, which is most of why
+    # it read as a foreign object. 0.68 puts it inside the land's key.
+    saturation=0.68,
     # Pre-break wave volume: hollow -> rising translucent face -> sharpening
     # lip -> collapse. Without these the wave has no body before it breaks and
     # the render reads as foam ON water instead of waves WITH foam on them.
@@ -106,7 +110,11 @@ COMMON = dict(
     # field (the wisps) is the shape that can.
     markCell=7.0, markLen=4.2, markWid=1.1, markDensity=0.55, markWander=0.55,
     markGain=0.0,
-    posterize=0.07, bands=22.0, bandSoft=0.42,
+    # PAINTED NOISE (composite.frag): flat tonal steps with a drawn accent on
+    # each boundary. 22 bands at 7% was a whisper over a continuous gradient --
+    # invisible, and a gradient is what reads as photograph. Few bands, a real
+    # blend, and an edge that makes each step a FORM.
+    posterize=0.55, bands=7.0, bandSoft=0.14, bandEdge=0.20, bandEdgeW=1.7,
     # How far deep water reaches toward the abyss colour. See composite.frag.
     abyssMix=0.95,
     # Primary-family harmonics. Chosen by the Stage-1 crest tracker, not by eye:
@@ -349,7 +357,11 @@ PRESETS['heavy_crashing_surf'] = dict(
     # scale, not per-crest bands. Aged foam goes translucent (foamVeil 0.88
     # -> 0.55) and the WISPS -- level-set filaments, connected by
     # construction -- carry the white as the aerial references' lace.
-    groupTone=0.40, wispGain=2.2, wispW=3.8,
+    # 0.40 -> 0.90: the painted bands need FORMS to outline. Measured against
+    # the land art in frame, form-scale energy went 6.74 -> 7.33 against the
+    # land's 8.12 while granularity fell 1.06 -> 1.00; at 2.0 local contrast
+    # overshot the land (27.8 against 21.5), so this is the top of the range.
+    groupTone=0.90, wispGain=2.2, wispW=3.8,
     # Subsurface teal flash under events (stylized-water-brief.md device 3).
     eventTeal=0.55,
     sprayLife=1.55, spraySpread=64.0, sprayInject=2.6, sprayGate=0.33, sprayGain=1.05,
