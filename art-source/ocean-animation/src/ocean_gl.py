@@ -180,6 +180,10 @@ class OceanRenderer:
                   uBreakGamma=p['breakGamma'], uWhitecapSteep=p['whitecapSteep'],
                   uWhitecapGain=float(p.get('whitecapGain', 60.0)),
                   uGroupGateExp=float(p.get('groupGateExp', 2.6)),
+                  # The plate camera resolves every family; the live layer
+                  # computes these per camera. Never leave them unbound -- a
+                  # GL-default 0 silently deletes two of the three trains.
+                  uSecVis=1.0, uChopVis=1.0,
                   # The live layer fades this with the camera; the plate is fixed,
                   # so 1 -- unless something is deliberately rendering what the
                   # wide shot shows, which is the only way to judge that tier

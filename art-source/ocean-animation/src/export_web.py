@@ -755,7 +755,7 @@ ALIAS = {
 }
 # Set by the renderer every frame, not by the preset table.
 RUNTIME = {'uRes', 'uTime', 'uLoop', 'uScrollLoop', 'uDt', 'uFirst', 'uG', 'uFlatOcean', 'uBare', 'uLightDirection',
-           'uOpenWaveVis',
+           'uOpenWaveVis', 'uSecVis', 'uChopVis',
            'uDirDeep', 'uDirSecond', 'uCamOrigin', 'uCamSpan', 'uPrevOrigin', 'uPrevSpan',
            'uZ', 'uZc', 'uOpacity', 'uTrainWarp',
            'uPeriodP', 'uPeriodS', 'uPeriodC', 'uOmegaS'}

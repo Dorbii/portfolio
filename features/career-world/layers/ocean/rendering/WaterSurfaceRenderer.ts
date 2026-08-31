@@ -416,6 +416,8 @@ export class WaterSurfaceRenderer {
   private renderScale = 1;
   private zc = 1;
   private openWaveVis = 1;
+  private secVis = 1;
+  private chopVis = 1;
   /**
    * ?water.raw -- draw the sea with the LoD policy switched off.
    *
@@ -1045,6 +1047,16 @@ export class WaterSurfaceRenderer {
     ));
     const viewTilt = (LAND_ART_OBLIQUE_DEGREES * oblique) / tunedTilt;
     const waveDetail = smoothstep(20, 45, lamP);
+    // Per-family LoD, the other half of the unresolvable-wave rule. waveDetail
+    // watches the PRIMARY's screen wavelength, but the capital-tier crosshatch
+    // came from the SECONDARY and CHOP trains sitting at a few screen pixels
+    // while the primary still resolved fine: every unresolvable fine crest
+    // whitecapped and stroked, which drew the woven fabric the owner kept
+    // circling. Each train now fades by its own screen wavelength; the shader
+    // side is uSecVis/uChopVis in wave.frag, pinned to 1 for the offline
+    // plate, whose camera resolves everything.
+    this.secVis = smoothstep(8, 18, tunedWavelength(OCEAN_FAMILIES.secondary.period) * zc);
+    this.chopVis = smoothstep(8, 18, tunedWavelength(OCEAN_FAMILIES.chop.period) * zc);
     // TRIED AND REVERTED. The wide shot's sea IS too plain -- measured against
     // the tuned plate downsampled to this camera's own pixel density, luma sd
     // 18.3 against 38.4 and 0.12% of pixels bright against 6.6% -- and putting
@@ -1232,6 +1244,9 @@ export class WaterSurfaceRenderer {
     // applied inside the wave pass after the RMS normalisation, so every term
     // downstream of the height field quietens in step. See wave.frag.
     set1("uOpenWaveVis", this.openWaveVis);
+    // Per-family resolvability; see the derivation beside waveDetail.
+    set1("uSecVis", this.secVis);
+    set1("uChopVis", this.chopVis);
     set1("uTrainWarp", this.trainWarp);
     set2("uDirDeep", DIR_PRIMARY);
     set2("uDirSecond", DIR_SECONDARY);
@@ -1449,6 +1464,8 @@ export class WaterSurfaceRenderer {
 export const RUNTIME_UNIFORMS = [
   "uRes",
   "uOpenWaveVis",
+  "uSecVis",
+  "uChopVis",
   "uTrainWarp",
   "uTime",
   "uLoop",

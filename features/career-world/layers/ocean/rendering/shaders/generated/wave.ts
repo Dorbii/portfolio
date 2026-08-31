@@ -402,6 +402,14 @@ vec4 fieldA(vec2 s) {
 
 
 uniform float uAmpP, uAmpS, uAmpC;      // base amplitudes, px
+// Per-family LoD: how much of THIS train the camera can resolve. uOpenWaveVis
+// gates the whole open-water field on the PRIMARY's screen wavelength, but
+// the fabric at mid zooms comes from the SECONDARY and CHOP being a few
+// screen pixels while the primary still resolves fine -- every unresolvable
+// crest whitecapped and stroked, which is the capital-tier crosshatch. The
+// live layer computes these from each family's own screen wavelength; the
+// offline plate pins both to 1.
+uniform float uSecVis, uChopVis;
 uniform float uSteep;                   // Gerstner sharpening 0..1
 uniform float uSetMix;                  // depth of the wave-set envelope
 uniform float uSetCycles;               // set cycles per loop
@@ -666,16 +674,18 @@ void main()
     float shS = (uFlatOcean > 0.5) ? 1.0 : A.y;
     vec2 perpS = vec2(-dirS.y, dirS.x);
     float k0S = pow(6.28318530718 / uPeriodS, 2.0) / uG;
-    addSpread(acc, SS, kS, dirS, perpS, k0S, px, uAmpS,        1.000, -0.42 * sp, uPeriodS, j2, shS);
-    addSpread(acc, SS, kS, dirS, perpS, k0S, px, uAmpS * 0.58, 1.310,  0.55 * sp, uPeriodS, j3, shS);
-    addSpread(acc, SS, kS, dirS, perpS, k0S, px, uAmpS * 0.40, 1.870, -0.20 * sp, uPeriodS, j1, shS);
+    float aS = uAmpS * uSecVis;
+    addSpread(acc, SS, kS, dirS, perpS, k0S, px, aS,        1.000, -0.42 * sp, uPeriodS, j2, shS);
+    addSpread(acc, SS, kS, dirS, perpS, k0S, px, aS * 0.58, 1.310,  0.55 * sp, uPeriodS, j3, shS);
+    addSpread(acc, SS, kS, dirS, perpS, k0S, px, aS * 0.40, 1.870, -0.20 * sp, uPeriodS, j1, shS);
 
     // ---- wind chop: short_, shallow-shoaling, deliberately noisy -----------
     float shC = (uFlatOcean > 0.5) ? 1.0 : min(A.z, 1.15);
     vec2 dirC = normalize(mix(dirP, dirS, 0.35) + vec2(nB.r - 0.5, nB.g - 0.5) * 0.25);
     float kC = min(kCraw, 0.235);        // floor the chop wavelength at ~27 px
-    addComp(acc, SC, kC, dirC, uAmpC * uChopGain,      1.000, uPeriodC, j3,        shC);
-    addComp(acc, SC, kC, dirC, uAmpC * 0.55 * uChopGain, 1.740, uPeriodC, j1 * 2.0, shC);
+    float aC = uAmpC * uChopVis;
+    addComp(acc, SC, kC, dirC, aC * uChopGain,      1.000, uPeriodC, j3,        shC);
+    addComp(acc, SC, kC, dirC, aC * 0.55 * uChopGain, 1.740, uPeriodC, j1 * 2.0, shC);
 
     // ---- Gerstner sharpening ---------------------------------------------
     // Real crests are narrow and troughs are broad. In this_ near-plan view that
