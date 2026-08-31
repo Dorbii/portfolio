@@ -166,6 +166,8 @@ COMMON = dict(
     eventStroke=0.0,
     # Swell-bank tone: broad soft brightness riding the group envelope.
     groupTone=0.0,
+    # Subsurface teal flash under breaking events; 0 = off.
+    eventTeal=0.0,
     # Deep-water persistence multiplier; 0.18 is the historic anti-ice-floe
     # cut, kept as the default for states still on dense injection.
     foamDeepTau=0.18,
@@ -348,9 +350,11 @@ PRESETS['heavy_crashing_surf'] = dict(
     # -> 0.55) and the WISPS -- level-set filaments, connected by
     # construction -- carry the white as the aerial references' lace.
     groupTone=0.40, wispGain=2.2, wispW=3.8,
+    # Subsurface teal flash under events (stylized-water-brief.md device 3).
+    eventTeal=0.55,
     sprayLife=1.55, spraySpread=64.0, sprayInject=2.6, sprayGate=0.33, sprayGain=1.05,
     specGain=0.16, sheen=0.034, shadowGain=0.88, crestGain=0.66, troughGain=1.144, transGain=0.72, swash=0.52,
-    foamThrFresh=0.154, foamThrOld=0.59, exposure=0.97,
+    foamThrFresh=0.154, foamThrOld=0.59, exposure=0.97, foamMass=1.18,
     # Darkened ALL the way to the reference plate, hue preserved so the shore
     # keeps its teal. Sampled on C5's water (664k px, foam excluded), the
     # reference runs p5 luma 16.8 / p35 30.2 / p85 71.9 -- its BRIGHTEST water is
@@ -360,8 +364,8 @@ PRESETS['heavy_crashing_surf'] = dict(
     # 20, and no amount of troughGain or abyssMix could reach it -- swept to the
     # limit it stopped at p50 68.5, because the floor is the palette itself.
     palette=dict(abyss=hx('#07192b'), deep=hx('#0c2a40'), mid=hx('#143d58'),
-                 shallow=hx('#1d6b74'), sky=hx('#74abc9'), foamThin=hx('#cfe6e4'), foamBody=hx('#e4edf1'),
-                 foamDense=hx('#f5fafa'), sun=hx('#fff4de')),
+                 shallow=hx('#1d6b74'), sky=hx('#74abc9'), foamThin=hx('#9fb4bc'), foamBody=hx('#e4edf1'),
+                 foamDense=hx('#edf3f3'), sun=hx('#fff4de')),
 )
 
 

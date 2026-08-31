@@ -410,6 +410,7 @@ uniform float uOpenPaint;   // flat-paint floor for per-crest tone on the open s
 uniform float uFacetGain, uFacetScale;   // painted facet sparkle: strength, cell size (tuned px)
 uniform float uEventStroke;              // how much a breaking event fattens and brightens its drawn arc
 uniform float uGroupTone;                // broad swell-bank brightness riding the group envelope
+uniform float uEventTeal;                // subsurface teal flash under breaking events
 uniform float uPlateInfluence, uPlateTint;
 uniform float uFoamThrFresh, uFoamThrOld, uFoamSoft, uLaceScale, uFoamBaseErode, uLaceContrast;
 uniform float uLaceRidge, uFilament;
@@ -1246,6 +1247,13 @@ void main()
     // the variance the reference has, applied where it cannot bend the path.
     float alongVary = 0.30 + 0.70 * sstep(0.26, 0.82,
         formEnv * (0.55 + 0.75 * noiseAt(px + loopScroll(uDirDeep, 8.0, 300.0), 300.0)));
+    // Subsurface teal flash: churned water goes SATURATED TEAL before it goes
+    // white -- Sea of Thieves' peak-mask device, and every aerial reference
+    // shows it as the aerated glow around events. It pre-announces the break
+    // and sells translucency; without it foam sits ON the water instead of
+    // coming OUT of it.
+    float peakT = sstep(0.45, 0.95, hn) * eventW;
+    base = mix(base, cShallow * 1.25, clamp(peakT * uEventTeal, 0.0, 0.70) * (1.0 - uBare));
     float lineGate = clamp(breaking * 1.35 + whitecap * 1.0 + uCrestLineFloor, 0.0, 1.0);
     float lineA = crestLine * lineGate * alongVary;
     // The event's arc draws toward SOLID white; the quiet sea's residual
