@@ -271,7 +271,7 @@ class OceanRenderer:
         c = p['palette']
         self._set(prog, cAbyss=c['abyss'], cDeep=c['deep'], cMid=c['mid'], cShallow=c['shallow'],
                   cFoamThin=c['foamThin'], cFoamBody=c['foamBody'], cFoamDense=c['foamDense'],
-                  cSky=c['sky'],
+                  cSky=c['sky'], uBreakVis=1.0,
                   cSun=c['sun'],
                   uSlope=p['slope'], uSpecGain=p['specGain'], uShin=p['shininess'],
                   uSheen=p['sheen'], uCrestGain=p['crestGain'], uTroughGain=p['troughGain'],

@@ -60,14 +60,21 @@ export function defineWaterRealismProfile(
 }
 
 /**
- * Below the windy state the field was baked from, because the world view wants
- * a restrained ambient sea that reveals its detail on approach rather than a
- * working surf. Raise it toward 1 for weather.
+ * THE state, not a blend. The wave GEOMETRY is baked from heavy_crashing_surf
+ * (export_web asserts it), and every uniform on the heavy row was tuned as a
+ * set against that geometry -- the hard whitecap threshold, the paint gate,
+ * the crash strokes, the palette. At 0.34 the runtime lerped every one of
+ * those two-thirds of the way toward the calm/windy rows, whose soft
+ * pre-threshold whitecap ramps re-covered the sea in dense dashes: a night of
+ * heavy-state tuning was shipping at one-third strength, blended with the
+ * exact old values it replaced. The restrained-ambient-sea intent now lives
+ * where it belongs: in the per-zoom resolvability gates (uSecVis/uChopVis/
+ * uBreakVis), which quiet the wide views without diluting the sea state.
  */
 export const CAREER_WORLD_WATER_REALISM_PROFILE = defineWaterRealismProfile({
   id: "solved-ocean@r1",
   ocean: {
-    weather: 0.34,
+    weather: 1,
     timeScale: 1,
   },
 });

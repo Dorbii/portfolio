@@ -18,6 +18,7 @@ uniform float uFacetGain, uFacetScale;   // painted facet sparkle: strength, cel
 uniform float uEventStroke;              // how much a breaking event fattens and brightens its drawn arc
 uniform float uGroupTone;                // broad swell-bank brightness riding the group envelope
 uniform float uEventTeal;                // subsurface teal flash under breaking events
+uniform float uBreakVis;                 // breaker resolvability at this camera; see wave.frag
 uniform float uPlateInfluence, uPlateTint;
 uniform float uFoamThrFresh, uFoamThrOld, uFoamSoft, uLaceScale, uFoamBaseErode, uLaceContrast;
 uniform float uLaceRidge, uFilament;
@@ -547,7 +548,14 @@ void main()
     float hAhead = texture(texFlow, aheadUV).z;
     float faceS = clamp((hForm - hAhead) * 2.6, 0.0, 1.0);   // surface falling shoreward
     vec2 nS = normalize(grS + vec2(1e-5));
-    float bpF = sstep(0.12, 0.78, bphase);
+    // A pre-break tell is a BREAKER-SCALE feature, so it fades with breaker
+    // resolvability exactly like breaking itself. Without this, the shallow
+    // shelf -- where break phase runs high on every crest by definition --
+    // grew a lip, a rim, a teal face and a hollow on every crest at map
+    // zooms: the capital-tier dash grid, found by stacked live ablation
+    // after every other author was eliminated. These painters are the close-
+    // zoom drama and they are wonderful there; uBreakVis is 1 there.
+    float bpF = sstep(0.12, 0.78, bphase) * uBreakVis;
 
     // 1. the hollow in front of the wave: broad, and deeper the closer the wave
     //    is to breaking. This is the stage that gives the following crest
@@ -608,7 +616,12 @@ void main()
     // what makes a wave read as a form rather than a bump in a field. It is also
     // the only kind of term here that places a mark along a curve: fields with
     // correct statistics still read as texture, strokes read as draughtsmanship.
-    float drawn = max(bpF, uOpenCrest);
+    // ...and at map zooms the same stroke IS the dash-grid fabric: a bright
+    // constant-width contour on every crest of three-pixel waves is hatching
+    // by definition. The stroke is a crest-scale mark, so it fades with
+    // breaker resolvability like every other crest-scale mark; the offline
+    // plate and the close cameras keep it at full strength.
+    float drawn = max(bpF, uOpenCrest * uBreakVis);
     float under = contourLine(hForm, 0.16, lipW * 1.70) * faceS * drawn;
     float lip = contourLine(hForm, 0.58, lipW) * faceS * drawn;
     base = mix(base, cAbyss * 0.58, clamp(under * uLipGain * 0.95, 0.0, 0.82) * (1.0 - uBare));

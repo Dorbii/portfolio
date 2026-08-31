@@ -1056,8 +1056,14 @@ export class WaterSurfaceRenderer {
     // circling. Each train now fades by its own screen wavelength; the shader
     // side is uSecVis/uChopVis in wave.frag, pinned to 1 for the offline
     // plate, whose camera resolves everything.
-    this.secVis = smoothstep(8, 18, tunedWavelength(OCEAN_FAMILIES.secondary.period) * zc);
-    this.chopVis = smoothstep(8, 18, tunedWavelength(OCEAN_FAMILIES.chop.period) * zc);
+    // The bands are set from the port's own measurement (fieldP's comment):
+    // at the capital camera the secondary runs ~14 screen px and MUST be
+    // silent -- silencing it and the chop there dropped orientation coherence
+    // 87% and erased "a fine diagonal hatching over the entire ocean". A
+    // first pass used 8..18 for both, which left the secondary two-thirds on
+    // at exactly that camera; the owner's screenshots found it immediately.
+    this.secVis = smoothstep(16, 32, tunedWavelength(OCEAN_FAMILIES.secondary.period) * zc);
+    this.chopVis = smoothstep(10, 22, tunedWavelength(OCEAN_FAMILIES.chop.period) * zc);
     // A breaking dash is ~60 tuned px of whitewater. On the capital's wide
     // shallow shelf the deep-water attenuation never applies (depth-gated by
     // design), so at map zooms every shelf crest broke in 5-10 screen-px
