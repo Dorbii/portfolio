@@ -405,7 +405,19 @@ PRESETS['heavy_crashing_surf'] = dict(
     # the sea was low-energy and disorganised, so the answer was never less
     # energy. These land it at 10.7/9.7/9.1, contrast 24.2, saturation 0.534
     # against the art's 0.544.
-    groupTone=0.27, wispGain=0.99, wispW=3.8, laceLineGain=0.82,
+    # THE STATIC WAS THE WISPS. Ablated one term at a time at the owner's
+    # camera, zeroing them took fine-scale energy 22.9 -> 14.2 and foam
+    # coverage 15.9% -> 11.8%, where the lace lines, the aeration, the fine
+    # relief and the glitter each moved it by nothing. They are contours of the
+    # foam field's level sets, and at hair width on a field that is granular at
+    # pixel scale a contour is not a filament, it is a dotted line -- which is
+    # what "reads as static/pixels" was, twice, in the owner's own crops.
+    #
+    # Raising them to 0.99 two commits ago was my error: the style metric asked
+    # for more fine energy and these were the cheapest source of it, but energy
+    # of the WRONG KIND is exactly the thing this lane keeps having to unlearn.
+    # Wider, softer and weaker draws the same filaments as marks instead.
+    groupTone=0.27, wispGain=0.45, wispW=6.5, wispSharp=3.0, laceLineGain=0.82,
     # Saturation overshot when it was keyed to open terrain (0.68 put the sea
     # at 0.40 against the capital art's 0.49); this reads 0.46.
     saturation=0.74,
@@ -414,7 +426,11 @@ PRESETS['heavy_crashing_surf'] = dict(
     # bed was invisible past a hair-thin fringe -- only 3.2% of this world's
     # water is shallower than 18 tuned px. Reaching further out is the
     # licence a painted map takes, and it is where the effect earns its keep.
-    seabedMix=0.95, seabedDepth=58.0, seabedScale=95.0,
+    # Dialled against the owner's camera: at 0.95/58 the whole near-shore band
+    # went milky, which reads as fog rather than as seeing the bottom. At
+    # 0.55/36 the sea keeps its deep blue offshore and the shallows open up
+    # over the rocks, which is the effect that was wanted.
+    seabedMix=0.55, seabedDepth=36.0, seabedScale=95.0,
     # Foam read at 1.8 px so its boundaries are curves, not dither.
     foamRead=1.8, shortSurf=0.22,
     # THE FOAM SPECKLE WAS THE CARVE, not the coverage. Reading the foam field

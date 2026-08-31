@@ -656,8 +656,8 @@ const COMPOSITE_HEAVY_CRASHING_SURF: Readonly<Record<string, OceanUniformValue>>
   uRimGain: 0.7,
   uRippleGain: 0.11,
   uSat: 0.74,
-  uSeabedDepth: 58.0,
-  uSeabedMix: 0.95,
+  uSeabedDepth: 36.0,
+  uSeabedMix: 0.55,
   uSeabedScale: 95.0,
   uShadeSmooth: 5.0,
   uShadeSmoothMix: 1.0,
@@ -685,10 +685,10 @@ const COMPOSITE_HEAVY_CRASHING_SURF: Readonly<Record<string, OceanUniformValue>>
   uTroughGain: 1.144,
   uViewTilt: 34.0,
   uVigMix: 0.42,
-  uWispGain: 0.99,
+  uWispGain: 0.45,
   uWispLevel: 0.55,
-  uWispSharp: 7.0,
-  uWispW: 3.8,
+  uWispSharp: 3.0,
+  uWispW: 6.5,
 });
 
 // Ordered calm -> windy -> heavy; the weather scalar walks each triple.
