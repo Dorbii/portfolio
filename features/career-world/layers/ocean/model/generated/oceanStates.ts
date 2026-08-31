@@ -148,7 +148,7 @@ const WAVE_HEAVY_CRASHING_SURF: Readonly<Record<string, OceanUniformValue>> = Ob
   uStokes: 4.2,
   uStokesDeep: 0.18,
   uWhitecapGain: 18.0,
-  uWhitecapSteep: 1.3,
+  uWhitecapSteep: 1.95,
 });
 
 const FOAM_CALM_SWELL: Readonly<Record<string, OceanUniformValue>> = Object.freeze({

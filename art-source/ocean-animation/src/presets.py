@@ -241,7 +241,13 @@ PRESETS['heavy_crashing_surf'] = dict(
     # literature's 5-10%-of-crest-length band -- where the old soft ramp at
     # 0.240 passed 19% of ALL deep pixels every frame and the sea integrated
     # a foam carpet with no zero left in it.
-    breakGamma=0.66, whitecapSteep=1.30, whitecapGain=18.0,
+    # 1.30 was calibrated to the reference plate's statistics (4.6% of deep
+    # water in events). The owner's direction supersedes the plate: "way too
+    # many waves painted... it needs to feel real, not be real." A live
+    # threshold ladder put the illustrated read at ~1.5x that: a handful of
+    # drawn white shapes on dark paint. Feel is the acceptance test now, not
+    # coverage arithmetic.
+    breakGamma=0.66, whitecapSteep=1.95, whitecapGain=18.0,
     preBreak=1.40, faceTeal=1.00, lipGain=1.00, foamErodeK=3.6,
     # licMix STAYS 0, and this is why -- the base preset offers 0.85 and every
     # state overrides it off with no reason recorded, so it looks like an obvious
