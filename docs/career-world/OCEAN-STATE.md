@@ -1,169 +1,209 @@
-# Ocean lane — current state
+# Ocean lane — resume here
 
-Last updated: 2026-08-30 · branch `codex/career-world-rebuild` · this is the ocean
-program's own resume thread. `STATE.md` is the city/director thread and calls this
-"a separate lane"; read that one for city work, this one for water.
+Last updated 2026-08-30 · branch `codex/career-world-rebuild` · head `e825ce9`.
 
-Standing ruling: **the ocean layer owns all water.** Contributors own WHERE water
-is; this layer owns HOW it looks. Inland water was moved under it by owner
-direction and is marked for nuke-and-boot. City-painted water is removed once the
-ocean earns the style; shore crash/swash stays city-owned where the city is
-present.
+This is the water program's own thread. `STATE.md` is the city/director thread
+and calls this "a separate lane": read that one for city work, this one for
+water. Do not resume ocean work from `STATE.md`.
 
-## The generated-shader rule
+---
 
+## What this lane is doing
+
+Replace all water logic and assets in `features/career-world/layers/ocean/` with
+the offline renderer in `art-source/ocean-animation/`. The owner has granted full
+water authority over it.
+
+**The ocean layer owns all water.** Contributors own WHERE water is; this layer
+owns HOW it looks. Inland water was moved under it by owner direction and is
+marked for nuke-and-boot. City-painted water is removed once the ocean earns the
+style; shore crash/swash stays city-owned where the city is present.
+
+## Two rules that will cost you a day each if you miss them
+
+**1. The generated files are generated.**
 `features/career-world/layers/ocean/rendering/shaders/generated/**` and
 `layers/ocean/model/generated/**` are written by
-`art-source/ocean-animation/src/export_web.py`. **Never edit them.** Tune offline,
-re-export, and then VERIFY THE GENERATED ARTEFACT — an export that dies on a
-missing `sub()` anchor leaves the previous shader in place, and a whole afternoon
-went into comparing a change against itself because of it.
+`art-source/ocean-animation/src/export_web.py`. Never edit them. Tune in
+`presets.py` / `shaders/*.frag` / `export_web.py`, then:
 
-## Landed this arc
+```bash
+cd art-source/ocean-animation/src && python export_web.py
+```
 
-- **The foam buffers were dead.** Widening them to RGBA32F silently made every
-  `texture(texPrev, ...)` return black, because `OES_texture_float_linear` was
-  never requested and a 32F target with LINEAR filtering is an incomplete
-  texture. `foam.fresh` sat at exactly `inj * dt`, and 30s of settle read the
-  same as 4s. This is why every injection, lifetime, threshold and suppression
-  sweep moved the picture by nothing. After the fix, on a matched box: fresh
-  0.0060 -> 0.0820 (offline 0.0847), above 0.1 0.91% -> 27.2% (offline 24.9%),
-  whitewater coverage 1.38% -> 3.41% (offline 5.44%). `9b6f0b7`
-- **Spray fired nowhere.** The live layer has no room for the baked impact field
-  so `impactSite` reconstructs it, and the reconstruction crossed the gate on
-  0.048% of the shore band against the baked field's 10.41%. Two structural
-  errors: the score SCALED the site instead of SELECTING it, and the lattice cell
-  copied the offline site SPACING (90) when the offline places its sites ALONG
-  the coast and this lattice is two-dimensional. Cell 28 plus a smoothstep gate:
-  10.99%. `c9795e7`
-- **The gap on the shore was the river, not the sea.** `c1-north-river` hands the
-  estuary to the ocean over its last 200 units, and the ocean does not take it --
-  `build_plates` keeps one connected component and the river is dammed at its
-  mouth in r4, so the ocean field calls that ground land. Ground the terrain
-  calls water and no layer paints: 0.389% of the inland window -> zero. `1840e4d`
+`export_web.py` must be run from `src/`, and every other command from the repo
+root — the Bash tool's cwd persists between calls and this bit me repeatedly.
+**Then verify the generated artefact.** An export that dies on a missing `sub()`
+anchor leaves the previous shader in place, and an afternoon went into comparing
+a change against itself.
 
-## The "not water" arc (2026-08-30)
+**2. Match the reference plate for the SEA STATE.**
+`art-source/ocean-animation/refs/canonical/crossref.json` labels the eight plates.
+The live state is `heavy_crashing_surf` (`OCEAN_BAKED_STATE`), so the targets are
+**C3** (heavy_localized_cliff_impacts) and **C7** (heavy_peak_storm_surf).
 
-The owner's words: *"a solid mass of blue moving with static white on top ...
-0 reflection or shadow work is being conveyed."* Three things landed, and the
-order they were ruled out matters more than any of them.
+I matched **C5** all day. C5 is `long_period_parallel_swell` and is the darkest,
+flattest, least foamy plate in the set. Measured water-only:
 
-Ruled OUT with captures, each of which I had believed:
+| plate | coverage | elongation | reach | fragments/1k | p50 | p90 |
+|---|---|---|---|---|---|---|
+| C3 heavy cliff | 9.12% | 52.05 | 240.9 | 2.71 | 66.0 | 181.5 |
+| C7 peak storm | 11.93% | 78.89 | 303.0 | 2.35 | 70.1 | 159.1 |
+| C2 windy churn | 7.61% | 52.92 | 320.4 | 3.62 | 69.6 | 165.8 |
+| **C5 (wrong)** | 1.84% | 12.41 | 134.8 | 14.26 | 38.0 | 87.1 |
 
-- **Directional spread.** Ours measures anisotropy 1.73-2.28 against the
-  project's own reference plates at 2.47-3.78: we are LESS directional than the
-  target. The reference is MORE striped than ours and still reads as water, so
-  the corduroy is not the sin. `aniso.py` is the measurement -- angle, because
-  it is scale-free where a wavelength in pixels is not.
-- **The foam pass.** Strip it and the mottle stays.
-- **The reflection terms as a group.** Zero gloss, spec, sheen and sky together
-  and the mottle stays.
+Matching C5 pulled the work steadily away from the target for hours: `126d491`
+cut foam coverage from 7.35% to 1.63% to reach C5's 1.84%, when 7.35% was close
+to right. The owner kept saying the sea was not alive enough and was correct
+every time. `e825ce9` reverses it.
 
-The granularity is in the BODY SHADING: with everything drawn zeroed, the bare
-body still carried 39.3 of the full picture's 54.2. And bisecting THAT on open
-water found the floor -- every named term off -- was the best-looking water of
-the set. The style stack was not missing; it was doing the damage.
+---
 
-- **The gloss lobe was haze.** Isolated, gloss alone made the grey-white cloud
-  blobs: p90 luma 111.5 against a floor of 77.5, in soft patches 50-100 px
-  across. composite.frag already says "broad is haze, tight is a highlight" and
-  34 is broad. 340 with double gain turns the clouds into discrete glints. `62c8090`
-- **fresnelP had the wrong sign.** `1 - pow(Ns.z, p)` is monotonically
-  INCREASING in p, so raising it to 13 to escape an older bug made it less
-  selective: flat water at Ns.z 0.94 evaluated to 0.55, mixing sky in at half
-  strength everywhere. 1.6 gives flat 0.09 against a tilted face 0.30. `62c8090`
-- **The crest stroke was being shredded.** `crestLine = contourLine(hPath, ...) *
-  (0.10 + 0.90 * facing)` and facing came off `geom.yz`, the macro gradient --
-  swell PLUS chop -- so a smooth contour was multiplied by a chop-frequency
-  number. Turning uCrestGain up 3x made more speckle, not more line, which is
-  what a shredded stroke does. This file already carried the correction, applied
-  to the shore stages and never to facing itself. `4922a86`
-- **uShadeSmooth was a screen length.** Fixed 5 px at every zoom: 5 tuned px in
-  the frame it was tuned in, 1.7 at the capital approach, ~35 at world. Same bug
-  uShadowStep already carried a comment about. `12fa748`
+## Where it stands (open sea, water-masked, against C3)
 
-**The remaining blocker is the foam pass.** With foam off, the crest strokes now
-draw as long continuous lines. With foam on, its granularity covers them and
-raising the crest gain only brightens the grain. So foam SHAPE -- the thing
-`foam_shape.py` has measured at elongation 15.5 against the reference's 33.3 --
-is now the single thing between here and the reference look, not one item on a
-list.
+| | ours | C3 | |
+|---|---|---|---|
+| foam coverage | 7.71% | 9.12% | close |
+| p99 luma | 220.9 | 223.4 | matched |
+| streak reach | 169.9 | 240.9 | short |
+| **elongation** | **14.70** | **52.05** | **far** |
+| **fragments / 1k** | **7.33** | **2.71** | **far** |
 
-## Where the open sea stands (2026-08-30, end of the autonomous loop)
+The two "far" rows are one fact: **the reference's whitewater is a few large
+connected masses and ours is many separate streaks.** That is the top open item.
 
-Against reference plate C5, matched tuned-pixel density, **both sides masked to
-water**:
+## Open, in the order I would take them
 
-                           ours    reference
-      foam coverage       1.17%        1.84%
-      elongation          11.19        12.41
-      fragments per 1k    15.35        14.26
-      streak reach         56.8        134.8
-      p10 luma             27.2         19.6
-      p50 luma             44.8         38.0
-      p90 luma             90.8         87.1
-      tonal range          63.6         67.6
+1. **Foam connectivity.** Elongation 14.7 against 52, fragments 7.3 against 2.7.
+   Coverage and brightness are right; the masses do not merge. The carve
+   (`uFilament`, `uLaceRidge`, `uFoamErodeK`) is the obvious suspect and reducing
+   all three did NOT fix it (fragments 11.15 -> 8.36 only), so the fragmentation
+   is probably upstream in how injection is distributed, not in the erosion.
+2. **Shoreline gaps at site LoD.** Owner-reported 2026-08-30 with a screenshot:
+   black voids between water and land, his guess is shore detail owned by another
+   layer. Same class as the river gap fixed in `1840e4d`. **Use the magenta
+   method below** — it finds these in one frame.
+3. **Tone.** p50 and p90 still below C3 after the retarget; not yet re-measured
+   since `e825ce9`.
+4. **The ocean pins the sun's elevation and a day/night cycle is coming.**
+   `oceanSunDirection` in `WaterSurfaceRenderer.ts` takes the world light's
+   azimuth and overrides the vertical to a fixed 34 degrees
+   (`TUNED_SUN_VERTICAL`), because the specular calibration is tuned to that
+   elevation. Costs nothing today — the two differ by about a degree. Under the
+   cycle the owner is planning, the land goes to dusk while the sea keeps a
+   permanent mid-afternoon sun. Needs doing before that lands.
+5. **Inland water nuke-and-boot**, assigned to this lane. Its coverage is
+   hand-authored (a river centreline plus ellipse patches) while the terrain's
+   water is derived, so the two drift and the drift is invisible until it is a
+   hole.
+6. **The one-water-authority contract** is agreed in principle and unwritten.
 
-Tone is close: p90 within 4%, range within 6%, median 18% bright. The one real
-outlier is streak reach at 42% of the reference.
+## Rejected — do not retry without new information
 
-**Mask both sides to the same thing.** The reference plate is a third cliff and
-trees, and comparing its whole-frame percentiles against our open-sea capture
-invented a contrast deficit that did not exist -- ours was already the WIDER
-range. A commit was made on that mistake and retracted (d3bb39f).
+- **`licMix`, the flow-aligned line integral** (`758ae02`). Looks like an obvious
+  win: the base preset offers 0.85, every state overrides it to 0 with no reason
+  recorded, and composite.frag says it is "what makes foam form continuous
+  streaks instead of disconnected patches". It marches along the flow direction,
+  which is globally similar, so it combs the WHOLE sea into parallel strokes.
+  Live it read as brushed metal.
+- **Longer foam persistence.** Up to 8x moved streak reach 19.9 -> 21.4 -> 17.5.
+  In deep water the flow is ORBITAL: foam oscillates in place, so a longer life
+  leaves it sitting there longer, not travelling further.
+- **Removing fine relief.** The reference's high-frequency energy is 30.5 against
+  our 25.5 — the plates are MORE detailed than we are. Ours is detailed in the
+  wrong way, not over-detailed.
 
-**Measure captures at the right scale.** Every capture lands at span 0.0825, not
-whatever was requested -- the app clamps -- and the frame is written at CSS scale,
-so zc is about 0.85 screen px per tuned px at that camera. Read it from the
-`.camera.json` beside the image; do not assume the request. Passing zc 2.86 when
-it was 0.85 made every foam number look 3.4x worse than it was and nearly buried
-a fix that had worked.
+## How to measure this layer without fooling yourself
 
-## Open
+Every one of these cost real time today.
 
-- **Foam SHAPE still short.** Elongation 15.5 against the offline's 33.3, streak
-  reach 135 tuned px against 398. Coverage and brightness match; shape does not,
-  and shape is what reads as paint. `foam_shape.py` is the discriminator.
-- **The corduroy.** At territory zoom the sea shows strong regular diagonal
-  banding — the "fabric" the owner keeps naming. Not yet attributed.
-- **Two specks at the river mouth** where r4 calls the ground land, the ocean
-  calls it land, and the land art is transparent anyway. A land-plate hole, not
-  a water one.
-- **Inland water nuke-and-boot**, assigned here by the owner. Its coverage is
-  hand-authored (a centreline plus ellipse patches) while the terrain's water is
-  derived, so the two drift and the drift is invisible until it is a hole.
-- **The one-water-authority contract** is agreed in principle and unwritten.
-- **The ocean FORCES the sun's elevation, and a day/night cycle will break it.**
-  `oceanSunDirection` takes the world light's azimuth and overrides the vertical
-  to a fixed 34 degrees above the water plane (`TUNED_SUN_VERTICAL`), because the
-  specular calibration -- lobe exponents, sheen, the half-vector against the view
-  tilt -- is tuned to that elevation. Today the two elevations differ by about a
-  degree so it costs nothing. Under a cycle the land goes to dusk while the sea
-  keeps a permanent mid-afternoon sun. The owner is planning that cycle
-  (2026-08-30), so this needs doing before it lands: honour the elevation and
-  re-derive the lobes across the range, rather than pinning one.
-- **Rejected, do not retry without new information:** `licMix` (the flow-aligned
-  line integral). See `758ae02` -- it combs the whole sea into parallel strokes
-  rather than lengthening individual streaks.
+- **Read the camera the app actually settled on.** `--span` is a request, not a
+  promise: the app clamps, and every capture at the open-sea camera lands at
+  **0.0825** whatever you ask for. The frame is written at CSS scale, so
+  **zc is about 0.85** screen px per tuned px there, not the 2.86 I was passing
+  to `foam_shape.py`. That made every foam number look 3.4x worse than it was and
+  nearly buried a fix that had worked. The value is in the `.camera.json` written
+  beside the image — read it and compute zc.
+- **Mask both sides to the same thing.** The reference plates are ~40% cliff and
+  trees. Comparing their whole-frame percentiles against an open-sea capture
+  invented a contrast deficit that did not exist, and a commit was made on it and
+  retracted (`d3bb39f`).
+- **`foam_shape.py` applies `--zc-b` to every image after the first.** A
+  three-image call silently rescales the reference. Use the two-image form.
+- **Never trust one frame.** The surf pulses with wave sets; the same config read
+  1.36% and 0.73% twenty minutes apart. `scripts/measure-ocean-motion.mjs`
+  captures over many frames and reports spread.
+- **A null result needs a long settle.** Foam and spray are integrated; use
+  `--settle 22` or more. A null from a short capture is not evidence.
+- **The metric is not the target.** Several times a number moved the right way
+  while the picture did not, and once the picture improved while the number got
+  worse (removing the gloss haze narrowed the luma histogram, because grey cloud
+  over everything widens one). Always look.
 
-## Measuring this layer
+### The magenta method — finds any coverage hole in one frame
 
-Never trust one frame: the surf pulses with wave sets, and the same config read
-1.36% and 0.73% twenty minutes apart. `scripts/measure-ocean-motion.mjs` captures
-over many frames and reports spread. Never trust a null result from a capture
-shorter than the slowest time constant in the buffer. And never compare the
-offline against the live without putting them on the same camera box — the
-capture helper puts the target world point at a viewport FRACTION, not the
-centre, and an offset of a third of a frame once read as 80% water against 46%.
+To find ground that no layer paints, paint the page background and photograph it:
 
-Offline/live probes: `art-source/ocean-animation/src/foam_probe.py` (the offline
-buffers in the live probe's format), `impact_compare.py` (baked vs reconstructed
-impact field), `foam_shape.py` (filament or stipple), and `?water.probe=1` with
-`scripts/capture-ocean-comparison.mjs --probe 1` for the live side.
+```js
+for (const s of ['.career-world__viewport', '.career-world__backdrop', '.career-world'])
+  for (const el of document.querySelectorAll(s)) el.style.background = '#ff00ff';
+```
 
-**To find a coverage hole, paint the backdrop.** Set
-`.career-world__viewport` / `.career-world__backdrop` to `#ff00ff` in the page and
-look: anything magenta is ground no layer paints. A distance-averaged alpha
-profile across the coast suggested a 60px translucent band and there was none —
-the average was measuring coastline roughness. The magenta showed the truth in
-one frame.
+Anything magenta is a hole. This found the river gap immediately after a
+distance-averaged alpha profile had suggested a 60px translucent band along every
+coastline that did not exist — the average was measuring coastline roughness.
+
+### Ablation
+
+To find which term is responsible for a look, zero the others with
+`?water.u.<uniform>=<multiplier>` and capture. Note it is a MULTIPLIER, so a
+uniform already at 0 cannot be raised this way — that needs a preset change and
+an export. Working down to a floor with every named term off, and then adding
+groups back one at a time, is what located the gloss haze.
+
+### Tools
+
+| | |
+|---|---|
+| `src/foam_shape.py` | filament or stipple: coverage, elongation, reach, fragments |
+| `src/aniso.py` | directional spectrum; scale-free, so plates and captures compare directly |
+| `src/foam_probe.py` | the offline buffers in the live probe's format |
+| `src/impact_compare.py` | baked vs reconstructed impact field |
+| `scripts/capture-ocean-comparison.mjs` | live capture; `--probe 1` with `?water.probe=1` |
+| `scripts/measure-ocean-motion.mjs` | multi-frame motion with spread |
+
+Offline scenes live in `art-source/ocean-animation/scenes/`; `match` is built on
+the live camera's actual box (46.28% water against the live 46.4%) and is the one
+to use for offline/live comparison.
+
+---
+
+## What landed 2026-08-30
+
+Read the commit messages — they carry the measurements and the retractions.
+
+| | |
+|---|---|
+| `c9795e7` | spray fired nowhere: the analytic impact reconstruction crossed its gate on 0.048% of the shore band against the baked field's 10.41%. The score scaled the site instead of selecting it, and the lattice cell copied the offline site spacing when the offline places sites ALONG the coast |
+| `1840e4d` | the reported shore gap was the river: `c1-north-river`'s oceanHandoff ceded the estuary to the ocean, and the ocean's field calls that ground land. Terrain water no layer paints: 0.389% -> zero |
+| `12fa748` | `uShadeSmooth`, the shading band-limit radius, was a screen length at every zoom — 5 tuned px offline, 1.7 at the capital, ~35 at world |
+| `62c8090` | the gloss lobe at 34 is haze by composite.frag's own definition, and made the grey-white cloud the owner called "static white on top". 340 with double gain. `fresnelP` had the opposite sign error: `1 - pow(Ns.z, p)` increases in p, so raising it to 13 made the sky term fire at 0.55 on flat water |
+| `4922a86` | the crest stroke was a clean contour multiplied by `facing`, built from the macro gradient (swell PLUS chop), which shredded it. This file already carried that fix for the shore stages and never applied it to `facing` itself |
+| `5155147` | foam was born as dots on a line, because a smooth crest contour was multiplied by the granular whitecap field. A wave breaks along a stretch of its crest, so a trigger now recruits along the tangent |
+| `52613fb` | whitecapping is patchy; every crest broke evenly along its whole length, which is a weave. `injPatch` gates injection on two noise scales times the wave-group envelope |
+| `e825ce9` | **the reference retarget** — see above. Also `foamVeil` 0.26 -> 0.99: offshore whitecaps rendered at a quarter opacity, which is why the open sea was grey mush |
+
+Retracted along the way and worth reading for the reasoning: `d3bb39f` (the
+tonal range was never narrow), `758ae02` (licMix), `a50062b` (a regex edit that
+hit the wrong sea state — there are three, and the first in the file is calm).
+
+## The through-line
+
+Four separate bugs this session were the same mistake: **detail shaded in
+per-pixel rather than drawn on**. The gloss lobe, the chop lambert, the crest
+`facing`, and the foam injection each took a clean field and multiplied it by a
+noisy one. composite.frag says it directly — "the detail is DRAWN on top rather
+than shaded in, which is the one thing that has worked all session" — and the
+codebase keeps re-learning it. If something reads as texture rather than as
+water, look for a smooth thing being multiplied by a granular thing before you
+look anywhere else.
