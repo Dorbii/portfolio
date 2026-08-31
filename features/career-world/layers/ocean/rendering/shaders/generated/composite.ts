@@ -425,6 +425,7 @@ uniform float uPaintMix, uPaintBands, uPaintEdge, uPaintEdgeW;  // the paint pas
 uniform float uFoamEdge;    // drawn rim around every foam shape
 uniform float uCrestGroup;  // how far per-crest painting is gated by the group envelope
 uniform float uSeabedMix, uSeabedDepth, uSeabedScale;  // the bottom, seen through the water
+uniform float uFoamRead;    // radius (px) the foam field is read at, so its edges are curves
 uniform float uSprayGain;
 uniform float uExposure, uSat, uVigMix;
 uniform float uAbyssMix;   // how far deep water reaches toward the abyss colour
@@ -1071,8 +1072,23 @@ void main()
     base = mix(base, mix(cFoamThin, cFoamDense, 0.80), clamp(lip * uLipGain, 0.0, 0.96) * (1.0 - uBare));
 
 
+    // FOAM IS READ SMOOTHED. Every threshold downstream (coverage, the lace
+    // carve, the painted quantisation) crosses a field that is granular at
+    // PIXEL scale, so the crossing dithers and foam arrives as scattered white
+    // pixels -- the owner's "the foam reads as pixels and noise", visible as
+    // speckle in a 1:1 crop. A painted mass needs a boundary that is a curve,
+    // and a curve needs a field that is smooth at the scale the boundary is
+    // drawn. Five taps at uFoamRead px: cheap, and it costs nothing in shape
+    // because the shape lives at ten times this_ scale.
     vec4 F = texture(texFoam, uv);
     F.ba += px;   // offset -> absolute; see the foam material write
+    // ...and the INTENSITY channels are read smoothed, while ba -- the material
+    // coordinates -- are not touched, because averaging a coordinate is
+    // meaningless and would decorrelate the lace lookup it feeds.
+    vec2 fr = vec2(uFoamRead) / uRes;
+    F.rg = F.rg * 0.36
+         + (texture(texFoam, uv + vec2(fr.x, 0.0)).rg + texture(texFoam, uv - vec2(fr.x, 0.0)).rg
+          + texture(texFoam, uv + vec2(0.0, fr.y)).rg + texture(texFoam, uv - vec2(0.0, fr.y)).rg) * 0.16;
 
     // ---- fine surface relief ------------------------------------------------
     // The source plate's water is corrugated at roughly 8-30 px with a lit side

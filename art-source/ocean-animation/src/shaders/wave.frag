@@ -20,6 +20,7 @@ uniform float uAmpP, uAmpS, uAmpC;      // base amplitudes, px
 // offline plate pins both to 1.
 uniform float uSecVis, uChopVis;
 uniform float uFlowScale;   // tuned px/s -> screen px/s for the advected fields
+uniform float uShortSurf;   // how much of the short trains survives the surf zone
 // And the same rule for BREAKERS: a breaking dash is a few tens of tuned px
 // long, and on the capital's wide shallow shelf the deep-water attenuation
 // never applies (it is depth-gated on purpose). At map zooms every crest on
@@ -314,7 +315,21 @@ void main()
     float shS = (uFlatOcean > 0.5) ? 1.0 : A.y;
     vec2 perpS = vec2(-dirS.y, dirS.x);
     float k0S = pow(6.28318530718 / uPeriodS, 2.0) / uG;
-    float aS = uAmpS * uSecVis;
+    // The secondary and the chop are generated as PLANE WAVES from a constant
+    // deep-water wavenumber (see the port's fieldP), so unlike the primary --
+    // whose phase comes from the eikonal solve -- they cannot slow down as
+    // they shoal. Their amplitude is shoaled all the same, which is the wrong
+    // cue twice over: taller AND still travelling at deep-water speed right up
+    // to the beach. Measured, the primary drops to 0.18 of its deep speed in
+    // the shallow band while these hold 1.00.
+    //
+    // Short waves are also the first to go in a real surf zone: breaking is
+    // depth-limited, H/d reaches its limit soonest for the shortest waves, so
+    // by the time you are in the white water the chop is gone and the swell
+    // owns the picture. Fading them where they would otherwise race is both
+    // the honest physics and the fix.
+    float shortSurf = mix(uShortSurf, 1.0, sstep(6.0, 34.0, depth));
+    float aS = uAmpS * uSecVis * shortSurf;
     addSpread(acc, SS, kS, dirS, perpS, k0S, px, aS,        1.000, -0.42 * sp, uPeriodS, j2, shS);
     addSpread(acc, SS, kS, dirS, perpS, k0S, px, aS * 0.58, 1.310,  0.55 * sp, uPeriodS, j3, shS);
     addSpread(acc, SS, kS, dirS, perpS, k0S, px, aS * 0.40, 1.870, -0.20 * sp, uPeriodS, j1, shS);
@@ -323,7 +338,7 @@ void main()
     float shC = (uFlatOcean > 0.5) ? 1.0 : min(A.z, 1.15);
     vec2 dirC = normalize(mix(dirP, dirS, 0.35) + vec2(nB.r - 0.5, nB.g - 0.5) * 0.25);
     float kC = min(kCraw, 0.235);        // floor the chop wavelength at ~27 px
-    float aC = uAmpC * uChopVis;
+    float aC = uAmpC * uChopVis * shortSurf * shortSurf;
     addComp(acc, SC, kC, dirC, aC * uChopGain,      1.000, uPeriodC, j3,        shC);
     addComp(acc, SC, kC, dirC, aC * 0.55 * uChopGain, 1.740, uPeriodC, j1 * 2.0, shC);
 

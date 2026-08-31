@@ -123,7 +123,7 @@ COMMON = dict(
     # The paint pass (composite.frag). 0 = off; the live state turns it on.
     paintMix=0.0, paintBands=6.0, paintEdge=0.28, paintEdgeW=1.8, foamEdge=0.0, crestGroup=0.0,
     # The seabed seen through the water; 0 = off.
-    seabedMix=0.0, seabedDepth=20.0, seabedScale=95.0,
+    seabedMix=0.0, seabedDepth=20.0, seabedScale=95.0, foamRead=1.0, shortSurf=1.0,
     # How far deep water reaches toward the abyss colour. See composite.frag.
     abyssMix=0.95,
     # Primary-family harmonics. Chosen by the Stage-1 crest tracker, not by eye:
@@ -292,7 +292,7 @@ PRESETS['heavy_crashing_surf'] = dict(
     # drawn white shapes on dark paint. Feel is the acceptance test now, not
     # coverage arithmetic.
     breakGamma=0.66, whitecapSteep=1.95, whitecapGain=18.0,
-    preBreak=1.40, faceTeal=1.00, lipGain=1.00, foamErodeK=3.6,
+    preBreak=1.40, faceTeal=1.00, lipGain=1.00, foamErodeK=1.26,
     # licMix STAYS 0, and this is why -- the base preset offers 0.85 and every
     # state overrides it off with no reason recorded, so it looks like an obvious
     # win going begging. It is not. Tried at 0.85 against the shape deficit
@@ -410,7 +410,20 @@ PRESETS['heavy_crashing_surf'] = dict(
     # at 0.40 against the capital art's 0.49); this reads 0.46.
     saturation=0.74,
     paintMix=0.55, foamEdge=0.34, crestGroup=0.85,
-    seabedMix=0.85, seabedDepth=20.0, seabedScale=95.0,
+    # seabedDepth 20 -> 58: clarity falls as exp(-depth/this), and at 20 the
+    # bed was invisible past a hair-thin fringe -- only 3.2% of this world's
+    # water is shallower than 18 tuned px. Reaching further out is the
+    # licence a painted map takes, and it is where the effect earns its keep.
+    seabedMix=0.95, seabedDepth=58.0, seabedScale=95.0,
+    # Foam read at 1.8 px so its boundaries are curves, not dither.
+    foamRead=1.8, shortSurf=0.22,
+    # THE FOAM SPECKLE WAS THE CARVE, not the coverage. Reading the foam field
+    # smoothed helped a little and no more, because the erosion that follows it
+    # -- a lace ridge evaluated per pixel at 40 px -- puts the pixel structure
+    # straight back before the threshold turns it into scattered white dots.
+    # A painted mass wants a boundary that is a curve: erode a third as hard,
+    # at twice the scale, with the filament weight down to match.
+    filament=0.16, laceScale=88.0,
     # Subsurface teal flash under events (stylized-water-brief.md device 3).
     eventTeal=0.55,
     sprayLife=1.55, spraySpread=64.0, sprayInject=2.6, sprayGate=0.33, sprayGain=1.05,
