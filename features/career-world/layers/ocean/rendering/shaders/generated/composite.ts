@@ -423,6 +423,7 @@ uniform float uPosterize, uBands, uBandSoft;
 uniform float uBandEdge, uBandEdgeW;  // painted accent drawn on each tonal step
 uniform float uPaintMix, uPaintBands, uPaintEdge, uPaintEdgeW;  // the paint pass
 uniform float uFoamEdge;    // drawn rim around every foam shape
+uniform float uCrestGroup;  // how far per-crest painting is gated by the group envelope
 uniform float uSprayGain;
 uniform float uExposure, uSat, uVigMix;
 uniform float uAbyssMix;   // how far deep water reaches toward the abyss colour
@@ -770,6 +771,17 @@ void main()
     float eventness = clamp(breaking * 1.5 + whitecap * 1.2, 0.0, 1.0);
     float surfNear = 1.0 - sstep(18.0, 46.0, depth);
     float openPaint = mix(clamp(uOpenPaint, 0.0, 1.0), 1.0, max(eventness, surfNear));
+    // ...and the painters are gated by the GROUP as well, which is what stops
+    // the sea being one uniform corduroy. An envelope that only scales
+    // amplitude still leaves every crest drawn, everywhere, at the same
+    // spacing -- the owner drew those parallel bands on a screenshot. With the
+    // envelope now irregular (see wave.frag), letting it gate the per-crest
+    // painting means whole patches of sea go quiet and flat while others carry
+    // their waves, which is the "two thirds of it happens in one third of the
+    // groups" the statistics describe, applied to the DRAWING rather than to
+    // the breaking.
+    float bankG = clamp(texture(texPath, uv).z, 0.0, 1.9);
+    openPaint *= mix(1.0, clamp(0.30 + 0.85 * bankG, 0.0, 1.35), uCrestGroup);
     // What replaces the per-crest banding: SWELL BANKS. The storm reference
     // the owner sent carries its mass in broad lit/shadow wave bodies, not in
     // foam or texture -- and the group envelope is already that shape, at

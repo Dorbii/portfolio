@@ -116,7 +116,7 @@ COMMON = dict(
     # blend, and an edge that makes each step a FORM.
     posterize=0.55, bands=7.0, bandSoft=0.14, bandEdge=0.20, bandEdgeW=1.7,
     # The paint pass (composite.frag). 0 = off; the live state turns it on.
-    paintMix=0.0, paintBands=6.0, paintEdge=0.28, paintEdgeW=1.8, foamEdge=0.0,
+    paintMix=0.0, paintBands=6.0, paintEdge=0.28, paintEdgeW=1.8, foamEdge=0.0, crestGroup=0.0,
     # How far deep water reaches toward the abyss colour. See composite.frag.
     abyssMix=0.95,
     # Primary-family harmonics. Chosen by the Stage-1 crest tracker, not by eye:
@@ -196,6 +196,7 @@ PRESETS['calm_swell'] = dict(
     ampP=2.30, ampS=1.00, ampC=0.70, chopGain=0.45,
     harmM=(1.0, 1.88, 3.25), harmA=(1.0, 0.24, 0.09),
     spread=19.0, groupDepth=0.58, groupScale=0.399, groupAcross=1.5,
+    groupNoise=620.0, groupIrreg=0.45,
     steep=0.54, setMix=0.50, setCycles=2.0, jitter=0.62,
     deepEnd=15.0, shallowEnd=4.0, tealDepth=17.0,
     breakGamma=0.80, whitecapSteep=0.160,
@@ -224,6 +225,7 @@ PRESETS['windy_rolling_surf'] = dict(
     ampP=3.20, ampS=2.00, ampC=1.50, chopGain=0.55,
     harmM=(1.0, 1.78, 3.05), harmA=(1.0, 0.30, 0.12),
     spread=27.0, groupDepth=0.62, groupScale=0.315, groupAcross=1.9,
+    groupNoise=620.0, groupIrreg=0.45,
     steep=0.66, setMix=0.60, setCycles=3.0, jitter=0.70, ampL=1.05,
     deepEnd=23.0, shallowEnd=9.0, tealDepth=26.0,
     breakGamma=0.72, whitecapSteep=0.280,
@@ -252,6 +254,8 @@ PRESETS['heavy_crashing_surf'] = dict(
     ampP=4.10, ampS=2.35, ampC=2.20, chopGain=0.72,
     harmM=(1.0, 1.72, 2.95), harmA=(1.0, 0.36, 0.16),
     spread=38.0, groupDepth=0.72, groupScale=0.338, groupAcross=2.2,
+    # Group envelope: mostly irregular travelling noise rather than a beat.
+    groupNoise=620.0, groupIrreg=0.72,
     steep=0.94, setMix=0.78, setCycles=2.0, jitter=0.78,
     deepEnd=24.0, shallowEnd=9.0, tealDepth=29.0,
     # The threshold is HARD now (see whitecapGain in COMMON): whitecap =
@@ -376,7 +380,7 @@ PRESETS['heavy_crashing_surf'] = dict(
     # Saturation overshot when it was keyed to open terrain (0.68 put the sea
     # at 0.40 against the capital art's 0.49); this reads 0.46.
     saturation=0.87,
-    paintMix=0.55, foamEdge=0.34,
+    paintMix=0.55, foamEdge=0.34, crestGroup=0.85,
     # Subsurface teal flash under events (stylized-water-brief.md device 3).
     eventTeal=0.55,
     sprayLife=1.55, spraySpread=64.0, sprayInject=2.6, sprayGate=0.33, sprayGain=1.05,

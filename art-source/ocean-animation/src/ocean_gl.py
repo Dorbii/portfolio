@@ -209,7 +209,9 @@ class OceanRenderer:
                   uSpread=float(p.get('spread', 26.0)),
                   uGroupDepth=float(p.get('groupDepth', 0.45)),
                   uGroupScale=float(p.get('groupScale', 0.13)),
-                  uGroupAcross=float(p.get('groupAcross', 1.6)))
+                  uGroupAcross=float(p.get('groupAcross', 1.6)),
+                  uGroupNoise=float(p.get('groupNoise', 620.0)),
+                  uGroupIrreg=float(p.get('groupIrreg', 0.0)))
         self.fboWave.use(); self.ctx.viewport = (0, 0, self.W, self.H)
         vao.render(moderngl.TRIANGLES)
 
@@ -279,6 +281,7 @@ class OceanRenderer:
                   uBandEdge=float(p.get('bandEdge', 0.0)),
                   uPaintMix=float(p.get('paintMix', 0.0)),
                   uFoamEdge=float(p.get('foamEdge', 0.0)),
+                  uCrestGroup=float(p.get('crestGroup', 0.0)),
                   uPaintBands=float(p.get('paintBands', 6.0)),
                   uPaintEdge=float(p.get('paintEdge', 0.28)),
                   uPaintEdgeW=float(p.get('paintEdgeW', 1.8)),

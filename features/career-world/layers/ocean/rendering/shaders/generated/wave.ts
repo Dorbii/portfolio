@@ -443,6 +443,8 @@ uniform float uSpread;  // directional spread half_-angle, degrees
 uniform float uGroupDepth;   // 0..1 depth of the travelling wave-set envelope
 uniform float uGroupScale;   // envelope wavenumber as a fraction of the swell's
 uniform float uGroupAcross;  // cross-crest extent of a group (0 = infinite crests)
+uniform float uGroupNoise;   // group-scale envelope noise, px
+uniform float uGroupIrreg;   // how far the envelope is noise rather than a beat
 
 // One family contributes several components. Scaling the solved phase by m
 // scales the wavenumber by m, and deep-water dispersion then fixes the angular
@@ -628,7 +630,27 @@ void main()
     float across2 = k0g * mg2 * uGroupAcross * 1.7 * dot(px, perpD);
     float g1 = cos(SP * mg1 + across1 - wg1 * uTime + nA.b * 4.0);
     float g2 = cos(SP * mg2 * 1.37 - across2 - wg2 * uTime + 2.1 + nA.r * 3.0);
-    float groupEnv = 1.0 + uGroupDepth * (0.66 * g1 + 0.44 * g2);
+    // TWO COSINES ARE A BEAT, AND A BEAT IS CORDUROY. The owner drew the
+    // parallel bands straight onto a screenshot, and they are this_ term: an
+    // envelope built from two cosines of the same phase field modulates
+    // amplitude on a repeating lattice, so every group is the same size, the
+    // same distance from the next, forever. The literature is explicit that a
+    // real sea is not like that -- group length is broadly DISTRIBUTED
+    // (Longuet-Higgins' envelope statistics), and two thirds of the breaking
+    // happens in one third of the groups (Holthuijsen-Herbers). Both facts
+    // describe irregular patches, not a grating.
+    //
+    // So the envelope carries a travelling NOISE field at group scale
+    // alongside the beat. Noise gives the broad length distribution the
+    // statistics call for and never repeats; the cosines stay, at reduced
+    // weight, because they are what makes the groups TRAVEL with the swell.
+    // Scrolled along the wave direction so a patch_ belongs to the water
+    // rather than to the screen, and loop-quantised like every other scroll.
+    vec2 gpx = px + loopScroll(uDirDeep, 11.0, uGroupNoise);
+    float gN = noiseAt(gpx, uGroupNoise) * 0.62
+             + noiseAt(gpx * 2.1 + vec2(53.0, 131.0), uGroupNoise * 0.45) * 0.38;
+    float groupEnv = 1.0 + uGroupDepth * mix(0.66 * g1 + 0.44 * g2,
+                                             (gN - 0.5) * 2.6, uGroupIrreg);
     // a residual slow global breathing, much weaker than before
     float setEnv = groupEnv * mix(1.0, 0.82 + 0.30 * (0.5 + 0.5 * loopSin(uTime, uSetCycles, nA.b * 0.15)), uSetMix);
 
