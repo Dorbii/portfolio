@@ -421,6 +421,8 @@ uniform float uCrestLineW, uCrestLevel, uLaceLineW, uLaceLineGain, uFoamMass;
 uniform float uCrestLineFloor, uLaceLineThr, uFoamSolid;
 uniform float uPosterize, uBands, uBandSoft;
 uniform float uBandEdge, uBandEdgeW;  // painted accent drawn on each tonal step
+uniform float uPaintMix, uPaintBands, uPaintEdge, uPaintEdgeW;  // the paint pass
+uniform float uFoamEdge;    // drawn rim around every foam shape
 uniform float uSprayGain;
 uniform float uExposure, uSat, uVigMix;
 uniform float uAbyssMix;   // how far deep water reaches toward the abyss colour
@@ -1284,6 +1286,40 @@ void main()
     float crestEdge = sstep(0.66, 0.99, hn) * (0.18 + 0.82 * facing) * (0.20 + 0.80 * lineGate);
     base = mix(base, mix(cFoamThin, cFoamDense, 0.35), crestEdge * uCrestGain * 0.20 * (1.0 - uBare));
 
+    // ---- PAINT PASS: the water body as flat shapes with drawn edges --------
+    //
+    // "Painted noise" done properly. The first attempt quantised the finished
+    // tone, but that tone already carried per-pixel noise, so its level sets
+    // were fractal and the bands came out speckle-edged -- noise wearing a
+    // costume, which is what the owner saw. Paint quantises a SMOOTH field.
+    //
+    // So this_ reads nothing but smooth sources: hForm (one clean wave form,
+    // refracted by the solve), the group envelope, and depth. Their level sets
+    // are long_ continuous curves, which is what a brush actually leaves. The
+    // steps become flat regions of palette colour, and the boundary between
+    // two regions is DRAWN as a darker accent -- an illustration defines a
+    // form with an edge, and that edge is the thing procedural water has never
+    // had. The noise still decides where the sea is working; it no longer gets
+    // to draw.
+    if (uPaintMix > 0.001 && uBare < 0.5) {
+        float toneP = 0.5 + 0.5 * clamp(hForm, -1.0, 1.0);
+        toneP *= 0.62 + 0.38 * clamp(groupEnv, 0.0, 1.6);
+        float shallowP = 1.0 - sstep(0.0, uDeepEnd * 1.5, depth);
+        toneP = clamp(toneP * 0.70 + shallowP * 0.52, 0.0, 1.0);
+
+        float bandsP = max(uPaintBands, 2.0);
+        float xp = toneP * bandsP;
+        float lvl = clamp(floor(xp) / (bandsP - 1.0), 0.0, 1.0);
+        vec3 painted = mix(mix(cAbyss, cDeep, sstep(0.0, 0.42, lvl)),
+                           mix(cMid, cShallow, sstep(0.55, 1.0, lvl)),
+                           sstep(0.30, 0.72, lvl));
+        float fp = fract(xp);
+        float gp = length(vec2(dFdx(xp), dFdy(xp))) + 1e-6;
+        float edgeP = 1.0 - smoothstep(0.0, uPaintEdgeW * gp, min(fp, 1.0 - fp));
+        painted *= 1.0 - uPaintEdge * edgeP;
+        base = mix(base, painted, clamp(uPaintMix, 0.0, 1.0) * water);
+    }
+
     // ---- foam -------------------------------------------------------------
     float fresh = F.r, persist = F.g;
     vec2 fdir = normalize(flow4.xy + vec2(1e-4));
@@ -1337,6 +1373,20 @@ void main()
     thrF *= mix(1.0 + uRegionFoam, 1.0 - uRegionFoam, regionE);
     float carved = cover * (1.0 - uFoamErodeK * erode * clamp(carve * 1.15 - 0.10, 0.0, 1.0));
     float foamA = sstep(thrF, thrF + uFoamSoft, carved);
+    // PAINT THE FOAM, not just the water. A soft threshold on a carved field
+    // gives a DITHERED boundary -- the single biggest reason the sea still
+    // read as noise after the water body was painted. Painted foam is a shape:
+    // a few flat densities with an edge drawn round them. Quantise the alpha,
+    // then draw its half_-level contour as a cool rim, screen-constant width
+    // like every other mark here.
+    if (uPaintMix > 0.001 && uBare < 0.5) {
+        float fq = floor(foamA * 3.0 + 0.5) / 3.0;
+        foamA = mix(foamA, fq, clamp(uPaintMix, 0.0, 1.0));
+        float fg = length(vec2(dFdx(foamA), dFdy(foamA))) + 1e-6;
+        float fedge = 1.0 - smoothstep(0.0, uPaintEdgeW * fg, abs(foamA - 0.5));
+        base = mix(base, cShallow * 0.80,
+                   clamp(fedge * uFoamEdge, 0.0, 0.85) * water);
+    }
     // Solidify. The erosion field varies more widely than the threshold, so the
     // crossing produced partial alpha across the WHOLE foam area -- a permanent
     // half_-transparent blend between white and water, which is what read as

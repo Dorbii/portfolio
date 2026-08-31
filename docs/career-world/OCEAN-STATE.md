@@ -91,6 +91,30 @@ variation), injPatchScale 420→640, injWhitecap 2.12→4.5, crestLineFloor
 0.30→0.05. Live before/after at the identical camera: the stripe weave breaks
 into dark water between distinct white masses; tone p50 56.9 vs C3's 55.8.
 
+## REVIEW THE WATER ONLY AT THE CAPITAL COAST
+
+The capital is the only stretch of this world with finished land art, so it is
+the only camera where the sea can be judged against the style it has to belong
+to (owner, 2026-08-31). Reviewed anywhere else the sea is compared to generic
+terrain -- which is how it came to be tuned LOUDER than the world it lives in.
+
+    node scripts/capture-ocean-comparison.mjs --out <p> --view NinjaOne --settle 22
+    python art-source/ocean-animation/src/style_match.py <p>
+
+`--view NinjaOne` clicks the nav button and waits for the fly-to, which is a
+fixed camera (origin 0.125,0 span 0.25) -- reproducible in a way --span is
+not. `style_match.py` splits the frame into land and sea with the coast
+authority and compares them AS PICTURES. The land numbers are the target:
+
+| | capital ART | sea, 2026-08-31 start | sea now |
+|---|---|---|---|
+| 1-2 px energy | 7.01 | 10.62 | 7.49 |
+| 4-8 px | 7.19 | 12.39 | 8.16 |
+| 16-32 px | 5.63 | 10.88 | 7.01 |
+| local contrast | 17.71 | 30.76 | 20.03 |
+| saturation | 0.492 | 0.397 | 0.499 |
+| edge coherence | 0.554 | 0.504 | 0.542 |
+
 ## THE FIRST RULE OF THIS LANE: you cannot see a change in a capture
 
 Two captures of the SAME build differ by wave phase -- the sea is at a

@@ -168,6 +168,25 @@ async function main() {
       console.log("hid layers:", hidden || "(none)");
       await delay(600);
     }
+    // --view ninjaone flies to the CAPITAL COAST, which is the only stretch of
+    // this world with finished land art -- and therefore the only camera where
+    // the sea can be judged against the style it has to belong to. Reviewing
+    // the water anywhere else compares it to generic terrain and proves
+    // nothing (owner, 2026-08-31). The fly-to is a fixed camera (origin
+    // 0.125,0 span 0.25), so this is reproducible in a way --span/--anchor is
+    // not: the zoom walk lands wherever the clamp puts it.
+    if (args.view) {
+      const clicked = await evaluate(connection, sessionId, `(() => {
+        const want = ${JSON.stringify(String(args.view))}.toLowerCase();
+        const b = [...document.querySelectorAll('button')]
+          .find((x) => x.textContent.trim().toLowerCase() === want);
+        if (!b) return 'not found';
+        b.click();
+        return 'clicked';
+      })()`);
+      console.log("view:", args.view, clicked);
+      await delay(9000);
+    }
     const anchor = (args.anchor ?? "0.5,0.5").split(",").map(Number);
     if (args.span) await setSpan(connection, sessionId, Number(args.span), anchor);
 

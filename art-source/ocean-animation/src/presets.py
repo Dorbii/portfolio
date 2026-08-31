@@ -115,6 +115,8 @@ COMMON = dict(
     # invisible, and a gradient is what reads as photograph. Few bands, a real
     # blend, and an edge that makes each step a FORM.
     posterize=0.55, bands=7.0, bandSoft=0.14, bandEdge=0.20, bandEdgeW=1.7,
+    # The paint pass (composite.frag). 0 = off; the live state turns it on.
+    paintMix=0.0, paintBands=6.0, paintEdge=0.28, paintEdgeW=1.8, foamEdge=0.0,
     # How far deep water reaches toward the abyss colour. See composite.frag.
     abyssMix=0.95,
     # Primary-family harmonics. Chosen by the Stage-1 crest tracker, not by eye:
@@ -361,12 +363,25 @@ PRESETS['heavy_crashing_surf'] = dict(
     # the land art in frame, form-scale energy went 6.74 -> 7.33 against the
     # land's 8.12 while granularity fell 1.06 -> 1.00; at 2.0 local contrast
     # overshot the land (27.8 against 21.5), so this is the top of the range.
-    groupTone=0.90, wispGain=2.2, wispW=3.8,
+    # ALL OF THESE ARE MEASURED AGAINST THE CAPITAL COAST -- the only stretch
+    # of this world with finished land art, and therefore the only camera where
+    # the sea can be judged against the style it must belong to (owner,
+    # 2026-08-31; capture with `--view NinjaOne`). Reviewed anywhere else the
+    # sea is compared to generic terrain, which is how it came to be tuned
+    # louder than the world: against the art it measured local contrast 30.8
+    # to the art's 17.7, and 1-2/4-8/16-32 px energy of 10.6/12.4/10.9 against
+    # 7.0/7.2/5.6 -- half again as loud at every scale. These land it at
+    # 8.1/9.1/7.8 and lc 22.4, with value 63.0 against the art's 66.5.
+    groupTone=0.27, wispGain=0.66, wispW=3.8, laceLineGain=0.51,
+    # Saturation overshot when it was keyed to open terrain (0.68 put the sea
+    # at 0.40 against the capital art's 0.49); this reads 0.46.
+    saturation=0.87,
+    paintMix=0.55, foamEdge=0.34,
     # Subsurface teal flash under events (stylized-water-brief.md device 3).
     eventTeal=0.55,
     sprayLife=1.55, spraySpread=64.0, sprayInject=2.6, sprayGate=0.33, sprayGain=1.05,
-    specGain=0.16, sheen=0.034, shadowGain=0.88, crestGain=0.66, troughGain=1.144, transGain=0.72, swash=0.52,
-    foamThrFresh=0.154, foamThrOld=0.59, exposure=0.97, foamMass=1.18,
+    specGain=0.16, sheen=0.034, shadowGain=0.88, crestGain=0.30, troughGain=1.144, transGain=0.72, swash=0.52,
+    foamThrFresh=0.231, foamThrOld=0.59, exposure=0.97, foamMass=0.65,
     # Darkened ALL the way to the reference plate, hue preserved so the shore
     # keeps its teal. Sampled on C5's water (664k px, foam excluded), the
     # reference runs p5 luma 16.8 / p35 30.2 / p85 71.9 -- its BRIGHTEST water is
