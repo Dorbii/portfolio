@@ -15,7 +15,9 @@ uniform float uSteep;                   // Gerstner sharpening 0..1
 uniform float uSetMix;                  // depth of the wave-set envelope
 uniform float uSetCycles;               // set cycles per loop
 uniform float uBreakGamma;              // H/d threshold
-uniform float uWhitecapSteep;           // deep-water whitecap steepness threshold
+uniform float uWhitecapSteep;           // deep-water whitecap steepness threshold (a HARD zero, see below)
+uniform float uWhitecapGain;            // quadratic growth above the threshold
+uniform float uGroupGateExp;            // group-envelope exponent feeding the threshold
 uniform float uOpenWaveVis;             // LoD: how much of the open-water wave field the picture can resolve
 uniform float uAmpL, uHarmL;            // long swell: fills the 200-600 px band
 uniform float uDirWander;               // slow spatial variation of wave direction (superseded)
@@ -455,7 +457,27 @@ void main()
     // front face, where a spilling crest actually shows, but never gate it on
     // being at the peak: slope is smallest exactly there.
     float frontFace = clamp(-dot(normalize(acc.g + vec2(1e-5)), dirP), 0.0, 1.0);
-    float whitecap = sstep(uWhitecapSteep, uWhitecapSteep * 1.75, totalSteep)
+    // Threshold-quadratic, NOT a soft ramp. Every empirical breaking law has
+    // the same shape -- max(x - x0, 0)^~2 with a GENUINE zero below x0 (Banner
+    // -Babanin-Young 2000: bT = 22(eps_p - 0.055)^2.01; Romero 2012: b =
+    // 0.4(S - 0.08)^{5/2}) -- and at a heavy sea state only ~5-10% of crest
+    // length is white (two independent derivations in
+    // refs/wave-physics-notes.md, R2). The old sstep ramp had no dead zone and
+    // sat inside the field's bulk, so every crest emitted a little white
+    // everywhere: the woven-fabric sea. The steepness rides the GROUP envelope
+    // raised to a power (Malila 2022 measured ~5x whitecap enhancement during
+    // group passage -> exponent ~2.6 for our envelope swing) BEFORE the
+    // threshold, so weak groups produce NOTHING -- Holthuijsen-Herbers: 2/3 of
+    // breaking happens in 1/3 of groups. Rarity by whole groups failing, never
+    // by a uniform dimmer: a dimmer reproduces the fabric. The once-per-Tp
+    // pulse inside a group comes free from crests moving at c through an
+    // envelope moving at c/2. Chop dominates totalSteep, so events inherit the
+    // shorter trains' directions while clustering under the primary's groups
+    // (Phillips' Lambda(c) peaks at c/cp 0.2-0.5) -- which is what breaks the
+    // one-diagonal read.
+    float groupGate = pow(max(groupEnv, 0.0), uGroupGateExp);
+    float wcExcess = max(totalSteep * groupGate - uWhitecapSteep, 0.0);
+    float whitecap = clamp(uWhitecapGain * wcExcess * wcExcess, 0.0, 1.0)
                    * (0.40 + 0.60 * frontFace)
                    * sstep(-0.35, 0.35, hn) * water;
     // run-up wash: the shallowest water is white whenever the surface is up,

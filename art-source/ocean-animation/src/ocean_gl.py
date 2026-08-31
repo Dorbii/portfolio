@@ -178,6 +178,8 @@ class OceanRenderer:
         self._set(prog, uAmpP=p['ampP'], uAmpS=p['ampS'], uAmpC=p['ampC'],
                   uSteep=p['steep'], uSetMix=p['setMix'], uSetCycles=p['setCycles'],
                   uBreakGamma=p['breakGamma'], uWhitecapSteep=p['whitecapSteep'],
+                  uWhitecapGain=float(p.get('whitecapGain', 60.0)),
+                  uGroupGateExp=float(p.get('groupGateExp', 2.6)),
                   # The live layer fades this with the camera; the plate is fixed,
                   # so 1 -- unless something is deliberately rendering what the
                   # wide shot shows, which is the only way to judge that tier
@@ -219,6 +221,7 @@ class OceanRenderer:
                   uInjShore=p['injShore'], uRelax=p['foamRelax'],
                   uDiffuse=p['foamDiffuse'], uFoamBlend=p['foamBlend'],
                   uFoamDeepFade=float(p.get('foamDeepFade', 0.93)),
+                  uFoamDeepTau=float(p.get('foamDeepTau', 0.18)),
                   uInjFilament=float(p.get('injFilament', 0.0)),
                   uInjCrestW=float(p.get('injCrestW', 5.0)),
                   uInjCrestLevel=float(p.get('injCrestLevel', 0.35)),

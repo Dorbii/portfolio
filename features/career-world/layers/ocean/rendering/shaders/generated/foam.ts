@@ -445,6 +445,7 @@ uniform float uRelax;        // seconds for material coords to relax back
 uniform float uDiffuse;
 uniform float uFoamBlend;   // per-step weight of the diffused neighbourhood
 uniform float uFoamDeepFade; // how hard offshore whitecap injection is cut
+uniform float uFoamDeepTau;  // deep-water persistence multiplier (the anti-slab cut)
 uniform float uInjFilament, uInjCrestW, uInjCrestLevel, uInjCrestBoost, uInjCrestRun;
 uniform float uInjPatch, uInjPatchScale;
 uniform float uFirst;        // 1.0 on the very first step
@@ -480,8 +481,14 @@ void main()
                       + texture(texPrev, buv - vec2(0.0, d.y))) * history;
     prev = mix(prev, blur, uFoamBlend);
 
-    // ...and it must fade faster out there, too
-    float tauP = uTauPersist * mix(1.0, 0.18, smoothstep(15.0, 38.0, max(fieldP( uv).w, 0.35)));
+    // ...and it must fade faster out there, too. The cut is preset-driven now:
+    // 0.18 was written when injection was dense enough to accumulate ice floes.
+    // With the threshold-quadratic whitecap (rare, group-clustered events) the
+    // accumulation cannot happen, and the literature wants residual foam to
+    // OUTLIVE fresh several-fold at heavy states (stage B >> stage A; notes R6)
+    // -- offshore foam should die by not being reinjected, not by being
+    // triple-killed.
+    float tauP = uTauPersist * mix(1.0, uFoamDeepTau, smoothstep(15.0, 38.0, max(fieldP( uv).w, 0.35)));
     float fresh   = prev.r * exp(-uDt / max(uTauFresh, 1e-3));
     float persist = prev.g * exp(-uDt / max(tauP, 1e-3));
 

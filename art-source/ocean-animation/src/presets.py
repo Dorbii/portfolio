@@ -150,6 +150,15 @@ COMMON = dict(
     # on it, but neighbour coherence dips (0.281 -> 0.258) and it reads noisier.
     # Left off; the machinery stays for a later pass.
     injFilament=0.70, injCrestRun=26.0, injPatch=0.50, injPatchScale=420.0, injCrestW=5.0, injCrestLevel=0.35, injCrestBoost=9.0,
+    # Threshold-quadratic whitecapping (refs/wave-physics-notes.md R2/R3):
+    # whitecap = gain * max(steep * groupEnv^exp - whitecapSteep, 0)^2. The
+    # threshold is a HARD zero -- a calm state below it whitecaps NOWHERE,
+    # which is the measured physics (BBY2000 saw negligible breaking below
+    # peak steepness 0.055), not an artistic choice.
+    whitecapGain=60.0, groupGateExp=2.6,
+    # Deep-water persistence multiplier; 0.18 is the historic anti-ice-floe
+    # cut, kept as the default for states still on dense injection.
+    foamDeepTau=0.18,
 )
 
 PRESETS = {}
@@ -223,11 +232,13 @@ PRESETS['heavy_crashing_surf'] = dict(
     spread=38.0, groupDepth=0.72, groupScale=0.338, groupAcross=2.2,
     steep=0.94, setMix=0.78, setCycles=2.0, jitter=0.78,
     deepEnd=24.0, shallowEnd=9.0, tealDepth=29.0,
-    # 0.240 -> 0.30: at 0.240 the slope threshold passed on 19% of deep-water
-    # pixels EVERY frame, and 5.5 s of persistence integrated that into a foam
-    # carpet with no zero left in it -- fresh foam measured above the render
-    # threshold on over half the deep sea. Whitecaps are events, not a field.
-    breakGamma=0.66, whitecapSteep=0.30,
+    # The threshold is HARD now (see whitecapGain in COMMON): whitecap =
+    # 18 * max(steep * groupEnv^2.6 - 1.30, 0)^2. Calibrated on the match
+    # scene so events cover 4.6% of deep water (frac > 0.05) -- the
+    # literature's 5-10%-of-crest-length band -- where the old soft ramp at
+    # 0.240 passed 19% of ALL deep pixels every frame and the sea integrated
+    # a foam carpet with no zero left in it.
+    breakGamma=0.66, whitecapSteep=1.30, whitecapGain=18.0,
     preBreak=1.40, faceTeal=1.00, lipGain=1.00, foamErodeK=3.6,
     # licMix STAYS 0, and this is why -- the base preset offers 0.85 and every
     # state overrides it off with no reason recorded, so it looks like an obvious
@@ -254,7 +265,10 @@ PRESETS['heavy_crashing_surf'] = dict(
     # thing twice.
     foamDeep=17.0, foamDeepThr=0.70, foamVeil=0.99,
     stokes=4.2, backwash=1.9,
-    tauFresh=1.30, tauPersist=5.5,
+    # tauPersist 5.5 -> 7.0 s: toward the 3-8 Tp the foam-decay measurements
+    # support for stage-B residue (notes R6). 9.0 was tried and smeared the
+    # events into dim blobs; 7.0 keeps them legible.
+    tauFresh=1.30, tauPersist=7.0,
     # Injection down 3x from injBreak 52 / injWhitecap 10.0 / injShore 15.3, and
     # back up 2.2x from the 6.5x cut once injPatch started throwing most of it
     # away -- what survives has to be strong enough to read.
@@ -282,7 +296,16 @@ PRESETS['heavy_crashing_surf'] = dict(
     # hatching, and the floor guaranteed exactly that -- ablation with ALL foam
     # injection zeroed still showed the full diagonal weave, drawn by the
     # unconditional stroke floor on every crest of two parallel trains.
-    injPatch=0.85, injPatchScale=640.0, crestLineFloor=0.05,
+    injPatch=0.55, injPatchScale=640.0, crestLineFloor=0.05,
+    # The noise patch gate relaxes to a mild role now that rarity comes from
+    # the group-gated hard threshold in wave.frag -- an independent-noise gate
+    # gives Poisson speckle, not wave groups (notes R8), and at 0.85 it was
+    # doing the clustering the physics should do.
+    # Stage-B residue outlives stage A several-fold at heavy states (notes R6):
+    # the deep persistence cut softens 0.18 -> 0.45. The ice floes it guarded
+    # against need dense injection, which the threshold removed; offshore foam
+    # now dies by not being reinjected.
+    foamDeepTau=0.45,
     sprayLife=1.55, spraySpread=64.0, sprayInject=2.6, sprayGate=0.33, sprayGain=1.05,
     specGain=0.16, sheen=0.034, shadowGain=0.88, crestGain=0.66, troughGain=1.144, transGain=0.72, swash=0.52,
     foamThrFresh=0.154, foamThrOld=0.59, exposure=0.97,
