@@ -1,6 +1,6 @@
 # Ocean lane — resume here
 
-Last updated 2026-08-30 · branch `codex/career-world-rebuild` · head `e825ce9`.
+Last updated 2026-08-30 (late) · branch `codex/career-world-rebuild` · head `b594ee8`.
 
 This is the water program's own thread. `STATE.md` is the city/director thread
 and calls this "a separate lane": read that one for city work, this one for
@@ -61,42 +61,59 @@ every time. `e825ce9` reverses it.
 
 ## Where it stands (open sea, water-masked, against C3)
 
-| | ours | C3 | |
-|---|---|---|---|
-| foam coverage | 7.71% | 9.12% | close |
-| p99 luma | 220.9 | 223.4 | matched |
-| streak reach | 169.9 | 240.9 | short |
-| **elongation** | **14.70** | **52.05** | **far** |
-| **fragments / 1k** | **7.33** | **2.71** | **far** |
+The connectivity table that stood here is retired: `b594ee8` found that the
+offline renderer never set `uInjPatch` / `uInjPatchScale` / `uInjCrestRun`
+(GL default 0 — gate open, recruit off, patch noise dividing by zero), so
+offline and live rendered **different foam physics**, and the gate's threshold
+was tuned against the renderer where it did nothing. With the fix in, the match
+scene at live physics measures coverage 9.46% / elongation 46.3 / fragments
+4.03 against C3's 9.12 / 52.05 / 2.71 — and the picture was STILL a corduroy
+sea, which is the second finding: **foam_shape is satisfiable by a weave.**
+Long parallel diagonal bands score as high elongation and low fragmentation.
+Do not chase its numbers without looking; `field_stats.py` reads the fields.
 
-The two "far" rows are one fact: **the reference's whitewater is a few large
-connected masses and ours is many separate streaks.** That is the top open item.
+What the weave actually was, established by ablation (all foam injection
+zeroed, weave still present): the unconditional crest stroke floor
+(`crestLineFloor` 0.30) hatching every crest of two parallel trains, plus a
+whitecap field passing its slope threshold on 19% of deep-water pixels every
+frame, which 5.5 s of persistence integrated into a carpet — fresh foam above
+the render threshold on over half the deep sea. The sea had lost its zero.
+`b594ee8` retunes: whitecapSteep 0.24→0.30, injPatch 0.50→0.85 (the group
+envelope runs p50 1.00 / p99 1.65 deep, so 0.85 keys inside its real
+variation), injPatchScale 420→640, injWhitecap 2.12→4.5, crestLineFloor
+0.30→0.05. Live before/after at the identical camera: the stripe weave breaks
+into dark water between distinct white masses; tone p50 56.9 vs C3's 55.8.
 
 ## Open, in the order I would take them
 
-1. **Foam connectivity.** Elongation 14.7 against 52, fragments 7.3 against 2.7.
-   Coverage and brightness are right; the masses do not merge. The carve
-   (`uFilament`, `uLaceRidge`, `uFoamErodeK`) is the obvious suspect and reducing
-   all three did NOT fix it (fragments 11.15 -> 8.36 only), so the fragmentation
-   is probably upstream in how injection is distributed, not in the erosion.
-2. **Shoreline gaps at site LoD.** Owner-reported 2026-08-30 with a screenshot:
+1. **Shoreline gaps at site LoD.** Owner-reported 2026-08-30 with a screenshot:
    black voids between water and land, his guess is shore detail owned by another
-   layer. Same class as the river gap fixed in `1840e4d`. **Use the magenta
-   method below** — it finds these in one frame.
-3. **Tone.** p50 and p90 still below C3 after the retarget; not yet re-measured
-   since `e825ce9`.
-4. **The ocean pins the sun's elevation and a day/night cycle is coming.**
+   layer. Same class as the river gap fixed in `1840e4d`. A magenta-method scan
+   along the whole coast was run by a Codex thread late 2026-08-30 — see
+   `art-source/ocean-animation/diagnostics/codexref/shore-gaps-report.md` if it
+   landed, else the captures beside it.
+2. **The coastal surf ribbon is uniformly solid.** After the de-weave the surf
+   band along the coast reads slightly as a snow rim — connected is right, but
+   its white is unbroken. The reference's masses have lacy interior structure.
+3. **Deep trains are still parallel-regular.** The events localize now but ride
+   trains of one diagonal. dirWander/dirBend are measured dead ends (they
+   decorrelate; see presets.py) — curvature must come from refraction, which
+   flat deep water legitimately lacks. C7 has parallel wind-banding too, so
+   this may be acceptable; judge it live before spending on it.
+4. **Foam whites clip.** Our p99 is 255 against the reference's 242 —
+   foamSolid/foamMass push the tops past the plate's soft white. Small, cheap.
+5. **The ocean pins the sun's elevation and a day/night cycle is coming.**
    `oceanSunDirection` in `WaterSurfaceRenderer.ts` takes the world light's
    azimuth and overrides the vertical to a fixed 34 degrees
    (`TUNED_SUN_VERTICAL`), because the specular calibration is tuned to that
    elevation. Costs nothing today — the two differ by about a degree. Under the
    cycle the owner is planning, the land goes to dusk while the sea keeps a
    permanent mid-afternoon sun. Needs doing before that lands.
-5. **Inland water nuke-and-boot**, assigned to this lane. Its coverage is
+6. **Inland water nuke-and-boot**, assigned to this lane. Its coverage is
    hand-authored (a river centreline plus ellipse patches) while the terrain's
    water is derived, so the two drift and the drift is invisible until it is a
    hole.
-6. **The one-water-authority contract** is agreed in principle and unwritten.
+7. **The one-water-authority contract** is agreed in principle and unwritten.
 
 ## Rejected — do not retry without new information
 
@@ -139,6 +156,26 @@ Every one of these cost real time today.
   while the picture did not, and once the picture improved while the number got
   worse (removing the gloss haze narrowed the luma histogram, because grey cloud
   over everything widens one). Always look.
+- **A canvas-only capture is two-thirds invisible.** The water shader writes
+  colour over the WHOLE frame and puts coverage in alpha (foam_shape.py's
+  docstring says so, and it masks correctly). Any ad-hoc statistic on a
+  canvas-only capture that does not zero alpha < 250 is measuring water the
+  page never shows — an hour late on 2026-08-30 went into a "shallow-shelf
+  camouflage mottle" that was 68% painted-over land.
+- **The camera json's origin is the top-left CORNER of the world window**, not
+  the centre. Verified by correlating a capture's alpha against the world water
+  mask: corner 99.3%, centre 54.4%. Get this wrong and every field crop reads
+  the wrong sea.
+- **Offline/live uniform parity is not automatic.** ocean_gl.py binds its
+  uniforms by hand and export_web.py binds them independently; a uniform bound
+  in one and not the other fails SILENTLY (GL defaults to 0). The patch gate
+  ran only live for its whole life. After adding any uniform, grep BOTH
+  binding sites — or run one A/B (offline `state_frame.py` against a live
+  capture at the match camera) before trusting an offline sweep.
+- **Single live captures differ by ~±1 in any texture statistic** frame to
+  frame (wave sets). Seven single-uniform live ablations on 2026-08-30 read as
+  null inside that noise; the all-terms-off floor capture is what actually
+  answered the question. Ablate to the floor, not one knob at a time.
 
 ### The magenta method — finds any coverage hole in one frame
 
@@ -165,7 +202,9 @@ groups back one at a time, is what located the gloss haze.
 
 | | |
 |---|---|
-| `src/foam_shape.py` | filament or stipple: coverage, elongation, reach, fragments |
+| `src/foam_shape.py` | filament or stipple: coverage, elongation, reach, fragments — satisfiable by a weave, see above |
+| `src/state_frame.py` | one settled frame of any preset+overrides in a scene, water-masked alpha; the offline iteration loop |
+| `src/field_stats.py` | wave-pass field stats over deep water: is whitecap an event field or a texture |
 | `src/aniso.py` | directional spectrum; scale-free, so plates and captures compare directly |
 | `src/foam_probe.py` | the offline buffers in the live probe's format |
 | `src/impact_compare.py` | baked vs reconstructed impact field |
@@ -192,6 +231,7 @@ Read the commit messages — they carry the measurements and the retractions.
 | `5155147` | foam was born as dots on a line, because a smooth crest contour was multiplied by the granular whitecap field. A wave breaks along a stretch of its crest, so a trigger now recruits along the tangent |
 | `52613fb` | whitecapping is patchy; every crest broke evenly along its whole length, which is a weave. `injPatch` gates injection on two noise scales times the wave-group envelope |
 | `e825ce9` | **the reference retarget** — see above. Also `foamVeil` 0.26 -> 0.99: offshore whitecaps rendered at a quarter opacity, which is why the open sea was grey mush |
+| `b594ee8` | **the offline renderer never ran the patch gate** (three uniforms unbound since they were written), foam_shape shown satisfiable by a weave, the foam carpet found and drained, the crest stroke floor cut — see "Where it stands" |
 
 Retracted along the way and worth reading for the reasoning: `d3bb39f` (the
 tonal range was never narrow), `758ae02` (licMix), `a50062b` (a regex edit that
