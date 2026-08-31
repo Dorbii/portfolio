@@ -19,6 +19,7 @@ uniform float uAmpP, uAmpS, uAmpC;      // base amplitudes, px
 // live layer computes these from each family's own screen wavelength; the
 // offline plate pins both to 1.
 uniform float uSecVis, uChopVis;
+uniform float uFlowScale;   // tuned px/s -> screen px/s for the advected fields
 // And the same rule for BREAKERS: a breaking dash is a few tens of tuned px
 // long, and on the capital's wide shallow shelf the deep-water attenuation
 // never applies (it is depth-gated on purpose). At map zooms every crest on
@@ -620,7 +621,18 @@ void main()
     // darkening most of all -- which is to say it is the term that draws a wave
     // whether or not anything else does.
     hForm *= openVis;
-    outFlow = vec4(flow, clamp(hForm, -1.0, 1.0) * seaGate, whitecap * seaGate);
+    // FLOW IS A SPEED IN TUNED PIXELS, and foam.frag backtraces it in SCREEN
+    // pixels -- so without a conversion the sea's surface moves at the tuned
+    // rate whatever the camera does, which at map zooms is several times too
+    // fast in world terms. That is what smeared a thin swash ribbon into
+    // diagonal streaks across the entire ocean: measured, foam was the sole
+    // author of the capital-tier fabric (killing injection took band energy
+    // 31.8 -> 14.2 and high-frequency energy 25.6 -> 8.7, where tone, strokes,
+    // sky and the wave field each moved it by ~5 or nothing), and the foam was
+    // in equilibrium rather than decaying, so it was being carried there, not
+    // left there. Same class as uShadeSmooth, which was a screen length at
+    // every zoom. 1.0 offline, zc live.
+    outFlow = vec4(flow * uFlowScale, clamp(hForm, -1.0, 1.0) * seaGate, whitecap * seaGate);
     // NOT multiplied by dsharp: that factor is built from the full hn, chop
     // included, so it would smuggle the high frequencies straight back in.
     outSwell = vec4(acc.gSwell * seaGate, hnSwell * seaGate, bphase * seaGate);

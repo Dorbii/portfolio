@@ -489,8 +489,28 @@ void main()
     // OUTLIVE fresh several-fold at heavy states (stage B >> stage A; notes R6)
     // -- offshore foam should die by not being reinjected, not by being
     // triple-killed.
-    float tauP = uTauPersist * mix(1.0, uFoamDeepTau, smoothstep(15.0, 38.0, max(fieldP( uv).w, 0.35)));
-    float fresh   = prev.r * exp(-uDt / max(uTauFresh, 1e-3));
+    // FOAM MUST NOT ACCUMULATE INTO A FIELD THE CAMERA CANNOT RESOLVE.
+    //
+    // This is the last author of the capital-tier fabric, and it took a
+    // phase-invariant metric to see: two captures of one build differ by wave
+    // phase, so nothing here can be judged by eye or by image difference. On
+    // water-masked captures at the capital camera, foam was the ONLY author of
+    // both the fine dashes (high-frequency energy 25.6 -> 8.7 with injection
+    // off) and the broad diagonal bands (band energy 31.8 -> 14.2), where six
+    // tone painters, the crest strokes, the sky/gloss family and even the wave
+    // field itself each moved them by ~5 or by nothing at all. Injection is
+    // already rare out there -- a swash ribbon over 1% of the water -- but
+    // seven seconds of persistence carried and held it until it covered the
+    // sea. Cutting lifetime alone (0.12x) collapsed the fabric to what killing
+    // injection does, which is the measurement this_ gate is built on.
+    //
+    // So lifetime rides breaker resolvability: close in, foam lives its tuned
+    // seven seconds and streaks the way surf does; from the map it dies about
+    // as fast as it is born, which leaves exactly the coast ribbon a wide shot
+    // should have and nothing on the open sea.
+    float tauLoD = mix(0.12, 1.0, uBreakVis);
+    float tauP = uTauPersist * tauLoD * mix(1.0, uFoamDeepTau, smoothstep(15.0, 38.0, max(fieldP( uv).w, 0.35)));
+    float fresh   = prev.r * exp(-uDt / max(uTauFresh * mix(0.30, 1.0, uBreakVis), 1e-3));
     float persist = prev.g * exp(-uDt / max(tauP, 1e-3));
 
     // Material coordinates ride with the flow. A material coordinate is *carried*,
@@ -592,12 +612,14 @@ void main()
     // gated (this_ was the LAST author of the capital-tier fabric, found by
     // elimination). The immediate swash line keeps its foam at every zoom;
     // the wider band fades with breaker resolvability like breaking itself.
-    // The ribbon window is written against LIVE depths: the world bake's
-    // depth channel tops out near 18 tuned px (the offline plate reaches
-    // 105), so a 9-px window called most of the shelf "waterline" and the
-    // gate never closed -- the probe showed fresh foam injecting on 9.4% of
-    // the water with breaking AND whitecap both reading zero.
-    float shoreVis = mix(uBreakVis, 1.0, 1.0 - sstep(1.0, 3.2, depthPx));
+    // RETRACTED READING, kept as a warning: this_ window was first set to
+    // 1.0..3.2 on the claim that the world bake's depth tops out near 18
+    // tuned px. It does not. Decoded from ocean-phase-r2's alpha with the
+    // manifest's own depthMax and TUNED_PER_WORLD, live depth runs to 105
+    // tuned px exactly as offline -- p50 86, with 36% of water inside the
+    // 18 px shelf and 60% beyond 46. Measure the asset, never infer the
+    // units from a symptom.
+    float shoreVis = mix(uBreakVis, 1.0, 1.0 - sstep(2.0, 7.0, depthPx));
     float inj = (breaking * uInjBreak + whitecap * uInjWhitecap * deepFade) * lineGate * patch_
               + shoreZone * uInjShore * shoreVis
                 * (0.22 + 0.78 * clamp(hn, 0.0, 1.0)) * (0.30 + 0.70 * breaking);

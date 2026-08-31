@@ -1002,6 +1002,17 @@ export class WaterSurfaceRenderer {
     // line down every crest is corrugation; by a hundred, which is the scale the
     // presets were tuned at, it is surf.
     const boldCrest = smoothstep(50, 110, lamP);
+    // FOAM marks need a stricter gate than crest strokes, and measurement is
+    // why. `line` opens at four stroke widths per wave, which is right for a
+    // stroke drawn ALONG a crest; the wisps, lace lines and streaks mark foam
+    // FILAMENTS, which are a fraction of a wave. At the capital camera (28 px
+    // a wave) `line` still passed them at 0.61 -- and a phase-invariant weave
+    // metric on water-masked captures put the whole capital-tier fabric on
+    // exactly this term: zeroing the four of them took high-frequency energy
+    // 25.6 -> 16.4 and foam coverage 7.7% -> 3.6%, where zeroing six base
+    // tone painters moved nothing at all (25.6 -> 25.7, inside a 0.11 noise
+    // floor). Filament marks are gone by four wave-widths and full by twenty.
+    const foamMark = smoothstep(9, 18, strokesPerWave);
     // Whether an individual wave is a thing the picture can show at all.
     //
     // At world zoom the swell is four or five screen pixels from crest to
@@ -1172,11 +1183,11 @@ export class WaterSurfaceRenderer {
       // wave is not less regular than one; it is twice as much drawing on a
       // wave the picture cannot carry either way.
       uCrossTrain: line * boldCrest,
-      uLaceLineGain: line,
-      uWispGain: line,
-      uStreakGain: line,
-      uChopCrest: line,
-      uChopGlint: line,
+      uLaceLineGain: line * foamMark,
+      uWispGain: line * foamMark,
+      uStreakGain: line * foamMark,
+      uChopCrest: line * foamMark,
+      uChopGlint: line * foamMark,
       // The specular is the other half of the corrugated look: a tight lobe
       // running along every ridge of a regular surface is exactly how ribbed
       // glass is drawn. It keeps its tuned weight where the crest count is
@@ -1261,6 +1272,10 @@ export class WaterSurfaceRenderer {
     set1("uSecVis", this.secVis);
     set1("uChopVis", this.chopVis);
     set1("uBreakVis", this.breakVis);
+    // Surface flow is a TUNED px/s speed and the foam/spray passes backtrace it
+    // in SCREEN pixels; without this the sea's surface drifts at the tuned rate
+    // whatever the camera does. See wave.frag's outFlow note.
+    set1("uFlowScale", this.zc);
     set1("uTrainWarp", this.trainWarp);
     set2("uDirDeep", DIR_PRIMARY);
     set2("uDirSecond", DIR_SECONDARY);
@@ -1481,6 +1496,7 @@ export const RUNTIME_UNIFORMS = [
   "uSecVis",
   "uChopVis",
   "uBreakVis",
+  "uFlowScale",
   "uTrainWarp",
   "uTime",
   "uLoop",

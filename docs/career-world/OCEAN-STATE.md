@@ -91,7 +91,64 @@ variation), injPatchScale 420→640, injWhitecap 2.12→4.5, crestLineFloor
 0.30→0.05. Live before/after at the identical camera: the stripe weave breaks
 into dark water between distinct white masses; tone p50 56.9 vs C3's 55.8.
 
-## The capital-tier crosshatch — state of the bisection (2026-08-31 late)
+## THE FIRST RULE OF THIS LANE: you cannot see a change in a capture
+
+Two captures of the SAME build differ by wave phase -- the sea is at a
+different moment -- so before/after images are unreadable by eye and by image
+difference alike. A whole day was spent showing the owner "before/after" pairs
+whose only real difference was phase, and his "they keep looking identical"
+was the correct read of them.
+
+Use the phase-invariant metrics instead, on canvas-only captures (alpha > 250
+masks to water the page actually shows):
+
+    python src/weave_metric.py <captures>   # coh, hf, foam%  -- fine texture
+    python src/band_metric.py  <captures>   # band energy     -- 15-60 px bands
+
+Measured noise floor between two identical builds: coh 0.3628 vs 0.3618, hf
+25.64 vs 25.53. Anything smaller than that is not a result. Always capture the
+ablation and its baseline in the same session, and ALWAYS from the repo root
+(the Bash cwd persists; a relative --out silently writes into a nested tree,
+which swallowed a whole ablation batch).
+
+## The capital-tier crosshatch — SOLVED (2026-08-31 late)
+
+Measured with the above, at the capital camera, one term at a time:
+
+| ablation | hf | band | verdict |
+|---|---|---|---|
+| baseline | 25.6 | 31.8 | the fabric |
+| six tone painters off | 25.7 | 31.1 | **nothing** |
+| crest strokes off | 25.7 | -- | **nothing** |
+| sky + gloss + specular off | -- | 26.0 | ~nothing |
+| wave field off (`?water.openWave=0`) | -- | 23.0 | ~nothing |
+| foam line-work off | 16.4 | 26.8 | **large** |
+| ALL foam injection off | 8.7 | 14.2 | **the author** |
+| foam lifetime x0.12 | 14.7 | 20.5 | **the mechanism** |
+
+The fabric was FOAM, entirely -- and not because too much was injected
+(injection out there is a swash ribbon over 1% of the water) but because
+seven seconds of persistence carried and held it until it covered the sea.
+Two gates fix it, both riding resolvability: foam FILAMENT marks (wisps,
+lace lines, streaks, chop marks) now fade on their own stricter gate --
+`line` still passed them at 0.61 where a wave is 28 px -- and foam LIFETIME
+drops to 0.12x when a breaker is unresolvable, so foam dies about as fast as
+it is born and only the coast ribbon survives. At the capital camera: hf
+25.6 -> 15.4, foam coverage 7.7% -> 2.9%, band 31.8 -> 24.3, with the site
+tier unchanged (foam 12.4%).
+
+Retracted along the way, both from bad masking -- measure the asset, and
+check what your mask actually selects: "the world bake's depth tops out at 18
+tuned px" (it reaches 105, exactly as offline) and "36% of the sea is shelf"
+(it is 3.2%; the depth PNG's alpha is nonzero over land, so the mask was
+selecting the whole frame). A third: scaling `uAmpP` cannot ablate the wave
+field, because hn is normalised by its own RMS -- wave.frag says so directly.
+
+Still open at the capital tier: a soft low-contrast diagonal banding (band
+energy 24 of an original 32) that survives every ablation above. It is the
+next thing, and it is NOT foam.
+
+## The capital-tier crosshatch — earlier bisection, superseded
 
 The owner sees a woven dash-grid at capital/territory zooms. Established with
 the validated instruments above, in order:
