@@ -91,23 +91,38 @@ variation), injPatchScale 420→640, injWhitecap 2.12→4.5, crestLineFloor
 0.30→0.05. Live before/after at the identical camera: the stripe weave breaks
 into dark water between distinct white masses; tone p50 56.9 vs C3's 55.8.
 
-## Open, in the order I would take them
+## Open — the owner's direction, and the order I would take it
 
-1. **Foam threads, not blobs.** `1067416` made whitecapping rare and
-   group-clustered (the fabric is broken), but C3's open-water foam is thin
-   curving THREADS along crest backs and ours fattens into blobs. The filament
-   machinery contours the PRIMARY path; group-shaped events crop those runs
-   into patch-shaped foam. Likely the injection contour needs to follow the
-   local steepest train inside an event, not the primary. Side-by-side that
-   states the problem: `diagnostics/codexref/phys2_vs_c3.png`.
-2. **The speckle dust.** A fine white grain rides the whole sea and reads as
-   noise at every zoom. Seven single-uniform live ablations were null INSIDE
-   frame variance (~±1 in any texture statistic); ablate to the floor, and
-   mind the canvas-alpha trap below before measuring anything.
-3. **The coastal surf ribbon is uniformly solid.** Connected is right, but its
-   interior is unbroken white where the reference keeps lace.
-4. **Foam whites clip.** Our p99 is 255 against the reference's 242 —
-   foamSolid/foamMass push the tops past the plate's soft white. Small, cheap.
+**The direction (owner, 2026-08-30 night): the sea must fit the LAND's style.**
+The land is an illustration — discrete drawn objects. The sea is a procedural
+field of parallel lines, and no amount of statistics tuning changes its
+language. The open sea wants to read as PAINT: mostly flat dark water, waves
+and foam as few, large, deliberately drawn shapes — the way C3's own painter
+handled open water.
+
+1. **The diagonal banding lives in the BASE COLOUR, below every gain.**
+   Established by a live floor test (2026-08-30 night): with faceLift,
+   shadowGain, crestGain, transGain, troughGain, sheen, specGain, chopGlint,
+   streakGain, licTone AND reliefLift all zeroed at once, the light/dark
+   diagonal banding is still fully present
+   (`diagnostics/codexref/painted_floor2.png`). The palette mapping itself is
+   keyed per-crest on the wave field. Do NOT spend another session sweeping
+   gain uniforms — rebuild the deep-water base colour to be flat/group-scale,
+   with per-crest tone allowed only inside events and the surf zone. This is
+   the composition pass the style direction requires, and it is shader work in
+   composite.frag, not tuning.
+2. **Foam threads, not blobs.** `1067416` made whitecapping rare and
+   group-clustered (the fabric-density is broken), but C3's open-water foam is
+   thin curving THREADS and ours fattens into blobs; as drawn shapes the
+   events should read as strokes. The filament machinery contours the PRIMARY
+   path; the injection contour likely needs to follow the local steepest train
+   inside an event. Side-by-side: `diagnostics/codexref/phys2_vs_c3.png`.
+3. **The speckle dust.** A fine white grain rides the whole sea and reads as
+   noise at every zoom — the opposite of drawn. Single-uniform live ablations
+   are null inside frame variance; whatever it is, find it by the floor
+   method, offline where renders are deterministic.
+4. **The coastal surf ribbon is uniformly solid** (interior wants lace), and
+   **foam whites clip** (p99 255 vs the plate's 242). Small, after the above.
 
 **Closed 2026-08-30 (night):** the shoreline gaps. `c2bc8b4` — the bake input
 mask was missing ~30k px of authority water (whole lakes) and build_plates
