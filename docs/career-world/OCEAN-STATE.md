@@ -91,6 +91,68 @@ variation), injPatchScale 420→640, injWhitecap 2.12→4.5, crestLineFloor
 0.30→0.05. Live before/after at the identical camera: the stripe weave breaks
 into dark water between distinct white masses; tone p50 56.9 vs C3's 55.8.
 
+## THE DIRECTION (owner, 2026-08-31) — do not drift from this
+
+Judge the water as a PhD would judge it, in two halves:
+
+**Physics realism** is how the water BEHAVES — how it flows, breaks, carries
+foam, meets the shore. The owner grants this half is broadly working.
+
+**Style realism** is a match to THIS WORLD'S ART, not to photographs. A thing
+is "real" here if it looks like it was painted by the hand that painted the
+land. This is the half that has been failing, and it outranks every
+photographic reference: *"it needs to feel real, not be real."* The eight
+canonical plates are diagnostics at most. The reference-plate convergence
+program is RETIRED — do not resurrect it (see [[ocean-feel-not-simulate]]).
+
+The synthesis the owner named, and the one that finally moved things:
+**PAINTED NOISE.** Noise decides WHERE things are; paint decides what is
+DRAWN. Nothing may be rendered as a continuous per-pixel gradient — tone
+quantises into flat steps and every boundary gets a drawn edge, because an
+illustration defines a form with an edge and a gradient defines nothing.
+Quantise SMOOTH fields only: quantising an already-noisy tone gives fractal
+level sets, which is noise wearing a costume, and the owner spots it.
+
+### The ocean lane owns everything at or below the waterline
+
+Agreed with the owner 2026-08-31, and the reason is ownership hygiene: every
+black void this lane has fixed was two layers each assuming the other paints
+a pixel. The rule:
+
+- OCEAN owns: the sea, the seabed and anything submerged (rocks, kelp,
+  aquatic life), the wet-sand band, and water's REACTION to structures
+  (foam on a piling's upstream side, diffraction arcs, wakes).
+- LAND layers own everything above the waterline.
+- Straddling assets (dock, pier) stay land-owned but must publish a
+  FOOTPRINT the ocean consumes. Never two owners for one pixel.
+
+Submerged assets should be LOW fidelity on purpose: contrast attenuates
+exponentially with depth, so a sharp underwater rock reads as wrong.
+
+### Build order for the coastal program
+
+1. **The seabed seen through the water** (in flight, `seabedMix`): the one
+   perceptual channel never used — you read a liquid by seeing INTO it. The
+   ocean draws its own bottom rather than making the surface translucent,
+   because the terrain paints nothing below the waterline (that is what the
+   black voids were).
+2. **Seabed detail** — submerged rocks and sand patches; procedural first.
+3. **Structure interaction** — needs the footprint contract above.
+4. **Aquatic life** — sparse, slow, low contrast.
+
+### Open, carried forward
+
+- Speckle in deep water: granular at its SOURCE (the foam field), so the fix
+  is painting foam where it is BORN, not where it is drawn.
+- The crest field is still a small sum of near-plane waves — a lattice by
+  construction. Crossing the trains (40 deg) bought real irregularity; the
+  rest needs a true spectrum, which costs frame time (the water pass already
+  runs 13.0 ms of a ~33 ms frame at 3282x1846). Architectural, not tuning.
+- Owed to the terrain thread: re-derive the merged bake mask and re-bake.
+  `world-land-mask-r4` changed (1,358 px water->land near D05); 79 of those
+  fall outside T70's bbox and are water in our bake input. Target list:
+  `.codex-tmp/qa/COASTFIX/targets2.json`.
+
 ## REVIEW THE WATER ONLY AT THE CAPITAL COAST
 
 The capital is the only stretch of this world with finished land art, so it is

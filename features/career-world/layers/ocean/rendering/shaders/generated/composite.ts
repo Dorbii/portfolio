@@ -424,6 +424,7 @@ uniform float uBandEdge, uBandEdgeW;  // painted accent drawn on each tonal step
 uniform float uPaintMix, uPaintBands, uPaintEdge, uPaintEdgeW;  // the paint pass
 uniform float uFoamEdge;    // drawn rim around every foam shape
 uniform float uCrestGroup;  // how far per-crest painting is gated by the group envelope
+uniform float uSeabedMix, uSeabedDepth, uSeabedScale;  // the bottom, seen through the water
 uniform float uSprayGain;
 uniform float uExposure, uSat, uVigMix;
 uniform float uAbyssMix;   // how far deep water reaches toward the abyss colour
@@ -789,6 +790,40 @@ void main()
     // envelope is high gives the flat paint large soft volumes to sit on.
     float bankEnv = clamp(texture(texPath, uv).z, 0.0, 1.9);
     base *= 1.0 + uGroupTone * (bankEnv - 1.0) * (1.0 - eventness) * (1.0 - uBare);
+
+    // ---- THE SEABED, SEEN THROUGH THE WATER --------------------------------
+    //
+    // The one perceptual channel this_ water has never used: you read a liquid
+    // by seeing INTO it. Everything until now has been opaque paint, which is
+    // why it could be beautiful and still not read as water.
+    //
+    // The ocean draws its own bottom rather than making the surface
+    // translucent, and that is deliberate: the terrain art paints NOTHING
+    // below the waterline (which is what the black shoreline voids were), so
+    // a transparent surface would reveal backdrop, not sand. Drawing the bed
+    // here keeps one owner for everything at or below the waterline.
+    //
+    // Clarity falls exponentially with depth, which is what light actually
+    // does in water (Beer-Lambert), and is why submerged detail should be SOFT
+    // -- contrast is attenuated, so a sharp rock underwater reads as wrong. It
+    // also means the bed only shows in the shallow fringe, which is exactly
+    // where the eye goes: the coastline.
+    if (uSeabedMix > 0.001 && uBare < 0.5) {
+        float clarity = exp(-depth / max(uSeabedDepth, 1.0));
+        vec2 bpx = px * 0.85 + vec2(19.0, 47.0);
+        float rock = sstep(0.52, 0.78, noiseAt(bpx, uSeabedScale) * 0.65
+                                     + noiseAt(bpx * 2.3, uSeabedScale * 0.38) * 0.35);
+        float grain = 0.85 + 0.30 * noiseAt(bpx * 1.6, uSeabedScale * 0.22);
+        // Sand is the warm, pale bed; rock the cooler dark one. Both are keyed
+        // off the existing palette so the bed belongs to the same picture.
+        vec3 sandC = mix(cShallow, cFoamThin, 0.42) * vec3(1.10, 1.04, 0.88);
+        vec3 rockC = mix(cMid, cAbyss, 0.45) * vec3(1.02, 1.00, 0.96);
+        vec3 bedC = mix(sandC, rockC, rock) * grain;
+        // Water still colours what you see through it: the deeper the sight
+        // line, the more the bed takes the water's own hue.
+        bedC = mix(bedC, base, clamp(1.0 - clarity, 0.0, 1.0) * 0.55);
+        base = mix(base, bedC, clamp(clarity * uSeabedMix, 0.0, 0.92) * water);
+    }
 
     // ---- tonal structure: deep troughs, lifted crest faces -----------------
     // Troughs must read as BROAD dark areas, so they are driven by the

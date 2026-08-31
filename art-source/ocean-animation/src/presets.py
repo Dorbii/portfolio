@@ -117,6 +117,8 @@ COMMON = dict(
     posterize=0.55, bands=7.0, bandSoft=0.14, bandEdge=0.20, bandEdgeW=1.7,
     # The paint pass (composite.frag). 0 = off; the live state turns it on.
     paintMix=0.0, paintBands=6.0, paintEdge=0.28, paintEdgeW=1.8, foamEdge=0.0, crestGroup=0.0,
+    # The seabed seen through the water; 0 = off.
+    seabedMix=0.0, seabedDepth=20.0, seabedScale=95.0,
     # How far deep water reaches toward the abyss colour. See composite.frag.
     abyssMix=0.95,
     # Primary-family harmonics. Chosen by the Stage-1 crest tracker, not by eye:
@@ -395,6 +397,7 @@ PRESETS['heavy_crashing_surf'] = dict(
     # at 0.40 against the capital art's 0.49); this reads 0.46.
     saturation=0.87,
     paintMix=0.55, foamEdge=0.34, crestGroup=0.85,
+    seabedMix=0.85, seabedDepth=20.0, seabedScale=95.0,
     # Subsurface teal flash under events (stylized-water-brief.md device 3).
     eventTeal=0.55,
     sprayLife=1.55, spraySpread=64.0, sprayInject=2.6, sprayGate=0.33, sprayGain=1.05,
