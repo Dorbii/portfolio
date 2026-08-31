@@ -159,6 +159,9 @@ COMMON = dict(
     # Flat-paint floor for per-crest tone on the open sea (composite.frag).
     # 1.0 = the old everywhere-field look; the live heavy state overrides it.
     openPaint=1.0,
+    # Painted facet sparkle (the cove-concept water language). Off by default;
+    # the live heavy state turns it on.
+    facetGain=0.0, facetScale=340.0,
     # Deep-water persistence multiplier; 0.18 is the historic anti-ice-floe
     # cut, kept as the default for states still on dense injection.
     foamDeepTau=0.18,
@@ -319,6 +322,12 @@ PRESETS['heavy_crashing_surf'] = dict(
     # Per-crest tone flattens to this floor away from events and the surf
     # zone (owner direction, 2026-08-30 night).
     openPaint=0.25,
+    # The facet-sparkle layer is OFF: at map zoom the first implementation
+    # read as added noise, not as the concept's sparkle (owner: "too much
+    # noise"). The mechanism stays in composite.frag for a close-zoom
+    # treatment designed at the right scale; do not re-enable it by nudging
+    # this gain -- redesign the cell rendering first.
+    facetGain=0.0, facetScale=340.0,
     sprayLife=1.55, spraySpread=64.0, sprayInject=2.6, sprayGate=0.33, sprayGain=1.05,
     specGain=0.16, sheen=0.034, shadowGain=0.88, crestGain=0.66, troughGain=1.144, transGain=0.72, swash=0.52,
     foamThrFresh=0.154, foamThrOld=0.59, exposure=0.97,

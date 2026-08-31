@@ -14,6 +14,7 @@ uniform float uSlope;
 uniform float uSpecGain, uShin, uSheen, uGlitter;
 uniform float uCrestGain, uTroughGain, uTransGain, uSwash;
 uniform float uOpenPaint;   // flat-paint floor for per-crest tone on the open sea
+uniform float uFacetGain, uFacetScale;   // painted facet sparkle: strength, cell size (tuned px)
 uniform float uPlateInfluence, uPlateTint;
 uniform float uFoamThrFresh, uFoamThrOld, uFoamSoft, uLaceScale, uFoamBaseErode, uLaceContrast;
 uniform float uLaceRidge, uFilament;
@@ -448,6 +449,41 @@ void main()
     float patchG = sstep(0.46, 0.86, noiseAt(px + loopScroll(uDirDeep, 12.0, 420.0), 420.0));
     base += cSun * (specBroad * uSpecGain + gloss * uGlossGain
                     + glintRaw * uGlitter * patchG);
+
+    // ---- facet sparkle -----------------------------------------------------
+    // The cove concept reads as WATER through crisp glinting facets on
+    // saturated blue -- painted caustic cells, not photographic glitter. Now
+    // that per-crest tone flattens to paint between events (openPaint), this
+    // is the open water's base texture: the sparkle carries "water", the
+    // drawn events carry "storm". The owner's brief, verbatim: it needs to
+    // feel real, not be real. Two scales of the FINE noise (the big texture's
+    // mipmap erases this band), thresholded tight so the cells keep edges,
+    // counter-scrolled so the field shimmers instead of sliding, and the
+    // threshold eases where the group envelope is high -- denser sparkle
+    // where the sea is working, which is the "dynamic and variant" half of
+    // the brief without simulating anything.
+    // A facet is a CELL with an edge, not a speck: bright tips separated by
+    // dark seams, the way the concept paints them. The seam is the ridge of
+    // the same field that makes the tips, so the two always agree on where
+    // the cells are.
+    // Cell-sized detail must come from the fbm texture's FINER OCTAVES inside
+    // a large tile. `scale` in these helpers is the period of the whole tile:
+    // asking either texture for a 19 px tile compressed all of it into 19 px
+    // and drew a perfect lattice across the sea -- twice, once per texture,
+    // before this comment was earned.
+    vec4 f4A = noise4(px + loopScroll(uDirDeep, 9.0, uFacetScale), uFacetScale);
+    vec4 f4B = noise4(px * 1.7 + loopScroll(vec2(-uDirDeep.y, uDirDeep.x), 6.0,
+                      uFacetScale) + vec2(137.0, 291.0), uFacetScale);
+    float facetCell = f4A.b * 0.42 + f4A.a * 0.24 + f4B.a * 0.34;
+    float gEnvF = clamp(texture(texPath, uv).z, 0.0, 1.9);
+    float facThr = 0.64 - 0.10 * clamp(gEnvF - 1.0, 0.0, 1.0);
+    float facetTip = sstep(facThr, facThr + 0.05, facetCell)
+                   + 0.15 * sstep(facThr - 0.08, facThr - 0.03, facetCell);
+    float facetVein = pow(clamp(1.0 - abs(facetCell * 2.0 - 1.0), 0.0, 1.0), 3.0);
+    base = mix(base, cAbyss,
+               clamp(facetVein * uFacetGain * 0.55, 0.0, 0.6) * water * (1.0 - uBare));
+    base = mix(base, mix(cSky, cFoamThin, 0.55),
+               clamp(facetTip * uFacetGain, 0.0, 0.85) * water * (1.0 - uBare));
 
     // ---- shallow water: transmission through the wave face ----------------
     float trans = facing * sstep(-0.05, 0.75, hn) * shallowT;
