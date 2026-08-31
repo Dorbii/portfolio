@@ -161,7 +161,10 @@ def main():
             # wavefield.solve_phase masks to the largest component itself --
             # so unreached water takes the same smooth phase extrapolation
             # land does, and precompute damps its wave amplitudes to calm.
-            keep = np.where(sizes >= 150)[0] + 1
+            # 40 px, the same floor the speck passes use: a 6x7-px pond is
+            # still real water the terrain paints around, and the first pass
+            # at 150 left owner-visible black pockets on the NE bay coast.
+            keep = np.where(sizes >= 40)[0] + 1
             if main not in keep:
                 keep = np.append(keep, main)
             water = np.isin(lab, keep)
