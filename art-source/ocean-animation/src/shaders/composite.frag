@@ -34,6 +34,7 @@ uniform float uCrestGroup;  // how far per-crest painting is gated by the group 
 uniform float uSeabedMix, uSeabedDepth, uSeabedScale;  // the bottom, seen through the water
 uniform float uFoamRead;    // radius (px) the foam field is read at, so its edges are curves
 uniform float uLineGroup;   // how far the crest-line floor is chosen by the group envelope
+uniform float uFineSparse, uFineSparseMix;  // where the fine foam filigree is allowed at all
 uniform float uSprayGain;
 uniform float uExposure, uSat, uVigMix;
 uniform float uAbyssMix;   // how far deep water reaches toward the abyss colour
@@ -1014,6 +1015,18 @@ void main()
         base = mix(base, bedC, clamp(clarity * uSeabedMix, 0.0, 0.92) * water);
     }
 
+    // FINE FOAM DETAIL, USED SPARINGLY. The owner's call on seeing it dense:
+    // "that may be fine foam detail, that's a good thing but used more
+    // sparingly not everywhere." Filigree over the whole sea is texture;
+    // the same filigree in a few places is detail, and the eye reads the
+    // difference as one being drawn and the other being generated. A large
+    // travelling patch field decides where the wisps and lace lines are
+    // allowed to appear, so most of the water carries its foam as plain
+    // masses and a minority of it carries the fine structure.
+    float fineSel = mix(1.0, sstep(uFineSparse, uFineSparse + 0.16,
+        noiseAt(px + loopScroll(uDirDeep, 5.0, 540.0), 540.0) * 0.7
+      + noiseAt(px * 2.1 + vec2(157.0, 61.0), 230.0) * 0.3), uFineSparseMix);
+
     // ---- foam -------------------------------------------------------------
     float fresh = F.r, persist = F.g;
     vec2 fdir = normalize(flow4.xy + vec2(1e-4));
@@ -1167,7 +1180,7 @@ void main()
     float wisp = clamp((cover - cb) * uWispSharp, 0.0, 1.0);
     wisp *= sstep(thrF * 0.10, thrF * 0.60, cover) * (1.0 - foamA * 0.55);
     base = mix(base, mix(cFoamBody, cFoamDense, 0.55),
-               clamp(wisp * uWispGain, 0.0, 1.0) * water * (1.0 - uBare));
+               clamp(wisp * uWispGain * fineSel, 0.0, 1.0) * water * (1.0 - uBare));
 
     // ---- foam MARKS ---------------------------------------------------------
     // Stamped shapes rather than another thresholded field. Placed in the foam's
@@ -1191,7 +1204,7 @@ void main()
     float lc = max(contourLine(lace, 0.44, uLaceLineW),
                    contourLine(lace, 0.63, uLaceLineW * 0.75) * 0.80);
     float laceA = lc * sstep(uLaceLineThr, uLaceLineThr + 0.28, cover) * (0.35 + 0.65 * old01);
-    base = mix(base, mix(cFoamBody, cFoamDense, 0.55), clamp(laceA * uLaceLineGain, 0.0, 1.0) * water * (1.0 - uBare));
+    base = mix(base, mix(cFoamBody, cFoamDense, 0.55), clamp(laceA * uLaceLineGain * fineSel, 0.0, 1.0) * water * (1.0 - uBare));
 
     // ---- stylise: quantise the water tone ----------------------------------
     // Painted water reads as flat areas plus marks. Continuous shading over every

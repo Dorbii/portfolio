@@ -21,6 +21,8 @@ uniform float uAmpP, uAmpS, uAmpC;      // base amplitudes, px
 uniform float uSecVis, uChopVis;
 uniform float uFlowScale;   // tuned px/s -> screen px/s for the advected fields
 uniform float uShortSurf;   // how much of the short trains survives the surf zone
+uniform float uSwashBreak;  // how hard the run-up wash counts as breaking
+uniform float uCrossForm, uCrossFormAmp;  // a second tonal train, unioned with the first
 // And the same rule for BREAKERS: a breaking dash is a few tens of tuned px
 // long, and on the capital's wide shallow shelf the deep-water attenuation
 // never applies (it is depth-gated on purpose). At map zooms every crest on
@@ -548,7 +550,18 @@ void main()
     float swashPatch = 0.12 + 0.88 * sstep(0.32, 0.76,
         noise4(px + loopScroll(uDirDeep, 9.0, 540.0), 540.0).r);
     swashPatch *= 0.30 + 0.70 * sstep(0.34, 0.74, reach);
-    breaking = max(breaking, swashZone * sstep(-0.25, 0.55, hn) * water * 0.85 * swashPatch);
+    // ...and this is the OTHER foam factory on the coast, the one that survived
+    // fixing the shore injection. It forces `breaking` to 0.85 anywhere shallow
+    // whenever the surface is merely up, and breaking is multiplied by
+    // injBreak = 70 in the foam pass, which saturates the whitewater channel on
+    // the first step. The result is the thick unbroken white collar the owner
+    // has now reported twice.
+    //
+    // Run-up IS driven by waves arriving, so it should pulse with them rather
+    // than stand there: a tighter height window (only the real run-ups, not
+    // every millimetre of swell) and an amplitude that leaves room for the
+    // breaking term to matter. uSwashBreak keeps it tunable from the presets.
+    breaking = max(breaking, swashZone * sstep(0.10, 0.70, hn) * water * uSwashBreak * swashPatch);
 
     // ---- surface flow used to advect foam and spray -----------------------
     vec2 shoreN = vec2(0.0);
@@ -650,6 +663,27 @@ void main()
                  + aL * cos(SP * uHarmL + bend * 0.55 - wLF * uTime + 1.3)
                  + a3 * cos(SP * mF3 + bend * 1.7 - wF3 * uTime + 2.6)) / (1.0 + aL + a3);
     hForm *= formEnv;
+    // A SECOND TRAIN, UNIONED RATHER THAN SUMMED -- this is what breaks the
+    // even spacing the owner has now marked on two screenshots.
+    //
+    // Everything above is a harmonic of ONE phase field, so hForm is a shaped
+    // waveform of a single train: its level sets are exactly one wavelength
+    // apart, everywhere, and the envelope can only change their CONTRAST, never
+    // their spacing. That is the corduroy, and no amount of amplitude
+    // modulation can reach it.
+    //
+    // Summing a second train is not the answer either -- this file already
+    // knows a beat's level set breaks wherever its components cancel, which is
+    // the cauliflower edge. The composite solved the same problem for crest
+    // LINES by drawing each train's own contour and taking the union, and the
+    // same trick works on tone: take whichever train is further from flat, so
+    // both crests and troughs survive, each stays a smooth curve, and their
+    // combined spacing is irregular because two periodic sets at different
+    // wavelengths and angles interleave irregularly.
+    float wS0 = 6.28318530718 / uPeriodS;
+    wS0 = 6.28318530718 * max(1.0, floor(wS0 * uLoop / 6.28318530718 + 0.5)) / uLoop;
+    float hFormB = cos(SS + bend * 0.6 - wS0 * uTime) * formEnv * uCrossFormAmp;
+    hForm = mix(hForm, (abs(hFormB) > abs(hForm)) ? hFormB : hForm, uCrossForm);
     // same crest/trough asymmetry the height field carries
     hForm = hForm + uSteep * 0.45 * (hForm * hForm * sign(hForm) - hForm);
     // hForm is built straight from the phase field rather than from the summed

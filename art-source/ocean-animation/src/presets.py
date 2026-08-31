@@ -123,7 +123,7 @@ COMMON = dict(
     # The paint pass (composite.frag). 0 = off; the live state turns it on.
     paintMix=0.0, paintBands=6.0, paintEdge=0.28, paintEdgeW=1.8, foamEdge=0.0, crestGroup=0.0,
     # The seabed seen through the water; 0 = off.
-    seabedMix=0.0, seabedDepth=20.0, seabedScale=95.0, foamRead=1.0, shortSurf=1.0, lineGroup=0.0, shoreFloor=0.30,
+    seabedMix=0.0, seabedDepth=20.0, seabedScale=95.0, foamRead=1.0, shortSurf=1.0, lineGroup=0.0, shoreFloor=0.30, fineSparse=0.0, fineSparseMix=0.0, openSpray=0.0, openGate=0.34, swashBreak=0.85, crossForm=0.0, crossFormAmp=0.85,
     # How far deep water reaches toward the abyss colour. See composite.frag.
     abyssMix=0.95,
     # Primary-family harmonics. Chosen by the Stage-1 crest tracker, not by eye:
@@ -433,6 +433,20 @@ PRESETS['heavy_crashing_surf'] = dict(
     seabedMix=0.55, seabedDepth=36.0, seabedScale=95.0,
     # Foam read at 1.8 px so its boundaries are curves, not dither.
     foamRead=1.8, shortSurf=0.22, lineGroup=1.0, shoreFloor=0.07,
+    # Fine filigree on roughly a third of the water, not all of it.
+    fineSparse=0.52, fineSparseMix=1.0,
+    # A breaker that crashes back into open water throws spray too.
+    openSpray=0.55, openGate=0.30, swashBreak=0.30,
+    # crossForm is OFF. The idea is right -- one train's level sets are exactly
+    # one wavelength apart, so only a second train can break the spacing -- but
+    # a hard union, `(|B| > |A|) ? B : A`, is DISCONTINUOUS: wherever the two
+    # are comparable the choice flips from pixel to pixel, and every term
+    # downstream takes a gradient or a contour of that field. It made the sea
+    # salt-and-pepper within one export (owner: "something you just changed
+    # made the water super pixelated"). If this is retried, it must be a smooth
+    # soft-max -- (A|A|^k + B|B|^k)/(|A|^k + |B|^k) -- which favours the more
+    # extreme train while staying continuous everywhere.
+    crossForm=0.0, crossFormAmp=0.85,
     # THE FOAM SPECKLE WAS THE CARVE, not the coverage. Reading the foam field
     # smoothed helped a little and no more, because the erosion that follows it
     # -- a lace ridge evaluated per pixel at 40 px -- puts the pixel structure

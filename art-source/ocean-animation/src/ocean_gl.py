@@ -185,6 +185,9 @@ class OceanRenderer:
                   # GL-default 0 silently deletes two of the three trains.
                   uSecVis=1.0, uChopVis=1.0, uBreakVis=1.0, uFlowScale=1.0,
                   uShortSurf=float(p.get('shortSurf', 1.0)),
+                  uSwashBreak=float(p.get('swashBreak', 0.85)),
+                  uCrossForm=float(p.get('crossForm', 0.0)),
+                  uCrossFormAmp=float(p.get('crossFormAmp', 0.85)),
                   uShoreFloor=float(p.get('shoreFloor', 0.30)),
                   # The live layer fades this with the camera; the plate is fixed,
                   # so 1 -- unless something is deliberately rendering what the
@@ -255,7 +258,10 @@ class OceanRenderer:
         self._bindtex(prog, self.texImpact, 'texImpact', n + 3)
         self._set(prog, uDt=dt, uRise=p['sprayRise'], uSpread=p['spraySpread'],
                   uFall=p['sprayFall'], uLife=p['sprayLife'], uInject=p['sprayInject'],
-                  uGate=p['sprayGate'], uFirst=1.0 if first else 0.0)
+                  uGate=p['sprayGate'],
+                  uOpenSpray=float(p.get('openSpray', 0.0)),
+                  uOpenGate=float(p.get('openGate', 0.34)),
+                  uFirst=1.0 if first else 0.0)
         self.fboSpray[1 - self.cur].use()
         vao.render(moderngl.TRIANGLES)
 
@@ -287,6 +293,8 @@ class OceanRenderer:
                   uSeabedMix=float(p.get('seabedMix', 0.0)),
                   uFoamRead=float(p.get('foamRead', 1.0)),
                   uLineGroup=float(p.get('lineGroup', 0.0)),
+                  uFineSparse=float(p.get('fineSparse', 0.0)),
+                  uFineSparseMix=float(p.get('fineSparseMix', 0.0)),
                   uSeabedDepth=float(p.get('seabedDepth', 20.0)),
                   uSeabedScale=float(p.get('seabedScale', 95.0)),
                   uPaintBands=float(p.get('paintBands', 6.0)),
