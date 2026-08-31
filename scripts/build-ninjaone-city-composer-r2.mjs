@@ -45,6 +45,7 @@ const files = Object.freeze({
   environmentProof: "public/career-world/capitals/ninjaone/environment/manifests/environment-proof-r1.json",
   foliageManifest: "public/career-world/capitals/ninjaone/environment/manifests/foliage-native-r4.json",
   geology: "public/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-close-r8.webp",
+  geologyTransition: "public/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-transition-close-r1.webp",
   surfaceDetail: "public/career-world/capitals/ninjaone/environment/plates/surface-detail/ninjaone-environment-surface-detail-close-r1.webp",
   manifest: ".codex-tmp/qa/T3/t3c-r5/d05-placements-r5.json",
   ungraded: ".codex-tmp/qa/T3/t3c-r5/d05-composed-ungraded-r5.png",
@@ -699,6 +700,7 @@ async function renderNativeEnvironmentUnderlay() {
   assert(registration.artboard.join(",") === "1440,1080", "Native environment artboard registration changed.");
   assert(registration.boundingWorldView.origin.join(",") === CITY_WORLD_ORIGIN.join(",") && registration.boundingWorldView.span.join(",") === CITY_WORLD_SPAN.join(","), "Native environment and city world placement disagree.");
   assert(environmentProof.layers.geology.sources.close.path.split("?")[0] === `/${files.geology.replace(/^public\//, "")}`, "Registered geology-close source changed.");
+  assert(environmentProof.layers.geology.transitionTreatment.sources.close.path.split("?")[0] === `/${files.geologyTransition.replace(/^public\//, "")}`, "Registered geology-transition-close source changed.");
   const [worldLeft, worldTop] = masterPointToWorld([D05_BOUNDS[0], D05_BOUNDS[1]]);
   const [worldRight, worldBottom] = masterPointToWorld([D05_BOUNDS[2], D05_BOUNDS[3]]);
   const nativeWorld = registration.boundingWorldView;
@@ -714,7 +716,7 @@ async function renderNativeEnvironmentUnderlay() {
     assert(crop.left >= 0 && crop.top >= 0 && crop.left + crop.width <= metadata.width && crop.top + crop.height <= metadata.height, `${label} D05 crop exceeds its registered plate.`);
     return { crop, bytes: await sharp(absolute(file)).extract(crop).resize(WIDTH, HEIGHT, { kernel: "lanczos3" }).ensureAlpha().png().toBuffer() };
   };
-  const [geology, surfaceDetail] = await Promise.all([cropFor(files.geology, "geology"), cropFor(files.surfaceDetail, "surface-detail")]);
+  const [geology, geologyTransition, surfaceDetail] = await Promise.all([cropFor(files.geology, "geology"), cropFor(files.geologyTransition, "geology-transition"), cropFor(files.surfaceDetail, "surface-detail")]);
   const environmentArtboardBounds = { origin: [(worldLeft - nativeWorld.origin[0]) / nativeWorld.span[0] * registration.artboard[0], (worldTop - nativeWorld.origin[1]) / nativeWorld.span[1] * registration.artboard[1]], span: [(worldRight - worldLeft) / nativeWorld.span[0] * registration.artboard[0], (worldBottom - worldTop) / nativeWorld.span[1] * registration.artboard[1]] };
   const resources = new Map(foliageManifest.resources.map((resource) => [resource.id, resource]));
   const foliageInstances = foliageManifest.instances.filter((instance) => intersectsBounds(environmentArtboardBounds, instance.artboardBounds));
@@ -729,8 +731,8 @@ async function renderNativeEnvironmentUnderlay() {
     const bottom = Math.ceil((originY + spanY - environmentArtboardBounds.origin[1]) / environmentArtboardBounds.span[1] * HEIGHT);
     return { input: await sharp(absolute(path.posix.join("public", publicPath(resource.path)))).extract({ left: sourceLeft, top: sourceTop, width: sourceWidth, height: sourceHeight }).resize(Math.max(1, right - left), Math.max(1, bottom - top), { kernel: "lanczos3" }).ensureAlpha().png().toBuffer(), left, top };
   }));
-  const bytes = await sharp(geology.bytes).composite([{ input: surfaceDetail.bytes, blend: "over" }, ...foliageComposites]).png({ compressionLevel: 9, adaptiveFiltering: false, palette: false }).toBuffer();
-  return { bytes, registration: { policy: "registered-native-environment-stack-geology-close-r8-plus-surface-detail-close-r1-plus-registered-native-conifer-instances", cityWorldBounds: { origin: [worldLeft, worldTop], span: [worldRight - worldLeft, worldBottom - worldTop] }, environmentArtboardBounds, geology: { path: files.geology, cropPx: geology.crop }, surfaceDetail: { path: files.surfaceDetail, cropPx: surfaceDetail.crop }, foliage: { manifest: files.foliageManifest, instanceCount: foliageInstances.length, instanceIds: foliageInstances.map((instance) => instance.id), resources: [...new Set(foliageInstances.map((instance) => resources.get(instance.atlasResourceId).path.split("?")[0]))] } } };
+  const bytes = await sharp(geology.bytes).composite([{ input: geologyTransition.bytes, blend: "over" }, { input: surfaceDetail.bytes, blend: "over" }, ...foliageComposites]).png({ compressionLevel: 9, adaptiveFiltering: false, palette: false }).toBuffer();
+  return { bytes, registration: { policy: "registered-native-environment-stack-geology-close-r8-plus-t40-transition-r1-plus-surface-detail-close-r1-plus-registered-native-conifer-instances", cityWorldBounds: { origin: [worldLeft, worldTop], span: [worldRight - worldLeft, worldBottom - worldTop] }, environmentArtboardBounds, geology: { path: files.geology, cropPx: geology.crop }, geologyTransition: { path: files.geologyTransition, cropPx: geologyTransition.crop }, surfaceDetail: { path: files.surfaceDetail, cropPx: surfaceDetail.crop }, foliage: { manifest: files.foliageManifest, instanceCount: foliageInstances.length, instanceIds: foliageInstances.map((instance) => instance.id), resources: [...new Set(foliageInstances.map((instance) => resources.get(instance.atlasResourceId).path.split("?")[0]))] } } };
 }
 async function renderOverCleanTerrain(terrain, cityLayer) {
   return sharp(terrain).composite([{ input: cityLayer, blend: "over" }]).png({ compressionLevel: 9, adaptiveFiltering: false, palette: false }).toBuffer();

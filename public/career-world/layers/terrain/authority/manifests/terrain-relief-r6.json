@@ -55,7 +55,7 @@
     "authoredSurfaceDetailSource": "../sources/world-land-surface-authored-r11-detail-4x.png",
     "authoredSurfaceDetailSourceSha256": "11B05875CB588FC19CCEFBD03B55F05282EFA6DE15D9CC4DBD7B958666B07E7F",
     "authoring": "terrain-dem-r4.json",
-    "authoringSha256": "EA4B155FD38E7B2DAAC53FBA4DB9C111F5A08BDF911389A429714E7C6E636DEE",
+    "authoringSha256": "8476B1928B4036D1B830BDA71131DE904BAA0969004FAE3E35824FD803D3AF8E",
     "operation": "mask one authored land-and-coast material with canonical geography; preserve five future development shelves in the separate topology field; add registered territory-only micro relief; publish topology QA and coast response derivatives",
     "worldLightDirection": [
       -0.42,

@@ -1,6 +1,5 @@
 import assetManifest from "../../../../../public/career-world/capitals/ninjaone/manifests/city-layer-assets-r2.json" with { type: "json" };
 import compositionManifest from "../../../../../public/career-world/capitals/ninjaone/manifests/city-layer-composition-r2.json" with { type: "json" };
-import d06StationProof from "../../../../../public/career-world/capitals/ninjaone/manifests/city-d06-station-proof-r1.json" with { type: "json" };
 import layoutManifest from "../../../../../public/career-world/capitals/ninjaone/manifests/city-master-node-layout-r3.json" with { type: "json" };
 import packageAuthority from "../../../../../public/career-world/capitals/ninjaone/manifests/city-package-authority-r4.json" with { type: "json" };
 import type { CameraView, Pair } from "../../../shared/camera";
@@ -14,10 +13,7 @@ import {
   NINJAONE_ENVIRONMENT_WORLD_ORIGIN,
   NINJAONE_ENVIRONMENT_WORLD_SPAN,
 } from "../../terrain/model/ninjaOneEnvironmentProof.ts";
-import {
-  ninjaOneCapitalCityFocusedDistrict,
-  type NinjaOneCapitalCityDistrictId,
-} from "./ninjaOneCapitalCityRepresentations.ts";
+import type { NinjaOneCapitalCityDistrictId } from "./ninjaOneCapitalCityRepresentations.ts";
 
 export type CityLayerId =
   | "L4_0"
@@ -61,7 +57,6 @@ type CityNodeBinding = {
   readonly anchor: Pair;
   readonly id: string;
   readonly kind:
-    | "d06-proof-registered-anchor"
     | "inferred-unverified-anchor"
     | "package-registered-anchor";
 };
@@ -95,8 +90,6 @@ interface MasterLayoutNode {
   readonly visibleTiers?: readonly CityAssetTier[];
   readonly zBias: number;
 }
-
-type D06StationProofNode = MasterLayoutNode;
 
 export interface NinjaOneCapitalCityCirculationPath {
   readonly id: string;
@@ -192,17 +185,6 @@ readonly NinjaOneCapitalCityCirculationPath[] = Object.freeze(
     })),
 );
 
-export const NINJAONE_CAPITAL_D06_STATION_PROOF = Object.freeze({
-  crop: Object.freeze({ ...d06StationProof.crop }),
-  excludedNodeIds: Object.freeze(d06StationProof.trackTopology.excludedD06NodeIds),
-  id: d06StationProof.id,
-  masterStationGroupBounds: Object.freeze({ ...d06StationProof.masterStationGroupBounds }),
-  masks: Object.freeze({ ...d06StationProof.masks }),
-  nodeIds: Object.freeze(d06StationProof.nodes.map(({ id }) => id)),
-  status: d06StationProof.status,
-  trackTopology: Object.freeze({ ...d06StationProof.trackTopology }),
-});
-
 if (
   compositionManifest.status !== "active-registered-r3-composition"
   || compositionManifest.authority.packageAuthorityId !== packageAuthority.id
@@ -271,62 +253,25 @@ const packageRegisteredAnchorByAssetId = new Map([
   ...packageLandmarkAnchorByAssetId,
 ]);
 
-const d06StationProofNodeById = new Map(
-  (d06StationProof.nodes as unknown as readonly D06StationProofNode[]).map((node) => [
-    node.id,
-    Object.freeze({
-      ...node,
-      anchor: finitePair(node.anchor, `${node.id}.d06ProofAnchor`),
-      motion: undefined,
-      visibleTiers: node.visibleTiers
-        ? Object.freeze([...node.visibleTiers])
-        : undefined,
-    }),
-  ]),
-);
-
 const cityNodeSources: readonly CityNodeSource[] = Object.freeze(
   (layoutManifest.nodes as unknown as readonly MasterLayoutNode[]).map((node) => {
-    const proofNode = d06StationProofNodeById.get(node.id);
-    const resolvedNode = proofNode ? { ...node, ...proofNode } : node;
-    const anchor = finitePair(resolvedNode.anchor, `${resolvedNode.id}.anchor`);
-    const registeredAnchor = packageRegisteredAnchorByAssetId.get(resolvedNode.assetId);
+    const anchor = finitePair(node.anchor, `${node.id}.anchor`);
+    const registeredAnchor = packageRegisteredAnchorByAssetId.get(node.assetId);
     const isPackageRegistered = registeredAnchor?.join(",") === anchor.join(",");
-    const isD06CapitalComposite = resolvedNode.id
-      === d06StationProof.trackTopology.capitalStationNodeId;
-    const isD06RegisteredBase = resolvedNode.id
-      === d06StationProof.trackTopology.siteStationNodeId;
-    const isD06RegisteredCloseOverlay = d06StationProof.trackTopology
-      .closeOverlayNodeIds.includes(resolvedNode.id);
-    const isD06LegacyNonconforming = d06StationProof.trackTopology
-      .legacyNonconformingCloseNodeIds.includes(resolvedNode.id);
     return Object.freeze({
-      ...resolvedNode,
-      districtId: proofNode ? "D06" as const : undefined,
+      ...node,
       binding: Object.freeze({
         anchor,
         id: isPackageRegistered
-          ? `${packageAuthority.id}#${resolvedNode.assetId}`
-          : proofNode
-            ? `${d06StationProof.id}#${resolvedNode.id}`
-            : `${layoutManifest.id}#${resolvedNode.id}`,
+          ? `${packageAuthority.id}#${node.assetId}`
+          : `${layoutManifest.id}#${node.id}`,
         kind: isPackageRegistered
           ? "package-registered-anchor" as const
-          : proofNode
-            ? "d06-proof-registered-anchor" as const
-            : "inferred-unverified-anchor" as const,
+          : "inferred-unverified-anchor" as const,
       }),
-      footprintFraction: DEFAULT_FOOTPRINT_BY_LAYER[resolvedNode.layerId],
-      label: resolvedNode.id.replaceAll("-", " "),
-      representationClass: isD06CapitalComposite
-        ? "capital-district-composite" as const
-        : isD06RegisteredBase
-          ? "registered-district-base" as const
-          : isD06RegisteredCloseOverlay
-            ? "registered-close-overlay" as const
-          : isD06LegacyNonconforming
-            ? "legacy-nonconforming-close-candidate" as const
-            : "unregistered-close-candidate" as const,
+      footprintFraction: DEFAULT_FOOTPRINT_BY_LAYER[node.layerId],
+      label: node.id.replaceAll("-", " "),
+      representationClass: "unregistered-close-candidate" as const,
     });
   }),
 );
@@ -387,15 +332,6 @@ if (
       packageSkillAnchorByAssetId.get(assetId)?.join(",") !== anchor.join(",")
     ))
   || packageLandmarkAnchorByAssetId.size !== 2
-  || d06StationProof.authority.districtPlateRuntimeVisible
-  || d06StationProofNodeById.size !== (
-    2 + d06StationProof.trackTopology.closeOverlayNodeIds.length
-    + d06StationProof.trackTopology.legacyNonconformingCloseNodeIds.length
-  )
-  || [...d06StationProofNodeById.values()].some((proofNode) => (
-    layoutManifest.nodes.find(({ id }) => id === proofNode.id)?.assetId
-      !== proofNode.assetId
-  ))
   || NINJAONE_CAPITAL_CITY_LAYER_NODES
     .filter(({ assetId }) => packageRegisteredAnchorByAssetId.has(assetId))
     .some(({ anchor, assetId, registrationBinding }) => (
@@ -649,21 +585,11 @@ export function ninjaOneCapitalVisibleCityLayerNodes(
   forcedFocusDistrict: NinjaOneCapitalCityDistrictId | null = null,
 ): readonly NinjaOneCapitalCityNode[] {
   if (tier === "world" || tier === "territory") return Object.freeze([]);
-  const focusedDistrict = ninjaOneCapitalCityFocusedDistrict(
-    tier,
-    forcedFocusDistrict,
-  );
   const [left, top, right, bottom] = ninjaOneCapitalCityLocalCameraBounds(camera);
   const margin = tier === "close" ? 96 : tier === "site" ? 180 : 260;
   const candidates = NINJAONE_CAPITAL_CITY_LAYER_NODES.filter((node) => (
-    !NINJAONE_CAPITAL_D06_STATION_PROOF.excludedNodeIds.includes(node.id)
-    && (tier === "capital"
-      ? node.representationClass === "capital-district-composite"
-      : focusedDistrict === "D06"
-        && node.districtId === "D06"
-        && (node.representationClass === "registered-district-base"
-          || (tier === "close"
-            && node.representationClass === "registered-close-overlay")))
+    tier === "capital"
+    && node.representationClass === "capital-district-composite"
     && (node.visibleTiers?.includes(tier)
       ?? DETAIL_TIER_DEPTH[tier] >= DETAIL_TIER_DEPTH[node.minimumTier])
     && node.anchor[0] + node.displayWidth >= left - margin
@@ -671,9 +597,7 @@ export function ninjaOneCapitalVisibleCityLayerNodes(
     && node.anchor[1] + node.displayWidth >= top - margin
     && node.anchor[1] - node.displayWidth <= bottom + margin
   )).sort((leftNode, rightNode) => (
-    Number(!NINJAONE_CAPITAL_D06_STATION_PROOF.nodeIds.includes(leftNode.id))
-      - Number(!NINJAONE_CAPITAL_D06_STATION_PROOF.nodeIds.includes(rightNode.id))
-    || CITY_LAYER_ADMISSION_ORDER.indexOf(leftNode.layerId)
+    CITY_LAYER_ADMISSION_ORDER.indexOf(leftNode.layerId)
       - CITY_LAYER_ADMISSION_ORDER.indexOf(rightNode.layerId)
   ));
   const decodedSources = new Set<string>();

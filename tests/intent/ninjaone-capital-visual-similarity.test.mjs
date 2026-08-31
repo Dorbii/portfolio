@@ -6,14 +6,12 @@ import {
 } from "../../scripts/capture-ninjaone-capital-visual-intent.mjs";
 
 const DISTRICT_F1_FLOOR = 0.5;
-const STATION_RAIL_F1_FLOOR = 0.65;
 const EXPECTED_DISTRICTS = Object.freeze([
   "D01",
   "D02",
   "D03",
   "D04",
   "D05",
-  "D06",
 ]);
 
 test("NinjaOne Capital live composition reaches the concept-level city-region intent", async () => {
@@ -33,11 +31,8 @@ test("NinjaOne Capital live composition reaches the concept-level city-region in
   );
   const failures = [];
   for (const district of metric.districtMetrics) {
-    const floor = district.id === "D06"
-      ? STATION_RAIL_F1_FLOOR
-      : DISTRICT_F1_FLOOR;
-    if (district.f1 < floor) {
-      failures.push(`${district.id} ${district.label} F1 ${district.f1} is below ${floor}`);
+    if (district.f1 < DISTRICT_F1_FLOOR) {
+      failures.push(`${district.id} ${district.label} F1 ${district.f1} is below ${DISTRICT_F1_FLOOR}`);
     }
   }
   if (acceptance.score < acceptance.threshold) {

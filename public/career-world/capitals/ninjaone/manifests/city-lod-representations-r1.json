@@ -8,12 +8,22 @@
       1448,
       1086
     ],
-    "representationPolicy": "world-marker-territory-proxy-district-exclusive-incremental-migration"
+    "representationPolicy": "world-marker-territory-symbolic-register-capital-semantic-handoff-district-exclusive-incremental-migration",
+    "territoryRegister": {
+      "representationClass": "symbolic-register",
+      "physicalScaleClaim": false,
+      "spatialContract": "registered semantic envelope; not a physical city scale",
+      "canonHandoff": {
+        "startsAtMaximumCameraSpan": 0.34,
+        "completesAtMaximumCameraSpan": 0.27,
+        "tier": "capital"
+      }
+    }
   },
   "routing": {
-    "capital": "P01-unconverted-context-with-D06-cutout-plus-I13-D06-composite",
-    "close": "P01-unconverted-context-with-D06-cutout-plus-I16-full-resolution-D06-base-plus-I17-close-civic-overlay",
-    "site": "P01-unconverted-context-with-D06-cutout-plus-I16-D06-site-composite",
+    "capital": "P01-unconverted-context",
+    "close": "P01-unconverted-context-plus-progressive-district-detail",
+    "site": "P01-unconverted-context-plus-progressive-district-detail",
     "territory": "P01-only",
     "world": "interface-marker-only"
   },
@@ -68,7 +78,7 @@
         "method": "full-alpha-trim-offset-preserved"
       },
       "presentation": {
-        "contextIntent": "cohesive-unconverted-city-context-without-D06-double-render",
+        "contextIntent": "cohesive-unconverted-city-context-with-progressive-detail-exclusion",
         "contextOpacity": 0.86,
         "territoryIntent": "small-readable-distant-city-mass-over-locked-L1-L3",
         "territoryOpacity": 0.82,
@@ -78,23 +88,7 @@
           776.49
         ]
       },
-      "replacedDistricts": [
-        {
-          "districtId": "D06",
-          "exclusionMask": "/career-world/capitals/ninjaone/city-nodes-r2/proof/d06/station-rail-mask.png",
-          "maskBounds": {
-            "height": 290,
-            "left": 665,
-            "top": 796,
-            "width": 783
-          },
-          "replacementByTier": {
-            "capital": "I13",
-            "close": "I16+I17",
-            "site": "I16"
-          }
-        }
-      ]
+      "replacedDistricts": []
     }
   ]
 }

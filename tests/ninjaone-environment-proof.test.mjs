@@ -172,11 +172,9 @@ test("regional terrain detail uses one coherent cohort and a registered contact 
 });
 
 test("interim terrain transition is wide, reversible, and pixel-bounded", async () => {
-  const [environment, treatment, d06Registration, d06Provenance] = await Promise.all([
+  const [environment, treatment] = await Promise.all([
     readJson("public/career-world/capitals/ninjaone/environment/manifests/environment-proof-r1.json"),
     readJson("public/career-world/capitals/ninjaone/environment/manifests/terrain-transition-interim-r1.json"),
-    readJson("public/career-world/capitals/ninjaone/city-v2/plates/d06-i16-registration-r10.json"),
-    readJson("public/career-world/capitals/ninjaone/city-v2/canon/d06-canon-r10.provenance.json"),
   ]);
   const contactMask = environment.layers.geology.contactMask;
   assert.match(treatment.status, /^INTERIM-/u);
@@ -231,13 +229,6 @@ test("interim terrain transition is wide, reversible, and pixel-bounded", async 
     const actual = createHash("sha256")
       .update(await readFile(path.join(root, protectedFile.path)))
       .digest("hex");
-    const currentD06WaterPath = `public${d06Registration.paintedWaterMask.path}`;
-    if (protectedFile.path === currentD06WaterPath) {
-      assert.equal(protectedFile.sha256, d06Provenance.terrainRestoration.parentWaterMaskSha256);
-      assert.equal(actual, d06Registration.paintedWaterMask.sha256);
-      assert.equal(actual, d06Provenance.terrainRestoration.waterMaskSha256);
-      continue;
-    }
     assert.equal(actual, protectedFile.sha256, `${protectedFile.path} changed during T40`);
   }
 });

@@ -1,0 +1,52 @@
+{
+  "dimensions": [
+    1305,
+    1205
+  ],
+  "sparkle": {
+    "maskPath": "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-mask-r4.png",
+    "frames": [
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-00-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-01-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-02-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-03-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-04-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-05-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-06-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-07-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-08-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-09-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-10-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-11-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-12-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-13-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-14-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-15-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-16-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-17-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-18-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-19-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-20-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-21-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-22-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-23-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-24-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-25-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-26-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-27-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-28-r4.png",
+      "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-frame-29-r4.png"
+    ],
+    "loopSeconds": 5
+  },
+  "foamMaskPath": "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-foam-mask-r4.png",
+  "crest": {
+    "maskPath": "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-crest-mask-r4.png",
+    "directionFieldPath": "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-direction-field-r4.png",
+    "travelDirection": [
+      0.9998,
+      -0.0222
+    ]
+  },
+  "provenancePath": "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-effects-r4.json"
+}

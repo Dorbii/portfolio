@@ -25,7 +25,7 @@ export function NinjaOneCapitalCityContext({
       className={territoryOnly
         ? "ninjaone-capital-city__proxy ninjaone-capital-city__proxy--territory"
         : "ninjaone-capital-city__proxy ninjaone-capital-city__proxy--context"}
-      data-city-context-d06-excluded={!territoryOnly}
+      data-city-context-progressive-detail-excluded={!territoryOnly}
       data-city-context-delivery={territoryOnly ? "territory" : "context"}
       data-city-context-proxy-id={NINJAONE_CAPITAL_CITY_WHOLE_CITY_PROXY.id}
       data-city-representation-class="whole-city-proxy"

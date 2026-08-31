@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "taskId": "T47-city-ocean-removal",
+  "status": "quarantine-only-candidate",
+  "method": "largest west-edge connected component of accepted binary r5 water-safe classifier; RGB source bytes retained; candidate alpha is zero only inside the derived open-ocean component",
+  "sourceHashAudit": {
+    "close": "c81eca41832ff16d187620a53a18559d026668a367c0c9206235b66913748b21",
+    "site": "0277cd4eb52b0d7b725c6a21080f6115fe122c5934f6224c2f90ef2907627978",
+    "capital": "79b14812f54cb1b528850a8bb5f0d02787e6994f20726bb4caebb80b7eb5168e",
+    "waterSafe": "b1cf1c6afe515e56ce77a4d7b0cad7ec1f8f83d9139b59467ca6bcfee46776fe",
+    "usable": "b2ef8399d229c6b2da4840bb8125ab6aea3edc230089649b7757ae25d1f2bbce",
+    "registration": "aef92f4d9664de1649c0f94957b585d47243a547f6396ae706a15005ffd57ad7",
+    "canonProvenance": "248882f5ef3147a6207b1f7a6622297706a5440644d9921a1562a3aa90577242",
+    "effects": "c632f59436970d0b027d21450fde4b0e621a0aaeb589d7f2be1e3e5aef126525",
+    "effectsRuntime": "b2187a883cac6fabeecf1a1b6a4beb7bb51749afc0709caf6d7b5c99ce396eca",
+    "oceanTexture": "707f314c867e8344ffe5e63838085f85ac9a61e7ccfef7b1390939eeb39b9842"
+  },
+  "maskLineage": {
+    "acceptedWaterSafe": {
+      "path": "public/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-safe-mask-r5.png",
+      "sha256": "b1cf1c6afe515e56ce77a4d7b0cad7ec1f8f83d9139b59467ca6bcfee46776fe",
+      "dimensions": [
+        1305,
+        1205,
+        1
+      ]
+    },
+    "usableRegistrationMask": {
+      "path": "public/career-world/capitals/ninjaone/city-v2/plates/d05-anchor-cover-usable-mask-r4.png",
+      "sha256": "b2ef8399d229c6b2da4840bb8125ab6aea3edc230089649b7757ae25d1f2bbce",
+      "dimensions": [
+        1305,
+        1205,
+        1
+      ]
+    },
+    "openOceanComponent": {
+      "pixels": 204465,
+      "bounds": [
+        0,
+        0,
+        453,
+        1205
+      ],
+      "touchesWestEdge": true,
+      "sha256": "d267b32042cac575b28cdcec80aa07e248e7c740ccdb673df05f1fb6c2e2a53e"
+    },
+    "retainedInlandAndLake": {
+      "pixels": 5875,
+      "sha256": "547e65db0043cce89eb190b9390988e41c0dc8b7cb99d834423ec12410e1a74f"
+    }
+  },
+  "registration": {
+    "id": "ninjaone-d05-anchor-cover@r4",
+    "sourcePath": "public/career-world/capitals/ninjaone/city-v2/plates/d05-anchor-cover-registration-r4.json",
+    "sourceSha256": "aef92f4d9664de1649c0f94957b585d47243a547f6396ae706a15005ffd57ad7",
+    "destinationMasterBounds": [
+      -270,
+      413,
+      691,
+      1300
+    ]
+  },
+  "tiers": {
+    "capital": {
+      "source": {
+        "path": "public/career-world/capitals/ninjaone/city-v2/canon/d05-canon-capital-r4.png",
+        "sha256": "79b14812f54cb1b528850a8bb5f0d02787e6994f20726bb4caebb80b7eb5168e",
+        "dimensions": [
+          1305,
+          1205,
+          3
+        ]
+      },
+      "candidate": {
+        "path": "canon/would-be-d05-canon-capital-r4.png",
+        "sha256": "b812fb4a2999fdff5b0e1c0478cf60062277773f49e2c3414326a22d12665693",
+        "dimensions": [
+          1305,
+          1205,
+          4
+        ]
+      },
+      "removalMask": {
+        "path": "masks/d05-canon-open-ocean-removal-mask-capital-r1.png",
+        "sha256": "d267b32042cac575b28cdcec80aa07e248e7c740ccdb673df05f1fb6c2e2a53e",
+        "dimensions": [
+          1305,
+          1205,
+          1
+        ]
+      }
+    },
+    "site": {
+      "source": {
+        "path": "public/career-world/capitals/ninjaone/city-v2/canon/d05-canon-intermediate-r4.png",
+        "sha256": "0277cd4eb52b0d7b725c6a21080f6115fe122c5934f6224c2f90ef2907627978",
+        "dimensions": [
+          2610,
+          2410,
+          3
+        ]
+      },
+      "candidate": {
+        "path": "canon/would-be-d05-canon-intermediate-r4.png",
+        "sha256": "b138ad6847b1b94cbc43843370073c329b3b7a09c843f358594b49768947484c",
+        "dimensions": [
+          2610,
+          2410,
+          4
+        ]
+      },
+      "removalMask": {
+        "path": "masks/d05-canon-open-ocean-removal-mask-site-r1.png",
+        "sha256": "abae5c2b87423ee9ddeeda754cae8477a6aab9a09991f2513b0aa706fed6c32a",
+        "dimensions": [
+          2610,
+          2410,
+          1
+        ]
+      }
+    },
+    "close": {
+      "source": {
+        "path": "public/career-world/capitals/ninjaone/city-v2/canon/d05-canon-r4.png",
+        "sha256": "c81eca41832ff16d187620a53a18559d026668a367c0c9206235b66913748b21",
+        "dimensions": [
+          2621,
+          2419,
+          3
+        ]
+      },
+      "candidate": {
+        "path": "canon/would-be-d05-canon-r4.png",
+        "sha256": "fd5f8baf8a69e4d9998e93ddd1ae3a4a40364d1b354e7a78772ee7fca3196d62",
+        "dimensions": [
+          2621,
+          2419,
+          4
+        ]
+      },
+      "removalMask": {
+        "path": "masks/d05-canon-open-ocean-removal-mask-close-r1.png",
+        "sha256": "0220bbfffee57808722d9c3124b01a7fc49b85836580113a8b9ad5bef75474c4",
+        "dimensions": [
+          2621,
+          2419,
+          1
+        ]
+      }
+    }
+  },
+  "runtimeAssessment": "No runtime source change: DEFAULT_WATER_TUNING already has cityWaterOpacity=0 and cityWaterShoreRamp=0; the D05 composite therefore keeps only its SDF-bounded shore effect when paint opacity is zero. The mounted image remains externally clipped by the existing usable mask, whose alpha grades are unchanged.",
+  "scopeAssertions": {
+    "oceanOnly": true,
+    "d06Touched": false,
+    "oceanRuntimeTouched": false,
+    "cameraOrLodTouched": false,
+    "imageGenCalls": 0
+  }
+}

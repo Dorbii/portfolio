@@ -15,9 +15,7 @@ export function NinjaOneCapitalCirculation({
       {circulationVisible ? (
         <g data-city-child-layer="L4_1">
           <g data-city-circulation-sublayer="provisional-inferred-stone-access">
-            {NINJAONE_CAPITAL_CITY_CIRCULATION_PATHS
-              .filter(({ id }) => id !== "station-terminal-concourse")
-              .map((path) => (
+            {NINJAONE_CAPITAL_CITY_CIRCULATION_PATHS.map((path) => (
               <g data-city-path-id={path.id} data-city-path-kind={path.kind} key={path.id}>
                 <polyline
                   className="ninjaone-capital-city__road-foundation"

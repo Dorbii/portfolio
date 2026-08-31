@@ -46,13 +46,6 @@ const FAMILY_CONTRACTS = Object.freeze([
   }),
 ]);
 
-const ASSET_VARIANT_TIER_OVERRIDES = Object.freeze({
-  I12: Object.freeze(["close"]),
-  I13: Object.freeze(["capital"]),
-  I16: Object.freeze(["site", "close"]),
-  I17: Object.freeze(["close"]),
-});
-
 function sha256(bytes) {
   return createHash("sha256").update(bytes).digest("hex");
 }
@@ -154,18 +147,13 @@ async function buildAsset(family, filename) {
   }
 
   const variants = {};
-  const allowedTiers = ASSET_VARIANT_TIER_OVERRIDES[id];
   for (const [tier, maximumEdge] of Object.entries(family.variants)) {
     const outputPath = path.join(OUTPUT_ROOT, tier, family.sourceDirectory, filename);
-    if (allowedTiers && !allowedTiers.includes(tier)) {
-      await fs.rm(outputPath, { force: true });
-      continue;
-    }
     variants[tier] = await renderVariant(
       sourcePath,
       outputPath,
-      (id === "I16" || id === "I17") && tier === "close" ? null : maximumEdge,
-      id === "I16" || id === "I17",
+      maximumEdge,
+      false,
     );
   }
 
@@ -222,28 +210,6 @@ async function main() {
         props: "city-detail-assets/alpha/microprops",
         skills: "skill-assets/skill-building-alpha",
       }),
-      promotedConceptDerivatives: Object.freeze([
-        Object.freeze({
-          assetId: "I12",
-          role: "close-straight-station-terrace-base",
-          sourceAuthority: "Steve-approved-close-detail-station-concept",
-        }),
-        Object.freeze({
-          assetId: "I13",
-          role: "capital-tier-complete-station-cluster",
-          sourceAuthority: "Steve-approved-capital-D06-crop",
-        }),
-        Object.freeze({
-          assetId: "I16",
-          role: "site-close-registered-station-base-silhouette",
-          sourceAuthority: "Steve-approved-D06-site-composite",
-        }),
-        Object.freeze({
-          assetId: "I17",
-          role: "close-only-station-civic-integration-overlay",
-          sourceAuthority: "master-and-approved-close-concept-derived-generated-overlay",
-        }),
-      ]),
       prohibitedRuntimeCohorts: Object.freeze([
         "district-plates",
         "full-canvas-city-fabric",
@@ -262,8 +228,7 @@ async function main() {
         close: 64 * 1024 * 1024,
         site: 64 * 1024 * 1024,
       }),
-      variantPolicy:
-        "capital-384-site-768-close-896-with-I13-capital-I16-site-downsample-native-close-base-I17-native-close-overlay-I12-close-quarantined",
+      variantPolicy: "capital-384-site-768-close-896",
     }),
     families: Object.freeze(families),
     assets: Object.freeze(assets),

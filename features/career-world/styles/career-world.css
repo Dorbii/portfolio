@@ -1600,15 +1600,6 @@ g[data-owner-id="project-kaizen-agent"].ambient-structure {
   filter: url("#ninjaone-capital-city-contact-soften");
 }
 
-.ninjaone-capital-city__d06-contact {
-  fill: rgb(3 5 5 / 58%);
-  filter: url("#ninjaone-capital-city-contact-soften");
-}
-
-.ninjaone-capital-city__d06-transition {
-  fill: rgb(17 19 17 / 18%);
-}
-
 .ninjaone-capital-city__node image {
   filter: brightness(0.94) contrast(0.98) saturate(0.9);
   image-rendering: auto;

@@ -42,7 +42,6 @@ const DISTRICTS = Object.freeze([
   Object.freeze({ id: "D03", label: "eastern-industry" }),
   Object.freeze({ id: "D04", label: "central-lake-terraces" }),
   Object.freeze({ id: "D05", label: "western-skill-terraces" }),
-  Object.freeze({ id: "D06", label: "station-rail" }),
 ]);
 
 function parseArguments(argv) {
@@ -194,45 +193,6 @@ function intersectionColorSimilarity(reference, live, targetMask, liveMask) {
   return channelCount === 0 ? 0 : round(1 - difference / (channelCount * 255));
 }
 
-function boundsUnion(bounds) {
-  const left = Math.min(...bounds.map((box) => box.left));
-  const top = Math.min(...bounds.map((box) => box.top));
-  const right = Math.max(...bounds.map((box) => box.left + box.width));
-  const bottom = Math.max(...bounds.map((box) => box.top + box.height));
-  return Object.freeze({ height: bottom - top, left, top, width: right - left });
-}
-
-function boundsRegistration(target, live) {
-  const intersectionLeft = Math.max(target.left, live.left);
-  const intersectionTop = Math.max(target.top, live.top);
-  const intersectionRight = Math.min(target.left + target.width, live.left + live.width);
-  const intersectionBottom = Math.min(target.top + target.height, live.top + live.height);
-  const intersection = Math.max(0, intersectionRight - intersectionLeft)
-    * Math.max(0, intersectionBottom - intersectionTop);
-  const union = target.width * target.height + live.width * live.height - intersection;
-  const targetCentroid = Object.freeze([
-    target.left + target.width * 0.5,
-    target.top + target.height * 0.5,
-  ]);
-  const liveCentroid = Object.freeze([
-    live.left + live.width * 0.5,
-    live.top + live.height * 0.5,
-  ]);
-  const centroidDelta = Object.freeze([
-    round(liveCentroid[0] - targetCentroid[0]),
-    round(liveCentroid[1] - targetCentroid[1]),
-  ]);
-  return Object.freeze({
-    bboxIoU: union === 0 ? 0 : round(intersection / union),
-    centroidDelta,
-    centroidErrorPixels: round(Math.hypot(...centroidDelta)),
-    heightErrorPixels: round(live.height - target.height),
-    live,
-    target,
-    widthErrorPixels: round(live.width - target.width),
-  });
-}
-
 async function rawRgba(file) {
   return sharp(file)
     .resize(REFERENCE_WIDTH, REFERENCE_HEIGHT, { fit: "fill" })
@@ -248,29 +208,6 @@ async function rawMask(file) {
     .raw()
     .toBuffer();
   return Uint8Array.from(data, (value) => Number(value >= 128));
-}
-
-function visibleBounds(mask, width, height) {
-  let left = width;
-  let top = height;
-  let right = -1;
-  let bottom = -1;
-  for (let pixel = 0; pixel < mask.length; pixel += 1) {
-    if (!mask[pixel]) continue;
-    const x = pixel % width;
-    const y = Math.floor(pixel / width);
-    left = Math.min(left, x);
-    top = Math.min(top, y);
-    right = Math.max(right, x);
-    bottom = Math.max(bottom, y);
-  }
-  if (right < left || bottom < top) return null;
-  return Object.freeze({
-    height: bottom - top + 1,
-    left,
-    top,
-    width: right - left + 1,
-  });
 }
 
 async function writeMask(file, mask) {
@@ -366,52 +303,12 @@ async function compareFrames({ baseFile, cityFile, masterFile, outputDirectory, 
     writeMask(targetMaskFile, targetMask),
     writeMask(liveMaskFile, liveMask),
   ]);
-  const stationMask = await rawMask(path.join(
-    root,
-    "art-source/career-world/ninjaone-capital/city-nodes-r2/intent/D06-mask.png",
-  ));
-  const stationBounds = visibleBounds(stationMask, REFERENCE_WIDTH, REFERENCE_HEIGHT);
-  if (!stationBounds) throw new Error("The D06 station mask is empty.");
-  const stationFiles = {
-    live: path.join(outputDirectory, "station-live.png"),
-    master: path.join(outputDirectory, "station-master.png"),
-    overlay: path.join(outputDirectory, "station-overlay.png"),
-    difference: path.join(outputDirectory, "station-difference.png"),
-    comparison: path.join(outputDirectory, "station-master-live-overlay.png"),
-  };
-  await Promise.all([
-    sharp(cityFile).resize(REFERENCE_WIDTH, REFERENCE_HEIGHT, { fit: "fill" })
-      .extract(stationBounds).png().toFile(stationFiles.live),
-    sharp(masterFile).resize(REFERENCE_WIDTH, REFERENCE_HEIGHT, { fit: "fill" })
-      .extract(stationBounds).png().toFile(stationFiles.master),
-    sharp(overlayFile).extract(stationBounds).png().toFile(stationFiles.overlay),
-    sharp(differenceFile).extract(stationBounds).png().toFile(stationFiles.difference),
-  ]);
-  await sharp({
-    create: {
-      background: { alpha: 1, b: 0, g: 0, r: 0 },
-      channels: 4,
-      height: stationBounds.height,
-      width: stationBounds.width * 3,
-    },
-  }).composite([
-    { input: stationFiles.master, left: 0, top: 0 },
-    { input: stationFiles.live, left: stationBounds.width, top: 0 },
-    { input: stationFiles.overlay, left: stationBounds.width * 2, top: 0 },
-  ]).png().toFile(stationFiles.comparison);
   return Object.freeze({
     boundaryF1,
     colorSimilarity,
     districtMetrics: Object.freeze(districtMetrics),
     score,
     silhouette,
-    stationProof: Object.freeze({
-      bounds: stationBounds,
-      files: Object.freeze(Object.fromEntries(Object.entries(stationFiles).map(
-        ([key, file]) => [key, path.relative(outputDirectory, file).replaceAll(path.sep, "/")],
-      ))),
-      metrics: districtMetrics.find(({ id }) => id === "D06"),
-    }),
   });
 }
 
@@ -608,28 +505,6 @@ export async function captureNinjaOneCapitalVisualIntent(options = {}) {
     outputDirectory,
     root,
   });
-  const d06Contract = JSON.parse(await readFile(path.join(
-    root,
-    "public/career-world/capitals/ninjaone/manifests/city-d06-station-proof-r1.json",
-  ), "utf8"));
-  const stationGroupIds = new Set([
-    d06Contract.trackTopology.capitalStationNodeId,
-  ]);
-  const stationGroupBounds = runtime.telemetry.nodes
-    .filter(({ id, imageBounds }) => stationGroupIds.has(id) && imageBounds)
-    .map(({ imageBounds }) => imageBounds);
-  const liveStationGroupBounds = stationGroupBounds.length === stationGroupIds.size
-    ? boundsUnion(stationGroupBounds)
-    : null;
-  const stationGroupRegistration = liveStationGroupBounds
-    ? boundsRegistration(d06Contract.masterStationGroupBounds, liveStationGroupBounds)
-    : null;
-  const capitalClusterIntrinsicRegistration = liveStationGroupBounds
-    ? boundsRegistration(
-      d06Contract.capitalClusterRegistration.expectedRenderedBounds,
-      liveStationGroupBounds,
-    )
-    : null;
   const [masterBytes, baseBytes, cityBytes, liveBytes] = await Promise.all([
     readFile(masterFile),
     readFile(baseFile),
@@ -648,7 +523,6 @@ export async function captureNinjaOneCapitalVisualIntent(options = {}) {
       liveLandCity: path.relative(outputDirectory, runtime.liveFile).replaceAll(path.sep, "/"),
       liveLandCitySha256: sha256(liveBytes),
       maskOverlay: "city-mask-overlay.png",
-      stationProof: metrics.stationProof.files,
     }),
     capture: Object.freeze({
       camera: Object.freeze({
@@ -667,8 +541,6 @@ export async function captureNinjaOneCapitalVisualIntent(options = {}) {
         "The master-minus-live-base target mask contains terrain-registration residue and is a guardrail, not visual acceptance authority.",
         "Runtime ground-contact and depth-order telemetry measures self-consistency only, not master agreement.",
       ]),
-      capitalClusterIntrinsicRegistration,
-      stationGroupRegistration,
       ...metrics,
     }),
     reference: Object.freeze({

@@ -13,26 +13,6 @@
       "skills": "skill-assets/skill-building-alpha"
     },
     "promotedConceptDerivatives": [
-      {
-        "assetId": "I12",
-        "role": "close-straight-station-terrace-base",
-        "sourceAuthority": "Steve-approved-close-detail-station-concept"
-      },
-      {
-        "assetId": "I13",
-        "role": "capital-tier-complete-station-cluster",
-        "sourceAuthority": "Steve-approved-capital-D06-crop"
-      },
-      {
-        "assetId": "I16",
-        "role": "site-close-registered-station-base-silhouette",
-        "sourceAuthority": "Steve-approved-D06-site-composite"
-      },
-      {
-        "assetId": "I17",
-        "role": "close-only-station-civic-integration-overlay",
-        "sourceAuthority": "master-and-approved-close-concept-derived-generated-overlay"
-      }
     ],
     "prohibitedRuntimeCohorts": [
       "district-plates",
@@ -52,7 +32,7 @@
       "close": 67108864,
       "site": 67108864
     },
-    "variantPolicy": "capital-384-site-768-close-896-with-I13-capital-I16-site-downsample-native-close-base-I17-native-close-overlay-I12-close-quarantined"
+    "variantPolicy": "capital-384-site-768-close-896"
   },
   "families": [
     {
@@ -98,12 +78,8 @@
         "I09",
         "I10",
         "I11",
-        "I12",
-        "I13",
         "I14",
-        "I15",
-        "I16",
-        "I17"
+        "I15"
       ],
       "id": "infrastructure",
       "sourceDirectory": "infrastructure",
@@ -120,7 +96,6 @@
         "D03",
         "D04",
         "D05",
-        "D06",
         "D07",
         "D08"
       ],
@@ -1501,54 +1476,6 @@
     },
     {
       "family": "infrastructure",
-      "id": "I12",
-      "source": {
-        "dimensions": [
-          1284,
-          804
-        ],
-        "path": "art-source/career-world/ninjaone-capital/city-nodes-r2/infrastructure/I12-station-straight-terrace-base-r1-alpha.png",
-        "sha256": "d9710a17d991d161b3e4466a027293b79e6c1e927959daa98cd6b925728d96e5"
-      },
-      "variants": {
-        "close": {
-          "decodedBytes": 2010624,
-          "dimensions": [
-            896,
-            561
-          ],
-          "encodedBytes": 591645,
-          "path": "/career-world/capitals/ninjaone/city-nodes-r2/close/infrastructure/I12-station-straight-terrace-base-r1-alpha.png",
-          "sha256": "17cacbf209c6cddefb966e805268d89123e23a883183ef22c84e87b1d245c639"
-        }
-      }
-    },
-    {
-      "family": "infrastructure",
-      "id": "I13",
-      "source": {
-        "dimensions": [
-          1472,
-          731
-        ],
-        "path": "art-source/career-world/ninjaone-capital/city-nodes-r2/infrastructure/I13-station-capital-cluster-r1-alpha.png",
-        "sha256": "a57ff73739b2bacae41c87e1a66a1d4031adb08ba3adfcf158c0e9f9432bc46d"
-      },
-      "variants": {
-        "capital": {
-          "decodedBytes": 293376,
-          "dimensions": [
-            384,
-            191
-          ],
-          "encodedBytes": 127649,
-          "path": "/career-world/capitals/ninjaone/city-nodes-r2/capital/infrastructure/I13-station-capital-cluster-r1-alpha.png",
-          "sha256": "44073732d80c3113b742fe80a346cbfc20e2af6c40cf589da664b890f2f68abe"
-        }
-      }
-    },
-    {
-      "family": "infrastructure",
       "id": "I14",
       "source": {
         "dimensions": [
@@ -1632,64 +1559,6 @@
           "encodedBytes": 565256,
           "path": "/career-world/capitals/ninjaone/city-nodes-r2/site/infrastructure/I15-station-civic-transition-r1-alpha.png",
           "sha256": "a5564174bfa9e0cbea343c50a5172eeaf7d0cad30cc95c086bf61d53be465505"
-        }
-      }
-    },
-    {
-      "family": "infrastructure",
-      "id": "I16",
-      "source": {
-        "dimensions": [
-          1448,
-          1086
-        ],
-        "path": "art-source/career-world/ninjaone-capital/city-nodes-r2/infrastructure/I16-station-site-composite-r1-alpha.png",
-        "sha256": "5b16e6943d2f88254e84dbb88a9ebab37bbc5b9b9d1c83b029c5f2a79232d483"
-      },
-      "variants": {
-        "close": {
-          "decodedBytes": 4649512,
-          "dimensions": [
-            1421,
-            818
-          ],
-          "encodedBytes": 1720892,
-          "path": "/career-world/capitals/ninjaone/city-nodes-r2/close/infrastructure/I16-station-site-composite-r1-alpha.png",
-          "sha256": "91c32bdc810170e69855c4e4775e7788d88f84722c75f6dbe56b80d3bc4dfc26"
-        },
-        "site": {
-          "decodedBytes": 1357824,
-          "dimensions": [
-            768,
-            442
-          ],
-          "encodedBytes": 545735,
-          "path": "/career-world/capitals/ninjaone/city-nodes-r2/site/infrastructure/I16-station-site-composite-r1-alpha.png",
-          "sha256": "254928b2fad68442c4dd1efe89cf6f053ebacd31cdcc710742a5a4482edd8944"
-        }
-      }
-    },
-    {
-      "family": "infrastructure",
-      "id": "I17",
-      "source": {
-        "dimensions": [
-          1536,
-          1024
-        ],
-        "path": "art-source/career-world/ninjaone-capital/city-nodes-r2/infrastructure/I17-station-close-civic-overlay-r1-alpha.png",
-        "sha256": "47b60db04fa543ad0a149755fc178c6178374df29d068c8f54894a0f5dad9f34"
-      },
-      "variants": {
-        "close": {
-          "decodedBytes": 5187676,
-          "dimensions": [
-            1489,
-            871
-          ],
-          "encodedBytes": 1125058,
-          "path": "/career-world/capitals/ninjaone/city-nodes-r2/close/infrastructure/I17-station-close-civic-overlay-r1-alpha.png",
-          "sha256": "d89f131d566361a29b28d6321550d9cb3f2415b31bcc01ebccaf496017c0f66c"
         }
       }
     },
@@ -1910,50 +1779,6 @@
           "encodedBytes": 665237,
           "path": "/career-world/capitals/ninjaone/city-nodes-r2/site/details/D05-cargo-service-yard-alpha.png",
           "sha256": "d9a5b258ab0b18f1b334781a56814b5c4e6c75b310e1e4af6b1e520c1df800c5"
-        }
-      }
-    },
-    {
-      "family": "secondary-fabric",
-      "id": "D06",
-      "source": {
-        "dimensions": [
-          1448,
-          1086
-        ],
-        "path": "art-source/career-world/ninjaone-capital/city-nodes-r2/details/D06-civic-courtyard-alpha.png",
-        "sha256": "9bac737e67e11691887ddfa51a74d38d50b95817f5ecfcf1d7b9e3592a139190"
-      },
-      "variants": {
-        "capital": {
-          "decodedBytes": 393216,
-          "dimensions": [
-            384,
-            256
-          ],
-          "encodedBytes": 167725,
-          "path": "/career-world/capitals/ninjaone/city-nodes-r2/capital/details/D06-civic-courtyard-alpha.png",
-          "sha256": "f1c5d27a33b164fe88fda7821fed02a3fb6292a483155be96b52fe675dff63a6"
-        },
-        "close": {
-          "decodedBytes": 2143232,
-          "dimensions": [
-            896,
-            598
-          ],
-          "encodedBytes": 864440,
-          "path": "/career-world/capitals/ninjaone/city-nodes-r2/close/details/D06-civic-courtyard-alpha.png",
-          "sha256": "38cdc496482db1ff41813fea418a53127e980f66763a863a25ef0d2050bfa7a5"
-        },
-        "site": {
-          "decodedBytes": 1575936,
-          "dimensions": [
-            768,
-            513
-          ],
-          "encodedBytes": 645557,
-          "path": "/career-world/capitals/ninjaone/city-nodes-r2/site/details/D06-civic-courtyard-alpha.png",
-          "sha256": "16a80a47c682dd6092cd1d937009cf27d02838b213bcd1cb6f34872006e17016"
         }
       }
     },

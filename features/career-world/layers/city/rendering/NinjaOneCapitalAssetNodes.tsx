@@ -7,7 +7,6 @@ import {
   ninjaOneCapitalVisibleCityLayerNodes,
   ninjaOneCapitalVisibleDistrictDetailNodes,
   ninjaOneCapitalVisibleRegisteredDetailNodes,
-  NINJAONE_CAPITAL_D06_STATION_PROOF,
   type CityLayerId,
   type NinjaOneCapitalCityNode,
 } from "../model/ninjaOneCapitalCityLayer";
@@ -124,14 +123,6 @@ export function NinjaOneCapitalAssetNodes({
           || node.districtId === "D03"
           || node.districtId === "D04"
           || node.districtId === "D05";
-        const isD06ProofNode = NINJAONE_CAPITAL_D06_STATION_PROOF.nodeIds.includes(node.id);
-        const isD06IntrinsicAlphaNode = node.id
-          === NINJAONE_CAPITAL_D06_STATION_PROOF.trackTopology.capitalStationNodeId
-          || node.id === NINJAONE_CAPITAL_D06_STATION_PROOF.trackTopology.siteStationNodeId
-          || NINJAONE_CAPITAL_D06_STATION_PROOF.trackTopology.closeOverlayNodeIds
-            .includes(node.id);
-        const usesD06ProofMask = isD06ProofNode
-          && !isD06IntrinsicAlphaNode;
         return (
           <g
             className={node.motion
@@ -147,9 +138,7 @@ export function NinjaOneCapitalAssetNodes({
             data-city-node-registration-binding={node.registrationBinding.kind}
             data-city-node-representation-class={node.representationClass}
             data-city-node-visible-tiers={node.visibleTiers?.join(",")}
-            data-city-proof-district={isD06ProofNode ? "D06" : undefined}
             key={node.id}
-            mask={usesD06ProofMask ? "url(#ninjaone-capital-d06-station-mask)" : undefined}
           >
             <title>{node.label}</title>
             {ownsLargeFootprint && !usesAuthoredGrounding

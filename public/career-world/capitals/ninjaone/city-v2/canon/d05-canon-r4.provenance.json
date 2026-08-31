@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
-  "taskId": "T16-canon-r4-mount",
-  "status": "owner-authorized-files-staged-for-F20",
+  "taskId": "T38-seam-extension",
+  "status": "T38-seam-extension-mounted-awaiting-director-owner-zoom-review",
   "lineage": "T12 naturalized plate B -> T13/T13b/T13c/T13d canon r4 -> T14 owner-accepted patches",
   "source": {
     "plateB": {
@@ -24,7 +24,7 @@
   },
   "registration": {
     "path": "public/career-world/capitals/ninjaone/city-v2/plates/d05-anchor-cover-registration-r4.json",
-    "sha256": "d1710e4deb7ef8244dc84a522ae20f32d9515c4ff3018fe4a741b4397087865a",
+    "sha256": "aef92f4d9664de1649c0f94957b585d47243a547f6396ae706a15005ffd57ad7",
     "destinationMasterBounds": [
       -270,
       413,
@@ -41,7 +41,7 @@
         1205,
         3
       ],
-      "sha256": "41960d120f1d4f8a3e6991849a683f917dc3866125a8c68751694e54a3e4820f",
+      "sha256": "79b14812f54cb1b528850a8bb5f0d02787e6994f20726bb4caebb80b7eb5168e",
       "derivation": "T14 deterministic downsample from patched r4 canon"
     },
     "site": {
@@ -51,7 +51,7 @@
         2410,
         3
       ],
-      "sha256": "420bcd434d6092be79fbbb8ccfcfcc67a52ad5a3e313714e606573de0353bdcb",
+      "sha256": "0277cd4eb52b0d7b725c6a21080f6115fe122c5934f6224c2f90ef2907627978",
       "derivation": "T14 deterministic downsample from patched r4 canon"
     },
     "close": {
@@ -61,19 +61,19 @@
         2419,
         3
       ],
-      "sha256": "84df8cf38eea9179a5f5d35a049176584087119e260c84b087317393d1ec75ea",
+      "sha256": "c81eca41832ff16d187620a53a18559d026668a367c0c9206235b66913748b21",
       "derivation": "T14 patched canonical maximum-resolution artwork"
     }
   },
   "foliageShimmer": {
     "path": "public/career-world/capitals/ninjaone/city-v2/canon/d05-canon-foliage-shimmer-mask-r4.png",
-    "sha256": "5150255f73fad8eab22b42bc113b2db4beddcb7d77a2add2ec1d368e900e41fe",
+    "sha256": "5068d0ef62e9acd5dbca2f5f946123345a7268ca885316906a2de023fbe11c92",
     "sourceTier": "capital",
-    "sourceTierSha256": "41960d120f1d4f8a3e6991849a683f917dc3866125a8c68751694e54a3e4820f",
+    "sourceTierSha256": "79b14812f54cb1b528850a8bb5f0d02787e6994f20726bb4caebb80b7eb5168e",
     "recipe": ".codex-tmp/qa/T16/build-d05-canon-foliage-shimmer-mask-r4.mjs",
     "t10bRecipe": "HSV 56-92, saturation >=0.40, 7px architecture buffer; source algorithm copied without threshold changes",
-    "coveragePercent": 21.7526,
-    "opaqueCoveragePercent": 10.4634,
+    "coveragePercent": 22.0816,
+    "opaqueCoveragePercent": 10.7329,
     "finalComponents": 861,
     "regionCount": 1,
     "architectureStandoff": {
@@ -89,5 +89,115 @@
       "STATE.md: owner-amended ocean-inclusive mask scope, 2026-08-26."
     ],
     "mountState": "files staged for F20; director owns live verification and commit"
+  },
+  "boundaryPainting": {
+    "taskId": "T36-boundary-painting",
+    "sourceCandidateSha256": "30d8e6c825b16e6a4b99908d42711d36a79697531cb97e08f488df77644948f0",
+    "parentCloseSha256": "84df8cf38eea9179a5f5d35a049176584087119e260c84b087317393d1ec75ea",
+    "reportPath": ".codex-tmp/qa/T36/mount-report.json",
+    "changedExtentMaster": [
+      585,
+      781.521631029339,
+      691,
+      1086
+    ],
+    "usableMaskSha256": "b2ef8399d229c6b2da4840bb8125ab6aea3edc230089649b7757ae25d1f2bbce",
+    "foliageShimmerSha256": "b3d6f7cff8da2cea75dc7ae445b44e40d0c055b9fd1a28518e404d8feaa087cf",
+    "waterPixelsChanged": 0
+  },
+  "seamExtension": {
+    "taskId": "T38-seam-extension",
+    "reportPath": ".codex-tmp/qa/T38/mount-report.json",
+    "cause": "one partially-owned resampled column at the D05 master boundary inside the T36 strip",
+    "targetLine": {
+      "joinX": 521,
+      "masterX": 691.192661,
+      "relationToT36": "inside [585,780], not a strip edge"
+    },
+    "patchJoinRectPx": [
+      430,
+      70,
+      660,
+      690
+    ],
+    "ownershipMasterRect": [
+      690.5,
+      785.6880733944954,
+      694.5,
+      1013.2110091743119
+    ],
+    "d05ChangedCloseRectPx": [
+      2532,
+      1018,
+      2621,
+      1636
+    ],
+    "d06ChangedCloseRectPx": [
+      0,
+      160,
+      209,
+      630
+    ],
+    "changedMaskRectPx": [
+      65,
+      11,
+      76,
+      500
+    ],
+    "patchBorders": {
+      "left": {
+        "sampleCount": 586,
+        "luminanceDeltaPercent": 0,
+        "saturationDeltaPercent": 0,
+        "pass": true
+      },
+      "right": {
+        "sampleCount": 581,
+        "luminanceDeltaPercent": 0.0026,
+        "saturationDeltaPercent": 0.0074,
+        "pass": true
+      },
+      "top": {
+        "sampleCount": 0,
+        "luminanceDeltaPercent": 0,
+        "saturationDeltaPercent": 0,
+        "pass": true
+      },
+      "bottom": {
+        "sampleCount": 230,
+        "luminanceDeltaPercent": 0,
+        "saturationDeltaPercent": 0,
+        "pass": true
+      }
+    },
+    "edgeScan": {
+      "scanJoinY": [
+        70,
+        690
+      ],
+      "before": {
+        "weakAlphaRows": 416,
+        "colorEdgeMean": 13.88484848484849,
+        "samples": 165
+      },
+      "after": {
+        "weakAlphaRows": 0,
+        "colorEdgeMean": 15.351132686084151,
+        "samples": 618,
+        "localMedianColorEdgeMean": 11.997743936830231,
+        "colorEdgeRatioToLocalMedian": 1.2795016102118841
+      },
+      "beforeWeakColumns": [
+        {
+          "x": 521,
+          "weakRows": 416
+        }
+      ],
+      "afterWeakColumns": []
+    },
+    "parentCloseSha256": "e4f0df2c8a31d38303d8ff9254d483fa34b8f8b573f69bf59293ab5c1b37c0a0",
+    "s11SpriteSha256": "5fdee9fc5032a017f42f0f450b12f461492c84077510ce9f21197f9079983c03",
+    "changedShimmerSamples": 4009,
+    "directorReview": "owner deepest zoom class required"
   }
 }

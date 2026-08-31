@@ -56,27 +56,26 @@
       ],
       "worldBounds": {
         "origin": [
-          0.1827153110047847,
-          0.4495217853347503
+          0.5548744019138756,
+          0.8421891604675876
         ],
         "span": [
-          0.05502392344497608,
-          0.09776833156216791
+          0.04485645933014354,
+          0.07970244420828905
         ]
       },
       "sourceCropPixels": {
         "origin": [
-          1222,
-          1692
+          3711,
+          3170
         ],
         "size": [
-          368,
-          368
+          300,
+          300
         ]
       },
       "sourceAlphaPolicy": "bounded-subset",
-      "sha256": "08747480BC06FF0540F9FD5BD2C412A526289550FEE9A869A6D0A92DD0912377",
-      "authoredSourcePath": "/career-world/layers/terrain/authority/sources/independent-capital-site-authored-r2.png"
+      "sha256": "F286C1DF9ADA4CF796B6947F2AF4D1504060158EF0946FE1581DF4436080A5E3"
     },
     {
       "id": "column-technologies-capital-site",
@@ -125,8 +124,8 @@
       ],
       "worldBounds": {
         "origin": [
-          0.5548744019138756,
-          0.8421891604675876
+          0.7311602870813397,
+          0.6509032943676939
         ],
         "span": [
           0.04485645933014354,
@@ -135,8 +134,8 @@
       },
       "sourceCropPixels": {
         "origin": [
-          3711,
-          3170
+          4890,
+          2450
         ],
         "size": [
           300,
@@ -144,7 +143,7 @@
         ]
       },
       "sourceAlphaPolicy": "bounded-subset",
-      "sha256": "F4C9C67E97E3E3EB7A5FD9A02FB1015234E91096F080C4E2668C2E4406F9121F"
+      "sha256": "81FCDDFF5B25D99EEB4DF4F38CE9A967BE6FEC461905C34E5962808AD6913782"
     },
     {
       "id": "project-kaizen-agent-site",

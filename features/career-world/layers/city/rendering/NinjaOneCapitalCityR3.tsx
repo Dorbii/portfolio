@@ -18,37 +18,22 @@ import {
 } from "../model/ninjaOneCapitalCityFoundationR3";
 import {
   NINJAONE_CAPITAL_D05_CONCEPT,
+  ninjaOneCapitalD05WaterEffectTuning,
   ninjaOneCapitalD05ConceptTierForSpan,
+  ninjaOneCapitalD05ConceptTierWeights,
+  type NinjaOneCapitalD05WaterEffectTuning,
 } from "../model/ninjaOneCapitalD05Concept";
 import {
   NINJAONE_CAPITAL_CITY_DETAIL_POLICY,
+  ninjaOneCapitalCitySemanticHandoffWeights,
   ninjaOneCapitalCityUsesFreeCameraDetailCohort,
   type NinjaOneCapitalCityDistrictId,
 } from "../model/ninjaOneCapitalCityRepresentations";
 import type { CityLayerId } from "../model/ninjaOneCapitalCityLayer";
 import { NinjaOneCapitalAssetNodes } from "./NinjaOneCapitalAssetNodes";
 import { NinjaOneCapitalNativeFoliage } from "./NinjaOneCapitalNativeFoliage";
+import { NinjaOneCapitalD05WaterComposite } from "./NinjaOneCapitalD05WaterComposite";
 
-const D06_CAPITAL_REVIEW_BASE = Object.freeze({
-  anchorX: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I20.placement!.anchor[0],
-  assetId: "I20",
-  height: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I20.placement!.baseSize[1]
-    * NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I20.placement!.scale,
-  path: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I20.asset.path,
-  scale: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I20.placement!.scale,
-  width: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I20.placement!.baseSize[0]
-    * NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I20.placement!.scale,
-});
-const D06_SITE_CLOSE_REVIEW_BASE = Object.freeze({
-  anchorX: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I24.placement!.anchor[0],
-  assetId: "I24",
-  height: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I24.placement!.baseSize[1]
-    * NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I24.placement!.scale,
-  path: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I24.asset.path,
-  scale: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I24.placement!.scale,
-  width: NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I24.placement!.baseSize[0]
-    * NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I24.placement!.scale,
-});
 const CITY_BRIDGE_WATER_DETAIL_REVIEW =
   NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.WFX01.asset.path;
 const CITY_BRIDGE_WATER_DETAIL_SOURCE_WINDOW =
@@ -153,8 +138,10 @@ export function NinjaOneCapitalCityR3({
   preloadDistrict,
   siteAssetsMounted,
   siteProgress,
+  territoryProgress,
   tier,
   visibility,
+  waterEffectTuning,
 }: {
   readonly camera: CameraView;
   readonly closeAssetsMounted: boolean;
@@ -165,12 +152,42 @@ export function NinjaOneCapitalCityR3({
   readonly preloadDistrict: NinjaOneCapitalCityDistrictId | null;
   readonly siteAssetsMounted: boolean;
   readonly siteProgress: number;
+  readonly territoryProgress: number;
   readonly tier: DetailTierId;
   readonly visibility: EnvironmentLayerVisibility;
+  readonly waterEffectTuning?: Pick<
+    NinjaOneCapitalD05WaterEffectTuning,
+    "cityWaterOpacity" | "cityWaterShoreRamp" | "sparkle" | "foam" | "crest" | "relight" | "cycling" | "swell"
+  >;
 }) {
   const [width, height] = NINJAONE_CAPITAL_CITY_R3_ARTBOARD;
-  if (tier === "world" || tier === "territory") return null;
-  const d05Tier = ninjaOneCapitalD05ConceptTierForSpan(Math.max(...camera.span));
+  if (tier === "world" || territoryProgress <= 0) return null;
+  const cameraSpan = Math.max(...camera.span);
+  const d05Tier = ninjaOneCapitalD05ConceptTierForSpan(cameraSpan);
+  const semanticHandoff = ninjaOneCapitalCitySemanticHandoffWeights(cameraSpan);
+  const d05TierWeights = ninjaOneCapitalD05ConceptTierWeights({
+    capitalToSite: siteProgress,
+    siteToClose: closeProgress,
+  });
+  const d05WaterEffectTuning = {
+    ...ninjaOneCapitalD05WaterEffectTuning(
+      typeof window === "undefined" ? "" : window.location.search,
+    ),
+    ...waterEffectTuning,
+  };
+  const waterEffects = NINJAONE_CAPITAL_D05_CONCEPT.waterEffects;
+  const waterSparkleFrames = waterEffects.sparkle.frames;
+  const waterSparkleValues = [...waterSparkleFrames, waterSparkleFrames[0]].join(";");
+  const waterSparkleKeyTimes = Array.from(
+    { length: waterSparkleFrames.length + 1 },
+    (_, index) => (index / waterSparkleFrames.length).toFixed(5),
+  ).join(";");
+  const waterCrestTravel = waterEffects.crest.travelDirection.map((value) => (
+    Number((value * 12).toFixed(2))
+  ));
+  // Preserve tier weighting without reducing the capital/site carrier below
+  // readable contrast at the registered display scale.
+  const d05WaterZoomWeight = d05Tier.id === "close" ? 1 : d05Tier.id === "site" ? 0.98 : 0.9;
   const d05Transform = `translate(${NINJAONE_CAPITAL_D05_CONCEPT.transform.offset.join(" ")}) scale(${NINJAONE_CAPITAL_D05_CONCEPT.transform.scale.join(" ")})`;
   // The shore plate's registered bounds overhang the city artboard (west coast,
   // south nature band), so the D05 mask regions must span the union of both.
@@ -254,8 +271,6 @@ export function NinjaOneCapitalCityR3({
   const d04DistrictLandscapeVisible = d04DistrictInFocus && landscapeVisible;
   const d04DistrictArchitectureVisible = d04DistrictInFocus && architectureVisible;
   const d04DistrictWaterDetailVisible = d04DistrictInFocus && waterDetailVisible;
-  const d06StationVisible = transportationVisible
-    && (focusDistrict === null || focusDistrict === "D06");
   const contextCutoutMask = d01DistrictLandscapeVisible
     ? "url(#ninjaone-capital-city-r3-d01-detail-cutout)"
     : d02DistrictLandscapeVisible
@@ -267,12 +282,6 @@ export function NinjaOneCapitalCityR3({
           : registeredDetailVisible
             ? "url(#ninjaone-capital-city-r3-registered-detail-cutout)"
             : undefined;
-  const d06StationBase = tier === "capital"
-    ? D06_CAPITAL_REVIEW_BASE
-    : D06_SITE_CLOSE_REVIEW_BASE;
-  const d06StationSourceWindow = tier === "capital"
-    ? null
-    : NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I24.sourceWindow!;
   return (
     <g
       data-city-r3-cohort={tier}
@@ -281,7 +290,7 @@ export function NinjaOneCapitalCityR3({
         ? "registered-context-with-d05-concept"
         : progressiveDistrictFocused
           ? `registered-context-with-d05-concept-plus-progressive-${progressiveDistrict}`
-          : "registered-context-with-d05-concept-plus-atomic-D06"}
+          : "registered-context-with-d05-concept"}
       data-city-r3-train-status="deferred-during-terrain-polish"
     >
       <defs>
@@ -357,6 +366,37 @@ export function NinjaOneCapitalCityR3({
             x={0}
             y={0}
           />
+        </mask>
+        <mask
+          height={d05MaskRegion.height}
+          id="ninjaone-capital-city-d05-concept-non-water-mask"
+          maskUnits="userSpaceOnUse"
+          style={{ maskType: "luminance" }}
+          width={d05MaskRegion.width}
+          x={d05MaskRegion.x}
+          y={d05MaskRegion.y}
+        >
+          <image
+            height={NINJAONE_CAPITAL_D05_CONCEPT.usableMask.dimensions[1]}
+            href={NINJAONE_CAPITAL_D05_CONCEPT.usableMask.path}
+            preserveAspectRatio="none"
+            transform={d05Transform}
+            width={NINJAONE_CAPITAL_D05_CONCEPT.usableMask.dimensions[0]}
+            x={0}
+            y={0}
+          />
+          <g mask="url(#ninjaone-capital-city-d05-concept-usable-mask)">
+            <image
+              filter="url(#ninjaone-capital-city-r3-inverse-water-mask)"
+              height={waterEffects.fieldDimensions[1]}
+              href={waterEffects.waterMaskPath}
+              preserveAspectRatio="none"
+              transform={d05Transform}
+              width={waterEffects.fieldDimensions[0]}
+              x={0}
+              y={0}
+            />
+          </g>
         </mask>
         <mask
           height={d05MaskRegion.height}
@@ -436,6 +476,156 @@ export function NinjaOneCapitalCityR3({
             preserveAspectRatio="none"
             transform={d05Transform}
             width={NINJAONE_CAPITAL_D05_CONCEPT.foliageShimmerMask.dimensions[0]}
+            x={0}
+            y={0}
+          />
+        </mask>
+        <filter
+          height={d05MaskRegion.height}
+          id="ninjaone-capital-city-d05-water-foam-filter"
+          width={d05MaskRegion.width}
+          x={d05MaskRegion.x}
+          y={d05MaskRegion.y}
+          filterUnits="userSpaceOnUse"
+        >
+          <feTurbulence
+            baseFrequency="0.028 0.012"
+            numOctaves={1}
+            result="ninjaone-d05-water-foam-noise"
+            seed={23}
+            type="fractalNoise"
+          />
+          <feOffset in="ninjaone-d05-water-foam-noise" result="ninjaone-d05-water-foam-lap">
+            <animate attributeName="dx" dur="9s" repeatCount="indefinite" values="0;5;0" />
+            <animate attributeName="dy" dur="9s" repeatCount="indefinite" values="0;2;0" />
+          </feOffset>
+          <feColorMatrix
+            in="ninjaone-d05-water-foam-lap"
+            result="ninjaone-d05-water-foam-phase"
+            type="matrix"
+            values="0 0 0 0 0
+              0 0 0 0 0
+              0 0 0 0 0
+              0.18 0.18 0.18 0 0"
+          />
+          <feFlood floodColor="#dceff5" result="ninjaone-d05-water-foam-light" />
+          <feComposite
+            in="ninjaone-d05-water-foam-light"
+            in2="ninjaone-d05-water-foam-phase"
+            operator="in"
+            result="ninjaone-d05-water-foam-light-phase"
+          />
+          <feBlend in="SourceGraphic" in2="ninjaone-d05-water-foam-light-phase" mode="screen" />
+        </filter>
+        <filter
+          height={d05MaskRegion.height}
+          id="ninjaone-capital-city-d05-water-crest-filter"
+          width={d05MaskRegion.width}
+          x={d05MaskRegion.x}
+          y={d05MaskRegion.y}
+          filterUnits="userSpaceOnUse"
+        >
+          <feTurbulence
+            baseFrequency="0.011 0.007"
+            numOctaves={1}
+            result="ninjaone-d05-water-crest-noise"
+            seed={29}
+            type="fractalNoise"
+          />
+          <feOffset in="ninjaone-d05-water-crest-noise" result="ninjaone-d05-water-crest-travel">
+            <animate
+              attributeName="dx"
+              dur="11s"
+              repeatCount="indefinite"
+              values={`0;${waterCrestTravel[0]};0`}
+            />
+            <animate
+              attributeName="dy"
+              dur="11s"
+              repeatCount="indefinite"
+              values={`0;${waterCrestTravel[1]};0`}
+            />
+          </feOffset>
+          <feColorMatrix
+            in="ninjaone-d05-water-crest-travel"
+            result="ninjaone-d05-water-crest-phase"
+            type="matrix"
+            values="0 0 0 0 0
+              0 0 0 0 0
+              0 0 0 0 0
+              0.15 0.15 0.15 0 0"
+          />
+          <feFlood floodColor="#d6edf4" result="ninjaone-d05-water-crest-light" />
+          <feComposite
+            in="ninjaone-d05-water-crest-light"
+            in2="ninjaone-d05-water-crest-phase"
+            operator="in"
+            result="ninjaone-d05-water-crest-light-phase"
+          />
+          <feBlend in="SourceGraphic" in2="ninjaone-d05-water-crest-light-phase" mode="screen" />
+        </filter>
+        <mask
+          height={d05MaskRegion.height}
+          id="ninjaone-capital-city-d05-water-sparkle-mask"
+          maskUnits="userSpaceOnUse"
+          style={{ maskType: "luminance" }}
+          width={d05MaskRegion.width}
+          x={d05MaskRegion.x}
+          y={d05MaskRegion.y}
+        >
+          <image
+            height={waterEffects.dimensions[1]}
+            href={waterSparkleFrames[0]}
+            preserveAspectRatio="none"
+            transform={d05Transform}
+            width={waterEffects.dimensions[0]}
+            x={0}
+            y={0}
+          >
+            <animate
+              attributeName="href"
+              calcMode="discrete"
+              dur={`${waterEffects.sparkle.loopSeconds}s`}
+              keyTimes={waterSparkleKeyTimes}
+              repeatCount="indefinite"
+              values={waterSparkleValues}
+            />
+          </image>
+        </mask>
+        <mask
+          height={d05MaskRegion.height}
+          id="ninjaone-capital-city-d05-water-foam-mask"
+          maskUnits="userSpaceOnUse"
+          style={{ maskType: "luminance" }}
+          width={d05MaskRegion.width}
+          x={d05MaskRegion.x}
+          y={d05MaskRegion.y}
+        >
+          <image
+            height={waterEffects.dimensions[1]}
+            href={waterEffects.foamMaskPath}
+            preserveAspectRatio="none"
+            transform={d05Transform}
+            width={waterEffects.dimensions[0]}
+            x={0}
+            y={0}
+          />
+        </mask>
+        <mask
+          height={d05MaskRegion.height}
+          id="ninjaone-capital-city-d05-water-crest-mask"
+          maskUnits="userSpaceOnUse"
+          style={{ maskType: "luminance" }}
+          width={d05MaskRegion.width}
+          x={d05MaskRegion.x}
+          y={d05MaskRegion.y}
+        >
+          <image
+            height={waterEffects.dimensions[1]}
+            href={waterEffects.crest.maskPath}
+            preserveAspectRatio="none"
+            transform={d05Transform}
+            width={waterEffects.dimensions[0]}
             x={0}
             y={0}
           />
@@ -626,6 +816,30 @@ export function NinjaOneCapitalCityR3({
           </mask>
         </defs>
       ) : null}
+      <image
+        className="ninjaone-capital-city__d05-territory-register"
+        data-city-district="D05"
+        data-city-representation-class="symbolic-territory-register"
+        data-city-spatial-contract="semantic-register-not-physical-scale"
+        data-city-tier="territory-register"
+        height={
+          NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[3] - NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[1]
+        }
+        href={NINJAONE_CAPITAL_D05_CONCEPT.tiers.territoryRegister.path}
+        mask="url(#ninjaone-capital-city-d05-concept-non-water-mask)"
+        opacity={semanticHandoff.territoryRegisterOpacity}
+        preserveAspectRatio="none"
+        width={
+          NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[2] - NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[0]
+        }
+        x={NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[0]}
+        y={NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[1]}
+      />
+      <g
+        data-city-canon-opacity={semanticHandoff.canonOpacity.toFixed(3)}
+        data-city-canon-handoff="capital-detail-only"
+        opacity={semanticHandoff.canonOpacity}
+      >
       {waterInteractionVisible ? (
         <image
           className="ninjaone-capital-city__r3-water-interaction"
@@ -695,24 +909,28 @@ export function NinjaOneCapitalCityR3({
       {/* Positioned via x/y/width/height into the registered master rect rather than a
           transform: a transform on this element would shift the userSpaceOnUse mask's
           coordinate space, applying the registration transform to the mask twice. */}
-      <image
-        className="ninjaone-capital-city__d05-concept"
-        data-city-concept-id={NINJAONE_CAPITAL_D05_CONCEPT.id}
-        data-city-district="D05"
-        data-city-representation-class="approved-concept-plate"
-        data-city-tier={d05Tier.id}
-        height={
-          NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[3] - NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[1]
-        }
-        href={d05Tier.path}
-        mask="url(#ninjaone-capital-city-d05-concept-usable-mask)"
-        preserveAspectRatio="none"
-        width={
-          NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[2] - NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[0]
-        }
-        x={NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[0]}
-        y={NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[1]}
-      />
+      {d05TierWeights.map(({ opacity, tier: sourceTier }) => (
+        <image
+          key={sourceTier.id}
+          className="ninjaone-capital-city__d05-concept"
+          data-city-concept-id={NINJAONE_CAPITAL_D05_CONCEPT.id}
+          data-city-district="D05"
+          data-city-representation-class="approved-concept-plate"
+          data-city-tier={sourceTier.id}
+          height={
+            NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[3] - NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[1]
+          }
+          href={sourceTier.path}
+          mask="url(#ninjaone-capital-city-d05-concept-non-water-mask)"
+          opacity={opacity}
+          preserveAspectRatio="none"
+          width={
+            NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[2] - NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[0]
+          }
+          x={NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[0]}
+          y={NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[1]}
+        />
+      ))}
       <g mask="url(#ninjaone-capital-city-d05-concept-usable-mask)">
         <image
           className="ninjaone-capital-city__d05-foliage-shimmer"
@@ -729,6 +947,30 @@ export function NinjaOneCapitalCityR3({
           x={NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[0]}
           y={NINJAONE_CAPITAL_D05_CONCEPT.masterBounds[1]}
         />
+      </g>
+      <g
+        data-city-effect="canon-water-effects"
+        data-city-water-direction-field={waterEffects.crest.directionFieldPath}
+        data-city-water-effects={`opacity:${d05WaterEffectTuning.cityWaterOpacity};shoreRamp:${d05WaterEffectTuning.cityWaterShoreRamp};sparkle:${d05WaterEffectTuning.sparkle};foam:${d05WaterEffectTuning.foam};crest:${d05WaterEffectTuning.crest};relight:${d05WaterEffectTuning.relight};cycling:${d05WaterEffectTuning.cycling};swell:${d05WaterEffectTuning.swell}`}
+        mask="url(#ninjaone-capital-city-d05-concept-usable-mask)"
+      >
+        <g transform={d05Transform}>
+          <foreignObject
+            height={waterEffects.fieldDimensions[1]}
+            pointerEvents="none"
+            width={waterEffects.fieldDimensions[0]}
+            x={0}
+            y={0}
+          >
+            <NinjaOneCapitalD05WaterComposite
+              effects={waterEffects}
+              motionEnabled
+              sourcePath={d05Tier.path}
+              tuning={d05WaterEffectTuning}
+              zoomWeight={d05WaterZoomWeight}
+            />
+          </foreignObject>
+        </g>
       </g>
       {d01DistrictLandscapeVisible ? (
         <image
@@ -944,46 +1186,7 @@ export function NinjaOneCapitalCityR3({
           tier={tier}
         />
       ) : null}
-      {d06StationVisible ? d06StationSourceWindow ? (
-        <svg
-          height={d06StationBase.height}
-          preserveAspectRatio="xMidYMid meet"
-          viewBox={`0 0 ${d06StationSourceWindow.sourceDimensions.join(" ")}`}
-          width={d06StationBase.width}
-          x={d06StationBase.anchorX - d06StationBase.width * 0.5}
-          y={1086 - d06StationBase.height}
-        >
-          <image
-            className="ninjaone-capital-city__r3-image"
-            data-city-asset-id={d06StationBase.assetId}
-            data-city-asset-source-tier="site-close"
-            data-city-child-layer="L4_2"
-            data-city-runtime-scale={d06StationBase.scale}
-            data-city-runtime-status="manifest-declared"
-            height={NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I24.asset.dimensions[1]}
-            href={d06StationBase.path}
-            preserveAspectRatio="none"
-            width={NINJAONE_CAPITAL_CITY_R3_RUNTIME_ASSETS.I24.asset.dimensions[0]}
-            x={d06StationSourceWindow.origin[0]}
-            y={d06StationSourceWindow.origin[1]}
-          />
-        </svg>
-      ) : (
-        <image
-          className="ninjaone-capital-city__r3-image"
-          data-city-asset-id={d06StationBase.assetId}
-          data-city-asset-source-tier="capital"
-          data-city-child-layer="L4_2"
-          data-city-runtime-scale={d06StationBase.scale}
-          data-city-runtime-status="manifest-declared"
-          height={d06StationBase.height}
-          href={d06StationBase.path}
-          preserveAspectRatio="xMidYMid meet"
-          width={d06StationBase.width}
-          x={d06StationBase.anchorX - d06StationBase.width * 0.5}
-          y={1086 - d06StationBase.height}
-        />
-      ) : null}
+    </g>
     </g>
   );
 }

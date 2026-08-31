@@ -115,10 +115,6 @@ const source = Object.freeze({
     ROOT,
     "art-source/career-world/ninjaone-capital/city-r3/landscape/D05L04-western-skill-terrace-mass-r1-alpha.png",
   ),
-  d06DistrictMask: path.join(
-    ROOT,
-    "art-source/career-world/ninjaone-capital/city-r3/districts/D06-station-rail-mask.png",
-  ),
   bridgeWaterDetail: path.join(
     ROOT,
     "public/career-world/capitals/ninjaone/city-r3/water-interaction/WFX01-city-bridge-water-detail-r1-alpha.png",
@@ -130,10 +126,6 @@ const source = Object.freeze({
   closeFabricDetail: path.join(
     ROOT,
     "public/career-world/capitals/ninjaone/city-r3/detail/CFX01-city-close-fabric-detail-r1-alpha.png",
-  ),
-  stationSiteClose: path.join(
-    ROOT,
-    "art-source/career-world/ninjaone-capital/city-r3/station/I24-station-cliff-registered-undercroft-r1-alpha.png",
   ),
   foliageManifest: path.join(
     ROOT,
@@ -173,14 +165,6 @@ const outputs = Object.freeze({
   centralArchitectureDetail: path.join(
     outputRoot,
     "detail/CFX02-city-central-architecture-detail-overlay-r1-alpha.png",
-  ),
-  stationCapital: path.join(
-    outputRoot,
-    "station/I20-station-capital-cluster-no-train-r1-alpha.png",
-  ),
-  stationSiteClose: path.join(
-    outputRoot,
-    "station/I24-station-cliff-registered-undercroft-r1-alpha-crop.png",
   ),
   waterRegistrationMask: path.join(
     outputRoot,
@@ -561,7 +545,6 @@ const [
   d05GroundIntegration,
   d05TerrainIntegrationDetail,
   d05TerraceMass,
-  d06DistrictMask,
 ] =
   await Promise.all([
     imageMetadata(source.master),
@@ -589,7 +572,6 @@ const [
     imageMetadata(source.d05GroundIntegration),
     imageMetadata(source.d05TerrainIntegrationDetail),
     imageMetadata(source.d05TerraceMass),
-    singleChannel(source.d06DistrictMask),
   ]);
 const d04CompactGatewayBytes = await readFile(source.d04CompactGateway);
 const d04CompactGatewayMetadata = await sharp(d04CompactGatewayBytes).metadata();
@@ -597,12 +579,10 @@ const [
   bridgeWaterDetailSourceWindow,
   rearRidgeUnderlaySourceWindow,
   closeFabricDetailSourceWindow,
-  stationSiteCloseSourceWindow,
 ] = await Promise.all([
   writeRegisteredAlphaCrop(source.bridgeWaterDetail, outputs.bridgeWaterDetail),
   writeRegisteredAlphaCrop(source.rearRidgeUnderlay, outputs.rearRidgeUnderlay),
   writeRegisteredAlphaCrop(source.closeFabricDetail, outputs.closeFabricDetail),
-  writeRegisteredAlphaCrop(source.stationSiteClose, outputs.stationSiteClose),
 ]);
 const cleanedWater = await cleanConnectedWaterMask(rawLiveWater);
 const liveWater = cleanedWater.mask;
@@ -1249,23 +1229,10 @@ await writePng(outputs.waterInteraction, sharp(waterInteractionRgba, {
   raw: { width: WIDTH, height: HEIGHT, channels: 4 },
 }));
 
-const foundation = await sharp(await readFile(outputs.composite))
+const capitalContext = await sharp(await readFile(outputs.capitalContext))
   .ensureAlpha()
   .raw()
   .toBuffer();
-const softenedD06DistrictMask = await sharp(d06DistrictMask, {
-  raw: { width: WIDTH, height: HEIGHT, channels: 1 },
-}).blur(1.4).toColourspace("b-w").raw().toBuffer();
-const capitalContext = Buffer.from(foundation);
-for (let index = 0; index < PIXELS; index += 1) {
-  const alphaOffset = index * 4 + 3;
-  capitalContext[alphaOffset] = Math.round(
-    capitalContext[alphaOffset] * (255 - softenedD06DistrictMask[index]) / 255,
-  );
-}
-await writePng(outputs.capitalContext, sharp(capitalContext, {
-  raw: { width: WIDTH, height: HEIGHT, channels: 4 },
-}));
 const foliageManifest = JSON.parse(await readFile(source.foliageManifest, "utf8"));
 const nativeFoliageReuse = await analyzeNativeFoliageReuse(capitalContext, foliageManifest);
 const d02RegisteredNativeFoliageInstanceIds = Object.freeze([
@@ -1445,7 +1412,7 @@ const manifest = {
   },
   layers: [
     { id: "L4_0", role: "city-water-interaction", asset: await artifact(outputs.waterInteraction) },
-    { id: "L4", role: "capital-composite-context-with-D06-exclusion", asset: await artifact(outputs.capitalContext) },
+    { id: "L4", role: "capital-composite-context-complement", asset: await artifact(outputs.capitalContext) },
   ],
   runtimeAssets: [
     {
@@ -1572,23 +1539,6 @@ const manifest = {
       role: "central-architecture-detail",
       tiers: ["close"],
       asset: await artifact(outputs.centralArchitectureDetail),
-    },
-    {
-      id: "I20",
-      layerId: "L4_2",
-      role: "train-free-capital-station",
-      tiers: ["capital"],
-      placement: { anchor: [1005, 1086], baseSize: [610, 610 * 191 / 384], scale: 1 },
-      asset: await artifact(outputs.stationCapital),
-    },
-    {
-      id: "I24",
-      layerId: "L4_2",
-      role: "cliff-registered-undercroft-site-close-station",
-      tiers: ["site", "close"],
-      placement: { anchor: [1056.5, 1086], baseSize: [783, 587], scale: 0.72 },
-      sourceWindow: stationSiteCloseSourceWindow,
-      asset: await artifact(outputs.stationSiteClose),
     },
   ],
   deliveries: {

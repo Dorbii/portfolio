@@ -26,8 +26,6 @@ export type NinjaOneCapitalCityRuntimeAssetId =
   | "D05L02"
   | "D05L03"
   | "D05L04"
-  | "I20"
-  | "I24"
   | "LFX06"
   | "S14D04"
   | "WFX01";
@@ -55,7 +53,7 @@ interface FoundationLayer {
   readonly asset: NinjaOneCapitalCityArtifact;
   readonly id: "L4" | "L4_0";
   readonly role:
-    | "capital-composite-context-with-D06-exclusion"
+    | "capital-composite-context-with-progressive-detail-exclusion"
     | "city-water-interaction";
 }
 
@@ -79,7 +77,7 @@ function artifact(
 const rawLayers = manifest.layers as unknown as readonly FoundationLayer[];
 const layerByRole = new Map(rawLayers.map((layer) => [layer.role, layer]));
 const waterLayer = layerByRole.get("city-water-interaction");
-const contextLayer = layerByRole.get("capital-composite-context-with-D06-exclusion");
+const contextLayer = layerByRole.get("capital-composite-context-with-progressive-detail-exclusion");
 const waterCoverage = manifest.verification.inlandWaterCoverageFraction;
 const progressiveWaterExclusion = manifest.authority.progressiveDetailWaterExclusion;
 const d01ContextExclusion = manifest.authority.progressiveDistrictContextExclusions.D01;
@@ -143,15 +141,12 @@ const expectedRuntimeAssetContract = Object.freeze({
   D05L02: Object.freeze({ layerId: "L4_1", tiers: "site,close" }),
   D05L03: Object.freeze({ layerId: "L4_1", tiers: "site,close" }),
   D05L04: Object.freeze({ layerId: "L4_1", tiers: "site,close" }),
-  I20: Object.freeze({ layerId: "L4_2", tiers: "capital" }),
-  I24: Object.freeze({ layerId: "L4_2", tiers: "site,close" }),
   LFX06: Object.freeze({ layerId: "L4_1", tiers: "capital,site,close" }),
   S14D04: Object.freeze({ layerId: "L4_3", tiers: "site,close" }),
   WFX01: Object.freeze({ layerId: "L4_0", tiers: "site,close" }),
 } as const);
 const expectedSourceWindowAssetIds = new Set<NinjaOneCapitalCityRuntimeAssetId>([
   "CFX01",
-  "I24",
   "LFX06",
   "WFX01",
 ]);
@@ -244,8 +239,6 @@ if (
       || (
         id === "D03L04"
         || id === "D05L04"
-        || id === "I20"
-        || id === "I24"
         || id === "S14D04"
       )
         !== Boolean(runtimeAsset.placement)

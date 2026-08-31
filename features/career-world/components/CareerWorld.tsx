@@ -10,6 +10,7 @@ interface CareerWorldProps {
   readonly enablePerformanceProbe?: boolean;
   readonly environmentProof?: boolean;
   readonly initialView?: "world" | "ninjaone-capital";
+  readonly layerInspector?: boolean;
 }
 
 export function CareerWorld({
@@ -20,6 +21,7 @@ export function CareerWorld({
   enablePerformanceProbe = false,
   environmentProof = false,
   initialView = "world",
+  layerInspector = false,
 }: CareerWorldProps) {
   return (
     <main className="career-world">
@@ -42,6 +44,7 @@ export function CareerWorld({
         environmentProof={environmentProof}
         initialView={initialView}
         key={cityProofView ?? "interactive"}
+        layerInspector={layerInspector}
       />
     </main>
   );

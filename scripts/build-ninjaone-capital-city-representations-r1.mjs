@@ -27,10 +27,6 @@ const contextOutputPath = path.join(
   root,
   "public/career-world/capitals/ninjaone/city-representations/context/P01-city-context-with-D06-cutout-r1-alpha.png",
 );
-const d06MaskPath = path.join(
-  root,
-  "public/career-world/capitals/ninjaone/city-nodes-r2/proof/d06/station-rail-mask.png",
-);
 const manifestPath = path.join(
   root,
   "public/career-world/capitals/ninjaone/manifests/city-lod-representations-r1.json",
@@ -38,9 +34,7 @@ const manifestPath = path.join(
 
 const ARTBOARD = Object.freeze([1448, 1086]);
 const TRIM_BOUNDS = Object.freeze({ height: 1024, left: 34, top: 40, width: 1386 });
-const D06_MASK_BOUNDS = Object.freeze({ height: 290, left: 665, top: 796, width: 783 });
 const TERRITORY_MAXIMUM_EDGE = 512;
-const CONTEXT_MAXIMUM_EDGE = 1024;
 
 function sha256(bytes) {
   return createHash("sha256").update(bytes).digest("hex");
@@ -184,38 +178,7 @@ if (!registeredCrop.equals(trimmedPixels)) {
 }
 await assertTransparentCornersAndNoGreenResidual(trimmedSourceBytes, "P01 trimmed source");
 
-const d06MaskBytes = await readFile(d06MaskPath);
-const d06MaskMetadata = await sharp(d06MaskBytes).metadata();
-if (
-  d06MaskMetadata.width !== D06_MASK_BOUNDS.width
-  || d06MaskMetadata.height !== D06_MASK_BOUNDS.height
-) {
-  throw new TypeError("The D06 exclusion mask no longer matches its registered crop.");
-}
-const fullPixels = await sharp(fullSourceBytes).ensureAlpha().raw().toBuffer();
-const maskPixels = await sharp(d06MaskBytes).greyscale().raw().toBuffer();
-for (let y = 0; y < D06_MASK_BOUNDS.height; y += 1) {
-  for (let x = 0; x < D06_MASK_BOUNDS.width; x += 1) {
-    const artboardX = D06_MASK_BOUNDS.left + x;
-    const artboardY = D06_MASK_BOUNDS.top + y;
-    if (artboardX >= ARTBOARD[0] || artboardY >= ARTBOARD[1]) continue;
-    const alphaOffset = (artboardY * ARTBOARD[0] + artboardX) * 4 + 3;
-    fullPixels[alphaOffset] = Math.round(
-      fullPixels[alphaOffset] * (1 - maskPixels[y * D06_MASK_BOUNDS.width + x] / 255),
-    );
-    if (fullPixels[alphaOffset] === 0) {
-      fullPixels[alphaOffset - 3] = 0;
-      fullPixels[alphaOffset - 2] = 0;
-      fullPixels[alphaOffset - 1] = 0;
-    }
-  }
-}
-const contextSourceBytes = await sharp(fullPixels, {
-  raw: { channels: 4, height: ARTBOARD[1], width: ARTBOARD[0] },
-}).png({ compressionLevel: 9, palette: false }).toBuffer();
-
 await resizeCleanAndWrite(fullSourceBytes, territoryOutputPath, TERRITORY_MAXIMUM_EDGE);
-await resizeCleanAndWrite(contextSourceBytes, contextOutputPath, CONTEXT_MAXIMUM_EDGE);
 
 const territoryOutputBytes = await readFile(territoryOutputPath);
 const contextOutputBytes = await readFile(contextOutputPath);
@@ -241,9 +204,9 @@ const manifest = Object.freeze({
       "world-marker-territory-proxy-district-exclusive-incremental-migration",
   }),
   routing: Object.freeze({
-    capital: "P01-unconverted-context-with-D06-cutout-plus-I13-D06-composite",
-    close: "P01-unconverted-context-with-D06-cutout-plus-I16-full-resolution-D06-base-plus-I17-close-civic-overlay",
-    site: "P01-unconverted-context-with-D06-cutout-plus-I16-D06-site-composite",
+    capital: "P01-complement-context",
+    close: "P01-complement-context-plus-registered-detail",
+    site: "P01-complement-context-plus-registered-detail",
     territory: "P01-only",
     world: "interface-marker-only",
   }),
@@ -284,25 +247,14 @@ const manifest = Object.freeze({
         method: "full-alpha-trim-offset-preserved",
       }),
       presentation: Object.freeze({
-        contextIntent: "cohesive-unconverted-city-context-without-D06-double-render",
+        contextIntent: "cohesive-unconverted-city-complement-context",
         contextOpacity: 0.86,
         territoryIntent: "small-readable-distant-city-mass-over-locked-L1-L3",
         territoryOpacity: 0.82,
         territoryScale: 0.46,
         territoryScaleAnchor: Object.freeze([984.64, 776.49]),
       }),
-      replacedDistricts: Object.freeze([
-        Object.freeze({
-          districtId: "D06",
-          exclusionMask: publicPath(d06MaskPath),
-          maskBounds: D06_MASK_BOUNDS,
-          replacementByTier: Object.freeze({
-            capital: "I13",
-            close: "I16+I17",
-            site: "I16",
-          }),
-        }),
-      ]),
+      replacedDistricts: Object.freeze([]),
     }),
   ]),
 });
@@ -310,5 +262,5 @@ const manifest = Object.freeze({
 await mkdir(path.dirname(manifestPath), { recursive: true });
 await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
 process.stdout.write(
-  `Built P01 territory ${territoryOutputMetadata.width}x${territoryOutputMetadata.height} and D06-cutout context ${contextOutputMetadata.width}x${contextOutputMetadata.height}.\n`,
+  `Built P01 territory ${territoryOutputMetadata.width}x${territoryOutputMetadata.height}; retained the complement context ${contextOutputMetadata.width}x${contextOutputMetadata.height}.\n`,
 );

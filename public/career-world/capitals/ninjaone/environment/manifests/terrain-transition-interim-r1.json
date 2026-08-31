@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "id": "career-world/terrain-transition-interim@r1",
+  "status": "INTERIM-owner-guard-treatment",
+  "ownerVerdict": "its not respecting the landscape",
+  "ownerDecision": "OPEN OWNER DECISION: retain interim only or bring forward a capital apron; full terrain pass remains deferred until post-territories",
+  "imageGen": {
+    "callsUsed": 1,
+    "cap": 4,
+    "riverCallsUsed": 1,
+    "riverCap": 2,
+    "edgeCallsUsed": 0,
+    "edgeCap": 2,
+    "candidateSha256": "1fa864882063466d1e51662056fc0f5762b7066afff490733c5b088e711419c0",
+    "prompt": "Resolve only the lower river corridor: keep the upstream river and the exact isometric terrain authority, narrow the channel into a shadowed rocky gorge or sink at least 80 pixels before the bottom edge, and carry dry matching rock and alpine ground to the bottom edge. Preserve all terrain, paths, trees, lighting, framing, scale, and projection outside that corridor; add no structures, roads, bridges, ponds, waterfalls, text, blur, haze, or border changes."
+  },
+  "sources": {
+    "previous": "art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r8.png",
+    "current": "art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r9.png"
+  },
+  "boundaryCensus": {
+    "contacts": [
+      {
+        "side": "left",
+        "disposition": "backing-contact-wide-transition"
+      },
+      {
+        "side": "right",
+        "disposition": "backing-contact-wide-transition"
+      },
+      {
+        "side": "bottom",
+        "disposition": "backing-contact-wide-transition-with-river-sink"
+      },
+      {
+        "side": "top",
+        "disposition": "alpha-land-silhouette-and-ocean-not-backing-contact"
+      }
+    ],
+    "previousFeatherPixels": 28,
+    "featherPixels": 176,
+    "previousTransitionWidths": {
+      "minimum": 31,
+      "median": 44,
+      "maximum": 1440
+    },
+    "transitionWidths": {
+      "minimum": 173,
+      "median": 191,
+      "maximum": 1440
+    }
+  },
+  "changedPixelPolicy": {
+    "affectedMasterRects": [
+      [
+        0,
+        0,
+        760,
+        4320
+      ],
+      [
+        5000,
+        0,
+        760,
+        4320
+      ],
+      [
+        0,
+        3560,
+        5760,
+        760
+      ],
+      [
+        3584,
+        3296,
+        1024,
+        1024
+      ]
+    ],
+    "affectedSupportMaskPath": "/career-world/capitals/ninjaone/environment/masks/terrain-transition-interim-support-r1.png",
+    "affectedSupportMaskSha256": "3548fbd5466a02e6cd3a3c21d71556f178f8d69b7a8f90aa284ce4e785f4a2a5",
+    "outsideChangedPixels": 0,
+    "riverChangedPixels": 315946,
+    "transitionChangedPixels": 6486431
+  },
+  "patchBorders": {
+    "limitPercent": 6,
+    "topLeftRightLuminancePercent": 0,
+    "topLeftRightSaturationPercent": 0,
+    "bottomEffectiveCompositePercent": 0
+  },
+  "riverExit": {
+    "sourceRect": [
+      3584,
+      3296,
+      1024,
+      1024
+    ],
+    "blueBottomPixelsBefore": 5454,
+    "blueBottomPixelsAfter": 1,
+    "resolution": "rocky-gorge-sink-before-edge"
+  },
+  "tiers": {
+    "territory": {
+      "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-transition-territory-r1.webp?v=86df2ad3af49",
+      "dimensions": [
+        720,
+        540
+      ],
+      "sha256": "86DF2AD3AF49ED86C02205A798EFDEA4B109CC483BAD35871200E7C026A37EBE",
+      "changedPixels": 116730,
+      "outsideChangedPixels": 0
+    },
+    "capital": {
+      "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-transition-capital-r1.webp?v=a8ba86c20812",
+      "dimensions": [
+        1440,
+        1080
+      ],
+      "sha256": "A8BA86C208125668FC5032750A9B61D69BFCB6FEC1CA6F8D4A4C1DEE9B409A7B",
+      "changedPixels": 462595,
+      "outsideChangedPixels": 0
+    },
+    "site": {
+      "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-transition-site-r1.webp?v=92cb28ee14bf",
+      "dimensions": [
+        2880,
+        2160
+      ],
+      "sha256": "92CB28EE14BF6A583B4296FD1E103460E4F0A7E3267C9F2B57233C74DB80DC4D",
+      "changedPixels": 1848985,
+      "outsideChangedPixels": 0
+    },
+    "close": {
+      "path": "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-transition-close-r1.webp?v=a7e04cf122b3",
+      "dimensions": [
+        5760,
+        4320
+      ],
+      "sha256": "A7E04CF122B3BC260AAD23574CF26F43CF16DFE62F1AE09490D5DE635CDF2F5E",
+      "changedPixels": 9020324,
+      "outsideChangedPixels": 0
+    }
+  },
+  "protectedFiles": [
+    {
+      "path": "public/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-safe-mask-r5.png",
+      "sha256": "b1cf1c6afe515e56ce77a4d7b0cad7ec1f8f83d9139b59467ca6bcfee46776fe"
+    },
+    {
+      "path": "public/career-world/layers/inland-water/authority/masks/ninjaone-inland-terrain-erase-r1.png",
+      "sha256": "4667a357373c94d36b9a8f07552ce38c38347a2e4dfb2aca74abddcc6f9bb7b2"
+    }
+  ]
+}

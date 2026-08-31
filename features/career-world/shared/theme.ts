@@ -2,14 +2,14 @@ export const CAREER_WORLD_THEME = Object.freeze({
   colors: Object.freeze({
     backdrop: "#050a09",
     water: Object.freeze({
-      abyss: "#061820",
-      deep: "#0a222c",
-      body: "#123742",
-      swell: "#2d5960",
-      shallow: "#23494b",
-      highlight: "#87aaa4",
-      foam: "#c5cfc0",
-      storm: "#101a20",
+      abyss: "#0a2440",
+      deep: "#0e3355",
+      body: "#1a4d6e",
+      swell: "#2f6f96",
+      shallow: "#2f7e94",
+      highlight: "#c8e1f0",
+      foam: "#dce9ec",
+      storm: "#0e1e2e",
     }),
     land: Object.freeze({
       shadow: "#24271d",

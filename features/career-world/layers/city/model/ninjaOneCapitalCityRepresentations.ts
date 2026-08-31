@@ -16,7 +16,7 @@ import {
   NINJAONE_ENVIRONMENT_WORLD_SPAN,
 } from "../../terrain/model/ninjaOneEnvironmentProof.ts";
 
-export type NinjaOneCapitalCityDistrictId = "D01" | "D02" | "D03" | "D04" | "D05" | "D06";
+export type NinjaOneCapitalCityDistrictId = "D01" | "D02" | "D03" | "D04" | "D05";
 
 export type NinjaOneCapitalCityRepresentationMode =
   | "capital-incremental-context"
@@ -30,8 +30,6 @@ export type NinjaOneCapitalCityRepresentationMode =
   | "d04-site-composite"
   | "d05-close-composite"
   | "d05-site-composite"
-  | "d06-close-composite"
-  | "d06-site-composite"
   | "territory-proxy"
   | "world-marker";
 
@@ -47,10 +45,11 @@ export type NinjaOneCapitalCityProofViewId =
   | "d04-site"
   | "d05-close"
   | "d05-site"
-  | "d06-close"
-  | "d06-site"
   | "territory"
   | "world";
+
+const TERRITORY_REGISTER_REPRESENTATION_POLICY =
+  "world-marker-territory-symbolic-register-capital-semantic-handoff-district-exclusive-incremental-migration";
 
 interface ProxyDelivery {
   readonly decodedBytes: number;
@@ -176,22 +175,25 @@ if (
   || representationManifest.status !== "runtime-awaiting-fixed-sequence-visual-acceptance"
   || representationManifest.authority.geographyOwnership !== "none"
   || representationManifest.authority.representationPolicy
-    !== "world-marker-territory-proxy-district-exclusive-incremental-migration"
+    !== TERRITORY_REGISTER_REPRESENTATION_POLICY
+  || representationManifest.authority.territoryRegister.representationClass
+    !== "symbolic-register"
+  || representationManifest.authority.territoryRegister.physicalScaleClaim !== false
+  || representationManifest.authority.territoryRegister.canonHandoff.tier !== "capital"
+  || representationManifest.authority.territoryRegister.canonHandoff.startsAtMaximumCameraSpan
+    !== DETAIL_POLICY.tierMaximumSpan.capital
+  || representationManifest.authority.territoryRegister.canonHandoff.completesAtMaximumCameraSpan
+    !== DETAIL_POLICY.territoryToCapital.endSpan
   || representationManifest.representations.length !== 1
   || NINJAONE_CAPITAL_CITY_WHOLE_CITY_PROXY.id !== "P01"
   || NINJAONE_CAPITAL_CITY_WHOLE_CITY_PROXY.representationClass !== "whole-city-proxy"
   || NINJAONE_CAPITAL_CITY_WHOLE_CITY_PROXY.registration.artboard.join(",") !== "1448,1086"
   || NINJAONE_CAPITAL_CITY_WHOLE_CITY_PROXY.presentation.territoryScale <= 0
   || NINJAONE_CAPITAL_CITY_WHOLE_CITY_PROXY.presentation.territoryScale >= 1
-  || NINJAONE_CAPITAL_CITY_WHOLE_CITY_PROXY.replacedDistricts.length !== 1
-  || NINJAONE_CAPITAL_CITY_WHOLE_CITY_PROXY.replacedDistricts[0].districtId !== "D06"
+  || NINJAONE_CAPITAL_CITY_WHOLE_CITY_PROXY.replacedDistricts.length !== 0
 ) {
   throw new TypeError("NinjaOne Capital representation authority is invalid.");
 }
-
-const D06_SELECTION_LOCAL_BOUNDS = Object.freeze({
-  ...NINJAONE_CAPITAL_CITY_WHOLE_CITY_PROXY.replacedDistricts[0].maskBounds,
-});
 
 const D01_PROOF_LOCAL_BOUNDS = Object.freeze({
   height: 520,
@@ -276,26 +278,7 @@ export const NINJAONE_CAPITAL_CITY_PROOF_LOCAL_WIDTHS = Object.freeze({
   "d04-site": 1080,
   "d05-close": 880,
   "d05-site": 1080,
-  "d06-close": 880,
-  "d06-site": 1080,
 });
-
-function registeredD06ParentCrop(localWidth: number): CameraView {
-  const localHeight = localWidth * 0.75;
-  const span = Object.freeze([
-    localWidth / 1448 * NINJAONE_ENVIRONMENT_WORLD_SPAN[0],
-    localHeight / 1086 * NINJAONE_ENVIRONMENT_WORLD_SPAN[1],
-  ] as Pair);
-  return Object.freeze({
-    origin: Object.freeze([
-      NINJAONE_ENVIRONMENT_WORLD_ORIGIN[0]
-        + (1448 - localWidth) / 1448 * NINJAONE_ENVIRONMENT_WORLD_SPAN[0],
-      NINJAONE_ENVIRONMENT_WORLD_ORIGIN[1]
-        + (1086 - localHeight) / 1086 * NINJAONE_ENVIRONMENT_WORLD_SPAN[1],
-    ] as Pair),
-    span,
-  });
-}
 
 function registeredDistrictParentCrop(
   localWidth: number,
@@ -370,12 +353,6 @@ Readonly<Record<NinjaOneCapitalCityProofViewId, CameraView>> = Object.freeze({
     NINJAONE_CAPITAL_CITY_PROOF_LOCAL_WIDTHS["d05-site"],
     D05_PROOF_LOCAL_BOUNDS,
   ),
-  "d06-close": registeredD06ParentCrop(
-    NINJAONE_CAPITAL_CITY_PROOF_LOCAL_WIDTHS["d06-close"],
-  ),
-  "d06-site": registeredD06ParentCrop(
-    NINJAONE_CAPITAL_CITY_PROOF_LOCAL_WIDTHS["d06-site"],
-  ),
   territory: Object.freeze({
     origin: Object.freeze([0, 0] as Pair),
     span: Object.freeze([0.72, 0.72] as Pair),
@@ -396,8 +373,6 @@ Readonly<Record<NinjaOneCapitalCityProofViewId, DetailTierId>> = Object.freeze({
   "d04-site": "site",
   "d05-close": "close",
   "d05-site": "site",
-  "d06-close": "close",
-  "d06-site": "site",
   territory: "territory",
   world: "world",
 });
@@ -414,9 +389,29 @@ export const NINJAONE_CAPITAL_CITY_DETAIL_POLICY = Object.freeze({
   siteToClose: DETAIL_POLICY.siteToClose,
 });
 
+// Territory is a symbolic register, not an architecture-bearing physical view.
+// Start the semantic hand-off at the first capital-detail camera span and finish
+// it before the existing territory-to-capital transition ends.
+export const NINJAONE_CAPITAL_CITY_CANON_HANDOFF = Object.freeze({
+  endSpan: DETAIL_POLICY.territoryToCapital.endSpan,
+  startSpan: DETAIL_POLICY.tierMaximumSpan.capital,
+});
+
 function descendingSmoothstep(span: number, start: number, end: number): number {
   const amount = Math.min(1, Math.max(0, (start - span) / (start - end)));
   return amount * amount * (3 - 2 * amount);
+}
+
+export function ninjaOneCapitalCitySemanticHandoffWeights(span: number) {
+  const canonOpacity = descendingSmoothstep(
+    span,
+    NINJAONE_CAPITAL_CITY_CANON_HANDOFF.startSpan,
+    NINJAONE_CAPITAL_CITY_CANON_HANDOFF.endSpan,
+  );
+  return Object.freeze({
+    canonOpacity,
+    territoryRegisterOpacity: 1 - canonOpacity,
+  });
 }
 
 function cameraIsCenteredInNinjaOneCapital(camera: CameraView): boolean {
@@ -506,7 +501,6 @@ export function ninjaOneCapitalCityProofDistrict(
   if (viewId === "d03-site" || viewId === "d03-close") return "D03";
   if (viewId === "d04-site" || viewId === "d04-close") return "D04";
   if (viewId === "d05-site" || viewId === "d05-close") return "D05";
-  if (viewId === "d06-site" || viewId === "d06-close") return "D06";
   return null;
 }
 
@@ -538,12 +532,6 @@ export function ninjaOneCapitalCityDistrictAtWorldPoint(
     (worldPoint[1] - NINJAONE_ENVIRONMENT_WORLD_ORIGIN[1])
     / NINJAONE_ENVIRONMENT_WORLD_SPAN[1]
   ) * 1086;
-  const right = D06_SELECTION_LOCAL_BOUNDS.left + D06_SELECTION_LOCAL_BOUNDS.width;
-  const bottom = D06_SELECTION_LOCAL_BOUNDS.top + D06_SELECTION_LOCAL_BOUNDS.height;
-  if (localX >= D06_SELECTION_LOCAL_BOUNDS.left
-    && localX <= right
-    && localY >= D06_SELECTION_LOCAL_BOUNDS.top
-    && localY <= bottom) return "D06";
   const d02Right = D02_SELECTION_LOCAL_BOUNDS.left + D02_SELECTION_LOCAL_BOUNDS.width;
   const d02Bottom = D02_SELECTION_LOCAL_BOUNDS.top + D02_SELECTION_LOCAL_BOUNDS.height;
   if (localX >= D02_SELECTION_LOCAL_BOUNDS.left
@@ -594,7 +582,5 @@ export function ninjaOneCapitalCityRepresentationMode(
   if (tier === "close" && focusedDistrict === "D04") return "d04-close-composite";
   if (tier === "site" && focusedDistrict === "D05") return "d05-site-composite";
   if (tier === "close" && focusedDistrict === "D05") return "d05-close-composite";
-  if (tier === "site" && focusedDistrict === "D06") return "d06-site-composite";
-  if (tier === "close" && focusedDistrict === "D06") return "d06-close-composite";
   return "capital-incremental-context";
 }

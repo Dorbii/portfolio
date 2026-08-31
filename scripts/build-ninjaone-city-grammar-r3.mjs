@@ -46,7 +46,6 @@ const districtDefinitions = Object.freeze([
   ["D03", "Eastern Industry", "art-source/career-world/ninjaone-capital/city-r3/districts/D03-eastern-industry-mask.png"],
   ["D04", "Central Lake Terraces", "art-source/career-world/ninjaone-capital/city-r3/districts/D04-central-lake-terraces-mask.png"],
   ["D05", "Western Skill Terraces", "art-source/career-world/ninjaone-capital/city-r3/districts/D05-western-skill-terraces-mask.png"],
-  ["D06", "Station and Rail", "art-source/career-world/ninjaone-capital/city-r3/districts/D06-station-rail-mask.png"],
 ].map(([id, label, file]) => Object.freeze({ id, label, file })));
 const output = Object.freeze({
   grammar: "public/career-world/capitals/ninjaone/city-v2/grammar/ninjaone-city-grammar-r3.json",
@@ -58,7 +57,7 @@ const LANDMARKS = Object.freeze([
   { id: "statue-observatory", label: "statue observatory", point: [0.63 * WIDTH, 0.2 * HEIGHT], bbox: [0.57 * WIDTH, 0.13 * HEIGHT, 0.69 * WIDTH, 0.26 * HEIGHT] },
   { id: "great-glass-train-hall", label: "great glass train hall", point: [0.6 * WIDTH, 0.85 * HEIGHT], bbox: [0.5 * WIDTH, 0.76 * HEIGHT, 0.72 * WIDTH, 0.95 * HEIGHT], tightenedBbox: [0.52 * WIDTH, 0.77 * HEIGHT, 0.7 * WIDTH, 0.94 * HEIGHT] },
 ]);
-const DISTRICT_COLORS = Object.freeze({ D01: "#ffd166", D02: "#ef476f", D03: "#f78c6b", D04: "#4cc9f0", D05: "#80ed99", D06: "#c77dff" });
+const DISTRICT_COLORS = Object.freeze({ D01: "#ffd166", D02: "#ef476f", D03: "#f78c6b", D04: "#4cc9f0", D05: "#80ed99" });
 const COMPONENT_COLORS = Object.freeze(["#ff3b30", "#ff9500", "#ffcc00", "#34c759", "#00c7be", "#30b0c7", "#007aff", "#5856d6", "#af52de", "#ff2d55"]);
 const OTHER_COMPONENT_COLOR = "#9aa0a6";
 

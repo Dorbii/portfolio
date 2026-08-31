@@ -4,6 +4,7 @@ import type { NinjaOneCapitalCityProofViewId } from "@/features/career-world/lay
 interface HomePageProps {
   readonly searchParams?: Promise<{
     readonly intent?: string | readonly string[];
+    readonly layers?: string | readonly string[];
     readonly lod?: string | readonly string[];
     readonly view?: string | readonly string[];
   }>;
@@ -30,8 +31,6 @@ function cityProofView(
     || candidate === "d04-close"
     || candidate === "d05-site"
     || candidate === "d05-close"
-    || candidate === "d06-site"
-    || candidate === "d06-close"
     ? candidate
     : null;
 }
@@ -59,6 +58,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     case "terrain":
       return <CareerWorld enableDevelopmentTools />;
     default:
-      return <CareerWorld />;
+      return (
+        <CareerWorld layerInspector={resolvedSearchParams?.layers !== undefined} />
+      );
   }
 }

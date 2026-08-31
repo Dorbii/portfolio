@@ -14,7 +14,10 @@ import {
   NINJAONE_CAPITAL_CITY_R3_WORLD_ORIGIN,
   NINJAONE_CAPITAL_CITY_R3_WORLD_SPAN,
 } from "../model/ninjaOneCapitalCityFoundationR3";
-import { NINJAONE_CAPITAL_D05_CONCEPT } from "../model/ninjaOneCapitalD05Concept";
+import {
+  NINJAONE_CAPITAL_D05_CONCEPT,
+  type NinjaOneCapitalD05WaterEffectTuning,
+} from "../model/ninjaOneCapitalD05Concept";
 import type { NinjaOneCapitalCityDistrictId } from "../model/ninjaOneCapitalCityRepresentations";
 import {
   ninjaOneCapitalCityAssetVariant,
@@ -43,6 +46,7 @@ export function NinjaOneCapitalCityLayer({
   preloadDistrict,
   presentationOpacity = 1,
   visibility,
+  waterEffectTuning,
 }: {
   readonly camera: CameraView;
   readonly detailState: DetailState;
@@ -52,21 +56,30 @@ export function NinjaOneCapitalCityLayer({
   readonly preloadDistrict?: NinjaOneCapitalCityDistrictId | null;
   readonly presentationOpacity?: number;
   readonly visibility: EnvironmentLayerVisibility;
+  readonly waterEffectTuning?: Pick<
+    NinjaOneCapitalD05WaterEffectTuning,
+    "cityWaterOpacity" | "cityWaterShoreRamp" | "sparkle" | "foam" | "crest" | "relight" | "cycling" | "swell"
+  >;
 }) {
   useEffect(() => {
-    if (!preloadDistrict) return;
     const tiers = [
       ...(detailState.shouldLoadSiteAssets ? ["site" as const] : []),
       ...(detailState.shouldLoadCloseAssets ? ["close" as const] : []),
     ];
-    const paths = new Set(tiers.flatMap((tier) => (
-      ninjaOneCapitalVisibleDistrictDetailNodes(
-        camera,
-        tier,
-        ["L4_2", "L4_3"],
-        preloadDistrict,
-      ).map((node) => ninjaOneCapitalCityAssetVariant(node, tier).path)
-    )));
+    const paths = new Set(preloadDistrict
+      ? tiers.flatMap((tier) => (
+        ninjaOneCapitalVisibleDistrictDetailNodes(
+          camera,
+          tier,
+          ["L4_2", "L4_3"],
+          preloadDistrict,
+        ).map((node) => ninjaOneCapitalCityAssetVariant(node, tier).path)
+      ))
+      : []);
+    if (detailState.shouldLoadCapitalAssets) {
+      paths.add(NINJAONE_CAPITAL_D05_CONCEPT.tiers.territoryRegister.path);
+      paths.add(NINJAONE_CAPITAL_D05_CONCEPT.tiers.capital.path);
+    }
     if (preloadDistrict === "D05") {
       paths.add(NINJAONE_CAPITAL_D05_CONCEPT.tiers.capital.path);
       if (detailState.shouldLoadSiteAssets) {
@@ -79,11 +92,17 @@ export function NinjaOneCapitalCityLayer({
     paths.forEach((path) => {
       void preloadImage(path).catch(() => undefined);
     });
-  }, [camera, detailState.shouldLoadCloseAssets, detailState.shouldLoadSiteAssets, preloadDistrict]);
+  }, [
+    camera,
+    detailState.shouldLoadCapitalAssets,
+    detailState.shouldLoadCloseAssets,
+    detailState.shouldLoadSiteAssets,
+    preloadDistrict,
+  ]);
 
   if (
     detailState.tier.id === "world"
-    || detailState.tier.id === "territory"
+    || detailState.territoryToCapital <= 0
     || !isEnvironmentLayerEffectivelyVisible(visibility, "L4")
   ) {
     return null;
@@ -113,7 +132,7 @@ export function NinjaOneCapitalCityLayer({
       data-city-focus-district={focusDistrict ?? "none"}
       data-city-foliage-source="L2-registered-tree-vocabulary"
       data-city-geography-ownership="immutable-L1-L3-plus-reversible-L4-modifications"
-      data-city-lod-delivery="territory-cache-capital-context-atomic-D06-site-close-promotion"
+      data-city-lod-delivery="territory-cache-capital-context-progressive-site-close-promotion"
       data-city-lod-tier={detailState.tier.id}
       data-city-light-direction={light.direction.join(",")}
       data-city-representation-authority={NINJAONE_CAPITAL_CITY_R3_AUTHORITY_ID}
@@ -146,8 +165,10 @@ export function NinjaOneCapitalCityLayer({
           preloadDistrict={preloadDistrict ?? null}
           siteAssetsMounted={detailState.shouldLoadSiteAssets}
           siteProgress={detailState.capitalToSite}
+          territoryProgress={detailState.territoryToCapital}
           tier={detailState.tier.id}
           visibility={visibility}
+          waterEffectTuning={waterEffectTuning}
         />
       </g>
       </svg>

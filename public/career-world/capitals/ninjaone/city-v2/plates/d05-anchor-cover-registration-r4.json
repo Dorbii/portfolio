@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "ninjaone-d05-anchor-cover@r4",
-  "status": "owner-authorized-canon-r4-files-staged-for-F20",
+  "status": "T38-seam-extension-mounted-awaiting-director-owner-zoom-review",
   "coordinateConventions": {
     "origin": "top-left",
     "units": "pixels",
@@ -223,7 +223,7 @@
   ],
   "mask": {
     "path": "/career-world/capitals/ninjaone/city-v2/plates/d05-anchor-cover-usable-mask-r4.png",
-    "sha256": "809c1ad2629729699c5ab8d8389d5e22b1e50c77df801406025cb362b6de11ac",
+    "sha256": "b2ef8399d229c6b2da4840bb8125ab6aea3edc230089649b7757ae25d1f2bbce",
     "dimensions": [
       1305,
       1205
@@ -295,5 +295,105 @@
   "supersedes": {
     "path": "public/career-world/capitals/ninjaone/city-v2/plates/d05-anchor-cover-registration-r3.json",
     "sha256": "74913d608dd4a80a0deca82486d1e33d2e5c118ea2b1d4076012cff43fa5f8b6"
+  },
+  "boundaryPainting": {
+    "contract": "D05 is the opaque painted underlay through the real D05/D06 overlap; D05 water remains removed by the unchanged water classifier",
+    "changedExtentMaster": [
+      585,
+      781.521631029339,
+      691,
+      1086
+    ]
+  },
+  "seamExtension": {
+    "taskId": "T38-seam-extension",
+    "reportPath": ".codex-tmp/qa/T38/mount-report.json",
+    "cause": "one partially-owned resampled column at the D05 master boundary inside the T36 strip",
+    "targetLine": {
+      "joinX": 521,
+      "masterX": 691.192661,
+      "relationToT36": "inside [585,780], not a strip edge"
+    },
+    "patchJoinRectPx": [
+      430,
+      70,
+      660,
+      690
+    ],
+    "ownershipMasterRect": [
+      690.5,
+      785.6880733944954,
+      694.5,
+      1013.2110091743119
+    ],
+    "d05ChangedCloseRectPx": [
+      2532,
+      1018,
+      2621,
+      1636
+    ],
+    "d06ChangedCloseRectPx": [
+      0,
+      160,
+      209,
+      630
+    ],
+    "changedMaskRectPx": [
+      65,
+      11,
+      76,
+      500
+    ],
+    "patchBorders": {
+      "left": {
+        "sampleCount": 586,
+        "luminanceDeltaPercent": 0,
+        "saturationDeltaPercent": 0,
+        "pass": true
+      },
+      "right": {
+        "sampleCount": 581,
+        "luminanceDeltaPercent": 0.0026,
+        "saturationDeltaPercent": 0.0074,
+        "pass": true
+      },
+      "top": {
+        "sampleCount": 0,
+        "luminanceDeltaPercent": 0,
+        "saturationDeltaPercent": 0,
+        "pass": true
+      },
+      "bottom": {
+        "sampleCount": 230,
+        "luminanceDeltaPercent": 0,
+        "saturationDeltaPercent": 0,
+        "pass": true
+      }
+    },
+    "edgeScan": {
+      "scanJoinY": [
+        70,
+        690
+      ],
+      "before": {
+        "weakAlphaRows": 416,
+        "colorEdgeMean": 13.88484848484849,
+        "samples": 165
+      },
+      "after": {
+        "weakAlphaRows": 0,
+        "colorEdgeMean": 15.351132686084151,
+        "samples": 618,
+        "localMedianColorEdgeMean": 11.997743936830231,
+        "colorEdgeRatioToLocalMedian": 1.2795016102118841
+      },
+      "beforeWeakColumns": [
+        {
+          "x": 521,
+          "weakRows": 416
+        }
+      ],
+      "afterWeakColumns": []
+    }
   }
 }

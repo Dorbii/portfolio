@@ -1,0 +1,227 @@
+{
+  "schemaVersion": 1,
+  "id": "ninjaone-d05-open-ocean-removal@r2",
+  "registration": {
+    "id": "ninjaone-d05-anchor-cover@r4",
+    "sourcePath": "public/career-world/capitals/ninjaone/city-v2/plates/d05-anchor-cover-registration-r4.json",
+    "sourceSha256": "aef92f4d9664de1649c0f94957b585d47243a547f6396ae706a15005ffd57ad7",
+    "destinationMasterBounds": [
+      -270,
+      413,
+      691,
+      1300
+    ]
+  },
+  "r1": {
+    "provenance": "public/career-world/capitals/ninjaone/city-v2/canon/d05-canon-ocean-removal-r1.provenance.json",
+    "registration": "public/career-world/capitals/ninjaone/city-v2/canon/d05-canon-ocean-removal-registration-r1.json",
+    "masks": {
+      "capital": "public/career-world/capitals/ninjaone/city-v2/canon/d05-canon-open-ocean-removal-mask-capital-r1.png",
+      "site": "public/career-world/capitals/ninjaone/city-v2/canon/d05-canon-open-ocean-removal-mask-site-r1.png",
+      "close": "public/career-world/capitals/ninjaone/city-v2/canon/d05-canon-open-ocean-removal-mask-close-r1.png"
+    }
+  },
+  "tiers": {
+    "capital": {
+      "source": {
+        "path": "public/career-world/capitals/ninjaone/city-v2/canon/d05-canon-capital-r4.png",
+        "sha256": "b812fb4a2999fdff5b0e1c0478cf60062277773f49e2c3414326a22d12665693",
+        "dimensions": [
+          1305,
+          1205,
+          4
+        ]
+      },
+      "candidate": {
+        "path": "canon/would-be-d05-canon-capital-r4.png",
+        "sha256": "5dd70a26ae325cdb2b1f026e3038df89e8e58ceb1eddaec13fc9d8d6c2ed16c0",
+        "dimensions": [
+          1305,
+          1205,
+          4
+        ]
+      },
+      "masks": {
+        "core": "masks/d05-canon-open-ocean-removal-capital-r2-core.png",
+        "residual-blue": "masks/d05-canon-open-ocean-removal-capital-r2-residual-blue.png",
+        "feather": "masks/d05-canon-open-ocean-removal-capital-r2-feather.png",
+        "aperture": "masks/d05-canon-open-ocean-removal-capital-r2-aperture.png",
+        "coast-band": "masks/d05-canon-open-ocean-removal-capital-r2-coast-band.png"
+      },
+      "thresholds": {
+        "quantiles": {
+          "hue": [
+            0.005,
+            0.995
+          ],
+          "saturation": [
+            0.05,
+            0.995
+          ],
+          "luma": [
+            0.005,
+            0.995
+          ]
+        },
+        "hue": [
+          191.35135135135135,
+          209.43396226415095
+        ],
+        "saturation": [
+          0.6043956043956044,
+          1
+        ],
+        "luma": [
+          0.13185254901960783,
+          0.6162894117647059
+        ]
+      },
+      "metrics": {
+        "selectionBandRadiusPx": 36,
+        "alphaSupportBandRadiusPx": 39,
+        "residualPixels": 16878,
+        "corePixels": 221343,
+        "featherPixels": 16177,
+        "residualOutsideAperture": 0,
+        "alphaChangesOutsideBand": 0,
+        "blueOutsideBandAlphaChanges": 0,
+        "retainedInlandChanges": 0,
+        "blueRoofOrNonWaterBluePixels": 9887
+      }
+    },
+    "site": {
+      "source": {
+        "path": "public/career-world/capitals/ninjaone/city-v2/canon/d05-canon-intermediate-r4.png",
+        "sha256": "b138ad6847b1b94cbc43843370073c329b3b7a09c843f358594b49768947484c",
+        "dimensions": [
+          2610,
+          2410,
+          4
+        ]
+      },
+      "candidate": {
+        "path": "canon/would-be-d05-canon-intermediate-r4.png",
+        "sha256": "8437bedb27bd9dc309f1d200f79445a4cd13ac87249703e8619ba3247199cb97",
+        "dimensions": [
+          2610,
+          2410,
+          4
+        ]
+      },
+      "masks": {
+        "core": "masks/d05-canon-open-ocean-removal-site-r2-core.png",
+        "residual-blue": "masks/d05-canon-open-ocean-removal-site-r2-residual-blue.png",
+        "feather": "masks/d05-canon-open-ocean-removal-site-r2-feather.png",
+        "aperture": "masks/d05-canon-open-ocean-removal-site-r2-aperture.png",
+        "coast-band": "masks/d05-canon-open-ocean-removal-site-r2-coast-band.png"
+      },
+      "thresholds": {
+        "quantiles": {
+          "hue": [
+            0.005,
+            0.995
+          ],
+          "saturation": [
+            0.05,
+            0.995
+          ],
+          "luma": [
+            0.005,
+            0.995
+          ]
+        },
+        "hue": [
+          190.97560975609758,
+          210.3370786516854
+        ],
+        "saturation": [
+          0.5923076923076922,
+          1
+        ],
+        "luma": [
+          0.13185254901960783,
+          0.7080650980392157
+        ]
+      },
+      "metrics": {
+        "selectionBandRadiusPx": 72,
+        "alphaSupportBandRadiusPx": 75,
+        "residualPixels": 70420,
+        "corePixels": 888280,
+        "featherPixels": 46827,
+        "residualOutsideAperture": 0,
+        "alphaChangesOutsideBand": 0,
+        "blueOutsideBandAlphaChanges": 0,
+        "retainedInlandChanges": 0,
+        "blueRoofOrNonWaterBluePixels": 40066
+      }
+    },
+    "close": {
+      "source": {
+        "path": "public/career-world/capitals/ninjaone/city-v2/canon/d05-canon-r4.png",
+        "sha256": "fd5f8baf8a69e4d9998e93ddd1ae3a4a40364d1b354e7a78772ee7fca3196d62",
+        "dimensions": [
+          2621,
+          2419,
+          4
+        ]
+      },
+      "candidate": {
+        "path": "canon/would-be-d05-canon-r4.png",
+        "sha256": "89f802ed868738f915cc3195383923b1c3e1cc095ad18a9d895db9ddf4ac27ac",
+        "dimensions": [
+          2621,
+          2419,
+          4
+        ]
+      },
+      "masks": {
+        "core": "masks/d05-canon-open-ocean-removal-close-r2-core.png",
+        "residual-blue": "masks/d05-canon-open-ocean-removal-close-r2-residual-blue.png",
+        "feather": "masks/d05-canon-open-ocean-removal-close-r2-feather.png",
+        "aperture": "masks/d05-canon-open-ocean-removal-close-r2-aperture.png",
+        "coast-band": "masks/d05-canon-open-ocean-removal-close-r2-coast-band.png"
+      },
+      "thresholds": {
+        "quantiles": {
+          "hue": [
+            0.005,
+            0.995
+          ],
+          "saturation": [
+            0.05,
+            0.995
+          ],
+          "luma": [
+            0.005,
+            0.995
+          ]
+        },
+        "hue": [
+          190.28571428571428,
+          210
+        ],
+        "saturation": [
+          0.5901639344262295,
+          1
+        ],
+        "luma": [
+          0.13285725490196076,
+          0.7290321568627451
+        ]
+      },
+      "metrics": {
+        "selectionBandRadiusPx": 72,
+        "alphaSupportBandRadiusPx": 75,
+        "residualPixels": 79961,
+        "corePixels": 898838,
+        "featherPixels": 45717,
+        "residualOutsideAperture": 0,
+        "alphaChangesOutsideBand": 0,
+        "blueOutsideBandAlphaChanges": 0,
+        "retainedInlandChanges": 0,
+        "blueRoofOrNonWaterBluePixels": 41158
+      }
+    }
+  }
+}

@@ -231,6 +231,40 @@ export const NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES = plateSources(
   PLATE_TIERS,
   EXPECTED_DIMENSIONS,
 ) as Readonly<Record<NinjaOneEnvironmentPlateTier, NinjaOneEnvironmentPlateSource>>;
+export const NINJAONE_ENVIRONMENT_GEOLOGY_TRANSITION_SOURCES = Object.freeze(
+  Object.fromEntries(PLATE_TIERS.map((tier) => {
+    const source = manifest.layers.geology.transitionTreatment.sources[tier];
+    return [tier, Object.freeze({
+      dimensions: Object.freeze([
+        source.dimensions[0],
+        source.dimensions[1],
+      ] as Pair),
+      path: source.path,
+    })];
+  })),
+) as Readonly<Record<NinjaOneEnvironmentPlateTier, NinjaOneEnvironmentPlateSource>>;
+
+export function ninjaOneEnvironmentGeologyTierWeights(detail: {
+  readonly capitalToSite: number;
+  readonly siteToClose: number;
+  readonly tierId: DetailTierId;
+}) {
+  if (detail.tierId === "world") return Object.freeze([] as const);
+  if (detail.tierId === "territory") {
+    return Object.freeze([{ opacity: 1, tier: "territory" as const }]);
+  }
+  return Object.freeze([
+    { opacity: 1 - detail.capitalToSite, tier: "capital" as const },
+    {
+      opacity: detail.capitalToSite * (1 - detail.siteToClose),
+      tier: "site" as const,
+    },
+    {
+      opacity: detail.capitalToSite * detail.siteToClose,
+      tier: "close" as const,
+    },
+  ].filter(({ opacity }) => opacity > 0));
+}
 export const NINJAONE_ENVIRONMENT_SECONDARY_RELIEF_SOURCES = plateSources(
   manifest.layers.secondaryRelief.sources,
   "layers.secondaryRelief.sources",

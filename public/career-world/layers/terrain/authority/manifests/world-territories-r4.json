@@ -72,17 +72,17 @@
     {
       "id": "independent",
       "label": "Independent",
-      "landmassId": "mainland",
+      "landmassId": "independent-island",
       "maskColor": "#a9ba72",
       "focusView": {
-        "origin": [0, 0.34],
-        "span": [0.62, 0.62]
+        "origin": [0.4873, 0.782],
+        "span": [0.18, 0.2]
       },
       "development": {
-        "capitalAnchor": [0.2103, 0.4983],
+        "capitalAnchor": [0.5773, 0.882],
         "capitalEnvelope": {
-          "origin": [0.1376, 0.4463],
-          "span": [0.1017, 0.1063]
+          "origin": [0.5323, 0.8289],
+          "span": [0.0897, 0.1063]
         },
         "minimumLandCoverage": 0.7,
         "firstDetailTier": "territory",
@@ -100,8 +100,8 @@
       "landmassId": "column-island",
       "maskColor": "#9b82ce",
       "focusView": {
-        "origin": [0.42, 0.32],
-        "span": [0.58, 0.58]
+        "origin": [0.7001, 0.5552],
+        "span": [0.28, 0.3]
       },
       "development": {
         "capitalAnchor": [0.8401, 0.7052],
@@ -122,16 +122,16 @@
     {
       "id": "ace-hardware",
       "label": "ACE Hardware",
-      "landmassId": "ace-island",
+      "landmassId": "column-island",
       "maskColor": "#d8bb65",
       "focusView": {
-        "origin": [0.44, 0.71],
-        "span": [0.29, 0.29]
+        "origin": [0.6236, 0.5408],
+        "span": [0.26, 0.3]
       },
       "development": {
-        "capitalAnchor": [0.5773, 0.882],
+        "capitalAnchor": [0.7536, 0.6908],
         "capitalEnvelope": {
-          "origin": [0.5323, 0.8289],
+          "origin": [0.7, 0.63],
           "span": [0.0897, 0.1063]
         },
         "minimumLandCoverage": 0.7,

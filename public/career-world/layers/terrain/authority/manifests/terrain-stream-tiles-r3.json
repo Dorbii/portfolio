@@ -53,7 +53,7 @@
       "worldBounds": {
         "origin": [
           0.12485047846889952,
-          0.0
+          0
         ],
         "span": [
           0.04171650717703349,
@@ -98,7 +98,7 @@
       "worldBounds": {
         "origin": [
           0.166566985645933,
-          0.0
+          0
         ],
         "span": [
           0.04171650717703349,
@@ -143,7 +143,7 @@
       "worldBounds": {
         "origin": [
           0.20828349282296652,
-          0.0
+          0
         ],
         "span": [
           0.04171650717703349,
@@ -188,7 +188,7 @@
       "worldBounds": {
         "origin": [
           0.25,
-          0.0
+          0
         ],
         "span": [
           0.041566985645933016,
@@ -2153,7 +2153,7 @@
             470
           ],
           "decodedBytes": 1049040,
-          "sha256": "48A4C1BED0699BB01208852B2CAC80C81C8F31B7D062510B336A96BE5487052A"
+          "sha256": "86EF974DBD3AD8741779874EF1194AF18E43D655FCA2644C27F7151EFD13EF7D"
         },
         "site": {
           "path": "/career-world/layers/terrain/authority/tiles/stream-r3/close-5-4-site.webp",
@@ -2162,7 +2162,7 @@
             1175
           ],
           "decodedBytes": 6556500,
-          "sha256": "39EF94FAF85FB7010B9A8CEB62CC05062D00D44CF3FD5CF1A5E0000E0074BF11"
+          "sha256": "13FF8FA477CC1D971FF01164F7CE550099BB90DD57E0B314B58E5B4B61C0F75A"
         }
       },
       "worldBounds": {
@@ -2198,7 +2198,7 @@
             470
           ],
           "decodedBytes": 1045280,
-          "sha256": "86CBFDF41FBA0AB5B71E30BC07E9563F29D6EF9BC229083769FBE44EA7D795F5"
+          "sha256": "8723BB2BDFB5FE059C70B9F6F9FAFF722B0C0E8891C9C4988FB45A90AFE95FF4"
         },
         "site": {
           "path": "/career-world/layers/terrain/authority/tiles/stream-r3/close-6-4-site.webp",
@@ -2207,7 +2207,7 @@
             1175
           ],
           "decodedBytes": 6533000,
-          "sha256": "16E5041118B621D5F0BB639BEA745B78E3D8FFB1F156445E2031874549BCA95A"
+          "sha256": "3BCD88765480A174DDACE1EAA412964BBEEDCC6E793D485E564BDF0F253B496A"
         }
       },
       "worldBounds": {
@@ -2243,7 +2243,7 @@
             470
           ],
           "decodedBytes": 1049040,
-          "sha256": "280C5683161BA5B06D8C592B451F1005FFE6985AE097FDD08591584EED7B2F02"
+          "sha256": "D782A82D4722355A081E6AC0E920F5505DC72E4A84864FD88BC1E924E5025494"
         },
         "site": {
           "path": "/career-world/layers/terrain/authority/tiles/stream-r3/close-7-4-site.webp",
@@ -2252,7 +2252,7 @@
             1175
           ],
           "decodedBytes": 6556500,
-          "sha256": "08465AC2B3CADE1EDCDC623F8C6FC7F6E64C3B7BCDC12EE7BA391F2F176E2387"
+          "sha256": "6C4E33FEA96FAC9F095794E67F6C80EB58E61AF6ADEAD5E365B0CA22B7218A1A"
         }
       },
       "worldBounds": {
@@ -2288,7 +2288,7 @@
             470
           ],
           "decodedBytes": 1045280,
-          "sha256": "5C88A6339470A49FF65698B9F0FFA18BF5FCD80494F6C464173DFDB29906EECF"
+          "sha256": "5B2DD7256768840495F149F83D6F6ED8EC491A229CF1CE5E9996AF2BD7471B19"
         },
         "site": {
           "path": "/career-world/layers/terrain/authority/tiles/stream-r3/close-8-4-site.webp",
@@ -2297,7 +2297,7 @@
             1175
           ],
           "decodedBytes": 6533000,
-          "sha256": "96C234F7899310816EA773534DF89506C28DFD283EEFF4E6BF11469F2C4A1AC5"
+          "sha256": "348CCB10E7154ADA1D36426347BB18BFB9BE2C9D7E4A4EF2DC0C0397D2A322F8"
         }
       },
       "worldBounds": {
@@ -2828,7 +2828,7 @@
             470
           ],
           "decodedBytes": 1049040,
-          "sha256": "B1D3097B0A07DF5612EBCA0A8A4A5B62415C39170F3D00A5A14FB62F6A38DE49"
+          "sha256": "B0E36A0295CC2D7794854E22CFB50925BD2D2CB17130FEDF3FD170066F1178E2"
         },
         "site": {
           "path": "/career-world/layers/terrain/authority/tiles/stream-r3/close-5-5-site.webp",
@@ -2837,7 +2837,7 @@
             1175
           ],
           "decodedBytes": 6556500,
-          "sha256": "ECAC80D4D6BD241C7D9E3FBB9310B79CD1FC54514902472898B60019F32AADA8"
+          "sha256": "3ECB35D6C73D3C10759C2091964A06A18F7007779C12A17DD2A6F3A86D787C01"
         }
       },
       "worldBounds": {
@@ -2873,7 +2873,7 @@
             470
           ],
           "decodedBytes": 1045280,
-          "sha256": "FDB587E658A51EB07FD4296DA9FDD5DC9C4A9CF333F357A8E55778FD8F09781C"
+          "sha256": "064F563914799ED7D8A5D4C30A0DCA1D0928D487135C4995E6F1BB6E5C39F9D3"
         },
         "site": {
           "path": "/career-world/layers/terrain/authority/tiles/stream-r3/close-6-5-site.webp",
@@ -2882,7 +2882,7 @@
             1175
           ],
           "decodedBytes": 6533000,
-          "sha256": "D49C045ABF83D01097EABE7867D549665D656F7B1054B2922F5AF4017FD7CC45"
+          "sha256": "15678757843565E29A1170DD2A2BD87FE61D31420D077FF79B373565C97E60F8"
         }
       },
       "worldBounds": {
@@ -2918,7 +2918,7 @@
             470
           ],
           "decodedBytes": 1049040,
-          "sha256": "FA2EDE845F33B2561EE01EEBDFBC2AE59943243035C93C1CA3420F77942C87AD"
+          "sha256": "88B85AB4E884AAD973279AF06E6C83215F57E5809A2A561535EB2DF554A14D4D"
         },
         "site": {
           "path": "/career-world/layers/terrain/authority/tiles/stream-r3/close-7-5-site.webp",
@@ -2927,7 +2927,7 @@
             1175
           ],
           "decodedBytes": 6556500,
-          "sha256": "0B51CFCC7C58E7D6126D31E9B436BF6D67B7B734AB51F1CAF76FBA95F725DAFA"
+          "sha256": "A8F585CDC5CC1707C0239EA31983A5775D4881F1CB99FC8D82FCCBAD9F5FEF20"
         }
       },
       "worldBounds": {
@@ -2963,7 +2963,7 @@
             470
           ],
           "decodedBytes": 1045280,
-          "sha256": "7698DBF723687D3E1E75511897A8B8DD5F826C21470BDB78947BC7142CA5410D"
+          "sha256": "B25A31717160BA9CD879AC9A02E416858435153BD36570906EFADA86E5DEB410"
         },
         "site": {
           "path": "/career-world/layers/terrain/authority/tiles/stream-r3/close-8-5-site.webp",
@@ -2972,7 +2972,7 @@
             1175
           ],
           "decodedBytes": 6533000,
-          "sha256": "FAE7E8EDD42F26962AE86FA94B89D4C487A352C538907814C99D8E62D36E0935"
+          "sha256": "B852E61ACB527239D4A2C42D2B4FA581C3696350454677CC130B9FAD1E182135"
         }
       },
       "worldBounds": {
@@ -3503,7 +3503,7 @@
             470
           ],
           "decodedBytes": 1049040,
-          "sha256": "C139C6B85BA54CE7D61FFA8C335173A377274EC81FD6D53285EA54DDB2A23F79"
+          "sha256": "D05834ACF32BAC4829097CD569776EEB6278E55AAE107EEA2BDBD4C10D7AE5A1"
         },
         "site": {
           "path": "/career-world/layers/terrain/authority/tiles/stream-r3/close-5-6-site.webp",
@@ -3512,7 +3512,7 @@
             1175
           ],
           "decodedBytes": 6556500,
-          "sha256": "F7DAEE19C8AB95E3212FDA13031F03C20377E4B75D8E628CDA3CD41C295195DE"
+          "sha256": "DA5692C4CF21991659476C31E09F07D12C04A1F173794F84110383675F45F4DC"
         }
       },
       "worldBounds": {
@@ -3548,7 +3548,7 @@
             470
           ],
           "decodedBytes": 1045280,
-          "sha256": "AF150384B142CBA69A5E91C18EF47D4F7B9EA2E5E6BBB84407CF16361DE5B653"
+          "sha256": "31E52802783E938689CE9EC772EE291AFAA662C93C84F3EA2361E36BA374A8CD"
         },
         "site": {
           "path": "/career-world/layers/terrain/authority/tiles/stream-r3/close-6-6-site.webp",
@@ -3557,7 +3557,7 @@
             1175
           ],
           "decodedBytes": 6533000,
-          "sha256": "FF0314191BDB2F73C15635443A5A584059C2A6D53D5237525D9EAE56C37C5E55"
+          "sha256": "9AB3CA161E540F09BFED9037A5EF15CAA17FAEADA4C154AD442E8A9B17FA344E"
         }
       },
       "worldBounds": {
@@ -3593,7 +3593,7 @@
             470
           ],
           "decodedBytes": 1049040,
-          "sha256": "1C2C71EE9A4D7795979B126118FCBF921E0ED6C888EF3E61D6FD98AB34462F35"
+          "sha256": "6F69DB449DCE3607A728F50EE4B99C609BFA54138374C772D6633A75B07E6676"
         },
         "site": {
           "path": "/career-world/layers/terrain/authority/tiles/stream-r3/close-7-6-site.webp",
@@ -3602,7 +3602,7 @@
             1175
           ],
           "decodedBytes": 6556500,
-          "sha256": "E7F9F410E03C00D56C7C94EBA2D9BF52B26574F8C22A68C99E4F40E886141E53"
+          "sha256": "B1217C061D167C3F6041A7461F2779C22196B4D84D0C363761ED611B834F56A0"
         }
       },
       "worldBounds": {
@@ -3638,7 +3638,7 @@
             470
           ],
           "decodedBytes": 1045280,
-          "sha256": "2CC3DD3381B2DA0CBA3663FD7B4B6E2DF24CA3B5757323582AB51C4CF0E9BEF7"
+          "sha256": "C83ED12512F58CE9284B16C1E20ADFD1580566AA46BC6A69CD36AAF69274ECF5"
         },
         "site": {
           "path": "/career-world/layers/terrain/authority/tiles/stream-r3/close-8-6-site.webp",
@@ -3647,7 +3647,7 @@
             1175
           ],
           "decodedBytes": 6533000,
-          "sha256": "D904590FE7BBE220801C5CC47978390C54011445C893F1E21E5DD01387E15DF4"
+          "sha256": "9F6F27F1FB5522584F5B341EE1746B6955C62FA7EE94828F27948B4DAF3554A9"
         }
       },
       "worldBounds": {
@@ -4358,7 +4358,7 @@
             472
           ],
           "decodedBytes": 1053504,
-          "sha256": "58E25E203A814A4CB83FE38C4D52039F638F3D5AAE5EF71CD56854E0E74C30AB"
+          "sha256": "5A7E378B0A266544E3E2012C4F9EF3671AF537019AEDCE39A86C238633A6630E"
         },
         "site": {
           "path": "/career-world/layers/terrain/authority/tiles/stream-r3/close-5-7-site.webp",
@@ -4367,7 +4367,7 @@
             1180
           ],
           "decodedBytes": 6584400,
-          "sha256": "2F063085FE1BBA21E8981348430336849CB11A66B988E219A1C0DDB6F07BF795"
+          "sha256": "EB063CA27BEA0F41F1BB15650CC0D624AF3CE849D70C406EA4F1056917D6DAA0"
         }
       },
       "worldBounds": {
@@ -4403,7 +4403,7 @@
             472
           ],
           "decodedBytes": 1049728,
-          "sha256": "24532FAF218351CC3999FAA93113ABA05615D37B449DA3E1C490EBBAC89CAC9F"
+          "sha256": "FC612268CF3CB5DD5961AC43F4E8D13319CA9E9540608C9C7492F912C55EAF39"
         },
         "site": {
           "path": "/career-world/layers/terrain/authority/tiles/stream-r3/close-6-7-site.webp",
@@ -4412,7 +4412,7 @@
             1180
           ],
           "decodedBytes": 6560800,
-          "sha256": "990620950DCA0E28981F62FB517430F8177C66F3DD8CF709318E91B26DA0B79B"
+          "sha256": "D45F33DDC100F8573BF5DD89A8F0C6E0EABC9EEC7FC0A1C156CA79266882A7A6"
         }
       },
       "worldBounds": {
@@ -4448,7 +4448,7 @@
             472
           ],
           "decodedBytes": 1053504,
-          "sha256": "A9EF55078B6546CFCD928B4789FEB66A294CC87ED2395A2625EB3B10D13CBE2C"
+          "sha256": "6B9858B76B7441753CC795C44FB93F805409F6CF67597AE2E67333010A367518"
         },
         "site": {
           "path": "/career-world/layers/terrain/authority/tiles/stream-r3/close-7-7-site.webp",
@@ -4457,7 +4457,7 @@
             1180
           ],
           "decodedBytes": 6584400,
-          "sha256": "411E821D2E2A31A3F9A2639A7A8FC50016B54DA918C7649D06E0D2F77F0CBB12"
+          "sha256": "E70ED87B8FD6E6C0355549694CF50E8722E2413BB98D8AB27B20A74C98840432"
         }
       },
       "worldBounds": {
@@ -4493,7 +4493,7 @@
             472
           ],
           "decodedBytes": 1049728,
-          "sha256": "CAEB8BE1682898432D944A8E4843EEDC84681C3A6B5727FB5537FB3C216E5D00"
+          "sha256": "B02543C4C3F4D8B7FE65DCB64BBB1A74F73E98BB2DCE185F486FAC174D72C51B"
         },
         "site": {
           "path": "/career-world/layers/terrain/authority/tiles/stream-r3/close-8-7-site.webp",
@@ -4502,7 +4502,7 @@
             1180
           ],
           "decodedBytes": 6560800,
-          "sha256": "342058CC7FAD17221FC75F8FC4C6BB4F0BB5078AB37E88409F5DCA605FC33EFE"
+          "sha256": "E62DF1FCB99BAB6A6700C996C6E906AD54869C28BD6388094AC3DC5CB89FDCBC"
         }
       },
       "worldBounds": {

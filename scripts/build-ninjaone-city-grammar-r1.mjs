@@ -51,11 +51,6 @@ const districtDefinitions = Object.freeze([
     label: "Western Skill Terraces",
     path: "art-source/career-world/ninjaone-capital/city-r3/districts/D05-western-skill-terraces-mask.png",
   }),
-  Object.freeze({
-    id: "D06",
-    label: "Station and Rail",
-    path: "art-source/career-world/ninjaone-capital/city-r3/districts/D06-station-rail-mask.png",
-  }),
 ]);
 
 const output = Object.freeze({
@@ -76,7 +71,6 @@ const districtColors = Object.freeze({
   D03: "#ff924c",
   D04: "#46c2ff",
   D05: "#8ac926",
-  D06: "#c77dff",
 });
 
 function sha256(bytes) {

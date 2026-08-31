@@ -20,13 +20,13 @@
   "runtimeRepresentationManifest": "/career-world/capitals/ninjaone/manifests/city-foundation-r3.json",
   "composition": {
     "densityExpansion": "package-registered-site-cohort-with-parent-derived-close-detail",
-    "targetNodeCount": 99,
+    "targetNodeCount": 91,
     "circulationMaterial": "narrow-terraced-stone-access-without-modern-road-markings"
   },
   "layers": [
     { "id": "L4_0", "label": "City water interaction", "owns": "reversible localized bridge and waterfront contact detail without replacing global L3 water" },
     { "id": "L4_1", "label": "City landscape and circulation", "owns": "reversible registered terrain transitions, retaining mass, terraces, roads, and pedestrian paths" },
-    { "id": "L4_2", "label": "City transportation", "owns": "registered train-free station infrastructure; the moving train remains an independent L4_7 actor" },
+    { "id": "L4_2", "label": "City transportation", "owns": "registered city transportation infrastructure; moving actors remain an independent L4_7 layer" },
     { "id": "L4_3", "label": "Primary city buildings", "owns": "package-registered capital landmarks and skill buildings" },
     { "id": "L4_4", "label": "Secondary city fabric", "owns": "parent-derived and registered secondary fabric and detail overlays without replacing land or water" },
     { "id": "L4_5", "label": "Street details", "owns": "small civic and service props admitted only with registered placement" },
@@ -38,8 +38,8 @@
     "sourceTierByDetailTier": { "capital": "capital", "site": "site", "close": "close" },
     "presentation": "capital-first-progressive-registered-cohort-routing",
     "territory": "preload and cache only; city art is not runtime visible",
-    "capital": "registered R3 context plus LFX06 landscape underlay and train-free I20 station",
-    "site": "capital context plus WFX01 water contact, CFX01 fabric detail, safe package-registered site nodes, and open-undercroft I21 station",
-    "close": "parent context plus WFX01, CFX01, close-only CFX02, registered L2 tree reuse, I17 civic overlay, and I21 station; unsafe full-building close cutouts remain suppressed"
+    "capital": "registered R3 context plus LFX06 landscape underlay",
+    "site": "capital context plus WFX01 water contact, CFX01 fabric detail, and safe package-registered site nodes",
+    "close": "parent context plus WFX01, CFX01, close-only CFX02, and registered L2 tree reuse"
   }
 }

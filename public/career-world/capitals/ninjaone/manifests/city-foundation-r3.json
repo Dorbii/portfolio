@@ -306,7 +306,7 @@
     },
     {
       "id": "L4",
-      "role": "capital-composite-context-with-D06-exclusion",
+      "role": "capital-composite-context-with-progressive-detail-exclusion",
       "asset": {
         "decodedBytes": 6290112,
         "dimensions": [
@@ -673,77 +673,6 @@
         "path": "/career-world/capitals/ninjaone/city-r3/detail/CFX02-city-central-architecture-detail-overlay-r1-alpha.png",
         "sha256": "049431e780ffe7423c371269268964888c0b15375b141d23af47e31a2d3f0059"
       }
-    },
-    {
-      "id": "I20",
-      "layerId": "L4_2",
-      "role": "train-free-capital-station",
-      "tiers": [
-        "capital"
-      ],
-      "placement": {
-        "anchor": [
-          1005,
-          1086
-        ],
-        "baseSize": [
-          610,
-          303.4114583333333
-        ],
-        "scale": 1
-      },
-      "asset": {
-        "decodedBytes": 293376,
-        "dimensions": [
-          384,
-          191
-        ],
-        "encodedBytes": 125898,
-        "path": "/career-world/capitals/ninjaone/city-r3/station/I20-station-capital-cluster-no-train-r1-alpha.png",
-        "sha256": "cd4be5472fc37316f4a87b3ee47c5d8f3aacc27c3ad8c3aa58966df2fcd995d2"
-      }
-    },
-    {
-      "id": "I24",
-      "layerId": "L4_2",
-      "role": "cliff-registered-undercroft-site-close-station",
-      "tiers": [
-        "site",
-        "close"
-      ],
-      "placement": {
-        "anchor": [
-          1056.5,
-          1086
-        ],
-        "baseSize": [
-          783,
-          587
-        ],
-        "scale": 0.72
-      },
-      "sourceWindow": {
-        "origin": [
-          19,
-          106
-        ],
-        "sourceDimensions": [
-          1448,
-          1086
-        ],
-        "sourcePath": "art-source/career-world/ninjaone-capital/city-r3/station/I24-station-cliff-registered-undercroft-r1-alpha.png",
-        "sourceSha256": "7344259d23a979bc697073c71fde2cb94eaa6fa60da9b10dfd3604780ad9ad85"
-      },
-      "asset": {
-        "decodedBytes": 4651920,
-        "dimensions": [
-          1420,
-          819
-        ],
-        "encodedBytes": 1694727,
-        "path": "/career-world/capitals/ninjaone/city-r3/station/I24-station-cliff-registered-undercroft-r1-alpha-crop.png",
-        "sha256": "cecbaca535f11712cf2e8e1e9adbe6f31871de3ccffd6b48f6e872d2a33f48a4"
-      }
     }
   ],
   "deliveries": {
@@ -803,11 +732,9 @@
     "d05GroundIntegration": "bf56f85f373eef3356fcae11d5d3f658db278eb868b7251a46029ed43bb80167",
     "d05TerrainIntegrationDetail": "985585a7c94d2710cc126caa23945d3c4dde1612f933a5c07115d12f499e3db5",
     "d05TerraceMass": "b69771147295cfcde77a85d6b30514b71236e193e52d013cd5978646fc21836c",
-    "d06DistrictMask": "0017c3b86dd0c05e3b4d698aed6ea9eb0d8270b1fd396a555b1e5c9c08e65a60",
     "bridgeWaterDetail": "978bbff405be2291e16263c587901dd0adb1ceb67fb06bc0ee13423fad88d350",
     "rearRidgeUnderlay": "ef00a69426b774848d75eff38a3b238edcaad8b276f03c15f59c6a3d99b65296",
     "closeFabricDetail": "cb02ebb9b096a5f79d690ba667b218d0acc33730f69def5862ea10333c3008c2",
-    "stationSiteClose": "7344259d23a979bc697073c71fde2cb94eaa6fa60da9b10dfd3604780ad9ad85",
     "foliageManifest": "776e87784c763b299c51083bf3cddf7bba88038a327f2317667ea8a56669e758"
   }
 }

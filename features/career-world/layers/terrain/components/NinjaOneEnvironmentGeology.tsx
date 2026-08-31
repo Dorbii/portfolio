@@ -6,9 +6,11 @@ import { WORLD_PLANE } from "../../../shared/world";
 import {
   NINJAONE_ENVIRONMENT_ARTBOARD,
   NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES,
+  NINJAONE_ENVIRONMENT_GEOLOGY_TRANSITION_SOURCES,
   NINJAONE_ENVIRONMENT_LOD_LAYERS,
   NINJAONE_ENVIRONMENT_WORLD_ORIGIN,
   NINJAONE_ENVIRONMENT_WORLD_SPAN,
+  ninjaOneEnvironmentGeologyTierWeights,
   type NinjaOneEnvironmentPlateTier,
 } from "../model/ninjaOneEnvironmentProof";
 
@@ -23,7 +25,7 @@ const INLAND_TERRAIN_ERASE_MASK_PATH =
   "/career-world/layers/inland-water/authority/masks/ninjaone-inland-terrain-erase-r1.png";
 const INLAND_TERRAIN_ERASE_MASK_CROP = Object.freeze([480, 168, 576, 912] as const);
 const TERRAIN_CONTACT_MASK_PATH =
-  "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-contact-r3.png";
+  "/career-world/capitals/ninjaone/environment/plates/geology/ninjaone-environment-geology-contact-r4.png";
 
 /**
  * The sole authored L2 replacement for the NinjaOne terrain region.
@@ -46,36 +48,30 @@ export function NinjaOneEnvironmentGeology({
   const currentSource = plateTier && visibleLayers.includes("terrain-geology")
     ? NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES[plateTier]
     : null;
-  const sourceLayers = !currentSource
-    ? []
-    : plateTier === "territory"
-      ? [{ opacity: 1, source: currentSource, tier: plateTier }]
-      : [
-        {
-          opacity: 1 - detailState.capitalToSite,
-          source: NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES.capital,
-          tier: "capital" as const,
-        },
-        {
-          opacity: detailState.capitalToSite * (1 - detailState.siteToClose),
-          source: NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES.site,
-          tier: "site" as const,
-        },
-        {
-          opacity: detailState.capitalToSite * detailState.siteToClose,
-          source: NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES.close,
-          tier: "close" as const,
-        },
-      ].filter(({ opacity }) => opacity > 0);
+  const currentTransitionSource = plateTier && visibleLayers.includes("terrain-geology")
+    ? NINJAONE_ENVIRONMENT_GEOLOGY_TRANSITION_SOURCES[plateTier]
+    : null;
+  const sourceLayers = ninjaOneEnvironmentGeologyTierWeights({
+    capitalToSite: detailState.capitalToSite,
+    siteToClose: detailState.siteToClose,
+    tierId: detailState.tier.id,
+  }).map(({ opacity, tier }) => ({
+    opacity,
+    source: NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES[tier],
+    tier,
+  }));
 
   useEffect(() => {
-    if (!currentSource) {
+    if (!currentSource || !currentTransitionSource) {
       onReadyChange?.(false);
       return;
     }
 
     let cancelled = false;
-    void decodeImage(currentSource.path).then(
+    void Promise.all([
+      decodeImage(currentSource.path),
+      decodeImage(currentTransitionSource.path),
+    ]).then(
       () => {
         if (!cancelled) onReadyChange?.(true);
       },
@@ -87,15 +83,21 @@ export function NinjaOneEnvironmentGeology({
     return () => {
       cancelled = true;
     };
-  }, [currentSource, onReadyChange]);
+  }, [currentSource, currentTransitionSource, onReadyChange]);
 
   useEffect(() => {
     const paths = [
       ...(detailState.shouldLoadSiteAssets
-        ? [NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES.site.path]
+        ? [
+          NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES.site.path,
+          NINJAONE_ENVIRONMENT_GEOLOGY_TRANSITION_SOURCES.site.path,
+        ]
         : []),
       ...(detailState.shouldLoadCloseAssets
-        ? [NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES.close.path]
+        ? [
+          NINJAONE_ENVIRONMENT_GEOLOGY_SOURCES.close.path,
+          NINJAONE_ENVIRONMENT_GEOLOGY_TRANSITION_SOURCES.close.path,
+        ]
         : []),
     ];
     paths.forEach((path) => {
@@ -119,6 +121,7 @@ export function NinjaOneEnvironmentGeology({
       className="career-world__layer ninjaone-environment-geology"
       data-environment-authority="L2"
       data-environment-geology-source={sourceLayers.map(({ source }) => source.path).join(",")}
+      data-environment-geology-transition-source={sourceLayers.map(({ tier }) => NINJAONE_ENVIRONMENT_GEOLOGY_TRANSITION_SOURCES[tier].path).join(",")}
       data-environment-role={proofMode ? "isolated-proof-geology" : "production-geology"}
       data-lod-tier={detailState.tier.id}
       preserveAspectRatio="none"
@@ -205,7 +208,7 @@ export function NinjaOneEnvironmentGeology({
           mask="url(#ninjaone-environment-geology-contact)"
         >
           <g mask="url(#ninjaone-environment-geology-water-cutout)">
-            {sourceLayers.map(({ opacity, source, tier }) => (
+            {sourceLayers.flatMap(({ opacity, source, tier }) => [
               <image
                 data-environment-layer="terrain-geology"
                 data-environment-source={source.path}
@@ -213,14 +216,28 @@ export function NinjaOneEnvironmentGeology({
                 filter="url(#ninjaone-environment-geology-source-alpha)"
                 height={NINJAONE_ENVIRONMENT_ARTBOARD[1]}
                 href={source.path}
-                key={tier}
+                key={`${tier}-base`}
                 opacity={opacity}
                 preserveAspectRatio="none"
                 width={NINJAONE_ENVIRONMENT_ARTBOARD[0]}
                 x="0"
                 y="0"
-              />
-            ))}
+              />,
+              <image
+                data-environment-layer="terrain-geology-transition-interim"
+                data-environment-source={NINJAONE_ENVIRONMENT_GEOLOGY_TRANSITION_SOURCES[tier].path}
+                data-environment-source-tier={tier}
+                filter="url(#ninjaone-environment-geology-source-alpha)"
+                height={NINJAONE_ENVIRONMENT_ARTBOARD[1]}
+                href={NINJAONE_ENVIRONMENT_GEOLOGY_TRANSITION_SOURCES[tier].path}
+                key={`${tier}-transition`}
+                opacity={opacity}
+                preserveAspectRatio="none"
+                width={NINJAONE_ENVIRONMENT_ARTBOARD[0]}
+                x="0"
+                y="0"
+              />,
+            ])}
           </g>
         </g>
       </g>

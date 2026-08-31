@@ -26,7 +26,7 @@
         "id": "registered-layout",
         "path": "public/career-world/capitals/ninjaone/manifests/city-master-node-layout-r3.json",
         "role": "registered-anchor-and-inferred-layout-seed",
-        "sha256": "cd3d2434c40106632a4d6708b5b045c8b9bb4d1e5bb1a21420dc024e93582b10"
+        "sha256": "50e2f4f3a6ee695fdf08fb8c9dfc23b8b8f18a1da9cde713ce78fdf55a643cf8"
       },
       {
         "id": "registered-inland-water",
@@ -63,12 +63,6 @@
         "path": "art-source/career-world/ninjaone-capital/city-r3/districts/D05-western-skill-terraces-mask.png",
         "role": "footprint-and-contour-boundary",
         "sha256": "1078c69efe56c446786dca236bc68d834f8153b01fd604799b70ea5e5be1aa18"
-      },
-      {
-        "id": "D06-district-mask",
-        "path": "art-source/career-world/ninjaone-capital/city-r3/districts/D06-station-rail-mask.png",
-        "role": "footprint-and-contour-boundary",
-        "sha256": "0017c3b86dd0c05e3b4d698aed6ea9eb0d8270b1fd396a555b1e5c9c08e65a60"
       }
     ]
   },
@@ -161,23 +155,6 @@
       "maskPath": "art-source/career-world/ninjaone-capital/city-r3/districts/D05-western-skill-terraces-mask.png",
       "maskSha256": "1078c69efe56c446786dca236bc68d834f8153b01fd604799b70ea5e5be1aa18",
       "pixelCount": 307396
-    },
-    {
-      "bounds": [
-        665,
-        796,
-        1448,
-        1086
-      ],
-      "centroid": [
-        1057.54,
-        960.39
-      ],
-      "id": "D06",
-      "label": "Station and Rail",
-      "maskPath": "art-source/career-world/ninjaone-capital/city-r3/districts/D06-station-rail-mask.png",
-      "maskSha256": "0017c3b86dd0c05e3b4d698aed6ea9eb0d8270b1fd396a555b1e5c9c08e65a60",
-      "pixelCount": 190066
     }
   ],
   "circulation": {
@@ -690,116 +667,6 @@
         "startVertexId": "V019"
       },
       {
-        "approximateWidth": 9,
-        "classificationEvidence": {
-          "source": "registered-water-intersection-and-segment-slope",
-          "waterFraction": 0
-        },
-        "kind": "road",
-        "points": [
-          [
-            530,
-            971
-          ],
-          [
-            700,
-            920
-          ]
-        ],
-        "sourceRouteId": "station-terminal-concourse",
-        "endVertexId": "V027",
-        "id": "E024",
-        "startVertexId": "V030"
-      },
-      {
-        "approximateWidth": 9,
-        "classificationEvidence": {
-          "source": "registered-water-intersection-and-segment-slope",
-          "waterFraction": 0
-        },
-        "kind": "road",
-        "points": [
-          [
-            700,
-            920
-          ],
-          [
-            850,
-            930
-          ]
-        ],
-        "sourceRouteId": "station-terminal-concourse",
-        "endVertexId": "V028",
-        "id": "E025",
-        "startVertexId": "V027"
-      },
-      {
-        "approximateWidth": 10.35,
-        "classificationEvidence": {
-          "source": "registered-water-intersection-and-segment-slope",
-          "waterFraction": 0.1905
-        },
-        "kind": "bridge",
-        "points": [
-          [
-            850,
-            930
-          ],
-          [
-            1010,
-            950
-          ]
-        ],
-        "sourceRouteId": "station-terminal-concourse",
-        "endVertexId": "V029",
-        "id": "E026",
-        "startVertexId": "V028"
-      },
-      {
-        "approximateWidth": 9,
-        "classificationEvidence": {
-          "source": "registered-water-intersection-and-segment-slope",
-          "waterFraction": 0
-        },
-        "kind": "road",
-        "points": [
-          [
-            1010,
-            950
-          ],
-          [
-            1190,
-            1000
-          ]
-        ],
-        "sourceRouteId": "station-terminal-concourse",
-        "endVertexId": "V031",
-        "id": "E027",
-        "startVertexId": "V029"
-      },
-      {
-        "approximateWidth": 9,
-        "classificationEvidence": {
-          "source": "registered-water-intersection-and-segment-slope",
-          "waterFraction": 0
-        },
-        "kind": "road",
-        "points": [
-          [
-            1190,
-            1000
-          ],
-          [
-            1360,
-            1050
-          ]
-        ],
-        "sourceRouteId": "station-terminal-concourse",
-        "endVertexId": "V032",
-        "id": "E028",
-        "startVertexId": "V031"
-      },
-      {
         "approximateWidth": 6,
         "classificationEvidence": {
           "source": "nearest-component-connector",
@@ -818,52 +685,30 @@
         ],
         "sourceRouteId": "inferred-component-connector",
         "endVertexId": "V007",
-        "id": "E029",
+        "id": "E024",
         "startVertexId": "V006"
-      },
-      {
-        "approximateWidth": 6,
-        "classificationEvidence": {
-          "source": "nearest-component-connector",
-          "waterFraction": 0
-        },
-        "kind": "stairs",
-        "points": [
-          [
-            490,
-            878
-          ],
-          [
-            530,
-            971
-          ]
-        ],
-        "sourceRouteId": "inferred-component-connector",
-        "endVertexId": "V030",
-        "id": "E030",
-        "startVertexId": "V026"
       },
       {
         "approximateWidth": 8,
         "classificationEvidence": {
           "source": "nearest-component-connector",
-          "waterFraction": 0.1429
+          "waterFraction": 0
         },
-        "kind": "bridge",
+        "kind": "road",
         "points": [
           [
-            900,
-            835
+            539,
+            570
           ],
           [
-            850,
-            930
+            397,
+            521
           ]
         ],
         "sourceRouteId": "inferred-component-connector",
-        "endVertexId": "V028",
-        "id": "E031",
-        "startVertexId": "V024"
+        "endVertexId": "V010",
+        "id": "E025",
+        "startVertexId": "V015"
       }
     ],
     "vertices": [
@@ -1048,48 +893,6 @@
           490,
           878
         ]
-      },
-      {
-        "id": "V027",
-        "point": [
-          700,
-          920
-        ]
-      },
-      {
-        "id": "V028",
-        "point": [
-          850,
-          930
-        ]
-      },
-      {
-        "id": "V029",
-        "point": [
-          1010,
-          950
-        ]
-      },
-      {
-        "id": "V030",
-        "point": [
-          530,
-          971
-        ]
-      },
-      {
-        "id": "V031",
-        "point": [
-          1190,
-          1000
-        ]
-      },
-      {
-        "id": "V032",
-        "point": [
-          1360,
-          1050
-        ]
       }
     ]
   },
@@ -1184,7 +987,7 @@
         ],
         "depth": 19.04,
         "districtId": "D05",
-        "id": "primary-openapi-observatory",
+        "id": "primary-openapi-archive",
         "layerId": "L4_3",
         "polygon": [
           [
@@ -1356,7 +1159,7 @@
             743
           ]
         ],
-        "sizeClass": "landmark",
+        "sizeClass": "large",
         "sourceConfidence": "registered-anchor",
         "sourceDisplayWidth": 180,
         "width": 97.92
@@ -1564,7 +1367,7 @@
         ],
         "depth": 32.37,
         "districtId": "D05",
-        "id": "primary-tool-generation-wheelworks",
+        "id": "primary-nodejs-millworks",
         "layerId": "L4_3",
         "polygon": [
           [
@@ -2078,7 +1881,7 @@
             517
           ]
         ],
-        "sizeClass": "landmark",
+        "sizeClass": "large",
         "sourceConfidence": "layout-inferred",
         "sourceDisplayWidth": 180,
         "width": 97.92
@@ -2116,7 +1919,7 @@
             596.94
           ]
         ],
-        "sizeClass": "landmark",
+        "sizeClass": "large",
         "sourceConfidence": "layout-inferred",
         "sourceDisplayWidth": 190,
         "width": 96.56
@@ -2420,7 +2223,7 @@
             697
           ]
         ],
-        "sizeClass": "landmark",
+        "sizeClass": "large",
         "sourceConfidence": "layout-inferred",
         "sourceDisplayWidth": 180,
         "width": 97.92
@@ -2579,120 +2382,6 @@
       },
       {
         "anchor": [
-          420,
-          350
-        ],
-        "area": 1462.56,
-        "assetId": "D06",
-        "center": [
-          420,
-          344
-        ],
-        "depth": 29.13,
-        "districtId": "D01",
-        "id": "fabric-upper-civic-court",
-        "layerId": "L4_4",
-        "polygon": [
-          [
-            389.4,
-            329.43
-          ],
-          [
-            462.84,
-            340.5
-          ],
-          [
-            450.6,
-            358.57
-          ],
-          [
-            377.16,
-            347.5
-          ]
-        ],
-        "sizeClass": "standard",
-        "sourceConfidence": "layout-inferred",
-        "sourceDisplayWidth": 170,
-        "width": 85.68
-      },
-      {
-        "anchor": [
-          720,
-          480
-        ],
-        "area": 1532.23,
-        "assetId": "D06",
-        "center": [
-          720,
-          473
-        ],
-        "depth": 29.82,
-        "districtId": "D01",
-        "id": "fabric-basin-civic-court",
-        "layerId": "L4_4",
-        "polygon": [
-          [
-            688.67,
-            458.09
-          ],
-          [
-            763.86,
-            469.42
-          ],
-          [
-            751.33,
-            487.91
-          ],
-          [
-            676.14,
-            476.58
-          ]
-        ],
-        "sizeClass": "standard",
-        "sourceConfidence": "layout-inferred",
-        "sourceDisplayWidth": 170,
-        "width": 87.72
-      },
-      {
-        "anchor": [
-          680,
-          720
-        ],
-        "area": 1604.42,
-        "assetId": "D06",
-        "center": [
-          680,
-          713
-        ],
-        "depth": 30.52,
-        "districtId": "D04",
-        "id": "fabric-lower-civic-court",
-        "layerId": "L4_4",
-        "polygon": [
-          [
-            647.94,
-            697.74
-          ],
-          [
-            724.88,
-            709.34
-          ],
-          [
-            712.06,
-            728.26
-          ],
-          [
-            635.12,
-            716.66
-          ]
-        ],
-        "sizeClass": "standard",
-        "sourceConfidence": "layout-inferred",
-        "sourceDisplayWidth": 170,
-        "width": 89.76
-      },
-      {
-        "anchor": [
           800,
           580
         ],
@@ -2772,38 +2461,38 @@
           820,
           850
         ],
-        "area": 884.5,
+        "area": 1963.07,
         "assetId": "D08",
         "center": [
-          820,
-          845
+          804,
+          807
         ],
-        "depth": 22.66,
-        "districtId": "D06",
+        "depth": 33.76,
+        "districtId": "D04",
         "id": "fabric-terminal-quay",
         "layerId": "L4_4",
         "polygon": [
           [
-            796.2,
-            833.67
+            768.54,
+            790.12
           ],
           [
-            853.32,
-            842.28
+            853.64,
+            802.95
           ],
           [
-            843.8,
-            856.33
+            839.46,
+            823.88
           ],
           [
-            786.68,
-            847.72
+            754.36,
+            811.05
           ]
         ],
-        "sizeClass": "compact",
+        "sizeClass": "landmark",
         "sourceConfidence": "layout-inferred",
         "sourceDisplayWidth": 200,
-        "width": 66.64
+        "width": 99.28
       }
     ],
     "sizeClasses": [
@@ -2818,12 +2507,12 @@
       },
       {
         "id": "large",
-        "maximumWidth": 95.2,
+        "maximumWidth": 97.92,
         "minimumWidthExclusive": 90.44
       },
       {
         "id": "landmark",
-        "minimumWidthExclusive": 95.2
+        "minimumWidthExclusive": 97.92
       }
     ]
   },
@@ -2840,7 +2529,7 @@
         "column": 0,
         "coverageFraction": 0.4593,
         "row": 0,
-        "density": 0.0441
+        "density": 0.0405
       },
       {
         "bounds": [
@@ -2853,7 +2542,7 @@
         "column": 1,
         "coverageFraction": 1,
         "row": 0,
-        "density": 0.1288
+        "density": 0.1177
       },
       {
         "bounds": [
@@ -2866,7 +2555,7 @@
         "column": 2,
         "coverageFraction": 1,
         "row": 0,
-        "density": 0.1736
+        "density": 0.1582
       },
       {
         "bounds": [
@@ -2879,7 +2568,7 @@
         "column": 3,
         "coverageFraction": 1,
         "row": 0,
-        "density": 0.2265
+        "density": 0.2083
       },
       {
         "bounds": [
@@ -2892,7 +2581,7 @@
         "column": 4,
         "coverageFraction": 1,
         "row": 0,
-        "density": 0.247
+        "density": 0.2297
       },
       {
         "bounds": [
@@ -2905,7 +2594,7 @@
         "column": 5,
         "coverageFraction": 0.9957,
         "row": 0,
-        "density": 0.2223
+        "density": 0.2074
       },
       {
         "bounds": [
@@ -2918,7 +2607,7 @@
         "column": 6,
         "coverageFraction": 0.6689,
         "row": 0,
-        "density": 0.1284
+        "density": 0.1202
       },
       {
         "bounds": [
@@ -2931,7 +2620,7 @@
         "column": 7,
         "coverageFraction": 0.156,
         "row": 0,
-        "density": 0.0255
+        "density": 0.024
       },
       {
         "bounds": [
@@ -2996,7 +2685,7 @@
         "column": 0,
         "coverageFraction": 0.8505,
         "row": 1,
-        "density": 0.1039
+        "density": 0.0954
       },
       {
         "bounds": [
@@ -3009,7 +2698,7 @@
         "column": 1,
         "coverageFraction": 1,
         "row": 1,
-        "density": 0.1826
+        "density": 0.166
       },
       {
         "bounds": [
@@ -3022,7 +2711,7 @@
         "column": 2,
         "coverageFraction": 1,
         "row": 1,
-        "density": 0.2882
+        "density": 0.2588
       },
       {
         "bounds": [
@@ -3035,7 +2724,7 @@
         "column": 3,
         "coverageFraction": 1,
         "row": 1,
-        "density": 0.436
+        "density": 0.3951
       },
       {
         "bounds": [
@@ -3048,7 +2737,7 @@
         "column": 4,
         "coverageFraction": 1,
         "row": 1,
-        "density": 0.4918
+        "density": 0.4588
       },
       {
         "bounds": [
@@ -3061,7 +2750,7 @@
         "column": 5,
         "coverageFraction": 1,
         "row": 1,
-        "density": 0.4087
+        "density": 0.3836
       },
       {
         "bounds": [
@@ -3074,7 +2763,7 @@
         "column": 6,
         "coverageFraction": 1,
         "row": 1,
-        "density": 0.3135
+        "density": 0.2937
       },
       {
         "bounds": [
@@ -3087,7 +2776,7 @@
         "column": 7,
         "coverageFraction": 0.9839,
         "row": 1,
-        "density": 0.2373
+        "density": 0.2235
       },
       {
         "bounds": [
@@ -3100,7 +2789,7 @@
         "column": 8,
         "coverageFraction": 0.2128,
         "row": 1,
-        "density": 0.0428
+        "density": 0.0408
       },
       {
         "bounds": [
@@ -3113,7 +2802,7 @@
         "column": 9,
         "coverageFraction": 0.5653,
         "row": 1,
-        "density": 0.0982
+        "density": 0.0948
       },
       {
         "bounds": [
@@ -3126,7 +2815,7 @@
         "column": 10,
         "coverageFraction": 0.9692,
         "row": 1,
-        "density": 0.144
+        "density": 0.14
       },
       {
         "bounds": [
@@ -3139,7 +2828,7 @@
         "column": 11,
         "coverageFraction": 0.9344,
         "row": 1,
-        "density": 0.1134
+        "density": 0.1107
       },
       {
         "bounds": [
@@ -3152,7 +2841,7 @@
         "column": 0,
         "coverageFraction": 0.742,
         "row": 2,
-        "density": 0.1122
+        "density": 0.1036
       },
       {
         "bounds": [
@@ -3165,7 +2854,7 @@
         "column": 1,
         "coverageFraction": 1,
         "row": 2,
-        "density": 0.2564
+        "density": 0.2345
       },
       {
         "bounds": [
@@ -3178,7 +2867,7 @@
         "column": 2,
         "coverageFraction": 1,
         "row": 2,
-        "density": 0.4725
+        "density": 0.4167
       },
       {
         "bounds": [
@@ -3187,11 +2876,11 @@
           483,
           362
         ],
-        "buildingCount": 1,
+        "buildingCount": 0,
         "column": 3,
         "coverageFraction": 1,
         "row": 2,
-        "density": 0.6245
+        "density": 0.4929
       },
       {
         "bounds": [
@@ -3204,7 +2893,7 @@
         "column": 4,
         "coverageFraction": 1,
         "row": 2,
-        "density": 0.5843
+        "density": 0.5173
       },
       {
         "bounds": [
@@ -3217,7 +2906,7 @@
         "column": 5,
         "coverageFraction": 1,
         "row": 2,
-        "density": 0.593
+        "density": 0.5446
       },
       {
         "bounds": [
@@ -3230,7 +2919,7 @@
         "column": 6,
         "coverageFraction": 1,
         "row": 2,
-        "density": 0.5401
+        "density": 0.5019
       },
       {
         "bounds": [
@@ -3243,7 +2932,7 @@
         "column": 7,
         "coverageFraction": 1,
         "row": 2,
-        "density": 0.3632
+        "density": 0.3411
       },
       {
         "bounds": [
@@ -3256,7 +2945,7 @@
         "column": 8,
         "coverageFraction": 0.9334,
         "row": 2,
-        "density": 0.285
+        "density": 0.274
       },
       {
         "bounds": [
@@ -3269,7 +2958,7 @@
         "column": 9,
         "coverageFraction": 0.9734,
         "row": 2,
-        "density": 0.2628
+        "density": 0.2565
       },
       {
         "bounds": [
@@ -3282,7 +2971,7 @@
         "column": 10,
         "coverageFraction": 1,
         "row": 2,
-        "density": 0.2333
+        "density": 0.2294
       },
       {
         "bounds": [
@@ -3295,7 +2984,7 @@
         "column": 11,
         "coverageFraction": 1,
         "row": 2,
-        "density": 0.1857
+        "density": 0.1831
       },
       {
         "bounds": [
@@ -3308,7 +2997,7 @@
         "column": 0,
         "coverageFraction": 0.7184,
         "row": 3,
-        "density": 0.1243
+        "density": 0.116
       },
       {
         "bounds": [
@@ -3321,7 +3010,7 @@
         "column": 1,
         "coverageFraction": 1,
         "row": 3,
-        "density": 0.3267
+        "density": 0.3058
       },
       {
         "bounds": [
@@ -3334,7 +3023,7 @@
         "column": 2,
         "coverageFraction": 1,
         "row": 3,
-        "density": 0.5127
+        "density": 0.4633
       },
       {
         "bounds": [
@@ -3347,7 +3036,7 @@
         "column": 3,
         "coverageFraction": 1,
         "row": 3,
-        "density": 0.693
+        "density": 0.5946
       },
       {
         "bounds": [
@@ -3360,7 +3049,7 @@
         "column": 4,
         "coverageFraction": 1,
         "row": 3,
-        "density": 0.7366
+        "density": 0.6626
       },
       {
         "bounds": [
@@ -3369,11 +3058,11 @@
           724,
           483
         ],
-        "buildingCount": 3,
+        "buildingCount": 2,
         "column": 5,
         "coverageFraction": 1,
         "row": 3,
-        "density": 0.7842
+        "density": 0.6724
       },
       {
         "bounds": [
@@ -3386,7 +3075,7 @@
         "column": 6,
         "coverageFraction": 1,
         "row": 3,
-        "density": 0.6615
+        "density": 0.5653
       },
       {
         "bounds": [
@@ -3399,7 +3088,7 @@
         "column": 7,
         "coverageFraction": 1,
         "row": 3,
-        "density": 0.5447
+        "density": 0.5126
       },
       {
         "bounds": [
@@ -3412,7 +3101,7 @@
         "column": 8,
         "coverageFraction": 1,
         "row": 3,
-        "density": 0.5333
+        "density": 0.5212
       },
       {
         "bounds": [
@@ -3425,7 +3114,7 @@
         "column": 9,
         "coverageFraction": 1,
         "row": 3,
-        "density": 0.5087
+        "density": 0.5039
       },
       {
         "bounds": [
@@ -3438,7 +3127,7 @@
         "column": 10,
         "coverageFraction": 1,
         "row": 3,
-        "density": 0.3943
+        "density": 0.3918
       },
       {
         "bounds": [
@@ -3451,7 +3140,7 @@
         "column": 11,
         "coverageFraction": 1,
         "row": 3,
-        "density": 0.3168
+        "density": 0.3154
       },
       {
         "bounds": [
@@ -3464,7 +3153,7 @@
         "column": 0,
         "coverageFraction": 1,
         "row": 4,
-        "density": 0.178
+        "density": 0.168
       },
       {
         "bounds": [
@@ -3477,7 +3166,7 @@
         "column": 1,
         "coverageFraction": 1,
         "row": 4,
-        "density": 0.3057
+        "density": 0.2898
       },
       {
         "bounds": [
@@ -3490,7 +3179,7 @@
         "column": 2,
         "coverageFraction": 1,
         "row": 4,
-        "density": 0.4844
+        "density": 0.4575
       },
       {
         "bounds": [
@@ -3503,7 +3192,7 @@
         "column": 3,
         "coverageFraction": 1,
         "row": 4,
-        "density": 0.661
+        "density": 0.6198
       },
       {
         "bounds": [
@@ -3516,7 +3205,7 @@
         "column": 4,
         "coverageFraction": 1,
         "row": 4,
-        "density": 0.7484
+        "density": 0.6891
       },
       {
         "bounds": [
@@ -3529,7 +3218,7 @@
         "column": 5,
         "coverageFraction": 1,
         "row": 4,
-        "density": 0.7512
+        "density": 0.641
       },
       {
         "bounds": [
@@ -3542,7 +3231,7 @@
         "column": 6,
         "coverageFraction": 1,
         "row": 4,
-        "density": 0.7485
+        "density": 0.6586
       },
       {
         "bounds": [
@@ -3555,7 +3244,7 @@
         "column": 7,
         "coverageFraction": 1,
         "row": 4,
-        "density": 0.7846
+        "density": 0.7567
       },
       {
         "bounds": [
@@ -3568,7 +3257,7 @@
         "column": 8,
         "coverageFraction": 1,
         "row": 4,
-        "density": 0.9069
+        "density": 0.8999
       },
       {
         "bounds": [
@@ -3581,7 +3270,7 @@
         "column": 9,
         "coverageFraction": 1,
         "row": 4,
-        "density": 0.9539
+        "density": 0.9543
       },
       {
         "bounds": [
@@ -3594,7 +3283,7 @@
         "column": 10,
         "coverageFraction": 1,
         "row": 4,
-        "density": 0.4875
+        "density": 0.4863
       },
       {
         "bounds": [
@@ -3607,7 +3296,7 @@
         "column": 11,
         "coverageFraction": 1,
         "row": 4,
-        "density": 0.2973
+        "density": 0.2959
       },
       {
         "bounds": [
@@ -3620,7 +3309,7 @@
         "column": 0,
         "coverageFraction": 1,
         "row": 5,
-        "density": 0.1788
+        "density": 0.1708
       },
       {
         "bounds": [
@@ -3633,7 +3322,7 @@
         "column": 1,
         "coverageFraction": 1,
         "row": 5,
-        "density": 0.306
+        "density": 0.2947
       },
       {
         "bounds": [
@@ -3646,7 +3335,7 @@
         "column": 2,
         "coverageFraction": 1,
         "row": 5,
-        "density": 0.4819
+        "density": 0.4653
       },
       {
         "bounds": [
@@ -3659,7 +3348,7 @@
         "column": 3,
         "coverageFraction": 1,
         "row": 5,
-        "density": 0.5977
+        "density": 0.5704
       },
       {
         "bounds": [
@@ -3672,7 +3361,7 @@
         "column": 4,
         "coverageFraction": 1,
         "row": 5,
-        "density": 0.7962
+        "density": 0.7411
       },
       {
         "bounds": [
@@ -3681,11 +3370,11 @@
           724,
           724
         ],
-        "buildingCount": 1,
+        "buildingCount": 0,
         "column": 5,
         "coverageFraction": 1,
         "row": 5,
-        "density": 0.7867
+        "density": 0.6577
       },
       {
         "bounds": [
@@ -3698,7 +3387,7 @@
         "column": 6,
         "coverageFraction": 1,
         "row": 5,
-        "density": 0.8244
+        "density": 0.7767
       },
       {
         "bounds": [
@@ -3711,7 +3400,7 @@
         "column": 7,
         "coverageFraction": 1,
         "row": 5,
-        "density": 0.9295
+        "density": 0.9237
       },
       {
         "bounds": [
@@ -3737,7 +3426,7 @@
         "column": 9,
         "coverageFraction": 1,
         "row": 5,
-        "density": 0.8471
+        "density": 0.8483
       },
       {
         "bounds": [
@@ -3750,7 +3439,7 @@
         "column": 10,
         "coverageFraction": 1,
         "row": 5,
-        "density": 0.4957
+        "density": 0.4953
       },
       {
         "bounds": [
@@ -3763,7 +3452,7 @@
         "column": 11,
         "coverageFraction": 1,
         "row": 5,
-        "density": 0.2486
+        "density": 0.247
       },
       {
         "bounds": [
@@ -3776,7 +3465,7 @@
         "column": 0,
         "coverageFraction": 1,
         "row": 6,
-        "density": 0.1812
+        "density": 0.1751
       },
       {
         "bounds": [
@@ -3789,7 +3478,7 @@
         "column": 1,
         "coverageFraction": 1,
         "row": 6,
-        "density": 0.3299
+        "density": 0.3222
       },
       {
         "bounds": [
@@ -3802,7 +3491,7 @@
         "column": 2,
         "coverageFraction": 1,
         "row": 6,
-        "density": 0.375
+        "density": 0.3633
       },
       {
         "bounds": [
@@ -3815,7 +3504,7 @@
         "column": 3,
         "coverageFraction": 1,
         "row": 6,
-        "density": 0.4811
+        "density": 0.4621
       },
       {
         "bounds": [
@@ -3828,7 +3517,7 @@
         "column": 4,
         "coverageFraction": 1,
         "row": 6,
-        "density": 0.6453
+        "density": 0.6069
       },
       {
         "bounds": [
@@ -3839,9 +3528,9 @@
         ],
         "buildingCount": 1,
         "column": 5,
-        "coverageFraction": 1,
+        "coverageFraction": 0.9817,
         "row": 6,
-        "density": 0.7833
+        "density": 0.6988
       },
       {
         "bounds": [
@@ -3850,11 +3539,11 @@
           845,
           845
         ],
-        "buildingCount": 2,
+        "buildingCount": 3,
         "column": 6,
-        "coverageFraction": 1,
+        "coverageFraction": 0.9205,
         "row": 6,
-        "density": 0.7929
+        "density": 0.7866
       },
       {
         "bounds": [
@@ -3865,9 +3554,9 @@
         ],
         "buildingCount": 0,
         "column": 7,
-        "coverageFraction": 1,
+        "coverageFraction": 0.7014,
         "row": 6,
-        "density": 0.7543
+        "density": 0.5452
       },
       {
         "bounds": [
@@ -3878,9 +3567,9 @@
         ],
         "buildingCount": 2,
         "column": 8,
-        "coverageFraction": 1,
+        "coverageFraction": 0.8549,
         "row": 6,
-        "density": 0.8112
+        "density": 0.6971
       },
       {
         "bounds": [
@@ -3893,7 +3582,7 @@
         "column": 9,
         "coverageFraction": 1,
         "row": 6,
-        "density": 0.612
+        "density": 0.6129
       },
       {
         "bounds": [
@@ -3904,9 +3593,9 @@
         ],
         "buildingCount": 0,
         "column": 10,
-        "coverageFraction": 1,
+        "coverageFraction": 0.9981,
         "row": 6,
-        "density": 0.3529
+        "density": 0.3513
       },
       {
         "bounds": [
@@ -3917,9 +3606,9 @@
         ],
         "buildingCount": 0,
         "column": 11,
-        "coverageFraction": 1,
+        "coverageFraction": 0.8847,
         "row": 6,
-        "density": 0.2018
+        "density": 0.1771
       },
       {
         "bounds": [
@@ -3932,7 +3621,7 @@
         "column": 0,
         "coverageFraction": 1,
         "row": 7,
-        "density": 0.1522
+        "density": 0.1474
       },
       {
         "bounds": [
@@ -3945,7 +3634,7 @@
         "column": 1,
         "coverageFraction": 1,
         "row": 7,
-        "density": 0.2444
+        "density": 0.2385
       },
       {
         "bounds": [
@@ -3958,7 +3647,7 @@
         "column": 2,
         "coverageFraction": 1,
         "row": 7,
-        "density": 0.2802
+        "density": 0.272
       },
       {
         "bounds": [
@@ -3971,7 +3660,7 @@
         "column": 3,
         "coverageFraction": 1,
         "row": 7,
-        "density": 0.4288
+        "density": 0.4182
       },
       {
         "bounds": [
@@ -3984,7 +3673,7 @@
         "column": 4,
         "coverageFraction": 1,
         "row": 7,
-        "density": 0.6177
+        "density": 0.604
       },
       {
         "bounds": [
@@ -3995,9 +3684,9 @@
         ],
         "buildingCount": 0,
         "column": 5,
-        "coverageFraction": 1,
+        "coverageFraction": 0.5803,
         "row": 7,
-        "density": 0.5385
+        "density": 0.3062
       },
       {
         "bounds": [
@@ -4006,11 +3695,11 @@
           845,
           965
         ],
-        "buildingCount": 1,
+        "buildingCount": 0,
         "column": 6,
-        "coverageFraction": 1,
+        "coverageFraction": 0.0044,
         "row": 7,
-        "density": 0.4832
+        "density": 0.0021
       },
       {
         "bounds": [
@@ -4021,9 +3710,9 @@
         ],
         "buildingCount": 0,
         "column": 7,
-        "coverageFraction": 1,
+        "coverageFraction": 0,
         "row": 7,
-        "density": 0.4381
+        "density": 0
       },
       {
         "bounds": [
@@ -4034,9 +3723,9 @@
         ],
         "buildingCount": 0,
         "column": 8,
-        "coverageFraction": 1,
+        "coverageFraction": 0.0287,
         "row": 7,
-        "density": 0.4099
+        "density": 0.0118
       },
       {
         "bounds": [
@@ -4047,9 +3736,9 @@
         ],
         "buildingCount": 0,
         "column": 9,
-        "coverageFraction": 1,
+        "coverageFraction": 0.2317,
         "row": 7,
-        "density": 0.3226
+        "density": 0.0745
       },
       {
         "bounds": [
@@ -4060,9 +3749,9 @@
         ],
         "buildingCount": 0,
         "column": 10,
-        "coverageFraction": 1,
+        "coverageFraction": 0.0708,
         "row": 7,
-        "density": 0.2239
+        "density": 0.0158
       },
       {
         "bounds": [
@@ -4073,9 +3762,9 @@
         ],
         "buildingCount": 0,
         "column": 11,
-        "coverageFraction": 1,
+        "coverageFraction": 0,
         "row": 7,
-        "density": 0.1527
+        "density": 0
       },
       {
         "bounds": [
@@ -4088,7 +3777,7 @@
         "column": 0,
         "coverageFraction": 1,
         "row": 8,
-        "density": 0.1112
+        "density": 0.1073
       },
       {
         "bounds": [
@@ -4101,7 +3790,7 @@
         "column": 1,
         "coverageFraction": 1,
         "row": 8,
-        "density": 0.1492
+        "density": 0.1444
       },
       {
         "bounds": [
@@ -4114,7 +3803,7 @@
         "column": 2,
         "coverageFraction": 1,
         "row": 8,
-        "density": 0.1947
+        "density": 0.1888
       },
       {
         "bounds": [
@@ -4127,7 +3816,7 @@
         "column": 3,
         "coverageFraction": 1,
         "row": 8,
-        "density": 0.2878
+        "density": 0.2813
       },
       {
         "bounds": [
@@ -4140,7 +3829,7 @@
         "column": 4,
         "coverageFraction": 1,
         "row": 8,
-        "density": 0.4271
+        "density": 0.4211
       },
       {
         "bounds": [
@@ -4151,9 +3840,9 @@
         ],
         "buildingCount": 1,
         "column": 5,
-        "coverageFraction": 1,
+        "coverageFraction": 0.6745,
         "row": 8,
-        "density": 0.3617
+        "density": 0.2405
       },
       {
         "bounds": [
@@ -4164,9 +3853,9 @@
         ],
         "buildingCount": 0,
         "column": 6,
-        "coverageFraction": 1,
+        "coverageFraction": 0,
         "row": 8,
-        "density": 0.2854
+        "density": 0
       },
       {
         "bounds": [
@@ -4177,9 +3866,9 @@
         ],
         "buildingCount": 0,
         "column": 7,
-        "coverageFraction": 1,
+        "coverageFraction": 0,
         "row": 8,
-        "density": 0.2549
+        "density": 0
       },
       {
         "bounds": [
@@ -4190,9 +3879,9 @@
         ],
         "buildingCount": 0,
         "column": 8,
-        "coverageFraction": 1,
+        "coverageFraction": 0,
         "row": 8,
-        "density": 0.2282
+        "density": 0
       },
       {
         "bounds": [
@@ -4203,9 +3892,9 @@
         ],
         "buildingCount": 0,
         "column": 9,
-        "coverageFraction": 1,
+        "coverageFraction": 0,
         "row": 8,
-        "density": 0.1918
+        "density": 0
       },
       {
         "bounds": [
@@ -4216,9 +3905,9 @@
         ],
         "buildingCount": 0,
         "column": 10,
-        "coverageFraction": 1,
+        "coverageFraction": 0,
         "row": 8,
-        "density": 0.1507
+        "density": 0
       },
       {
         "bounds": [
@@ -4229,9 +3918,9 @@
         ],
         "buildingCount": 0,
         "column": 11,
-        "coverageFraction": 1,
+        "coverageFraction": 0,
         "row": 8,
-        "density": 0.1149
+        "density": 0
       }
     ],
     "columns": 12,
@@ -4673,97 +4362,6 @@
             951
           ]
         ]
-      },
-      {
-        "approximateWidth": 6,
-        "districtId": "D06",
-        "edgeStrength": 36.146,
-        "id": "D06-T1",
-        "kind": "terrace-contour",
-        "points": [
-          [
-            934,
-            807
-          ],
-          [
-            955,
-            808
-          ],
-          [
-            976,
-            802
-          ]
-        ]
-      },
-      {
-        "approximateWidth": 6,
-        "districtId": "D06",
-        "edgeStrength": 23.409,
-        "id": "D06-T2",
-        "kind": "terrace-contour",
-        "points": [
-          [
-            670,
-            879
-          ],
-          [
-            779,
-            877
-          ],
-          [
-            887,
-            874
-          ],
-          [
-            996,
-            868
-          ],
-          [
-            1104,
-            881
-          ]
-        ]
-      },
-      {
-        "approximateWidth": 6,
-        "districtId": "D06",
-        "edgeStrength": 22.137,
-        "id": "D06-T3",
-        "kind": "terrace-contour",
-        "points": [
-          [
-            680,
-            976
-          ],
-          [
-            790,
-            969
-          ],
-          [
-            899,
-            976
-          ],
-          [
-            1009,
-            986
-          ],
-          [
-            1118,
-            970
-          ],
-          [
-            1228,
-            967
-          ],
-          [
-            1337,
-            979
-          ],
-          [
-            1447,
-            966
-          ]
-        ]
       }
     ]
   },
@@ -4771,9 +4369,9 @@
     "foliage": {
       "dominantSwatches": [
         {
-          "fraction": 0.8561,
+          "fraction": 0.8533,
           "hex": "#202010",
-          "pixelCount": 70818,
+          "pixelCount": 60579,
           "rgb": [
             32,
             32,
@@ -4781,19 +4379,19 @@
           ]
         },
         {
-          "fraction": 0.1264,
-          "hex": "#404030",
-          "pixelCount": 10455,
+          "fraction": 0.1281,
+          "hex": "#404020",
+          "pixelCount": 9095,
           "rgb": [
             64,
             64,
-            48
+            32
           ]
         },
         {
-          "fraction": 0.0151,
+          "fraction": 0.0161,
           "hex": "#606040",
-          "pixelCount": 1246,
+          "pixelCount": 1140,
           "rgb": [
             96,
             96,
@@ -4801,9 +4399,9 @@
           ]
         },
         {
-          "fraction": 0.0023,
+          "fraction": 0.0024,
           "hex": "#808060",
-          "pixelCount": 189,
+          "pixelCount": 173,
           "rgb": [
             128,
             128,
@@ -4813,7 +4411,7 @@
         {
           "fraction": 0.0001,
           "hex": "#001000",
-          "pixelCount": 9,
+          "pixelCount": 8,
           "rgb": [
             0,
             16,
@@ -4821,15 +4419,15 @@
           ]
         }
       ],
-      "sampleCount": 293625,
+      "sampleCount": 252815,
       "sampling": "green-hue master pixels inside the district union"
     },
     "rock": {
       "dominantSwatches": [
         {
-          "fraction": 0.665,
+          "fraction": 0.7714,
           "hex": "#101010",
-          "pixelCount": 20811,
+          "pixelCount": 18120,
           "rgb": [
             16,
             16,
@@ -4837,9 +4435,9 @@
           ]
         },
         {
-          "fraction": 0.1721,
+          "fraction": 0.1237,
           "hex": "#303020",
-          "pixelCount": 5386,
+          "pixelCount": 2906,
           "rgb": [
             48,
             48,
@@ -4847,45 +4445,45 @@
           ]
         },
         {
-          "fraction": 0.1099,
-          "hex": "#504030",
-          "pixelCount": 3439,
+          "fraction": 0.0797,
+          "hex": "#605040",
+          "pixelCount": 1872,
           "rgb": [
+            96,
             80,
-            64,
-            48
+            64
           ]
         },
         {
-          "fraction": 0.0436,
-          "hex": "#706050",
-          "pixelCount": 1364,
+          "fraction": 0.0202,
+          "hex": "#807050",
+          "pixelCount": 474,
           "rgb": [
+            128,
             112,
-            96,
             80
           ]
         },
         {
-          "fraction": 0.0094,
-          "hex": "#908060",
-          "pixelCount": 295,
+          "fraction": 0.005,
+          "hex": "#405040",
+          "pixelCount": 117,
           "rgb": [
-            144,
-            128,
-            96
+            64,
+            80,
+            64
           ]
         }
       ],
-      "sampleCount": 86565,
+      "sampleCount": 59523,
       "sampling": "low-saturation master pixels outside building and vegetation zones"
     },
     "roof": {
       "dominantSwatches": [
         {
-          "fraction": 0.3396,
+          "fraction": 0.3479,
           "hex": "#101010",
-          "pixelCount": 8975,
+          "pixelCount": 8894,
           "rgb": [
             16,
             16,
@@ -4893,9 +4491,9 @@
           ]
         },
         {
-          "fraction": 0.2808,
+          "fraction": 0.2789,
           "hex": "#303020",
-          "pixelCount": 7421,
+          "pixelCount": 7130,
           "rgb": [
             48,
             48,
@@ -4903,9 +4501,9 @@
           ]
         },
         {
-          "fraction": 0.2357,
+          "fraction": 0.2338,
           "hex": "#504030",
-          "pixelCount": 6228,
+          "pixelCount": 5978,
           "rgb": [
             80,
             64,
@@ -4913,9 +4511,9 @@
           ]
         },
         {
-          "fraction": 0.1165,
+          "fraction": 0.113,
           "hex": "#706040",
-          "pixelCount": 3079,
+          "pixelCount": 2888,
           "rgb": [
             112,
             96,
@@ -4923,9 +4521,9 @@
           ]
         },
         {
-          "fraction": 0.0273,
+          "fraction": 0.0265,
           "hex": "#908060",
-          "pixelCount": 722,
+          "pixelCount": 677,
           "rgb": [
             144,
             128,
@@ -4933,15 +4531,15 @@
           ]
         }
       ],
-      "sampleCount": 131712,
+      "sampleCount": 127375,
       "sampling": "roof zone around registered and inferred building anchors"
     },
     "wall": {
       "dominantSwatches": [
         {
-          "fraction": 0.4145,
+          "fraction": 0.4158,
           "hex": "#303020",
-          "pixelCount": 7019,
+          "pixelCount": 6757,
           "rgb": [
             48,
             48,
@@ -4949,9 +4547,9 @@
           ]
         },
         {
-          "fraction": 0.344,
+          "fraction": 0.3432,
           "hex": "#504030",
-          "pixelCount": 5826,
+          "pixelCount": 5578,
           "rgb": [
             80,
             64,
@@ -4959,9 +4557,9 @@
           ]
         },
         {
-          "fraction": 0.1668,
+          "fraction": 0.1661,
           "hex": "#706040",
-          "pixelCount": 2825,
+          "pixelCount": 2700,
           "rgb": [
             112,
             96,
@@ -4969,9 +4567,9 @@
           ]
         },
         {
-          "fraction": 0.0387,
+          "fraction": 0.038,
           "hex": "#908060",
-          "pixelCount": 655,
+          "pixelCount": 618,
           "rgb": [
             144,
             128,
@@ -4979,9 +4577,9 @@
           ]
         },
         {
-          "fraction": 0.036,
+          "fraction": 0.0368,
           "hex": "#201010",
-          "pixelCount": 610,
+          "pixelCount": 598,
           "rgb": [
             32,
             16,
@@ -4989,15 +4587,15 @@
           ]
         }
       ],
-      "sampleCount": 105836,
+      "sampleCount": 101191,
       "sampling": "wall zone around registered and inferred building anchors"
     },
     "water": {
       "dominantSwatches": [
         {
-          "fraction": 0.969,
+          "fraction": 0.9689,
           "hex": "#102020",
-          "pixelCount": 594,
+          "pixelCount": 467,
           "rgb": [
             16,
             32,
@@ -5005,9 +4603,9 @@
           ]
         },
         {
-          "fraction": 0.0277,
+          "fraction": 0.027,
           "hex": "#303030",
-          "pixelCount": 17,
+          "pixelCount": 13,
           "rgb": [
             48,
             48,
@@ -5015,7 +4613,7 @@
           ]
         },
         {
-          "fraction": 0.0016,
+          "fraction": 0.0021,
           "hex": "#90a0b0",
           "pixelCount": 1,
           "rgb": [
@@ -5025,7 +4623,7 @@
           ]
         },
         {
-          "fraction": 0.0016,
+          "fraction": 0.0021,
           "hex": "#405040",
           "pixelCount": 1,
           "rgb": [
@@ -5035,18 +4633,18 @@
           ]
         }
       ],
-      "sampleCount": 1187,
+      "sampleCount": 900,
       "sampling": "master pixels inside registered inland-water authority"
     }
   },
   "validation": {
     "circulationConnectedComponents": 1,
     "circulationEdgesByKind": {
-      "road": 14,
-      "stairs": 9,
-      "bridge": 8
+      "road": 11,
+      "stairs": 8,
+      "bridge": 6
     },
-    "footprintCount": 45,
+    "footprintCount": 42,
     "footprintOutsideDistrictMaskCount": 0,
     "paletteFamilies": 5,
     "propertyChecks": [
@@ -5056,6 +4654,6 @@
       "terrace-band points stay within their assigned district masks",
       "all five material families publish dominant swatches"
     ],
-    "terraceBandCount": 18
+    "terraceBandCount": 15
   }
 }

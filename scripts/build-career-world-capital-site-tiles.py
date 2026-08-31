@@ -27,13 +27,9 @@ TERRITORIES = LAND_ROOT / "manifests" / "world-territories-r4.json"
 STRUCTURES = STRUCTURE_ROOT / "manifests" / "capital-structures-r1.json"
 PROJECTS = STRUCTURE_ROOT / "manifests" / "project-structures-r1.json"
 MANIFEST = LAND_ROOT / "manifests" / "terrain-site-tiles-r2.json"
-INDEPENDENT_SOURCE = (
-    LAND_ROOT / "sources" / "independent-capital-site-authored-r2.png"
-)
 
 OUTPUT_SIZE = 1254
 GENERATED_CROP_SIZE = 300
-INDEPENDENT_CROP_SIZE = 368
 NINJAONE_SITE_SOURCE_CROPS = {
     "project-kaizen-agent": (1428, 601, 1648, 821),
 }
@@ -94,33 +90,6 @@ def support_field(
     )
     irregularity = (irregularity - irregularity.mean()) / 255.0
     return distance + irregularity * 0.11
-
-
-def build_authored_independent(
-    registered_source: Image.Image,
-    source_bounds: tuple[int, int, int, int],
-) -> Image.Image:
-    authored = Image.open(INDEPENDENT_SOURCE).convert("RGBA")
-    pixels = np.asarray(authored, dtype=np.uint8).copy()
-    support = support_field(
-        authored,
-        center=(0.50, 0.59),
-        radius=(0.43, 0.35),
-    )
-    support = 1.0 - smooth_unit((support - 0.68) / 0.32)
-    registered_alpha = registered_source.crop(source_bounds).resize(
-        authored.size,
-        Image.Resampling.LANCZOS,
-    ).getchannel("A")
-    source_alpha = np.asarray(registered_alpha, dtype=np.float32)
-    authored_alpha = pixels[..., 3].astype(np.float32)
-    pixels[..., 3] = np.clip(
-        np.round(np.minimum(source_alpha, authored_alpha) * support),
-        0,
-        255,
-    ).astype(np.uint8)
-    pixels[pixels[..., 3] == 0, :3] = 0
-    return Image.fromarray(pixels, mode="RGBA")
 
 
 def build_generated_site(
@@ -200,25 +169,13 @@ def main() -> None:
         territory_id = capital["territoryId"]
         territory = territory_by_id[territory_id]
         anchor = tuple(territory["development"]["capitalAnchor"])
-        crop_size = (
-            INDEPENDENT_CROP_SIZE
-            if territory_id == "independent"
-            else GENERATED_CROP_SIZE
-        )
         bounds = (
             NINJAONE_SITE_SOURCE_CROPS[capital["id"]]
             if territory_id == "ninjaone"
-            else centered_crop(anchor, crop_size, registered_source.size)
+            else centered_crop(anchor, GENERATED_CROP_SIZE, registered_source.size)
         )
 
-        if territory_id == "independent":
-            image = build_authored_independent(registered_source, bounds)
-            revision = "r3"
-            authored_source_path = (
-                "/career-world/layers/terrain/authority/"
-                "sources/independent-capital-site-authored-r2.png"
-            )
-        elif territory_id == "ninjaone":
+        if territory_id == "ninjaone":
             image = build_generated_site(
                 registered_source,
                 bounds,
@@ -234,7 +191,7 @@ def main() -> None:
                 lowland,
                 rock,
             )
-            revision = "r1"
+            revision = "r3" if territory_id == "independent" else "r1"
             authored_source_path = None
 
         file_name = f"{territory_id}-capital-site-{revision}.png"

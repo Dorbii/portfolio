@@ -1,0 +1,28 @@
+{
+  "dimensions": [
+    1305,
+    1205
+  ],
+  "sourcePath": "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-capital-r4.png",
+  "waterMaskPath": "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-safe-mask-r5.png",
+  "sparkle": {
+    "maskPath": "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-mask-r5.png",
+    "phaseFieldPath": "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-sparkle-phase-r5.png"
+  },
+  "foam": {
+    "maskPath": "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-foam-mask-r5.png",
+    "shoreSdfPath": "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-shore-sdf-r5.png"
+  },
+  "crest": {
+    "maskPath": "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-crest-mask-r5.png",
+    "directionFieldPath": "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-direction-field-r5.png",
+    "travelDirection": [
+      0.9894,
+      -0.1449
+    ],
+    "wavePhaseFieldPath": "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-wave-phase-r5.png",
+    "pseudoNormalFieldPath": "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-pseudo-normal-r5.png",
+    "rampLutPath": "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-ramp-lut-r5.png"
+  },
+  "provenancePath": "/career-world/capitals/ninjaone/city-v2/canon/d05-canon-water-effects-r5.json"
+}

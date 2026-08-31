@@ -1164,3 +1164,148 @@ Checkpoint the free-camera LoD fix, then run a reversible D06 station-scale/cont
 - Evidence: `.codex-tmp/qa/T13/full-canon-preview.png`, `border-strips-all-internal.png`, and `tile-03-tile-04-chroma-wide-before-after-2x.png`; ledgers at `.codex-tmp/quarantine/city-v2/T13-canon-r4/`.
 - No ImageGen, runtime, public, frozen layer, camera, LoD, test, commit, or mounted-canon change.
 - Next action: director review of the refreshed owner package before any promotion/mount authorization.
+
+## Crash-safe checkpoint — 2026-08-27 T27d frequency-separated ocean r4
+
+- Offline sigma-28 low/residual pairs reconstruct r2 water within one 8-bit code value; runtime grades low only and re-adds the residual before near-tier gain.
+- Default broad relight/trough bands measure -69.244 px/s in the 8-frame CPU mirror; residual edge floor 1.2313, stamps 1.1092, tonal distance to city water 5.8537 -> 3.5629.
+- Evidence and deterministic reports: `.codex-tmp/qa/T27/r4/`; backup SHA ledger: `.codex-tmp/backups/T27d-ocean-painted-style-r4-delta-2026-08-27/`.
+- Bundled-node typecheck, scoped lint, 40 focused tests, deterministic checks, and direct Vinext build pass; host has no live GL proof.
+- Next action: director live-verifies default/extreme dials, streaming, reduced motion, and <=2/6ms before owner review; no commit.
+
+## Crash-safe checkpoint — 2026-08-27 T30 overlay removal and tier calm
+
+- Backup-first T30 makes `city-water.opacity` default zero; full-canon alpha now separates painted carrier from SDF-limited shore-crash effects.
+- World/territory field weights are `.18/.32`; speed is `.012/.035`, with higher far-field frequency. Capital/site formulas remain r4 inputs.
+- CPU 2s visible-change: world `0`, territory `.0056`, capital `.9385`, site `.8297`; block scan found zero long axis-aligned runs at opacity `.5`.
+- Evidence: `.codex-tmp/qa/T30/`; deterministic check `verify-t30-overlay-removal-and-tier-calm.mjs --check` passes; backup SHA ledger under `.codex-tmp/backups/T30-overlay-removal-and-tier-calm-2026-08-27/`.
+- Typecheck, scoped lint, 46 focused tests, r4/r6b checks, and build pass; full lint only has 2 pre-existing grammar warnings; known mutable-ocean full-suite failures persist.
+- Next action: director live-verifies ready/not-fallback, all tiers, opacity 0/.5/1 coast crops, streaming, reduced motion, and <=2/6ms; browser permission prevented worker live capture. No commit.
+
+## Crash-safe checkpoint — 2026-08-27 T31b bounded chaos
+
+- Backup-first ocean runtime trial adds residual-coordinate march, seeded regional gusts, direction/speed/phase variation, competing swells, and clamped rare crest events; world/territory chaos remains zero.
+- Evidence `.codex-tmp/qa/T31/b/`: city-variance ratio `.4671 -> .9085`, residual edge `1.0562 >= .995`, spectral-flatness `1.70x` T31, cross-region correlation `.0546`, deterministic event schedule, and tracked march `5.784–6.107px/s`.
+- Deterministic T31b/T31/T30/T27d/r6b checks, focused `15/15`, bundled typecheck/scoped lint, and Vinext build pass; full suite `215` pass / two known dirty-ocean hash failures.
+- No ImageGen, commit, public/canon, city, frozen-layer, camera, or LoD change. Next action: director live review at owner zoom, including the explicit tame/regular question and `<=2/6ms` check.
+
+## Crash-safe checkpoint — 2026-08-27 T33c streak source and loop
+
+- Backup `.codex-tmp/backups/T33c-streak-source-2026-08-27/`; source fix keeps r4 material and residual march registered in world UVs, removing zoom-time scale/fract retiling.
+- World/reference r2 and r4 low/residual source pairs are byte-identical; mips already use `generateMipmap` + trilinear minification. The live source is treatment alignment, not a reference-only PNG or missing mips.
+- Controller ignores equivalent camera/detail publications and applies a 30fps cadence, eliminating the rAF cancel/settle loop starvation path.
+- Evidence `.codex-tmp/qa/T33/c/`: 16-cell isolation matrix, scan report, and `owner-sheet-1200.png`; deterministic gates T27d-T33 plus r5/r6/r6b pass, focused water/uniform 15/15, typecheck/lint/build pass.
+- Open risk: localhost browser permission blocked the mandatory clean-load and territory-return >=30s timing sets and human GL streak check; full suite still fails the two pre-existing dirty-ocean hash/checkpoint tests. No commit.
+- Next action: director executes the stated steady-state protocol; require `frameIntervalP95Ms` 26.67-40ms and inspect both source paths before releasing owner flyovers.
+
+## Crash-safe checkpoint - 2026-08-27 T36 boundary painting
+
+- T35's reported x=1056.5 boundary was D06's internal tile seam; the real masked district join is `[665,781.521631029339,691,1086]`.
+- Full-length census: three spans, all one contiguous complex gorge/cliff/forest site; no clean simple/water span and no transport crossing.
+- One built-in ImageGen call banked (`1/8`); deterministic strip `[585,781.521631029339,780,1086]` mounted into both canon pyramids.
+- D05/D06 close changed `117,582/135,738` pixels; outside strip, protected structures, and classified water all changed `0` pixels.
+- D05/D06 usable masks re-derived for opaque painted ownership; D05 foliage shimmer locally re-derived; water classifiers unchanged.
+- Shared border maximums: luminance `0.0724%`, saturation `0.1761%`; deterministic T36 and dual-composer checks pass.
+- Evidence `.codex-tmp/qa/T36/`; lineage `.codex-tmp/quarantine/city-v2/T36-boundary-painting/`.
+- Focused tests are baseline `60/61` (unchanged concurrent ocean `u_siteLod` failure); typecheck/scoped lint and Vinext build pass; no commit.
+- Director passed all three full-res segments; owner then flagged cross-boundary crane ambiguity. T37 is separately dispatched to remove the D06 station crane; T36 itself remains uncommitted.
+
+## Crash-safe checkpoint - 2026-08-27 T37 station crane removal
+
+- Owner ruled the D06 station crane removed; D05's accepted crane and hanging ball remain byte-identical.
+- One built-in ImageGen call banked (`1/3`); silhouette-bounded close change is `[71,72,331,441]`, `82,971` pixels, with `0` changes outside the recorded site.
+- Census updated `18 -> 16`: `TOWER-01` and `FABRIC-10` are `OWNER-RULED`, not gate failures; registration/provenance hashes agree.
+- Close/site/capital re-derived; usable and painted-water masks re-derived with `0` changed samples; route and six static sprites are byte-identical.
+- Patch-border maxima are luminance `0.0317%`, saturation `0.0404%`; T37 `--check` and dual-composer pass.
+- Evidence `.codex-tmp/qa/T37/`; lineage `.codex-tmp/quarantine/city-v2/T37-remove-station-crane/`; no commit.
+- Focused tests remain baseline `60/61` on the concurrent ocean-only `u_siteLod` failure; typecheck and lint (`0` errors, two unchanged warnings) pass.
+- Next: director reviews the full T36 join and T37 owner sheet, then Steve decides the visual verdict.
+
+## Crash-safe checkpoint - 2026-08-27 T40 terrain transition interim
+
+- Owner guard interim only: full terrain pass or capital-apron extension remains an OPEN OWNER DECISION.
+- r8 runtime geology stays byte-identical; sparse per-tier overlays plus a 176px contact mask provide the reversible edge treatment.
+- River exit uses one ImageGen call and resolves into a rocky gorge/sink; bottom-blue samples `5,454 -> 1`.
+- Exact support mask proves `0` r8->r9 RGB changes outside scope and identical source alpha; patch borders `0% <=6%`.
+- Close overlay is `2,666,930` bytes versus unchanged `8,505,426`-byte base; edge ImageGen spend `0/2`.
+- Evidence `.codex-tmp/qa/T40/`; lineage `.codex-tmp/quarantine/terrain/T40-terrain-transition-interim/`.
+- T40 `--check`, D05 + isolated D06 composers, typecheck, focused `16/16`, lint, and build pass; live browser proof blocked by local-access denial.
+- Concurrent T42 temporarily mutated the D06 masks, then restored usable `de2cfd...` and painted-water `55fb4d...`; T40 writes neither and the final dual composer passes.
+- No commit. Next: director live owner-zoom boundary review, then Steve decides interim-only versus capital apron.
+
+## Crash-safe checkpoint - 2026-08-27 T44 D03 north-district concepts
+
+- Grammar resolves the north-of-D06 socket as D03 Eastern Industry: 483 touching boundary pixels; D01/D02 are 260/340px away.
+- Four quarantine concepts are ready with no selection: A foundry terraces, B powerworks, C guild arcades, D industrial conservatory.
+- Full-rulebook terrain defenses and same-frame D06 context are recorded in `.codex-tmp/qa/T44/OWNER-REVIEW.md` and `candidate-gates.json`.
+- Strict final masks report 0 outside-D03 changes and 0 registered-water changes for all four; no D03 rail, mover, or cross-join reaching object was retained.
+- ImageGen spend is 5/5: four scheduled calls plus one targeted C boundary retry; measured ledger `.codex-tmp/qa/T44/measured-run-ledger.json`.
+- Review evidence: four <=1200px owner sheets, four terrain overlays, and `adjacency-sheet-d03-with-d06.png`; owner locks the winner.
+- Quarantine only: no public/runtime/mounted/frozen-layer/camera/LoD/ocean change. This worker made no commit; concurrent checkpoint `a401340` captured only the QA record after the lane. Plate/tile/mount work remains queued behind the river lane and owner lock.
+
+## Crash-safe checkpoint - 2026-08-27 T42b layered river
+
+- T42 option 2 is mounted: deterministic terrain-with-river base plus byte-exact station/viaduct overlay with binary true-arch apertures.
+- Registered outputs: `public/.../city-v2/canon/d06-canon-terrain-base-r10.png` and `public/.../city-v2/overlays/d06-station-viaduct-overlay-{r10,mask-r10,registration-r10}`.
+- T41/r8 owns the course through the arches; the final south stretch crossfades to T40/r9's narrowing gorge/sink.
+- Composite gates: `0` overlay-owned byte changes, `0` unauthorized deltas, `2,941` water-through-aperture pixels, route/six statics byte-identical.
+- F03 candidate mounted only in terrain-owned pixels; F08 reopens `510` detailed-north samples and leaves `0` ghost-risk samples.
+- Evidence `.codex-tmp/qa/T42b/`; owner sheet <=1200px; Chrome and Edge CDP both closed before navigation, so live proof is unverified.
+- T42b `--check`, isolated/dual composers, typecheck, lint, focused `48/48`, and build pass; full suite `222/226` with two known dirty-ocean failures and two skips.
+- Historical T39/T40 content-hash checks reject the intentional successor D06 bytes; T42b check + dual composer are the current-state gates.
+- ImageGen `0/8`; no commit; no L1-L3 authority, camera, LoD, ocean-runtime, D05, route, or static edit.
+- Next: director reviews T42b evidence, then Steve gives the visual verdict before any commit.
+
+## Crash-safe checkpoint - 2026-08-27 T42c course-restoration block
+
+- Backup-first T42c candidate was mechanically built from the exact T41 pre-D06 composite; ImageGen `0/2`.
+- Binding owner-zoom three-way sheet `.codex-tmp/qa/T42/c/owner-zoom-baseline-t42b-t42c-sheet.png` FAILS: course is still not traceable from north entry to T40 exit.
+- Candidate mechanics: overlay opaque changes `0`; restored core `7,947`; newly visible-water mask samples `535`; north-entry crop exposed source-mask misclassification.
+- Candidate was rejected and every mounted D06 derivative restored byte-identically to T42b, including terrain base, close/site/capital, masks, registrations/provenance, and overlay bytes/mask.
+- Evidence `.codex-tmp/qa/T42/c/`; backup and candidate builder `.codex-tmp/quarantine/city-v2/T42c-course-restoration/` and `scripts/build-t42c-course-restoration.mjs`.
+- T42b `--check` and dual composer remain current-state gates; no commit or frozen-layer/runtime/D05/route/static change.
+- Next: director supplies/reviews a native, human-legible baseline course-support mask; only then one deterministic restore under unchanged overlay ownership.
+
+## Crash-safe checkpoint - 2026-08-28 T47 city ocean removal candidate
+
+- Quarantine-only, backup-first D05 aperture candidate; no mounted/public/runtime/ocean/D06/camera/LoD write and no commit.
+- r5 water-safe mask `b1cf1c6a...46776fe`: unique west-edge open-ocean component `204,465` px `[0,0,453,1205]`; retained lake/inland `5,875` px.
+- r4 usable-mask feather authority retained unchanged: `b2ef8399...f2bbce`; candidate changes alpha only, no RGB bytes.
+- Candidate hashes close/site/capital: `fd5f8baf...196d62` / `b138ad68...47484c` / `b812fb4a...665693`; full audit `.codex-tmp/qa/T47/hash-audit.json`.
+- Evidence: `.codex-tmp/qa/T47/d05-west-coast-before-after-owner-sheet.png` (registered-art proxy; ocean visible through the aperture, shore material retained).
+- Builder + `--check` and bundled-node typecheck pass. Focused run: 59 pass, one planned dirty-ocean `u_siteLod` assertion failure; no T47-owned red gate.
+- Next: director inspects candidate bytes/sheet at owner coast framing; any promotion remains a separate serialized mount lane.
+
+## Crash-safe checkpoint - 2026-08-28 T47b blue pass candidate
+
+- Quarantined r2 uses r1-derived blue statistics in a 36px selection band (39px including the 3px alpha feather); RGB remains byte-identical and only the edge ring is fractional.
+- Residual/out-of-band/inland scans are zero; blue non-water alpha changes are zero. Ocean and L1-off-black owner sheets: `.codex-tmp/qa/T47/b/`.
+- Builder, check, candidate tiers/masks/provenance/registration, and hash audit: `.codex-tmp/quarantine/city-v2/T47b-blue-pass/`; no mounted/public/runtime/ocean/D06/transition writes or commit.
+- Gates: deterministic build/check (26 outputs) and bundled-node typecheck pass; focused run 62 pass / 1 pre-existing dirty-ocean `u_siteLod` assertion failure.
+- Next: director visual review only; promotion remains serialized and is not authorized by this record.
+
+## T58e face-extent-and-recut (quarantine-only)
+
+- Measured face end `x1310` (raw ambiguous transition `x1289-1310`); r2 geometry keeps E1/E2 only, with a 24px east solid abutment.
+- T58d re-cut restores 15,300 changed pixels outside the 26,018px r2 scope; outside scope is byte-identical to mounted terrain (0px).
+- Content: 0.0461% blue, 0 morphology masonry; all protections 0; detail register 114.8% vs requested 90-110 band (reported, not tuned).
+- Evidence `.codex-tmp/qa/T58/e/`; candidate `.codex-tmp/quarantine/city-v2/T58e-face-extent-and-recut/`; build/check, 42 focused tests, and typecheck pass.
+- Next: director reviews the extent overlay, aligned sheet, and out-of-band detail register; no mount or T59 restart is authorized.
+
+### T69-spandrel-byte-transfer — quarantine-only
+- Replaced T67's 821px nearest-neighbour smear with a 457px zero-dilation A4 main-crossing byte transfer; restored 364 over-dilated pixels byte-identically from T63.
+- Evidence: `.codex-tmp/qa/T69/{patch-before-after-6x,course-continuity-trace-6x,source-rect-in-situ-6x,e2-crown-6x,both-openings-6x,e1-crown-6x}.png`; builder/report in `.codex-tmp/quarantine/city-v2/T69-spandrel-byte-transfer/`.
+- Gates: apertures 0 opaque / 0px deviation; water 0; ZNCC 0.389762; straight run 5px; focused 67/1 baseline red only, typecheck PASS. Next: director visual review; no mount.
+
+## W1 world resegmentation — STOP
+
+- Candidate geography has zero unclaimed/doubly-claimed land and proof under `.codex-tmp/qa/TERRITORY/W1/`, but was not promoted.
+- Blocker: moving ACE/Independent requires relocating terrain-owned site raster placements; their alpha/source-crop contract fails without regenerating forbidden terrain rasters. DEM also has frozen `ace-development-shelf` at ACE's old coordinate.
+- All W1 production/test files restored; typecheck PASS, lint 0/1 inherited, focused baseline 71/2 inherited. Next: owner must authorize an exception for the two terrain-site rasters and ACE DEM shelf, or narrow W1 to segmentation-only without moving capital/site placements.
+
+## W1 world resegmentation — owner-authorized follow-up
+
+- Owner authorization removed the former raster/DEM blocker: mounted the five-region SVG, moved Independent to the smallest island and ACE to the medium island, and centered Column’s focus on its retained medium-island capital.
+- Regenerated only Independent/ACE placeholder site tiles from registered relief/material inputs; moved only Independent/ACE DEM shelves/ridge; D05 registration/canon remain byte-identical to the W1 backup, and the land mask plus frozen L1–L3 files were not written.
+- Proof `.codex-tmp/qa/TERRITORY/W1/{before-final,after-final}-segmentation-over-relief.png`, final report `after-final-segmentation-report.json`; island coverage is unique (`0/0` unclaimed/doubly claimed).
+- Gates: bundled-node typecheck PASS; lint remains `0 errors / 1` inherited warning; focused W1 terrain/structure/city-adjacent suite `46/46` PASS. No commit. Next: director visual review of the labelled overlays and owner allocation.
