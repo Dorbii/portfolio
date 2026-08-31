@@ -164,6 +164,8 @@ COMMON = dict(
     facetGain=0.0, facetScale=340.0,
     # Event-drawn arcs: 0 keeps the old uniform hairline behaviour.
     eventStroke=0.0,
+    # Swell-bank tone: broad soft brightness riding the group envelope.
+    groupTone=0.0,
     # Deep-water persistence multiplier; 0.18 is the historic anti-ice-floe
     # cut, kept as the default for states still on dense injection.
     foamDeepTau=0.18,
@@ -277,7 +279,7 @@ PRESETS['heavy_crashing_surf'] = dict(
     # C3 and C7 are white out there. foamDeepThr comes down with it: the offshore
     # coverage threshold was raised 1.4x on top of the veil, suppressing the same
     # thing twice.
-    foamDeep=17.0, foamDeepThr=0.70, foamVeil=0.88,
+    foamDeep=17.0, foamDeepThr=0.70, foamVeil=0.55,
     stokes=4.2, backwash=1.9,
     # tauPersist 5.5 -> 7.0 s: toward the 3-8 Tp the foam-decay measurements
     # support for stage-B residue (notes R6). 9.0 was tried and smeared the
@@ -341,6 +343,11 @@ PRESETS['heavy_crashing_surf'] = dict(
     # elsewhere. The "waves and crashes, dynamic and variant" half of the
     # owner's brief, conveyed rather than simulated.
     eventStroke=2.2,
+    # The storm clip's mass lives in broad wave bodies: soft banks at group
+    # scale, not per-crest bands. Aged foam goes translucent (foamVeil 0.88
+    # -> 0.55) and the WISPS -- level-set filaments, connected by
+    # construction -- carry the white as the aerial references' lace.
+    groupTone=0.40, wispGain=2.2, wispW=3.8,
     sprayLife=1.55, spraySpread=64.0, sprayInject=2.6, sprayGate=0.33, sprayGain=1.05,
     specGain=0.16, sheen=0.034, shadowGain=0.88, crestGain=0.66, troughGain=1.144, transGain=0.72, swash=0.52,
     foamThrFresh=0.154, foamThrOld=0.59, exposure=0.97,
@@ -352,8 +359,8 @@ PRESETS['heavy_crashing_surf'] = dict(
     # the reference the gap showed as p50 luma 78 against 49 and p10 51 against
     # 20, and no amount of troughGain or abyssMix could reach it -- swept to the
     # limit it stopped at p50 68.5, because the floor is the palette itself.
-    palette=dict(abyss=hx('#07192b'), deep=hx('#0b2436'), mid=hx('#123349'),
-                 shallow=hx('#165b65'), sky=hx('#74abc9'), foamThin=hx('#c0d1da'), foamBody=hx('#e4edf1'),
+    palette=dict(abyss=hx('#07192b'), deep=hx('#0c2a40'), mid=hx('#143d58'),
+                 shallow=hx('#1d6b74'), sky=hx('#74abc9'), foamThin=hx('#cfe6e4'), foamBody=hx('#e4edf1'),
                  foamDense=hx('#f5fafa'), sun=hx('#fff4de')),
 )
 

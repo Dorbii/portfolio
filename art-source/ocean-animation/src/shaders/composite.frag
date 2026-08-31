@@ -16,6 +16,7 @@ uniform float uCrestGain, uTroughGain, uTransGain, uSwash;
 uniform float uOpenPaint;   // flat-paint floor for per-crest tone on the open sea
 uniform float uFacetGain, uFacetScale;   // painted facet sparkle: strength, cell size (tuned px)
 uniform float uEventStroke;              // how much a breaking event fattens and brightens its drawn arc
+uniform float uGroupTone;                // broad swell-bank brightness riding the group envelope
 uniform float uPlateInfluence, uPlateTint;
 uniform float uFoamThrFresh, uFoamThrOld, uFoamSoft, uLaceScale, uFoamBaseErode, uLaceContrast;
 uniform float uLaceRidge, uFilament;
@@ -371,6 +372,13 @@ void main()
     float eventness = clamp(breaking * 1.5 + whitecap * 1.2, 0.0, 1.0);
     float surfNear = 1.0 - sstep(18.0, 46.0, depth);
     float openPaint = mix(clamp(uOpenPaint, 0.0, 1.0), 1.0, max(eventness, surfNear));
+    // What replaces the per-crest banding: SWELL BANKS. The storm reference
+    // the owner sent carries its mass in broad lit/shadow wave bodies, not in
+    // foam or texture -- and the group envelope is already that shape, at
+    // group scale, moving with the sea. A gentle brightness swell where the
+    // envelope is high gives the flat paint large soft volumes to sit on.
+    float bankEnv = clamp(texture(texPath, uv).z, 0.0, 1.9);
+    base *= 1.0 + uGroupTone * (bankEnv - 1.0) * (1.0 - eventness) * (1.0 - uBare);
 
     // ---- tonal structure: deep troughs, lifted crest faces -----------------
     // Troughs must read as BROAD dark areas, so they are driven by the
