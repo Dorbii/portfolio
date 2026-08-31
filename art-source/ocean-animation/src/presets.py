@@ -156,6 +156,9 @@ COMMON = dict(
     # which is the measured physics (BBY2000 saw negligible breaking below
     # peak steepness 0.055), not an artistic choice.
     whitecapGain=60.0, groupGateExp=2.6,
+    # Flat-paint floor for per-crest tone on the open sea (composite.frag).
+    # 1.0 = the old everywhere-field look; the live heavy state overrides it.
+    openPaint=1.0,
     # Deep-water persistence multiplier; 0.18 is the historic anti-ice-floe
     # cut, kept as the default for states still on dense injection.
     foamDeepTau=0.18,
@@ -306,6 +309,10 @@ PRESETS['heavy_crashing_surf'] = dict(
     # against need dense injection, which the threshold removed; offshore foam
     # now dies by not being reinjected.
     foamDeepTau=0.45,
+    # The land is an illustration; the open sea between events is PAINT.
+    # Per-crest tone flattens to this floor away from events and the surf
+    # zone (owner direction, 2026-08-30 night).
+    openPaint=0.25,
     sprayLife=1.55, spraySpread=64.0, sprayInject=2.6, sprayGate=0.33, sprayGain=1.05,
     specGain=0.16, sheen=0.034, shadowGain=0.88, crestGain=0.66, troughGain=1.144, transGain=0.72, swash=0.52,
     foamThrFresh=0.154, foamThrOld=0.59, exposure=0.97,

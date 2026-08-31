@@ -13,6 +13,7 @@ uniform vec3  cSky;
 uniform float uSlope;
 uniform float uSpecGain, uShin, uSheen, uGlitter;
 uniform float uCrestGain, uTroughGain, uTransGain, uSwash;
+uniform float uOpenPaint;   // flat-paint floor for per-crest tone on the open sea
 uniform float uPlateInfluence, uPlateTint;
 uniform float uFoamThrFresh, uFoamThrOld, uFoamSoft, uLaceScale, uFoamBaseErode, uLaceContrast;
 uniform float uLaceRidge, uFilament;
@@ -354,6 +355,21 @@ void main()
     float facing = clamp(-dot(normalize(grS + vec2(1e-5)), dirP), 0.0, 1.0);
     float shallowT = 1.0 - sstep(2.5, 26.0, depth);
 
+    // ---- the open sea is PAINT ---------------------------------------------
+    // The land is an illustration: discrete drawn objects. Per-crest tone over
+    // the whole deep sea rules it into a fabric that no injection statistics
+    // can fix -- a live floor test with eleven gain terms zeroed at once still
+    // showed the full diagonal banding, because the painters below key the
+    // BASE COLOUR on the wave phase everywhere. The owner's direction: the sea
+    // must fit the land's style. So per-crest painting is gated: full strength
+    // where something is HAPPENING -- a breaking or whitecapping event, the
+    // surf zone -- and flattened toward group-scale pigment on the open sea.
+    // uOpenPaint is the flat floor: 1 keeps the old field look everywhere,
+    // 0 is pure flat paint between events.
+    float eventness = clamp(breaking * 1.5 + whitecap * 1.2, 0.0, 1.0);
+    float surfNear = 1.0 - sstep(18.0, 46.0, depth);
+    float openPaint = mix(clamp(uOpenPaint, 0.0, 1.0), 1.0, max(eventness, surfNear));
+
     // ---- tonal structure: deep troughs, lifted crest faces -----------------
     // Troughs must read as BROAD dark areas, so they are driven by the
     // swell-only height with a deliberately wide response -- the whole lower
@@ -361,9 +377,9 @@ void main()
     // wave shoals, which is what makes an approaching set look like it is
     // standing up out of a hollow rather than sitting on a flat sheet.
     float troughS = sstep(0.20, -0.80, hForm);
-    base = mix(base, cAbyss, clamp(troughS * uTroughGain * (0.80 + 0.45 * bphase), 0.0, 0.94));
+    base = mix(base, cAbyss, clamp(troughS * uTroughGain * (0.80 + 0.45 * bphase), 0.0, 0.94) * openPaint);
     base = mix(base, mix(cMid, cShallow, 0.35 + 0.4 * shallowT),
-               clamp(hnS, 0.0, 1.0) * uFaceLift);
+               clamp(hnS, 0.0, 1.0) * uFaceLift * openPaint);
     // Diffuse shading reads the SWELL normal only. Isolation showed this single
     // term -- specifically its ndlDetail component on the full-frequency normal --
     // was what remained mottling the water after every other contribution was
@@ -380,7 +396,7 @@ void main()
     // Widened where it is missing -- full strength offshore, tapering out in the
     // surf zone, which already matches the plate.
     float openness = sstep(40.0, 190.0, depth);
-    float dAmp = 0.34 * (1.0 + uOpenRelief * openness);
+    float dAmp = 0.34 * (1.0 + uOpenRelief * openness) * (0.30 + 0.70 * openPaint);
     base *= (1.0 - dAmp) + dAmp * (1.0 + ndl);
 
     // Every small wave has a lit side and a shadowed side. Reading the diffuse
@@ -394,7 +410,7 @@ void main()
     // stipple came from a sharp SPECULAR lobe on the raw gradient, not from a
     // diffuse term, and a lambert has no lobe to alias.
     float ndlM = clamp(dot(Nm, L), -1.0, 1.0);
-    base *= (1.0 + uChopShade * (ndlM - ndl) * (1.0 - uBare));
+    base *= (1.0 + uChopShade * (ndlM - ndl) * openPaint * (1.0 - uBare));
 
     // ---- sky reflection ---------------------------------------------------
     // Most of the colour variance in real water is not the body colour at all:
@@ -410,7 +426,8 @@ void main()
     // -- flat water reflects little, tilted faces reflect a lot -- across the
     // range of slopes this geometry actually produces.
     float fres = 1.0 - pow(clamp(Ns.z, 0.0, 1.0), uFresnelP);
-    base = mix(base, cSky, clamp(fres * uSkyMix, 0.0, 0.72) * (1.0 - uBare));
+    base = mix(base, cSky, clamp(fres * uSkyMix, 0.0, 0.72)
+               * (0.40 + 0.60 * openPaint) * (1.0 - uBare));
 
     // broad sky sheen on tilted faces
     float tilt = 1.0 - Ns.z;
@@ -465,7 +482,7 @@ void main()
         float hnUp = texture(texGeom, uv - sunXY * (off / uRes)).x;
         shadow = max(shadow, clamp((hnUp - hn) * 1.4 - 0.10, 0.0, 1.0) * (1.0 - float(i - 1) * 0.28));
     }
-    base = mix(base, cAbyss * 0.82, clamp(shadow * uShadowGain, 0.0, 0.90));
+    base = mix(base, cAbyss * 0.82, clamp(shadow * uShadowGain, 0.0, 0.90) * openPaint);
 
     // ---- pre-break wave volume ---------------------------------------------
     // A shoaling wave has a lifecycle, and painting foam straight onto a sine
