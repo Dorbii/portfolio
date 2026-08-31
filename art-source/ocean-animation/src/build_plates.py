@@ -149,7 +149,28 @@ def main():
     water = ndi.binary_opening(water, np.ones((5, 5)))
     lab, n = ndi.label(water)
     if n:
-        water = lab == int(np.argmax(ndi.sum(water, lab, range(1, n + 1)))) + 1
+        sizes = ndi.sum(water, lab, range(1, n + 1))
+        main = int(np.argmax(sizes)) + 1
+        if override:
+            # An authoritative mask's disconnected water is real water: lakes
+            # and pocket bays the terrain paints around. Culling to the one
+            # ocean component here is what left whole water bodies unpainted
+            # by ANY layer (owner-reported black voids, 2026-08-30 -- the SW
+            # lake system alone is ~3.4k world px). Keep every real body.
+            # The eikonal SOLVE still runs on the ocean component alone --
+            # wavefield.solve_phase masks to the largest component itself --
+            # so unreached water takes the same smooth phase extrapolation
+            # land does, and precompute damps its wave amplitudes to calm.
+            keep = np.where(sizes >= 150)[0] + 1
+            if main not in keep:
+                keep = np.append(keep, main)
+            water = np.isin(lab, keep)
+            print(f'  kept {len(keep)} water bodies from the authoritative mask '
+                  f'({int(sizes.sum() - sizes[keep - 1].sum())} px of specks dropped)')
+        else:
+            # An INFERRED mask's disconnected "water" is usually misread land
+            # colour; the single-component rule stays for those plates.
+            water = lab == main
     # remove land specks smaller than a real rock (<40 px) from inside the ocean
     landlab, ln = ndi.label(~water)
     if ln:
@@ -270,6 +291,22 @@ def main():
     sub = (cov - 0.5) / np.maximum(np.hypot(gx, gy), 1e-4)
     near = np.clip(1.5 - np.abs(sdf), 0.0, 1.0)
     sdf = ((1.0 - near) * sdf + near * np.clip(sub, -2.0, 2.0)).astype(np.float32)
+    # Still-water bodies from the authoritative mask were authored blockier
+    # than the coast -- the owner's screenshots of the unfilled lake show the
+    # same rectangular texel notches the fill inherited. Round their waterline
+    # with a wider sub-pixel kernel; the OCEAN coast keeps the 1.0-sigma
+    # placement the registration numbers above were measured on.
+    lab_s, n_s = ndi.label(water)
+    if n_s > 1:
+        sea_s = lab_s == int(np.argmax(ndi.sum(water, lab_s, range(1, n_s + 1)))) + 1
+        still_s = water & ~sea_s
+        if still_s.any():
+            near_still = ndi.distance_transform_edt(~still_s) <= 4.0
+            cov2 = ndi.gaussian_filter(water.astype(np.float32), 2.2)
+            gy2, gx2 = np.gradient(cov2)
+            sub2 = (cov2 - 0.5) / np.maximum(np.hypot(gx2, gy2), 1e-4)
+            near2 = np.clip(3.2 - np.abs(sdf), 0.0, 1.0) * near_still
+            sdf = ((1.0 - near2) * sdf + near2 * np.clip(sub2, -4.0, 4.0)).astype(np.float32)
 
     # bathymetry: shoals to zero at the coast, exponential shelf seaward.
     # sea stacks shoal the water around themselves for free (they are land in the SDF).
@@ -300,6 +337,19 @@ def main():
     spray_land_soft = np.where(sdf <= 0, np.clip((sdf + 13) / 9.0, 0, 1), 0.0).astype(np.float32)
     shore_band = (sdf > -13) & (sdf < 46)
     shore_band_soft = (np.clip((46 - sdf) / 26, 0, 1) * np.clip((sdf + 13) / 8, 0, 1)).astype(np.float32)
+    # The bands are derived from sdf alone, and sdf now measures to EVERY water
+    # body's shore -- a lake rim would get ocean swash and spray. Restrict the
+    # bands to the sea (the largest component) and its adjoining land; still
+    # water keeps coverage and depth, never surf. (The web path gates the same
+    # bands on the zeroed focus channel -- see export_web fieldM.)
+    lab_b, n_b = ndi.label(water)
+    if n_b > 1:
+        sea_b = lab_b == int(np.argmax(ndi.sum(water, lab_b, range(1, n_b + 1)))) + 1
+        near_sea = ndi.distance_transform_edt(~sea_b) <= 48.0
+        for band in (spray_land_band, shore_band):
+            band &= near_sea
+        spray_land_soft[~near_sea] = 0.0
+        shore_band_soft[~near_sea] = 0.0
 
     # ---- soft water coverage for compositing ------------------------------
     soft = ndi.gaussian_filter(water.astype(np.float32), 0.8)

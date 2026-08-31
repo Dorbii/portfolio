@@ -187,11 +187,11 @@ uniform float uPeriodP, uPeriodS, uPeriodC;
 
 const vec2  WORLD_SIZE   = vec2(1672.0, 941.0);
 const vec2  WORLD_TEXEL  = vec2(0.000598086, 0.001062699);
-const float PHASE_LO     = -19.650136;
-const float PHASE_SPAN   = 385.294207;
-const float PHASE_K0     = 0.53293043;
-const vec2  PHASE_DIR    = vec2(0.58568742, 0.81053701);
-const float FIELD_KMAX   = 1.40839970;
+const float PHASE_LO     = -20.372584;
+const float PHASE_SPAN   = 385.175766;
+const float PHASE_K0     = 0.53389716;
+const vec2  PHASE_DIR    = vec2(0.58534366, 0.81078530);
+const float FIELD_KMAX   = 6.04055882;
 const float FIELD_DMAX   = 7.39338398;
 const float FIELD_FMAX   = 2.40000010;
 const float FIELD_SDFMAX = 32.0000;
@@ -350,10 +350,21 @@ vec4 fieldD(vec2 s) {
 vec4 fieldM(vec2 s) {
     vec4 fl = flowAt(worldUvOf(s));
     float sdf = fl.z;
-    float waterSoft = smoothstep(-0.6, 0.6, sdf / TUNED_PER_WORLD);
+    // The ramp is one-sided ON PURPOSE: water is OPAQUE at the coastline and
+    // feathers out INSIDE the land, under the land art's own edge. The old
+    // symmetric smoothstep(-0.6, 0.6) put alpha 0.5 exactly where the land
+    // art's own feather also sits at ~0.5, and two coincident half_-alphas
+    // never compose opaque -- the page background showed through as the thin
+    // dark outline on every coast (owner-reported 2026-08-30; codex scan
+    // measured it in all nine coastal cameras).
+    float waterSoft = smoothstep(-1.1, -0.25, sdf / TUNED_PER_WORLD);
+    // The shore and spray bands are derived from sdf alone, so a lake rim
+    // would get ocean swash and spray. Focus is baked to exactly zero on
+    // still water (see precompute) -- gate the bands, never the coverage.
+    float sea = step(1e-4, fl.w);
     float shore = clamp((46.0 - sdf) / 26.0, 0.0, 1.0)
-                * clamp((sdf + 13.0) / 8.0, 0.0, 1.0);
-    float sprayLand = (sdf <= 0.0) ? clamp((sdf + 13.0) / 9.0, 0.0, 1.0) : 0.0;
+                * clamp((sdf + 13.0) / 8.0, 0.0, 1.0) * sea;
+    float sprayLand = (sdf <= 0.0) ? clamp((sdf + 13.0) / 9.0, 0.0, 1.0) * sea : 0.0;
     return vec4(waterSoft, shore, sprayLand, 1.0);
 }
 

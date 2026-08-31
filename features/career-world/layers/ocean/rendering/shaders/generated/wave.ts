@@ -190,11 +190,11 @@ uniform float uPeriodP, uPeriodS, uPeriodC;
 
 const vec2  WORLD_SIZE   = vec2(1672.0, 941.0);
 const vec2  WORLD_TEXEL  = vec2(0.000598086, 0.001062699);
-const float PHASE_LO     = -19.650136;
-const float PHASE_SPAN   = 385.294207;
-const float PHASE_K0     = 0.53293043;
-const vec2  PHASE_DIR    = vec2(0.58568742, 0.81053701);
-const float FIELD_KMAX   = 1.40839970;
+const float PHASE_LO     = -20.372584;
+const float PHASE_SPAN   = 385.175766;
+const float PHASE_K0     = 0.53389716;
+const vec2  PHASE_DIR    = vec2(0.58534366, 0.81078530);
+const float FIELD_KMAX   = 6.04055882;
 const float FIELD_DMAX   = 7.39338398;
 const float FIELD_FMAX   = 2.40000010;
 const float FIELD_SDFMAX = 32.0000;
@@ -353,10 +353,21 @@ vec4 fieldD(vec2 s) {
 vec4 fieldM(vec2 s) {
     vec4 fl = flowAt(worldUvOf(s));
     float sdf = fl.z;
-    float waterSoft = smoothstep(-0.6, 0.6, sdf / TUNED_PER_WORLD);
+    // The ramp is one-sided ON PURPOSE: water is OPAQUE at the coastline and
+    // feathers out INSIDE the land, under the land art's own edge. The old
+    // symmetric smoothstep(-0.6, 0.6) put alpha 0.5 exactly where the land
+    // art's own feather also sits at ~0.5, and two coincident half_-alphas
+    // never compose opaque -- the page background showed through as the thin
+    // dark outline on every coast (owner-reported 2026-08-30; codex scan
+    // measured it in all nine coastal cameras).
+    float waterSoft = smoothstep(-1.1, -0.25, sdf / TUNED_PER_WORLD);
+    // The shore and spray bands are derived from sdf alone, so a lake rim
+    // would get ocean swash and spray. Focus is baked to exactly zero on
+    // still water (see precompute) -- gate the bands, never the coverage.
+    float sea = step(1e-4, fl.w);
     float shore = clamp((46.0 - sdf) / 26.0, 0.0, 1.0)
-                * clamp((sdf + 13.0) / 8.0, 0.0, 1.0);
-    float sprayLand = (sdf <= 0.0) ? clamp((sdf + 13.0) / 9.0, 0.0, 1.0) : 0.0;
+                * clamp((sdf + 13.0) / 8.0, 0.0, 1.0) * sea;
+    float sprayLand = (sdf <= 0.0) ? clamp((sdf + 13.0) / 9.0, 0.0, 1.0) * sea : 0.0;
     return vec4(waterSoft, shore, sprayLand, 1.0);
 }
 
@@ -526,6 +537,15 @@ void main()
 
     float depth = max(P.w, 0.35);
     float water = M.x;
+
+    // Still water. Focus is baked to EXACTLY zero in water the wave solve
+    // never reaches -- lakes and pocket bays kept from the authoritative mask.
+    // Amplitude cannot express calm here: hn is self-normalised, so a lake
+    // would draw full-contrast phantom swell at any amplitude. Gate the DRAWN
+    // fields at the outputs instead. Ray focus is normalised off a positive
+    // floor everywhere the solve ran, so exact zero is unambiguous. Stage 1
+    // has no baked fields, so the gate is forced open there.
+    float seaGate = (uFlatOcean > 0.5) ? 1.0 : step(1e-4, A.w);
 
     vec2 dirP = normalize(D.xy + 1e-6);
     vec2 dirS = normalize(D.zw + 1e-6);
@@ -902,7 +922,8 @@ void main()
               + vec2(g2y, -g2x) * (cs2 / (2.0 * ce.x)) * 0.65;
     flow += curl * uCurlGain * (0.40 + 0.60 * shallow);
 
-    outGeom = vec4(hn, acc.g.x, acc.g.y, clamp(breaking, 0.0, 1.0));
+    outGeom = vec4(hn * seaGate, acc.g.x * seaGate, acc.g.y * seaGate,
+                   clamp(breaking, 0.0, 1.0) * seaGate);
     // ---- clean wave FORM, for shading only ---------------------------------
     // hnSwell is a sum of directionally-spread components: an interference
     // pattern, not a wave form. Everything that draws a wave's SHAPE -- the
@@ -949,10 +970,10 @@ void main()
     // darkening most of all -- which is to say it is the term that draws a wave
     // whether or not anything else does.
     hForm *= openVis;
-    outFlow = vec4(flow, clamp(hForm, -1.0, 1.0), whitecap);
+    outFlow = vec4(flow, clamp(hForm, -1.0, 1.0) * seaGate, whitecap * seaGate);
     // NOT multiplied by dsharp: that factor is built from the full hn, chop
     // included, so it would smuggle the high frequencies straight back in.
-    outSwell = vec4(acc.gSwell, hnSwell, bphase);
+    outSwell = vec4(acc.gSwell * seaGate, hnSwell * seaGate, bphase * seaGate);
 
     // ---- stroke path -------------------------------------------------------
     // ONE cosine of the solved phase field, carrying only the coarse bend. The
@@ -965,6 +986,8 @@ void main()
     // The variance the reference draws belongs in the stroke's alpha and width;
     // put it in the field and it displaces the path instead.
     float hPath = cos(SP + bendCoarse - wF * uTime);
-    outPath = vec4(hPath, formEnv, groupEnv, rE);
+    // A gated path holds no level-set crossing, so the crest stroke and the
+    // filament injection contour both die with it on still water.
+    outPath = vec4(hPath * seaGate, formEnv, groupEnv, rE);
 }
 `;

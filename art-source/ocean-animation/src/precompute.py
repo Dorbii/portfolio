@@ -194,16 +194,38 @@ def build(families, force=False):
         return fields, depth, water, sdf, {k: z[k] for k in z.files if k != 'sites'}, z['sites']
 
     P, S, C = fields['primary'], fields['secondary'], fields['chop']
+    # Water the eikonal solve cannot reach -- lakes and pocket bays kept from
+    # an authoritative mask -- is still water. Ray focus is normalised off a
+    # positive floor everywhere the solve ran, so EXACT zero in the focus
+    # channel is the still-water flag: wave.frag gates every drawn field on it
+    # (amplitude cannot express calm, because hn is self-normalised), and the
+    # web fieldM gates its sdf-derived shore band the same way.
+    lab_w, n_w = ndi.label(water)
+    sea = water
+    if n_w > 1:
+        sea = lab_w == int(np.argmax(ndi.sum(water, lab_w, range(1, n_w + 1)))) + 1
+    still = water & ~sea
     focus = ray_focus(P['dir'], water)
+    focus[still] = 0.0
+    # The web samples this texture with LINEAR filtering, so a still-water
+    # pixel one texel from land reads a blend of its zero and the land texel's
+    # arbitrary positive focus -- which reopened the sea gate in a one-texel
+    # rim around every lake and rendered it as breaking surf. Land around
+    # still water carries no meaningful focus; zero it so the blend stays
+    # zero. Ocean-adjacent land keeps its values (the coast rim SHOULD gate
+    # open there).
+    if still.any():
+        focus[ndi.binary_dilation(still, iterations=3) & ~sea] = 0.0
     ampP = shoaling_amp(P['k'], depth, P['period'], water) * focus
     ampS = shoaling_amp(S['k'], depth, S['period'], water) * (0.55 + 0.45 * focus)
     ampC = shoaling_amp(C['k'], depth, C['period'], water)
     for a in (ampP, ampS, ampC):
-        deep = water & (sdf > _px(120.0))
+        deep = sea & (sdf > _px(120.0))
         a /= np.percentile(a[deep], 55) if deep.any() else 1.0
 
     dirP_deep = families['primary'][0]
-    impact, sites = impact_sites(sdf, water, np.array(dirP_deep) / np.linalg.norm(dirP_deep))
+    # Impact sites are ocean surf; a lake rim must not throw spray.
+    impact, sites = impact_sites(sdf, sea, np.array(dirP_deep) / np.linalg.norm(dirP_deep))
     noise = tileable_fbm()
     noise_fine = tileable_fbm_fine()
 

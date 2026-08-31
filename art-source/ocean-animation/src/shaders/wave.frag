@@ -148,6 +148,15 @@ void main()
     float depth = max(P.w, 0.35);
     float water = M.x;
 
+    // Still water. Focus is baked to EXACTLY zero in water the wave solve
+    // never reaches -- lakes and pocket bays kept from the authoritative mask.
+    // Amplitude cannot express calm here: hn is self-normalised, so a lake
+    // would draw full-contrast phantom swell at any amplitude. Gate the DRAWN
+    // fields at the outputs instead. Ray focus is normalised off a positive
+    // floor everywhere the solve ran, so exact zero is unambiguous. Stage 1
+    // has no baked fields, so the gate is forced open there.
+    float seaGate = (uFlatOcean > 0.5) ? 1.0 : step(1e-4, A.w);
+
     vec2 dirP = normalize(D.xy + 1e-6);
     vec2 dirS = normalize(D.zw + 1e-6);
 
@@ -523,7 +532,8 @@ void main()
               + vec2(g2y, -g2x) * (cs2 / (2.0 * ce.x)) * 0.65;
     flow += curl * uCurlGain * (0.40 + 0.60 * shallow);
 
-    outGeom = vec4(hn, acc.g.x, acc.g.y, clamp(breaking, 0.0, 1.0));
+    outGeom = vec4(hn * seaGate, acc.g.x * seaGate, acc.g.y * seaGate,
+                   clamp(breaking, 0.0, 1.0) * seaGate);
     // ---- clean wave FORM, for shading only ---------------------------------
     // hnSwell is a sum of directionally-spread components: an interference
     // pattern, not a wave form. Everything that draws a wave's SHAPE -- the
@@ -570,10 +580,10 @@ void main()
     // darkening most of all -- which is to say it is the term that draws a wave
     // whether or not anything else does.
     hForm *= openVis;
-    outFlow = vec4(flow, clamp(hForm, -1.0, 1.0), whitecap);
+    outFlow = vec4(flow, clamp(hForm, -1.0, 1.0) * seaGate, whitecap * seaGate);
     // NOT multiplied by dsharp: that factor is built from the full hn, chop
     // included, so it would smuggle the high frequencies straight back in.
-    outSwell = vec4(acc.gSwell, hnSwell, bphase);
+    outSwell = vec4(acc.gSwell * seaGate, hnSwell * seaGate, bphase * seaGate);
 
     // ---- stroke path -------------------------------------------------------
     // ONE cosine of the solved phase field, carrying only the coarse bend. The
@@ -586,5 +596,7 @@ void main()
     // The variance the reference draws belongs in the stroke's alpha and width;
     // put it in the field and it displaces the path instead.
     float hPath = cos(SP + bendCoarse - wF * uTime);
-    outPath = vec4(hPath, formEnv, groupEnv, rE);
+    // A gated path holds no level-set crossing, so the crest stroke and the
+    // filament injection contour both die with it on still water.
+    outPath = vec4(hPath * seaGate, formEnv, groupEnv, rE);
 }

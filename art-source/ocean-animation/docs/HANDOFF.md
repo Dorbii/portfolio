@@ -870,8 +870,16 @@ needs all five steps, in order:
 ```bash
 cd src
 export OCEAN_ROOT=../scenes/world PYTHONPATH=. OCEAN_CALM_REFS=
-export OCEAN_WATER_MASK=../scenes/world/city_coast_water_mask_r1.png
-export OCEAN_G=13.537503 OCEAN_DEPTH=10.934099 OCEAN_SHELF=23.951140
+# authority_coast_water_mask_r2 = world-land-mask-r4 water everywhere, except
+# T70's D05 coast extension bbox where city_coast_water_mask_r1 rules. Built
+# 2026-08-30; the old city_coast_water_mask_r1 input was missing ~30k px of
+# authority water (whole lakes and pocket bays -- the black shoreline voids).
+export OCEAN_WATER_MASK=../scenes/world/authority_coast_water_mask_r2.png
+# G for the CURRENT baked state's primary period (T=2.87, heavy_crashing_surf).
+# The 13.537503 that stood here was for T=2.36 and disagreed with bake.json --
+# bake_world derives G itself and would have refused, but build_plates runs
+# first and would have built the bathymetry at the wrong scale silently.
+export OCEAN_G=9.153713616306502 OCEAN_DEPTH=7.393384 OCEAN_SHELF=16.194954
 python build_plates.py                 # masks, shoreline SDF, bathymetry
 rm -rf ../scenes/world/work            # THE SOLVE CACHE KEYS ON FAMILIES, NOT
                                        # ON THE COASTLINE -- a stale work/ will

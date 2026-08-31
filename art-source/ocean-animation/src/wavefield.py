@@ -128,6 +128,15 @@ def solve_phase(direction, period, water, depth, seed_px=16, iters=26, tag=''):
     # (shoaling, refraction, diffraction round the stacks) is retained.
     depth = ndi.zoom(depth, SS, order=1)
     water = ndi.zoom(water.astype(np.float32), SS, order=1) > 0.5
+    # The march must see ONE connected sea. The mask may now carry lakes and
+    # pocket bays (real water, kept for coverage/sdf/depth); marching cannot
+    # reach them from the edge seeds, and a water cell the march never reaches
+    # holds S = inf, which the land-extrapolation below deliberately skips for
+    # water. Mask them to land HERE so they take the same smooth extrapolated
+    # phase land does, instead of poisoning the field with inf.
+    _lab, _n = ndi.label(water)
+    if _n > 1:
+        water = _lab == int(np.argmax(ndi.sum(water, _lab, range(1, _n + 1)))) + 1
     H, W = depth.shape
     k = wavenumber(omega, depth) / float(SS)           # per fine-grid cell
     seed_px = seed_px * SS

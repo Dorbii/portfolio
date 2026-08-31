@@ -405,10 +405,21 @@ vec4 fieldD(vec2 s) {{
 vec4 fieldM(vec2 s) {{
     vec4 fl = flowAt(worldUvOf(s));
     float sdf = fl.z;
-    float waterSoft = smoothstep(-0.6, 0.6, sdf / TUNED_PER_WORLD);
+    // The ramp is one-sided ON PURPOSE: water is OPAQUE at the coastline and
+    // feathers out INSIDE the land, under the land art's own edge. The old
+    // symmetric smoothstep(-0.6, 0.6) put alpha 0.5 exactly where the land
+    // art's own feather also sits at ~0.5, and two coincident half-alphas
+    // never compose opaque -- the page background showed through as the thin
+    // dark outline on every coast (owner-reported 2026-08-30; codex scan
+    // measured it in all nine coastal cameras).
+    float waterSoft = smoothstep(-1.1, -0.25, sdf / TUNED_PER_WORLD);
+    // The shore and spray bands are derived from sdf alone, so a lake rim
+    // would get ocean swash and spray. Focus is baked to exactly zero on
+    // still water (see precompute) -- gate the bands, never the coverage.
+    float sea = step(1e-4, fl.w);
     float shore = clamp((46.0 - sdf) / 26.0, 0.0, 1.0)
-                * clamp((sdf + 13.0) / 8.0, 0.0, 1.0);
-    float sprayLand = (sdf <= 0.0) ? clamp((sdf + 13.0) / 9.0, 0.0, 1.0) : 0.0;
+                * clamp((sdf + 13.0) / 8.0, 0.0, 1.0) * sea;
+    float sprayLand = (sdf <= 0.0) ? clamp((sdf + 13.0) / 9.0, 0.0, 1.0) * sea : 0.0;
     return vec4(waterSoft, shore, sprayLand, 1.0);
 }}
 

@@ -569,7 +569,7 @@ test("terrain authoring declares six connected mountain systems", async () => {
       "tanium-saddle-range",
       "southern-spine-range",
       "column-landmark-range",
-      "ace-ridge",
+      "ace-medium-ridge",
       "ninjaone-northwest-crown",
     ],
   );
@@ -1568,7 +1568,7 @@ test("the solved ocean fields are the accepted checkpoint", async () => {
   const acceptedAssets = [
     [
       "public/career-world/layers/ocean/fields/ocean-flow-r2.png",
-      "B55EE96004D6707C081FF6032BD17AC9C5F864C0F43AEB67D093410FF8275CD9",
+      "018E92B1DF56012EC3880F5F2322F541567C32C936880DB73CA6D6C524270806",
     ],
     [
       "public/career-world/layers/ocean/fields/ocean-noise-fine-r2.png",
@@ -1580,7 +1580,7 @@ test("the solved ocean fields are the accepted checkpoint", async () => {
     ],
     [
       "public/career-world/layers/ocean/fields/ocean-phase-r2.png",
-      "6D26790AAE6F4B6DD62E557A47B1E37785A031FB4A884FA6D28E83D239301A38",
+      "E5F9EF595198AE541815084F1ACA20DE578BAD6D88E54B9719F73A65ED14C930",
     ],
   ];
 
