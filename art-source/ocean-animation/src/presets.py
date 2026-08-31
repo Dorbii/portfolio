@@ -457,7 +457,13 @@ PRESETS['heavy_crashing_surf'] = dict(
     # Subsurface teal flash under events (stylized-water-brief.md device 3).
     eventTeal=0.55,
     sprayLife=1.55, spraySpread=64.0, sprayInject=2.6, sprayGate=0.33, sprayGain=1.05,
-    specGain=0.16, sheen=0.034, shadowGain=0.88, crestGain=0.78, troughGain=1.144, transGain=0.72, swash=0.52,
+    # swash 0.52 -> 0.26. It paints the last few metres pale turquoise "whatever
+    # the wave does", which at close range spread a milky film along every rock
+    # -- the owner marked two stretches of coast reading wrong, and a valid
+    # same-camera ablation (the first one this session, after fixing the zoom to
+    # land reproducibly) put it on this term rather than on the seabed, which
+    # was identical with it on and off.
+    specGain=0.16, sheen=0.034, shadowGain=0.88, crestGain=0.78, troughGain=1.144, transGain=0.72, swash=0.26,
     foamThrFresh=0.231, foamThrOld=0.59, exposure=1.31, foamMass=0.65,
     # Darkened ALL the way to the reference plate, hue preserved so the shore
     # keeps its teal. Sampled on C5's water (664k px, foam excluded), the

@@ -705,7 +705,7 @@ const COMPOSITE_HEAVY_CRASHING_SURF: Readonly<Record<string, OceanUniformValue>>
   uSubDepth: 26.0,
   uSubGreen: 0.11,
   uSubMix: 0.52,
-  uSwash: 0.52,
+  uSwash: 0.26,
   uTealDepth: 29.0,
   uTransGain: 0.72,
   uTroughDark: 0.3,

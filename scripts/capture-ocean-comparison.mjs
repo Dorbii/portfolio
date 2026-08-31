@@ -69,7 +69,13 @@ async function launch(executable, viewport) {
  * gets framed on a coastline rather than on whatever happens to be mid-map.
  */
 async function setSpan(connection, sessionId, target, anchor) {
-  for (let attempt = 0; attempt < 60; attempt += 1) {
+  // The zoom walks in bounded steps and the app clamps, so the span it settles
+  // on depends on the path it took -- two runs asking for the same number can
+  // land at 0.0825 and 0.1055. That is fatal for ablation: the captures being
+  // compared must share a camera or the difference measured is the camera.
+  // The loop below now keeps stepping while it is outside tolerance, and the
+  // caller verifies what it actually got.
+  for (let attempt = 0; attempt < 140; attempt += 1) {
     const camera = await readCamera(connection, sessionId);
     if (Math.abs(camera.span[0] - target) <= 1e-6) return camera;
     const scale = Math.min(1.28, Math.max(1 / 1.28, target / camera.span[0]));
@@ -188,7 +194,29 @@ async function main() {
       await delay(9000);
     }
     const anchor = (args.anchor ?? "0.5,0.5").split(",").map(Number);
-    if (args.span) await setSpan(connection, sessionId, Number(args.span), anchor);
+    if (args.span) {
+      // One pass of the zoom walk can stop short: the app clamps, and where it
+      // clamps depends on the path and on what has finished loading, so the
+      // same request lands at 0.0825 on one run and 0.1055 on the next. Two
+      // captures at different spans cannot be compared, and an A/B built on
+      // them measures the camera. Keep walking until it holds still.
+      for (let pass = 0; pass < 5; pass += 1) {
+        const cam = await setSpan(connection, sessionId, Number(args.span), anchor);
+        if (Math.abs(cam.span[0] - Number(args.span)) / Number(args.span) < 0.02) break;
+        await delay(400);
+      }
+    }
+    // Say plainly what camera this capture is OF, and shout when it is not the
+    // one that was asked for -- a silent mismatch turns every A/B built on it
+    // into a measurement of the camera instead of the change.
+    if (args.span) {
+      const got = await readCamera(connection, sessionId);
+      const drift = Math.abs(got.span[0] - Number(args.span)) / Number(args.span);
+      if (drift > 0.02) {
+        console.log(`CAMERA NOTE: asked span ${args.span}, settled at ${got.span[0].toFixed(5)}`
+          + ` (the app clamps). Compare only against captures reporting the same span.`);
+      }
+    }
     // --origin x,y pans to an EXACT camera after zooming, by dragging. The
     // anchor trick cannot express "this world point at that screen position",
     // so it can approach a framing but never reproduce one; the owner reviews
