@@ -273,6 +273,7 @@ class OceanRenderer:
                   uOpenPaint=float(p.get('openPaint', 1.0)),
                   uFacetGain=float(p.get('facetGain', 0.0)),
                   uFacetScale=float(p.get('facetScale', 8.0)),
+                  uEventStroke=float(p.get('eventStroke', 0.0)),
                   uTransGain=p['transGain'], uPlateInfluence=p['plateInfluence'],
                   uPlateTint=p['plateTint'], uFoamThrFresh=p['foamThrFresh'],
                   uFoamThrOld=p['foamThrOld'], uFoamSoft=p['foamSoft'],

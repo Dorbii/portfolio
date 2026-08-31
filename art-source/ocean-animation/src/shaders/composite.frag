@@ -15,6 +15,7 @@ uniform float uSpecGain, uShin, uSheen, uGlitter;
 uniform float uCrestGain, uTroughGain, uTransGain, uSwash;
 uniform float uOpenPaint;   // flat-paint floor for per-crest tone on the open sea
 uniform float uFacetGain, uFacetScale;   // painted facet sparkle: strength, cell size (tuned px)
+uniform float uEventStroke;              // how much a breaking event fattens and brightens its drawn arc
 uniform float uPlateInfluence, uPlateTint;
 uniform float uFoamThrFresh, uFoamThrOld, uFoamSoft, uLaceScale, uFoamBaseErode, uLaceContrast;
 uniform float uLaceRidge, uFilament;
@@ -814,8 +815,15 @@ void main()
     // edge, and it is why the sea read as mottled rather than drawn.
     vec4 PA = texture(texPath, uv + vec2(0.0, liftPx * hn) / uRes);
     float hPath = PA.x, formEnv = PA.y, groupEnv = PA.z;
-    // Width carries the wave's state; the path never does.
-    float strokeW = uCrestLineW * mix(0.62, 1.30, clamp(groupEnv, 0.0, 1.6) / 1.6);
+    // Width carries the wave's state; the path never does. An EVENT carries
+    // far more of it: with whitecapping made rare (a handful of events on the
+    // whole sea), the event's crest is where the drawn wave lives -- the
+    // owner's brief wants crashes CONVEYED, and a 3 px hairline conveys
+    // nothing. The stroke fattens and brightens where the sea is actually
+    // breaking, and stays a whisper elsewhere.
+    float eventW = clamp(whitecap * 1.3 + breaking, 0.0, 1.0);
+    float strokeW = uCrestLineW * mix(0.62, 1.30, clamp(groupEnv, 0.0, 1.6) / 1.6)
+                  * (1.0 + uEventStroke * eventW);
     float crestLine = contourLine(hPath, uCrestLevel, strokeW) * (0.10 + 0.90 * facing);
     // A SECOND clean train, drawn separately rather than summed into the first.
     // One train gives smooth unbroken strokes -- and perfectly regular ones,
@@ -838,7 +846,11 @@ void main()
         formEnv * (0.55 + 0.75 * noiseAt(px + loopScroll(uDirDeep, 8.0, 300.0), 300.0)));
     float lineGate = clamp(breaking * 1.35 + whitecap * 1.0 + uCrestLineFloor, 0.0, 1.0);
     float lineA = crestLine * lineGate * alongVary;
-    base = mix(base, mix(cFoamThin, cFoamDense, 0.55), lineA * uCrestGain * (1.0 - uBare));
+    // The event's arc draws toward SOLID white; the quiet sea's residual
+    // strokes keep the old thin mix.
+    base = mix(base, mix(cFoamThin, cFoamDense, 0.55 + 0.40 * eventW),
+               clamp(lineA * uCrestGain * (1.0 + 0.8 * uEventStroke * eventW), 0.0, 0.92)
+               * (1.0 - uBare));
 
     // a soft residual edge underneath, so the stroke sits on something
     // A soft residual edge under the stroke, but gated the same way the stroke

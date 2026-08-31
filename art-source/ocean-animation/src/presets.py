@@ -162,6 +162,8 @@ COMMON = dict(
     # Painted facet sparkle (the cove-concept water language). Off by default;
     # the live heavy state turns it on.
     facetGain=0.0, facetScale=340.0,
+    # Event-drawn arcs: 0 keeps the old uniform hairline behaviour.
+    eventStroke=0.0,
     # Deep-water persistence multiplier; 0.18 is the historic anti-ice-floe
     # cut, kept as the default for states still on dense injection.
     foamDeepTau=0.18,
@@ -275,12 +277,12 @@ PRESETS['heavy_crashing_surf'] = dict(
     # C3 and C7 are white out there. foamDeepThr comes down with it: the offshore
     # coverage threshold was raised 1.4x on top of the veil, suppressing the same
     # thing twice.
-    foamDeep=17.0, foamDeepThr=0.70, foamVeil=0.99,
+    foamDeep=17.0, foamDeepThr=0.70, foamVeil=0.88,
     stokes=4.2, backwash=1.9,
     # tauPersist 5.5 -> 7.0 s: toward the 3-8 Tp the foam-decay measurements
     # support for stage-B residue (notes R6). 9.0 was tried and smeared the
     # events into dim blobs; 7.0 keeps them legible.
-    tauFresh=1.30, tauPersist=7.0,
+    tauFresh=1.5, tauPersist=7.0,
     # Injection down 3x from injBreak 52 / injWhitecap 10.0 / injShore 15.3, and
     # back up 2.2x from the 6.5x cut once injPatch started throwing most of it
     # away -- what survives has to be strong enough to read.
@@ -294,7 +296,13 @@ PRESETS['heavy_crashing_surf'] = dict(
     # heavy_crashing_surf was being matched against long_period_parallel_swell --
     # the darkest, flattest, least foamy of the eight canonical references --
     # and the heavy plates want 9-12% foam coverage where C5 wants 1.84%.
-    injBreak=70.4, injWhitecap=4.5, injShore=20.7,
+    # A crash is ONE drawn mark. injCrestRun 26 -> 70 recruits the whole
+    # breaking stretch of the crest into a single arc instead of a row of
+    # dots; injWhitecap 4.5 -> 7.0 makes the head solid white on arrival;
+    # tauFresh 1.30 -> 1.8 keeps it white while it lives; the deep residue
+    # dies sooner (foamDeepTau 0.45 -> 0.30) and dimmer (foamVeil 0.99 ->
+    # 0.88) so the tail is a fade, not a grey smoke-wisp.
+    injBreak=70.4, injWhitecap=5.0, injShore=20.7, injCrestRun=70.0,
     # The patch gate's threshold was tuned against a broken offline renderer
     # (ocean_gl never set uInjPatch/uInjPatchScale/uInjCrestRun -- see the fix
     # there), and at 0.50 it sat BELOW the group envelope's whole range: formEnv
@@ -317,7 +325,7 @@ PRESETS['heavy_crashing_surf'] = dict(
     # the deep persistence cut softens 0.18 -> 0.45. The ice floes it guarded
     # against need dense injection, which the threshold removed; offshore foam
     # now dies by not being reinjected.
-    foamDeepTau=0.45,
+    foamDeepTau=0.30,
     # The land is an illustration; the open sea between events is PAINT.
     # Per-crest tone flattens to this floor away from events and the surf
     # zone (owner direction, 2026-08-30 night).
@@ -328,6 +336,11 @@ PRESETS['heavy_crashing_surf'] = dict(
     # treatment designed at the right scale; do not re-enable it by nudging
     # this gain -- redesign the cell rendering first.
     facetGain=0.0, facetScale=340.0,
+    # The drawn crash: a breaking event fattens its crest arc ~3x and pulls it
+    # toward solid white -- the wave is DRAWN where it breaks, whispered
+    # elsewhere. The "waves and crashes, dynamic and variant" half of the
+    # owner's brief, conveyed rather than simulated.
+    eventStroke=2.2,
     sprayLife=1.55, spraySpread=64.0, sprayInject=2.6, sprayGate=0.33, sprayGain=1.05,
     specGain=0.16, sheen=0.034, shadowGain=0.88, crestGain=0.66, troughGain=1.144, transGain=0.72, swash=0.52,
     foamThrFresh=0.154, foamThrOld=0.59, exposure=0.97,
