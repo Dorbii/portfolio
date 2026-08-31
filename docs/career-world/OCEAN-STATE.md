@@ -1,6 +1,13 @@
 # Ocean lane — resume here
 
-Last updated 2026-08-30 (late) · branch `codex/career-world-rebuild` · head `b594ee8`.
+Last updated 2026-08-30 (night) · branch `codex/career-world-rebuild` · head `1067416`.
+
+**World scale**: WORLD_LAMBDA stays 12 world px, deliberately. The city
+thread's S2 audit puts the terrain-implied scale at 6.8–35.2 m per world px, so
+a 12 px swell is 82–422 m — inside the physical range for ocean swell. The
+world raster is NOT metric under the district scale (0.13 m/unit); do not mix
+them. Coast authority is `world-land-mask-r4` (frozen; T70's D05 extension is
+the one deliberate city modification, encoded in the bake mask).
 
 This is the water program's own thread. `STATE.md` is the city/director thread
 and calls this "a separate lane": read that one for city work, this one for
@@ -86,22 +93,31 @@ into dark water between distinct white masses; tone p50 56.9 vs C3's 55.8.
 
 ## Open, in the order I would take them
 
-1. **Shoreline gaps at site LoD.** Owner-reported 2026-08-30 with a screenshot:
-   black voids between water and land, his guess is shore detail owned by another
-   layer. Same class as the river gap fixed in `1840e4d`. A magenta-method scan
-   along the whole coast was run by a Codex thread late 2026-08-30 — see
-   `art-source/ocean-animation/diagnostics/codexref/shore-gaps-report.md` if it
-   landed, else the captures beside it.
-2. **The coastal surf ribbon is uniformly solid.** After the de-weave the surf
-   band along the coast reads slightly as a snow rim — connected is right, but
-   its white is unbroken. The reference's masses have lacy interior structure.
-3. **Deep trains are still parallel-regular.** The events localize now but ride
-   trains of one diagonal. dirWander/dirBend are measured dead ends (they
-   decorrelate; see presets.py) — curvature must come from refraction, which
-   flat deep water legitimately lacks. C7 has parallel wind-banding too, so
-   this may be acceptable; judge it live before spending on it.
+1. **Foam threads, not blobs.** `1067416` made whitecapping rare and
+   group-clustered (the fabric is broken), but C3's open-water foam is thin
+   curving THREADS along crest backs and ours fattens into blobs. The filament
+   machinery contours the PRIMARY path; group-shaped events crop those runs
+   into patch-shaped foam. Likely the injection contour needs to follow the
+   local steepest train inside an event, not the primary. Side-by-side that
+   states the problem: `diagnostics/codexref/phys2_vs_c3.png`.
+2. **The speckle dust.** A fine white grain rides the whole sea and reads as
+   noise at every zoom. Seven single-uniform live ablations were null INSIDE
+   frame variance (~±1 in any texture statistic); ablate to the floor, and
+   mind the canvas-alpha trap below before measuring anything.
+3. **The coastal surf ribbon is uniformly solid.** Connected is right, but its
+   interior is unbroken white where the reference keeps lace.
 4. **Foam whites clip.** Our p99 is 255 against the reference's 242 —
    foamSolid/foamMass push the tops past the plate's soft white. Small, cheap.
+
+**Closed 2026-08-30 (night):** the shoreline gaps. `c2bc8b4` — the bake input
+mask was missing ~30k px of authority water (whole lakes) and build_plates
+culled disconnected water besides; codex measured 115,128 unpainted px at nine
+coastal cameras, and after the re-bake the same scan reads ZERO. Lakes render
+as still water via the focus=0 flag (see the commit for the three traps:
+LINEAR-filtered focus bleeding into rims, self-normalised hn drawing phantom
+swell at any amplitude, the one-sided coverage ramp that kills the coastline
+outline). The whitecap-statistics pass also landed (`1067416`,
+threshold-quadratic + group gating; literature in refs/wave-physics-notes.md).
 5. **The ocean pins the sun's elevation and a day/night cycle is coming.**
    `oceanSunDirection` in `WaterSurfaceRenderer.ts` takes the world light's
    azimuth and overrides the vertical to a fixed 34 degrees
