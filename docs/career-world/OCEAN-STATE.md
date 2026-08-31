@@ -160,8 +160,17 @@ the only camera where the sea can be judged against the style it has to belong
 to (owner, 2026-08-31). Reviewed anywhere else the sea is compared to generic
 terrain -- which is how it came to be tuned LOUDER than the world it lives in.
 
-    node scripts/capture-ocean-comparison.mjs --out <p> --view NinjaOne --settle 22
+    node scripts/capture-ocean-comparison.mjs --out <p>         --span 0.20 --origin 0.045,0.129 --settle 22
     python art-source/ocean-animation/src/style_match.py <p>
+
+THAT IS THE ANCHOR CAMERA -- the owner's own review framing, given
+2026-08-31: open sea across the left third, the coast running down the
+middle, the cathedral, ziggurat and works to the right. `--origin` pans to an
+exact camera by dragging, because the anchor trick can approach a framing but
+never reproduce one, and a review camera that drifts is not a review camera.
+`--view NinjaOne` still exists (it clicks the nav button) but lands the city
+on the LEFT with unfinished terrain filling the right, which is a worse frame
+for judging water.
 
 `--view NinjaOne` clicks the nav button and waits for the fly-to, which is a
 fixed camera (origin 0.125,0 span 0.25) -- reproducible in a way --span is

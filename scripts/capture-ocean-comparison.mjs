@@ -189,6 +189,38 @@ async function main() {
     }
     const anchor = (args.anchor ?? "0.5,0.5").split(",").map(Number);
     if (args.span) await setSpan(connection, sessionId, Number(args.span), anchor);
+    // --origin x,y pans to an EXACT camera after zooming, by dragging. The
+    // anchor trick cannot express "this world point at that screen position",
+    // so it can approach a framing but never reproduce one; the owner reviews
+    // the water at a specific camera, and a review camera that drifts is not a
+    // review camera.
+    if (args.origin) {
+      const want = args.origin.split(",").map(Number);
+      for (let attempt = 0; attempt < 8; attempt += 1) {
+        const cam = await readCamera(connection, sessionId);
+        const dx = (want[0] - cam.origin[0]) * (cam.rect.width / cam.span[0]);
+        const dy = (want[1] - cam.origin[1]) * (cam.rect.height / cam.span[1]);
+        if (Math.abs(dx) < 1.5 && Math.abs(dy) < 1.5) break;
+        const cx = cam.rect.x + cam.rect.width * 0.5;
+        const cy = cam.rect.y + cam.rect.height * 0.5;
+        const stepX = Math.max(-600, Math.min(600, -dx));
+        const stepY = Math.max(-600, Math.min(600, -dy));
+        await connection.send("Input.dispatchMouseEvent",
+          { type: "mousePressed", button: "left", buttons: 1, clickCount: 1, x: cx, y: cy }, sessionId);
+        for (let s = 1; s <= 6; s += 1) {
+          await connection.send("Input.dispatchMouseEvent",
+            { type: "mouseMoved", button: "left", buttons: 1,
+              x: cx + (stepX * s) / 6, y: cy + (stepY * s) / 6 }, sessionId);
+          await delay(16);
+        }
+        await connection.send("Input.dispatchMouseEvent",
+          { type: "mouseReleased", button: "left", buttons: 0, clickCount: 1,
+            x: cx + stepX, y: cy + stepY }, sessionId);
+        await delay(120);
+      }
+      const cam = await readCamera(connection, sessionId);
+      console.log("origin:", JSON.stringify(cam.origin), "span:", JSON.stringify(cam.span));
+    }
 
     // Count frames so the capture can PROVE the simulation ran rather than
     // assume it. A capture with zero frames is the failure mode, not an edge case.
