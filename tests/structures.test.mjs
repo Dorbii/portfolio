@@ -8,6 +8,11 @@ import {
   resolveNodeVisibility,
 } from "../features/career-world/shared/lod.ts";
 import { WORLD_PLANE } from "../features/career-world/shared/world.ts";
+import { DETAIL_POLICY } from "../features/career-world/shared/lod.ts";
+import {
+  NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN,
+  resolveD05CanonOneToOneMinimumSpan,
+} from "../features/career-world/layers/city/model/ninjaOneCapitalD05Concept.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -913,9 +918,31 @@ test("NinjaOne controls expose progressive map destinations without affecting la
   );
   assert.match(
     scene,
-    /NINJAONE_CAPITAL_INTERACTIVE_MINIMUM_SPAN =[\s\S]*?DETAIL_POLICY\.cameraMinimumSpan/,
+    /interactiveArtResolvingMinimumSpan\([\s\S]*?DETAIL_POLICY\.cameraMinimumSpan/,
   );
-  assert.match(scene, /interactiveCameraMinimumSpan\(camera\)/);
+  assert.match(scene, /interactiveCameraMinimumSpan\(camera, viewportSize\)/);
+  // The floor is derived from the live viewport rather than a bare span, so a
+  // wide window can no longer zoom past the canon's 1:1 resolving power.
+  // It must still reproduce the owner-approved cap at its reference width.
+  assert.equal(
+    Number(resolveD05CanonOneToOneMinimumSpan(1303).toFixed(4)),
+    NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN,
+  );
+  assert.ok(
+    resolveD05CanonOneToOneMinimumSpan(1948)
+      > NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN,
+    "a wider viewport must stop the camera sooner, not later",
+  );
+  for (const width of [320, 1303, 1948, 2560, 3840]) {
+    const floor = resolveD05CanonOneToOneMinimumSpan(width);
+    assert.ok(floor > 0 && floor <= 1, `floor out of range at ${width}`);
+  }
+  assert.equal(
+    resolveD05CanonOneToOneMinimumSpan(0),
+    NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN,
+    "an unmeasured viewport must fall back to the owner-approved cap",
+  );
+  assert.ok(DETAIL_POLICY.cameraMinimumSpan > 0);
   assert.match(scene, /resolveProjectFocusView/);
   assert.match(scene, /SUPPORT_STRUCTURE_INSTANCES\.filter/);
   assert.match(

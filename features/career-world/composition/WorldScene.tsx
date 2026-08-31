@@ -28,7 +28,10 @@ import {
   resolveNinjaOneCapitalDetailState,
   type NinjaOneCapitalCityProofViewId,
 } from "../layers/city";
-import { NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN } from "../layers/city/model/ninjaOneCapitalD05Concept";
+import {
+  NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN,
+  resolveD05CanonOneToOneMinimumSpan,
+} from "../layers/city/model/ninjaOneCapitalD05Concept";
 import {
   NinjaOneInlandHabitatCanvas,
   NinjaOneInlandWaterCanvas,
@@ -72,6 +75,7 @@ import {
   WaterTuningPanel,
 } from "../development";
 import {
+  fitCameraViewToViewport,
   interpolateCameraView,
   normalizeCameraView,
   panCameraViewByPixels,
@@ -80,6 +84,7 @@ import {
   type CameraView,
 } from "../shared/camera";
 import { DETAIL_POLICY } from "../shared/lod";
+import { WORLD_PLANE } from "../shared/world";
 import { WORLD_LIGHT } from "../shared/lighting";
 import { resolveTownPresentationAnchor } from "../shared/townPresentation";
 import {
@@ -119,12 +124,16 @@ const MIN_WHEEL_ZOOM_SCALE = 1 / MAX_WHEEL_ZOOM_SCALE;
 // at the D05 canon's 1:1 resolving power (2.72 px/master; about 2x plate
 // magnification), so the free camera never displays detail no canon source
 // resolves. Proof/test cameras still use the unclamped camera floor.
-const INTERACTIVE_ART_RESOLVING_MINIMUM_SPAN = Math.max(
-  NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN,
-  DETAIL_POLICY.cameraMinimumSpan,
-);
-const NINJAONE_CAPITAL_INTERACTIVE_MINIMUM_SPAN =
-  INTERACTIVE_ART_RESOLVING_MINIMUM_SPAN;
+function interactiveArtResolvingMinimumSpan(
+  viewportSize: readonly [number, number] | null,
+): number {
+  return Math.max(
+    viewportSize
+      ? resolveD05CanonOneToOneMinimumSpan(viewportSize[0])
+      : NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN,
+    DETAIL_POLICY.cameraMinimumSpan,
+  );
+}
 const LIVE_PROJECT_STRUCTURES = Object.freeze(
   PROJECT_STRUCTURES.filter(({ id }) => id !== KAIZEN_NEIGHBORHOOD_OWNER_ID),
 );
@@ -149,7 +158,10 @@ function wheelZoomScale(deltaY: number): number {
   );
 }
 
-function interactiveCameraMinimumSpan(camera: CameraView): number {
+function interactiveCameraMinimumSpan(
+  camera: CameraView,
+  viewportSize: readonly [number, number] | null,
+): number {
   const center = camera.origin.map(
     (value, index) => value + camera.span[index] * 0.5,
   );
@@ -160,9 +172,11 @@ function interactiveCameraMinimumSpan(camera: CameraView): number {
     value >= NINJAONE_CAPITAL_CITY_LAYER_WORLD_ORIGIN[index]
     && value <= capitalMaximum[index]
   ));
+  // Both branches resolve to the same floor today; the capital stays called
+  // out so a capital-specific cap can diverge without touching the free camera.
   return centeredOnCapital
-    ? NINJAONE_CAPITAL_INTERACTIVE_MINIMUM_SPAN
-    : INTERACTIVE_ART_RESOLVING_MINIMUM_SPAN;
+    ? interactiveArtResolvingMinimumSpan(viewportSize)
+    : interactiveArtResolvingMinimumSpan(viewportSize);
 }
 
 function projectPresentationAnchor(project: ProjectStructure) {
@@ -344,6 +358,9 @@ export function WorldScene({
   const [showGrid, setShowGrid] = useState(false);
   const [showLandmarkLabels, setShowLandmarkLabels] = useState(false);
   const [isPageVisible, setIsPageVisible] = useState(true);
+  const [viewportSize, setViewportSize] = useState<[number, number] | null>(
+    null,
+  );
   const [environmentLayerVisibility, setEnvironmentLayerVisibility] = useState(
     DEFAULT_ENVIRONMENT_LAYER_VISIBILITY,
   );
@@ -444,15 +461,52 @@ export function WorldScene({
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) {
+      return;
+    }
+    const measure = () => {
+      const bounds = viewport.getBoundingClientRect();
+      if (bounds.width <= 0 || bounds.height <= 0) {
+        return;
+      }
+      setViewportSize((current) => (
+        current
+          && Math.abs(current[0] - bounds.width) < 0.5
+          && Math.abs(current[1] - bounds.height) < 0.5
+          ? current
+          : [bounds.width, bounds.height]
+      ));
+    };
+    measure();
+    if (typeof ResizeObserver === "undefined") {
+      return;
+    }
+    const observer = new ResizeObserver(measure);
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, []);
+
   const normalizeSceneCamera = useCallback((next: CameraView) => {
     const normalized = normalizeCameraView(
       next,
       DETAIL_POLICY.cameraMinimumSpan,
     );
-    return cityProofView
-      ? constrainNinjaOneCapitalCityProofCamera(cityProofView, normalized)
+    // Layers draw the camera region with preserveAspectRatio="none", so the
+    // span has to carry the viewport's aspect or the world renders stretched.
+    const fitted = viewportSize
+      ? fitCameraViewToViewport(
+        normalized,
+        viewportSize,
+        [WORLD_PLANE.width, WORLD_PLANE.height],
+        DETAIL_POLICY.cameraMinimumSpan,
+      )
       : normalized;
-  }, [cityProofView]);
+    return cityProofView
+      ? constrainNinjaOneCapitalCityProofCamera(cityProofView, fitted)
+      : fitted;
+  }, [cityProofView, viewportSize]);
 
   const commitCamera = useCallback((next: CameraView) => {
     const normalized = normalizeSceneCamera(next);
@@ -466,6 +520,15 @@ export function WorldScene({
       generation: current.generation + 1,
     }));
   }, [normalizeSceneCamera]);
+
+  // A resize changes the required span aspect, so re-run the current view
+  // through the funnel rather than leaving it stretched until the next input.
+  useEffect(() => {
+    if (!viewportSize) {
+      return;
+    }
+    commitCamera(cameraRef.current);
+  }, [commitCamera, viewportSize]);
 
   const queueCamera = useCallback((next: CameraView) => {
     cameraRef.current = normalizeSceneCamera(next);
@@ -553,7 +616,7 @@ export function WorldScene({
       (event.clientY - bounds.top) / Math.max(bounds.height, 1),
     ] as const;
     const scale = wheelZoomScale(event.deltaY);
-    const minimumSpan = interactiveCameraMinimumSpan(publishedCamera);
+    const minimumSpan = interactiveCameraMinimumSpan(publishedCamera, viewportSize);
     const candidate = zoomCameraViewAt(
       publishedCamera,
       anchor,
@@ -567,6 +630,7 @@ export function WorldScene({
     cityProofView,
     publishedCamera,
     queueCamera,
+    viewportSize,
   ]);
 
   const handlePointerDown = useCallback(
@@ -664,12 +728,12 @@ export function WorldScene({
           cameraRef.current,
           [0.5, 0.5],
           event.key === "-" ? 1.18 : 0.84,
-          interactiveCameraMinimumSpan(cameraRef.current),
+          interactiveCameraMinimumSpan(cameraRef.current, viewportSize),
         ));
         setActiveViewId("custom");
       }
     },
-    [cancelFocusAnimation, cityProofView, commitCamera],
+    [cancelFocusAnimation, cityProofView, commitCamera, viewportSize],
   );
 
   return (
@@ -683,7 +747,7 @@ export function WorldScene({
         : cityProofView
           ? "fixed-proof-camera"
           : "world-bounds"}
-      data-camera-minimum-span={interactiveCameraMinimumSpan(camera)}
+      data-camera-minimum-span={interactiveCameraMinimumSpan(camera, viewportSize)}
       data-page-visible={isPageVisible}
       data-capital-lod={detailState.territoryToCapital.toFixed(3)}
       data-capital-layer-inspection={capitalLayerInspection}

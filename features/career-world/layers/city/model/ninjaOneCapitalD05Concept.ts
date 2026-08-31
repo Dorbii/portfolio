@@ -57,6 +57,38 @@ const TIERS = Object.freeze({
 // intermediate derivative occupies the remaining approach to that floor.
 export const NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN = 0.0825;
 
+// 0.0825 above is a bare span, so it only lands on 1:1 for one window width
+// (about 1303px). On a wider viewport the same span magnifies the canon --
+// roughly 1.5x at 1948px -- which is the softness seen when the camera is
+// allowed past the art. Derive the floor from the live viewport instead.
+//
+// The capital envelope's world span is immutable at 0.25 (world-territories-r4,
+// asserted by test) and the master artboard is 1448 wide.
+const MASTER_ARTBOARD_WIDTH = 1448;
+const CAPITAL_ENVELOPE_WORLD_SPAN_X = 0.25;
+const D05_CANON_WORLD_SPAN_X =
+  (registration.destinationMasterBounds[2]
+    - registration.destinationMasterBounds[0])
+  / MASTER_ARTBOARD_WIDTH
+  * CAPITAL_ENVELOPE_WORLD_SPAN_X;
+
+/**
+ * Smallest camera span that still shows the D05 canon at or below 1:1 for a
+ * viewport of `viewportWidth` CSS pixels. Zooming past this only enlarges
+ * pixels no source resolves.
+ */
+export function resolveD05CanonOneToOneMinimumSpan(
+  viewportWidth: number,
+): number {
+  if (!Number.isFinite(viewportWidth) || viewportWidth <= 0) {
+    return NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN;
+  }
+  return Math.min(
+    1,
+    viewportWidth * D05_CANON_WORLD_SPAN_X / TIERS.close.dimensions[0],
+  );
+}
+
 export const NINJAONE_CAPITAL_D05_CONCEPT_TIER_MAXIMUM_SPANS = Object.freeze({
   capital:
     NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN

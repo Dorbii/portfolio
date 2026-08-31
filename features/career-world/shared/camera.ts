@@ -203,3 +203,72 @@ export function cameraViewBox(view: CameraView, dimensions: Pair): string {
     normalized.span[1] * height,
   ].join(" ");
 }
+
+/**
+ * Expand a camera span so its on-screen aspect matches the viewport.
+ *
+ * Layers render the camera region through an SVG viewBox with
+ * `preserveAspectRatio="none"`, so any mismatch between the span's aspect and
+ * the viewport's is drawn as a stretch. Spans are authored as constants (the
+ * capital envelope is `[0.25, 1/3]`) and cannot be correct for every viewport,
+ * and `normalizeCameraView` clamps each axis independently — so one axis can
+ * saturate at 1 while the other keeps growing, skewing the world part-way
+ * through a zoom or an LoD transition.
+ *
+ * Correcting here keeps the requested region visible and only ever reveals
+ * more world, never crops.
+ */
+export function fitCameraViewToViewport(
+  view: CameraView,
+  viewportSize: Pair,
+  planeSize: Pair,
+  minimumSpan = CAMERA_MINIMUM_SPAN,
+): CameraView {
+  const normalized = normalizeCameraView(view, minimumSpan);
+  const [viewportWidth, viewportHeight] = finitePair(
+    viewportSize,
+    "Camera viewport size",
+  );
+  const [planeWidth, planeHeight] = finitePair(planeSize, "Camera plane size");
+  if (viewportWidth <= 0 || viewportHeight <= 0) {
+    return normalized;
+  }
+  if (planeWidth <= 0 || planeHeight <= 0) {
+    throw new RangeError("Camera plane dimensions must be positive.");
+  }
+
+  // Undistorted when spanY / spanX === (planeWidth / planeHeight) / (viewportWidth / viewportHeight).
+  const targetRatio = (planeWidth / planeHeight)
+    / (viewportWidth / viewportHeight);
+  const [spanX, spanY] = normalized.span;
+  let fittedX = spanX;
+  let fittedY = spanY;
+  if (spanY / spanX < targetRatio) {
+    fittedY = spanX * targetRatio;
+  } else {
+    fittedX = spanY / targetRatio;
+  }
+
+  // Expansion can overrun the plane; give back the overrun on the other axis so
+  // the ratio survives wherever the world is large enough to hold it.
+  if (fittedY > 1) {
+    fittedY = 1;
+    fittedX = Math.min(1, fittedY / targetRatio);
+  }
+  if (fittedX > 1) {
+    fittedX = 1;
+    fittedY = Math.min(1, fittedX * targetRatio);
+  }
+
+  const center = normalized.origin.map(
+    (value, index) => value + normalized.span[index] * 0.5,
+  ) as [number, number];
+  const span = [fittedX, fittedY] as [number, number];
+
+  return normalizeCameraView({
+    origin: center.map(
+      (value, index) => value - span[index] * 0.5,
+    ) as [number, number],
+    span,
+  }, minimumSpan);
+}
