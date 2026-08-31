@@ -75,6 +75,19 @@ export const CAREER_WORLD_WATER_REALISM_PROFILE = defineWaterRealismProfile({
   id: "solved-ocean@r1",
   ocean: {
     weather: 1,
-    timeScale: 1,
+    // THE SEA WAS RUNNING AT PLATE SPEED, NOT WORLD SPEED. The owner: "why is
+    // it so fast here." The wave periods come from the tuned plate, where the
+    // primary swell is 170 px of a cliffside close-up -- a few metres of water,
+    // and 2.87 s is right for that. At world scale the same swell is 12 world
+    // px, which the terrain-implied scale (6.8-35.2 m per world px) puts at
+    // 82-422 m, and deep-water dispersion gives a wave that long a period of
+    // 7-16 s. So the sea was moving 2.5x to 5.7x too fast for its own size.
+    //
+    // 0.30 sits just inside the fast end of that band rather than at the
+    // physical middle (which would be 0.23): this lane's standing direction is
+    // that the water must FEEL right rather than be simulation-correct, and a
+    // map wants a sea that is alive. It scales the clock AND the step, so
+    // waves, foam advection and spray all slow together.
+    timeScale: 0.30,
   },
 });
