@@ -153,6 +153,29 @@ exponentially with depth, so a sharp underwater rock reads as wrong.
   fall outside T70's bbox and are water in our bake input. Target list:
   `.codex-tmp/qa/COASTFIX/targets2.json`.
 
+## THIS LANE LIVES IN A WORKTREE
+
+Owner's call, 2026-08-31, after a day of sharing one checkout with the
+terrain/city lane: two agents editing one working tree meant every commit was
+a negotiation and every dev server served somebody else's code.
+
+    worktree   .claude/worktrees/ocean-lane        branch  ocean/lane
+    dev server npm run dev -- --port 3100          captures  --url http://localhost:3100/
+
+Three things that cost an hour to discover, so they are written down:
+
+- The harness's preview_start is PINNED to the launch directory and will
+  happily reuse the main tree's server no matter what the worktree's
+  launch.json says. Verify which tree is being served by writing a marker
+  into public/ and fetching it; do not assume.
+- The worktree needs its OWN node_modules. Junctioning the main tree's makes
+  two vite servers share one dependency-optimize cache.
+- HEAD alone may not run: the shared checkout can work only because of the
+  other lane's uncommitted edits. If the worktree 500s on a missing component,
+  the fix is to move onto their latest commit, not to hunt the component.
+
+Merge back with a normal merge of ocean/lane into codex/career-world-rebuild.
+
 ## REVIEW THE WATER ONLY AT THE CAPITAL COAST
 
 The capital is the only stretch of this world with finished land art, so it is
