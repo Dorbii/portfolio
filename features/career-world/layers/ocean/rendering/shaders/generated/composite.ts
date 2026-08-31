@@ -186,11 +186,11 @@ uniform float uPeriodP, uPeriodS, uPeriodC;
 
 const vec2  WORLD_SIZE   = vec2(1672.0, 941.0);
 const vec2  WORLD_TEXEL  = vec2(0.000598086, 0.001062699);
-const float PHASE_LO     = -20.372680;
-const float PHASE_SPAN   = 385.175849;
-const float PHASE_K0     = 0.53389716;
-const vec2  PHASE_DIR    = vec2(0.58534377, 0.81078522);
-const float FIELD_KMAX   = 6.04055882;
+const float PHASE_LO     = -20.506821;
+const float PHASE_SPAN   = 385.193504;
+const float PHASE_K0     = 0.53402486;
+const vec2  PHASE_DIR    = vec2(0.58534348, 0.81078543);
+const float FIELD_KMAX   = 6.04161596;
 const float FIELD_DMAX   = 7.39338398;
 const float FIELD_FMAX   = 2.40000010;
 const float FIELD_SDFMAX = 32.0000;
