@@ -223,7 +223,11 @@ PRESETS['heavy_crashing_surf'] = dict(
     spread=38.0, groupDepth=0.72, groupScale=0.338, groupAcross=2.2,
     steep=0.94, setMix=0.78, setCycles=2.0, jitter=0.78,
     deepEnd=24.0, shallowEnd=9.0, tealDepth=29.0,
-    breakGamma=0.66, whitecapSteep=0.240,
+    # 0.240 -> 0.30: at 0.240 the slope threshold passed on 19% of deep-water
+    # pixels EVERY frame, and 5.5 s of persistence integrated that into a foam
+    # carpet with no zero left in it -- fresh foam measured above the render
+    # threshold on over half the deep sea. Whitecaps are events, not a field.
+    breakGamma=0.66, whitecapSteep=0.30,
     preBreak=1.40, faceTeal=1.00, lipGain=1.00, foamErodeK=3.6,
     # licMix STAYS 0, and this is why -- the base preset offers 0.85 and every
     # state overrides it off with no reason recorded, so it looks like an obvious
@@ -264,7 +268,21 @@ PRESETS['heavy_crashing_surf'] = dict(
     # heavy_crashing_surf was being matched against long_period_parallel_swell --
     # the darkest, flattest, least foamy of the eight canonical references --
     # and the heavy plates want 9-12% foam coverage where C5 wants 1.84%.
-    injBreak=70.4, injWhitecap=2.12, injShore=20.7,
+    injBreak=70.4, injWhitecap=4.5, injShore=20.7,
+    # The patch gate's threshold was tuned against a broken offline renderer
+    # (ocean_gl never set uInjPatch/uInjPatchScale/uInjCrestRun -- see the fix
+    # there), and at 0.50 it sat BELOW the group envelope's whole range: formEnv
+    # runs p50 1.00 / p99 1.65 over deep water, so the gate was open nearly
+    # everywhere and injection was uniform. 0.85 puts the window inside the
+    # envelope's real variation, so injection follows wave groups; 640 makes a
+    # surviving patch group-sized rather than dash-sized; injWhitecap 2.12 ->
+    # 4.5 so the survivors carry the same total coverage (measured 9.5% against
+    # C3's 9.12% on the match scene, water-masked). crestLineFloor 0.30 -> 0.05:
+    # composite.frag's own comment says a line on every crest everywhere is
+    # hatching, and the floor guaranteed exactly that -- ablation with ALL foam
+    # injection zeroed still showed the full diagonal weave, drawn by the
+    # unconditional stroke floor on every crest of two parallel trains.
+    injPatch=0.85, injPatchScale=640.0, crestLineFloor=0.05,
     sprayLife=1.55, spraySpread=64.0, sprayInject=2.6, sprayGate=0.33, sprayGain=1.05,
     specGain=0.16, sheen=0.034, shadowGain=0.88, crestGain=0.66, troughGain=1.144, transGain=0.72, swash=0.52,
     foamThrFresh=0.154, foamThrOld=0.59, exposure=0.97,

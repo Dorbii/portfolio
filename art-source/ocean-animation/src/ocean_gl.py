@@ -223,6 +223,13 @@ class OceanRenderer:
                   uInjCrestW=float(p.get('injCrestW', 5.0)),
                   uInjCrestLevel=float(p.get('injCrestLevel', 0.35)),
                   uInjCrestBoost=float(p.get('injCrestBoost', 9.0)),
+                  # These three were never set, so every offline render ran with
+                  # them at GL-default 0: recruit off, patch gate wide open,
+                  # patch noise at scale 0 -- while the web export wires the
+                  # preset values in. Offline and live rendered different foam.
+                  uInjCrestRun=float(p.get('injCrestRun', 0.0)),
+                  uInjPatch=float(p.get('injPatch', 0.0)),
+                  uInjPatchScale=float(p.get('injPatchScale', 420.0)),
                   uFirst=1.0 if first else 0.0)
         self.fboFoam[1 - self.cur].use()
         vao.render(moderngl.TRIANGLES)

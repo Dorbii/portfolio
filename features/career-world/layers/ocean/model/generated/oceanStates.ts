@@ -142,7 +142,7 @@ const WAVE_HEAVY_CRASHING_SURF: Readonly<Record<string, OceanUniformValue>> = Ob
   uSteep: 0.94,
   uStokes: 4.2,
   uStokesDeep: 0.18,
-  uWhitecapSteep: 0.24,
+  uWhitecapSteep: 0.3,
 });
 
 const FOAM_CALM_SWELL: Readonly<Record<string, OceanUniformValue>> = Object.freeze({
@@ -193,10 +193,10 @@ const FOAM_HEAVY_CRASHING_SURF: Readonly<Record<string, OceanUniformValue>> = Ob
   uInjCrestRun: 26.0,
   uInjCrestW: 5.0,
   uInjFilament: 0.7,
-  uInjPatch: 0.5,
-  uInjPatchScale: 420.0,
+  uInjPatch: 0.85,
+  uInjPatchScale: 640.0,
   uInjShore: 20.7,
-  uInjWhitecap: 2.12,
+  uInjWhitecap: 4.5,
   uRelax: 4.5,
   uTauFresh: 1.3,
   uTauPersist: 5.5,
@@ -509,7 +509,7 @@ const COMPOSITE_HEAVY_CRASHING_SURF: Readonly<Record<string, OceanUniformValue>>
   uCrestBand: 0.8,
   uCrestGain: 0.66,
   uCrestLevel: 0.55,
-  uCrestLineFloor: 0.3,
+  uCrestLineFloor: 0.05,
   uCrestLineW: 3.8,
   uCrestTeal: 0.11,
   uCrossChop: 1.15,
