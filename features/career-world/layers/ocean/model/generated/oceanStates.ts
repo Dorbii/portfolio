@@ -28,7 +28,7 @@ export const OCEAN_SCROLL_LOOPS = 16;
 // Primary direction and period are the baked solve's and cannot vary.
 export const OCEAN_FAMILIES = Object.freeze({
   primary: Object.freeze({ direction: Object.freeze([0.574, 0.819] as const), period: 2.87 }),
-  secondary: Object.freeze({ direction: Object.freeze([0.719, 0.695] as const), period: 2.05 }),
+  secondary: Object.freeze({ direction: Object.freeze([0.966, 0.259] as const), period: 2.05 }),
   chop: Object.freeze({ direction: Object.freeze([0.375, 0.927] as const), period: 1.2 }),
 });
 
@@ -124,7 +124,7 @@ const WAVE_HEAVY_CRASHING_SURF: Readonly<Record<string, OceanUniformValue>> = Ob
   uAmpC: 2.2,
   uAmpL: 1.55,
   uAmpP: 4.1,
-  uAmpS: 2.35,
+  uAmpS: 3.75,
   uBackwash: 1.9,
   uBreakGamma: 0.66,
   uChopGain: 0.72,

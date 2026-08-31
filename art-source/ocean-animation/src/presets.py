@@ -248,10 +248,24 @@ PRESETS['heavy_crashing_surf'] = dict(
     COMMON,
     title='Heavy crashing surf',
     duration=17.0, loop=17.0, preroll=12.0,
-    families={'primary': ((0.574, 0.819), 2.87),      # L0 ~ 170 px
-              'secondary': ((0.719, 0.695), 2.05),    # L0 ~  87 px
+    # A SEA WITH ONE DIRECTION IS CORDUROY BY CONSTRUCTION. These three trains
+    # used to sit at 55, 44 and 68 degrees -- all within 13 degrees, which is
+    # not three trains but one, and no envelope can rescue a lattice built from
+    # near-parallel components. Real coastal water is swell from one fetch
+    # crossing wind-sea from another, tens of degrees apart, and that crossing
+    # is what makes crests short and their spacing irregular in every reference
+    # the owner has sent. The secondary now arrives 40 degrees off the primary
+    # (both still shoreward), and the chop, whose direction is a blend of the
+    # two, follows. Costs nothing: the web port bakes only the primary and
+    # generates these as plane waves from a runtime direction.
+    families={'primary': ((0.574, 0.819), 2.87),      # L0 ~ 170 px, 55 deg
+              'secondary': ((0.966, 0.259), 2.05),    # L0 ~  87 px, 15 deg
               'chop': ((0.375, 0.927), 1.20)},        # L0 ~  30 px
-    ampP=4.10, ampS=2.35, ampC=2.20, chopGain=0.72,
+    # ampS 2.35 -> 3.75: a crossing train that carries a third of the primary's
+    # energy is not a crossing sea, it is a ripple on one. Measured at the
+    # capital view, raising it takes edge coherence 0.561 -> 0.544 (less
+    # parallel); past ~1.8x the gain flattens, so this is the knee.
+    ampP=4.10, ampS=3.75, ampC=2.20, chopGain=0.72,
     harmM=(1.0, 1.72, 2.95), harmA=(1.0, 0.36, 0.16),
     spread=38.0, groupDepth=0.72, groupScale=0.338, groupAcross=2.2,
     # Group envelope: mostly irregular travelling noise rather than a beat.
