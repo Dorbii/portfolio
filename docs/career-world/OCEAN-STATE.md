@@ -93,12 +93,28 @@ into dark water between distinct white masses; tone p50 56.9 vs C3's 55.8.
 
 ## Open — the owner's direction, and the order I would take it
 
-**The direction (owner, 2026-08-30 night): the sea must fit the LAND's style.**
-The land is an illustration — discrete drawn objects. The sea is a procedural
-field of parallel lines, and no amount of statistics tuning changes its
-language. The open sea wants to read as PAINT: mostly flat dark water, waves
-and foam as few, large, deliberately drawn shapes — the way C3's own painter
-handled open water.
+**The direction (owner, 2026-08-30 night), in his words: "it needs to feel
+real, not be real."** And: "I want waves and crashes, dynamic and variant, but
+it doesn't need the same simulated requirements — it just needs to convey the
+concept." He pointed at the rocky-cove concept art as the water that "always
+looks better even though it may be less realistic": crisp painted FACETS,
+sparkle on saturated blue, discrete drawn shapes. The reference plates are
+hereby demoted: their statistics are diagnostics at most, never acceptance
+tests. Feel is the acceptance test, and the owner's eye is the instrument.
+This retires the entire plate-convergence program this lane spent its first
+sessions on — do not resurrect it.
+
+The concrete composition this implies, partly landed tonight:
+- flat dark pigment between events (`openPaint`, landed `ef3a988`),
+- a HANDFUL of drawn wave events, not a statistical density (landed `873b687`
+  — whitecapSteep 1.95, chosen by a live ladder against his eye, 1.5x the
+  plate-calibrated value),
+- **still to build: the facet-sparkle base** — the cove concept reads as water
+  through crisp glinting facets at a readable scale, and the composite already
+  owns glitter machinery (uGlitter / glintRaw / patchG at composite.frag's
+  specular block) that could carry it at a coarser, painted scale,
+- **still to build: drawn crash events** — big breakers as deliberate shapes
+  with the existing stroke/alongVary machinery, bolder and rarer.
 
 1. **DONE (`ef3a988`): the open sea is paint.** The banding lived in the base
    colour painters, below every gain — composite.frag now gates them all with
