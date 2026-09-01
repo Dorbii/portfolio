@@ -1,9 +1,9 @@
 {
- "solidifiedAt": "2026-09-01T22:00:25.222Z",
+ "solidifiedAt": "2026-09-01T22:48:40.292Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "3480add9adf1e0af",
-  "plan-territory.mjs": "0ad41c5b80815aaf",
+  "cell.mjs": "cb0251b376811650",
+  "plan-territory.mjs": "23ba229648a15383",
   "AGENTS.md": "0d4c3c0fc8f88b87"
  },
  "history": [
@@ -112,6 +112,24 @@
    "hashes": {
     "cell.mjs": "3480add9adf1e0af",
     "plan-territory.mjs": "0ad41c5b80815aaf",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-01T22:43:16.556Z",
+   "reason": "owner directed 2026-09-01 (before the change), his words: 'it should be based on neighbor but we should also set biome areas on the grid so even if its a biome transition it can handle it correctly and with appropriate assets'. Change: plan-territory.mjs emits a biome vocabulary table and a per-cell biome assignment (from the owner-reviewed scenery variance map, with the named moments); cell.mjs requires a biome for every cell and writes a Biome section (vocabulary: ground, rock, trees, water, palette, wonders) and a Transitions section (each orthogonal neighbour's biome; boundaries placed on the cell's outer third, never on the seam) into every packet. The plan moves from gitignored scratch to a committed path beside the sources (closes the durability gap). Controls first.",
+   "hashes": {
+    "cell.mjs": "3480add9adf1e0af",
+    "plan-territory.mjs": "0ad41c5b80815aaf",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-01T22:48:40.293Z",
+   "reason": "owner directed 2026-09-01 (change landed, suite 9/9): biome map on the grid - plan-territory.mjs emits a 10-biome vocabulary table (ground/rock/trees/water/palette/wonders) and a per-cell assignment for all 20 cells from the owner-reviewed variance map (purple field at 1,1; magical gorge at 3,1; shelves lush; coasts, plateaus, moor, dark forest, bench country, quarry), plus the south-border and register rulings in the plan rules; the plan now lives committed at art-source/career-world/l2-land/ninjaone/plan.json (durability gap closed). cell.mjs reads it there, refuses a cell without a biome, and writes Biome and Transitions sections into every packet with the rule that a biome change lives inside the later-authored cell's outer third, never on the seam; the ledger records each cell's biome. Control: the packet test asserts the sections and the authored/unauthored neighbour lines.",
+   "hashes": {
+    "cell.mjs": "cb0251b376811650",
+    "plan-territory.mjs": "23ba229648a15383",
     "AGENTS.md": "0d4c3c0fc8f88b87"
    }
   }

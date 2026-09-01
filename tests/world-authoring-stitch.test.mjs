@@ -196,6 +196,11 @@ test("edit target carries the neighbour's concept paint byte-exact and grey else
   const packet = fs.readFileSync(path.join(ROOT, ".codex-tmp", "authoring", "cells", "c2-1", "packet-c2-1.md"), "utf8");
   assert.match(packet, /EDIT mode/);
   assert.match(packet, /same framing and extent/);
+  // biome map (owner-directed 2026-09-01): vocabulary and transitions in every packet
+  assert.match(packet, /## Biome: /);
+  assert.match(packet, /## Transitions/);
+  assert.match(packet, /\*\*west \(1,1\):\*\* .*authored/, "the authored west neighbour's biome must be named");
+  assert.match(packet, /\*\*east \(3,1\):\*\* .*not yet authored/, "an unauthored neighbour must be marked so");
   // a frontier cell gets no edit target and stays in generate mode
   const log3 = execFileSync(process.execPath, [SCRIPT, "--cell", "3,1", "--dry-run"],
     { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" });

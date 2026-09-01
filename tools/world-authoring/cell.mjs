@@ -43,7 +43,7 @@ import sharp from "sharp";
 sharp.cache(false);
 
 const ROOT = process.cwd();
-const TERRITORY = ".codex-tmp/territory/ninjaone-plan.json";
+const TERRITORY = "art-source/career-world/l2-land/ninjaone/plan.json";   // committed, beside the sources
 const WORK = ".codex-tmp/authoring/cells";
 // one lock per OUTPUT TREE: the invariant is one writer per world, and a
 // relocated test world (L2_OUT_ROOT) is its own world with its own lock
@@ -438,6 +438,14 @@ const plan = JSON.parse(fs.readFileSync(TERRITORY, "utf8"));
 if (col < 0 || row < 0 || col >= plan.grid.cols || row >= plan.grid.rows) {
   die(`cell ${col},${row} is outside the ${plan.grid.cols}x${plan.grid.rows} territory`);
 }
+// biome (owner-directed 2026-09-01): every cell has one, from the plan's map.
+// The packet carries its vocabulary and each neighbour's biome, so a
+// transition cell knows it is one. No biome means the map is incomplete: stop.
+const biomeId = plan.cellBiomes?.[`${col},${row}`];
+const biome = biomeId ? plan.biomes?.[biomeId] : null;
+if (!biome) {
+  die(`no biome assigned for cell ${col},${row} — assign it in plan-territory.mjs (the owner's biome map) and regenerate the plan`);
+}
 if (!describe && !dryRun) {
   die("--describe \"...\" or --describe-file FILE is required.\n"
     + "  This is the one thing only you can supply: what this ground should be,\n"
@@ -482,6 +490,7 @@ const authoredNeighbours = NEIGHBOURS
 console.log(`\n  cell ${id}  (${plan.territory})`);
 console.log(`  ground        ${(CELL_PX / ART * M_PER_WORLDPX).toFixed(1)} m square at ${CM_PER_PX.toFixed(1)} cm/px`);
 console.log(`  generate      ${GEN_PX}x${GEN_PX} px  (keeps ${CELL_PX}, bleeds ${BLEED} into neighbours)`);
+console.log(`  biome         ${biome.name} (${biomeId})`);
 console.log(`  shelf         ${shelf ? `${shelf.id} — ${shelf.role}` : "none"}`);
 console.log(`  rail          ${loopHere ? "loop passes through" : "no loop"}`
   + `${features.length ? ` — ${features.map((f) => f.kind).join(", ")}` : ""}`);
@@ -582,6 +591,22 @@ if (authoredNeighbours.length) {
 const editMode = authoredNeighbours.length > 0;
 const FRAMING_PREAMBLE = "Edit this image in place. The output must be a SQUARE image with exactly the same framing and extent as the input: the painted terrain stays exactly where it is, at the same scale, and the flat grey area is painted in. Do not change the aspect ratio, do not crop, do not zoom, do not extend the canvas beyond the input. Paint the grey area as a seamless continuation of the painted ground so the join is invisible. Keep exactly the same painterly style, palette, brush density, rock shading and view as the existing paint.";
 
+// transitions: a biome change lives INSIDE the later-authored cell, across its
+// outer third on that side, so the biome boundary never lies on a cell seam
+// (where it would coincide with the pixel seam and read twice as hard)
+const transitionLines = [["north", col, row - 1], ["east", col + 1, row], ["south", col, row + 1], ["west", col - 1, row]]
+  .map(([dir, c, r]) => {
+    if (c < 0 || r < 0 || c >= plan.grid.cols || r >= plan.grid.rows) {
+      return `- **${dir}:** territory edge — nothing arrives; end your terrain mid-ground.`;
+    }
+    const nid = plan.cellBiomes?.[`${c},${r}`], nb = nid ? plan.biomes?.[nid] : null;
+    const nName = nb ? nb.name : "unassigned";
+    const authored = !!ledger.cells[`c${c}-${r}`];
+    if (!authored) return `- **${dir} (${c},${r}):** ${nName} — not yet authored: paint ${biome.name} to the edge.`;
+    if (nid === biomeId) return `- **${dir} (${c},${r}):** ${nName} — authored, same biome: continue without change.`;
+    return `- **${dir} (${c},${r}):** ${nName} — authored: its paint arrives as ${nName}; continue it at the edge and change to ${biome.name} across your ${dir} third.`;
+  }).join("\n");
+
 const packet = `# L2 CELL ${id} — ${plan.territory}
 
 Author one cell of the land layer. Terrain only. Quarantine-only: write to
@@ -611,6 +636,30 @@ ${describe || "(dry run — no brief supplied)"}
 ## Territory rules — ${plan.territory}
 
 ${Object.entries(plan.rules).map(([k, v]) => `- **${k}.** ${v}`).join("\n")}
+
+## Biome: ${biome.name} (\`${biomeId}\`)
+
+This is what the ground of this cell IS. The hand (brush, view, flat
+lighting) comes from the neighbours' paint and the canon; the biome sets what
+is painted and how the palette shifts.
+
+- **ground.** ${biome.ground}
+- **rock.** ${biome.rock}
+- **trees.** ${biome.trees}
+- **water.** ${biome.water}
+- **palette.** ${biome.palette}
+- **wonders.** ${biome.wonders}
+
+## Transitions
+
+${transitionLines}
+
+Where a neighbour's paint arrives in a different biome, continue that paint
+at the edge exactly as it arrives and make the change to your own biome
+INSIDE this cell, across the outer third on that side — the biome boundary
+never lies on the cell seam. Where the arriving biome is your own, continue
+without change. Where a neighbour is not authored yet, paint your own biome
+to the edge; that cell will adapt to you when it is authored.
 
 ${shelf ? `## Settlement shelf: ${shelf.id}
 
@@ -1183,6 +1232,7 @@ codex exec \\
     features: features.map((f) => f.kind),
     waterZones: Array.isArray(zones) ? zones.map((z) => z.class) : zones,
     bridged: bridgedInfo.length ? bridgedInfo : undefined,
+    biome: biomeId,
     source: srcDir.replace(/\\/g, "/"),
     stitch: { order: existing?.stitch?.order ?? Object.keys(ledger.cells).length + 1,
       tiles: result.counts.map((c) => c.tiles) },

@@ -12,7 +12,9 @@ import fs from "node:fs";
 // 256px bleed overlaps its neighbours. Boundaries interlock with tabs so the
 // seam network has no straight lines and no four-way junctions.
 
-const OUT = ".codex-tmp/territory/";
+// The plan is what every cell derives from, so it lives beside the cell
+// sources and is committed (it was gitignored scratch until 2026-09-01).
+const OUT = "art-source/career-world/l2-land/ninjaone/";
 fs.mkdirSync(OUT, { recursive: true });
 
 const CELL = 2048;              // kept area, px
@@ -58,6 +60,96 @@ const FEATURES = [
   { at: [0.4, 2.6], kind: "submerged run", note: "line dives and runs beneath the water on the south-west" },
 ];
 
+// Biomes (owner-directed 2026-09-01: "set biome areas on the grid so even if
+// its a biome transition it can handle it correctly and with appropriate
+// assets"). One vocabulary per biome, quoted verbatim into every packet, and
+// one biome per cell from the owner-reviewed scenery variance map. The hand
+// (brush, projection, flat lighting) is territory-wide and comes from the
+// neighbours' paint; the biome sets what is painted and the palette shift.
+const BIOMES = {
+  "bare-plateau": { name: "Bare plateau",
+    ground: "bare pale basalt benches with hexagonal-jointed tops, scree fans, thin wind-scoured grass only in cracks; no meadow",
+    rock: "pale warm basalt, stepped benches and low column walls, talus at every foot",
+    trees: "none on the open plateau; a few dark conifers in gullies",
+    water: "tarns lying in bare rock; thin tall falls off the bench edges",
+    palette: "pale warm greys and creams, cool teal water, sparse grey-green",
+    wonders: "none" },
+  "moor": { name: "Heather moor",
+    ground: "open heather-and-grass moor, wind-scoured, boulders and scrub; heather sparse and subdued, never a carpet",
+    rock: "low basalt outcrops and boulder fields, an occasional column wall",
+    trees: "dark conifers only in gullies and hollows",
+    water: "becks in shallow gullies, small pools",
+    palette: "olive and gold-green, dull violet accents, grey rock",
+    wonders: "none" },
+  "dark-forest": { name: "Dark forest gorge",
+    ground: "dense dark conifer stands on mossy ground, little open ground, flat haze in the gorge",
+    rock: "mossy basalt gorge walls, wet talus",
+    trees: "dense dark conifers, the darkest green in the territory",
+    water: "a gorge stream with falls, pools in shade",
+    palette: "deep greens, near-black under the stands, grey-blue haze",
+    wonders: "none" },
+  "coast-cliff": { name: "Wild coast",
+    ground: "bare basalt benches and talus above sea-cliffs, thin grass, shingle coves; no meadow",
+    rock: "tall columnar sea-cliffs with ledges partway up, stacks",
+    trees: "dark conifers only in gullies",
+    water: "the sea on the seaward edge with surf and wash; an occasional tarn on a shelf",
+    palette: "pale grey rock, teal to deep-blue sea, sparse green",
+    wonders: "none" },
+  "sound-coast": { name: "Sound coast",
+    ground: "bare rock diving into the sound, shingle, thin grass",
+    rock: "low basalt slabs and ledges running on under the water",
+    trees: "none near the shore",
+    water: "the sound (sea) on the seaward edge, clear shallows over slabs",
+    palette: "grey slabs, turquoise shallows to deep teal",
+    wonders: "none" },
+  "quarry": { name: "Construction quarry",
+    ground: "cut benches, quarried faces, spoil fans, a levelled floor; works read from landform only",
+    rock: "fresh pale cut rock and column walls",
+    trees: "a few dark conifers on the rim and in the drainage gully",
+    water: "a flooded pit, the drainage stream, the sea where coastal",
+    palette: "pale cut rock, dust, a thin green rim",
+    wonders: "none" },
+  "mixed-bench": { name: "Bench country",
+    ground: "stepped benches and terraces, scree, moor on the flats",
+    rock: "column walls between benches, talus",
+    trees: "conifer stands on the sheltered benches",
+    water: "becks stepping down the benches",
+    palette: "moor palette with pale rock",
+    wonders: "none" },
+  "lush-shelf": { name: "Settlement shelf",
+    ground: "the richest ground in its neighbourhood: meadow green warmed with gold, glades, flowers allowed here",
+    rock: "low outcrops and natural terraces that a settlement could sit on",
+    trees: "orchard-like conifer stands with open glades",
+    water: "a stream through the shelf, a pool",
+    palette: "luminous gold-green, warm rock",
+    wonders: "none" },
+  "magical-gorge": { name: "Magical gorge (moment)",
+    ground: "a deep gorge with flat mist; the ground around it is moor",
+    rock: "column walls; rock fragments floating above the gorge trailing roots and moss",
+    trees: "dark conifers",
+    water: "a great fall into faintly glowing water",
+    palette: "moor palette plus violet crystal glow and luminous teal",
+    wonders: "floating rock fragments with crystals; self-luminous crystal outcrops that cast no light; faintly glowing water at the fall" },
+  "purple-field": { name: "The purple field (unique)",
+    ground: "a saturated magenta-violet carpet of grass and low bloom on magenta soil filling the whole cell; tufts of pale lavender-blue grass; clumps of gold, orange, red and pale-blue flowering shrubs",
+    rock: "a crystal-crowned knoll rising from the field; low outcrops",
+    trees: "pink-blossom broadleaf trees standing in the field; dark conifers only at the edges",
+    water: "a beck through the field",
+    palette: "saturated magenta-violet ground, high-key and bright, purple as the base and the other hues as accents",
+    wonders: "the crystal knoll; nothing floating" },
+};
+// col,row -> biome (owner-reviewed scenery variance map, 2026-09-01)
+const CELL_BIOMES = {
+  "0,0": "moor", "1,0": "bare-plateau", "2,0": "dark-forest", "3,0": "bare-plateau", "4,0": "lush-shelf",
+  "0,1": "lush-shelf", "1,1": "purple-field", "2,1": "lush-shelf", "3,1": "magical-gorge", "4,1": "coast-cliff",
+  "0,2": "sound-coast", "1,2": "moor", "2,2": "mixed-bench", "3,2": "dark-forest", "4,2": "coast-cliff",
+  "0,3": "sound-coast", "1,3": "lush-shelf", "2,3": "moor", "3,3": "moor", "4,3": "quarry",
+};
+for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+  const b = CELL_BIOMES[`${c},${r}`];
+  if (!b || !BIOMES[b]) throw new Error(`cell ${c},${r} has no valid biome`);
+}
+
 const plan = {
   territory: "ninjaone",
   grid: { cols: COLS, rows: ROWS, cells: COLS * ROWS },
@@ -65,28 +157,39 @@ const plan = {
     groundMetres: +cellMetres.toFixed(1) },
   territoryMetres: [+(COLS * cellMetres).toFixed(0), +(ROWS * cellMetres).toFixed(0)],
   shelves: SHELVES, loop: LOOP, railFeatures: FEATURES,
+  biomes: BIOMES, cellBiomes: CELL_BIOMES,
   rules: {
-    geology: "columnar basalt, bedded and jointed, talus at cliff bases; plateau-and-gorge",
-    vegetation: "conifer in gullies and shelter, thinning on exposed rock; scrub and heather on open ground; crowns 4-7 m",
+    geology: "columnar basalt, bedded and jointed, talus at cliff bases; plateau-and-gorge — columns are a feature where the biome says so, not the ground everywhere",
+    vegetation: "conifer in gullies and shelter, thinning on exposed rock; scrub and heather on open ground; crowns 4-7 m; the biome sets the mix",
     water: "coastal cliff and shingle seaward; inland tarns on shelves draining by falls into gorges",
     buildable: "~1/3 occupiable shelf, separated by gorges and broken ground so settlements read distinct",
     rail: "fantasy railway: tunnels, improbable spans and submerged runs permitted; land supplies the drama, not the gradient. The south-west leg runs SUBMERGED, so that coast must open into water the line can dive beneath.",
-    lighting: "form shading and ambient occlusion only; no directional key, no cast shadows",
+    lighting: "flat: every rock face the same value whichever way it faces; ambient occlusion only; no directional key, no lit side, no cast shadows",
+    southBorder: "OWNER RULING 2026-09-01: NinjaOne and Tanium share BOTH a land and an ocean border. Cells 0,3 and 1,3: the south edge opens into a SOUND (ocean border - the inlet crossing and submerged run live here). Cells 2,3 and 3,3: the south edge is LAND that continues into Tanium territory (land border) - terrain must run to the south edge as solid connecting ground, no coast. Cell 4,3: south-east bay, sea as authored.",
+    register: "OWNER RULING 2026-09-01: epic, fantastical, light-toned fantasy register — luminous and hopeful, never grim; scenery varies by biome so wonders read as wonders",
   },
 };
-fs.writeFileSync(OUT + "ninjaone-plan.json", JSON.stringify(plan, null, 1));
+fs.writeFileSync(OUT + "plan.json", JSON.stringify(plan, null, 1));
 
 // review render
 const S = 240;                    // px per cell in the review image
 const W = COLS * S, H = ROWS * S;
 const svg = [];
 svg.push(`<rect width="${W}" height="${H}" fill="#141821"/>`);
+const BIOME_COLOUR = {
+  "bare-plateau": "#5a5650", "moor": "#4d5a2e", "dark-forest": "#1f3a2a", "coast-cliff": "#3d4f5c",
+  "sound-coast": "#2e5566", "quarry": "#6b6250", "mixed-bench": "#4f5a3c", "lush-shelf": "#5f7a2a",
+  "magical-gorge": "#4a3566", "purple-field": "#7a2f7a",
+};
 for (let r = 0; r < ROWS; r++) {
   for (let c = 0; c < COLS; c++) {
+    const bid = CELL_BIOMES[`${c},${r}`];
     svg.push(`<rect x="${c * S}" y="${r * S}" width="${S}" height="${S}" `
-      + `fill="none" stroke="#2f3946" stroke-width="2"/>`);
-    svg.push(`<text x="${c * S + 8}" y="${r * S + 20}" fill="#4a5666" `
+      + `fill="${BIOME_COLOUR[bid] || "#141821"}" stroke="#2f3946" stroke-width="2"/>`);
+    svg.push(`<text x="${c * S + 8}" y="${r * S + 20}" fill="#c9d2dc" `
       + `font-family="monospace" font-size="14">${c},${r}</text>`);
+    svg.push(`<text x="${c * S + 8}" y="${r * S + S - 12}" fill="#e6ecf2" `
+      + `font-family="Georgia,serif" font-size="14">${bid}</text>`);
   }
 }
 const P = ([c, r]) => [c * S, r * S];
@@ -104,11 +207,13 @@ for (const s of SHELVES) {
   svg.push(`<text x="${x + rad + 6}" y="${y + 5}" fill="#b7f090" font-family="Georgia,serif" font-size="17">${s.id}</text>`);
 }
 await sharp(Buffer.from(`<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">${svg.join("")}</svg>`))
-  .png().toFile(OUT + "ninjaone-plan.png");
+  .png().toFile(OUT + "plan-review.png");
 
 console.log("shelves:");
 for (const s of SHELVES) console.log(`  ${s.id.padEnd(17)} cell ${s.cell.join(",")}  ${s.role}`);
 console.log("\nrail features around the loop:");
 for (const f of FEATURES) console.log(`  ${f.kind.padEnd(20)} ${f.note}`);
-console.log(`\nplan -> ${OUT}ninjaone-plan.json`);
-console.log(`review -> ${OUT}ninjaone-plan.png`);
+console.log("\nbiomes by row:");
+for (let r = 0; r < ROWS; r++) console.log(`  row ${r}: ` + Array.from({ length: COLS }, (_, c) => CELL_BIOMES[`${c},${r}`].padEnd(14)).join(" "));
+console.log(`\nplan -> ${OUT}plan.json`);
+console.log(`review -> ${OUT}plan-review.png`);
