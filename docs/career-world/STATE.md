@@ -71,3 +71,281 @@ Only Steve accepts (F10); two strikes → reframe; F17 discard-don't-repair; F21
 ## Dispatch discipline
 
 `codex exec --sandbox workspace-write -c model=gpt-5.6-{sol|terra} -c model_reasoning_effort=high "$(cat <packet>)" < /dev/null > <log> 2>&1` from REPO ROOT (a stray `cd` once silently killed a dispatch); verify the log grew past the banner; watch for the `tokens used` completion marker (never poll the process list). Bundled Node (F5): `~/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node.exe`. Quarantine-only until director review + owner acceptance. HEAD advances concurrently (ocean program) — re-establish red baselines per lane; known pre-existing red: D05 hash mismatch at `tests/ninjaone-capital-city-lod-routing.test.mjs:847`.
+
+---
+
+## L2 land regeneration programme (owner-approved 2026-08-31)
+
+Supersedes the "patch the tiles" approach. Steve: *"start at L2 at the closest
+zoom levels generate it and try to keep the same footprint and then go from
+there"* and *"fine detail first then max LoD last that way we stop drifting on
+land shape and scale."*
+
+### Why the previous approach could not work
+
+The site tiles are **20.0 px per world px**; D05's canon is **9.4**; the 4x
+relief plate they are generated from is **4.0**. So the tiles are 2.1x finer
+than the capital art but every pixel in them derives from a source 2.4x
+coarser than it. That 5x information deficit is why "site tier adds nothing
+over an upscale of its own capital tier" measured 1.43-1.57 against a median
+of 12.28. No amount of restoring or sharpening authors topography that was
+never drawn.
+
+The derivation also ran the wrong way: coarse plate enlarged into fine tiles,
+with coarse tiers authored independently. That is the direct cause of the
+tier-to-tier drift, the Y=815 content break, and the four-way coastline
+disagreement.
+
+### The programme
+
+1. **Author L2 at the finest tier**, tile by tile, conditioned on:
+   - the DEM crop for that tile as landform armature (verified usable: the DEM
+     is 1.00 px per world px, giving **70x59 samples inside one tile**, sd
+     20-28, mean gradient 5.1-5.7 across land),
+   - the slope field, so cliffs land where the ground is actually steep,
+   - **pixel-anchored D05 canon crops for style**. Verbal style prompting is
+     banned; it failed four consecutive times on D06.
+2. **Generate each tile as a continuation of its finished neighbours' edges**,
+   in raster order. Independently generated tiles do not join - that is the
+   Y=815 break multiplied by every tile boundary, and it is the single failure
+   mode most likely to sink this.
+3. **Derive every coarser tier by reduction**: site -> capital -> territory ->
+   world. Never author a coarse tier directly. LoD then becomes correct by
+   construction rather than symbolic.
+4. **Publish the resulting footprint to the ocean lane.** The coastline itself
+   is now OCEAN's authority; land hands over a boundary and stops maintaining a
+   coast that can drift. Footprint is "close enough", not defended per pixel.
+
+### Pinned constraints
+
+- **Neutral lighting.** Form shading and ambient occlusion yes; directional
+  cast shadows and any implied sun angle NO - those belong to `L2_3 Dynamic
+  terrain shadows`, which is why it sits PENDING in the layer registry.
+- **Stylised toward D05**, not photoreal.
+- **D05 remains the scale anchor** and does not move. Author at D05's density
+  (9.4 px/world px) so nothing out-resolves the capital.
+- **2x2 pilot before scale.** Four adjacent tiles must prove seams, style match
+  against D05, and believable landform from the armature. ~157 land tiles total;
+  finding a seam failure at four is cheap, at 157 is not.
+
+### Retired by this plan
+
+- The 9,733-px ocean authority flip and its de-speckle condition. Under the new
+  coastline ownership the ocean derives its own coast; land does not edit
+  world-land-mask-r4 on their behalf.
+
+### World scale reset (owner-approved 2026-08-31)
+
+The root cause of "scale and perspective are a constant issue", measured:
+
+- 0.4503 m per world pixel (from 0.13 m per master unit).
+- The ENTIRE world plane was 753 m x 424 m.
+- The "great island" was 226 m across; a mountain range radius was 23 m.
+- D05's capital is 125 m across -- a sane village core -- so the capital
+  occupied 55% of its own island and was dwarfed by 23 m "mountains".
+
+The capital was never too big. THE GEOGRAPHY WAS DRAWN AT BUILDING SCALE.
+
+Approved fix: **world plane x2, land fraction 2/3**. That yields a ~640 m
+great island with ~90 m ridges against a 20 m cathedral (~4.5:1, reads as a
+town beneath hills) and costs ~88 regions to author. x3 reads better at 7:1 but
+costs ~210 regions and was judged not worth tripling the work.
+
+Every existing registration is re-derived: D05 master bounds, territory
+envelopes, LoD span constants. Owner accepted there is no going back halfway.
+
+### Territory budget
+
+Sized by project count, capital weighted double (125 m vs a ~60 m project city).
+
+| territory   | projects | regions | land approx |
+|-------------|----------|---------|-------------|
+| NinjaOne    | 4        | 21      | ~450 m      |
+| Tanium      | 4        | 21      | ~450 m      |
+| Column      | 2        | 14      | ~367 m      |
+| ACE         | 2        | 14      | ~367 m      |
+| Independent | 3        | 18      | ~416 m      |
+
+Landmass A: NinjaOne north + Tanium south (42). Landmass B: Column + ACE (28).
+Landmass C: Independent, isolated (18).
+
+Independent is deliberately LARGER than Column and ACE — it holds Steve's
+personal projects. Its character is mad-scientist / tinkerer / steampunk
+fantasy, and that must read in the LANDFORM: crags, gorges, waterfalls, odd
+rock to hang contraptions from — not gentle countryside.
+
+A region is an authoring unit, not a place: 218 x 218 world px, about
+98 m x 98 m of ground, output as one 2060 x 2060 image. It is simply the
+largest patch one generation pass can draw at full detail.
+
+### Standing land-design direction
+
+- Rivers and lakes throughout, not only coastline. Interior without water is
+  the least interesting ground in the world to fly over.
+- Topography must be interesting AND buildable — benches, terraces, gorges,
+  waterfalls. Flat plains are a failure, not a neutral outcome.
+- Neutral lighting: form shading and ambient occlusion only, no directional
+  key, no cast shadows. Those belong to `L2_3`.
+- Style anchored on the neutral TERRAIN tiles (1.18-1.28x directionality), not
+  D05's canon (1.51-1.57x, one baked sun at 220 deg).
+
+### NinjaOne territory rule set (owner-approved 2026-08-31)
+
+First territory to be authored. Rules are per-territory; do NOT generalise these
+to other landmasses without the owner setting them.
+
+- **Geology.** Columnar basalt — bedded, jointed, talus collecting at cliff
+  bases. Plateau-and-gorge country, not rolling hills. Established by the L2
+  seed region, which the owner accepted.
+- **Vegetation.** Conifer gathering in gullies and on sheltered slopes, thinning
+  on exposed rock and ridge tops; scrub and heather on open ground. Crowns
+  4-7 m (83-146 px at 4.8 cm/px).
+- **Water.** Coastal cliffs and shingle on the seaward edge; inland, tarns on
+  plateau shelves draining by falls into gorges.
+- **Buildable.** Roughly one third occupiable: coherent shelves able to hold a
+  capital plus four project towns, separated by gorges and broken ground so the
+  settlements read as distinct places.
+- **Rail corridor.** A route linking all five settlement shelves. **This is a
+  FANTASY railway and is not bound by adhesion physics** — owner ruling: *"it
+  can go through mountains, its fantasy so it can even go under water or do
+  some cool shit. Its a fun project not a science one."* Tunnels, submerged
+  stretches, improbable spans and spirals are all permitted and encouraged.
+  A previously recorded `<=3% sustained gradient` rule was DIRECTOR-INVENTED and
+  is retracted.
+
+  The terrain requirement is therefore about OPPORTUNITY, not feasibility: the
+  land should offer good rail theatre — a gorge worth bridging, a headland worth
+  tunnelling, a shelf to run a line along, water to cross. L2 authors the
+  terrain; track, tunnels, viaducts and any submerged section are built
+  structures belonging to the infrastructure layer.
+
+### Owner content: the railway
+
+The train is **Circle CI**. The main station is in the NinjaOne capital.
+
+**Topology: a closed double-track loop** — two rails, one each way, running out
+from the capital, calling at each project city, and returning. Owner: *"just
+have a 2 rail come and go loop."* Not hub-and-spoke; a single continuous circuit
+serving all five settlements.
+
+Terrain consequence: the loop must be able to leave the capital and come back
+to it, so the capital shelf needs TWO usable approaches rather than several, and
+the circuit has to close. Since the railway may tunnel or cross water, the
+requirement is that the route be INTERESTING rather than gentle — the loop
+should collect a gorge span, a tunnelled headland, a cliff run and a water
+crossing on its way round. Plan the circuit and the five shelves it serves
+before any cells are generated.
+
+This inverts the D06 failure directly: D06 had to force a station onto terrain
+that could not support one, and its best layout found 0.055% buildable ground.
+Land is now upstream of the city, so the ground is authored to carry the railway.
+
+### Water authoring contract for L2 cells
+
+L2 may PAINT water in the concept, but must also be able to REMOVE it. Each cell
+produces three artefacts:
+
+1. `concept` — water painted, composition as intended. This is the reference the
+   ocean (L1) and inland-water (L3) agents work from.
+2. `l2` — the same art with water zones alpha-0. This is what ships in the land
+   layer.
+3. `water-footprint` — mask plus classification per zone (coast, lake, stream,
+   fall) so L3 renders rather than infers.
+
+Gate: after removal, verify **no residual water-hued pixels** survive along the
+footprint edge. D05's ocean-removal left blue fringes and the repo still carries
+`residual-blue` artefacts from chasing them.
+
+### Standing rule: remove dead code and legacy assets as you go
+
+Owner instruction, 2026-09-01: *"we need to remove all the dead code and legacy
+code and assets it finds or creates along the way. We need to clean the repo for
+a change this large and doing it while working is easiest since you can check
+and verify both the removal and the code replacing it."*
+
+The L2 rebuild replaces terrain art, the LoD chain, the tile pipeline and the
+district layouts. That obsoletes a great deal, and the cheapest moment to remove
+each piece is **while its replacement is in front of you** — that is the only
+point at which you can verify both sides of the swap. Deferred cleanup becomes
+archaeology: nobody later can tell whether a file is dead or load-bearing.
+
+**Do this as part of the work, not as a separate pass:**
+
+- When a replacement lands, delete what it replaced in the same change. Do not
+  leave the old asset "just in case" — that is what git history is for.
+- When you find dead code or an orphaned asset while working, remove it then,
+  even if unrelated to the current task. Note it in the commit message.
+- Verify BOTH sides: prove the new path works and prove nothing still references
+  the old one. Grep for references before deleting; run the focused tests after.
+- Delete the scaffolding you create. Probes, one-off scripts, quarantine
+  candidates and superseded evidence are not deliverables. `.codex-tmp` is
+  gitignored precisely so scratch never becomes legacy.
+- If something looks dead but you cannot prove it, say so rather than deleting
+  on a hunch, and rather than silently leaving it.
+
+**Already known to be obsolete or obsolescent** (verify before removing):
+
+- The shoreline-erosion change in `build-career-world-land-stream-tiles.py` and
+  the v3 coast fill — both superseded by the L2 rebuild, since regenerated art
+  will not derive from the relief plate at all.
+- The `d05-canon-ocean-removal-*` and `residual-blue` artefact families, once
+  the new per-cell water contract replaces them.
+- D06-era scripts, manifests and proof assets left behind by the district
+  removal.
+- Old LoD tier assets once tiers are derived by reduction rather than authored.
+- Superseded terrain plates once cells become the source of truth.
+
+Do not remove anything under `tools/world-authoring/` — that directory is
+solidified and changes there need owner approval first. See its `AGENTS.md`.
+
+### Pipeline status — 2026-09-01 session (stitch landed, first cell authored)
+
+- **Stitch-and-propagate LANDED and verified** (commit `a72f74f`, owner-approved
+  dispatch recorded in `solidified.json`). `cell.mjs` now: gates → copies
+  artefacts to `art-source/career-world/l2-land/<territory>/<id>/` → recomputes
+  every dirty tile FROM SOURCES (deterministic tab-seam ownership: corner
+  jitter 64 px, tapered wiggle 64 px, 8 px feather; normalized weighted average
+  in premultiplied space) → lanczos3 2:1 reductions through 7 levels →
+  records the cell in the manifest-ledger
+  `manifests/terrain-l2-ninjaone-r1.json`. Re-stitching is byte-idempotent, an
+  interrupted stitch heals on re-run, tiles are lossless webp. Tile tree:
+  `tiles/l2-ninjaone-r1/L{0..6}/{x}-{y}.webp`, territory-local; world
+  registration deliberately pending the scale-reset re-derivation. No runtime
+  consumes the tree yet — serving is a future lane.
+- **Control suite ran FIRST**: `tests/world-authoring-stitch.test.mjs` (5/5) —
+  alignment, bleed, gate blocking, seam ownership/blend, idempotence, exact
+  pyramid reduction, all against computable expected bytes. It caught libvips
+  retaining Windows file handles over tiles the stitch rewrites (fixed:
+  `sharp.cache(false)`; would have corrupted the first neighbour stitch) and a
+  false-FAIL mode of the isotropy gate on textureless synthetic input.
+  Reduction kernel MEASURED: lanczos3 flattest luma over 6 halvings (drift
+  0.1); the old test's "box" was nearest-neighbour decimation, whose
+  detail-retention score rewards aliasing.
+- **Cell c4-3 (construction zone) AUTHORED, GATED, STITCHED** — the first real
+  cell. Gates: isotropy `1.209`, land `74.2%`, water-removed residual `0%`,
+  fringe `0.0%` (reported-only this cell; now calibrated — harden to `<1%`
+  from the next cell). `124` tiles written (`81/25/9/4/2/2/1` by level),
+  matching predicted geometry exactly. Style anchored to the seed by file
+  reference — side-by-side verified, NO style drift (the failure that killed
+  four D06 attempts did not recur). Water zones classified
+  coast/lake/stream/fall. Sea takes the E and S edges and wraps the SW corner;
+  the drainage stream crosses the N edge, so **c4-2 must continue it**. The
+  cliff-run ledge is continuous but `6-8 m` wide in stretches vs the `8-12 m`
+  in the director's brief — a director number, not an owner rule; the rail
+  lane may widen with added structure (land rule permits adding).
+- The accepted L2 seed moved from scratch into
+  `art-source/career-world/l2-land/ninjaone/seed/` as the style canon cells
+  reference. Superseded `.codex-tmp/authoring/cell.mjs` copy deleted.
+- **Costs measured**: tiles ~`68 KB` avg (8.4 MB for this cell's 124); cell
+  sources ~`35 MB` PNG each → ~`700 MB`/territory. Consider lossless-webp
+  sources (pixel-exact, roughly half) — needs owner approval since cell.mjs's
+  expected filenames are solidified.
+- **NEXT: author c3-3 (west) or c4-2 (north)** — the first cell against a real
+  authored neighbour, to prove the seam + conditioning path (context crops and
+  binding maps are wired; only the frontier path has run live). Then proceed by
+  adjacency toward the capital (2,1). Review artefacts for c4-3 in
+  `.codex-tmp/dir-stitch/preview-*.png`.
+- **Unresolved, owner call**: the `407` uncommitted stream-r3 modifications in
+  this worktree (shoreline-erosion re-bake + v3 coast fill, both declared
+  obsolescent above) — commit as an interim fix for the live old-world serving,
+  or discard. Left untouched this session.

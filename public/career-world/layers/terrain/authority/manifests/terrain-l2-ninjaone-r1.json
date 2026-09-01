@@ -1,0 +1,111 @@
+{
+ "format": "l2-cell-pyramid",
+ "territory": "ninjaone",
+ "contract": {
+  "keptPx": 2048,
+  "bleedPx": 256,
+  "generatedPx": 2560,
+  "artPxPerWorldPx": 9.45,
+  "mPerWorldPx": 0.4503,
+  "tilePx": 256,
+  "levels": 7,
+  "reduction": "lanczos3, premultiplied, chained exact 2:1",
+  "seam": {
+   "cornerJitterPx": 64,
+   "wigglePx": 64,
+   "featherPx": 8
+  }
+ },
+ "gridPx": [
+  10240,
+  8192
+ ],
+ "levelTiles": [
+  [
+   40,
+   32
+  ],
+  [
+   20,
+   16
+  ],
+  [
+   10,
+   8
+  ],
+  [
+   5,
+   4
+  ],
+  [
+   3,
+   2
+  ],
+  [
+   2,
+   1
+  ],
+  [
+   1,
+   1
+  ]
+ ],
+ "tilePath": "L{level}/{x}-{y}.webp",
+ "registration": {
+  "status": "territory-local; world placement pending the world-scale-reset re-derivation"
+ },
+ "cells": {
+  "c4-3": {
+   "authoredAt": "2026-09-01T06:05:03.424Z",
+   "describe": "**Style canon (binding):** `art-source/career-world/l2-land/ninjaone/seed/L2-seed-region-r1.png`\nis the accepted look of this world's terrain. Open it and study it before\npainting. Same palette register, same columnar-basalt rendering with bedded\njoints and talus, same conifer treatment and crown scale, same painterly\ndensity. Your cell must read as MORE OF THAT WORLD, not a new interpretation.\nAn",
+   "gates": [
+    {
+     "name": "lighting isotropy",
+     "value": 1.209,
+     "pass": true,
+     "note": "must stay near-uniform; concentration on one axis means a baked sun"
+    },
+    {
+     "name": "land coverage",
+     "value": "74.2%",
+     "pass": true
+    },
+    {
+     "name": "water removed",
+     "value": "0%",
+     "pass": true,
+     "note": "opaque paint surviving inside the delivered water zones"
+    },
+    {
+     "name": "water fringe",
+     "value": "0% (reported, not yet gating)",
+     "pass": true,
+     "note": "blue-leaning opaque pixels in the 6px ring outside water zones"
+    }
+   ],
+   "shelf": "construction",
+   "features": [
+    "cliff run"
+   ],
+   "waterZones": [
+    "coast",
+    "lake",
+    "stream",
+    "fall"
+   ],
+   "source": "art-source/career-world/l2-land/ninjaone/c4-3",
+   "stitch": {
+    "order": 1,
+    "tiles": [
+     81,
+     25,
+     9,
+     4,
+     2,
+     2,
+     1
+    ]
+   }
+  }
+ }
+}
