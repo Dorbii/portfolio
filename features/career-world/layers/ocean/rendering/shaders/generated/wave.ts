@@ -413,7 +413,7 @@ uniform float uSecVis, uChopVis;
 uniform float uFlowScale;   // tuned px/s -> screen px/s for the advected fields
 uniform float uShortSurf;   // how much of the short_ trains survives the surf zone
 uniform float uSwashBreak;  // how hard the run-up wash counts as breaking
-uniform float uCrossForm, uCrossFormAmp;  // a second tonal train, unioned with the first
+uniform float uCrossForm, uCrossFormAmp, uCrossFormK;  // a second tonal train, soft-maxed with the first
 // And the same rule for BREAKERS: a breaking dash is a few tens of tuned px
 // long_, and on the capital's wide shallow shelf the deep-water attenuation
 // never applies (it is depth-gated on purpose). At map zooms every crest on
@@ -1073,7 +1073,24 @@ void main()
     float wS0 = 6.28318530718 / uPeriodS;
     wS0 = 6.28318530718 * max(1.0, floor(wS0 * uLoop / 6.28318530718 + 0.5)) / uLoop;
     float hFormB = cos(SS + bend * 0.6 - wS0 * uTime) * formEnv * uCrossFormAmp;
-    hForm = mix(hForm, (abs(hFormB) > abs(hForm)) ? hFormB : hForm, uCrossForm);
+    // SOFT-max, not a hard one. '(|B| > |A|) ? B : A' is discontinuous -- where
+    // the two trains are comparable the choice flips from pixel to pixel, and
+    // every term downstream takes a gradient or a contour of this_ field, so the
+    // sea went salt-and-pepper within one export. Weighting each train by its
+    // own magnitude keeps the same behaviour (the stronger train wins, both
+    // crests and troughs survive) while staying continuous everywhere:
+    //
+    //     (A|A|^k + B|B|^k) / (|A|^k + |B|^k)
+    //
+    // which is what finally breaks the even spacing two viewers have now
+    // called out. One phase field can only put its level sets one wavelength
+    // apart, forever; two at different wavelengths and 40 degrees apart
+    // interleave irregularly, and the soft-max lets them do that without
+    // shredding either one.
+    float wA = pow(abs(hForm), uCrossFormK);
+    float wB = pow(abs(hFormB), uCrossFormK);
+    float hFormMix = (hForm * wA + hFormB * wB) / max(wA + wB, 1e-4);
+    hForm = mix(hForm, hFormMix, uCrossForm);
     // same crest/trough asymmetry the height field carries
     hForm = hForm + uSteep * 0.45 * (hForm * hForm * sign(hForm) - hForm);
     // hForm is built straight from the phase field rather than from the summed

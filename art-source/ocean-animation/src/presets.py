@@ -123,7 +123,7 @@ COMMON = dict(
     # The paint pass (composite.frag). 0 = off; the live state turns it on.
     paintMix=0.0, paintBands=6.0, paintEdge=0.28, paintEdgeW=1.8, foamEdge=0.0, crestGroup=0.0,
     # The seabed seen through the water; 0 = off.
-    seabedMix=0.0, seabedDepth=20.0, seabedScale=95.0, foamRead=1.0, shortSurf=1.0, lineGroup=0.0, shoreFloor=0.30, fineSparse=0.0, fineSparseMix=0.0, openSpray=0.0, openGate=0.34, swashBreak=0.85, crossForm=0.0, crossFormAmp=0.85,
+    seabedMix=0.0, seabedDepth=20.0, seabedScale=95.0, foamRead=1.0, foamWide=1.0, shortSurf=1.0, lineGroup=0.0, shoreFloor=0.30, fineSparse=0.0, fineSparseMix=0.0, openSpray=0.0, openGate=0.34, swashBreak=0.85, crossForm=0.0, crossFormAmp=0.85, crossFormK=3.0,
     # How far deep water reaches toward the abyss colour. See composite.frag.
     abyssMix=0.95,
     # Primary-family harmonics. Chosen by the Stage-1 crest tracker, not by eye:
@@ -155,7 +155,20 @@ COMMON = dict(
     shadeSmooth=5.0, shadeSmoothMix=1.0,
     # Variance in the DRAWN wave form: bend makes crests curve, group makes them
     # wax and wane along their length so they read as separate strokes.
-    formBend=0.70, formGroup=0.85, formFine=0.42,
+    # formBend 0.70 -> 4.2. THIS is how the wave spacing stops being uniform,
+    # and it is the owner's idea in the one form this codebase has measured as
+    # safe. He asked for finite crests from spawn points that interfere; the
+    # literature agrees crests should be short, but this file also measured
+    # that summing decorrelated trains gives interference MOTTLE, not sea, and
+    # two attempts at a second tonal train today failed exactly that way.
+    #
+    # A coarse phase BEND on a SINGLE train is the exception the file already
+    # documents ("only a single train survives bending"). Its gradient adds to
+    # the local wavenumber, so spacing varies from place to place while every
+    # crest stays a smooth curve. Measured at the wide camera, band coherence
+    # 0.60 -> 0.47 with band energy held (23.2 -> 22.7): the stripes bend and
+    # their spacing varies, without the sea turning to mottle.
+    formBend=4.2, formGroup=0.85, formFine=0.42,
     sprayRise=26.0, sprayFall=16.0,
     # Fraction of the shoreward Stokes drift surviving in deep water. See wave.frag.
     stokesDeep=0.18,
@@ -444,7 +457,7 @@ PRESETS['heavy_crashing_surf'] = dict(
     # and only as much read-smoothing as it takes to keep the boundary a curve
     # (foamRead 1.8 -> 0.9). Foam then has edges and internal structure, which
     # is what separates churned water from a cloud.
-    foamRead=0.9, foamSoft=0.046, foamErodeK=2.5, laceScale=48.0,
+    foamRead=0.9, foamSoft=0.046, foamErodeK=2.5, laceScale=48.0, foamWide=0.35,
     shortSurf=0.22, lineGroup=1.0, shoreFloor=0.07,
     # Fine filigree on roughly a third of the water, not all of it.
     fineSparse=0.52, fineSparseMix=1.0,
@@ -459,7 +472,17 @@ PRESETS['heavy_crashing_surf'] = dict(
     # made the water super pixelated"). If this is retried, it must be a smooth
     # soft-max -- (A|A|^k + B|B|^k)/(|A|^k + |B|^k) -- which favours the more
     # extreme train while staying continuous everywhere.
-    crossForm=0.0, crossFormAmp=0.85,
+    # crossForm is OFF, and this is its SECOND failure -- do not try a third
+    # time without a new idea. The diagnosis is still right (one phase field
+    # puts its level sets exactly one wavelength apart, so only a second train
+    # can break the spacing) but adding one to hForm does not deliver it. The
+    # hard union flipped pixel to pixel and made salt-and-pepper; the smooth
+    # soft-max, which fixed that honestly, produced "still uniformed but messy"
+    # and brought the grey cloud blobs back -- a second set of crests adds
+    # material without changing the RHYTHM, because both trains are still
+    # perfectly periodic. Breaking the rhythm needs the spacing itself to vary,
+    # which means the phase field, not another cosine on top of it.
+    crossForm=0.0, crossFormAmp=0.85, crossFormK=3.0,
     # THE FOAM SPECKLE WAS THE CARVE, not the coverage. Reading the foam field
     # smoothed helped a little and no more, because the erosion that follows it
     # -- a lace ridge evaluated per pixel at 40 px -- puts the pixel structure
@@ -487,7 +510,7 @@ PRESETS['heavy_crashing_surf'] = dict(
     # 20, and no amount of troughGain or abyssMix could reach it -- swept to the
     # limit it stopped at p50 68.5, because the floor is the palette itself.
     palette=dict(abyss=hx('#07192b'), deep=hx('#0c2a40'), mid=hx('#143d58'),
-                 shallow=hx('#1d6b74'), sky=hx('#74abc9'), foamThin=hx('#9fb4bc'), foamBody=hx('#e4edf1'),
+                 shallow=hx('#1d6b74'), sky=hx('#74abc9'), foamThin=hx('#86c2cf'), foamBody=hx('#e4edf1'),
                  foamDense=hx('#edf3f3'), sun=hx('#fff4de')),
 )
 

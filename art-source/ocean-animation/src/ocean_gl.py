@@ -188,6 +188,7 @@ class OceanRenderer:
                   uSwashBreak=float(p.get('swashBreak', 0.85)),
                   uCrossForm=float(p.get('crossForm', 0.0)),
                   uCrossFormAmp=float(p.get('crossFormAmp', 0.85)),
+                  uCrossFormK=float(p.get('crossFormK', 3.0)),
                   uShoreFloor=float(p.get('shoreFloor', 0.30)),
                   # The live layer fades this with the camera; the plate is fixed,
                   # so 1 -- unless something is deliberately rendering what the
@@ -292,6 +293,7 @@ class OceanRenderer:
                   uCrestGroup=float(p.get('crestGroup', 0.0)),
                   uSeabedMix=float(p.get('seabedMix', 0.0)),
                   uFoamRead=float(p.get('foamRead', 1.0)),
+                  uFoamWide=float(p.get('foamWide', 1.0)),
                   uLineGroup=float(p.get('lineGroup', 0.0)),
                   uFineSparse=float(p.get('fineSparse', 0.0)),
                   uFineSparseMix=float(p.get('fineSparseMix', 0.0)),

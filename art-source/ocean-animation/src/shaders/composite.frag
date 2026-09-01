@@ -33,6 +33,7 @@ uniform float uFoamEdge;    // drawn rim around every foam shape
 uniform float uCrestGroup;  // how far per-crest painting is gated by the group envelope
 uniform float uSeabedMix, uSeabedDepth, uSeabedScale;  // the bottom, seen through the water
 uniform float uFoamRead;    // radius (px) the foam field is read at, so its edges are curves
+uniform float uFoamWide;    // how much open-water foam survives when breakers are unresolvable
 uniform float uLineGroup;   // how far the crest-line floor is chosen by the group envelope
 uniform float uFineSparse, uFineSparseMix;  // where the fine foam filigree is allowed at all
 uniform float uSprayGain;
@@ -1080,6 +1081,14 @@ void main()
     thrF *= mix(1.0 + uRegionFoam, 1.0 - uRegionFoam, regionE);
     float carved = cover * (1.0 - uFoamErodeK * erode * clamp(carve * 1.15 - 0.10, 0.0, 1.0));
     float foamA = sstep(thrF, thrF + uFoamSoft, carved);
+    // Foam is MOST of what the sea shows at wide zooms -- measured at span
+    // 0.45, killing injection takes band energy 23.6 -> 16.8, more than the
+    // wave field and the tone together. That is the wrong balance for a map:
+    // from altitude a sea is colour, a slow mottle, and surf on the shore.
+    // Thin the open-water foam as breakers stop being resolvable, while the
+    // coast keeps its ribbon (surfNear), which is the one white a wide shot
+    // should have.
+    foamA *= mix(uFoamWide, 1.0, max(uBreakVis, surfZone));
     // PAINT THE FOAM, not just the water. A soft threshold on a carved field
     // gives a DITHERED boundary -- the single biggest reason the sea still
     // read as noise after the water body was painted. Painted foam is a shape:
