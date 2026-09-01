@@ -1073,8 +1073,19 @@ export class WaterSurfaceRenderer {
     // 87% and erased "a fine diagonal hatching over the entire ocean". A
     // first pass used 8..18 for both, which left the secondary two-thirds on
     // at exactly that camera; the owner's screenshots found it immediately.
-    this.secVis = smoothstep(16, 32, tunedWavelength(OCEAN_FAMILIES.secondary.period) * zc);
-    this.chopVis = smoothstep(10, 22, tunedWavelength(OCEAN_FAMILIES.chop.period) * zc);
+    // These bands were set to kill the capital-tier crosshatch, and they went
+    // too far: at the owner's own viewing zoom they left the secondary at 42%
+    // and the chop at ZERO, so the sea was one long train and nothing else --
+    // "lots of differently spaced long waves, you need a mix of long short
+    // waves and direction". A sea reads as a sea because several lengths at
+    // several angles are present at once; removing the short ones to stop them
+    // aliasing removes the mix along with the alias.
+    //
+    // The fabric they were fighting is handled properly now by rarity and by
+    // the paint gate, so these can open up to where the waves are genuinely
+    // sub-pixel: the secondary is full by 16 screen px a wave, the chop by 11.
+    this.secVis = smoothstep(8, 16, tunedWavelength(OCEAN_FAMILIES.secondary.period) * zc);
+    this.chopVis = smoothstep(5, 11, tunedWavelength(OCEAN_FAMILIES.chop.period) * zc);
     // A breaking dash is ~60 tuned px of whitewater. On the capital's wide
     // shallow shelf the deep-water attenuation never applies (depth-gated by
     // design), so at map zooms every shelf crest broke in 5-10 screen-px

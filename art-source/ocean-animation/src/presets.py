@@ -168,7 +168,16 @@ COMMON = dict(
     # crest stays a smooth curve. Measured at the wide camera, band coherence
     # 0.60 -> 0.47 with band energy held (23.2 -> 22.7): the stripes bend and
     # their spacing varies, without the sea turning to mottle.
-    formBend=4.2, formGroup=0.85, formFine=0.42,
+    # REVERTED to 0.70. The bend does lower the striping METRIC (band coherence
+    # 0.60 -> 0.47) and the picture got WORSE: "still uniformed just busier".
+    # A bend varies where the crests are without changing that there is a crest
+    # every wavelength, so it buys irregularity of position and pays for it in
+    # noise. Third failed attempt at breaking uniformity by arithmetic on the
+    # existing field; the next attempt should be crest PRIMITIVES (a few finite
+    # drawn arcs placed irregularly) rather than another modulation of a
+    # periodic function. Metric moved, picture did not -- the exact trap this
+    # lane is supposed to watch for.
+    formBend=0.70, formGroup=0.85, formFine=0.42,
     sprayRise=26.0, sprayFall=16.0,
     # Fraction of the shoreward Stokes drift surviving in deep water. See wave.frag.
     stokesDeep=0.18,
@@ -285,7 +294,16 @@ PRESETS['heavy_crashing_surf'] = dict(
     # energy is not a crossing sea, it is a ripple on one. Measured at the
     # capital view, raising it takes edge coherence 0.561 -> 0.544 (less
     # parallel); past ~1.8x the gain flattens, so this is the knee.
-    ampP=4.10, ampS=3.75, ampC=2.20, chopGain=0.72,
+    # A SPECTRUM IS PEAKED, NOT SHARED. Raising the secondary to 3.75 against
+    # the primary's 4.10 was meant to make the sea a crossing sea; what two
+    # LONG trains of comparable strength at 40 degrees actually draw is plaid,
+    # and the owner's crop of it reads as woven cloth. Real directional spectra
+    # put most of the energy in one dominant train and spread the rest across
+    # SHORTER components at other angles -- long swell you can name a direction
+    # for, chop you cannot. So the secondary drops back to a supporting role
+    # and the chop comes up, which is the "mix of long short waves and
+    # direction" the sea was missing.
+    ampP=4.10, ampS=1.95, ampC=2.85, chopGain=0.95,
     harmM=(1.0, 1.72, 2.95), harmA=(1.0, 0.36, 0.16),
     spread=38.0, groupDepth=0.72, groupScale=0.338, groupAcross=2.2,
     # Group envelope: mostly irregular travelling noise rather than a beat.
@@ -329,7 +347,14 @@ PRESETS['heavy_crashing_surf'] = dict(
     # C3 and C7 are white out there. foamDeepThr comes down with it: the offshore
     # coverage threshold was raised 1.4x on top of the veil, suppressing the same
     # thing twice.
-    foamDeep=17.0, foamDeepThr=0.70, foamVeil=0.55,
+    # OPAQUE OR ABSENT. Mid-alpha white over dark water IS grey, which is why
+    # two viewers independently called the foam clouds -- proven by ablation
+    # (cloud-like pixels 1.57% of water, 0.28% with foam injection off, 0.23%
+    # in bare mode), and NOT fixed by recolouring the veil or by solidifying
+    # it. A veil at 0.55 is a half-transparent white mass by construction. So
+    # offshore foam renders opaque and is made rarer instead (threshold 0.231
+    # -> 0.30): white where it is, water where it is not, and no grey.
+    foamDeep=17.0, foamDeepThr=0.70, foamVeil=1.0,
     stokes=4.2, backwash=1.9,
     # tauPersist 5.5 -> 7.0 s: toward the 3-8 Tp the foam-decay measurements
     # support for stage-B residue (notes R6). 9.0 was tried and smeared the
@@ -500,7 +525,7 @@ PRESETS['heavy_crashing_surf'] = dict(
     # land reproducibly) put it on this term rather than on the seabed, which
     # was identical with it on and off.
     specGain=0.16, sheen=0.034, shadowGain=0.88, crestGain=0.78, troughGain=1.144, transGain=0.72, swash=0.26,
-    foamThrFresh=0.231, foamThrOld=0.59, exposure=1.31, foamMass=0.65,
+    foamThrFresh=0.30, foamThrOld=0.59, exposure=1.31, foamMass=0.65,
     # Darkened ALL the way to the reference plate, hue preserved so the shore
     # keeps its teal. Sampled on C5's water (664k px, foam excluded), the
     # reference runs p5 luma 16.8 / p35 30.2 / p85 71.9 -- its BRIGHTEST water is
