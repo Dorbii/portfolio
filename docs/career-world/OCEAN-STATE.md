@@ -260,6 +260,51 @@ ablation and its baseline in the same session, and ALWAYS from the repo root
 (the Bash cwd persists; a relative --out silently writes into a nested tree,
 which swallowed a whole ablation batch).
 
+## The fabric — the measurement that reframes it (2026-08-31 night)
+
+Six attempts have now been spent making the SWELL less regular, and the return
+has fallen to about 1% of visible change each (spectral peak 84 -> 76 -> 75).
+Two measurements suggest the premise was wrong.
+
+FIRST, a target, from this project's own canonical plates, measured at the
+screen scales where the fabric lives (50-220 px; see spectrum_metric.py):
+
+    S  selected source        peak  22.4   angular width 66.7 deg
+    C1 calm long swell        peak  32.0                 41.1
+    C2 windy churning         peak  44.1                 36.9
+    C5 organized wave trains  peak  66.0                 31.6
+    ours                      peak  75.4                 28.9
+
+We are more peaked and NARROWER IN ANGLE than every reference, including the
+plate chosen for parallel trains. Angular width is the lever, and it is why
+making the dense fan LOUDER backfired: its energy sat beside the dominant
+direction. Flat-in-angle reweighting bought 25.7 -> 28.9.
+
+SECOND, and more important, the same-frame test -- sea pixels against the
+hand-painted land art in ONE capture at ONE camera, so no scale confound is
+possible (HUD excluded, local contrast = luma sd in a 9 px window):
+
+    sea        median  6.4    55.9% of pixels below 8
+    land art   median 29.9     1.1% of pixels below 8
+
+The sea's typical pixel is 4.7x flatter than the illustration it sits inside,
+and over half of it is featureless where the land is 99% textured. So the
+fabric may not be that the sea has too much structure: it has too little of
+everything else, and the one periodic modulation present is the only thing the
+eye can hold. A flat panel with stripes on it reads as cloth; a busy surface
+with the same stripes reads as water.
+
+The open direction is therefore APERIODIC INCIDENT in the body -- patches,
+facets, slicks, colour variation, wind streaks -- carrying real local contrast,
+with two acceptance tests that must BOTH hold:
+  * sea median local contrast rises toward the land art's in the same frame;
+  * the 50-220 px spectral peak does NOT rise (or it is just a new grating).
+
+Note the tension with the earlier "too much noise" feedback that parked the
+facet layer at 0. The difference is measurable now rather than a matter of
+taste: noise raises the peak and the fine-band energy together and reads as
+grain; incident raises median contrast while leaving the peak alone.
+
 ## The clouds — SOLVED (2026-08-31 night)
 
 The owner's wife, unprompted, asked why there were clouds in the water, and the
