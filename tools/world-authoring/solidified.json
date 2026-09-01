@@ -2,7 +2,7 @@
  "solidifiedAt": "2026-09-01T05:09:40.792Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "0fe890a3d4034792",
+  "cell.mjs": "fd6d3a108cb479d6",
   "plan-territory.mjs": "0ad41c5b80815aaf",
   "AGENTS.md": "0d4c3c0fc8f88b87"
  },
@@ -30,6 +30,24 @@
    "reason": "owner approved: same dispatch - fix found by the stitch control suite: disable the libvips per-process file cache so context reads do not hold Windows handles over tiles the stitch then rewrites",
    "hashes": {
     "cell.mjs": "0fe890a3d4034792",
+    "plan-territory.mjs": "0ad41c5b80815aaf",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-01T20:05:00.000Z",
+   "reason": "owner defect report (seam very noticeable): first cell carried a bleed-ring character join from core-upscale-plus-outpainted-margins. Fix removes the possibility instead of detecting it: the worker now delivers ONE square generation (>=1536px, 2048 preferred) plus the water mask at source resolution, and cell.mjs performs the uniform upscale and derives concept/l2/water itself. Sources recorded in art-source and sourcePx in the manifest.",
+   "hashes": {
+    "cell.mjs": "dc3e699b6665f2c5",
+    "plan-territory.mjs": "0ad41c5b80815aaf",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-01T20:20:00.000Z",
+   "reason": "same defect fix, floor corrected to tool truth: the bundled generator tops out at 1254px square (the seed source was exactly that), so MIN_SRC=1254; the worker correctly refused 1536 rather than fake it. Native-2048 fallback available if the owner configures an API key for workers.",
+   "hashes": {
+    "cell.mjs": "fd6d3a108cb479d6",
     "plan-territory.mjs": "0ad41c5b80815aaf",
     "AGENTS.md": "0d4c3c0fc8f88b87"
    }

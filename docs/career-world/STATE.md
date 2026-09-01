@@ -321,18 +321,33 @@ solidified and changes there need owner approval first. See its `AGENTS.md`.
   Reduction kernel MEASURED: lanczos3 flattest luma over 6 halvings (drift
   0.1); the old test's "box" was nearest-neighbour decimation, whose
   detail-retention score rewards aliasing.
-- **Cell c4-3 (construction zone) AUTHORED, GATED, STITCHED** — the first real
-  cell. Gates: isotropy `1.209`, land `74.2%`, water-removed residual `0%`,
-  fringe `0.0%` (reported-only this cell; now calibrated — harden to `<1%`
-  from the next cell). `124` tiles written (`81/25/9/4/2/2/1` by level),
-  matching predicted geometry exactly. Style anchored to the seed by file
-  reference — side-by-side verified, NO style drift (the failure that killed
-  four D06 attempts did not recur). Water zones classified
-  coast/lake/stream/fall. Sea takes the E and S edges and wraps the SW corner;
-  the drainage stream crosses the N edge, so **c4-2 must continue it**. The
-  cliff-run ledge is continuous but `6-8 m` wide in stretches vs the `8-12 m`
-  in the director's brief — a director number, not an owner rule; the rail
-  lane may widen with added structure (land rule permits adding).
+- **Cell c4-3 (construction zone) AUTHORED, GATED, STITCHED — on the second
+  attempt, after an owner catch (F24: director missed it).** Attempt one
+  passed every gate and the director's 1:1 review, but the owner saw a seam:
+  a **bleed-ring character join** ~200-240 px inside every land edge — the
+  worker had upscaled a 1254 px core into the kept area and generated the
+  margins separately. It reads worst at REDUCED zoom (averaging turns a
+  texture-density shift into a tonal split), which is where reviews must also
+  look from now on. Three detector attempts overfit and were discarded;
+  the landed fix **removes the possibility instead of detecting it**: the
+  worker now delivers ONE square raw generation (>= `1254` px — the bundled
+  generator's max; the seed's own source size) plus the water mask at source
+  resolution, and `cell.mjs` performs the uniform upscale and derives
+  concept/l2/water itself. A multi-pass canvas cannot reach the world through
+  the dispatch path. The worker's first regen attempt REFUSED correctly when
+  asked for >= 1536 (tool max is 1254) rather than faking it — the floor now
+  matches tool truth. **A native-2048 generation path exists if the owner
+  configures `OPENAI_API_KEY` for workers — that would raise effective density
+  from `4.63` to `7.56` art px per world px (seed effective: `5.75`).**
+- Accepted regen gates: isotropy `1.315`, land `78.5%`, water residual
+  `0.13%`, fringe `0.22%` (still report-only; two accepted cells now measure
+  `0.0%` and `0.22%` — harden to `<1%` next cell). `124` tiles
+  (`81/25/9/4/2/2/1`). NO ring at any zoom — verified at 1:1 AND reduced
+  scale. Style matches the seed; water classified coast/lake/stream/fall; the
+  stream mask traces the channel ~`0.25 m` wider than the waterline per bank
+  (wet-margin latitude for L3). Sea takes the E and S edges; the drainage
+  stream crosses the N edge, so **c4-2 must continue it**. `sourcePx` is
+  recorded per cell in the manifest.
 - The accepted L2 seed moved from scratch into
   `art-source/career-world/l2-land/ninjaone/seed/` as the style canon cells
   reference. Superseded `.codex-tmp/authoring/cell.mjs` copy deleted.

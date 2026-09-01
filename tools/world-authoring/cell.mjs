@@ -17,6 +17,13 @@
  * same output tree destroyed 106 tile files earlier in this project; a lockfile
  * refuses a second concurrent invocation outright.
  *
+ * ONE generation per cell: the worker delivers a single raw square generation
+ * covering the whole canvas plus the water mask at that resolution, and THIS
+ * script performs the upscale to canvas size and derives concept/l2/water. A
+ * canvas assembled from a core and separately generated margins carries a ring
+ * where texture character shifts — the owner caught exactly that on the first
+ * cell — so the possibility is removed rather than detected.
+ *
  * Tiles are DERIVED, never edited: every stitch recomputes each dirty tile from
  * the accepted cell sources (art-source/), so a re-run is byte-idempotent, the
  * seam is order-independent, and an interrupted stitch heals on the next run.
@@ -49,6 +56,12 @@ const CM_PER_PX = (M_PER_WORLDPX / ART) * 100;
 
 const TILE = 256;
 const LEVELS = 7;                         // 0 (finest) .. 6, exact 2:1 each
+const MIN_SRC = 1254;                     // smallest acceptable single generation:
+                                          // the bundled generator's largest square
+                                          // (the accepted seed's source was exactly
+                                          //  this). A native-2048 path exists but
+                                          //  needs the owner to configure an API key
+                                          //  for workers; raise this floor then.
 const TAB_CORNER = 64;                    // corner jitter amplitude, art px
 const TAB_WIGGLE = 64;                    // mid-edge wiggle amplitude, art px
 const FEATHER = 8;                        // seam blend half-width, art px
@@ -507,15 +520,17 @@ Author one cell of the land layer. Terrain only. Quarantine-only: write to
 | | |
 |---|---|
 | ground | **${(CELL_PX / ART * M_PER_WORLDPX).toFixed(1)} m square** |
-| output | **${GEN_PX} x ${GEN_PX} px RGBA** |
-| resolution | **${CM_PER_PX.toFixed(1)} cm per pixel** |
+| you deliver | **ONE square generation, ${MIN_SRC}+ px (2048 preferred)** |
+| shipped canvas | **${GEN_PX} x ${GEN_PX} px** (the pipeline upscales your generation) |
+| final resolution | **${CM_PER_PX.toFixed(1)} cm per pixel** |
 
-At this resolution a conifer 4-7 m across is **${Math.round(4 / (CM_PER_PX / 100))}-${Math.round(7 / (CM_PER_PX / 100))} px** wide
-and a person would be ~${Math.round(1.7 / (CM_PER_PX / 100))} px tall. Size everything against that.
+On the final canvas a conifer 4-7 m across is **${Math.round(4 / (CM_PER_PX / 100))}-${Math.round(7 / (CM_PER_PX / 100))} px** wide and a
+person would be ~${Math.round(1.7 / (CM_PER_PX / 100))} px tall — on a ${MIN_SRC} px generation that is a
+**${Math.round(4 / (CM_PER_PX / 100) * MIN_SRC / GEN_PX)}-${Math.round(7 / (CM_PER_PX / 100) * MIN_SRC / GEN_PX)} px** crown. Size everything against that.
 
-The outer **${BLEED} px** on every side is BLEED that overlaps neighbouring cells.
-Terrain must run right to all four edges as if the ground continues, because it
-does. Do not vignette, fade or frame.
+The outer **${Math.round(BLEED / GEN_PX * 100)}%** of the frame on every side is BLEED that overlaps
+neighbouring cells. Terrain must run right to all four edges as if the ground
+continues, because it does. Do not vignette, fade or frame.
 
 ## What this ground must be
 
@@ -558,22 +573,31 @@ from. Later cells will be conditioned on your edges.
    layer. A baked sun is an automatic FAIL and is measured.
 2. **Terrain only.** No buildings, walls, roads, bridges, docks, boats, fences,
    figures or track. Rock and vegetation are terrain and belong.
-3. **Water is painted, then removed.** Deliver ALL of:
-   - \`${id}-concept.png\` — water painted, composition as intended. This is the
-     reference the ocean and inland-water layers work from.
-   - \`${id}-l2.png\` — identical art with every water surface alpha-0.
-   - \`${id}-water.png\` — mask of the water zones (opaque white on transparent),
-     plus \`${id}-water.json\` classifying each zone: an array of
+3. **ONE generation, whole canvas.** Deliver the single raw generation —
+   \`${id}-source.png\`, a square image **${MIN_SRC} px or larger** (use the
+   largest single-pass square your generator can produce — 2048 if available)
+   with the ENTIRE canvas (kept area AND bleed) in frame. The
+   pipeline performs the upscale to ${GEN_PX} px and derives the shipped
+   layers. Do NOT generate a core and margins separately, do NOT assemble from
+   tiles, do NOT upscale or resize anything yourself — a ring or line where
+   texture character shifts is an automatic FAIL. Iterate at generation time
+   (regenerate whole candidates and pick), never by patching regions.
+4. **Water is painted, then classified.** Paint water where it belongs in the
+   source. Alongside it deliver:
+   - \`${id}-water-source.png\` — mask of every water surface at the SAME
+     dimensions as the source (opaque white on transparent),
+   - \`${id}-water.json\` — an array of
      \`{ "class": "coast|lake|stream|fall|submerged", "note": "..." }\`.
-   After removal, **no water-hued pixels may survive along the footprint edge.**
-4. **High oblique 2.5D**, consistent with the reference. Not top-down.
+   The pipeline cuts the water out of the land layer using your mask, so an
+   imprecise mask ships as a wrong coastline — trace it carefully.
+5. **High oblique 2.5D**, consistent with the reference. Not top-down.
 
 ## Report
 
 Write \`${id}-report.json\`: lighting isotropy (peak vs uniform over land),
-median conifer crown in px and metres, buildable vs steep fraction, water
-footprint fraction, and confirmation that no opaque land was painted outside the
-intended coastline.
+median conifer crown in px and metres **stated at final ${GEN_PX} px canvas
+scale**, buildable vs steep fraction, water footprint fraction, and the exact
+generation size you produced.
 `;
 
 fs.writeFileSync(path.join(cellDir, `packet-${id}.md`), packet);
@@ -620,6 +644,40 @@ codex exec \\
     } catch {
       die(`dispatch failed — see ${path.join(cellDir, `${id}.log`)}`);
     }
+  }
+
+  // ------------------------------------------- derive canvas from source ----
+  // The shipped layers come from ONE uniformly upscaled generation, so a
+  // core-plus-margins ring cannot exist. (--from supplies finished artefacts
+  // directly — the operator's and the control suite's escape hatch.)
+  let sourcePx = null;
+  if (!from) {
+    const srcFile = path.join(cellDir, `${id}-source.png`);
+    const wsrcFile = path.join(cellDir, `${id}-water-source.png`);
+    if (!fs.existsSync(srcFile)) die(`no generation at ${srcFile} — cell NOT accepted`);
+    if (!fs.existsSync(wsrcFile)) die(`no water mask at ${wsrcFile} — cell NOT accepted`);
+    const sm = await sharp(srcFile).metadata();
+    if (sm.width !== sm.height) die(`generation is ${sm.width}x${sm.height} — must be square`);
+    if (sm.width < MIN_SRC) die(`generation is ${sm.width}px — one pass of at least ${MIN_SRC}px is required`);
+    const wm0 = await sharp(wsrcFile).metadata();
+    if (wm0.width !== sm.width || wm0.height !== sm.height) {
+      die(`water mask is ${wm0.width}x${wm0.height} but the generation is ${sm.width}px — same dimensions required`);
+    }
+    sourcePx = sm.width;
+    const concept = await sharp(srcFile).ensureAlpha()
+      .resize(GEN_PX, GEN_PX, { kernel: "lanczos3" }).raw().toBuffer();
+    const mask = await sharp(wsrcFile).ensureAlpha()
+      .resize(GEN_PX, GEN_PX, { kernel: "lanczos3" }).raw().toBuffer();
+    const l2 = Buffer.from(concept);
+    for (let i = 0; i < GEN_PX * GEN_PX; i++) {
+      const o = i * 4;
+      l2[o + 3] = Math.round(concept[o + 3] * (1 - mask[o + 3] / 255));
+    }
+    const asPng = (buf) => sharp(buf, { raw: { width: GEN_PX, height: GEN_PX, channels: 4 } }).png();
+    await asPng(concept).toFile(path.join(cellDir, `${id}-concept.png`));
+    await asPng(mask).toFile(path.join(cellDir, `${id}-water.png`));
+    await asPng(l2).toFile(path.join(cellDir, `${id}-l2.png`));
+    console.log(`  derived       concept/l2/water at ${GEN_PX}px from one ${sm.width}px generation`);
   }
 
   // -------------------------------------------------------------- gates -----
@@ -721,7 +779,7 @@ codex exec \\
   const srcDir = path.join(paths.sources, id);
   fs.mkdirSync(srcDir, { recursive: true });
   for (const f of [`${id}-l2.png`, `${id}-concept.png`, `${id}-water.png`, `${id}-water.json`,
-    `${id}-report.json`]) {
+    `${id}-report.json`, `${id}-source.png`, `${id}-water-source.png`]) {
     const p = path.join(cellDir, f);
     if (fs.existsSync(p)) fs.copyFileSync(p, path.join(srcDir, f));
   }
@@ -736,6 +794,7 @@ codex exec \\
   ledger.cells[id] = {
     authoredAt: new Date().toISOString(),
     describe: (describe || "").slice(0, 400),
+    sourcePx,
     gates, shelf: shelf?.id ?? null,
     features: features.map((f) => f.kind),
     waterZones: Array.isArray(zones) ? zones.map((z) => z.class) : zones,
