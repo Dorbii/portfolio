@@ -86,6 +86,7 @@ const WAVE_CALM_SWELL: Readonly<Record<string, OceanUniformValue>> = Object.free
   uStokes: 1.5,
   uStokesDeep: 0.18,
   uSwashBreak: 0.85,
+  uSwellTone: 1.0,
   uWhitecapGain: 60.0,
   uWhitecapSteep: 0.16,
 });
@@ -130,6 +131,7 @@ const WAVE_WINDY_ROLLING_SURF: Readonly<Record<string, OceanUniformValue>> = Obj
   uStokes: 2.6,
   uStokesDeep: 0.18,
   uSwashBreak: 0.85,
+  uSwellTone: 1.0,
   uWhitecapGain: 60.0,
   uWhitecapSteep: 0.28,
 });
@@ -174,6 +176,7 @@ const WAVE_HEAVY_CRASHING_SURF: Readonly<Record<string, OceanUniformValue>> = Ob
   uStokes: 4.2,
   uStokesDeep: 0.18,
   uSwashBreak: 0.3,
+  uSwellTone: 1.0,
   uWhitecapGain: 18.0,
   uWhitecapSteep: 1.95,
 });
@@ -779,6 +782,7 @@ export const OCEAN_PASS_UNIFORM_TYPES: Readonly<Record<OceanPassName, Readonly<R
     uStokes: "float",
     uStokesDeep: "float",
     uSwashBreak: "float",
+    uSwellTone: "float",
     uWhitecapGain: "float",
     uWhitecapSteep: "float",
   }),

@@ -45,6 +45,7 @@ uniform float uRegionDepth, uRegionContrast;  // large-scale weather: how much t
 uniform float uFormBend, uFormGroup, uFormFine;  // curvature, group variance, finer train
 uniform float uFormSpread;   // directional bandwidth of the TONE, as a fraction of uSpread
 uniform float uSpecDense;    // 0 = the old 3-component swell, 1 = the dense fan
+uniform float uSwellTone;    // how loudly the swell may draw in OPEN water
 uniform float uChopGain;
 uniform float uJitter;                  // crest-spacing jitter, radians
 uniform float uStokes;                  // shoreward drift gain
@@ -784,7 +785,18 @@ void main()
     // told separately. It drives the broad tonal structure -- the trough
     // darkening most of all -- which is to say it is the term that draws a wave
     // whether or not anything else does.
-    hForm *= openVis;
+    // SWELL TONE LOUDNESS -- the number that actually governs the fabric read.
+    // A shipped reference (DREDGE) measures three times more spectrally peaked
+    // and twice as directionally coherent as this sea and reads as water, on a
+    // band amplitude one third of ours. Eight attempts here moved the SHAPE of
+    // the spectrum and none moved its loudness, which is why none of them
+    // changed the picture. This scales what the swell is allowed to draw in
+    // open water WITHOUT touching the field that drives breaking, foam,
+    // timing and flow: the swell keeps placing events, it just stops painting
+    // the whole ocean. Surf-zone tone is deliberately exempt -- detail is
+    // welcome where interaction explains it.
+    float openTone = mix(uSwellTone, 1.0, shallowGate);
+    hForm *= openVis * openTone;
     // FLOW IS A SPEED IN TUNED PIXELS, and foam.frag backtraces it in SCREEN
     // pixels -- so without a conversion the sea's surface moves at the tuned
     // rate whatever the camera does, which at map zooms is several times too
