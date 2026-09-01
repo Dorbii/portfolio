@@ -160,25 +160,25 @@
    }
   },
   "c3-3": {
-   "authoredAt": "2026-09-01T16:12:16.902Z",
+   "authoredAt": "2026-09-01T19:00:50.835Z",
    "describe": "**Style canon (binding):** `art-source/career-world/l2-land/ninjaone/seed/L2-seed-region-r1.png`\nis the accepted look of this world's terrain — same palette register, same\ncolumnar basalt, same conifer treatment, same painterly density. Anchor style\nto those pixels, not to words.\n\n**Your east edge joins ALREADY-AUTHORED cells.** `context/window.png` is the\nreal composited paint (water shown painte",
    "sourcePx": 1254,
    "gates": [
     {
      "name": "key-light asymmetry",
-     "value": 0.0035,
+     "value": 0.0012,
      "pass": true,
      "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004"
     },
     {
      "name": "gradient ratio",
-     "value": "1.451 (reported)",
+     "value": "1.456 (reported)",
      "pass": true,
      "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
     },
     {
      "name": "land coverage",
-     "value": "98.5%",
+     "value": "98.4%",
      "pass": true
     },
     {
@@ -197,7 +197,13 @@
      "name": "water continuity",
      "value": "ok (0 crossings checked)",
      "pass": true,
-     "note": "every watercourse crossing a shared authored edge must be met by the neighbour within 48px"
+     "note": "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint"
+    },
+    {
+     "name": "palette conformance",
+     "value": "worst dBG 0.130 dLuma 11.7 over 1 seam(s)",
+     "pass": true,
+     "note": "vegetation medians of the bands beside each authored seam; calibrated fine=0.109/4.5 vs clash=0.294/14.6, thresholds 0.18/8"
     }
    ],
    "shelf": null,

@@ -1,10 +1,11 @@
 {
   "cell": "c3-3",
+  "status": "quarantined_candidate_with_open_isotropy_risk",
   "generation": {
     "filename": "c3-3-source.png",
     "exact_size_px": [1254, 1254],
     "format": "PNG RGB",
-    "sha256": "5C7736A374C55D9A9873C8B604575CD7DF8F8DE2010C5A908FCC623314905850",
+    "sha256": "E9B89E1F7A96B4E87309F2B84FB5F5A4F66820B0E7F3DBA0FD5FD06FDB0FFD84",
     "mode": "built-in image generation",
     "whole_canvas_single_pass": true,
     "resized_or_tiled": false
@@ -13,71 +14,77 @@
   "ground_extent_m": [97.6, 97.6],
   "final_resolution_cm_per_px": 4.8,
   "lighting_isotropy": {
-    "metric": "36-bin land-luminance-gradient peak divided by uniform-bin mean after a local separable Lanczos3 reproduction of the 2560 px pipeline derivation; gradients below 12 luminance units excluded",
-    "peak_vs_uniform_over_land": 1.440494,
+    "metric": "36-bin land-luminance-gradient peak divided by uniform-bin mean after a local separable Lanczos3 reproduction of the 2560 px pipeline derivation; mask pixels and gradients below 12 luminance units excluded",
+    "peak_vs_uniform_over_land": 1.465132,
     "uniform_reference": 1.0,
-    "maximum_allowed": 1.45,
-    "pass_under_local_reproduction": true,
+    "repository_ceiling": 1.45,
+    "pass_under_local_reproduction": false,
     "official_node_gate_run": false,
-    "calibration": "The local Lanczos3 implementation reproduced authored neighbour c4-2 within 0.000269; the official Node tool could not execute because the managed sandbox denied the system node.exe.",
-    "visual_check": "Neutral form shading and ambient occlusion only; no directional key, cast-shadow field, sun angle, or time-of-day gradient observed."
+    "visual_check": "No directional key, cast-shadow field, sun angle, time-of-day gradient, or consistent lit-side direction was observed; shading is local form shading and ambient occlusion.",
+    "risk": "The local numeric proxy remains 0.015132 over the inherited ceiling after two whole-canvas generation attempts. Predominant east-west gorge-face gradients may contribute, but that explanation is an inference and does not override the failed proxy."
+  },
+  "palette_conformance": {
+    "metric": "Median per-pixel blue/green ratio over vegetation-classified pixels using one identical classifier for source, context, and seed",
+    "source": 0.3846,
+    "context_window": 0.3770,
+    "seed": 0.3968,
+    "required_neighbour_register": [0.32, 0.47],
+    "pass": true
   },
   "median_conifer_crown_final_scale": {
-    "px_on_2560_canvas": 96,
-    "metres": 4.6,
-    "source_px_equivalent": 47,
+    "px_on_2560_canvas": 90,
+    "metres": 4.3,
+    "source_px_equivalent": 44,
     "measurement": "Median visual crown-width sample across mature conifers, converted by 2560/1254 to final canvas scale.",
     "required_final_px_range": [84, 147],
     "pass": true
   },
   "buildable_vs_steep_fraction": {
     "basis": "estimated fraction of non-water land area",
-    "buildable": 0.39,
-    "steep": 0.18,
-    "other_broken_talus_or_vegetated": 0.43,
-    "method": "Authoring-zone estimate from broad coherent saddle and gorge-rim bench surfaces versus exposed central cliff and gully faces; remaining land is broken, talus-covered, scrubbed, or vegetated."
+    "buildable": 0.48,
+    "steep": 0.17,
+    "other_broken_talus_or_vegetated": 0.35,
+    "method": "Authoring-zone estimate from the broad coherent saddle and gorge-rim shelf versus exposed central basalt faces; remaining land is broken, talus-covered, scrubbed, or vegetated."
   },
-  "water_footprint_fraction": 0.010167,
+  "water_footprint_fraction": 0.012512,
   "water_mask": {
     "filename": "c3-3-water-source.png",
     "exact_size_px": [1254, 1254],
     "format": "PNG RGBA",
-    "sha256": "4332F3AE92E6988A3830D0C641B2F7DB00A0A0DC1E187D78C0E3F79B48DBF585",
+    "sha256": "0AEC493559BF401A0137C9557907DC7688D63DC746C982D50F54A65C492EF9F3",
     "encoding": "opaque white water pixels on fully transparent non-water pixels",
-    "opaque_water_pixels": 15988,
+    "opaque_water_pixels": 19676,
     "intermediate_alpha_pixels": 0,
     "non_white_opaque_pixels": 0,
     "interior_holes": 0,
     "logical_water_systems": 1,
-    "visible_components_separated_by_dry_boulders": 8,
+    "source_bounds_px": [593, 460, 803, 1253],
     "edge_water_fraction": {
       "north": 0.0,
       "east": 0.0,
       "south": 0.018341,
       "west": 0.0
     },
-    "south_first_water_x_source_px": 526,
-    "south_first_water_fraction_x": 0.419458,
-    "method": "Source-registered segmentation guide refined against the terrain's cool-water pixels, with the single fall and spray admitted explicitly; two-pixel fringe expansion, deterministic component filtering, two-pixel closing, and enclosed-hole filling. The terrain source remained byte-identical.",
+    "south_first_water_x_source_px": 781,
+    "south_first_water_fraction_x": 0.622807,
+    "method": "Source-registered smooth connected silhouette following the painted beck; includes dark channel water, water between rocks, riffle highlights, the complete fall column, splash, spray, foam, reflections, and visibly wet margins. The selected terrain source remained byte-identical.",
     "local_lanczos3_pipeline_proxy": {
-      "water_removed_residual_percent": 3.096330,
-      "water_removed_maximum_percent": 0.5,
-      "water_removed_pass": false,
-      "water_fringe_percent": 0.005797,
+      "water_removed_residual_percent": 1.598421,
+      "water_fringe_percent": 0.099335,
       "water_fringe_maximum_percent": 1.0,
       "water_fringe_pass": true,
-      "note": "The thin-feature residual proxy remains above the repository gate because interpolated mask-edge pixels dominate a narrow irregular stream. The accurate overlay was retained instead of over-masking dry gully rocks. Official Node verification was unavailable in the managed sandbox."
+      "note": "The mask is binary at source resolution. Local Lanczos3 interpolation produces a narrow partial-alpha transition at final scale; the painted fringe classifier remains below its ceiling."
     }
   },
   "image_generation": {
     "source_calls_used": 2,
     "candidate_selected": 2,
-    "candidate_1_rejected_reason": "Painted two distinct falls instead of the required single short drop.",
-    "selected_candidate_mask_guide_calls_used": 1,
-    "mask_guide_role": "Segmentation guide only; source-aware deterministic refinement produced the delivered binary mask and did not modify the selected terrain generation."
+    "candidate_1_rejected_reason": "Vegetation palette passed, but the local final-scale lighting-isotropy proxy measured 1.464053 against the inherited 1.45 ceiling.",
+    "candidate_2_selection_reason": "Closest context-palette match, clearer broad saddle, one south-running beck and one fall, all-land east edge, and solid south land edge apart from the stream crossing.",
+    "two_strike_stop": "Both whole-canvas candidates remained marginally above the inherited isotropy ceiling; no third attempt or regional patch was made."
   },
   "open_risks": [
-    "The local Lanczos3 water-removed residual proxy is above the repository threshold; the exact official Node gate remains unrun because the managed sandbox denied the system runtime.",
-    "Visual quality and exact east-neighbour seam judgment remain owner decisions; mechanical checks do not establish acceptance."
+    "Lighting isotropy is a local mechanical fail at 1.465132 versus 1.45; the candidate must not be promoted on this report alone.",
+    "Visual quality, exact east-neighbour seam continuity, and final owner judgment remain unverified by mechanical checks."
   ]
 }

@@ -359,89 +359,125 @@ solidified and changes there need owner approval first. See its `AGENTS.md`.
   sources ~`35 MB` PNG each → ~`700 MB`/territory. Consider lossless-webp
   sources (pixel-exact, roughly half) — needs owner approval since cell.mjs's
   expected filenames are solidified.
-### RESUME POINT — 2026-09-02, session 2 handoff (all landed work committed)
+### RESUME POINT — 2026-09-01, session 3 handoff (landed work committed on `codex/land-lod-completion`)
 
-**The pipeline is COMPLETE and control-suited (6/6,
-`tests/world-authoring-stitch.test.mjs`).** One command authors a cell:
-`node tools/world-authoring/cell.mjs --cell C,R --describe-file BRIEF
-[--force] [--redo] [--from DIR] [--dry-run]`. It builds the packet with
-concept-composited neighbour context, dispatches ONE codex worker which
-delivers ONE square raw generation (>= `1254` px, the bundled generator's
-max) plus a water mask at source resolution; the pipeline upscales, binarizes
-and feathers the mask, derives concept/l2/water, **bridges** watercourse
-crossings that land within (48..150] px of a neighbour's (footprint-space
-reroute; larger misses reject), runs the gates, and on pass stitches
-(derive-from-sources, byte-idempotent) through the 7-level pyramid and
-records everything in the manifest-ledger
-(`manifests/terrain-l2-ninjaone-r1.json`). `--redo` re-judges an existing
-generation without a bake. Every solidified change is in
-`tools/world-authoring/solidified.json` history with its calibration
-evidence.
+**What happened this session, in order.** Control suite `6/6` and the hash
+gate were green before anything ran. Then:
+
+1. **c3-3 saddle REPLACED** by `--redo --force` from the already-generated
+   deep-green candidate — no bake. All seven gates PASS: key-light `0.0012`,
+   land `98.4%`, water cut `0 px`, fringe `0%`, continuity ok, palette worst
+   `dBG 0.130 / dLuma 11.7` (it IS the third calibration point). `143` tiles
+   rewritten (`90/30/12/6/2/2/1`), `0` byte-identical. Director eyes at 1:1,
+   1/4 and the L3 tier: it joins the quarry; residuals listed below.
+2. **c4-2 replacement bake REJECTED by three gates.** `gpt-5.6-sol`, effort
+   high, `12m46s` wall, `140,967` worker tokens (bakes are ~13 min, not 35).
+   Water continuity: the stream reached the shared edge at gen-x `8644` vs the
+   quarry's `8435` — a **209 px miss** against a bridge reach of 150. Water
+   fringe **8.45%** (limit `<1%`). Palette **dBG 0.301** (limit `0.18`) at the
+   c4-3 seam. World unchanged; the candidate is quarantined in
+   `.codex-tmp/authoring/cells/c4-2/`. **c4-2 stays the OLD version** with its
+   known stream miss (~700 px, the Z-kink) at the c4-3 seam.
+
+**Why c4-2 failed, measured** (sheet 5: `.codex-tmp/session3/review/final/sheet-5-c42-candidate.png`):
+
+- **The generator cannot land a stream on a coordinate.** Candidate 1 exited
+  near 1/3 width; candidate 2, briefed by the worker itself with explicit
+  bottom-row coordinates, at `26.5%` vs the `19.5%` peg. Two strikes on the
+  same brief → reframe: landing is the PIPELINE's job (already the recorded
+  caution). Do not roll a third time on prose alone.
+- **The worker authored its mask as a 16 px POLYLINE** (`build-c4-2-water-mask.ps1`),
+  not from painted pixels: a ~40 px strip of painted stream water lies beside
+  the cut. Director reproduction of the gate's own classifier
+  (`.codex-tmp/session3/misfit.mjs`): accepted c4-3 `0.22%` at ring 6 (matches
+  its recorded gate value) / `0.18%` at ring 48; c3-3 `0.00% / 0.01%`;
+  candidate `7.78% / 6.27%` with `16,928` blue px in the 7–48 band. So an
+  extended bridge alone could NOT have rescued this candidate.
+- **Mock of the footprint bridge at 209 px** (same construction as cell.mjs,
+  cap removed, `.codex-tmp/session3/peg-evidence.mjs`): a smooth water sweep
+  across open meadow beside an orphaned painted gully — visible at 1:1, a
+  dogleg at 1/4. The owner judges by eye (sheet 5, right panel).
+
+**OWNER DECISION NEEDED before the next c4-2 attempt** — every option edits
+solidified `cell.mjs`, so approval is recorded in `solidified.json` history
+FIRST, then the control suite gains a control for it (accepted cells pass,
+the quarantined candidate fails), then the change:
+
+- (a) extend the bridge reach `150 → 256` px (the seam-band width); the mock
+  shows the cost;
+- (b) add a wide-ring painted-water-outside-mask gate (ring 48; calibrated
+  `<1%` — accepted `0.18% / 0.01%`, candidate `6.27%`) so polyline masks fail
+  at the gate instead of at the seam;
+- (c) a pipeline-placed stream: the packet carries a pixel-anchored
+  composition exemplar with the neighbour's stream drawn through the
+  candidate's frame (F25 anchor-and-cover) — a lane of its own.
+
+Cheapest in owner time: (a)+(b), then one more bake (~13 min).
+
+**World state:** c4-3 quarry GOOD (accepted canon). c3-3 saddle NEW — deep
+green, gates green, **owner review pending**. c4-2 OLD — known stream miss
+at the c4-3 seam; replacement rejected.
+
+**Residual defects flagged on the c3-3 landing (sheets 1–4):**
+
+- c3-3|c4-3 seam, upper ~700 px (meadow-to-meadow): a mild texture/tone step
+  at 1:1 — the `dLuma 11.7` point; faint at 1/4, invisible at the L3 tier.
+- c3-3's beck rises in a round dark source pool on the plateau that reads as
+  a black dot at reduced zoom; L3 will render it as a small tarn.
+- the three-way corner pocket in unauthored c3-2 is bleed-only smudge —
+  provisional by design until c3-2 is authored.
+- c4-2|c4-3 seam: unchanged — the old stream miss remains (sheets 3/3b).
+
+**Review tooling (scratch, gitignored, `.codex-tmp/session3/`):**
+`review.mjs <tag>` assembles proofs from the STITCHED TILES only (mounted at
+1/2 and 1/4, the L2/L3/L4 tiers as held, magenta hole hunt, both seams at
+1:1 + 1/2 + 1/4, the corner); `sheet.mjs <tag> [beforeTag]` composes the
+labelled sheets; `peg-evidence.mjs` and `misfit.mjs` are the c4-2
+measurements. Final set: `.codex-tmp/session3/review/final/sheet-{1..5}*.png`
+(byte-identical to the interim set — the rejected bake changed nothing).
+
+**IMMEDIATE NEXT ACTIONS, in order:**
+
+1. Owner reviews sheets 1–5 (he marks up images) and records acceptance or
+   defects for c3-3.
+2. Owner rules on (a)/(b)/(c). Director: record approval → control first →
+   edit → `npm run check:world-authoring` → re-bake c4-2 with
+   `node tools/world-authoring/cell.mjs --cell 4,2 --describe-file
+   .codex-tmp/authoring/brief-c4-2.md --force` (brief unchanged; the pegs are
+   verified against the CURRENT c4-3: stream centre `498/2560 = 19.5%`,
+   width 37, at the shared line).
+3. Then continue by adjacency toward the capital `2,1`, one cell per dispatch,
+   briefs per `.codex-tmp/territory/ninjaone-plan.json`.
 
 **Gates (all thresholds calibrated, provenance in the lock):** key-light
 asymmetry `<0.011` (sunned D05 `0.0318`, canon `<=0.004`); water cut-clear
-exact-zero; fringe `<1%` (accepted cells `0.0/0.22/0.67%`); water continuity
-(crossings matched `48 px`, bridge to `150`); palette conformance at
-authored seams (veg-median `dBG<=0.18`, `dLuma<=13` — the `13` is
-eyes-calibrated on three points; evidence
-`.codex-tmp/dir-stitch/pal-check-pair.png`).
+exact-zero; fringe `<1%` (accepted `0.0/0.22/0%`); water continuity
+(crossings matched `48 px`, bridge to `150`); palette conformance at authored
+seams (veg-median `dBG<=0.18`, `dLuma<=13`, eyes-calibrated on three points).
 
-**World state (branch `codex/land-lod-completion`, worktree
-`.claude/worktrees/land-lod-completion`):**
-- `c4-3` quarry: GOOD, accepted style canon alongside the seed.
-- `c4-2` wild coast: in world but carries a known `~500 px` stream Z-kink at
-  the c4-3 seam (pre-bridge attempt). Its replacement brief is READY at
-  `.codex-tmp/authoring/brief-c4-2.md` (survey pegs: one stream at 19.5%
-  from its west canvas edge — bridge forgives to 150 px — and NO sea on the
-  south edge).
-- `c3-3` saddle: in world as the OLD yellow-meadow version. Its REPLACEMENT
-  IS ALREADY GENERATED AND PASSES ALL GATES under the current thresholds —
-  the artefacts sit in `.codex-tmp/authoring/cells/c3-3/`.
+**Standing owner rulings:** Tanium/NinjaOne share BOTH border types (bound in
+`plan.rules.southBorder`: sound under `0,3`/`1,3`, land under `2,3`/`3,3`,
+bay at `4,3`); water bridge approved at 150; palette gate-and-regenerate
+approved; `OPENAI_API_KEY` for native-2048 workers still an open offer
+(effective density `4.63 -> 7.56` px/world px).
 
-**IMMEDIATE NEXT ACTIONS, in order:**
-1. `node tools/world-authoring/cell.mjs --cell 3,3 --describe-file
-   .codex-tmp/authoring/brief-c3-3.md --redo --force` — accepts and stitches
-   the already-generated deep-green c3-3 (no bake needed).
-2. `node tools/world-authoring/cell.mjs --cell 4,2 --describe-file
-   .codex-tmp/authoring/brief-c4-2.md --force` — one bake (~35 min; ONE codex
-   at a time; verify no `codex exec` is running — the resident Codex
-   app-server PID is not a bake).
-3. Rebuild the three-cell review (`.codex-tmp/dir-stitch/preview.mjs` for
-   assembly; mounted view + both seam bands + reduced zoom) and send to the
-   owner with any residual defects flagged. He marks up images.
-4. Then continue by adjacency toward the capital `2,1`, one cell per
-   dispatch, briefs authored per the plan
-   (`.codex-tmp/territory/ninjaone-plan.json` — NOTE: gitignored scratch, a
-   durability gap; owner approval needed to move it since `cell.mjs`'s path
-   constant is solidified).
+**Durability gap, still open:** `.codex-tmp/territory/ninjaone-plan.json`
+and its generator are gitignored scratch that `cell.mjs` requires; moving
+them touches a solidified path constant — owner approval needed.
 
-**Standing owner rulings this arc:** Tanium/NinjaOne share BOTH border types
-(bound in `plan.rules.southBorder`: sound under `0,3`/`1,3`, land under
-`2,3`/`3,3`, bay at `4,3`); water bridge approved; palette
-gate-and-regenerate approved; `OPENAI_API_KEY` for native-2048 workers still
-an open offer (would raise effective density `4.63 -> 7.56` px/world px).
+**Unresolved, owner call:** the `407` uncommitted stream-r3 modifications in
+this worktree (shoreline-erosion re-bake + v3 coast fill, obsolescent) —
+commit as an interim fix for the old-world serving, or discard. Untouched
+again this session; NOT included in this session's commit. Side cost: every
+worker runs `git status` and swallows those 400 lines into its context.
 
-**Cautions that cost lanes this session:** carrying a discarded attempt's
-numbers across a regeneration (the west-water `25.6%` incident — measure
-against the CURRENT accepted artefact); prose spatial pegs (generators
-cannot hit coordinates — the bridge exists because of this); review at
-reduced zoom as well as 1:1; eyes on flagged pixels before believing or
-tuning any gate; corner-pocket smudges in unauthored ground are provisional
-by design; stale stall-monitors fire false alarms after their bake ends —
-stop them when the bake lands.
-- **OWNER RULING (2026-09-01): NinjaOne and Tanium share BOTH a land and an
-  ocean border.** Director binding along NinjaOne's south row: cells `0,3`/`1,3`
-  open into a SOUND (ocean border — the inlet-crossing and submerged-run rail
-  features live there); cells `2,3`/`3,3` run as LAND into Tanium (the land
-  border — no coast on their south edges); `4,3`'s south-east bay stays sea as
-  authored. Recorded in the plan's `rules.southBorder`, so every south-row
-  packet inherits it. Tanium's future plan must mirror it on its north edge.
-- **Durability gap, flagged**: the territory plan
-  (`.codex-tmp/territory/ninjaone-plan.json`) and its generator script are
-  gitignored scratch, yet `cell.mjs` requires the plan and the manifest's cells
-  derive from it. Moving it to a committed path touches a solidified constant —
-  owner approval needed; until then a `git clean` erases the plan.
-- **Unresolved, owner call**: the `407` uncommitted stream-r3 modifications in
-  this worktree (shoreline-erosion re-bake + v3 coast fill, both declared
-  obsolescent above) — commit as an interim fix for the live old-world serving,
-  or discard. Left untouched this session.
+**Cautions that cost lanes (carry forward):** measure against the CURRENT
+accepted artefact, never a discarded attempt's numbers; prose spatial pegs
+do not land — the bridge exists because of this, and this session proved it
+again twice; review at reduced zoom as well as 1:1; eyes on flagged pixels
+before believing or tuning any gate; corner-pocket smudges in unauthored
+ground are provisional; a bake is ~13 min — dispatch it as a background
+shell (the Bash timeout does not kill background runs; verified) and read
+`.codex-tmp/authoring/cells/<id>/<id>.log` for `tokens used`, never the
+process list; worker self-reports are claims (this one honestly reported its
+own peg miss — still measure).
