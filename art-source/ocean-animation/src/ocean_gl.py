@@ -211,6 +211,7 @@ class OceanRenderer:
                   uRegionContrast=float(p.get('regionContrast', 1.0)),
                   uFormBend=float(p.get('formBend', 0.0)),
                   uFormSpread=float(p.get('formSpread', 1.0)),
+                  uSpecDense=float(p.get('specDense', 1.0)),
                   uFormGroup=float(p.get('formGroup', 0.0)),
                   uFormFine=float(p.get('formFine', 0.0)),
                   uSpread=float(p.get('spread', 26.0)),

@@ -44,6 +44,7 @@ uniform float uDirBend;                 // bounded additive phase bend: curvatur
 uniform float uRegionDepth, uRegionContrast;  // large-scale weather: how much the sea varies place to place
 uniform float uFormBend, uFormGroup, uFormFine;  // curvature, group variance, finer train
 uniform float uFormSpread;   // directional bandwidth of the TONE, as a fraction of uSpread
+uniform float uSpecDense;    // 0 = the old 3-component swell, 1 = the dense fan
 uniform float uChopGain;
 uniform float uJitter;                  // crest-spacing jitter, radians
 uniform float uStokes;                  // shoreward drift gain
@@ -308,6 +309,28 @@ void main()
     addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * uHarmA.x, uHarmM.x,  0.00 * sp, uPeriodP, j1,       shP);
     addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * 0.54,               0.92,     -0.62 * sp, uPeriodP, j2,       shP);
     addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * 0.47,               1.09,      0.72 * sp, uPeriodP, j3,       shP);
+    // A DENSER SPECTRUM. Three components at one scale and three angles is a
+    // grating, and this file already wrote down why: "a narrowband sea is
+    // regular by construction ... no amount of foam or shading work can fix a
+    // spectrum." Measured on the FFT of the live frame, the swell peak stands
+    // 84x its own band's median; with the wave field off -- no fabric visible
+    // at all -- it is 43x. That ratio IS the fabric, and the only thing that
+    // lowers it is more independent waves.
+    //
+    // Six more, each a slightly different SIZE as well as direction, so the sum
+    // stops repeating: neighbouring components drift in and out of step over
+    // the frame instead of locking into one beat. Amplitudes decay with angle
+    // (a cos-2s fan, not a crossed sea -- two comparable trains 40 degrees
+    // apart is what produced the plaid, and that failure is recorded).
+    // Scale-narrow is deliberately relaxed here to +-30%: the crest-hopping the
+    // narrow band was protecting against is exactly what finite crest length
+    // looks like from above.
+    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * 0.42 * uSpecDense, 0.88, -0.30 * sp, uPeriodP, j2 * 1.7, shP);
+    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * 0.38 * uSpecDense, 1.14,  0.34 * sp, uPeriodP, j3 * 0.4, shP);
+    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * 0.33 * uSpecDense, 0.95, -0.95 * sp, uPeriodP, j1 * 2.3, shP);
+    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * 0.30 * uSpecDense, 1.21,  1.02 * sp, uPeriodP, j2 * 0.6, shP);
+    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * 0.26 * uSpecDense, 0.83, -1.35 * sp, uPeriodP, j3 * 1.9, shP);
+    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * 0.23 * uSpecDense, 1.30,  1.42 * sp, uPeriodP, j1 * 0.8, shP);
     // The sun sheen must read the large-scale surface only. Evaluating a
     // pow(dot(N,H), 24) lobe against a normal that still carries the secondary
     // train and the chop was, by ablation, 64% of all high-frequency mottling in

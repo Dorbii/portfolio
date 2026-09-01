@@ -224,7 +224,7 @@ PRESETS['calm_swell'] = dict(
               'chop': ((0.342, 0.940), 1.12)},        # L0 ~  26 px
     ampP=2.30, ampS=1.00, ampC=0.70, chopGain=0.45,
     harmM=(1.0, 1.88, 3.25), harmA=(1.0, 0.24, 0.09),
-    spread=19.0, formSpread=1.0, groupDepth=0.58, groupScale=0.399, groupAcross=1.5,
+    spread=19.0, formSpread=1.0, specDense=1.0, groupDepth=0.58, groupScale=0.399, groupAcross=1.5,
     groupNoise=620.0, groupIrreg=0.45,
     steep=0.54, setMix=0.50, setCycles=2.0, jitter=0.62,
     deepEnd=15.0, shallowEnd=4.0, tealDepth=17.0,
@@ -253,7 +253,7 @@ PRESETS['windy_rolling_surf'] = dict(
               'chop': ((0.259, 0.966), 1.04)},        # L0 ~  22 px
     ampP=3.20, ampS=2.00, ampC=1.50, chopGain=0.55,
     harmM=(1.0, 1.78, 3.05), harmA=(1.0, 0.30, 0.12),
-    spread=27.0, formSpread=1.0, groupDepth=0.62, groupScale=0.315, groupAcross=1.9,
+    spread=27.0, formSpread=1.0, specDense=1.0, groupDepth=0.62, groupScale=0.315, groupAcross=1.9,
     groupNoise=620.0, groupIrreg=0.45,
     steep=0.66, setMix=0.60, setCycles=3.0, jitter=0.70, ampL=1.05,
     deepEnd=23.0, shallowEnd=9.0, tealDepth=26.0,
@@ -305,7 +305,7 @@ PRESETS['heavy_crashing_surf'] = dict(
     # direction" the sea was missing.
     ampP=4.10, ampS=1.95, ampC=2.85, chopGain=0.95,
     harmM=(1.0, 1.72, 2.95), harmA=(1.0, 0.36, 0.16),
-    spread=38.0, formSpread=1.0, groupDepth=0.72, groupScale=0.338, groupAcross=2.2,
+    spread=38.0, formSpread=1.0, specDense=1.0, groupDepth=0.72, groupScale=0.338, groupAcross=2.2,
     # Group envelope: mostly irregular travelling noise rather than a beat.
     groupNoise=620.0, groupIrreg=0.72,
     steep=0.94, setMix=0.78, setCycles=2.0, jitter=0.78,
