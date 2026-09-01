@@ -260,6 +260,57 @@ ablation and its baseline in the same session, and ALWAYS from the repo root
 (the Bash cwd persists; a relative --out silently writes into a nested tree,
 which swallowed a whole ablation batch).
 
+## THE FABRIC IS LOUDNESS, NOT REGULARITY (2026-08-31 night, external ref)
+
+One external reference finally got measured, and it falsifies six sessions of
+premise. DREDGE is a shipped, well-liked stylized game whose near-plan water
+nobody calls cloth. Its open water, hand-cropped 768x768 and verified by eye:
+
+                   band energy   coherence   spectral peak   median contrast
+    DREDGE             5.77        0.688         229.7             0.5
+    ours              17.64        0.374          75.4             5.1
+
+DREDGE's sea is THREE TIMES more spectrally peaked and TWICE as directionally
+coherent as ours -- far more "regular" by every shape measure we have been
+chasing -- and it reads fine. The one number where it is not extreme is
+absolute amplitude: its banding is a third of ours.
+
+So the fabric read tracks the ABSOLUTE AMPLITUDE of the swell band, not the
+shape of the spectrum. That explains, at last, why every attempt to make the
+spectrum less regular changed the picture so little: hard union, soft-max,
+phase bend, raised secondary, licMix, the tonal fan, the 9-component swell,
+the angle-flat reweighting. All eight moved SHAPE. None moved LOUDNESS.
+
+It also corrects the contrast hypothesis recorded below. Our sea is indeed
+flatter than the land art beside it (6.4 vs 29.9), but DREDGE's water is
+median 0.5 -- ten times flatter than ours -- and does not read as cloth. So
+"the sea must approach the land's local contrast" is NOT supported. What is
+supported: the sea's PERIODIC content must be quiet. Aperiodic incident is a
+style choice available to us, not the fix.
+
+THE DIRECTION, and the acceptance test:
+  * Primary number is band-energy on a water-only capture at the anchor camera.
+    Ours 16.9; the wave-field-off floor is 11.8; DREDGE sits at 5.8.
+  * Cut the swell's CONTINUOUS TONAL contribution in open water so band energy
+    falls toward the floor, WITHOUT killing the field -- it still drives
+    events, timing and flow. This is the codex deep dive's step 1: the swell
+    becomes a placement signal, not a compulsory visible mark.
+  * Spend visible contrast on finite events -- breaks, foam runs, shore, wakes
+    -- which is where the eye accepts detail as cause rather than pattern.
+  * peak / angdeg / coherence are now DIAGNOSTICS ONLY. Do not optimise them.
+    DREDGE would fail all three and looks right.
+
+Scale caveat, honestly: DREDGE's camera is closer than our map view, so its
+screen wavelengths are not ours. The amplitude comparison is the robust part;
+treat 5.8 as a direction, not a target to hit exactly.
+
+REFERENCE COLLECTION IS HARDER THAN IT LOOKS. Two automated passes over 18
+games returned 15 accepted crops of which ZERO were water: sky is blue, UI
+panels are blue, a snow bay is blue, and an ARPG screenshot is nearly always
+combat on land. Every crop must be eyeballed on a contact sheet before a number
+from it is allowed to count. The one row here was hand-picked off a coordinate
+grid.
+
 ## The fabric — the measurement that reframes it (2026-08-31 night)
 
 Six attempts have now been spent making the SWELL less regular, and the return
