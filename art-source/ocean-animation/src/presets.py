@@ -224,7 +224,7 @@ PRESETS['calm_swell'] = dict(
               'chop': ((0.342, 0.940), 1.12)},        # L0 ~  26 px
     ampP=2.30, ampS=1.00, ampC=0.70, chopGain=0.45,
     harmM=(1.0, 1.88, 3.25), harmA=(1.0, 0.24, 0.09),
-    spread=19.0, groupDepth=0.58, groupScale=0.399, groupAcross=1.5,
+    spread=19.0, formSpread=1.0, groupDepth=0.58, groupScale=0.399, groupAcross=1.5,
     groupNoise=620.0, groupIrreg=0.45,
     steep=0.54, setMix=0.50, setCycles=2.0, jitter=0.62,
     deepEnd=15.0, shallowEnd=4.0, tealDepth=17.0,
@@ -253,7 +253,7 @@ PRESETS['windy_rolling_surf'] = dict(
               'chop': ((0.259, 0.966), 1.04)},        # L0 ~  22 px
     ampP=3.20, ampS=2.00, ampC=1.50, chopGain=0.55,
     harmM=(1.0, 1.78, 3.05), harmA=(1.0, 0.30, 0.12),
-    spread=27.0, groupDepth=0.62, groupScale=0.315, groupAcross=1.9,
+    spread=27.0, formSpread=1.0, groupDepth=0.62, groupScale=0.315, groupAcross=1.9,
     groupNoise=620.0, groupIrreg=0.45,
     steep=0.66, setMix=0.60, setCycles=3.0, jitter=0.70, ampL=1.05,
     deepEnd=23.0, shallowEnd=9.0, tealDepth=26.0,
@@ -305,7 +305,7 @@ PRESETS['heavy_crashing_surf'] = dict(
     # direction" the sea was missing.
     ampP=4.10, ampS=1.95, ampC=2.85, chopGain=0.95,
     harmM=(1.0, 1.72, 2.95), harmA=(1.0, 0.36, 0.16),
-    spread=38.0, groupDepth=0.72, groupScale=0.338, groupAcross=2.2,
+    spread=38.0, formSpread=1.0, groupDepth=0.72, groupScale=0.338, groupAcross=2.2,
     # Group envelope: mostly irregular travelling noise rather than a beat.
     groupNoise=620.0, groupIrreg=0.72,
     steep=0.94, setMix=0.78, setCycles=2.0, jitter=0.78,
@@ -482,7 +482,7 @@ PRESETS['heavy_crashing_surf'] = dict(
     # and only as much read-smoothing as it takes to keep the boundary a curve
     # (foamRead 1.8 -> 0.9). Foam then has edges and internal structure, which
     # is what separates churned water from a cloud.
-    foamRead=0.9, foamSoft=0.046, foamErodeK=2.5, laceScale=48.0, foamWide=0.35,
+    foamRead=0.9, foamSoft=0.046, foamErodeK=6.5, laceScale=48.0, foamWide=0.35,
     shortSurf=0.22, lineGroup=1.0, shoreFloor=0.07,
     # Fine filigree on roughly a third of the water, not all of it.
     fineSparse=0.52, fineSparseMix=1.0,
@@ -514,7 +514,7 @@ PRESETS['heavy_crashing_surf'] = dict(
     # straight back before the threshold turns it into scattered white dots.
     # A painted mass wants a boundary that is a curve: erode a third as hard,
     # at twice the scale, with the filament weight down to match.
-    filament=0.16,
+    filament=0.55,
     # Subsurface teal flash under events (stylized-water-brief.md device 3).
     eventTeal=0.55,
     sprayLife=1.55, spraySpread=64.0, sprayInject=2.6, sprayGate=0.33, sprayGain=1.05,

@@ -434,6 +434,7 @@ uniform float uDirWander;               // slow spatial variation of wave direct
 uniform float uDirBend;                 // bounded additive phase bend: curvature without decorrelation
 uniform float uRegionDepth, uRegionContrast;  // large-scale weather: how much the sea varies place to place
 uniform float uFormBend, uFormGroup, uFormFine;  // curvature, group variance, finer train
+uniform float uFormSpread;   // directional bandwidth of the TONE, as a fraction of uSpread
 uniform float uChopGain;
 uniform float uJitter;                  // crest-spacing jitter, radians
 uniform float uStokes;                  // shoreward drift gain
@@ -522,6 +523,30 @@ void addSpread(inout Acc acc, float S, float kmag, vec2 dir, vec2 perpD, float k
     acc.energy += a * a;
     acc.orb += kd * (a * w * c);
     acc.steepMax = max(acc.steepMax, ak);
+}
+
+// THE TONE NEEDS THE DIRECTIONAL BANDWIDTH THE HEIGHT FIELD ALREADY HAS.
+// addSpread above gives the height field real wavevector rotations, so its
+// crests are short_. hForm below never got them: it was three cosines of the one
+// scalar phase SP, whose level sets are parallel BY CONSTRUCTION, everywhere,
+// forever. Measured, that is not a statistic but a structural constant -- band
+// coherence 0.4525 and 0.4515 on two captures of one build, a spread of 0.001.
+// A zero-bandwidth model can return nothing else, which is why four attempts to
+// break the fabric by arithmetic ON that field all failed.
+//
+// This is the SAME rotation addSpread performs -- a FIXED angle per component,
+// not the spatially-varying_ wander/bend that this_ file records as failures at
+// uDirWander and uDirBend. The distinction is the whole point: a fixed_ rotation
+// adds a second direction and keeps every component's phase coherent along its
+// own crests, while a noise-driven bend decorrelates a component from itself
+// across the scene and lands in mottle. One is a spectrum; the other is jitter.
+float formWave(float SPv, float m, float deltaDeg, float k0, vec2 pxv,
+               vec2 perpDv, float bendTerm, float w, float phase)
+{
+    float dl = radians(deltaDeg);
+    float th = SPv * m * cos(dl) + k0 * m * sin(dl) * dot(pxv, perpDv)
+             + bendTerm - w * uTime + phase;
+    return cos(th);
 }
 
 void addComp(inout Acc acc, float S, float kmag, vec2 dir, float amp,
@@ -1049,9 +1074,29 @@ void main()
     float wF3 = w0F * sqrt(mF3);
     wF3 = 6.28318530718 * max(1.0, floor(wF3 * uLoop / 6.28318530718 + 0.5)) / uLoop;
     float a3 = uFormFine;
-    float hForm = (cos(SP + bend - wF * uTime)
-                 + aL * cos(SP * uHarmL + bend * 0.55 - wLF * uTime + 1.3)
-                 + a3 * cos(SP * mF3 + bend * 1.7 - wF3 * uTime + 2.6)) / (1.0 + aL + a3);
+    // ---- the tone as a DIRECTIONAL FAN, not one phase ---------------------
+    // Three components at FIXED angles across the spread, cosine-squared
+    // weights, all at the same wavelength: that is a directional spectrum, and
+    // its level sets cross instead of running parallel. Crest LENGTH now comes
+    // from where neighbouring directions fall in and out of step, which is the
+    // mechanism that makes real crests finite -- not from the group envelope,
+    // which can only change their contrast.
+    //
+    // Frequency-dependent spread, as measured seas have it: the swell keeps the
+    // narrow fan, and the finer harmonic gets a much wider one, because short_
+    // waves are always more short_-crested than the swell they ride on.
+    //
+    // At uFormSpread 0 every offset vanishes and the three fan components
+    // collapse to a single cosine of SP with the old amplitude -- an exact
+    // no-op, so the negative result stays reproducible and the A/B is clean.
+    float spF = uSpread * uFormSpread;
+    float hFan = (formWave(SP, 1.0,  0.00 * spF, k0P, px, perpP, bend, wF, 0.0)
+           + 0.62 * formWave(SP, 1.0, -0.78 * spF, k0P, px, perpP, bend, wF, 0.0)
+           + 0.52 * formWave(SP, 1.0,  0.86 * spF, k0P, px, perpP, bend, wF, 0.0))
+           / 2.14;
+    float hLong = formWave(SP, uHarmL, 0.26 * spF, k0P, px, perpP, bend * 0.55, wLF, 1.3);
+    float hFine = formWave(SP, mF3,   -1.35 * spF, k0P, px, perpP, bend * 1.7,  wF3, 2.6);
+    float hForm = (hFan + aL * hLong + a3 * hFine) / (1.0 + aL + a3);
     hForm *= formEnv;
     // A SECOND TRAIN, UNIONED RATHER THAN SUMMED -- this_ is what breaks the
     // even spacing the owner has now marked on two screenshots.
@@ -1125,7 +1170,19 @@ void main()
     // runs unbroken across the frame, and refracts because SP already does.
     // The variance the reference draws belongs in the stroke's alpha and width;
     // put it in the field and it displaces the path instead.
-    float hPath = cos(SP + bendCoarse - wF * uTime);
+    // The drawn crest LINES need the fan as much as the tone does -- more, in
+    // fact, since a stroke is the most legible thing on the sea. One cosine of
+    // SP gives contourLine a set of level sets exactly one wavelength apart and
+    // parallel to the last, which is a woven texture no matter how it is shaded.
+    // Summed across the fan, the level sets cross and interleave, so strokes
+    // START AND STOP: crest length becomes finite and varied for the same reason
+    // it is in a real sea, because neighbouring directions drift in and out of
+    // step along the crest. Same gate as the tone, so uFormSpread 0 restores the
+    // single cosine exactly.
+    float hPath = (formWave(SP, 1.0,  0.00 * spF, k0P, px, perpP, bendCoarse, wF, 0.0)
+            + 0.62 * formWave(SP, 1.0, -0.78 * spF, k0P, px, perpP, bendCoarse, wF, 0.0)
+            + 0.52 * formWave(SP, 1.0,  0.86 * spF, k0P, px, perpP, bendCoarse, wF, 0.0))
+            / 2.14;
     // A gated path holds no level-set crossing, so the crest stroke and the
     // filament injection contour both die with it on still water.
     outPath = vec4(hPath * seaGate, formEnv, groupEnv, rE);

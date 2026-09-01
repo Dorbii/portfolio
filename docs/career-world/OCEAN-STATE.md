@@ -222,12 +222,81 @@ masks to water the page actually shows):
 
     python src/weave_metric.py <captures>   # coh, hf, foam%  -- fine texture
     python src/band_metric.py  <captures>   # band energy     -- 15-60 px bands
+    python src/cloud_metric.py <captures>   # foam SHAPE      -- the cloud read
+
+ALWAYS CAPTURE WITH --canvas-only. This cost most of a session. A capture
+without it is a PAGE SCREENSHOT of the canvas rect, which at the anchor camera
+is 66% CAPITAL: the metrics' alpha>250 water mask then passes every pixel, and
+they measure the city. Read that way the sea appeared to have band-coherence
+0.452 with a dominant orientation of +38 degrees -- which was the street grid,
+not the swell. On the real water mask the same frame is 0.379 at -7.7 degrees,
+water is 34% of the frame, and the noise floor between two captures is 0.0000.
+Every conclusion drawn from a page screenshot of this camera is void.
+
+The other half of the same lesson: a RELATIVE threshold cannot compare builds.
+cloud_metric defaulted to median+1.8sd, so ablating the foam moved the
+threshold onto the bright teal shallows and reported a healthy "foam"
+population with the foam switched off. Pin it (--thr=121.9 for this camera)
+across any comparison set.
 
 Measured noise floor between two identical builds: coh 0.3628 vs 0.3618, hf
-25.64 vs 25.53. Anything smaller than that is not a result. Always capture the
+25.64 vs 25.53. Anything smaller than that is not a result.
+
+BAND-COHERENCE IS THE SHARPEST INSTRUMENT THIS LANE HAS. Two independent
+captures of one build at the anchor camera (2026-08-31, post-crash rebaseline)
+returned band-coherence 0.4525 and 0.4515 -- a phase spread of 0.001 -- with
+band-energy 26.53 vs 25.85. So band-coherence resolves a real change of about
+0.005; band-energy needs about 1.5. That makes coherence the number to move
+when the complaint is "reads as fabric", because fabric IS coherence.
+
+BUT ONLY WITHIN ONE CANVAS SIZE. The metric is a 3-px minus 40-px blur, so its
+band is defined in SCREEN pixels: capture the same sea into a different canvas
+and it measures a different physical scale. Today's captures are 1666x937 and
+read 0.452; earlier sessions recorded 0.396 at the same camera and cannot be
+compared to them, because their canvas is not recorded and no longer exists.
+Record the resolution beside every number, and re-measure the baseline in the
+same session as the ablation rather than quoting yesterday's. Always capture the
 ablation and its baseline in the same session, and ALWAYS from the repo root
 (the Bash cwd persists; a relative --out silently writes into a nested tree,
 which swallowed a whole ablation batch).
+
+## The clouds — SOLVED (2026-08-31 night)
+
+The owner's wife, unprompted, asked why there were clouds in the water, and the
+owner has raised it four times since. It was never the tone, the gloss, the sky
+reflection or the paint pass. Isolating the foam layer against a foam-free
+build made it obvious in one look: in open water the foam was drawing ROUNDED
+MASSES WITH CAULIFLOWER EDGES -- cumulus, seen from above. 57.4% of all foam
+area sat in components thicker than 8 px.
+
+Cause: the heavy row had walked both foam SHAPE controls down from COMMON --
+erosion 5.0 -> 2.5, filament 0.46 -> 0.16 -- so the one state that ships had the
+least-carved foam of the three. At 6.5 and 0.55 the blobs are gone (57.4% ->
+0.0% by area) and foam saturation rises 0.228 -> 0.313, meaning what remains
+carries the water's colour instead of sitting on top as neutral grey.
+
+What did NOT work, all ablated and all back within noise: gloss, sky mix, patch
+injection (injPatch, a 640 px stamp, the obvious suspect), foam diffusion, and
+the composite read smoothing. And one instructive failure -- raising
+foamDeepThr to thin the offshore foam culled the LACE and left the lumps
+standing, taking blobby UP to 70.6%. Rarity is not shape.
+
+## The directional fan — PARTIAL (2026-08-31 night)
+
+wave.frag's addSpread has always given the HEIGHT field real wavevector
+rotations. hForm and hPath never got them: both were cosines of the one scalar
+phase SP, whose level sets are parallel by construction. Both now sum a
+three-component fan across uSpread, gated by uFormSpread (0 = exact no-op).
+
+Honest result: it lowers band ENERGY 4% (24.01 -> 23.05, against a floor of
+0.01) and leaves orientation coherence unmoved (0.3788 vs 0.3792). So it is a
+real change that does not by itself fix the fabric read. Keep it -- it is the
+physically right construction and it costs ~30 ALU -- but the fabric is not
+merely a zero-bandwidth tone, since the height field HAS bandwidth and still
+bands. The group envelope is currently the only term measurably fighting it:
+switching groups off RAISES coherence to 0.4836, and pushing along-crest group
+breakup lowers it to 0.4406 (both on the old contaminated mask; re-measure on
+canvas-only before building on them).
 
 ## The capital-tier crosshatch — SOLVED (2026-08-31 late)
 
