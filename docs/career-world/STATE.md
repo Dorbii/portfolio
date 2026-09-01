@@ -498,7 +498,46 @@ three intensities, `.codex-tmp/session3/seed-r2/`), then the three existing
 cells are regenerated under it from an empty L2 world in adjacency order
 (c4-3, c3-3, c4-2) — the old cells and the r1 seed are deleted when their
 replacements land. Territory geology/vegetation/water rules are unchanged;
-only the register changes.
+only the register changes. **Seed round 1** (`seed-r2-a/b/c.png`): owner —
+"much closer to the direction I want", with three corrections that are now
+binding: (1) **the lighting was not neutral** — the owner's eye caught a
+consistent lit side (cream front faces, violet right-facing faces) that the
+key-light gate passed at `0.0007–0.0021` because millions of grass gradients
+dilute it; the director's hue-isolated strong-edge moment inside rock only
+(`.codex-tmp/session3/seed-light.mjs`) measures the candidates at
+`0.18–0.27 @ ~50°` against the accepted quarry's `0.07` — a stable direction
+across three independent generations, i.e. an implied key. Round 2 enforces
+flat lighting (every face the same value whatever it faces; ambient
+occlusion only). A gate at this measure (rock-only, edges >= 80, threshold
+~0.15) is a candidate for `cell.mjs` — owner approval, control first.
+(2) **"Less happy meadows everywhere"** — a whole territory of luminous
+meadow would exhaust the viewer; scenery must vary (moor, bare basalt, dark
+forest, scree, mist, ONE lush pocket). Director proposal per cell:
+`.codex-tmp/session3/seed-r2/scenery-variance-plan.md`, sent for mark-up.
+(3) **The owner's crop of candidate c's gorge** (floating rock fragments with
+crystals, self-luminous outcrops, a fall into glowing water) is the target
+for the INTERESTING areas — placed as terrain moments at the rail theatre
+cells, never a ground state. Plus one named unique place: **the purple
+field** — one open area carpeted in dense uniform purple bloom (the owner's
+Outward memory), proposed at cell `1,1` on the rail approach to the capital;
+general heather everywhere else stays sparse so the field is unique.
+**Seed rounds 2 and 3 (ledger R059/R060):** flat-lighting WORDS changed
+nothing (`0.18–0.25` at strong rock edges, reference = round-1 b); using the
+accepted quarry as the ONLY reference fixed it for the plain candidate g
+(`0.105`, the canon's band) while the magical candidate h stayed at `0.246`.
+Lesson: the shading convention travels through the reference image, not
+the prompt. Owner's cross-cutting observation, confirmed: one image model
+renders every generation and every packet references the previous lineage,
+so the hand never changes; a pipeline FINISH prototype
+(`.codex-tmp/session3/finish.mjs`, value steps + edge ink + split tone +
+seeded grain) was rendered on g as the cheapest lever toward a look that is
+ours; the owner parked the idea of mixing two agents' image tools (the
+director has no image tool) and does not want a local model (the machine
+could run one: RTX 3080 Ti 12 GB). **Sourced reference for the purple
+field:** Outward's Conflux Mountain, Chersonese — mana-tinted ground in
+patches around a landmark, muted violet, against grey rock and mist;
+recorded with URLs in `scenery-variance-plan.md`. **Seed canon: NOT yet
+picked — owner reviews rounds 1–3 and the finish prototype.**
 
 **Durability gap, still open:** `.codex-tmp/territory/ninjaone-plan.json`
 and its generator are gitignored scratch that `cell.mjs` requires; moving
