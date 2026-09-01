@@ -360,6 +360,18 @@ solidified and changes there need owner approval first. See its `AGENTS.md`.
   binding maps are wired; only the frontier path has run live). Then proceed by
   adjacency toward the capital (2,1). Review artefacts for c4-3 in
   `.codex-tmp/dir-stitch/preview-*.png`.
+- **OWNER RULING (2026-09-01): NinjaOne and Tanium share BOTH a land and an
+  ocean border.** Director binding along NinjaOne's south row: cells `0,3`/`1,3`
+  open into a SOUND (ocean border — the inlet-crossing and submerged-run rail
+  features live there); cells `2,3`/`3,3` run as LAND into Tanium (the land
+  border — no coast on their south edges); `4,3`'s south-east bay stays sea as
+  authored. Recorded in the plan's `rules.southBorder`, so every south-row
+  packet inherits it. Tanium's future plan must mirror it on its north edge.
+- **Durability gap, flagged**: the territory plan
+  (`.codex-tmp/territory/ninjaone-plan.json`) and its generator script are
+  gitignored scratch, yet `cell.mjs` requires the plan and the manifest's cells
+  derive from it. Moving it to a committed path touches a solidified constant —
+  owner approval needed; until then a `git clean` erases the plan.
 - **Unresolved, owner call**: the `407` uncommitted stream-r3 modifications in
   this worktree (shoreline-erosion re-bake + v3 coast fill, both declared
   obsolescent above) — commit as an interim fix for the live old-world serving,
