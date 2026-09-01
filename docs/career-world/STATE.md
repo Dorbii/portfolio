@@ -345,7 +345,11 @@ solidified and changes there need owner approval first. See its `AGENTS.md`.
   (`81/25/9/4/2/2/1`). NO ring at any zoom — verified at 1:1 AND reduced
   scale. Style matches the seed; water classified coast/lake/stream/fall; the
   stream mask traces the channel ~`0.25 m` wider than the waterline per bank
-  (wet-margin latitude for L3). Sea takes the E and S edges; the drainage
+  (wet-margin latitude for L3). Sea takes the E and S edges with the cove in
+  the cell's south-east; **the west edge is entirely land** (the first
+  attempt's "coast wraps the SW corner" and `25.6%` west-edge water belonged
+  to the DISCARDED attempt — carrying its report across the regen briefly
+  misinformed c3-3's brief until the continuity gate caught it). The drainage
   stream crosses the N edge, so **c4-2 must continue it**. `sourcePx` is
   recorded per cell in the manifest.
 - The accepted L2 seed moved from scratch into
@@ -355,11 +359,39 @@ solidified and changes there need owner approval first. See its `AGENTS.md`.
   sources ~`35 MB` PNG each → ~`700 MB`/territory. Consider lossless-webp
   sources (pixel-exact, roughly half) — needs owner approval since cell.mjs's
   expected filenames are solidified.
-- **NEXT: author c3-3 (west) or c4-2 (north)** — the first cell against a real
-  authored neighbour, to prove the seam + conditioning path (context crops and
-  binding maps are wired; only the frontier path has run live). Then proceed by
-  adjacency toward the capital (2,1). Review artefacts for c4-3 in
-  `.codex-tmp/dir-stitch/preview-*.png`.
+- **Neighbour cells c4-2 and c3-3 AUTHORED (2026-09-01, late session).** Ten
+  bakes total across three cells; six rejections, five of them by gates. The
+  gate set evolved on evidence: baked-sun detection moved to the first
+  circular moment (`<0.011`; sunned D05 measures `0.0318`, canon terrain
+  `<=0.004` — the old orientation-ratio metric scored the SEED at `1.444`
+  against its own `1.45` threshold and could not gate); worker masks are
+  binarized+feathered at derivation (soft interiors shipped half-removed
+  water); the water-removed gate became a strict self-check after it started
+  measuring the derivation's own feather (the void-gate pattern); `--redo`
+  re-derives and re-gates an existing generation without a bake; a **water
+  continuity gate** matches footprint crossings on shared edges (48 px).
+- **OPEN MECHANISM DECISIONS (owner input requested before more cells):**
+  1. **Stream handover.** The generator cannot hit spatial pegs by prompt
+     (three attempts landed a stream at 26.7-35% against a binding 19.5%; the
+     worker itself stopped per the two-strike rule and asked for either a
+     deterministic coordinate correction or a spatially controllable
+     generator). c4-2 therefore stands in the world as its earlier accepted
+     attempt with a measured `~500 px` stream misalignment Z-kink at the
+     c4-3 seam. Options: (a) pipeline-side footprint bridge in the seam band
+     for gaps `<=150 px` (mask-space only, feels-real doglegs, art untouched);
+     (b) operator-drawn watercourse overlays as conditioning; (c) native-2048
+     API generator with better spatial adherence (needs `OPENAI_API_KEY`);
+     (d) accept kinks as character. The continuity gate blocks new
+     misalignments regardless.
+  2. **Inter-cell palette drift.** c3-3's meadow measures blue/green `0.35`
+     vs the seed's `0.50` — visibly yellower beside its neighbours in the
+     mounted view. No gate measures palette conformance yet; a
+     content-controlled land-colour gate (vegetation-classified medians vs
+     the seed, calibrated) is the candidate.
+- Corner-pocket ghost smudges where 3+ bleeds average in UNAUTHORED ground are
+  provisional by design — the owning cell repaints them when authored.
+- Review artefacts in `.codex-tmp/dir-stitch/` (three-cell mounted view, seam
+  bands, per-cell previews).
 - **OWNER RULING (2026-09-01): NinjaOne and Tanium share BOTH a land and an
   ocean border.** Director binding along NinjaOne's south row: cells `0,3`/`1,3`
   open into a SOUND (ocean border — the inlet-crossing and submerged-run rail

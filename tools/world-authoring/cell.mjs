@@ -45,7 +45,11 @@ sharp.cache(false);
 const ROOT = process.cwd();
 const TERRITORY = ".codex-tmp/territory/ninjaone-plan.json";
 const WORK = ".codex-tmp/authoring/cells";
-const LOCKDIR = ".codex-tmp/authoring/cell.lock";
+// one lock per OUTPUT TREE: the invariant is one writer per world, and a
+// relocated test world (L2_OUT_ROOT) is its own world with its own lock
+const LOCKDIR = process.env.L2_OUT_ROOT
+  ? path.join(process.env.L2_OUT_ROOT, "cell.lock")
+  : ".codex-tmp/authoring/cell.lock";
 
 const CELL_PX = 2048;
 const BLEED = 256;
@@ -85,6 +89,9 @@ function args() {
     from: get("--from"),
     dryRun: a.includes("--dry-run"),
     force: a.includes("--force"),
+    redo: a.includes("--redo"),   // re-derive + re-gate + stitch from the
+                                  // cell dir's existing source artefacts,
+                                  // without dispatching a new generation
   };
 }
 function die(msg) { console.error(`\n  ${msg}\n`); process.exit(1); }
@@ -301,76 +308,91 @@ function weightMask(seam, contributor, authored, win, tileX, tileY) {
   return { mask, N, Mg };
 }
 
-async function stitchAndPropagate(plan, seam, paths, ledger, id) {
-  const gridW = plan.grid.cols * CELL_PX, gridH = plan.grid.rows * CELL_PX;
-  const authored = new Set([...Object.keys(ledger.cells), id]);
-  const parse = (cid) => cid.slice(1).split("-").map(Number);
-  const [col, row] = parse(id);
-  const win = windowOf(col, row, gridW, gridH);
-  const dirty = dirtyTiles(win, gridW, gridH);
+const parseCid = (cid) => cid.slice(1).split("-").map(Number);
 
-  // contributors: every authored cell whose window can reach a dirty tile
-  const contributors = [...authored].map((cid) => {
-    const [c, r] = parse(cid);
+// compose one 256px tile of the world from authored cell sources; kind picks
+// the source layer ("l2" for the shipped world, "concept" for conditioning —
+// water painted, so a neighbour's stream is visible paint, not a hole)
+async function composeTile(seam, authored, contributors, sourceOf, tx, ty, kind) {
+  const accP = new Float32Array(TILE * TILE * 4);   // premultiplied RGB + A
+  const wsum = new Float32Array(TILE * TILE);
+  for (const c of contributors) {
+    const tWin = { x0: tx * TILE, y0: ty * TILE, x1: (tx + 1) * TILE, y1: (ty + 1) * TILE };
+    if (c.win.x1 <= tWin.x0 || c.win.x0 >= tWin.x1 || c.win.y1 <= tWin.y0 || c.win.y0 >= tWin.y1) continue;
+    const { mask, N, Mg } = weightMask(seam, c.cid, authored, c.win, tx, ty);
+    const src = await sourceOf(c.cid, kind);
+    const [cc, cr] = parseCid(c.cid);
+    const gx0 = cc * CELL_PX - BLEED, gy0 = cr * CELL_PX - BLEED;   // gen origin, unclipped
+    for (let v = 0; v < TILE; v++) {
+      const y = ty * TILE + v;
+      const sy = y - gy0;
+      if (sy < 0 || sy >= src.height) continue;
+      for (let u = 0; u < TILE; u++) {
+        const w = mask[(v + Mg) * N + (u + Mg)];
+        if (w <= 0) continue;
+        const x = tx * TILE + u;
+        const sx = x - gx0;
+        if (sx < 0 || sx >= src.width) continue;
+        const si = (sy * src.width + sx) * 4;
+        const a = src.data[si + 3] / 255;
+        const o = (v * TILE + u) * 4, oi = v * TILE + u;
+        accP[o] += src.data[si] * a * w;
+        accP[o + 1] += src.data[si + 1] * a * w;
+        accP[o + 2] += src.data[si + 2] * a * w;
+        accP[o + 3] += a * 255 * w;
+        wsum[oi] += w;
+      }
+    }
+  }
+  const out = Buffer.alloc(TILE * TILE * 4);
+  for (let i = 0; i < TILE * TILE; i++) {
+    const w = wsum[i];
+    if (w <= 1e-4) continue;
+    const o = i * 4;
+    const a = accP[o + 3] / w;
+    out[o + 3] = Math.round(a);
+    if (a > 0) {
+      out[o] = Math.min(255, Math.round(accP[o] / w / (a / 255)));
+      out[o + 1] = Math.min(255, Math.round(accP[o + 1] / w / (a / 255)));
+      out[o + 2] = Math.min(255, Math.round(accP[o + 2] / w / (a / 255)));
+    }
+  }
+  return out;
+}
+
+function makeSourceOf(paths) {
+  const sources = new Map();
+  return async (cid, kind) => {
+    const key = `${cid}:${kind}`;
+    if (!sources.has(key)) {
+      sources.set(key, await rawOf(path.join(paths.sources, cid, `${cid}-${kind}.png`)));
+    }
+    return sources.get(key);
+  };
+}
+
+function contributorsFor(authored, win, gridW, gridH) {
+  return [...authored].map((cid) => {
+    const [c, r] = parseCid(cid);
     return { cid, win: windowOf(c, r, gridW, gridH) };
   }).filter((c) =>
     c.win.x1 > win.x0 - TILE && c.win.x0 < win.x1 + TILE &&
     c.win.y1 > win.y0 - TILE && c.win.y0 < win.y1 + TILE);
+}
 
-  const sources = new Map();
-  const sourceOf = async (cid) => {
-    if (!sources.has(cid)) {
-      sources.set(cid, await rawOf(path.join(paths.sources, cid, `${cid}-l2.png`)));
-    }
-    return sources.get(cid);
-  };
+async function stitchAndPropagate(plan, seam, paths, ledger, id) {
+  const gridW = plan.grid.cols * CELL_PX, gridH = plan.grid.rows * CELL_PX;
+  const authored = new Set([...Object.keys(ledger.cells), id]);
+  const [col, row] = parseCid(id);
+  const win = windowOf(col, row, gridW, gridH);
+  const dirty = dirtyTiles(win, gridW, gridH);
+  const contributors = contributorsFor(authored, win, gridW, gridH);
+  const sourceOf = makeSourceOf(paths);
 
   let written = 0, unchanged = 0;
   // ---- level 0: recompute each dirty tile from cell sources --------------
   for (const [tx, ty] of dirty[0]) {
-    const accP = new Float32Array(TILE * TILE * 4);   // premultiplied RGB + A
-    const wsum = new Float32Array(TILE * TILE);
-    for (const c of contributors) {
-      const tWin = { x0: tx * TILE, y0: ty * TILE, x1: (tx + 1) * TILE, y1: (ty + 1) * TILE };
-      if (c.win.x1 <= tWin.x0 || c.win.x0 >= tWin.x1 || c.win.y1 <= tWin.y0 || c.win.y0 >= tWin.y1) continue;
-      const { mask, N, Mg } = weightMask(seam, c.cid, authored, c.win, tx, ty);
-      const src = await sourceOf(c.cid);
-      const [cc, cr] = parse(c.cid);
-      const gx0 = cc * CELL_PX - BLEED, gy0 = cr * CELL_PX - BLEED;   // gen origin, unclipped
-      for (let v = 0; v < TILE; v++) {
-        const y = ty * TILE + v;
-        const sy = y - gy0;
-        if (sy < 0 || sy >= src.height) continue;
-        for (let u = 0; u < TILE; u++) {
-          const w = mask[(v + Mg) * N + (u + Mg)];
-          if (w <= 0) continue;
-          const x = tx * TILE + u;
-          const sx = x - gx0;
-          if (sx < 0 || sx >= src.width) continue;
-          const si = (sy * src.width + sx) * 4;
-          const a = src.data[si + 3] / 255;
-          const o = (v * TILE + u) * 4, oi = v * TILE + u;
-          accP[o] += src.data[si] * a * w;
-          accP[o + 1] += src.data[si + 1] * a * w;
-          accP[o + 2] += src.data[si + 2] * a * w;
-          accP[o + 3] += a * 255 * w;
-          wsum[oi] += w;
-        }
-      }
-    }
-    const out = Buffer.alloc(TILE * TILE * 4);
-    for (let i = 0; i < TILE * TILE; i++) {
-      const w = wsum[i];
-      if (w <= 1e-4) continue;
-      const o = i * 4;
-      const a = accP[o + 3] / w;
-      out[o + 3] = Math.round(a);
-      if (a > 0) {
-        out[o] = Math.min(255, Math.round(accP[o] / w / (a / 255)));
-        out[o + 1] = Math.min(255, Math.round(accP[o + 1] / w / (a / 255)));
-        out[o + 2] = Math.min(255, Math.round(accP[o + 2] / w / (a / 255)));
-      }
-    }
+    const out = await composeTile(seam, authored, contributors, sourceOf, tx, ty, "l2");
     const file = tilePath(paths, 0, tx, ty);
     fs.mkdirSync(path.dirname(file), { recursive: true });
     const buf = await sharp(out, { raw: { width: TILE, height: TILE, channels: 4 } })
@@ -409,7 +431,7 @@ async function stitchAndPropagate(plan, seam, paths, ledger, id) {
 }
 
 // --------------------------------------------------------------- main -----
-const { col, row, describe, from, dryRun, force } = args();
+const { col, row, describe, from, dryRun, force, redo } = args();
 if (!fs.existsSync(TERRITORY)) die(`territory plan missing: ${TERRITORY}`);
 const plan = JSON.parse(fs.readFileSync(TERRITORY, "utf8"));
 if (col < 0 || row < 0 || col >= plan.grid.cols || row >= plan.grid.rows) {
@@ -469,29 +491,30 @@ console.log(`  context       ${authoredNeighbours.length} authored neighbour(s)`
 const cellDir = path.join(WORK, id);
 fs.mkdirSync(cellDir, { recursive: true });
 
-// conditioning: the stitched world as it already exists inside this window,
-// plus an ownership map showing which pixels are binding (owned by an authored
-// neighbour — the stitch will preserve them regardless of what is drawn)
+// conditioning: the neighbours' CONCEPT art composited across this window —
+// water is visible as painted water, so an arriving stream or shoreline is a
+// feature to continue, not a transparent hole — plus an ownership map showing
+// which pixels are binding (the stitch preserves them regardless of the draw)
 if (authoredNeighbours.length) {
   const win = windowOf(col, row, gridW, gridH);
   const ctxDir = path.join(cellDir, "context");
   fs.mkdirSync(ctxDir, { recursive: true });
   const W = win.x1 - win.x0, H = win.y1 - win.y0;
   const authoredSet = new Set(Object.keys(ledger.cells));
+  const ctxContrib = contributorsFor(authoredSet, win, gridW, gridH);
+  const ctxSourceOf = makeSourceOf(paths);
   const canvas = Buffer.alloc(W * H * 4);
   const ownMap = Buffer.alloc(W * H * 4);
   for (let ty = Math.floor(win.y0 / TILE); ty < Math.ceil(win.y1 / TILE); ty++) {
     for (let tx = Math.floor(win.x0 / TILE); tx < Math.ceil(win.x1 / TILE); tx++) {
-      const file = tilePath(paths, 0, tx, ty);
-      if (!fs.existsSync(file)) continue;
-      const t = await rawOf(file);
+      const t = await composeTile(seam, authoredSet, ctxContrib, ctxSourceOf, tx, ty, "concept");
       for (let v = 0; v < TILE; v++) {
         const y = ty * TILE + v;
         if (y < win.y0 || y >= win.y1) continue;
         for (let u = 0; u < TILE; u++) {
           const x = tx * TILE + u;
           if (x < win.x0 || x >= win.x1) continue;
-          t.data.copy(canvas, ((y - win.y0) * W + (x - win.x0)) * 4, (v * TILE + u) * 4, (v * TILE + u) * 4 + 4);
+          t.copy(canvas, ((y - win.y0) * W + (x - win.x0)) * 4, (v * TILE + u) * 4, (v * TILE + u) * 4 + 4);
         }
       }
     }
@@ -507,7 +530,7 @@ if (authoredNeighbours.length) {
     .toFile(path.join(ctxDir, "window.png"));
   await sharp(ownMap, { raw: { width: W, height: H, channels: 4 } }).png()
     .toFile(path.join(ctxDir, "binding.png"));
-  console.log(`  conditioning  ${ctxDir}/window.png (+ binding.png)`);
+  console.log(`  conditioning  ${ctxDir}/window.png (+ binding.png, concept-composited)`);
 }
 
 const packet = `# L2 CELL ${id} — ${plan.territory}
@@ -589,7 +612,11 @@ from. Later cells will be conditioned on your edges.
    - \`${id}-water.json\` — an array of
      \`{ "class": "coast|lake|stream|fall|submerged", "note": "..." }\`.
    The pipeline cuts the water out of the land layer using your mask, so an
-   imprecise mask ships as a wrong coastline — trace it carefully.
+   imprecise mask ships as a wrong coastline — trace it carefully. **The mask
+   covers the water's ENTIRE painted extent**: surf, wash between shore rocks,
+   ripple highlights and reflections are all water. Both rejections so far
+   were masks that stopped at the "open water" and left the painted edge zone
+   behind as land. No interior holes; smooth boundary at your resolution.
 5. **High oblique 2.5D**, consistent with the reference. Not top-down.
 
 ## Report
@@ -625,6 +652,11 @@ try {
       fs.copyFileSync(src, path.join(cellDir, f));
     }
     console.log(`\n  artefacts supplied via --from ${from} — generation skipped.`);
+  } else if (redo) {
+    if (!fs.existsSync(path.join(cellDir, `${id}-source.png`))) {
+      die(`--redo needs an existing ${id}-source.png in ${cellDir}`);
+    }
+    console.log(`\n  --redo: re-deriving from the existing generation, no dispatch.`);
   } else {
     console.log(`\n  dispatching (bounded: one process, effort=high)...\n`);
     const runner = path.join(cellDir, `run-${id}.sh`);
@@ -666,16 +698,41 @@ codex exec \\
     sourcePx = sm.width;
     const concept = await sharp(srcFile).ensureAlpha()
       .resize(GEN_PX, GEN_PX, { kernel: "lanczos3" }).raw().toBuffer();
-    const mask = await sharp(wsrcFile).ensureAlpha()
+    const maskUp = await sharp(wsrcFile).ensureAlpha()
       .resize(GEN_PX, GEN_PX, { kernel: "lanczos3" }).raw().toBuffer();
+    // the worker's mask is intent, not geometry: binarize so a soft or
+    // semi-opaque interior cannot leave half-removed water, then feather the
+    // boundary a couple of pixels so the cut edge stays soft
+    let bin = new Float32Array(GEN_PX * GEN_PX);
+    for (let i = 0; i < GEN_PX * GEN_PX; i++) {
+      bin[i] = maskUp[i * 4 + 3] > 128 && maskUp[i * 4] > 128 ? 255 : 0;
+    }
+    for (let pass = 0; pass < 2; pass++) {
+      const R = 2, w = 2 * R + 1, tmp = new Float32Array(GEN_PX * GEN_PX);
+      for (let y = 0; y < GEN_PX; y++) for (let x = 0; x < GEN_PX; x++) {
+        let acc = 0;
+        for (let k = -R; k <= R; k++) acc += bin[y * GEN_PX + Math.min(GEN_PX - 1, Math.max(0, x + k))];
+        tmp[y * GEN_PX + x] = acc / w;
+      }
+      const dst = new Float32Array(GEN_PX * GEN_PX);
+      for (let y = 0; y < GEN_PX; y++) for (let x = 0; x < GEN_PX; x++) {
+        let acc = 0;
+        for (let k = -R; k <= R; k++) acc += tmp[Math.min(GEN_PX - 1, Math.max(0, y + k)) * GEN_PX + x];
+        dst[y * GEN_PX + x] = acc / w;
+      }
+      bin = dst;
+    }
     const l2 = Buffer.from(concept);
+    const water = Buffer.alloc(GEN_PX * GEN_PX * 4);
     for (let i = 0; i < GEN_PX * GEN_PX; i++) {
       const o = i * 4;
-      l2[o + 3] = Math.round(concept[o + 3] * (1 - mask[o + 3] / 255));
+      l2[o + 3] = Math.round(concept[o + 3] * (1 - bin[i] / 255));
+      water[o] = water[o + 1] = water[o + 2] = 255;
+      water[o + 3] = Math.round(bin[i]);
     }
     const asPng = (buf) => sharp(buf, { raw: { width: GEN_PX, height: GEN_PX, channels: 4 } }).png();
     await asPng(concept).toFile(path.join(cellDir, `${id}-concept.png`));
-    await asPng(mask).toFile(path.join(cellDir, `${id}-water.png`));
+    await asPng(water).toFile(path.join(cellDir, `${id}-water.png`));
     await asPng(l2).toFile(path.join(cellDir, `${id}-l2.png`));
     console.log(`  derived       concept/l2/water at ${GEN_PX}px from one ${sm.width}px generation`);
   }
@@ -690,7 +747,7 @@ codex exec \\
 
   const L = (p) => 0.2126 * data[p] + 0.7152 * data[p + 1] + 0.0722 * data[p + 2];
   const bins = new Array(36).fill(0);
-  let n = 0, opaque = 0;
+  let n = 0, opaque = 0, gsx = 0, gsy = 0, gsm = 0;
   for (let y = 1; y < H - 1; y++) {
     for (let x = 1; x < W - 1; x++) {
       const i = (y * W + x) * 4;
@@ -702,11 +759,17 @@ codex exec \\
       let a = Math.atan2(gy, gx) * 180 / Math.PI;
       if (a < 0) a += 360;
       bins[Math.floor(a / 10) % 36] += mag;
+      gsx += gx; gsy += gy; gsm += mag;
       n += 1;
     }
   }
   const total = bins.reduce((a, b) => a + b, 0);
   const isotropy = total ? Math.max(...bins) / (total / 36) : 0;
+  // a baked key light pushes gradient DIRECTIONS one way (first circular
+  // moment); landform ridges give +/- pairs that cancel. Calibrated 2026-09-01:
+  // canon terrain (seed + accepted cells) 0.0012-0.0036, sunned D05 detail
+  // 0.0318 — threshold at the geometric midpoint.
+  const keyLight = gsm ? Math.hypot(gsx, gsy) / gsm : 0;
 
   // water contract: all three artefacts, and water zones actually removed.
   // The fringe measure is reported but does not yet gate — its threshold is
@@ -734,7 +797,10 @@ codex exec \\
     for (let x = 1; x < W - 1; x++) {
       const i = (y * W + x) * 4;
       if (isWater(x, y)) {
-        if (isWater(x - 1, y) && isWater(x + 1, y) && isWater(x, y - 1) && isWater(x, y + 1)) {
+        // strict check only where the mask is FULLY water (beyond the cut
+        // feather): the land layer must be exactly clear there. Judged on the
+        // delivered artefacts, so a --from supply of unremoved water fails.
+        if (wm.data[i + 3] === 255 && wm.data[i] > 128) {
           waterInterior += 1;
           if (data[i + 3] > 8) wetResidual += 1;
         }
@@ -757,15 +823,79 @@ codex exec \\
   const wetResidualPct = waterInterior ? 100 * wetResidual / waterInterior : 0;
   const fringePct = ringN ? 100 * fringe / ringN : 0;
 
+  // water continuity across every shared edge with an authored orthogonal
+  // neighbour: a watercourse that crosses the boundary must be met by the
+  // neighbour's footprint at the same place, or the rendered water dead-ends
+  // at the cell line. Crossing intervals (alpha < 128 runs >= 30 px) on the
+  // shared line are matched by centre distance; 48 px (~2.3 m) tolerance.
+  const contViolations = [];
+  let contChecked = 0;
+  {
+    const runsOf = (samples, coord0) => {
+      const runs = [];
+      let s = -1;
+      for (let k = 0; k <= samples.length; k++) {
+        const w = k < samples.length && samples[k] < 128;
+        if (w && s < 0) s = k;
+        else if (!w && s >= 0) {
+          if (k - s >= 30) runs.push({ a: coord0 + s, b: coord0 + k, c: coord0 + (s + k) / 2 });
+          s = -1;
+        }
+      }
+      return runs;
+    };
+    const nSources = new Map();
+    for (const nb of authoredNeighbours) {
+      const [nc, nr] = nb.cell;
+      if (Math.abs(nc - col) + Math.abs(nr - row) !== 1) continue;
+      const nRaw = nSources.get(nb.id)
+        ?? (await rawOf(path.join(paths.sources, nb.id, `${nb.id}-l2.png`)));
+      nSources.set(nb.id, nRaw);
+      const vertical = nr === row;   // shared edge is a vertical line when the neighbour is E/W
+      const lineT = vertical
+        ? (nc > col ? (col + 1) * CELL_PX : col * CELL_PX)
+        : (nr > row ? (row + 1) * CELL_PX : row * CELL_PX);
+      const spanT0 = vertical ? row * CELL_PX : col * CELL_PX;
+      const mine = new Uint8Array(CELL_PX), theirs = new Uint8Array(CELL_PX);
+      for (let k = 0; k < CELL_PX; k++) {
+        const tx = vertical ? lineT : spanT0 + k;
+        const ty = vertical ? spanT0 + k : lineT;
+        const mg = [tx - (col * CELL_PX - BLEED), ty - (row * CELL_PX - BLEED)];
+        const ng = [tx - (nc * CELL_PX - BLEED), ty - (nr * CELL_PX - BLEED)];
+        mine[k] = data[(mg[1] * GEN_PX + mg[0]) * 4 + 3];
+        theirs[k] = nRaw.data[(ng[1] * GEN_PX + ng[0]) * 4 + 3];
+      }
+      const rm = runsOf(mine, spanT0), rt = runsOf(theirs, spanT0);
+      contChecked += rm.length + rt.length;
+      for (const [from, to, who] of [[rm, rt, "mine"], [rt, rm, "neighbour"]]) {
+        for (const r of from) {
+          const best = to.reduce((m, o) => Math.min(m, Math.abs(o.c - r.c)), Infinity);
+          if (best > 48) {
+            contViolations.push(`${nb.id} edge: ${who === "mine" ? "my" : "their"} crossing at `
+              + `${Math.round(r.c)} (width ${Math.round(r.b - r.a)}) unmet, nearest ${best === Infinity ? "none" : Math.round(best) + "px"}`);
+          }
+        }
+      }
+    }
+  }
+
   const gates = [
-    { name: "lighting isotropy", value: +isotropy.toFixed(3), pass: isotropy < 1.45,
-      note: "must stay near-uniform; concentration on one axis means a baked sun" },
+    { name: "key-light asymmetry", value: +keyLight.toFixed(4), pass: keyLight < 0.011,
+      note: "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004" },
+    { name: "gradient ratio", value: +isotropy.toFixed(3) + " (reported)", pass: true,
+      note: "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate" },
     { name: "land coverage", value: +(100 * opaque / (W * H)).toFixed(1) + "%", pass: opaque > 0 },
-    { name: "water removed", value: +wetResidualPct.toFixed(2) + "%", pass: wetResidualPct < 0.5,
-      note: "opaque paint surviving inside the delivered water zones" },
-    { name: "water fringe", value: +fringePct.toFixed(2) + "% (reported, not yet gating)", pass: true,
-      note: "blue-leaning opaque pixels in the 6px ring outside water zones" },
+    { name: "water cut clear", value: wetResidual === 0 ? "0 px" : `${wetResidual} px (${wetResidualPct.toFixed(2)}%)`,
+      pass: wetResidual === 0,
+      note: "paint surviving where the mask is fully water; exact zero by construction for pipeline-derived cells" },
+    { name: "water fringe", value: +fringePct.toFixed(2) + "%", pass: fringePct < 1,
+      note: "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)" },
+    { name: "water continuity", value: contViolations.length
+        ? `${contViolations.length} unmet crossing(s)` : `ok (${contChecked} crossings checked)`,
+      pass: contViolations.length === 0,
+      note: "every watercourse crossing a shared authored edge must be met by the neighbour within 48px" },
   ];
+  for (const v of contViolations) console.log(`      continuity: ${v}`);
   console.log(`\n  gates:`);
   for (const g of gates) {
     console.log(`    ${g.pass ? "PASS" : "FAIL"}  ${g.name.padEnd(20)} ${g.value}`);

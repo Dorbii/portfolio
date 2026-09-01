@@ -1,0 +1,72 @@
+{
+  "cell": "c4-2",
+  "generation": {
+    "filename": "c4-2-source.png",
+    "exact_size_px": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "B911518F9972B07671BCBD5A4BB55ADE09B58D11751A1397E4CB75EFFD64A03D",
+    "mode": "built-in image generation",
+    "whole_canvas_single_pass": true,
+    "resized_or_tiled": false
+  },
+  "shipped_canvas_px": [2560, 2560],
+  "ground_extent_m": [97.6, 97.6],
+  "final_resolution_cm_per_px": 4.8,
+  "lighting_isotropy": {
+    "metric": "36-bin land-luminance-gradient peak divided by uniform-bin mean; gradients below 12 luminance units excluded",
+    "peak_vs_uniform_over_land": 1.404887,
+    "uniform_reference": 1.0,
+    "maximum_allowed": 1.45,
+    "pass": true,
+    "visual_check": "Neutral form shading and ambient occlusion only; no cast-shadow field or directional daylight key observed."
+  },
+  "median_conifer_crown_final_scale": {
+    "px_on_2560_canvas": 90,
+    "metres": 4.3,
+    "source_px_equivalent": 44,
+    "measurement": "Median visual crown-width sample across mature conifers, converted by 2560/1254 to final canvas scale.",
+    "required_final_px_range": [84, 147],
+    "pass": true
+  },
+  "buildable_vs_steep_fraction": {
+    "basis": "estimated fraction of non-water land area",
+    "buildable": 0.34,
+    "steep": 0.28,
+    "other_broken_talus_or_vegetated": 0.38,
+    "method": "Authoring-zone estimate from coherent plateau and bench surfaces versus exposed cliff faces, gorge walls, talus, and dense vegetation."
+  },
+  "water_footprint_fraction": 0.089999,
+  "water_mask": {
+    "filename": "c4-2-water-source.png",
+    "exact_size_px": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "3AEDCF323ABCEFB9078B23040C3D363486E31223C3581598F69C75DA10064F7D",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels",
+    "method": "Source-registered geometry-aware classification guide followed by deterministic connected-component cleanup and enclosed-hole filling; the terrain source was not changed.",
+    "topology_at_final_scale": {
+      "connected_water_systems": 2,
+      "systems": [
+        "east-edge coast",
+        "tarn-fall-stream"
+      ],
+      "interior_holes": 0
+    },
+    "pipeline_equivalent_gates_at_2560_px": {
+      "water_removed_residual_percent": 0.390288,
+      "water_removed_maximum_percent": 0.5,
+      "water_fringe_percent": 0.748385,
+      "water_fringe_maximum_percent": 1.0,
+      "pass": true
+    }
+  },
+  "open_risks": [
+    "Visual quality and seam acceptance remain owner decisions; mechanical checks do not establish acceptance."
+  ],
+  "image_generation": {
+    "source_calls_used": 2,
+    "candidate_selected": 1,
+    "candidate_2_rejected_reason": "Introduced sea across the south edge, violating the east-edge-only coast topology.",
+    "water_mask_revision_calls_used": 1,
+    "water_mask_revision_role": "Segmentation guide only; the selected terrain source remained byte-identical."
+  }
+}

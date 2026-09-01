@@ -1,0 +1,18 @@
+[
+  {
+    "class": "coast",
+    "note": "Open dark-teal sea along the east edge outside the continuous columnar sea cliff, shingle, and talus waterline."
+  },
+  {
+    "class": "lake",
+    "note": "Small dark tarn on the elevated north-west plateau shelf."
+  },
+  {
+    "class": "stream",
+    "note": "Narrow rocky watercourse draining from the tarn, descending through the inland gully, and reaching the south edge."
+  },
+  {
+    "class": "fall",
+    "note": "Short vertical drop immediately below the tarn lip; minor white-water steps farther downstream remain part of the stream surface."
+  }
+]

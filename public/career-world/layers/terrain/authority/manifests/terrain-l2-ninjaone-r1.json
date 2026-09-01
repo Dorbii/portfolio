@@ -107,6 +107,118 @@
      1
     ]
    }
+  },
+  "c4-2": {
+   "authoredAt": "2026-09-01T15:18:28.262Z",
+   "describe": "**Style canon (binding):** `art-source/career-world/l2-land/ninjaone/seed/L2-seed-region-r1.png`\nis the accepted look of this world's terrain — same palette register, same\ncolumnar basalt, same conifer treatment, same painterly density. Anchor style\nto those pixels, not to words.\n\n**Your south edge joins an ALREADY-AUTHORED cell.** `context/window.png` is\nthe real stitched paint of this cell's win",
+   "sourcePx": 1254,
+   "gates": [
+    {
+     "name": "lighting isotropy",
+     "value": 1.395,
+     "pass": true,
+     "note": "must stay near-uniform; concentration on one axis means a baked sun"
+    },
+    {
+     "name": "land coverage",
+     "value": "90.7%",
+     "pass": true
+    },
+    {
+     "name": "water removed",
+     "value": "0.18%",
+     "pass": true,
+     "note": "opaque paint surviving inside the delivered water zones"
+    },
+    {
+     "name": "water fringe",
+     "value": "0.67%",
+     "pass": true,
+     "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
+    }
+   ],
+   "shelf": null,
+   "features": [],
+   "waterZones": [
+    "coast",
+    "lake",
+    "stream",
+    "fall"
+   ],
+   "source": "art-source/career-world/l2-land/ninjaone/c4-2",
+   "stitch": {
+    "order": 2,
+    "tiles": [
+     90,
+     30,
+     12,
+     6,
+     4,
+     2,
+     1
+    ]
+   }
+  },
+  "c3-3": {
+   "authoredAt": "2026-09-01T16:12:16.902Z",
+   "describe": "**Style canon (binding):** `art-source/career-world/l2-land/ninjaone/seed/L2-seed-region-r1.png`\nis the accepted look of this world's terrain — same palette register, same\ncolumnar basalt, same conifer treatment, same painterly density. Anchor style\nto those pixels, not to words.\n\n**Your east edge joins ALREADY-AUTHORED cells.** `context/window.png` is the\nreal composited paint (water shown painte",
+   "sourcePx": 1254,
+   "gates": [
+    {
+     "name": "key-light asymmetry",
+     "value": 0.0035,
+     "pass": true,
+     "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004"
+    },
+    {
+     "name": "gradient ratio",
+     "value": "1.451 (reported)",
+     "pass": true,
+     "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
+    },
+    {
+     "name": "land coverage",
+     "value": "98.5%",
+     "pass": true
+    },
+    {
+     "name": "water cut clear",
+     "value": "0 px",
+     "pass": true,
+     "note": "paint surviving where the mask is fully water; exact zero by construction for pipeline-derived cells"
+    },
+    {
+     "name": "water fringe",
+     "value": "0%",
+     "pass": true,
+     "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
+    },
+    {
+     "name": "water continuity",
+     "value": "ok (0 crossings checked)",
+     "pass": true,
+     "note": "every watercourse crossing a shared authored edge must be met by the neighbour within 48px"
+    }
+   ],
+   "shelf": null,
+   "features": [],
+   "waterZones": [
+    "stream",
+    "fall"
+   ],
+   "source": "art-source/career-world/l2-land/ninjaone/c3-3",
+   "stitch": {
+    "order": 3,
+    "tiles": [
+     90,
+     30,
+     12,
+     6,
+     2,
+     2,
+     1
+    ]
+   }
   }
  }
 }

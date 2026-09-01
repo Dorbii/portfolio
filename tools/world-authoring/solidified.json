@@ -2,7 +2,7 @@
  "solidifiedAt": "2026-09-01T05:09:40.792Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "fd6d3a108cb479d6",
+  "cell.mjs": "07906af13cdc02ce",
   "plan-territory.mjs": "0ad41c5b80815aaf",
   "AGENTS.md": "0d4c3c0fc8f88b87"
  },
@@ -48,6 +48,33 @@
    "reason": "same defect fix, floor corrected to tool truth: the bundled generator tops out at 1254px square (the seed source was exactly that), so MIN_SRC=1254; the worker correctly refused 1536 rather than fake it. Native-2048 fallback available if the owner configures an API key for workers.",
    "hashes": {
     "cell.mjs": "fd6d3a108cb479d6",
+    "plan-territory.mjs": "0ad41c5b80815aaf",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-01T21:00:00.000Z",
+   "reason": "fringe gate hardened to <1% as pre-announced to the owner (calibrated: two accepted cells measure 0.0% and 0.22%) - F27 threshold from accepted baseline",
+   "hashes": {
+    "cell.mjs": "d043128b126d9d2d",
+    "plan-territory.mjs": "0ad41c5b80815aaf",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-01T22:10:00.000Z",
+   "reason": "first real neighbour cell exposed a water handover failure (streams 500px apart at the c4-2|c4-3 edge, measured): context windows now composite the neighbours CONCEPT sources so arriving water is visible paint, and a water-continuity gate matches footprint crossings on every shared authored edge (>=30px runs, 48px tolerance) before anything stitches. Serves the owners request to review multi-cell coherence. Lock is scoped per output tree so the control suite can run beside a live bake (test worlds are their own worlds). Packet water rule now states the mask covers the entire painted water extent (surf/wash/highlights) after two workers under-masked the edge zone.",
+   "hashes": {
+    "cell.mjs": "d0c1b79ddc26e476",
+    "plan-territory.mjs": "0ad41c5b80815aaf",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-01T23:30:00.000Z",
+   "reason": "gate recalibration with a measured positive control: the accepted seed scores 1.444 on the old orientation-ratio metric (threshold was 1.45 - no margin), while a sunned D05 detail measures firstMoment 0.0318 vs canon terrain 0.0012-0.0036. The baked-sun gate is now the first circular moment (<0.011, geometric midpoint); the ratio is report-only. Worker masks are binarized then boundary-feathered at derivation so a soft mask interior cannot ship half-removed water. --redo re-derives and re-gates an existing generation without a new bake. The water-removed gate was measuring the derivations own feather on thin watercourses (22.9% on a beck) - the void-gate pattern; it is now a strict zero check where the mask is fully water, which still catches --from-supplied unremoved water.",
+   "hashes": {
+    "cell.mjs": "07906af13cdc02ce",
     "plan-territory.mjs": "0ad41c5b80815aaf",
     "AGENTS.md": "0d4c3c0fc8f88b87"
    }
