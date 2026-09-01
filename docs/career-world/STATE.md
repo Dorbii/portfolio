@@ -486,6 +486,20 @@ approved; `OPENAI_API_KEY` for the API image path still an open offer — no
 longer needed for outpainting after R057, still the route to native-2048
 density (`4.63 -> 7.56` px/world px) and true masks.
 
+**OWNER RULING (2026-09-01, register change): the land moves to an EPIC,
+FANTASTICAL, LIGHT-TONED fantasy register** — the feel of classic painted
+fantasy card-game landscape art of the 2000s, luminous and hopeful rather
+than dark — translated into this world's projection and rules. Owner words:
+the city assets are reference only and were going to be regenerated anyway;
+the lighting rule stands (form shading + AO only, no directional key); the
+ocean work is mid-flight and fine to change, the owner handles that later.
+Mechanism: a new style seed the owner accepts by eye (candidates a/b/c at
+three intensities, `.codex-tmp/session3/seed-r2/`), then the three existing
+cells are regenerated under it from an empty L2 world in adjacency order
+(c4-3, c3-3, c4-2) — the old cells and the r1 seed are deleted when their
+replacements land. Territory geology/vegetation/water rules are unchanged;
+only the register changes.
+
 **Durability gap, still open:** `.codex-tmp/territory/ninjaone-plan.json`
 and its generator are gitignored scratch that `cell.mjs` requires; moving
 them touches a solidified path constant — owner approval needed.
