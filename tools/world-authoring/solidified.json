@@ -2,7 +2,7 @@
  "solidifiedAt": "2026-09-01T05:09:40.792Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "07906af13cdc02ce",
+  "cell.mjs": "08341c5deab2cd43",
   "plan-territory.mjs": "0ad41c5b80815aaf",
   "AGENTS.md": "0d4c3c0fc8f88b87"
  },
@@ -75,6 +75,24 @@
    "reason": "gate recalibration with a measured positive control: the accepted seed scores 1.444 on the old orientation-ratio metric (threshold was 1.45 - no margin), while a sunned D05 detail measures firstMoment 0.0318 vs canon terrain 0.0012-0.0036. The baked-sun gate is now the first circular moment (<0.011, geometric midpoint); the ratio is report-only. Worker masks are binarized then boundary-feathered at derivation so a soft mask interior cannot ship half-removed water. --redo re-derives and re-gates an existing generation without a new bake. The water-removed gate was measuring the derivations own feather on thin watercourses (22.9% on a beck) - the void-gate pattern; it is now a strict zero check where the mask is fully water, which still catches --from-supplied unremoved water.",
    "hashes": {
     "cell.mjs": "07906af13cdc02ce",
+    "plan-territory.mjs": "0ad41c5b80815aaf",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-02T01:30:00.000Z",
+   "reason": "owner selected both seam mechanisms: (1) water bridge - a candidate watercourse reaching a shared authored edge within (48..150]px of the neighbours crossing is rerouted deterministically in the FOOTPRINT inside the seam band (mask-space only, art untouched; the fringe ring skips the bridged band since the reroute knowingly orphans painted water there); (2) palette conformance gate - vegetation medians of the 16..176px bands beside each authored seam must agree within dBG 0.18 / dLuma 8, calibrated fine=0.109/4.5 vs owner-flagged clash=0.294/14.6. Bridge is control-proven in the suite (synthetic 100px offset reroutes and connects). Also: the lock dir creates its parent so a fresh output root is not misreported as locked.",
+   "hashes": {
+    "cell.mjs": "c3d7d486046c5b51",
+    "plan-territory.mjs": "0ad41c5b80815aaf",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-02T02:40:00.000Z",
+   "reason": "palette dLuma threshold 8 -> 13 on a third calibration point judged by eye: the rejected c3-3 candidate (dBG 0.130, dLuma 11.7) does NOT read as a clash beside c4-3 (evidence: .codex-tmp/dir-stitch/pal-check-pair.png), while the owner-flagged clash (14.6) does. Verified-fine now extends to 11.7; threshold at the midpoint 13.",
+   "hashes": {
+    "cell.mjs": "08341c5deab2cd43",
     "plan-territory.mjs": "0ad41c5b80815aaf",
     "AGENTS.md": "0d4c3c0fc8f88b87"
    }

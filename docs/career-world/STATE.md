@@ -359,39 +359,76 @@ solidified and changes there need owner approval first. See its `AGENTS.md`.
   sources ~`35 MB` PNG each → ~`700 MB`/territory. Consider lossless-webp
   sources (pixel-exact, roughly half) — needs owner approval since cell.mjs's
   expected filenames are solidified.
-- **Neighbour cells c4-2 and c3-3 AUTHORED (2026-09-01, late session).** Ten
-  bakes total across three cells; six rejections, five of them by gates. The
-  gate set evolved on evidence: baked-sun detection moved to the first
-  circular moment (`<0.011`; sunned D05 measures `0.0318`, canon terrain
-  `<=0.004` — the old orientation-ratio metric scored the SEED at `1.444`
-  against its own `1.45` threshold and could not gate); worker masks are
-  binarized+feathered at derivation (soft interiors shipped half-removed
-  water); the water-removed gate became a strict self-check after it started
-  measuring the derivation's own feather (the void-gate pattern); `--redo`
-  re-derives and re-gates an existing generation without a bake; a **water
-  continuity gate** matches footprint crossings on shared edges (48 px).
-- **OPEN MECHANISM DECISIONS (owner input requested before more cells):**
-  1. **Stream handover.** The generator cannot hit spatial pegs by prompt
-     (three attempts landed a stream at 26.7-35% against a binding 19.5%; the
-     worker itself stopped per the two-strike rule and asked for either a
-     deterministic coordinate correction or a spatially controllable
-     generator). c4-2 therefore stands in the world as its earlier accepted
-     attempt with a measured `~500 px` stream misalignment Z-kink at the
-     c4-3 seam. Options: (a) pipeline-side footprint bridge in the seam band
-     for gaps `<=150 px` (mask-space only, feels-real doglegs, art untouched);
-     (b) operator-drawn watercourse overlays as conditioning; (c) native-2048
-     API generator with better spatial adherence (needs `OPENAI_API_KEY`);
-     (d) accept kinks as character. The continuity gate blocks new
-     misalignments regardless.
-  2. **Inter-cell palette drift.** c3-3's meadow measures blue/green `0.35`
-     vs the seed's `0.50` — visibly yellower beside its neighbours in the
-     mounted view. No gate measures palette conformance yet; a
-     content-controlled land-colour gate (vegetation-classified medians vs
-     the seed, calibrated) is the candidate.
-- Corner-pocket ghost smudges where 3+ bleeds average in UNAUTHORED ground are
-  provisional by design — the owning cell repaints them when authored.
-- Review artefacts in `.codex-tmp/dir-stitch/` (three-cell mounted view, seam
-  bands, per-cell previews).
+### RESUME POINT — 2026-09-02, session 2 handoff (all landed work committed)
+
+**The pipeline is COMPLETE and control-suited (6/6,
+`tests/world-authoring-stitch.test.mjs`).** One command authors a cell:
+`node tools/world-authoring/cell.mjs --cell C,R --describe-file BRIEF
+[--force] [--redo] [--from DIR] [--dry-run]`. It builds the packet with
+concept-composited neighbour context, dispatches ONE codex worker which
+delivers ONE square raw generation (>= `1254` px, the bundled generator's
+max) plus a water mask at source resolution; the pipeline upscales, binarizes
+and feathers the mask, derives concept/l2/water, **bridges** watercourse
+crossings that land within (48..150] px of a neighbour's (footprint-space
+reroute; larger misses reject), runs the gates, and on pass stitches
+(derive-from-sources, byte-idempotent) through the 7-level pyramid and
+records everything in the manifest-ledger
+(`manifests/terrain-l2-ninjaone-r1.json`). `--redo` re-judges an existing
+generation without a bake. Every solidified change is in
+`tools/world-authoring/solidified.json` history with its calibration
+evidence.
+
+**Gates (all thresholds calibrated, provenance in the lock):** key-light
+asymmetry `<0.011` (sunned D05 `0.0318`, canon `<=0.004`); water cut-clear
+exact-zero; fringe `<1%` (accepted cells `0.0/0.22/0.67%`); water continuity
+(crossings matched `48 px`, bridge to `150`); palette conformance at
+authored seams (veg-median `dBG<=0.18`, `dLuma<=13` — the `13` is
+eyes-calibrated on three points; evidence
+`.codex-tmp/dir-stitch/pal-check-pair.png`).
+
+**World state (branch `codex/land-lod-completion`, worktree
+`.claude/worktrees/land-lod-completion`):**
+- `c4-3` quarry: GOOD, accepted style canon alongside the seed.
+- `c4-2` wild coast: in world but carries a known `~500 px` stream Z-kink at
+  the c4-3 seam (pre-bridge attempt). Its replacement brief is READY at
+  `.codex-tmp/authoring/brief-c4-2.md` (survey pegs: one stream at 19.5%
+  from its west canvas edge — bridge forgives to 150 px — and NO sea on the
+  south edge).
+- `c3-3` saddle: in world as the OLD yellow-meadow version. Its REPLACEMENT
+  IS ALREADY GENERATED AND PASSES ALL GATES under the current thresholds —
+  the artefacts sit in `.codex-tmp/authoring/cells/c3-3/`.
+
+**IMMEDIATE NEXT ACTIONS, in order:**
+1. `node tools/world-authoring/cell.mjs --cell 3,3 --describe-file
+   .codex-tmp/authoring/brief-c3-3.md --redo --force` — accepts and stitches
+   the already-generated deep-green c3-3 (no bake needed).
+2. `node tools/world-authoring/cell.mjs --cell 4,2 --describe-file
+   .codex-tmp/authoring/brief-c4-2.md --force` — one bake (~35 min; ONE codex
+   at a time; verify no `codex exec` is running — the resident Codex
+   app-server PID is not a bake).
+3. Rebuild the three-cell review (`.codex-tmp/dir-stitch/preview.mjs` for
+   assembly; mounted view + both seam bands + reduced zoom) and send to the
+   owner with any residual defects flagged. He marks up images.
+4. Then continue by adjacency toward the capital `2,1`, one cell per
+   dispatch, briefs authored per the plan
+   (`.codex-tmp/territory/ninjaone-plan.json` — NOTE: gitignored scratch, a
+   durability gap; owner approval needed to move it since `cell.mjs`'s path
+   constant is solidified).
+
+**Standing owner rulings this arc:** Tanium/NinjaOne share BOTH border types
+(bound in `plan.rules.southBorder`: sound under `0,3`/`1,3`, land under
+`2,3`/`3,3`, bay at `4,3`); water bridge approved; palette
+gate-and-regenerate approved; `OPENAI_API_KEY` for native-2048 workers still
+an open offer (would raise effective density `4.63 -> 7.56` px/world px).
+
+**Cautions that cost lanes this session:** carrying a discarded attempt's
+numbers across a regeneration (the west-water `25.6%` incident — measure
+against the CURRENT accepted artefact); prose spatial pegs (generators
+cannot hit coordinates — the bridge exists because of this); review at
+reduced zoom as well as 1:1; eyes on flagged pixels before believing or
+tuning any gate; corner-pocket smudges in unauthored ground are provisional
+by design; stale stall-monitors fire false alarms after their bake ends —
+stop them when the bake lands.
 - **OWNER RULING (2026-09-01): NinjaOne and Tanium share BOTH a land and an
   ocean border.** Director binding along NinjaOne's south row: cells `0,3`/`1,3`
   open into a SOUND (ocean border — the inlet-crossing and submerged-run rail

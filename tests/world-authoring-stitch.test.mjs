@@ -36,10 +36,16 @@ const F = (x, y) => [
   Math.round(180 + 40 * Math.sin(x / 13.7)),
   Math.round(120 + 30 * Math.sin(y / 17.3) + nz(x, y, 7)),
   Math.round(60 + 25 * Math.sin((x + y) / 23.1)), 255];
-const G = (x, y) => [
-  Math.round(90 + 35 * Math.sin(y / 11.9 + 1)),
-  Math.round(170 + 25 * Math.sin(x / 15.4 + 2) + nz(x, y, 91)),
-  Math.round(110 + 45 * Math.sin((x - y) / 19.7)), 255];
+// G stays byte-distinct from F (ownership checks compare exact values) but
+// shares F's blue/green ratio and luma so the palette-conformance gate, which
+// judges REAL neighbour drift, does not fire on the synthetic pair
+const G = (x, y) => {
+  const g = 164 + 25 * Math.sin(x / 15.4 + 2) + nz(x, y, 91);
+  return [
+    Math.round(90 + 35 * Math.sin(y / 11.9 + 1)),
+    Math.round(g),
+    Math.round(0.5 * g + 6 * Math.sin((x - y) / 19.7)), 255];
+};
 
 function genImage(col, row, paint, { waterDisc, keepWaterPaint } = {}) {
   const ox = col * CELL - BLEED, oy = row * CELL - BLEED;
@@ -105,7 +111,7 @@ function treeHash() {
 
 // fresh scratch world and synthetic sources
 fs.rmSync(OUT, { recursive: true, force: true });
-for (const id of ["c1-1", "c2-1"]) {
+for (const id of ["c1-1", "c2-1", "c3-1", "c4-1"]) {
   fs.rmSync(path.join(ROOT, ".codex-tmp", "authoring", "cells", id), { recursive: true, force: true });
 }
 const SYN = path.join(OUT, "synthetic");
@@ -209,6 +215,65 @@ test("re-stitching a cell from the same source is byte-idempotent", async () => 
   assert.match(log, /total 0 written/);
 });
 
+test("a 100px stream offset at a shared edge is bridged in the footprint", async () => {
+  // source-form synthetic cells driven through --redo (the derivation path,
+  // where the bridge lives). D crosses its east edge at territory y=3072;
+  // E crosses its west edge at 3172 — inside the (48..150] bridge window.
+  const SRC = 1254;
+  async function writeSources(id, col, row, stripe) {
+    const dir = path.join(ROOT, ".codex-tmp", "authoring", "cells", id);
+    fs.mkdirSync(dir, { recursive: true });
+    const art = Buffer.alloc(SRC * SRC * 4), wat = Buffer.alloc(SRC * SRC * 4);
+    const ox = col * CELL - BLEED, oy = row * CELL - BLEED;
+    for (let sy = 0; sy < SRC; sy++) for (let sx = 0; sx < SRC; sx++) {
+      const tx = ox + sx * GEN / SRC, ty = oy + sy * GEN / SRC;
+      const [r, g, b] = G(tx, ty);
+      const o = (sy * SRC + sx) * 4;
+      art[o] = r; art[o + 1] = g; art[o + 2] = b; art[o + 3] = 255;
+      const [sy0, sx0, sx1] = stripe;
+      if (Math.abs(sy - sy0) <= 10 && sx >= sx0 && sx <= sx1) {
+        art[o] = 40; art[o + 1] = 80; art[o + 2] = 120;
+        wat[o] = wat[o + 1] = wat[o + 2] = 255; wat[o + 3] = 255;
+      }
+    }
+    const save = (buf, name) => sharp(buf, { raw: { width: SRC, height: SRC, channels: 4 } })
+      .png().toFile(path.join(dir, `${id}-${name}.png`));
+    await save(art, "source");
+    await save(wat, "water-source");
+    fs.writeFileSync(path.join(dir, `${id}-water.json`),
+      JSON.stringify([{ class: "stream", note: "bridge control" }]));
+  }
+  const toSrc = (genPx) => Math.round(genPx * SRC / GEN);
+  // D at (3,1): stream row gen y=1280 (terr 3072), from gen x 1160 to the east edge
+  await writeSources("c3-1", 3, 1, [toSrc(1280), toSrc(1160), SRC - 1]);
+  // E at (4,1): stream row gen y=1380 (terr 3172), from the west edge to gen x 1380
+  await writeSources("c4-1", 4, 1, [toSrc(1380), 0, toSrc(1380)]);
+
+  const logD = execFileSync(process.execPath,
+    [SCRIPT, "--cell", "3,1", "--redo", "--describe", "bridge control D"],
+    { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" });
+  assert.match(logD, /accepted, stitched/);
+
+  let logE;
+  try {
+    logE = execFileSync(process.execPath,
+      [SCRIPT, "--cell", "4,1", "--redo", "--describe", "bridge control E"],
+      { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" });
+  } catch (e) {
+    console.error("E rejected. Child output:\n", e.stdout, e.stderr);
+    throw e;
+  }
+  assert.match(logE, /bridge\s+c3-1 edge: rerouted/);
+  assert.match(logE, /accepted, stitched/);
+
+  // the stitched footprint is continuous water across the shared line at D's
+  // crossing (territory x=8192, y=3072): the line pixel and both flanks are holes
+  for (const [tx, u] of [[31, 248], [32, 0], [32, 8]]) {
+    const t = await tileRaw(0, tx, 12);
+    assert.ok(t[(0 * 256 + u) * 4 + 3] < 128, `water hole at tile ${tx} u=${u}`);
+  }
+});
+
 test("manifest records the contract and both cells", () => {
   const m = JSON.parse(fs.readFileSync(path.join(OUT, "manifest.json"), "utf8"));
   assert.equal(m.format, "l2-cell-pyramid");
@@ -219,7 +284,7 @@ test("manifest records the contract and both cells", () => {
   assert.deepEqual(m.cells["c1-1"].waterZones, ["lake"]);
   // success: clear the scratch world (kept on failure for diagnosis)
   fs.rmSync(OUT, { recursive: true, force: true });
-  for (const id of ["c1-1", "c2-1"]) {
+  for (const id of ["c1-1", "c2-1", "c3-1", "c4-1"]) {
     fs.rmSync(path.join(ROOT, ".codex-tmp", "authoring", "cells", id), { recursive: true, force: true });
   }
 });

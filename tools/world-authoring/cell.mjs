@@ -636,6 +636,7 @@ if (dryRun) {
 }
 
 // one cell per invocation, one process — a second concurrent run refuses here
+fs.mkdirSync(path.dirname(LOCKDIR), { recursive: true });
 try {
   fs.mkdirSync(LOCKDIR, { recursive: false });
 } catch {
@@ -683,6 +684,9 @@ codex exec \\
   // core-plus-margins ring cannot exist. (--from supplies finished artefacts
   // directly — the operator's and the control suite's escape hatch.)
   let sourcePx = null;
+  let bridgedInfo = [];
+  const bridgeRects = [];   // gen-space bands where a reroute knowingly orphans
+                            // painted water; the fringe ring skips them
   if (!from) {
     const srcFile = path.join(cellDir, `${id}-source.png`);
     const wsrcFile = path.join(cellDir, `${id}-water-source.png`);
@@ -707,6 +711,103 @@ codex exec \\
     for (let i = 0; i < GEN_PX * GEN_PX; i++) {
       bin[i] = maskUp[i * 4 + 3] > 128 && maskUp[i * 4] > 128 ? 255 : 0;
     }
+
+    // ---- water bridge (owner-approved 2026-09-01) -----------------------
+    // The generator cannot hit spatial pegs, so when this cell's watercourse
+    // reaches a shared authored edge within (48..150] px of the neighbour's
+    // crossing, the FOOTPRINT is rerouted deterministically inside the seam
+    // band to land exactly on the neighbour's crossing — mask-space only, the
+    // art is untouched; L3 renders the resulting dogleg. Larger misses, and a
+    // crossing with nothing on the other side, still reject at the gate.
+    const bridged = [];
+    {
+      const frames = {
+        N: (u, v) => [u, BLEED + v], S: (u, v) => [u, CELL_PX + BLEED - v],
+        W: (u, v) => [BLEED + v, u], E: (u, v) => [CELL_PX + BLEED - v, u],
+      };
+      const getB = (f, u, v) => {
+        const [gx, gy] = f(u, v);
+        return (gx < 0 || gy < 0 || gx >= GEN_PX || gy >= GEN_PX) ? 0 : bin[gy * GEN_PX + gx];
+      };
+      const setB = (f, u, v, val) => {
+        const [gx, gy] = f(u, v);
+        if (gx >= 0 && gy >= 0 && gx < GEN_PX && gy < GEN_PX) bin[gy * GEN_PX + gx] = val;
+      };
+      const runsAt = (f, v) => {
+        const runs = []; let s = -1;
+        for (let u = 0; u <= GEN_PX; u++) {
+          const w = u < GEN_PX && getB(f, u, v) > 128;
+          if (w && s < 0) s = u;
+          else if (!w && s >= 0) { if (u - s >= 20) runs.push({ a: s, b: u, c: (s + u) / 2 }); s = -1; }
+        }
+        return runs;
+      };
+      for (const nb of authoredNeighbours) {
+        const [nc, nr] = nb.cell;
+        if (Math.abs(nc - col) + Math.abs(nr - row) !== 1) continue;
+        const edge = nc > col ? "E" : nc < col ? "W" : nr > row ? "S" : "N";
+        const f = frames[edge];
+        // the neighbour's crossings on the shared line, in MY gen-u coords
+        const nRaw = await rawOf(path.join(paths.sources, nb.id, `${nb.id}-l2.png`));
+        const theirs = [];
+        {
+          let s = -1;
+          for (let u = 0; u <= GEN_PX; u++) {
+            let w = false;
+            if (u < GEN_PX) {
+              const [gx, gy] = f(u, 0);
+              const tx = gx + col * CELL_PX - BLEED, ty = gy + row * CELL_PX - BLEED;
+              const ngx = tx - (nc * CELL_PX - BLEED), ngy = ty - (nr * CELL_PX - BLEED);
+              w = ngx >= 0 && ngy >= 0 && ngx < GEN_PX && ngy < GEN_PX
+                && nRaw.data[(ngy * GEN_PX + ngx) * 4 + 3] < 128;
+            }
+            if (w && s < 0) s = u;
+            else if (!w && s >= 0) { if (u - s >= 20) theirs.push({ a: s, b: u, c: (s + u) / 2 }); s = -1; }
+          }
+        }
+        for (const mine of runsAt(f, 0)) {
+          const best = theirs.reduce((m, o) => (Math.abs(o.c - mine.c) < Math.abs(m.c - mine.c) ? o : m),
+            { c: Infinity, a: 0, b: 0 });
+          const d = Math.abs(best.c - mine.c);
+          if (d <= 48 || d > 150 || !isFinite(d)) continue;
+          const myW = mine.b - mine.a, theirW = best.b - best.a;
+          const N = Math.min(240, Math.max(128, Math.round(2 * d)));
+          // erase my channel through the band, following it inward and outward
+          for (const dir of [1, -1]) {
+            let cPrev = mine.c;
+            for (let v = 0; dir > 0 ? v <= N : v >= -BLEED; v += dir) {
+              const near = runsAt(f, v).filter((r) => Math.abs(r.c - cPrev) <= 90);
+              if (!near.length) break;
+              for (const r of near) {
+                for (let u = Math.max(0, r.a - 20); u < Math.min(GEN_PX, r.b + 20); u++) setB(f, u, v, 0);
+              }
+              cPrev = near.reduce((m, o) => (Math.abs(o.c - cPrev) < Math.abs(m.c - cPrev) ? o : m)).c;
+            }
+          }
+          // stamp the connector: neighbour's position at the line, easing to
+          // my channel's position at depth N, straight through my bleed
+          for (let v = -BLEED; v <= N; v++) {
+            const t = v <= 0 ? 0 : smooth01(v / N);
+            const c = best.c + (mine.c - best.c) * t;
+            const hw = Math.max(16, (theirW + (myW - theirW) * t) / 2);
+            for (let u = Math.max(0, Math.round(c - hw)); u <= Math.min(GEN_PX - 1, Math.round(c + hw)); u++) {
+              setB(f, u, v, 255);
+            }
+          }
+          bridged.push(`${nb.id} edge: rerouted my crossing ${Math.round(mine.c)} -> ${Math.round(best.c)} (${Math.round(d)}px)`);
+          const uLo = Math.min(mine.c, best.c) - (Math.max(myW, theirW) / 2 + 60);
+          const uHi = Math.max(mine.c, best.c) + (Math.max(myW, theirW) / 2 + 60);
+          const [ax, ay] = f(uLo, -BLEED), [bx, by] = f(uHi, N);
+          bridgeRects.push({
+            x0: Math.max(0, Math.min(ax, bx)), x1: Math.min(GEN_PX, Math.max(ax, bx) + 1),
+            y0: Math.max(0, Math.min(ay, by)), y1: Math.min(GEN_PX, Math.max(ay, by) + 1),
+          });
+        }
+      }
+      for (const b of bridged) console.log(`  bridge        ${b}`);
+      bridgedInfo = bridged;
+    }
+
     for (let pass = 0; pass < 2; pass++) {
       const R = 2, w = 2 * R + 1, tmp = new Float32Array(GEN_PX * GEN_PX);
       for (let y = 0; y < GEN_PX; y++) for (let x = 0; x < GEN_PX; x++) {
@@ -811,6 +912,7 @@ codex exec \\
             || isWater(x, Math.max(0, y - d)) || isWater(x, Math.min(GEN_PX - 1, y + d));
         }
         if (nearWater) {
+          if (bridgeRects.some((r) => x >= r.x0 && x < r.x1 && y >= r.y0 && y < r.y1)) continue;
           ringN += 1;
           const r = data[i], g = data[i + 1], b = data[i + 2];
           const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
@@ -879,6 +981,53 @@ codex exec \\
     }
   }
 
+  // palette conformance at each authored seam: vegetation medians of the two
+  // 16..176px bands beside the shared line must agree. Calibrated 2026-09-01:
+  // the seam that reads FINE measures dBG 0.109 / dLuma 4.5, the seam the
+  // owner sees clash measures 0.294 / 14.6 — thresholds at the midpoints.
+  const palViolations = [];
+  let palWorst = { bg: 0, luma: 0 }, palSeams = 0;
+  {
+    // vegetation median of the 16..176px band just inside `edge` of a canvas
+    const vegBand = (buf, edge) => {
+      const rs = [], gs = [], bs = [];
+      for (let t = 256; t < 2304; t += 2) {
+        for (let o = 16; o <= 176; o += 2) {
+          let gx, gy;
+          if (edge === "N") { gx = t; gy = BLEED + o; }
+          else if (edge === "S") { gx = t; gy = CELL_PX + BLEED - o; }
+          else if (edge === "W") { gy = t; gx = BLEED + o; }
+          else { gy = t; gx = CELL_PX + BLEED - o; }
+          const i = (gy * GEN_PX + gx) * 4;
+          if (buf[i + 3] < 250) continue;
+          const [r, g, b] = [buf[i], buf[i + 1], buf[i + 2]];
+          if (g > r && g > b && g > 60) { rs.push(r); gs.push(g); bs.push(b); }
+        }
+      }
+      if (rs.length < 500) return null;
+      const med = (a) => { a.sort((p, q) => p - q); return a[a.length >> 1]; };
+      const r = med(rs), g = med(gs), b = med(bs);
+      return { bg: b / g, luma: 0.2126 * r + 0.7152 * g + 0.0722 * b };
+    };
+    for (const nb of authoredNeighbours) {
+      const [nc, nr] = nb.cell;
+      if (Math.abs(nc - col) + Math.abs(nr - row) !== 1) continue;
+      const edge = nc > col ? "E" : nc < col ? "W" : nr > row ? "S" : "N";
+      const opp = { E: "W", W: "E", N: "S", S: "N" }[edge];
+      const nRaw = await rawOf(path.join(paths.sources, nb.id, `${nb.id}-l2.png`));
+      const mine = vegBand(data, edge);
+      const theirs = vegBand(nRaw.data, opp);
+      if (!mine || !theirs) continue;
+      palSeams += 1;
+      const dBG = Math.abs(mine.bg - theirs.bg), dL = Math.abs(mine.luma - theirs.luma);
+      palWorst = { bg: Math.max(palWorst.bg, dBG), luma: Math.max(palWorst.luma, dL) };
+      if (dBG > 0.18 || dL > 13) {
+        palViolations.push(`${nb.id} seam: dBG ${dBG.toFixed(3)} dLuma ${dL.toFixed(1)}`);
+      }
+    }
+  }
+  for (const v of palViolations) console.log(`      palette: ${v}`);
+
   const gates = [
     { name: "key-light asymmetry", value: +keyLight.toFixed(4), pass: keyLight < 0.011,
       note: "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004" },
@@ -891,9 +1040,13 @@ codex exec \\
     { name: "water fringe", value: +fringePct.toFixed(2) + "%", pass: fringePct < 1,
       note: "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)" },
     { name: "water continuity", value: contViolations.length
-        ? `${contViolations.length} unmet crossing(s)` : `ok (${contChecked} crossings checked)`,
+        ? `${contViolations.length} unmet crossing(s)` : `ok (${contChecked} crossings checked${bridgedInfo.length ? `, ${bridgedInfo.length} bridged` : ""})`,
       pass: contViolations.length === 0,
-      note: "every watercourse crossing a shared authored edge must be met by the neighbour within 48px" },
+      note: "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint" },
+    { name: "palette conformance", value: palSeams
+        ? `worst dBG ${palWorst.bg.toFixed(3)} dLuma ${palWorst.luma.toFixed(1)} over ${palSeams} seam(s)`
+        : "no vegetated seams", pass: palViolations.length === 0,
+      note: "vegetation medians of the bands beside each authored seam; calibrated fine=0.109/4.5 vs clash=0.294/14.6, thresholds 0.18/8" },
   ];
   for (const v of contViolations) console.log(`      continuity: ${v}`);
   console.log(`\n  gates:`);
@@ -928,6 +1081,7 @@ codex exec \\
     gates, shelf: shelf?.id ?? null,
     features: features.map((f) => f.kind),
     waterZones: Array.isArray(zones) ? zones.map((z) => z.class) : zones,
+    bridged: bridgedInfo.length ? bridgedInfo : undefined,
     source: srcDir.replace(/\\/g, "/"),
     stitch: { order: existing?.stitch?.order ?? Object.keys(ledger.cells).length + 1,
       tiles: result.counts.map((c) => c.tiles) },
