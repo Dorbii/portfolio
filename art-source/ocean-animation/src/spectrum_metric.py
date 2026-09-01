@@ -97,8 +97,17 @@ def stats(path, size=768, lam_lo=50.0, lam_hi=220.0):
                 box=(x, y), frac=frac)
 
 
-for p in sys.argv[1:]:
-    s = stats(p)
+# --lam=lo,hi widens or narrows the band. Needed because a peak sitting AT the
+# band edge is a truncated measurement, not a result: the canonical plates all
+# reported 213 px against a 220 px ceiling, which is the ceiling talking.
+paths = [a for a in sys.argv[1:] if not a.startswith('--lam')]
+_lam = [a for a in sys.argv[1:] if a.startswith('--lam')]
+LO, HI = (50.0, 220.0)
+if _lam:
+    LO, HI = (float(v) for v in _lam[0].split('=', 1)[1].split(','))
+
+for p in paths:
+    s = stats(p, lam_lo=LO, lam_hi=HI)
     name = p.replace('\\', '/').split('/')[-1]
     if s is None:
         print('%-26s no all-water box' % name)

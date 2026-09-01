@@ -325,12 +325,20 @@ void main()
     // Scale-narrow is deliberately relaxed here to +-30%: the crest-hopping the
     // narrow band was protecting against is exactly what finite crest length
     // looks like from above.
-    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * 0.42 * uSpecDense, 0.88, -0.30 * sp, uPeriodP, j2 * 1.7, shP);
-    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * 0.38 * uSpecDense, 1.14,  0.34 * sp, uPeriodP, j3 * 0.4, shP);
-    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * 0.33 * uSpecDense, 0.95, -0.95 * sp, uPeriodP, j1 * 2.3, shP);
-    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * 0.30 * uSpecDense, 1.21,  1.02 * sp, uPeriodP, j2 * 0.6, shP);
-    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * 0.26 * uSpecDense, 0.83, -1.35 * sp, uPeriodP, j3 * 1.9, shP);
-    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * 0.23 * uSpecDense, 1.30,  1.42 * sp, uPeriodP, j1 * 0.8, shP);
+    // ANGLE-FLAT, NOT ANGLE-DECAYING. The first cut of this fan decayed with
+    // angle, which put its loudest new energy right beside the dominant
+    // direction -- so scaling it up REINFORCED the peak (uSpecDense 1.8 took
+    // peak 76 -> 104). The plates say the deficiency is angular width: measured
+    // at the screen scales where our fabric lives, the canonical references run
+    // 31.6-66.7 degrees against our 25.7, and even the plate chosen for
+    // "organized wave trains" is wider than we are. So the near-axis pair is cut
+    // and the wide pairs carry the energy.
+    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * 0.20 * uSpecDense, 0.88, -0.30 * sp, uPeriodP, j2 * 1.7, shP);
+    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * 0.18 * uSpecDense, 1.14,  0.34 * sp, uPeriodP, j3 * 0.4, shP);
+    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * 0.46 * uSpecDense, 0.95, -0.95 * sp, uPeriodP, j1 * 2.3, shP);
+    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * 0.43 * uSpecDense, 1.21,  1.02 * sp, uPeriodP, j2 * 0.6, shP);
+    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * 0.44 * uSpecDense, 0.83, -1.35 * sp, uPeriodP, j3 * 1.9, shP);
+    addSpread(acc, SP, kP, dirP, perpP, k0P, px, uAmpP * 0.40 * uSpecDense, 1.30,  1.42 * sp, uPeriodP, j1 * 0.8, shP);
     // The sun sheen must read the large-scale surface only. Evaluating a
     // pow(dot(N,H), 24) lobe against a normal that still carries the secondary
     // train and the chop was, by ablation, 64% of all high-frequency mottling in
