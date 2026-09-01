@@ -292,7 +292,7 @@ PRESETS['heavy_crashing_surf'] = dict(
     # drawn white shapes on dark paint. Feel is the acceptance test now, not
     # coverage arithmetic.
     breakGamma=0.66, whitecapSteep=1.95, whitecapGain=18.0,
-    preBreak=1.40, faceTeal=1.00, lipGain=1.00, foamErodeK=1.26,
+    preBreak=1.40, faceTeal=1.00, lipGain=1.00,
     # licMix STAYS 0, and this is why -- the base preset offers 0.85 and every
     # state overrides it off with no reason recorded, so it looks like an obvious
     # win going begging. It is not. Tried at 0.85 against the shape deficit
@@ -432,7 +432,20 @@ PRESETS['heavy_crashing_surf'] = dict(
     # over the rocks, which is the effect that was wanted.
     seabedMix=0.55, seabedDepth=36.0, seabedScale=95.0,
     # Foam read at 1.8 px so its boundaries are curves, not dither.
-    foamRead=1.8, shortSurf=0.22, lineGroup=1.0, shoreFloor=0.07,
+    # "WHY DO I HAVE CLOUDS IN THE WATER" -- an unprimed viewer, which is the
+    # only test that matters. Soft blurry edges, neutral grey, isotropic blobs
+    # sitting ON the surface: that is a cloud, and it was partly self-inflicted.
+    # Fixing the owner's "reads as pixels" note earlier today I smoothed the
+    # foam read and softened the carve, which traded speckle for fluff.
+    #
+    # The answer is neither sharper nor softer but SHAPED: a crisp boundary
+    # (foamSoft 0.130 -> 0.046, so the threshold crossing is a line rather than
+    # a gradient), a torn interior (foamErodeK 1.26 -> 2.5, laceScale 88 -> 48),
+    # and only as much read-smoothing as it takes to keep the boundary a curve
+    # (foamRead 1.8 -> 0.9). Foam then has edges and internal structure, which
+    # is what separates churned water from a cloud.
+    foamRead=0.9, foamSoft=0.046, foamErodeK=2.5, laceScale=48.0,
+    shortSurf=0.22, lineGroup=1.0, shoreFloor=0.07,
     # Fine filigree on roughly a third of the water, not all of it.
     fineSparse=0.52, fineSparseMix=1.0,
     # A breaker that crashes back into open water throws spray too.
@@ -453,7 +466,7 @@ PRESETS['heavy_crashing_surf'] = dict(
     # straight back before the threshold turns it into scattered white dots.
     # A painted mass wants a boundary that is a curve: erode a third as hard,
     # at twice the scale, with the filament weight down to match.
-    filament=0.16, laceScale=88.0,
+    filament=0.16,
     # Subsurface teal flash under events (stylized-water-brief.md device 3).
     eventTeal=0.55,
     sprayLife=1.55, spraySpread=64.0, sprayInject=2.6, sprayGate=0.33, sprayGain=1.05,
