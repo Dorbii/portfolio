@@ -35,7 +35,8 @@
     "test:intent": "node --experimental-strip-types --test tests/intent/index.test.mjs",
     "test:intent:city": "node --experimental-strip-types --test tests/intent/ninjaone-capital-visual-similarity.test.mjs",
     "verify": "npm run typecheck && npm run lint && npm run test && npm run build",
-    "verify:ninjaone-environment-mvp": "node scripts/verify-ninjaone-environment-mvp.mjs"
+    "verify:ninjaone-environment-mvp": "node scripts/verify-ninjaone-environment-mvp.mjs",
+    "check:world-authoring": "node tools/world-authoring/check-solidified.mjs"
   },
   "dependencies": {
     "next": "16.2.11",

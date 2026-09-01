@@ -1,0 +1,38 @@
+{
+ "solidifiedAt": "2026-09-01T05:09:40.792Z",
+ "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
+ "hashes": {
+  "cell.mjs": "0fe890a3d4034792",
+  "plan-territory.mjs": "0ad41c5b80815aaf",
+  "AGENTS.md": "0d4c3c0fc8f88b87"
+ },
+ "history": [
+  {
+   "at": "2026-09-01T05:09:40.793Z",
+   "reason": "initial lock: pipeline solidified with owner approval 2026-09-01",
+   "hashes": {
+    "cell.mjs": "cdb9faa12dc5d4ba",
+    "plan-territory.mjs": "0ad41c5b80815aaf",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-01T18:20:00.000Z",
+   "reason": "owner approved: 2026-09-01 session dispatch instruction #1 - finish stitch-and-propagate in cell.mjs (seam-routed tile writes, 7-level pyramid, derive-from-sources compositing; plus the water-contract gates, --from, concurrency lockfile, and durable manifest/sources paths that step requires)",
+   "hashes": {
+    "cell.mjs": "50b273707e21a73e",
+    "plan-territory.mjs": "0ad41c5b80815aaf",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-01T18:40:00.000Z",
+   "reason": "owner approved: same dispatch - fix found by the stitch control suite: disable the libvips per-process file cache so context reads do not hold Windows handles over tiles the stitch then rewrites",
+   "hashes": {
+    "cell.mjs": "0fe890a3d4034792",
+    "plan-territory.mjs": "0ad41c5b80815aaf",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  }
+ ]
+}

@@ -5,3 +5,6 @@
 *.webp binary
 *.woff2 binary
 public/career-world/capitals/ninjaone/environment/manifests/inland-water-r1.json text eol=lf
+# the solidified gate hashes raw bytes; line-ending conversion on checkout
+# would false-trip it, so these stay LF everywhere
+tools/world-authoring/* text eol=lf
