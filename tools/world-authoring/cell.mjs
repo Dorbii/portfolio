@@ -69,6 +69,7 @@ const MIN_SRC = 1254;                     // smallest acceptable single generati
 const TAB_CORNER = 64;                    // corner jitter amplitude, art px
 const TAB_WIGGLE = 64;                    // mid-edge wiggle amplitude, art px
 const FEATHER = 8;                        // seam blend half-width, art px
+const EDIT_GREY = [96, 104, 88];          // unpainted area of an edit target (neutral, mid-value)
 const TAB_REACH = TAB_CORNER + TAB_WIGGLE + FEATHER * 4;   // < BLEED by design
 
 // ---------------------------------------------------------------- args ----
@@ -531,7 +532,55 @@ if (authoredNeighbours.length) {
   await sharp(ownMap, { raw: { width: W, height: H, channels: 4 } }).png()
     .toFile(path.join(ctxDir, "binding.png"));
   console.log(`  conditioning  ${ctxDir}/window.png (+ binding.png, concept-composited)`);
+
+  // edit target (owner-approved 2026-09-01): the FULL generation canvas with
+  // the authored neighbours' concept paint wherever their canvases cover it,
+  // and neutral grey wherever this cell is still unpainted. The cell's own
+  // previous paint is never included, so a replacement cannot inherit what it
+  // replaces. The worker EDITS this image in place (built-in image_gen edit
+  // mode), so the generation is conditioned on real neighbour pixels: measured
+  // band fidelity r 0.74 and a seam step inside the no-seam range (ledger
+  // R057), against r ~0 when the same paint is only shown as a reference.
+  {
+    const gx0 = col * CELL_PX - BLEED, gy0 = row * CELL_PX - BLEED;
+    const others = new Set([...authoredSet].filter((c) => c !== id));
+    const canvasWin = { x0: gx0, y0: gy0, x1: gx0 + GEN_PX, y1: gy0 + GEN_PX };
+    const contrib = contributorsFor(others, canvasWin, gridW, gridH);
+    const target = Buffer.alloc(GEN_PX * GEN_PX * 4);
+    for (let i = 0; i < GEN_PX * GEN_PX; i++) {
+      target[i * 4] = EDIT_GREY[0]; target[i * 4 + 1] = EDIT_GREY[1]; target[i * 4 + 2] = EDIT_GREY[2]; target[i * 4 + 3] = 255;
+    }
+    const tx0 = Math.max(0, Math.floor(gx0 / TILE)), ty0 = Math.max(0, Math.floor(gy0 / TILE));
+    const tx1 = Math.min(Math.ceil(gridW / TILE), Math.ceil((gx0 + GEN_PX) / TILE));
+    const ty1 = Math.min(Math.ceil(gridH / TILE), Math.ceil((gy0 + GEN_PX) / TILE));
+    for (let ty = ty0; ty < ty1; ty++) {
+      for (let tx = tx0; tx < tx1; tx++) {
+        const t = await composeTile(seam, others, contrib, ctxSourceOf, tx, ty, "concept");
+        for (let v = 0; v < TILE; v++) {
+          const y = ty * TILE + v - gy0;
+          if (y < 0 || y >= GEN_PX) continue;
+          for (let u = 0; u < TILE; u++) {
+            const x = tx * TILE + u - gx0;
+            if (x < 0 || x >= GEN_PX) continue;
+            const si = (v * TILE + u) * 4;
+            if (t[si + 3] < 128) continue;   // nothing painted here: stays grey
+            const o = (y * GEN_PX + x) * 4;
+            target[o] = t[si]; target[o + 1] = t[si + 1]; target[o + 2] = t[si + 2];
+          }
+        }
+      }
+    }
+    await sharp(target, { raw: { width: GEN_PX, height: GEN_PX, channels: 4 } }).png()
+      .toFile(path.join(ctxDir, "edit-target.png"));
+    console.log(`  edit target   ${ctxDir}/edit-target.png (neighbour concept paint, grey to paint)`);
+  }
 }
+
+// edit mode whenever a neighbour exists: the worker edits the target in place
+// instead of generating from a prompt, so pegs are paint rather than prose.
+// A frontier cell has nothing to continue and stays in generate mode.
+const editMode = authoredNeighbours.length > 0;
+const FRAMING_PREAMBLE = "Edit this image in place. The output must be a SQUARE image with exactly the same framing and extent as the input: the painted terrain stays exactly where it is, at the same scale, and the flat grey area is painted in. Do not change the aspect ratio, do not crop, do not zoom, do not extend the canvas beyond the input. Paint the grey area as a seamless continuation of the painted ground so the join is invisible. Keep exactly the same painterly style, palette, brush density, rock shading and view as the existing paint.";
 
 const packet = `# L2 CELL ${id} — ${plan.territory}
 
@@ -576,14 +625,23 @@ ${features.map((f) => `- **${f.kind}** — ${f.note}`).join("\n")}
 Author the TERRAIN that makes this possible. Do not draw track, sleepers,
 bridges or tunnel mouths — those are built structures owned by another layer.
 ` : ""}
-${authoredNeighbours.length ? `## Neighbour context
+${editMode ? `## Neighbour context — you EDIT this cell into existence, you do not generate it
 
-\`${cellDir}/context/window.png\` is the stitched world as it already exists
-across this cell's window, and \`binding.png\` marks the pixels that belong to
-authored neighbours (dark = binding). **Continue that terrain.** A ridge
-arriving at your border continues into your cell; a shoreline arriving
-continues. The stitch preserves binding pixels no matter what you draw there,
-so any mismatch at the seam will read as YOUR edge failing to join.
+\`${cellDir}/context/edit-target.png\` is your canvas: the authored
+neighbours' real paint wherever it reaches into this cell's window, and flat
+grey wherever this cell is still unpainted. Load it with the built-in
+\`view_image\` tool, then make ONE \`image_gen\` call in EDIT mode on that
+image. Your edit prompt begins with this paragraph VERBATIM, followed by the
+brief above written as what the ground IS and what CONTINUES from the painted
+edge — never as coordinates or percentages:
+
+> ${FRAMING_PREAMBLE}
+
+The stitch preserves the neighbours' pixels no matter what you paint over
+them, so the join you paint at the grey boundary is the seam the world will
+show. A ridge arriving at the boundary continues into the grey; a stream
+arriving continues; a shoreline arriving continues. \`window.png\` and
+\`binding.png\` are there to read, not to edit.
 ` : `## Frontier cell
 
 No authored neighbours yet, so you are setting the terms this area continues
@@ -596,7 +654,13 @@ from. Later cells will be conditioned on your edges.
    layer. A baked sun is an automatic FAIL and is measured.
 2. **Terrain only.** No buildings, walls, roads, bridges, docks, boats, fences,
    figures or track. Rock and vegetation are terrain and belong.
-3. **ONE generation, whole canvas.** Deliver the single raw generation —
+${editMode ? `3. **ONE edit call, whole canvas.** Deliver the raw output of that single
+   EDIT call as \`${id}-source.png\`: a SQUARE image **${MIN_SRC} px or
+   larger**, unresized, uncropped, untouched. If the tool returns a
+   non-square image, do NOT resize it — repeat the framing paragraph and
+   retry ONCE; a non-square delivery is rejected by the pipeline. Never
+   generate mode, never a core plus margins, never tiles, never patches:
+   a ring or line where texture character shifts is an automatic FAIL.` : `3. **ONE generation, whole canvas.** Deliver the single raw generation —
    \`${id}-source.png\`, a square image **${MIN_SRC} px or larger** (use the
    largest single-pass square your generator can produce — 2048 if available)
    with the ENTIRE canvas (kept area AND bleed) in frame. The
@@ -604,7 +668,7 @@ from. Later cells will be conditioned on your edges.
    layers. Do NOT generate a core and margins separately, do NOT assemble from
    tiles, do NOT upscale or resize anything yourself — a ring or line where
    texture character shifts is an automatic FAIL. Iterate at generation time
-   (regenerate whole candidates and pick), never by patching regions.
+   (regenerate whole candidates and pick), never by patching regions.`}
 4. **Water is painted, then classified.** Paint water where it belongs in the
    source. Alongside it deliver:
    - \`${id}-water-source.png\` — mask of every water surface at the SAME
@@ -925,6 +989,41 @@ codex exec \\
   const wetResidualPct = waterInterior ? 100 * wetResidual / waterInterior : 0;
   const fringePct = ringN ? 100 * fringe / ringN : 0;
 
+  // wide ring (owner-approved 2026-09-01): painted water left on land up to
+  // 48px beyond the mask. A polyline-authored mask leaves a strip of painted
+  // water beside the cut that the 6px ring only sees when the strip touches
+  // the mask edge; the rejected c4-2 candidate measured 6.27% here against
+  // 0.18% / 0.01% for the accepted cells. Same classifier, same bridge skip.
+  let ring48N = 0, ring48F = 0;
+  {
+    const RW = 48;
+    const rowP = new Int32Array(H * (W + 1)), colP = new Int32Array(W * (H + 1));
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) rowP[y * (W + 1) + x + 1] = rowP[y * (W + 1) + x] + (isWater(x, y) ? 1 : 0);
+    }
+    for (let x = 0; x < W; x++) {
+      for (let y = 0; y < H; y++) colP[x * (H + 1) + y + 1] = colP[x * (H + 1) + y] + (isWater(x, y) ? 1 : 0);
+    }
+    for (let y = 1; y < H - 1; y++) {
+      for (let x = 1; x < W - 1; x++) {
+        const i = (y * W + x) * 4;
+        if (data[i + 3] <= 250 || isWater(x, y)) continue;
+        const x0 = Math.max(0, x - RW), x1 = Math.min(W, x + RW + 1);
+        const y0 = Math.max(0, y - RW), y1 = Math.min(H, y + RW + 1);
+        const near = (rowP[y * (W + 1) + x1] - rowP[y * (W + 1) + x0]) > 0
+          || (colP[x * (H + 1) + y1] - colP[x * (H + 1) + y0]) > 0;
+        if (!near) continue;
+        if (bridgeRects.some((r) => x >= r.x0 && x < r.x1 && y >= r.y0 && y < r.y1)) continue;
+        ring48N += 1;
+        const r = data[i], g = data[i + 1], b = data[i + 2];
+        const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+        const sat = mx ? (mx - mn) / mx : 0;
+        if (mx > 40 && sat > 0.25 && b > r && b >= g) ring48F += 1;
+      }
+    }
+  }
+  const ring48Pct = ring48N ? 100 * ring48F / ring48N : 0;
+
   // water continuity across every shared edge with an authored orthogonal
   // neighbour: a watercourse that crosses the boundary must be met by the
   // neighbour's footprint at the same place, or the rendered water dead-ends
@@ -1039,6 +1138,8 @@ codex exec \\
       note: "paint surviving where the mask is fully water; exact zero by construction for pipeline-derived cells" },
     { name: "water fringe", value: +fringePct.toFixed(2) + "%", pass: fringePct < 1,
       note: "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)" },
+    { name: "water fringe (48px)", value: +ring48Pct.toFixed(2) + "%", pass: ring48Pct < 1,
+      note: "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)" },
     { name: "water continuity", value: contViolations.length
         ? `${contViolations.length} unmet crossing(s)` : `ok (${contChecked} crossings checked${bridgedInfo.length ? `, ${bridgedInfo.length} bridged` : ""})`,
       pass: contViolations.length === 0,

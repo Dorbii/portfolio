@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-01T05:09:40.792Z",
+ "solidifiedAt": "2026-09-01T22:00:25.222Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "08341c5deab2cd43",
+  "cell.mjs": "3480add9adf1e0af",
   "plan-territory.mjs": "0ad41c5b80815aaf",
   "AGENTS.md": "0d4c3c0fc8f88b87"
  },
@@ -93,6 +93,24 @@
    "reason": "palette dLuma threshold 8 -> 13 on a third calibration point judged by eye: the rejected c3-3 candidate (dBG 0.130, dLuma 11.7) does NOT read as a clash beside c4-3 (evidence: .codex-tmp/dir-stitch/pal-check-pair.png), while the owner-flagged clash (14.6) does. Verified-fine now extends to 11.7; threshold at the midpoint 13.",
    "hashes": {
     "cell.mjs": "08341c5deab2cd43",
+    "plan-territory.mjs": "0ad41c5b80815aaf",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-01T21:54:19.735Z",
+   "reason": "owner approved 2026-09-01 (before the change): (1) edit-mode authoring - cell.mjs builds context/edit-target.png (full 2560 canvas: authored neighbours' CONCEPT paint wherever their canvases cover it, the replaced cell's own old paint never included, neutral grey elsewhere) and the packet mandates ONE built-in image_gen EDIT call on it with a verbatim square-framing preamble; frontier cells keep generate mode. Measured basis R056/R057: band fidelity r 0.74 vs 0 today, simulated seam step 20.2 vs 26.2 (interior 15.6-22.7), stream inside the 48px gate. (2) wide-ring painted-water gate: fringe classifier in a 48px ring outside the mask, <1% (accepted 0.18%/0.01%, rejected polyline-mask candidate 6.27%). Controls to be added to the suite before the edit.",
+   "hashes": {
+    "cell.mjs": "08341c5deab2cd43",
+    "plan-territory.mjs": "0ad41c5b80815aaf",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-01T22:00:25.223Z",
+   "reason": "owner approved 2026-09-01 (change landed, suite 9/9): edit-target context (context/edit-target.png, full canvas, neighbours' concept paint, own old paint excluded, grey elsewhere) + edit-mode packet with the verbatim square-framing preamble for cells with authored neighbours (frontier cells stay generate mode) + the 48px water-fringe gate (<1%). Three controls added: edit target byte-exact and grey elsewhere with a frontier cell staying generate mode; replacement target never carries the cell's own paint; painted water 12..40px beyond the mask fails the 48px ring while the 6px ring passes and the world stays untouched.",
+   "hashes": {
+    "cell.mjs": "3480add9adf1e0af",
     "plan-territory.mjs": "0ad41c5b80815aaf",
     "AGENTS.md": "0d4c3c0fc8f88b87"
    }

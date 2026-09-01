@@ -160,7 +160,7 @@
    }
   },
   "c3-3": {
-   "authoredAt": "2026-09-01T19:00:50.835Z",
+   "authoredAt": "2026-09-01T22:00:54.083Z",
    "describe": "**Style canon (binding):** `art-source/career-world/l2-land/ninjaone/seed/L2-seed-region-r1.png`\nis the accepted look of this world's terrain — same palette register, same\ncolumnar basalt, same conifer treatment, same painterly density. Anchor style\nto those pixels, not to words.\n\n**Your east edge joins ALREADY-AUTHORED cells.** `context/window.png` is the\nreal composited paint (water shown painte",
    "sourcePx": 1254,
    "gates": [
@@ -192,6 +192,12 @@
      "value": "0%",
      "pass": true,
      "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
+    },
+    {
+     "name": "water fringe (48px)",
+     "value": "0.01%",
+     "pass": true,
+     "note": "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)"
     },
     {
      "name": "water continuity",

@@ -414,28 +414,46 @@ gate were green before anything ran. Then:
    (vs `...-CURRENT-1to1.png`), `probe-sheet.png`. One sample each; the
    real bake's gates are the replication.
 
-**RECOMMENDED PATH (needs owner approval — `cell.mjs` is solidified):**
+**PIPELINE CHANGE LANDED (owner approved 2026-09-01; lock history has the
+before and after entries; suite 9/9; hash gate intact):**
 
-- (a) **Edit-mode authoring.** `cell.mjs` builds `context/edit-target.png`
-  (2560 square: neighbour CONCEPT paint wherever an authored neighbour's
-  canvas covers the overlap, neutral grey `rgb(96,104,88)` elsewhere; the
-  old cell's own paint is NEVER included when replacing) and the packet
-  mandates: `view_image` it, ONE `image_gen` call in EDIT mode, prompt =
-  the framing preamble (verbatim from
-  `.codex-tmp/session3/probe/prompt-c4-2-outpaint-square.md`, first
-  paragraph) + the brief as a continuation with no coordinates; deliver the
-  raw output unresized. Record the approval in `solidified.json` first; add
-  a control to the suite (the target builder's band is byte-equal to the
-  neighbours' concept crops); then re-bake c4-2.
-- (b) **Wide-ring painted-water-outside-mask gate** (ring 48, `<1%`;
-  accepted `0.18/0.01%` vs the rejected candidate `6.27%`) — workers still
-  author the mask, and the polyline shortcut must fail at the gate.
-- The bridge-reach extension (150 → 256) is no longer needed if (a) lands;
-  keep 150.
-- Not measured and not claimed: how (a) behaves with TWO orthogonal authored
-  neighbours (an L-shaped band) and at the capital; the first such cell is
-  the test.
+- (a) **Edit-mode authoring.** For any cell with an authored neighbour,
+  `cell.mjs` builds `context/edit-target.png` — the full 2560 canvas with the
+  neighbours' CONCEPT paint wherever their canvases cover it, the replaced
+  cell's own old paint never included, neutral grey `rgb(96,104,88)`
+  elsewhere — and the packet mandates ONE built-in `image_gen` EDIT call on
+  it, prompt = the verbatim square-framing preamble + the brief written as
+  what continues (never coordinates). Frontier cells stay in generate mode
+  with the seed as reference. Controls: target byte-exact where the neighbour
+  owns or bleeds, grey elsewhere, frontier gets none; a replacement's target
+  never carries its own paint.
+- (b) **48 px water-fringe gate** (`<1%`, same classifier as the 6 px ring,
+  bridge bands skipped). Real-data calibration through `--redo`: saddle
+  `0.01%` (re-stitched byte-identical, 143 tiles), quarry `0.17%`, the
+  rejected coast candidate `6.15%`. Control: paint 12–40 px beyond the mask
+  fails the 48 px ring while the 6 px ring passes and the world is untouched.
+- The bridge reach stays at 150. The quarry's own `--redo` is now refused by
+  the continuity gate because its neighbour is the OLD coast with the 700 px
+  miss — expected; the coast regenerates first under the new path anyway.
+- Not yet exercised on a real bake: a cell with TWO orthogonal authored
+  neighbours (an L-shaped painted band); the second regenerated cell is the
+  test.
 
+**REGENERATION PLAN (waits only on Q1, the seed canon):**
+
+1. Canon: the chosen candidate copied to
+   `art-source/career-world/l2-land/ninjaone/seed/L2-seed-region-r2-source.png`
+   (1254) with its 2560 lanczos upscale as `L2-seed-region-r2.png`; r1 deleted
+   once all three cells are regenerated under r2.
+2. Briefs ready in the new register under the variance map, written as
+   continuation with no coordinates: `.codex-tmp/authoring/brief-c4-3-r2.md`,
+   `brief-c3-3-r2.md`, `brief-c4-2-r2.md`.
+3. Wipe the L2 world (tiles `l2-ninjaone-r1/`, the manifest, the three
+   `art-source` cells) — git-reversible, owner-approved with the register
+   change — then regenerate in adjacency order: `4,3` (frontier, generate
+   mode from the seed) → `3,3` → `4,2` (edit mode). ~13 min each. Review at
+   1:1 and 1/4 after each; the second and third are the first real
+   edit-mode bakes.
 **World state:** c4-3 quarry GOOD (accepted canon). c3-3 saddle NEW — deep
 green, gates green, **owner review pending** (sheets 1–4). c4-2 OLD — known
 stream miss at the c4-3 seam; generate-mode replacement rejected.
@@ -534,9 +552,14 @@ seeded grain) was rendered on g as the cheapest lever toward a look that is
 ours; the owner parked the idea of mixing two agents' image tools (the
 director has no image tool) and does not want a local model (the machine
 could run one: RTX 3080 Ti 12 GB). **Sourced reference for the purple
-field:** Outward's Conflux Mountain, Chersonese — mana-tinted ground in
-patches around a landmark, muted violet, against grey rock and mist;
-recorded with URLs in `scenery-variance-plan.md`. **Seed canon: NOT yet
+field:** Outward's Conflux Mountain, Chersonese — CORRECTED by the owner's
+own screenshots ("way more than the concept"): a saturated magenta-violet
+flower-field carpet filling the whole valley floor, pale lavender-blue grass
+tufts, clumps of gold/orange/red/pale-blue flowering shrubs, pink-blossom
+broadleaf trees standing in it, the landmark rising straight out of the
+field under a bright sky. In our grid: the whole of cell `1,1` spilling
+into its neighbours' edges, a REGION at territory zoom. Full brief text in
+`scenery-variance-plan.md`. **Seed canon: NOT yet
 picked — owner reviews rounds 1–3 and the finish prototype.**
 
 **Durability gap, still open:** `.codex-tmp/territory/ninjaone-plan.json`

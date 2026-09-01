@@ -47,7 +47,7 @@ const G = (x, y) => {
     Math.round(0.5 * g + 6 * Math.sin((x - y) / 19.7)), 255];
 };
 
-function genImage(col, row, paint, { waterDisc, keepWaterPaint } = {}) {
+function genImage(col, row, paint, { waterDisc, keepWaterPaint, paintedRing } = {}) {
   const ox = col * CELL - BLEED, oy = row * CELL - BLEED;
   const l2 = Buffer.alloc(GEN * GEN * 4);
   const concept = Buffer.alloc(GEN * GEN * 4);
@@ -64,6 +64,11 @@ function genImage(col, row, paint, { waterDisc, keepWaterPaint } = {}) {
           concept[o] = 40; concept[o + 1] = 90; concept[o + 2] = 200;
           mask[o] = mask[o + 1] = mask[o + 2] = 255; mask[o + 3] = 255;
           if (!keepWaterPaint) { l2[o] = l2[o + 1] = l2[o + 2] = l2[o + 3] = 0; }
+        } else if (paintedRing && d >= waterDisc[2] + paintedRing[0] && d < waterDisc[2] + paintedRing[1]) {
+          // water paint left on LAND in an annulus beyond the mask: a strip of
+          // dry paint separates it from the mask edge so the 6px ring gate
+          // cannot see it - only a wide ring can (the polyline-mask defect)
+          concept[o] = l2[o] = 40; concept[o + 1] = l2[o + 1] = 90; concept[o + 2] = l2[o + 2] = 200;
         }
       }
     }
@@ -120,6 +125,10 @@ await writeArtefacts(path.join(SYN, "a"), "c1-1",
 await writeArtefacts(path.join(SYN, "b-bad"), "c2-1",
   genImage(2, 1, G, { waterDisc: [5120, 3072, 300], keepWaterPaint: true }));
 await writeArtefacts(path.join(SYN, "b"), "c2-1", genImage(2, 1, G));
+// water paint 12..40px beyond the mask edge, dry paint in between: invisible to
+// the 6px ring, blatant to the 48px ring (owner-approved gate, 2026-09-01)
+await writeArtefacts(path.join(SYN, "b-ring"), "c2-1",
+  genImage(2, 1, G, { waterDisc: [5120, 3072, 260], paintedRing: [12, 40] }));
 
 test("frontier cell stitches aligned, bleeds one ring, and removes water", async () => {
   const log = runCell("1,1", path.join(SYN, "a"));
@@ -161,6 +170,39 @@ test("frontier cell stitches aligned, bleeds one ring, and removes water", async
   for (let k = 0; k < 7; k++) {
     assert.ok(fs.readdirSync(path.join(OUT, "tiles", `L${k}`)).length > 0, `level ${k} populated`);
   }
+});
+
+test("edit target carries the neighbour's concept paint byte-exact and grey elsewhere", async () => {
+  // c1-1 is authored; a dry run for its east neighbour must build the target
+  const log = execFileSync(process.execPath, [SCRIPT, "--cell", "2,1", "--dry-run"],
+    { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" });
+  assert.match(log, /edit target/);
+  const f = path.join(ROOT, ".codex-tmp", "authoring", "cells", "c2-1", "context", "edit-target.png");
+  const { data, info } = await sharp(f).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  assert.equal(info.width, GEN); assert.equal(info.height, GEN);
+  const px = (x, y) => { const o = (y * GEN + x) * 4; return [data[o], data[o + 1], data[o + 2]]; };
+  const ox = 2 * CELL - BLEED, oy = 1 * CELL - BLEED;   // c2-1's canvas origin in territory px
+  // inside c1-1's kept area: the neighbour's concept, byte-exact
+  for (const [x, y] of [[100, 1280], [200, 600], [40, 2000]]) {
+    assert.deepEqual(px(x, y), F(ox + x, oy + y).slice(0, 3), `neighbour paint at ${x},${y}`);
+  }
+  // c1-1's bleed over c2-1's own ground (territory x 4096..4352): still the neighbour's paint
+  assert.deepEqual(px(400, 1280), F(ox + 400, oy + 1280).slice(0, 3), "bleed paint");
+  // beyond any neighbour's canvas: the grey fill
+  for (const [x, y] of [[1280, 1280], [2400, 300], [700, 2500]]) {
+    assert.deepEqual(px(x, y), [96, 104, 88], `grey at ${x},${y}`);
+  }
+  // the packet mandates edit mode with the verbatim framing preamble
+  const packet = fs.readFileSync(path.join(ROOT, ".codex-tmp", "authoring", "cells", "c2-1", "packet-c2-1.md"), "utf8");
+  assert.match(packet, /EDIT mode/);
+  assert.match(packet, /same framing and extent/);
+  // a frontier cell gets no edit target and stays in generate mode
+  const log3 = execFileSync(process.execPath, [SCRIPT, "--cell", "3,1", "--dry-run"],
+    { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" });
+  assert.doesNotMatch(log3, /edit target/);
+  assert.ok(!fs.existsSync(path.join(ROOT, ".codex-tmp", "authoring", "cells", "c3-1", "context", "edit-target.png")),
+    "frontier cell must not get an edit target");
+  assert.match(fs.readFileSync(path.join(ROOT, ".codex-tmp", "authoring", "cells", "c3-1", "packet-c3-1.md"), "utf8"), /ONE generation, whole canvas/);
 });
 
 test("a failing gate blocks the stitch entirely", async () => {
@@ -213,6 +255,30 @@ test("re-stitching a cell from the same source is byte-idempotent", async () => 
   const log = runCell("2,1", path.join(SYN, "b"), ["--force"]);
   assert.equal(treeHash(), before, "identical source must reproduce identical tiles");
   assert.match(log, /total 0 written/);
+});
+
+test("edit target for a replacement never carries the cell's own previous paint", async () => {
+  execFileSync(process.execPath, [SCRIPT, "--cell", "2,1", "--dry-run", "--force"],
+    { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" });
+  const f = path.join(ROOT, ".codex-tmp", "authoring", "cells", "c2-1", "context", "edit-target.png");
+  const { data } = await sharp(f).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const px = (x, y) => { const o = (y * GEN + x) * 4; return [data[o], data[o + 1], data[o + 2]]; };
+  // c2-1 is authored (G), yet its own kept interior must be grey, not G
+  for (const [x, y] of [[1280, 1280], [2000, 800]]) {
+    assert.deepEqual(px(x, y), [96, 104, 88], `own paint excluded at ${x},${y}`);
+  }
+  const ox = 2 * CELL - BLEED, oy = 1 * CELL - BLEED;
+  assert.deepEqual(px(100, 1280), F(ox + 100, oy + 1280).slice(0, 3), "neighbour paint kept");
+});
+
+test("painted water beyond the mask fails the 48px ring gate and leaves the world untouched", () => {
+  const before = treeHash();
+  let out = "";
+  try { runCell("2,1", path.join(SYN, "b-ring"), ["--force"]); assert.fail("b-ring must be rejected"); }
+  catch (e) { out = String(e.stdout || "") + String(e.stderr || ""); }
+  assert.match(out, /FAIL\s+water fringe \(48px\)/, "the wide ring must fire");
+  assert.match(out, /PASS\s+water fringe\s+[\d.]+%/, "the 6px ring cannot see paint 12px away");
+  assert.equal(treeHash(), before, "a rejected replacement must leave the world untouched");
 });
 
 test("a 100px stream offset at a shared edge is bridged in the footprint", async () => {
