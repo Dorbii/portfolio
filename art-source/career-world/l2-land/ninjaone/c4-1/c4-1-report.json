@@ -1,0 +1,105 @@
+{
+  "cell": "c4-1",
+  "generation": {
+    "filename": "c4-1-source.png",
+    "exact_size_px": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "FFDDC9AA0FFFB399E25F8419B54D4CE6B11B133CA53565624ABDE7239BF9B4D1",
+    "mode": "built-in imagegen edit with edit target and style-reference inputs",
+    "edit_calls_used": 1,
+    "whole_canvas_single_pass": true,
+    "raw_output_preserved": true,
+    "resized_cropped_or_tiled": false
+  },
+  "shipped_canvas_px": [2560, 2560],
+  "final_resolution_cm_per_px": 4.8,
+  "lighting_isotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean; source pixels with gradient below 12 luminance units excluded",
+    "peak_vs_uniform_over_land": 1.637401,
+    "uniform_reference": 1.0,
+    "key_light_asymmetry": 0.001961,
+    "key_light_gate_maximum": 0.011,
+    "key_light_pass_under_source_scale_reproduction": true,
+    "visual_check": "Neutral form shading and local ambient occlusion are present; no directional cast-shadow field, sun angle, or time-of-day treatment was observed."
+  },
+  "median_conifer_crown_final_scale": {
+    "px_on_2560_canvas": 67.368,
+    "metres_at_4_8_cm_per_px": 3.234,
+    "source_px_equivalent": 33.0,
+    "measurement": "Median bounding-box width across 29 isolated dark-green conifer components, scaled by 2560/1254; dense merged crowns are an acknowledged source of upward bias.",
+    "required_final_px_range": [84, 147],
+    "required_metres_range": [4.0, 7.0],
+    "pass": false
+  },
+  "buildable_vs_steep_fraction": {
+    "basis": "manual estimated fraction of non-water land area",
+    "buildable": 0.38,
+    "steep": 0.22,
+    "other_broken_talus_or_sparse_vegetation": 0.40,
+    "method": "Broad coherent inland benches count as buildable; exposed cliff and gully faces count as steep; scattered rock, talus, scrub, and denser conifer ground make up the remainder."
+  },
+  "water_footprint_fraction": 0.126264,
+  "water_mask": {
+    "filename": "c4-1-water-source.png",
+    "exact_size_px": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "2494C223EF0BADBDFD107EF35E973DB858658826EEBC8D2905FD93503338B6D9",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "derivation": "Source-raster colour classification, connected-component selection, local wet-margin growth, morphological smoothing, and hole fill over the painted coast, surf, wash, stream, tarn, and fall; no polyline geometry.",
+    "opaque_water_pixels": 198552,
+    "intermediate_alpha_pixels": 0,
+    "non_white_water_pixels": 0,
+    "raster_components": 14,
+    "raster_component_note": "The three logical water systems contain separate visible raster components where rocks and conifers occlude the painted stream and coast.",
+    "interior_hole_pixels": 0,
+    "edge_water_pixels": {
+      "north": 171,
+      "east": 1254,
+      "south": 253,
+      "west": 0
+    },
+    "edge_water_runs_source_px": {
+      "north": [[1083, 1253]],
+      "east": [[0, 1253]],
+      "south": [[226, 248], [1015, 1066], [1076, 1253]],
+      "west": []
+    },
+    "source_scale_gate_reproduction": {
+      "ring_6_px_final": {
+        "source_radius_px": 3,
+        "samples": 11405,
+        "blue_leaning_pixels": 89,
+        "percent": 0.78036,
+        "maximum_percent": 1.0,
+        "pass": true
+      },
+      "ring_48_px_final": {
+        "source_radius_px": 24,
+        "samples": 79132,
+        "blue_leaning_pixels": 173,
+        "percent": 0.218622,
+        "maximum_percent": 1.0,
+        "pass": true
+      },
+      "note": "Radii 3 and 24 at 1254 px scale to approximately 6.12 and 49.0 px on the 2560 px canvas; the classifier matches the repository blue-fringe predicate."
+    }
+  },
+  "constraint_checks": {
+    "square_at_least_1254_px": true,
+    "single_edit_call": true,
+    "two_inputs_used": true,
+    "terrain_only": true,
+    "neutral_lighting_mechanical_proxy": true,
+    "water_mask_complete_fringe_proxies": true,
+    "conifer_scale": false,
+    "north_edge_dry": false,
+    "west_edge_dry": true,
+    "south_edge_water_only_at_southwest_tarn": false,
+    "visual_acceptance": "not claimed; owner authority"
+  },
+  "open_risks": [
+    "Median conifer crowns measure about 67.37 px / 3.234 m at final canvas scale, below the required 84-147 px / 4-7 m range.",
+    "The single edit paints eastern sea through the north-east corner and through two south-east edge runs. The mask includes those wet pixels as required, but the literal north-edge-dry and south-edge-only-at-the-southwest-tarn constraints are not met.",
+    "The generated result has not been visually approved by the owner."
+  ]
+}
