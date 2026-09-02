@@ -565,7 +565,18 @@ faces and states the tarn corner as permission. Contract note: a neighbour's
 water body crossing a cell line is legitimate; if workers keep missing it,
 the pipeline can OR the neighbours' water into the delivered mask within
 the bleed (lock change; passes the gate but leaves a straight shore on the
-ownership curve, so brief-level first). Five cells stand. Briefs ready for the next cells in
+ownership curve, so brief-level first). **Second attempt fixed both
+(rock lighting `0.143`, corner continued) and failed the palette gate alone
+at `dBG 0.218`** (ledger R069): the gorge's haze in 3,2's north band
+(`0.681`) stops at the line where the candidate's south third is clear
+(`0.463`) — a mild, findable tone step by eye. Candidate kept in full at
+`.codex-tmp/session3/rejected/c3-1-palette/` (acceptable via `--from` if
+the owner rules the step fine). **Third attempt queued** behind the 2,2
+bake with haze continuity and confined crystals in the brief. Next lock
+change candidate: "haze continues across seams at the arriving tint" in
+the dark-forest and magical-gorge vocabularies. **c2-2 bench country
+dispatched** (edit from 3,2 east and 2,3 south; sites waystation bench and
+hot spring). Five cells stand. Briefs ready for the next cells in
 adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 `brief-c3-1-r2.md` (magical gorge, rail gorge span), `brief-c2-2-r2.md`
 (bench country, waystation bench, hot spring).

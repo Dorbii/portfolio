@@ -374,6 +374,13 @@ Steve rejected the r5 composition on two grounds the director's QA under-weighte
 - **Contract note (no pipeline change yet):** a neighbour's water body whose shore crosses a cell line is legitimate and the edit target shows it; the later cell must continue it. If a worker fails this again, the robust fix is the pipeline ORing the neighbours' water into the delivered mask within the bleed, which makes the gate pass but would leave a straight shore on the ownership curve — so the brief-level fix is the right first fix.
 - **Evidence:** `.codex-tmp/session3/regen-c3-1.log`, `.codex-tmp/session3/review/regen-c3-1-cand1-{quarter,chasm-1to1,SEcorner}.png`, `regen-c3-1-target-SEcorner.png`.
 
+### R069 — 2026-09-01 — c3-1 magical gorge, second attempt: both fixes held, a third gate fires (codex exec via cell.mjs, gpt-5.6-sol, effort=high)
+
+- **Setup:** brief revised for flat column faces and the tarn corner stated as permission. `159,832` tokens, ~11 min, one edit call.
+- **Verdict: REJECTED by the palette gate only** — `dBG 0.218` at the 3,2 seam (limit `0.18`, dLuma `2.8`); rock lighting `0.143` (from `0.31`), continuity `ok (2 crossings)` with the tarn corner continued, fringe `0.35% / 0.41%`. Gate replica on the two bands: 3,2's north band vegetation blue/green `0.681` (its gorge top lies under flat haze), the candidate's south band `0.463` (clear forest) — the haze stops at the cell line. Eyes on the stacked seam band: a mild but findable warm-to-cool step; the trees themselves match. The candidate otherwise realises the brief and is kept in full (source, derived concept/l2/water, report) at `.codex-tmp/session3/rejected/c3-1-palette/` so it can be accepted through `--from` if the owner judges the step acceptable. Also noted by eye: crystals scattered across the open moor rather than confined to the rims and fragments.
+- **Model-attributable observation:** each attempt fixed exactly what it was told and surfaced the next unstated thing — cylinder shading, then the corner, then the haze. The pattern is the edit model continuing STRUCTURE from the arriving band reliably and ATMOSPHERE (mist tint) only when told; the haze sentence now lives in the brief, and belongs in the dark-forest and magical-gorge biome vocabularies for the next lock change ("haze continues across seams at the arriving tint").
+- **Evidence:** `.codex-tmp/session3/regen-c3-1.log`, `.codex-tmp/session3/review/regen-c3-1-cand2-{quarter,seamband,seamband-1to1}.png`.
+
 ## Findings backlog (flow improvements to fold into future packets)
 
 - F1: Task packets must declare required gate tier (focused / full / none) — otherwise workers default to maximal ceremony. (From R000.)
