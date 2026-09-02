@@ -623,8 +623,14 @@ system; attempt 3 goes after 0,2 (strike three parks the cell). **0,2 the
 west shore ACCEPTED first attempt** (R099, commit `3aafb2b`: seam tones
 `7.6` and under over two seams, the bay present, `141` tiles; the sound
 runs off its north edge over the west `456 px`). **FIFTEEN CELLS STAND.**
-**2,0 attempt 3 DISPATCHED** on the reframed `brief-c2-0-r3.md` (log after
-`rebake3-start`; strike three parks the cell). `brief-c0-1.md` READY (the
+**2,0 attempt 3 REJECTED by the two lighting gates only** (R100:
+key-light `0.0117`, rock lighting `0.189`; the reframe fixed both seams
+(`5.7`), the water and the composition; the lit rock is the east third's
+plateau benches, not the forest floor — tested). **2,0 PARKED after three
+strikes — OWNER CALL:** accept candidate 3 by eye with a recorded
+exception, a fourth attempt with the east benches explicitly flat-shaded,
+or leave it. **0,1 the Metrics-Service shelf DISPATCHED** (`brief-c0-1.md`;
+log `.codex-tmp/session3/regen-c0-1.log`). `brief-c0-1.md` READY (the
 Metrics-Service shelf: the sound arriving on its south edge's west 22% and
 up the west side; the line from the south edge near the middle to the
 station and out east a fifth of the way down). Remaining: 1,1 (after lock
@@ -1030,6 +1036,7 @@ back explicitly; owner asked for this discipline 2026-09-01):**
 | 27 | "this looks weird" (4,0: the station strip as a pale graded band, a straight cut, short walls) | CLOSED: cause was my brief's "strip" and "cutting"; 4,0 replaced on brief-c4-0-r2.md and accepted (R094), the road gone; caution recorded — the land offers open ground and natural draws, never strips, cuttings, corridors or bands |
 | 28 | "the capital one is fine cause were gonna cover the land for that area anyways" (2,1 station strip) | CLOSED: 2,1 stays; the city structures cover that ground |
 | 29 | (director-found) the purple field reads as water to the fringe rings and the mask growth | lock change 7 staged (hue window on the water test) — owner's word pending; then 1,1 attempt 2 on brief r2 |
+| 30 | (director-found) 2,0 the dark-forest gorge parked after three lighting strikes; seams and composition right on the third | OPEN: owner's call — accept by eye / fourth attempt with flat-shaded east benches / leave |
 | — | director-found: the control suite shares the real working dirs | FIXED for 4,3 (R073, `97eb0d6`); WORK relocation is lock change 5a |
 | — | director-found: fringe rejections are mask tracing, not art (four candidates) | lock change 5b: mask completion by bounded growth |
 | — | director-found: stale scratch deliverables hazard | worked around by hand; next lock change |
