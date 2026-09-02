@@ -646,7 +646,8 @@ within the noise of their calibrations; key-light and crowns now pass;
 **OWNER CALL:** recalibrate the two limits on his eye (lock change 8: rock
 `0.16`, tone `21`) and `--redo` candidate 4, or a fifth attempt, or leave
 it). **1,1 the purple field LANDED** (attempt 2, R107, commit `6f1577cc`, every
-gate green; owner's eye pending on `review/regen-c1-1-st-*.png`). 19 of 20
+gate green; **owner's eye: "those transitions look fine"** on the stitched
+seams). 19 of 20
 cells hold; 2,0 alone is open. **NEW OWNER THREAD (row 32), the 2,0
 candidate-4 WEST seam against 1,0:** "the seam on this one is too noticeable
 … trees and other features are legit cut in half" — the strip located by
@@ -1073,6 +1074,7 @@ back explicitly; owner asked for this discipline 2026-09-01):**
 | 30 | "go ahead and do a 4th for the dark forest" (2,0) | DONE: attempt 4 missed rock lighting by 0.003 and the plateau seam by 0.0 (R106); the owner's answer was the west seam (row 32), so lock change 8 stays staged and moot until the seam is solved |
 | 31 | "so whats the ask here? Cant we just manually pass it?" / "go" (the purple field and lock change 7) | LANDED as lock change 7 (R105): the hue window on the water test; 1,1's second attempt follows |
 | 32 | "the seam on this one is too noticeable" / "trees and other features are legit cut in half" (strip of the 2,0 candidate-4 west seam against 1,0) | IN PROGRESS: located (r 0.98); faithful-seam preview and hard-edge excess measured at every accepted seam for the control; fix to be proposed on the evidence |
+| 33 | "those transitions look fine, not gonna get a smooth one with all that purple" (the purple field's four seams) | DONE: 1,1 accepted by the owner's eye; stays as committed (`6f1577cc`) |
 | — | director-found: the control suite shares the real working dirs | FIXED for 4,3 (R073, `97eb0d6`); WORK relocation is lock change 5a |
 | — | director-found: fringe rejections are mask tracing, not art (four candidates) | lock change 5b: mask completion by bounded growth |
 | — | director-found: stale scratch deliverables hazard | worked around by hand; next lock change |
