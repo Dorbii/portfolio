@@ -663,8 +663,12 @@ after; suite 20/20 with three new controls): content-aware seams between
 authored cells (minimum-error cut within 128 px, corners pinned) and
 `--restitch`. **The 19 accepted cells RESTITCHED** on the new seams (R108; world commit
 `e4e33f73`; dev feed regenerated; before/after strips at every seam in
-`review/seams-compare-{vertical,horizontal}.png` for the owner's eye). Next:
-lock change 8 (the two limits), then `--redo` 2,0 candidate 4. Whole-
+`review/seams-compare-{vertical,horizontal}.png` for the owner's eye). **LOCK CHANGE 8 LANDED** (`976743f2`, rock `0.16`, tone `21`, suite 20/20)
+and **2,0 LANDED by `--redo` of candidate 4** (R109, world commit
+`a2a6d0c3`): **THE TERRITORY IS 20 OF 20.** Owner's eye pending on 2,0's
+stitched previews. Next: the whole-territory review at reduced zoom (crown
+drift, tints), the owner's-eye items (regular bench runs, 1,3's dry gully,
+0,0's south-edge pool), then the territory tier of the pyramid. Whole-
 territory review at quarter scale: `review/territory-L2-quarter.png`. **REMAINING THREE, all waiting on
 the owner:** 1,1 the purple field (lock change 7 staged — the hue window on
 the water test; then `brief-c1-1-r2.md`), 2,0 the dark-forest gorge
@@ -1077,7 +1081,7 @@ back explicitly; owner asked for this discipline 2026-09-01):**
 | 27 | "this looks weird" (4,0: the station strip as a pale graded band, a straight cut, short walls) | CLOSED: cause was my brief's "strip" and "cutting"; 4,0 replaced on brief-c4-0-r2.md and accepted (R094), the road gone; caution recorded — the land offers open ground and natural draws, never strips, cuttings, corridors or bands |
 | 28 | "the capital one is fine cause were gonna cover the land for that area anyways" (2,1 station strip) | CLOSED: 2,1 stays; the city structures cover that ground |
 | 29 | (director-found) the purple field reads as water to the fringe rings and the mask growth | lock change 7 staged (hue window on the water test) — owner's word pending; then 1,1 attempt 2 on brief r2 |
-| 30 | "go ahead and do a 4th for the dark forest" (2,0) | DONE: attempt 4 missed rock lighting by 0.003 and the plateau seam by 0.0 (R106); the owner's answer was the west seam (row 32), so lock change 8 stays staged and moot until the seam is solved |
+| 30 | "go ahead and do a 4th for the dark forest" (2,0) | DONE: attempt 4 landed by `--redo` after lock change 8 recalibrated the two limits on the owner's eye (R109, `a2a6d0c3`); 20 of 20 |
 | 31 | "so whats the ask here? Cant we just manually pass it?" / "go" (the purple field and lock change 7) | LANDED as lock change 7 (R105): the hue window on the water test; 1,1's second attempt follows |
 | 32 | "the seam on this one is too noticeable" / "trees and other features are legit cut in half" (strip of the 2,0 candidate-4 west seam against 1,0) | LANDED as lock change 9, content-aware seams (`54927a8c`, suite 20/20) and the world restitched (`e4e33f73`); before/after strips at every seam sent for the owner's eye |
 | 33 | "those transitions look fine, not gonna get a smooth one with all that purple" (the purple field's four seams) | DONE: 1,1 accepted by the owner's eye; stays as committed (`6f1577cc`) |

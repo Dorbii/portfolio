@@ -699,6 +699,13 @@ Steve rejected the r5 composition on two grounds the director's QA under-weighte
 - **Restitch:** 19 of 19 cells restitched in under four minutes, 763 tiles written and 2019 byte-identical, no failure; world commit `e4e33f73`.
 - **Evidence:** `.codex-tmp/session3/review/c2-0-cand4-west-seam-compare4.png` (owner / straight / real seam / min-cut), `regen-c2-0-cand4-real-seam-W-north.png` vs `c2-0-cand4-mincut-W-north.png` at 1:1, `seams-before-{vertical,horizontal}.png` and `seams-after-*.png` at every seam, suite logs `suite-lock9-{before,after3}.log`, `restitch-world.log`, `tools/world-authoring/solidified.json` history.
 
+### R109 — 2026-09-02 — lock change 8 and c2-0 lands: the territory is 20 of 20 (no new bake)
+
+- **Setup:** the owner's answer to the fourth candidate's two misses (R106) was the west seam (R108), and to the recommendation "both changes together, then the redo": "if you think its needed go ahead". Lock change 8 (approval before and after, suite `20/20`, commit `976743f2`): rock lighting `0.15 -> 0.16`, all-land seam tone `20 -> 21`, the tone control's lift `+30 -> +34` so it still fails over the new limit. Then `--redo` of candidate 4 from its recorded generation on `brief-c2-0-r4.md`, no dispatch.
+- **Verdict: ACCEPTED, stitched on the content-aware seams, world commit `a2a6d0c3`** — key-light `0.0086`, gradient ratio `1.475`, rock lighting `0.153` (limit `0.16`), land coverage `96.1%`, water cut clear, fringe `0% / 0%`, continuity ok (nothing wet at any edge), vegetation `dBG 0.076` / `dLuma 5.4` over two seams, all-land tone worst `20.0` (limit `21`) at the 3,0 seam; `121` tiles written, `21` byte-identical; crowns `98` px (R106). Its three seams (1,0 west, 3,0 east, 2,1 south) are the first drawn content-aware at first stitch rather than by restitch.
+- **Reading:** the dark-forest gorge with its two falls and the mill ledge holds between the territory's two brightest grounds; the plateau seam sits at the limit's edge by a hair on a whole-edge median, which is the tone the owner already accepted at 1,3 (R100). The grid reads 20 of 20; the dev feed carries all twenty cells for the runtime LoD test. Owner's eye pending on the stitched previews (`review/regen-c2-0-final-*.png`, `seams-c2-0-strips.png`).
+- **Evidence:** `.codex-tmp/session3/regen-c2-0.log` after `redo-start`, `art-source/career-world/l2-land/ninjaone/c2-0/`, `tools/world-authoring/solidified.json` history (lock change 8 before/after), `suite-lock8.log`.
+
 ## Findings backlog (flow improvements to fold into future packets)
 
 - F1: Task packets must declare required gate tier (focused / full / none) — otherwise workers default to maximal ceremony. (From R000.)
