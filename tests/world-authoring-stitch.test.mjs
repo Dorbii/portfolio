@@ -70,7 +70,7 @@ const G = (x, y) => {
     Math.round(0.5 * g + 6 * Math.sin((x - y) / 19.7)), 255];
 };
 
-function genImage(col, row, paint, { waterDisc, keepWaterPaint, paintedRing, hazeArc } = {}) {
+function genImage(col, row, paint, { waterDisc, keepWaterPaint, paintedRing, hazeArc, violetRing } = {}) {
   const ox = col * CELL - BLEED, oy = row * CELL - BLEED;
   const l2 = Buffer.alloc(GEN * GEN * 4);
   const concept = Buffer.alloc(GEN * GEN * 4);
@@ -87,6 +87,10 @@ function genImage(col, row, paint, { waterDisc, keepWaterPaint, paintedRing, haz
           concept[o] = 40; concept[o + 1] = 90; concept[o + 2] = 200;
           mask[o] = mask[o + 1] = mask[o + 2] = 255; mask[o + 3] = 255;
           if (!keepWaterPaint) { l2[o] = l2[o + 1] = l2[o + 2] = l2[o + 3] = 0; }
+        } else if (violetRing && d >= waterDisc[2] + violetRing[0] && d < waterDisc[2] + violetRing[1]) {
+          // saturated violet ground beside the water (hue ~285, b > r, b >= g):
+          // blue-leaning to the old classifier, not water to the hue-limited one
+          concept[o] = l2[o] = 150; concept[o + 1] = l2[o + 1] = 60; concept[o + 2] = l2[o + 2] = 200;
         } else if (hazeArc && ox + u > waterDisc[0] && d >= waterDisc[2] + hazeArc[0] && d < waterDisc[2] + hazeArc[1]) {
           // a flat blue-grey haze touching the water: sat 0.12, under the
           // classifier's 0.25 — growth must NOT absorb it
@@ -547,6 +551,18 @@ test("a mask that stops 20px short of the painted shore is completed, and the ri
   const px = await tileRaw(0, Math.floor((C41[0] + 290) / TILE), Math.floor(C41[1] / TILE));
   const o = (((C41[1]) % TILE) * TILE + ((C41[0] + 290) % TILE)) * 4;
   assert.equal(px[o + 3], 0, "painted water 290px from the centre (inside the grown mask) must be cut");
+});
+
+test("violet ground beside the water is neither fringe nor grown into (lock change 7)", async () => {
+  await supplyGeneration("c4-1", 4, 1,
+    genImage(4, 1, G, { waterDisc: [C41[0], C41[1], 300], keepWaterPaint: true, violetRing: [0, 60] }),
+    genImage(4, 1, G, { waterDisc: [C41[0], C41[1], 300] }));
+  const out = redoCell("4,1", ["--force"]);
+  const m = out.match(/mask\s+completed: \+(\d+) px/);
+  assert.ok(!m || +m[1] < 500, "violet ground must not be grown into: " + (m ? m[1] : 0));
+  assert.match(out, /PASS\s+water fringe\s+0%/, "violet ground is not fringe to the 6px ring:\n" + out.slice(-600));
+  assert.match(out, /PASS\s+water fringe \(48px\)\s+0%/, "violet ground is not fringe to the 48px ring");
+  assert.match(out, /accepted, stitched/);
 });
 
 test("dry paint between the mask and painted water stops the growth: the polyline defect still fails", async () => {

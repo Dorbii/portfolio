@@ -75,6 +75,20 @@ const TAB_CORNER = 64;                    // corner jitter amplitude, art px
 const TAB_WIGGLE = 64;                    // mid-edge wiggle amplitude, art px
 const FEATHER = 8;                        // seam blend half-width, art px
 const EDIT_GREY = [96, 104, 88];          // unpainted area of an edit target (neutral, mid-value)
+// what the water tools (fringe rings, mask growth) call painted water: saturated,
+// blue-leaning AND within the cyan-to-blue hue window. Violet and magenta ground
+// (the purple field, hue 240-300) is blue-leaning but not water (R093, 2026-09-02).
+const WATER_HUE = [150, 225];
+function isWaterPaint(r, g, b, mx, sat) {
+  if (!(mx > 40 && sat > 0.25 && b > r && b >= g)) return false;
+  const mn = Math.min(r, g, b);
+  if (mx === mn) return false;
+  let h = mx === r ? 60 * (((g - b) / (mx - mn)) % 6)
+    : mx === g ? 60 * ((b - r) / (mx - mn) + 2)
+    : 60 * ((r - g) / (mx - mn) + 4);
+  if (h < 0) h += 360;
+  return h >= WATER_HUE[0] && h <= WATER_HUE[1];
+}
 const TAB_REACH = TAB_CORNER + TAB_WIGGLE + FEATHER * 4;   // < BLEED by design
 
 // ---------------------------------------------------------------- args ----
@@ -1049,7 +1063,7 @@ exit 1
         const r = concept[o], g = concept[o + 1], b = concept[o + 2];
         const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
         const sat = mx ? (mx - mn) / mx : 0;
-        return mx > 40 && sat > 0.25 && b > r && b >= g;
+        return isWaterPaint(r, g, b, mx, sat);
       };
       const inBridge = (x, y) => bridgeRects.some((r) => x >= r.x0 && x < r.x1 && y >= r.y0 && y < r.y1);
       const dist = new Int16Array(N).fill(-1);
@@ -1251,7 +1265,7 @@ exit 1
           const r = data[i], g = data[i + 1], b = data[i + 2];
           const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
           const sat = mx ? (mx - mn) / mx : 0;
-          if (mx > 40 && sat > 0.25 && b > r && b >= g) fringe += 1;
+          if (isWaterPaint(r, g, b, mx, sat)) fringe += 1;
         }
       }
     }
@@ -1288,7 +1302,7 @@ exit 1
         const r = data[i], g = data[i + 1], b = data[i + 2];
         const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
         const sat = mx ? (mx - mn) / mx : 0;
-        if (mx > 40 && sat > 0.25 && b > r && b >= g) ring48F += 1;
+        if (isWaterPaint(r, g, b, mx, sat)) ring48F += 1;
       }
     }
   }

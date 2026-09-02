@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-02T18:29:31.862Z",
+ "solidifiedAt": "2026-09-02T22:22:33.324Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "b445247a9c46ea46",
+  "cell.mjs": "d123a80493240a41",
   "plan-territory.mjs": "270aec1cef622a35",
   "AGENTS.md": "0d4c3c0fc8f88b87"
  },
@@ -219,6 +219,24 @@
    "reason": "owner 2026-09-02 (change landed, suite 17/17): lock change 6 - (a) the palette gate also compares the median luma of ALL opaque land in the 16..176 px bands on both sides of every authored seam and fails above 20 (the stark seam 24.5; accepted seams 2.3-17.4); (b) for each authored orthogonal edge the neighbour's bleed-paint tone (per 64 px segment, the median of its last 64 px before the grey) is blended into the edit target's grey from full strength where the grey begins (256 px inside the kept edge) to flat grey a third of the kept area in; painted pixels never change. Controls: a +30-luma outer-third synthetic fails the tone gate and leaves the world untouched; the dry-run target reads the ramp at two depths within +-2 per channel and exact grey beyond the third.",
    "hashes": {
     "cell.mjs": "b445247a9c46ea46",
+    "plan-territory.mjs": "270aec1cef622a35",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-02T22:18:21.649Z",
+   "reason": "owner 2026-09-02: 'so whats the ask here? Cant we just manually pass it?' then 'go'. Lock change 7: the water-paint test used by the fringe rings (6 and 48 px) and the mask growth gains a hue window of 150..225 (cyan to blue) in one shared isWaterPaint; violet and magenta ground (hue 240-300, the purple field) is no longer water to the water tools. Basis R093: on the purple field the old test flagged 29.6/24.1% of ring pixels (42,237 of 44,700 at hue 270-300), the hue-limited test 0.12/0.03%; accepted cells unchanged (1,3 0/0, 4,2 0.09/0.06, 3,1's real water still flagged). Control: a violet annulus beside a water disc is neither fringe nor grown into; the blue-ring control still fails.",
+   "hashes": {
+    "cell.mjs": "b445247a9c46ea46",
+    "plan-territory.mjs": "270aec1cef622a35",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-02T22:22:33.325Z",
+   "reason": "owner 2026-09-02 'go' (change landed, suite 18/18): lock change 7 - one shared isWaterPaint with a hue window of 150..225 for the 6 px ring, the 48 px ring and the mask growth; violet and magenta ground is no longer water to the water tools. Controls: a violet annulus beside a water disc is neither fringe nor grown into and the cell stitches; the blue-ring control still fails; the undersize-mask and haze controls unchanged; the real working dirs untouched.",
+   "hashes": {
+    "cell.mjs": "d123a80493240a41",
     "plan-territory.mjs": "270aec1cef622a35",
     "AGENTS.md": "0d4c3c0fc8f88b87"
    }
