@@ -657,8 +657,14 @@ feathered one (port in `.codex-tmp/session3/seam-geo.mjs`, checked against
 the stitched tiles; faithful previews via `stitch-preview.mjs`), but the
 mismatch of features across the line is real; `seam-edge2.mjs` measures the
 hard-edge excess at the real seam against the paint's own rate as the
-control, over every accepted seam. Lock change 8 (the two limits) stays
-staged and is moot unless the seam is solved. Whole-
+control, over every accepted seam. **LOCK CHANGE 9 LANDED** (owner: "if you think its needed go ahead" /
+"min cut is fine here"; commit `54927a8c`; approval recorded before and
+after; suite 20/20 with three new controls): content-aware seams between
+authored cells (minimum-error cut within 128 px, corners pinned) and
+`--restitch`. **RESTITCH OF THE 19 ACCEPTED CELLS IN PROGRESS**
+(`.codex-tmp/session3/restitch-world.sh`, log `restitch-world.log`); then
+the dev feed, after-strips at every seam for the owner's eye, R108. Lock
+change 8 (the two limits) follows, then `--redo` 2,0 candidate 4. Whole-
 territory review at quarter scale: `review/territory-L2-quarter.png`. **REMAINING THREE, all waiting on
 the owner:** 1,1 the purple field (lock change 7 staged — the hue window on
 the water test; then `brief-c1-1-r2.md`), 2,0 the dark-forest gorge
@@ -1073,7 +1079,7 @@ back explicitly; owner asked for this discipline 2026-09-01):**
 | 29 | (director-found) the purple field reads as water to the fringe rings and the mask growth | lock change 7 staged (hue window on the water test) — owner's word pending; then 1,1 attempt 2 on brief r2 |
 | 30 | "go ahead and do a 4th for the dark forest" (2,0) | DONE: attempt 4 missed rock lighting by 0.003 and the plateau seam by 0.0 (R106); the owner's answer was the west seam (row 32), so lock change 8 stays staged and moot until the seam is solved |
 | 31 | "so whats the ask here? Cant we just manually pass it?" / "go" (the purple field and lock change 7) | LANDED as lock change 7 (R105): the hue window on the water test; 1,1's second attempt follows |
-| 32 | "the seam on this one is too noticeable" / "trees and other features are legit cut in half" (strip of the 2,0 candidate-4 west seam against 1,0) | IN PROGRESS: located (r 0.98); faithful-seam preview and hard-edge excess measured at every accepted seam for the control; PROPOSED as lock change 9, content-aware seams (the cut follows the minimum-error path through the two paints; prototype 3-4x less paint disagreement on every seam tried; design in `.codex-tmp/session3/next-lock-change.md`); awaiting the owner's words; 2,0 waits behind it |
+| 32 | "the seam on this one is too noticeable" / "trees and other features are legit cut in half" (strip of the 2,0 candidate-4 west seam against 1,0) | LANDED as lock change 9, content-aware seams (`54927a8c`, suite 20/20); the world restitch is running; owner's eye on the after-strips next |
 | 33 | "those transitions look fine, not gonna get a smooth one with all that purple" (the purple field's four seams) | DONE: 1,1 accepted by the owner's eye; stays as committed (`6f1577cc`) |
 | — | director-found: the control suite shares the real working dirs | FIXED for 4,3 (R073, `97eb0d6`); WORK relocation is lock change 5a |
 | — | director-found: fringe rejections are mask tracing, not art (four candidates) | lock change 5b: mask completion by bounded growth |
