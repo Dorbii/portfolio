@@ -554,8 +554,18 @@ a crown-size gate (tree detection) is a candidate for a later lock change.
 `175,757` tokens; ledger R067); the worker flagged the saddle's inherited
 east column wall as fairly regular — the saddle predates the
 weathered-column rule; owner's eye decides whether it earns a regeneration.
-**c3-1 magical gorge dispatched** (the rail gorge span; wonders; brief
-`brief-c3-1-r2.md` with the scale line). Five cells stand. Briefs ready for the next cells in
+**c3-1 magical gorge — first attempt REJECTED by two gates, correctly**
+(ledger R068): rock lighting `0.31` (cylinder-shaded columns with one
+bright side, direction `33°`, not the crystals) and continuity (the coast's
+tarn crosses the 3,2|3,1 line by `40–60 px`; the target showed the sliver in
+the candidate's kept corner and the candidate painted it over). The cell
+itself realises the owner's crop — chasm, mist, hanging fragments with
+crystals, glowing pool. **Re-baked** on a brief that asks for flat column
+faces and states the tarn corner as permission. Contract note: a neighbour's
+water body crossing a cell line is legitimate; if workers keep missing it,
+the pipeline can OR the neighbours' water into the delivered mask within
+the bleed (lock change; passes the gate but leaves a straight shore on the
+ownership curve, so brief-level first). Five cells stand. Briefs ready for the next cells in
 adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 `brief-c3-1-r2.md` (magical gorge, rail gorge span), `brief-c2-2-r2.md`
 (bench country, waystation bench, hot spring).
