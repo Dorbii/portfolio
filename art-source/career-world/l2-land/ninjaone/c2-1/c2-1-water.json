@@ -1,18 +1,18 @@
 [
   {
+    "class": "lake",
+    "note": "The enclosed spring pool on the raised shelf. The mask includes its complete dark-green water surface, ripple marks, reflections, and wet margin up to the surrounding stones."
+  },
+  {
     "class": "stream",
-    "note": "Closed inland stream connecting the spring basin, shelf pool, and terminal receiving pool; the mask covers the full painted channel, wet margins, ripple highlights, and reflections without touching any canvas edge."
+    "note": "The single stream crossing the shelf from the spring pool to the terrace lip. The mask follows the complete painted wet channel, including narrow and rock-occluded reaches."
+  },
+  {
+    "class": "fall",
+    "note": "The single short fall over the broken shelf edge. The mask includes the full falling sheet, foam, splash, spray, and impact wash."
   },
   {
     "class": "lake",
-    "note": "All enclosed basin surfaces in the single closed water system: the small spring basin, the widened shelf pool, and the lower receiving pool, including their complete painted wet extents."
-  },
-  {
-    "class": "fall",
-    "note": "Main small shelf-edge fall into the lower receiving pool, including the complete painted sheet, impact wash, and attached spray."
-  },
-  {
-    "class": "fall",
-    "note": "The generated source also paints a second short drop immediately below the spring basin; it is classified rather than omitted, although this exceeds the requested single-fall composition."
+    "note": "The terminal pool below the fall where the water ends. The mask includes the full painted surface, shallow submerged-stone area, reflections, and the last wet pixels; no water reaches a frame edge."
   }
 ]

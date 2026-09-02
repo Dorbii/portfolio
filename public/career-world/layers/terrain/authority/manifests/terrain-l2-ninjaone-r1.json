@@ -726,31 +726,31 @@
    }
   },
   "c2-1": {
-   "authoredAt": "2026-09-02T16:50:37.859Z",
+   "authoredAt": "2026-09-02T17:19:09.215Z",
    "describe": "**You are EDITING the painted neighbours into this cell, not generating a\nscene.** Two neighbours arrive in the edit target: along your EAST edge the\nmagical-gorge cell (open heather moor with dark conifers gathering toward\nits chasm, weathered basalt rims, a blue-grey mist that belongs to the\nchasm and thins away from it), and along your SOUTH edge the broken bench\ncountry (heather flats in shall",
    "sourcePx": 1254,
    "gates": [
     {
      "name": "key-light asymmetry",
-     "value": 0.0028,
+     "value": 0.0065,
      "pass": true,
      "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004"
     },
     {
      "name": "gradient ratio",
-     "value": "1.451 (reported)",
+     "value": "1.49 (reported)",
      "pass": true,
      "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
     },
     {
      "name": "rock lighting",
-     "value": 0.038,
+     "value": "0.018 (n 3771, report-only)",
      "pass": true,
      "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.07"
     },
     {
      "name": "land coverage",
-     "value": "96.3%",
+     "value": "97.7%",
      "pass": true
     },
     {
@@ -761,19 +761,19 @@
     },
     {
      "name": "mask completion",
-     "value": "+987 px grown, 54 px holes filled (reported)",
+     "value": "+0 px grown, 0 px holes filled (reported)",
      "pass": true,
      "note": "the delivered mask grown into contiguous painted water within 48 px and speckle holes <=64 px filled before the cut (owner 2026-09-02); dry paint stops the growth, so a polyline mask still fails the rings"
     },
     {
      "name": "water fringe",
-     "value": "0.34%",
+     "value": "0%",
      "pass": true,
      "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
     },
     {
      "name": "water fringe (48px)",
-     "value": "0.07%",
+     "value": "0%",
      "pass": true,
      "note": "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)"
     },
@@ -793,15 +793,11 @@
    "shelf": "capital",
    "features": [],
    "waterZones": [
-    "stream",
     "lake",
+    "stream",
     "fall",
-    "fall"
+    "lake"
    ],
-   "maskCompletion": {
-    "grownPx": 987,
-    "holePx": 54
-   },
    "biome": "lush-shelf",
    "source": "art-source/career-world/l2-land/ninjaone/c2-1",
    "stitch": {
