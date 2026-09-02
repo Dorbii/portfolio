@@ -594,6 +594,26 @@ adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 `brief-c3-1-r2.md` (magical gorge, rail gorge span), `brief-c2-2-r2.md`
 (bench country, waystation bench, hot spring).
 
+**SESSION 4, LATE (2026-09-02) — RESUME HERE.** Twelve cells stand.
+**Owner rejected 4,0's drawn station strip by eye** ("this looks weird";
+my brief asked for a "strip" and a "cutting" as geometry) — **4,0
+REPLACEMENT DISPATCHED** on `brief-c4-0-r2.md` (open soft-edged meadow, a
+natural draw, nothing that reads as built; log `regen-c4-0.log` after
+`replace-start`); 2,1's strip stays by the owner's word (the city covers
+it). **1,1 the purple field, first attempt REJECTED on a gate defect**
+(R093): the water tools' "blue-leaning" test reads violet ground as water
+— fringe `14.35% / 16.67%`, growth `+31,976 px` into the purple; with a
+hue window (150–225) the rings read `0.12 / 0.03%`, accepted cells
+unchanged. **LOCK CHANGE 7 proposed and staged** (`apply-lock7.mjs`
+--check ok): one `isWaterPaint` with the hue window for both rings and the
+growth; control: a violet annulus beside a water disc is neither fringe nor
+grown into. Awaiting the owner's word. The candidate also drew a bare-soil
+path and ran purple to the seams; `brief-c1-1-r2.md` is ready (no line of
+any kind; the outer thirds as the moor; the knoll north-west). A chroma
+term in the tone gate (7b) is the candidate for hue seams the luma gate
+cannot see. Order after the owner's word: land 7 → 1,1 attempt 2 → 0,3 →
+2,0 → 3,0 (after the 4,0 replacement) → 0,2 → 1,0 → 0,1 → 0,0.
+
 **SESSION 4, EVENING (2026-09-02) — RESUME HERE.** **4,1 the coast headland
 ACCEPTED first attempt** (R089: key-light `0.0007`, rock lighting `0.07`, 6
 crossings met, `130` tiles, commit `d06a81c`); its 4,2 seam reads dLuma
