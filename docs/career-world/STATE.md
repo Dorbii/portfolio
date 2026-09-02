@@ -613,11 +613,22 @@ fourth generation). **2,2 attempt 2:** palette `dBG 0.266` (its east
 forest painted yellow-green, `0.29` vs the arriving `0.56`); fringe
 `0/0%`; and the palisade walls are still there by the worker's own report
 and by eye (`review/regen-c2-2-cand2-quarter.png`). Diagnosis: the biome's
-own words describe continuous terrace walls. **2,2 attempt 3 DISPATCHED**
-on a reframed landform (`brief-c2-2-r3.md`: broken bench country —
-scattered tors, short broken scarps two to six crowns long, no continuous
-edge; the arriving cool green held across the whole east third); log
-`.codex-tmp/session3/regen-c2-2.log` after `rebake3-start`. **Incident
+own words describe continuous terrace walls. **2,2 attempt 3 ACCEPTED on all nine
+gates** (R074) on a reframed landform (`brief-c2-2-r3.md`: broken bench
+country — scattered tors, short broken scarps two to six crowns long, no
+continuous edge; the arriving cool green held across the whole east
+third): palette `dBG 0.143` at the gorge seam, fringe `0/0%`, key-light
+`0.0108`, `162` tiles, `387,569` tokens; committed `f1bdf80`. **SIX CELLS
+STAND** (4,3 / 3,3 / 4,2 / 3,2 / 2,3 / 2,2). Eyes on the stitched tiles:
+both seams continuous at 1:1 (`review/stitched-c2-2-seam-*`); ONE item
+for the owner's eye — a long wandering escarpment of broken column stubs
+through the east third (`review/stitched-c2-2-east-scarp-1to1.png`),
+uneven and cornerless but one connected edge about 1,300 px long. **1,2
+heather moor DISPATCHED** (`brief-c1-2.md`: hamlet clearing by the beck,
+lookout crag on the south side, closed water; log
+`.codex-tmp/session3/regen-c1-2.log`). `brief-c4-1.md` (coast headland,
+tunnel mouth shelf) is written but DEFERRED: authoring 4,1 would give 3,1 a
+third authored neighbour before its fourth attempt. **Incident
 fixed (R073):** the control suite shares `.codex-tmp/authoring/cells` with
 the real world (`WORK` is not relocated by `L2_OUT_ROOT`); a test stub
 reached 4,3's ledger record (`waterZones ["lake"]`); restored from git,
