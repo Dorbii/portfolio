@@ -1,0 +1,18 @@
+[
+  {
+    "class": "coast",
+    "note": "Sea along the complete east edge, including surf, foam, wash between shore rocks, spray, ripples, reflections, wet margins, and offshore-stack surrounds."
+  },
+  {
+    "class": "stream",
+    "note": "The complete narrow shelf stream from its inland visible source through all wet margins to the pool and coastal brow."
+  },
+  {
+    "class": "lake",
+    "note": "The stream-fed shelf pool, including ripples, reflections, and its full wet shoreline margin."
+  },
+  {
+    "class": "fall",
+    "note": "The single waterfall over the east cliff, including the falling sheet, spray, foam, and plunge disturbance where it joins the coast."
+  }
+]
