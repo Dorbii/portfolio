@@ -632,8 +632,12 @@ exception, a fourth attempt with the east benches explicitly flat-shaded,
 or leave it. **0,1 the Metrics-Service shelf ACCEPTED first attempt** (R101, commit
 `e6920ed`: seam tone `6.5`, 2 crossings met with 1 bridged, no route marks,
 `141` tiles; crowns `51 px`). **SIXTEEN CELLS STAND.** **0,0 the moor with
-the shepherd's fold DISPATCHED** (`brief-c0-0.md`; 0,1's north edge dry;
-log `.codex-tmp/session3/regen-c0-0.log`). **REMAINING THREE, all waiting on
+the shepherd's fold ACCEPTED first attempt** (R102, commit `1b741c2`:
+seam tone `13.0`, veg `0.080`, the hollow unmistakable, `120` tiles; a small
+pool touches its south edge, the owner's eye at the seam). **SEVENTEEN
+CELLS STAND.** **1,0 the bare plateau DISPATCHED** (`brief-c1-0.md`, the
+crater tarn and the column altar; 0,0's east edge dry; 1,1 and 2,0 not yet
+authored; log `.codex-tmp/session3/regen-c1-0.log`). **REMAINING THREE, all waiting on
 the owner:** 1,1 the purple field (lock change 7 staged — the hue window on
 the water test; then `brief-c1-1-r2.md`), 2,0 the dark-forest gorge
 (parked after three lighting strikes; accept by eye / fourth attempt with

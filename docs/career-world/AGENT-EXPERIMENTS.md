@@ -645,6 +645,14 @@ Steve rejected the r5 composition on two grounds the director's QA under-weighte
 - **Edges for the last cells:** 0,1's north and east edges are dry, so 0,0 arrives on the shelf's meadow with no water, and 1,1 (when it comes) meets a dry west edge.
 - **Evidence:** `.codex-tmp/session3/regen-c0-1.log`, `review/stitched-c0-1-cell-half.png`, `review/territory-grid-status.png` (16 of 20).
 
+### R102 — 2026-09-02 — c0-0 the moor with the shepherd's fold, first attempt accepted; seventeen cells stand (codex exec via cell.mjs, gpt-5.6-sol, effort=high)
+
+- **Setup:** `brief-c0-0.md` — heather moor with the shepherd's fold (a grassy hollow among boulders), the south third as the arriving Metrics-Service meadow, a low-rock landform, closed water; 0,1's north edge read first (dry); edit mode with 0,1 (south), the canon as second input, the tone ramp. `149,673` tokens.
+- **Verdict: ACCEPTED on all gates** — key-light `0.0011`, rock lighting `0.224` on `1,555` strong edges (report-only), seam tone dLuma `13.0` on all land and vegetation `dBG 0.080`, fringe `0/0%`, land `98%`, `120` tiles; the worker confirms the hollow unmistakable and no wall, ring or path. Committed `1b741c2`. **SEVENTEEN CELLS STAND.**
+- **Worker-reported:** a separate small pool touching the south edge (73 source px) beside the closed beck — the continuity gate found nothing to match on 0,1's dry north edge and passed it (a pool lip on a line, under the gate's 20 px run threshold or matched by nothing; the owner's eye at the seam decides); crowns `45 px`.
+- **Edges for 1,0:** 0,0's east edge is dry, so 1,0 arrives on moor with no water; its south (1,1) and east (2,0) neighbours are not authored, so it ends those edges mid-terrain.
+- **Evidence:** `.codex-tmp/session3/regen-c0-0.log`, `review/stitched-c0-0-cell-half.png`, `review/territory-grid-status.png` (17 of 20).
+
 ## Findings backlog (flow improvements to fold into future packets)
 
 - F1: Task packets must declare required gate tier (focused / full / none) — otherwise workers default to maximal ceremony. (From R000.)
