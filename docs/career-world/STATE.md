@@ -594,6 +594,35 @@ adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 `brief-c3-1-r2.md` (magical gorge, rail gorge span), `brief-c2-2-r2.md`
 (bench country, waystation bench, hot spring).
 
+**SESSION 4, LATEST (2026-09-02 midday) — RESUME HERE.** **Lock change 5
+part 2 LANDED** (R080, commit `61f0dd7`, suite `16/16`): every edit-mode
+packet mandates the canon source as the SECOND input of the single edit
+call. **1,2 heather moor ACCEPTED on the third attempt** with it (R081):
+key-light `0.0068` where the same target gave `0.021` and `0.0186` before
+— the lineage fix replicated on a real bake; `167` tiles; commit
+`ee81a13`. **EIGHT CELLS STAND** (4,3 / 3,3 / 4,2 / 3,2 / 2,3 / 2,2 / 3,1 /
+1,2). **2,1 the capital DISPATCHED** (`brief-c2-1.md`: the shelf a third
+of the cell, luminous gold-green, the station strip, the line's ground
+west-to-east, closed water; log `.codex-tmp/session3/regen-c2-1.log`).
+Owner on the stitched sets: "The images and seams look good to me!"
+Owner asked to see the grid (`grid-status.mjs` → `review/territory-grid-status.png`)
+and asked how the south coast is handled (answered from the plan: sound
+under 0,3/1,3 with the inlet crossing, land border under 2,3/3,3 done, bay
+at 4,3 done; coast cells cut their sea and publish the footprint, the ocean
+layer fills). **Owner asked whether the LoD works before more cells are
+spent:** offline check done (R081; `review/pyramid-A-block-L3-L6.png`,
+`pyramid-B2-seam-stretched.png`): seams not findable at any level, brush
+character to L3, tone stable. **The runtime has never streamed this
+pyramid** — its land streamer (`features/career-world/layers/terrain/model/streamTiles.ts`,
+manifest `terrain-stream-runtime-r4.json`: tiles with normalized world
+bounds, source tiers capital+site, five camera tiers in
+`shared/lod/policy.ts`) needs a manifest generator from the pyramid, a
+streamer extension for more tiers, a layer-only dev toggle and a dev
+placement from NinjaOne's focus view — about half a day of app work,
+awaiting the owner's word. Next cells after 2,1: 1,3 (Vendy shelf on the
+sound, the inlet the loop crosses — owner to set the inlet's width), 0,3,
+0,2 (submerged run), 4,1 (brief ready), then row 0.
+
 **SESSION 4, LATER (2026-09-02, owner online) — RESUME HERE.** The owner
 overruled the 3,1 rejection ("way too harsh… just fix that water issue…
 all of these look pretty great"; the fall and pool "perfectly fine") and
@@ -839,6 +868,8 @@ back explicitly; owner asked for this discipline 2026-09-01):**
 | 17 | "go ahead and run the probe if you need it" | CLOSED: probe run (R078) — two-image edit accepted, key light halved; part 2 staged for the owner's word |
 | 18 | "sure you can make it the default if its been working" (two-image edit call) | LANDED as lock change 5 part 2 (R080): every edit-mode packet mandates the canon as the second input of the single edit call; 1,2's third attempt is the first real bake on it |
 | 19 | "Can I see what cells in the territory grid we have finished?" | ANSWERED: `review/territory-grid-status.png` (grid-status.mjs renders it from the ledger and the L3 tiles) — 7 of 20 |
+| 20 | "how will we handle the coast for this bottom part?" | ANSWERED from the plan's southBorder rule and the water contract; the inlet's width at the crossing is the owner's choice when 1,3 comes up |
+| 21 | "the next step is all the layers of the pyramid?" / "shouldnt we test the LoD out then" | pyramid tiers are written by every stitch (not a step); offline LoD check DONE (R081); runtime streaming test scoped (half a day, app code) — awaiting the owner's word |
 | — | director-found: the control suite shares the real working dirs | FIXED for 4,3 (R073, `97eb0d6`); WORK relocation is lock change 5a |
 | — | director-found: fringe rejections are mask tracing, not art (four candidates) | lock change 5b: mask completion by bounded growth |
 | — | director-found: stale scratch deliverables hazard | worked around by hand; next lock change |
