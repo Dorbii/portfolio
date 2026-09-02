@@ -1,18 +1,18 @@
 [
   {
     "class": "coast",
-    "note": "Sea along the complete east edge, including surf, foam, wash between shore rocks, spray, ripples, reflections, wet margins, and offshore-stack surrounds."
+    "note": "The teal-to-deep-blue sea along every pixel of the east edge, including coves, surf, wash between shore rocks, ripple rings, spray, wet margins, and the water footprint around offshore stacks. The generated source also carries sea across 93 pixels of the north edge at the north-east corner; the mask follows those painted pixels rather than concealing the source defect."
   },
   {
     "class": "stream",
-    "note": "The complete narrow shelf stream from its inland visible source through all wet margins to the pool and coastal brow."
+    "note": "The single narrow natural stream meandering across the shelf into the pool. The mask follows every source-visible wet reach; dry stones that fully occlude two short reaches leave three connected raster components within one logical water system."
   },
   {
     "class": "lake",
-    "note": "The stream-fed shelf pool, including ripples, reflections, and its full wet shoreline margin."
+    "note": "The one organic shelf pool immediately above the sea cliff, including its full teal surface, shallow margins, submerged-stone colour, reflections, and ripple highlights."
   },
   {
     "class": "fall",
-    "note": "The single waterfall over the east cliff, including the falling sheet, spray, foam, and plunge disturbance where it joins the coast."
+    "note": "The one painted fall over the east cliff, including the full falling sheet, foam, spray, impact wash, and wet pixels connecting the pool to the sea."
   }
 ]
