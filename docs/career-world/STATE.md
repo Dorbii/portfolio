@@ -594,6 +594,34 @@ adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 `brief-c3-1-r2.md` (magical gorge, rail gorge span), `brief-c2-2-r2.md`
 (bench country, waystation bench, hot spring).
 
+**SESSION 4, LATER (2026-09-02, owner online) — RESUME HERE.** The owner
+overruled the 3,1 rejection ("way too harsh… just fix that water issue…
+all of these look pretty great"; the fall and pool "perfectly fine") and
+the director landed **lock change 5 part 1** on it (R077; lock history
+before/after; suite `16/16`; hash gate intact; commit `6f2e14c`): (a) the
+suite's working dir follows `L2_OUT_ROOT` and the suite asserts the real
+cells' dirs untouched; (b) **mask completion by bounded growth** (48 px
+into contiguous painted water, speckle holes ≤64 px, bridge bands exempt,
+before the cut — a gate-table row and a ledger field); (c) **palette limit
+`0.20`** on the owner's eye (fine `0.109/0.189`, clash `0.218/0.294`).
+Then **3,1 candidate 3 was re-derived and ACCEPTED** (R079): mask
+completion `+3,880 px`, fringe `0.54% / 0.89%`, palette `0.189`, `156`
+tiles, commit `272f614`. **SEVEN CELLS STAND** (4,3 / 3,3 / 4,2 / 3,2 /
+2,3 / 2,2 / 3,1). The real stitched seam reads clean at 1:1
+(`review/stitched-c3-1-*`). **Lineage probe (R078, owner-authorised):**
+the built-in edit call ACCEPTS the canon as a second input image; with it,
+1,2's key-light moment reads `0.0093` (under the gate) against
+`0.019–0.020` for the two pipeline attempts, seam-band fidelity `r 0.759`
+(attempts `0.84–0.88`; the edit path was adopted at `0.74`). **Lock change
+5 part 2 proposed and staged** (`.codex-tmp/session3/apply-lock5-part2.mjs`
++ a dry-run control): every edit-mode packet mandates the canon source as
+the second input of the single edit call with the reference paragraph
+verbatim. Needs the owner's word; then 1,2's third attempt is the first
+real bake on it. The lock record needs the owner's keystroke when the
+classifier blocks the director (it allowed the two records today after the
+owner's explicit instruction). Next cells by adjacency after 1,2: 4,1
+(brief ready: `brief-c4-1.md`), then 2,1 the capital.
+
 **SESSION 4 (2026-09-02) — RESUME HERE.** Both queued bakes landed and
 were REJECTED (ledger R071/R072). **3,1 attempt 3:** water fringe
 `4.9% / 2.49%` (the tarn's south shore in the SE bleed and the luminous
@@ -805,9 +833,10 @@ back explicitly; owner asked for this discipline 2026-09-01):**
 | 11 | interior cells need settlements/attractions | RECORDED; sites mechanism proposed below, next lock change |
 | 12 | direct questions with direct assets | DONE: Q1 g by director default, Q2 confirmed by owner screenshots, Q3 approved and landed, Q4 open |
 | 13 | "close but a few seam issues" (3,1 candidate 2 crops) | OPEN: attempt 3 holds the wall's drum size across the line; the haze step is now a mild tone line (`dBG 0.189` vs `0.18`); owner rules on candidate 3's 1:1 seam or approves lock change 5 before a fourth attempt |
-| 14 | "youre being way too harsh… just fix that water issue… all of these look pretty great" (3,1 candidate 3) | OWNER RULING 2026-09-02: candidate 3 stands, subject to the mask; the seam at `dBG 0.189` reads fine, so the palette limit recalibrates to `0.20`; mask completion by growth fixes the water by construction; `--redo` 3,1 once lock change 5 part 1 lands (the lock record needs the owner's own keystroke) |
+| 14 | "youre being way too harsh… just fix that water issue… all of these look pretty great" (3,1 candidate 3) | CLOSED: lock change 5 part 1 landed (mask completion, palette `0.20`, suite isolation); candidate 3 re-derived and stitched (`272f614`) |
 | 15 | "the water falls into a cavern perfectly fine" (3,1 fall and pool crop) | NOTED: the art stands; the growth adds only the painted pool surface before the overhang and the tarn's south edge |
-| 16 | "you can run it thats fine" (the lock record) | the director's run of the record command is blocked by the permission classifier regardless; owner runs it or adds a permission rule |
+| 16 | "you can run it thats fine" / "got this but you can run it idc" (the lock record) | CLOSED: both records made by the director on the owner's instruction after his own run hit the wrong checkout |
+| 17 | "go ahead and run the probe if you need it" | CLOSED: probe run (R078) — two-image edit accepted, key light halved; part 2 staged for the owner's word |
 | — | director-found: the control suite shares the real working dirs | FIXED for 4,3 (R073, `97eb0d6`); WORK relocation is lock change 5a |
 | — | director-found: fringe rejections are mask tracing, not art (four candidates) | lock change 5b: mask completion by bounded growth |
 | — | director-found: stale scratch deliverables hazard | worked around by hand; next lock change |
