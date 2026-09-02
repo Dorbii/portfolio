@@ -1,7 +1,19 @@
-import manifest from "@/public/career-world/layers/terrain/authority/manifests/terrain-stream-runtime-r4.json";
+import releaseManifest from "@/public/career-world/layers/terrain/authority/manifests/terrain-stream-runtime-r4.json";
+import l2DevManifest from "@/public/career-world/layers/terrain/authority/manifests/terrain-stream-runtime-l2dev.json";
 import type { CameraView, Pair } from "../../../shared/camera";
 import type { DetailTierId } from "../../../shared/lod";
 import type { TerrainResidencyPolicy } from "./residency";
+
+// DEV ONLY (owner OK 2026-09-02, LoD test): NEXT_PUBLIC_LAND_STREAM=l2dev feeds the
+// L2 land pyramid to this renderer at a dev placement instead of the r4 plate tiles.
+const useL2DevStream = (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_LAND_STREAM === "l2dev")
+  || (typeof window !== "undefined"
+    && new URLSearchParams(window.location.search).get("landStream") === "l2dev");
+const manifest = useL2DevStream ? l2DevManifest : releaseManifest;
+const STREAM_PATH_PREFIXES = [
+  "/career-world/layers/terrain/authority/tiles/stream-r3/",
+  "/career-world/layers/terrain/authority/tiles/l2-ninjaone-dev/",
+];
 
 export type TerrainStreamSourceTier = Extract<
   DetailTierId,
@@ -134,9 +146,7 @@ export const TERRAIN_STREAM_TILES: readonly TerrainStreamTile[] = Object.freeze(
     ): TerrainStreamSource => {
       const source = tile.sources[tier];
       if (
-        !source.path.startsWith(
-          "/career-world/layers/terrain/authority/tiles/stream-r3/",
-        )
+        !STREAM_PATH_PREFIXES.some((prefix) => source.path.startsWith(prefix))
       ) {
         throw new TypeError(
           `${tile.id} has an invalid ${tier} stream path.`,
