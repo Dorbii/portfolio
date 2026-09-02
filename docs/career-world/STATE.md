@@ -601,9 +601,19 @@ call. **1,2 heather moor ACCEPTED on the third attempt** with it (R081):
 key-light `0.0068` where the same target gave `0.021` and `0.0186` before
 — the lineage fix replicated on a real bake; `167` tiles; commit
 `ee81a13`. **EIGHT CELLS STAND** (4,3 / 3,3 / 4,2 / 3,2 / 2,3 / 2,2 / 3,1 /
-1,2). **2,1 the capital DISPATCHED** (`brief-c2-1.md`: the shelf a third
-of the cell, luminous gold-green, the station strip, the line's ground
-west-to-east, closed water; log `.codex-tmp/session3/regen-c2-1.log`).
+1,2). **2,1 the capital ACCEPTED on all ten gates** (R082: key-light `0.0028`,
+rock lighting `0.038`, `139` tiles, commit `efdbcc7`) — **NINE CELLS
+STAND** — **but the shelf did not land:** by the worker's own checks and
+by eye (`review/stitched-c2-1-cell-half.png`) the cell is olive moor with
+a stream and a pool, no raised table, no brighter meadow, no station
+strip. No gate measures composition; the owner's eye decides. A forced
+replacement brief is ready (`brief-c2-1-r2.md`: the shelf as a raised
+table two steps brighter, bounded by broken terraces, a treeless station
+strip three crowns wide, the ramps for the line) — director recommends
+replacing; awaiting the owner's word. **1,3 Vendy shelf on the sound
+DISPATCHED** (`brief-c1-3.md`: the inlet a few crowns wide at the
+crossing, the director's default pending the owner's choice; log
+`.codex-tmp/session3/regen-c1-3.log`).
 Owner on the stitched sets: "The images and seams look good to me!"
 Owner asked to see the grid (`grid-status.mjs` → `review/territory-grid-status.png`)
 and asked how the south coast is handled (answered from the plan: sound
@@ -870,6 +880,7 @@ back explicitly; owner asked for this discipline 2026-09-01):**
 | 19 | "Can I see what cells in the territory grid we have finished?" | ANSWERED: `review/territory-grid-status.png` (grid-status.mjs renders it from the ledger and the L3 tiles) — 7 of 20 |
 | 20 | "how will we handle the coast for this bottom part?" | ANSWERED from the plan's southBorder rule and the water contract; the inlet's width at the crossing is the owner's choice when 1,3 comes up |
 | 21 | "the next step is all the layers of the pyramid?" / "shouldnt we test the LoD out then" | pyramid tiers are written by every stitch (not a step); offline LoD check DONE (R081); runtime streaming test scoped (half a day, app code) — awaiting the owner's word |
+| 22 | (director-found) the capital's shelf did not land in 2,1 though every gate passed | OPEN: owner to say replace (brief r2 ready) or keep |
 | — | director-found: the control suite shares the real working dirs | FIXED for 4,3 (R073, `97eb0d6`); WORK relocation is lock change 5a |
 | — | director-found: fringe rejections are mask tracing, not art (four candidates) | lock change 5b: mask completion by bounded growth |
 | — | director-found: stale scratch deliverables hazard | worked around by hand; next lock change |
