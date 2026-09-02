@@ -832,11 +832,13 @@ back explicitly; owner asked for this discipline 2026-09-01):**
 | 10 | biome areas on the grid, transitions handled | LANDED (this session, lock history) |
 | 11 | interior cells need settlements/attractions | RECORDED; sites mechanism proposed below, next lock change |
 | 12 | direct questions with direct assets | DONE: Q1 g by director default, Q2 confirmed by owner screenshots, Q3 approved and landed, Q4 open |
-| 13 | "close but a few seam issues" (3,1 candidate 2 crops) | OPEN: attempt 3 holds the wall's drum size across the line; the haze step is now a mild tone line (`dBG 0.189` vs `0.18`); owner rules on candidate 3's 1:1 seam or approves lock change 5 before a fourth attempt |
+| 13 | "close but a few seam issues" (3,1 candidate 2 crops) | CLOSED 2026-09-02: candidate 3 stitched; owner on the stitched 3,1 and 2,2 sets: "The images and seams look good to me!" — the 2,2 east-third escarpment stands too |
 | 14 | "youre being way too harsh… just fix that water issue… all of these look pretty great" (3,1 candidate 3) | CLOSED: lock change 5 part 1 landed (mask completion, palette `0.20`, suite isolation); candidate 3 re-derived and stitched (`272f614`) |
 | 15 | "the water falls into a cavern perfectly fine" (3,1 fall and pool crop) | NOTED: the art stands; the growth adds only the painted pool surface before the overhang and the tarn's south edge |
 | 16 | "you can run it thats fine" / "got this but you can run it idc" (the lock record) | CLOSED: both records made by the director on the owner's instruction after his own run hit the wrong checkout |
 | 17 | "go ahead and run the probe if you need it" | CLOSED: probe run (R078) — two-image edit accepted, key light halved; part 2 staged for the owner's word |
+| 18 | "sure you can make it the default if its been working" (two-image edit call) | LANDED as lock change 5 part 2 (R080): every edit-mode packet mandates the canon as the second input of the single edit call; 1,2's third attempt is the first real bake on it |
+| 19 | "Can I see what cells in the territory grid we have finished?" | ANSWERED: `review/territory-grid-status.png` (grid-status.mjs renders it from the ledger and the L3 tiles) — 7 of 20 |
 | — | director-found: the control suite shares the real working dirs | FIXED for 4,3 (R073, `97eb0d6`); WORK relocation is lock change 5a |
 | — | director-found: fringe rejections are mask tracing, not art (four candidates) | lock change 5b: mask completion by bounded growth |
 | — | director-found: stale scratch deliverables hazard | worked around by hand; next lock change |
