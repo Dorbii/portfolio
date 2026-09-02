@@ -637,9 +637,15 @@ seam tone `13.0`, veg `0.080`, the hollow unmistakable, `120` tiles; a small
 pool touches its south edge, the owner's eye at the seam). **SEVENTEEN
 CELLS STAND.** **1,0 the bare plateau, first attempt REJECTED by rock lighting alone**
 (R103: `0.171` on 49,841 strong edges — lit bench tops; seams `0.8`, the
-crater tarn present); **attempt 2 DISPATCHED** on `brief-c1-0-r2.md` (the
-lit rock named, one flat value per face verbatim, bench edges that wander,
-the altar as weather-made rock; log after `rebake2-start`). **REMAINING THREE, all waiting on
+crater tarn present); **attempt 2 ACCEPTED** (R104, commit `dccab43`: rock lighting
+`0.138`, seam tone `0.7`, the tarn and its rim; the worker flags regular
+bench runs and a block-like altar for the owner's eye). **EIGHTEEN CELLS
+STAND — the two remaining wait on the owner:** 1,1 the purple field (lock
+change 7 staged and anchor-verified: the hue window on the water test;
+then `brief-c1-1-r2.md`) and 2,0 the dark-forest gorge (parked after three
+lighting strikes with seams and composition right: accept candidate 3 by
+eye / a fourth attempt with the east benches flat-shaded / leave). Whole-
+territory review at quarter scale: `review/territory-L2-quarter.png`. **REMAINING THREE, all waiting on
 the owner:** 1,1 the purple field (lock change 7 staged — the hue window on
 the water test; then `brief-c1-1-r2.md`), 2,0 the dark-forest gorge
 (parked after three lighting strikes; accept by eye / fourth attempt with
