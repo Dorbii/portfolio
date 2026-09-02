@@ -601,14 +601,16 @@ crossings met, `130` tiles, commit `d06a81c`); its 4,2 seam reads dLuma
 3,1 / 1,2 / 2,1 / 4,1). Dev LoD feed regenerated for ten
 (`?landStream=l2dev`). **1,3 PARKED** (three rock-lighting strikes; owner's
 call: accept by eye at `0.198`, a fourth attempt on a rock-light landform
-after lock change 6b, or leave). **BAKES ON HOLD until lock change 6 has
-the owner's word:** every remaining cell is a biome change against an
-authored neighbour, and the stark-seam class (R088) is not gated yet.
-Lock change 6 is staged and anchor-verified
-(`.codex-tmp/session3/apply-lock6.mjs --check`): (6a) the palette gate on
-ALL land, tone dLuma `> 20` fails, with a +30-luma synthetic control; (6b)
-the neighbour's edge tone blended into the edit target's grey across the
-outer third, with a dry-run control on the ramp and the grey beyond it.
+after lock change 6b, or leave). **LOCK CHANGE 6 LANDED** (owner "lock that down… go with that change";
+R090; suite `17/17`; commit `09a019c`): (6a) the palette gate on ALL
+land, tone dLuma `> 20` fails; (6b) the neighbour's edge tone blended into
+the edit target's grey from full strength where the grey begins (256 px in,
+past the bleed) to flat grey a third in. Bakes resume: **1,3 fourth attempt
+DISPATCHED** on `brief-c1-3-r4.md` (a low-rock landform: shingle and sand
+shores, grassy slopes over rounded rock, no columns, terraces or pavements;
+the layout of candidates 2–3 kept) — the first bake with the ramp; measure
+its seams on all land first. A suite-level lock on the test world is queued
+(6d, tests only).
 Next cells after it: 1,3 (fourth attempt if the owner wants it), 4,0
 Kaizen, 3,0, 2,0, 1,1 the purple field, 0,x the sound coast.
 
@@ -953,7 +955,8 @@ back explicitly; owner asked for this discipline 2026-09-01):**
 | 21 | "the next step is all the layers of the pyramid?" / "shouldnt we test the LoD out then" | CLOSED: pyramid tiers are written by every stitch; offline check (R081) and the runtime streaming test (R085) both pass; dev feed `?landStream=l2dev` |
 | 22 | (director-found) the capital's shelf did not land in 2,1 though every gate passed | CLOSED: owner 'agreed' → replaced on brief r2 and accepted (R084) |
 | 23 | (director-found) 1,3's brief denied the beck 1,2 delivers at the shared edge | the beck landed on attempt 2; 1,3 then PARKED after three rock-lighting strikes — owner call (accept by eye / new landform / leave); lock-change 5i stays (arriving crossings in the packet) |
-| 24 | "The seams are stark here… Need a better transition" (1,3 candidate 3) | MEASURED (R088): a gate blind spot (vegetation-only medians) and a transition the words did not place; lock change 6 proposed (all-land tone gate + a tone ramp in the target) — owner's word pending |
+| 24 | "The seams are stark here… Need a better transition" / "lock that down" (1,3 candidate 3) | LANDED as lock change 6 (R090): all-land tone gate at 20 + the tone ramp in the edit target; 1,3's fourth attempt is the first bake with it |
+| 25 | "this landscape is fucking awesome… best results we have had this entire project" | RECORDED: the owner's acceptance of the register and the ten-cell world as of 2026-09-02 |
 | — | director-found: the control suite shares the real working dirs | FIXED for 4,3 (R073, `97eb0d6`); WORK relocation is lock change 5a |
 | — | director-found: fringe rejections are mask tracing, not art (four candidates) | lock change 5b: mask completion by bounded growth |
 | — | director-found: stale scratch deliverables hazard | worked around by hand; next lock change |
