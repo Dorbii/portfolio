@@ -45,7 +45,9 @@ node tools/world-authoring/cell.mjs --cell 4,3 --dry-run
 ```
 
 `--force` is required to replace a cell that already exists, and it reports what
-will be regenerated before doing it.
+will be regenerated before doing it. `--restitch` rebuilds an accepted cell's tiles
+from its recorded sources with no dispatch and no gates: the way a changed seam rule
+is carried through the world without a bake.
 
 ## Fixed contract — do not change without approval
 
@@ -63,6 +65,12 @@ These are power-of-two aligned on purpose. A cell is a whole number of tiles at
 every level, so dirty-tile propagation is exact and a replaced cell touches
 nothing outside itself. Changing any of them breaks that alignment and silently
 reintroduces resampling at every cell boundary.
+
+Seams between two authored cells are content-aware (owner-approved 2026-09-02):
+the boundary follows the minimum-error path through the two paints within
+128 px of the nominal line, pinned to the jittered corners and feathered 8 px,
+derived from the two sources alone so both cells agree on it. A fixed line cut
+whatever straddled it. Edges to unauthored ground keep the geometric wiggle.
 
 ## Lighting
 

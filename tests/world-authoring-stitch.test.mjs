@@ -70,7 +70,7 @@ const G = (x, y) => {
     Math.round(0.5 * g + 6 * Math.sin((x - y) / 19.7)), 255];
 };
 
-function genImage(col, row, paint, { waterDisc, keepWaterPaint, paintedRing, hazeArc, violetRing } = {}) {
+function genImage(col, row, paint, { waterDisc, keepWaterPaint, paintedRing, hazeArc, violetRing, disc } = {}) {
   const ox = col * CELL - BLEED, oy = row * CELL - BLEED;
   const l2 = Buffer.alloc(GEN * GEN * 4);
   const concept = Buffer.alloc(GEN * GEN * 4);
@@ -81,6 +81,10 @@ function genImage(col, row, paint, { waterDisc, keepWaterPaint, paintedRing, haz
       const o = (v * GEN + u) * 4;
       concept[o] = l2[o] = r; concept[o + 1] = l2[o + 1] = g;
       concept[o + 2] = l2[o + 2] = b; concept[o + 3] = l2[o + 3] = a;
+      if (disc && Math.hypot(ox + u - disc[0], oy + v - disc[1]) < disc[2]) {
+        // one dark crown, opaque, on the concept and the shipped l2 alike
+        concept[o] = l2[o] = 30; concept[o + 1] = l2[o + 1] = 32; concept[o + 2] = l2[o + 2] = 28;
+      }
       if (waterDisc) {
         const d = Math.hypot(ox + u - waterDisc[0], oy + v - waterDisc[1]);
         if (d < waterDisc[2]) {
@@ -504,17 +508,92 @@ test("a stone on the shared line does not hide a stream crossing from the contin
   assert.match(log, /accepted, stitched/);
 });
 
+// ---- content-aware seams (owner 2026-09-02, lock change 9) ----------------------
+// The stitch's boundary between two AUTHORED cells follows the minimum-error path
+// through the two paints instead of a fixed wiggle. Control: one dark crown painted
+// on ONE cell's canvas, centred exactly on the boundary the pipeline itself drew
+// against the plain neighbour (read from its own binding map), so a fixed line
+// must cut it. Verified on the stitched tiles, not on any preview.
+const ENV = { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" };
+async function worldPixel(tiles, x, y) {
+  const k = `${x >> 8},${y >> 8}`;
+  if (!tiles.has(k)) tiles.set(k, await tileRaw(0, x >> 8, y >> 8));
+  const d = tiles.get(k), o = ((y & 255) * TILE + (x & 255)) * 4;
+  return [d[o], d[o + 1], d[o + 2], d[o + 3]];
+}
+test("a crown straddling the shared line on one paint only comes through whole or not at all (lock change 9)", async () => {
+  await writeArtefacts(path.join(SYN, "row3-a"), "c1-3", genImage(1, 3, F));
+  const logA = runCell("1,3", path.join(SYN, "row3-a"));
+  assert.match(logA, /accepted, stitched/, "the plain cell must actually stitch");
+  // the pipeline's own boundary against c1-3, from the dry run's binding map
+  execFileSync(process.execPath, [SCRIPT, "--cell", "2,3", "--dry-run"], ENV);
+  const bind = await sharp(path.join(WORKT, "c2-3", "context", "binding.png")).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const wx0 = 2 * CELL - BLEED, wy0 = 3 * CELL - BLEED, W = bind.info.width;
+  const yMid = 3 * CELL + 1024, v = yMid - wy0;
+  let bx = -1;
+  for (let u = 0; u < W; u++) if (bind.data[(v * W + u) * 4] === 255) { bx = wx0 + u; break; }
+  assert.ok(bx > 2 * CELL - 160 && bx < 2 * CELL + 160, `the geometric boundary sits inside the tab reach: ${bx}`);
+  // c2-3 continues F byte-exact, plus one crown of radius 70 centred on that boundary
+  const R = 70;
+  await writeArtefacts(path.join(SYN, "row3-b"), "c2-3", genImage(2, 3, F, { disc: [bx, yMid, R] }));
+  const logB = runCell("2,3", path.join(SYN, "row3-b"));
+  assert.match(logB, /accepted, stitched/, "the crown cell must actually stitch (an already-authored cell exits 0 untouched)");
+  const tiles = new Map();
+  let inside = 0, crown = 0, third = 0, gap = 0;
+  const bbox = { x0: Infinity, x1: -Infinity, y0: Infinity, y1: -Infinity };
+  for (let y = yMid - R; y <= yMid + R; y++) for (let x = bx - R; x <= bx + R; x++) {
+    if (Math.hypot(x - bx, y - yMid) >= R - 12) continue;          // 12 px inside the crown's edge, past the 8 px feather
+    inside += 1;
+    const [r, g, b, a] = await worldPixel(tiles, x, y);
+    if (a !== 255) { gap += 1; bbox.x0 = Math.min(bbox.x0, x); bbox.x1 = Math.max(bbox.x1, x); bbox.y0 = Math.min(bbox.y0, y); bbox.y1 = Math.max(bbox.y1, y); }
+    const f = F(x, y);
+    if (r < 45 && g < 45 && b < 45) crown += 1;
+    else if (Math.abs(r - f[0]) > 2 || Math.abs(g - f[1]) > 2 || Math.abs(b - f[2]) > 2) third += 1;
+  }
+  if (gap > 0 || third > 0) {
+    // keep the evidence beside the scratch world: the crown region and the numbers
+    const dbg = path.join(ROOT, ".codex-tmp", "dir-stitch", "crown-debug");
+    fs.mkdirSync(dbg, { recursive: true });
+    const S = 2 * R + 1, buf = Buffer.alloc(S * S * 4);
+    for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) buf.set(await worldPixel(tiles, bx - R + x, yMid - R + y), (y * S + x) * 4);
+    await sharp(buf, { raw: { width: S, height: S, channels: 4 } }).png().toFile(path.join(dbg, "crown-region.png"));
+    fs.writeFileSync(path.join(dbg, "crown.json"), JSON.stringify({ bx, yMid, inside, crown, third, gap, bbox, sample: await worldPixel(tiles, bx, yMid) }));
+  }
+  assert.equal(gap, 0, `the band stays opaque (bbox ${JSON.stringify(bbox)})`);
+  assert.equal(third, 0, "inside the crown every pixel is the crown or the plain paint, never a blend of the two");
+  const share = crown / inside;
+  assert.ok(share > 0.97 || share < 0.03, `the crown must be whole or absent, not cut: ${(share * 100).toFixed(1)}% of it shows`);
+  // the paint beyond the tab reach is untouched on both sides
+  for (const [x, y] of [[2 * CELL - 200, yMid], [2 * CELL + 200, yMid + 300], [2 * CELL - 170, yMid - 900]]) {
+    const [r, g, b] = await worldPixel(tiles, x, y);
+    assert.deepEqual([r, g, b], F(x, y).slice(0, 3), `pure F at ${x},${y}`);
+  }
+});
+
+test("--restitch rebuilds an accepted cell's tiles from its sources with no dispatch and no gates, byte-identically, and refuses an unauthored cell", () => {
+  const before = treeHash();
+  const log = execFileSync(process.execPath, [SCRIPT, "--cell", "2,3", "--restitch"], ENV);
+  assert.equal(treeHash(), before, "the same sources and the same seams reproduce the same tiles");
+  assert.match(log, /total 0 written/);
+  assert.doesNotMatch(log, /gates:/, "no gate runs on a restitch: the acceptance stands");
+  let refused = "";
+  try { execFileSync(process.execPath, [SCRIPT, "--cell", "3,3", "--restitch"], { ...ENV, stdio: "pipe" }); }
+  catch (e) { refused = String(e.stderr || e.message); }
+  assert.match(refused, /not authored/, "an unauthored cell has nothing to restitch");
+});
+
 test("manifest records the contract and both cells", () => {
   const m = JSON.parse(fs.readFileSync(path.join(OUT, "manifest.json"), "utf8"));
   assert.equal(m.format, "l2-cell-pyramid");
   assert.equal(m.contract.levels, 7);
   assert.equal(m.contract.keptPx, 2048);
+  assert.equal(m.contract.seam.contentAware?.bandPx, 128, "the manifest records how seams are drawn (lock change 9)");
   assert.deepEqual(m.levelTiles[0], [40, 32]);
   assert.ok(m.cells["c1-1"] && m.cells["c2-1"]);
   assert.deepEqual(m.cells["c1-1"].waterZones, ["lake"]);
   // success: clear the scratch world (kept on failure for diagnosis)
   fs.rmSync(OUT, { recursive: true, force: true });
-  for (const id of ["c1-1", "c2-1", "c3-1", "c4-1"]) {
+  for (const id of ["c1-1", "c2-1", "c3-1", "c4-1", "c1-3", "c2-3"]) {
     fs.rmSync(path.join(WORKT, id), { recursive: true, force: true });
   }
 });

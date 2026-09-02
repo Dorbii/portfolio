@@ -1,10 +1,10 @@
 {
- "solidifiedAt": "2026-09-02T22:22:33.324Z",
+ "solidifiedAt": "2026-09-02T23:46:29.076Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "d123a80493240a41",
+  "cell.mjs": "fcd939b45f27ddc1",
   "plan-territory.mjs": "270aec1cef622a35",
-  "AGENTS.md": "0d4c3c0fc8f88b87"
+  "AGENTS.md": "a1ab4eaec1d4c6ac"
  },
  "history": [
   {
@@ -239,6 +239,24 @@
     "cell.mjs": "d123a80493240a41",
     "plan-territory.mjs": "270aec1cef622a35",
     "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-02T23:22:38.395Z",
+   "reason": "owner approved 2026-09-02 (in conversation, on the four-strip comparison of the 2,0 west seam: 'if you think its needed go ahead but this is the first seam to cause an issue so is that a bit drastic?' then 'min cut is fine here'): lock change 9, BEFORE the change - content-aware seams: between two authored cells the stitch boundary follows the minimum-error path through the two l2 paints (image quilting), within +-128 px of the nominal line, +-1 px per step, pinned to the jittered corners by a tapered envelope, deterministic from the two sources so both cells derive the same boundary; edges to unauthored ground keep the wiggle; feather, water cut, gates, edit targets unchanged. Plus --restitch to rebuild an accepted cell's tiles from its recorded sources with no dispatch and no gates, so the rule is carried through the 19 accepted cells without a bake; the manifest records the seam contract. Controls in the suite first: a crown straddling the pipeline's own boundary on one paint must come through whole or not at all; --restitch byte-idempotent and refusing an unauthored cell; the manifest contract.",
+   "hashes": {
+    "cell.mjs": "d123a80493240a41",
+    "plan-territory.mjs": "270aec1cef622a35",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-02T23:46:29.077Z",
+   "reason": "owner approved 2026-09-02 ('if you think its needed go ahead' / 'min cut is fine here'): lock change 9, AFTER the change - content-aware seams landed in cell.mjs (SEAM_BAND 128, SEAM_STEP 2, cutBoundary + contentSeams, boundaries consulted by vOffset/hOffset, corners pinned by the taper envelope), --restitch, the manifest seam contract, the header usage line; AGENTS.md documents --restitch and the seam rule. Suite 20/20 (three new controls: the crown whole-or-absent on the pipeline's own boundary, --restitch byte-idempotent and refusing an unauthored cell, the manifest contract); on the pre-change script the crown was cut with 44.7% showing and blends at the line. Next: --restitch the 19 accepted cells.",
+   "hashes": {
+    "cell.mjs": "fcd939b45f27ddc1",
+    "plan-territory.mjs": "270aec1cef622a35",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
    }
   }
  ]
