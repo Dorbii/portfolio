@@ -640,9 +640,7 @@ CELLS STAND.** **1,0 the bare plateau, first attempt REJECTED by rock lighting a
 crater tarn present); **attempt 2 ACCEPTED** (R104, commit `dccab43`: rock lighting
 `0.138`, seam tone `0.7`, the tarn and its rim; the worker flags regular
 bench runs and a block-like altar for the owner's eye). **EIGHTEEN CELLS
-STAND — the two remaining wait on the owner:** 1,1 the purple field (lock
-change 7 staged and anchor-verified: the hue window on the water test;
-then `brief-c1-1-r2.md`) and 2,0 the dark-forest gorge (parked after three
+STAND — the two remaining wait on the owner:** 1,1 the purple field (**LOCK CHANGE 7 LANDED** — owner "go"; R105; suite `18/18`; commit `dadbf1f`: the hue window on the water test for both rings and the growth; **1,1 attempt 2 is next on the lock** on `brief-c1-1-r2.md`) and 2,0 the dark-forest gorge (parked after three
 lighting strikes with seams and composition right: accept candidate 3 by
 eye / a fourth attempt with the east benches flat-shaded / leave). Whole-
 territory review at quarter scale: `review/territory-L2-quarter.png`. **REMAINING THREE, all waiting on
@@ -1058,7 +1056,7 @@ back explicitly; owner asked for this discipline 2026-09-01):**
 | 28 | "the capital one is fine cause were gonna cover the land for that area anyways" (2,1 station strip) | CLOSED: 2,1 stays; the city structures cover that ground |
 | 29 | (director-found) the purple field reads as water to the fringe rings and the mask growth | lock change 7 staged (hue window on the water test) — owner's word pending; then 1,1 attempt 2 on brief r2 |
 | 30 | (director-found) 2,0 the dark-forest gorge parked after three lighting strikes; seams and composition right on the third | OWNER: "go ahead and do a 4th for the dark forest" — attempt 4 dispatched on brief-c2-0-r4.md (the east benches flat-shaded, the conifers one value all round, the layout of candidate 3 kept) |
-| 31 | "so whats the ask here? Cant we just manually pass it?" (the purple field and lock change 7) | ANSWERED: the pipeline refuses to stitch a failing cell; "manually pass" = the gate fix (the hue window), which is lock change 7 — one word from the owner records it |
+| 31 | "so whats the ask here? Cant we just manually pass it?" / "go" (the purple field and lock change 7) | LANDED as lock change 7 (R105): the hue window on the water test; 1,1's second attempt follows |
 | — | director-found: the control suite shares the real working dirs | FIXED for 4,3 (R073, `97eb0d6`); WORK relocation is lock change 5a |
 | — | director-found: fringe rejections are mask tracing, not art (four candidates) | lock change 5b: mask completion by bounded growth |
 | — | director-found: stale scratch deliverables hazard | worked around by hand; next lock change |

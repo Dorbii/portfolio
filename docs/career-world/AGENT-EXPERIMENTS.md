@@ -669,6 +669,14 @@ Steve rejected the r5 composition on two grounds the director's QA under-weighte
 - **World state:** 18 of 20; the two remaining wait on the owner — 1,1 the purple field (lock change 7, the hue window on the water test) and 2,0 the dark-forest gorge (parked after three lighting strikes: accept by eye / fourth attempt / leave).
 - **Evidence:** `.codex-tmp/session3/regen-c1-0.log` (after `rebake2-start`), `review/stitched-c1-0-cell-half.png`, `review/territory-grid-status.png` (18 of 20), `review/territory-L2-quarter.png`.
 
+### R105 — 2026-09-02 — Lock change 7: the water test gets a hue window, so violet ground is not water (owner: "go"; controls first)
+
+- **Owner:** "so whats the ask here? Cant we just manually pass it?" — answered: the pipeline refuses to stitch a failing cell, so "manually pass" is the gate fix — then "go".
+- **Change (`cell.mjs`):** one shared `isWaterPaint(r, g, b, mx, sat)` — the old blue-leaning test (`mx>40, sat>.25, b>r, b>=g`) plus a hue window of `150..225` — used by the 6 px ring, the 48 px ring and the mask growth. Violet and magenta ground (hue 240–300, the purple field) is blue-leaning but not water.
+- **Basis (R093):** on the purple field candidate the old test flagged `29.6% / 24.1%` of ring pixels on the delivered mask (`42,237` of `44,700` at hue 270–300), the hue-limited test `0.12% / 0.03%`; on the accepted cells the two tests agree (1,3 `0/0`, 4,2 `0.09/0.06`, 3,1's real blue water still flagged). The growth, which had eaten `31,976 px` of purple, is bounded by the same test.
+- **Controls (suite 18/18):** a saturated violet annulus (`150,60,200`, hue ~285) beside a water disc is neither fringe nor grown into and the cell stitches; the blue-ring control (`40,90,200`, hue 220) still fails the 48 px ring; the undersize-mask and haze controls unchanged. Lock history has the before and after entries; hash gate intact; commit `dadbf1f`.
+- **First use:** 1,1 the purple field, second attempt (`brief-c1-1-r2.md`: no drawn line of any kind, the moor held in the east and south thirds, the knoll north-west).
+
 ## Findings backlog (flow improvements to fold into future packets)
 
 - F1: Task packets must declare required gate tier (focused / full / none) — otherwise workers default to maximal ceremony. (From R000.)
