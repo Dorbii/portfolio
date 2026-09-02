@@ -525,6 +525,17 @@ stream miss at the c4-3 seam; generate-mode replacement rejected.
 `probe/`. `misfit.mjs` and `peg-evidence.mjs` are the c4-2 rejection
 measurements.
 
+**LOCK CHANGE 4 LANDED (owner "works for me please proceed", 2026-09-01;
+suite 12/12; lock history before/after):** twelve interior sites in the
+plan and a "Sites this cell must offer" packet section; stale scratch
+deliverables cleared at dispatch; the runner retries "model at capacity"
+itself (4 attempts, `CELL_RETRY_WAIT_S`); loop presence by segment; a
+rock-only strong-edge lighting gate `<0.15` (report-only under 5000 strong
+rock edges) — real cells re-judged at `0.064 / 0.046 / 0.055`, byte-identical
+stitches. Continuing by adjacency: **c3-2 dark-forest gorge dispatched**
+(first L-shaped two-neighbour edit: coast east, saddle south; sites:
+hermit's crag, giant tree; brief `brief-c3-2-r2.md`).
+
 **IMMEDIATE NEXT ACTIONS, in order (as of the end of session 3):**
 
 1. Owner reviews the finished three-cell world
