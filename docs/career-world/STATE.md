@@ -594,6 +594,18 @@ adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 `brief-c3-1-r2.md` (magical gorge, rail gorge span), `brief-c2-2-r2.md`
 (bench country, waystation bench, hot spring).
 
+**OWNER RULING (2026-09-02, on 1,3 candidate 3's north seam): "The seams
+are stark here, assuming because its a new biome. Need a better
+transition."** Measured (R088, `tone-seam.mjs`): the palette gate skipped
+that seam ("no vegetated seams" — olive moor is not green to its
+classifier) while the all-land luma step reads `24.5` against `2.3–17.4` on
+every accepted seam. **LOCK CHANGE 6 PROPOSED** (`next-lock-change.md`,
+awaiting the owner's word): (6a) the palette gate on ALL land, dLuma `> 20`
+fails; (6b) the neighbour's edge tone blended into the edit target's grey
+across the outer third so the transition is given as pixels, not words;
+(6c) the seam-step gate. 1,3's fourth attempt, if the owner wants one,
+should wait for 6b.
+
 **SESSION 4, AFTERNOON (2026-09-02) — RESUME HERE.** Owner: "agreed on
 both" → **2,1 the capital REPLACED** on `brief-c2-1-r2.md` and accepted
 (R084, commit `b26390b`): the shelf now a brighter table ringed by broken
@@ -923,6 +935,7 @@ back explicitly; owner asked for this discipline 2026-09-01):**
 | 21 | "the next step is all the layers of the pyramid?" / "shouldnt we test the LoD out then" | CLOSED: pyramid tiers are written by every stitch; offline check (R081) and the runtime streaming test (R085) both pass; dev feed `?landStream=l2dev` |
 | 22 | (director-found) the capital's shelf did not land in 2,1 though every gate passed | CLOSED: owner 'agreed' → replaced on brief r2 and accepted (R084) |
 | 23 | (director-found) 1,3's brief denied the beck 1,2 delivers at the shared edge | the beck landed on attempt 2; 1,3 then PARKED after three rock-lighting strikes — owner call (accept by eye / new landform / leave); lock-change 5i stays (arriving crossings in the packet) |
+| 24 | "The seams are stark here… Need a better transition" (1,3 candidate 3) | MEASURED (R088): a gate blind spot (vegetation-only medians) and a transition the words did not place; lock change 6 proposed (all-land tone gate + a tone ramp in the target) — owner's word pending |
 | — | director-found: the control suite shares the real working dirs | FIXED for 4,3 (R073, `97eb0d6`); WORK relocation is lock change 5a |
 | — | director-found: fringe rejections are mask tracing, not art (four candidates) | lock change 5b: mask completion by bounded growth |
 | — | director-found: stale scratch deliverables hazard | worked around by hand; next lock change |
