@@ -620,9 +620,15 @@ band ~80; the south seam held). Two strikes → reframe on
 brightness, the forest in the core with a soft edge, a gorge of rounded
 mossy rock (no columns), conifers the same value all round, one water
 system; attempt 3 goes after 0,2 (strike three parks the cell). **0,2 the
-west shore DISPATCHED** (`brief-c0-2.md`, the submerged-run bay; log
-`.codex-tmp/session3/regen-c0-2.log`). Remaining: 1,1 (after lock change
-7), 1,0, 0,1, 0,0 (briefs after their neighbours land). `brief-c0-2.md` READY (the sound
+west shore ACCEPTED first attempt** (R099, commit `3aafb2b`: seam tones
+`7.6` and under over two seams, the bay present, `141` tiles; the sound
+runs off its north edge over the west `456 px`). **FIFTEEN CELLS STAND.**
+**2,0 attempt 3 DISPATCHED** on the reframed `brief-c2-0-r3.md` (log after
+`rebake3-start`; strike three parks the cell). `brief-c0-1.md` READY (the
+Metrics-Service shelf: the sound arriving on its south edge's west 22% and
+up the west side; the line from the south edge near the middle to the
+station and out east a fifth of the way down). Remaining: 1,1 (after lock
+change 7), 0,1, 1,0, 0,0. `brief-c0-2.md` READY (the sound
 along the west edge, a wide calm bay in the south-west for the submerged
 run; 0,3's north edge dry, its sound holding its west edge from 53% down); 2,1's strip stays by the owner's word (the city covers
 it). **1,1 the purple field, first attempt REJECTED on a gate defect**

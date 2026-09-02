@@ -622,6 +622,13 @@ Steve rejected the r5 composition on two grounds the director's QA under-weighte
 - **Reframe (`brief-c2-0-r3.md`, strike three would park the cell):** both thirds held at the arriving brightness with the forest edge soft; the gorge cut in ROUNDED moss-covered rock with no columns, caps or slab faces (the 1,3 lesson); every conifer the same value all round (the key-light finding named); one closed water system; the mill ledge kept. 0,2 runs meanwhile.
 - **Evidence:** `.codex-tmp/session3/regen-c2-0.log` (after `rebake2-start`), candidate at `.codex-tmp/session3/rejected/c2-0-cand2/`, `review/regen-c2-0-cand2-quarter.png`.
 
+### R099 — 2026-09-02 — c0-2 the west shore with the submerged-run bay, first attempt accepted; fifteen cells stand (codex exec via cell.mjs, gpt-5.6-sol, effort=high)
+
+- **Setup:** `brief-c0-2.md` — the sound along the west edge, a wide calm bay in the south-west for the line's dive, austere sound-coast ground past the transition thirds, a low-rock landform; 1,2's west edge and 0,3's north edge read first (both dry); edit mode with two authored neighbours, the canon as second input, the tone ramp on both edges. `221,561` tokens.
+- **Verdict: ACCEPTED on all gates** — key-light `0.002`, rock lighting `0.131`, seam tone dLuma `7.6` on all land over two seams and vegetation `dBG 0.117`, fringe `0/0%`, closed inland water, land `69.6%`, `141` tiles; crowns `65 px`. The worker confirms the bay. Committed `3aafb2b`. **FIFTEEN CELLS STAND.**
+- **Worker-reported:** the sound runs off the north edge (165 source px at the west end — the coast continuing, which 0,1 inherits: water on 0,1's south edge over its west `456 px`), and stops short of the south-west corner, so 0,2's and 0,3's water do not meet exactly at the territory's west border (outside the authored area; the ocean layer's business); the moor tone carries further than the austere coast should, as on 0,3.
+- **Evidence:** `.codex-tmp/session3/regen-c0-2.log`, `review/stitched-c0-2-cell-half.png`, `review/territory-grid-status.png` (15 of 20).
+
 ## Findings backlog (flow improvements to fold into future packets)
 
 - F1: Task packets must declare required gate tier (focused / full / none) — otherwise workers default to maximal ceremony. (From R000.)
