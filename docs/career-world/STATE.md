@@ -525,16 +525,27 @@ stream miss at the c4-3 seam; generate-mode replacement rejected.
 `probe/`. `misfit.mjs` and `peg-evidence.mjs` are the c4-2 rejection
 measurements.
 
-**IMMEDIATE NEXT ACTIONS, in order:**
+**IMMEDIATE NEXT ACTIONS, in order (as of the end of session 3):**
 
-1. Owner reviews sheets 1–5 and `probe-sheet.png`; records acceptance or
-   defects for c3-3; rules on (a) and (b).
-2. Director, on approval: record it in `solidified.json` history → control
-   first (suite) → edit `cell.mjs` → `npm run check:world-authoring` →
-   re-bake c4-2 (`--force`, brief unchanged; the pegs become the edit
-   target's paint, not prose) → review at 1:1 and 1/4 → commit.
+1. Owner reviews the finished three-cell world
+   (`.codex-tmp/session3/review/regen3/sheet-{1,3,3b,4}*.png`, the coast
+   previews) and marks residuals. Director-flagged residuals: the coast's
+   ledge reads as stepped benches rather than one continuous rising line;
+   the saddle's gorge belt runs with the beck north–south rather than
+   east–west as briefed; the coast plateau is uniformly austere by biome.
+2. **Next lock change** (draft with code and controls:
+   `.codex-tmp/session3/next-lock-change.md`; owner directions already
+   recorded above): interior sites in the plan and packet; stale scratch
+   deliverables cleared at dispatch; capacity-error retry inside the
+   runner; loop presence by segment (cell 4,2 was told "no loop" though the
+   line crosses it); rock-only lighting gate at ~0.15. Approval → controls
+   → edit → suite → re-lock.
 3. Then continue by adjacency toward the capital `2,1`, one cell per
-   dispatch, briefs per `.codex-tmp/territory/ninjaone-plan.json`.
+   dispatch, every packet now carrying its biome and transitions from the
+   committed plan `art-source/career-world/l2-land/ninjaone/plan.json`;
+   next cells `3,2` (dark forest) and `2,3` (moor, land border), then
+   `3,1` (the magical gorge) and `1,1` (the purple field) need their
+   moment briefs. The finish pass (checklist item 8) waits on the owner.
 
 **Gates (all thresholds calibrated, provenance in the lock):** key-light
 asymmetry `<0.011` (sunned D05 `0.0318`, canon `<=0.004`); water cut-clear
@@ -642,8 +653,9 @@ back explicitly; owner asked for this discipline 2026-09-01):**
 
 | # | owner item | status |
 |---|---|---|
-| 1 | register change to epic/fantastical/light | LANDED: canon r2 = candidate g installed; regeneration in progress |
-| 2 | "careful with that lighting, is that neutral?" | MEASURED (rock-only strong-edge moment; gate blind to it); fixed at the source by reference choice; a gate at ~0.15 is the next lock change |
+| 1 | register change to epic/fantastical/light | LANDED: canon r2 = candidate g; all three cells regenerated under it (quarry from the seed, saddle and coast edited from their neighbours); both seams inside the no-seam range; r1 seed deleted |
+| 2 | "careful with that lighting, is that neutral?" | MEASURED (rock-only strong-edge moment; gate blind to it); fixed at the source by reference choice — the three regenerated cells measure `0.041 / 0.056 / 0.057` rock-only; a gate at ~0.15 is the next lock change |
+| 2b | "check 1 is fine they match" / "check 2 the cliff side is unnatural" | LANDED: continuity gate reads a band across the line (and the bridge erase bug it exposed is fixed); coast-cliff biome + geology rule demand weathered columns; coast re-baked and accepted |
 | 3 | less happy meadow, scenery variance | LANDED: biome map in the committed plan |
 | 4 | one purple flower field (Outward) | SOURCED + owner-corrected; biome `purple-field` at 1,1; brief when 1,1 is authored |
 | 5 | the magical-gorge crop as the model for interesting areas | LANDED: biome `magical-gorge` at 3,1 |
