@@ -596,6 +596,50 @@ if (authoredNeighbours.length) {
         }
       }
     }
+    // tone ramp (owner 2026-09-02, "need a better transition"): the Transitions
+    // words did not place the biome change inside the cell — the model changed
+    // tone at the line. So the transition is given as pixels: along each
+    // authored orthogonal edge, the neighbour's tone just before the grey
+    // (per 64 px segment, the median of its last 64 painted px) is blended
+    // into the grey across the outer third of the kept area, fading to the
+    // flat grey. The model continues a tone it can see.
+    {
+      const THIRD = Math.round(CELL_PX / 3);
+      const isGrey = (o) => target[o] === EDIT_GREY[0] && target[o + 1] === EDIT_GREY[1] && target[o + 2] === EDIT_GREY[2];
+      const frames = {
+        N: (u, v) => [u, BLEED + v], S: (u, v) => [u, CELL_PX + BLEED - 1 - v],
+        W: (u, v) => [BLEED + v, u], E: (u, v) => [CELL_PX + BLEED - 1 - v, u],
+      };
+      const med = (a) => { a.sort((p, q) => p - q); return a[a.length >> 1]; };
+      for (const nb of authoredNeighbours) {
+        const [nc, nr] = nb.cell;
+        if (Math.abs(nc - col) + Math.abs(nr - row) !== 1) continue;
+        const edge = nc > col ? "E" : nc < col ? "W" : nr > row ? "S" : "N";
+        const f = frames[edge];
+        for (let u0 = 0; u0 < GEN_PX; u0 += 64) {
+          const rs = [], gs = [], bs = [];
+          for (let u = u0; u < Math.min(GEN_PX, u0 + 64); u++) {
+            for (let v = BLEED - 64; v < BLEED; v++) {   // the neighbour's bleed paint, its last 64 px before the grey
+              const [x, y] = f(u, v); const o = (y * GEN_PX + x) * 4;
+              if (isGrey(o)) continue;
+              rs.push(target[o]); gs.push(target[o + 1]); bs.push(target[o + 2]);
+            }
+          }
+          if (rs.length < 512) continue;   // no neighbour paint on this segment
+          const tone = [med(rs), med(gs), med(bs)];
+          for (let u = u0; u < Math.min(GEN_PX, u0 + 64); u++) {
+            // full tone where the grey begins (the neighbour's bleed ends at v = BLEED),
+            // fading to flat grey a third of the kept area in from the seam
+            for (let v = BLEED; v < THIRD; v++) {
+              const [x, y] = f(u, v); const o = (y * GEN_PX + x) * 4;
+              if (!isGrey(o)) continue;
+              const w = 1 - (v - BLEED) / (THIRD - BLEED);
+              for (let c = 0; c < 3; c++) target[o + c] = Math.round(EDIT_GREY[c] + (tone[c] - EDIT_GREY[c]) * w);
+            }
+          }
+        }
+      }
+    }
     await sharp(target, { raw: { width: GEN_PX, height: GEN_PX, channels: 4 } }).png()
       .toFile(path.join(ctxDir, "edit-target.png"));
     console.log(`  edit target   ${ctxDir}/edit-target.png (neighbour concept paint, grey to paint)`);
@@ -1328,6 +1372,7 @@ exit 1
   // thresholds between the fine and clash points.
   const palViolations = [];
   let palWorst = { bg: 0, luma: 0 }, palSeams = 0;
+  let toneWorst = 0, toneSeams = 0;   // all-land tone step (owner 2026-09-02)
   {
     // vegetation median of the 16..176px band just inside `edge` of a canvas
     const vegBand = (buf, edge) => {
@@ -1350,6 +1395,27 @@ exit 1
       const r = med(rs), g = med(gs), b = med(bs);
       return { bg: b / g, luma: 0.2126 * r + 0.7152 * g + 0.0722 * b };
     };
+    // the same band over ALL opaque land: a moor's olive is not vegetation to
+    // the classifier above, and a stark tone step on it passed as "no
+    // vegetated seams" (owner 2026-09-02: "the seams are stark here")
+    const toneBand = (buf, edge) => {
+      const ls = [];
+      for (let t = 256; t < 2304; t += 2) {
+        for (let o = 16; o <= 176; o += 2) {
+          let gx, gy;
+          if (edge === "N") { gx = t; gy = BLEED + o; }
+          else if (edge === "S") { gx = t; gy = CELL_PX + BLEED - o; }
+          else if (edge === "W") { gy = t; gx = BLEED + o; }
+          else { gy = t; gx = CELL_PX + BLEED - o; }
+          const i = (gy * GEN_PX + gx) * 4;
+          if (buf[i + 3] < 250) continue;
+          ls.push(0.2126 * buf[i] + 0.7152 * buf[i + 1] + 0.0722 * buf[i + 2]);
+        }
+      }
+      if (ls.length < 500) return null;
+      ls.sort((p, q) => p - q);
+      return { luma: ls[ls.length >> 1] };
+    };
     for (const nb of authoredNeighbours) {
       const [nc, nr] = nb.cell;
       if (Math.abs(nc - col) + Math.abs(nr - row) !== 1) continue;
@@ -1358,6 +1424,14 @@ exit 1
       const nRaw = await rawOf(path.join(paths.sources, nb.id, `${nb.id}-l2.png`));
       const mine = vegBand(data, edge);
       const theirs = vegBand(nRaw.data, opp);
+      const tMine = toneBand(data, edge), tTheirs = toneBand(nRaw.data, opp);
+      if (tMine && tTheirs) {
+        const dT = Math.abs(tMine.luma - tTheirs.luma);
+        toneWorst = Math.max(toneWorst, dT); toneSeams += 1;
+        if (dT > 20) {
+          palViolations.push(`${nb.id} seam: tone dLuma ${dT.toFixed(1)} on all land (limit 20; accepted seams read 2.3-17.4, the stark one 24.5)`);
+        }
+      }
       if (!mine || !theirs) continue;
       palSeams += 1;
       const dBG = Math.abs(mine.bg - theirs.bg), dL = Math.abs(mine.luma - theirs.luma);
@@ -1391,9 +1465,9 @@ exit 1
         ? `${contViolations.length} unmet crossing(s)` : `ok (${contChecked} crossings checked${bridgedInfo.length ? `, ${bridgedInfo.length} bridged` : ""})`,
       pass: contViolations.length === 0,
       note: "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint" },
-    { name: "palette conformance", value: palSeams
-        ? `worst dBG ${palWorst.bg.toFixed(3)} dLuma ${palWorst.luma.toFixed(1)} over ${palSeams} seam(s)`
-        : "no vegetated seams", pass: palViolations.length === 0,
+    { name: "palette conformance", value: (palSeams || toneSeams)
+        ? `${palSeams ? `veg worst dBG ${palWorst.bg.toFixed(3)} dLuma ${palWorst.luma.toFixed(1)} over ${palSeams} seam(s); ` : "no vegetated seams; "}tone worst dLuma ${toneWorst.toFixed(1)} on all land over ${toneSeams} seam(s)`
+        : "no authored seams", pass: palViolations.length === 0,
       note: "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13" },
   ];
   for (const v of contViolations) console.log(`      continuity: ${v}`);

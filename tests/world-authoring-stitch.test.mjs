@@ -218,9 +218,25 @@ test("edit target carries the neighbour's concept paint byte-exact and grey else
   }
   // c1-1's bleed over c2-1's own ground (territory x 4096..4352): still the neighbour's paint
   assert.deepEqual(px(400, 1280), F(ox + 400, oy + 1280).slice(0, 3), "bleed paint");
-  // beyond any neighbour's canvas: the grey fill
-  for (const [x, y] of [[1280, 1280], [2400, 300], [700, 2500]]) {
+  // beyond the outer third of any authored edge: the grey fill
+  for (const [x, y] of [[1280, 1280], [2400, 300], [1300, 2500]]) {
     assert.deepEqual(px(x, y), [96, 104, 88], `grey at ${x},${y}`);
+  }
+  // lock change 6b: inside the outer third of the west edge the grey carries
+  // the neighbour's tone, fading with distance from the kept edge
+  {
+    const med = (a) => { a.sort((p, q) => p - q); return a[a.length >> 1]; };
+    const rs = [], gs = [], bs = [];
+    for (let x = 448; x < 512; x++) for (let y = 1280; y < 1344; y++) { const [r, g, b] = px(x, y); rs.push(r); gs.push(g); bs.push(b); }
+    const tone = [med(rs), med(gs), med(bs)];
+    const THIRD = Math.round(CELL / 3);
+    for (const x of [600, 800]) {
+      const v = x - BLEED;
+      const w = 1 - (v - BLEED) / (THIRD - BLEED);
+      const expect = [96, 104, 88].map((gv, c) => Math.round(gv + (tone[c] - gv) * w));
+      const got = px(x, 1300);
+      for (let c = 0; c < 3; c++) assert.ok(Math.abs(got[c] - expect[c]) <= 2, `tone ramp at x=${x}: got ${got}, expected ${expect}`);
+    }
   }
   // the packet mandates edit mode with the verbatim framing preamble
   const packet = fs.readFileSync(path.join(WORKT, "c2-1", "packet-c2-1.md"), "utf8");
@@ -359,6 +375,19 @@ test("edit target for a replacement never carries the cell's own previous paint"
   }
   const ox = 2 * CELL - BLEED, oy = 1 * CELL - BLEED;
   assert.deepEqual(px(100, 1280), F(ox + 100, oy + 1280).slice(0, 3), "neighbour paint kept");
+});
+
+test("a +30 luma step across an authored seam fails the all-land tone gate", async () => {
+  // G' = G lifted by 30 luma in the west third only: vegetation medians barely
+  // move (the lift is on every channel), the all-land tone step does
+  const lifted = (x, y) => { const [r, g, b, a] = G(x, y); const inWest = x - (2 * CELL) < CELL / 3; const k = inWest ? 30 : 0; return [Math.min(255, r + k), Math.min(255, g + k), Math.min(255, b + k), a]; };
+  await writeArtefacts(path.join(SYN, "b-tone"), "c2-1", genImage(2, 1, lifted));
+  const before = treeHash();
+  let out = "";
+  try { runCell("2,1", path.join(SYN, "b-tone"), ["--force"]); assert.fail("b-tone must be rejected"); }
+  catch (e) { out = String(e.stdout || "") + String(e.stderr || ""); }
+  assert.match(out, /tone dLuma [0-9.]+ on all land/, "the all-land tone gate must fire:\n" + out.slice(-600));
+  assert.equal(treeHash(), before, "world untouched");
 });
 
 test("painted water beyond the mask fails the 48px ring gate and leaves the world untouched", () => {

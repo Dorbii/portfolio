@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-02T16:22:13.049Z",
+ "solidifiedAt": "2026-09-02T18:29:31.862Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "79bcb9d0237a590a",
+  "cell.mjs": "b445247a9c46ea46",
   "plan-territory.mjs": "270aec1cef622a35",
   "AGENTS.md": "0d4c3c0fc8f88b87"
  },
@@ -201,6 +201,24 @@
    "reason": "owner 2026-09-02 (change landed, suite 16/16): lock change 5 part 2 - the edit-mode packet mandates the style canon source (seed/L2-seed-region-r2-source.png under the sources root) as the SECOND input image of the single edit call, with the framing paragraph reworded to 'the first image' and a verbatim reference paragraph (flat lighting, brush, palette family, ground scale); the pipeline refuses edit mode without the canon file; a tool refusal means report and stop, never a second call. The first application put the canon-path check above its constant (TDZ) and every control failed; moved below the constants, suite 16/16. Control: the dry-run packet asserts 'BOTH images attached', the reference paragraph and the canon path; the test world carries a synthetic canon.",
    "hashes": {
     "cell.mjs": "79bcb9d0237a590a",
+    "plan-territory.mjs": "270aec1cef622a35",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-02T18:18:40.940Z",
+   "reason": "owner 2026-09-02: 'The seams are stark here… Need a better transition', 'the assets on that border are fine though', then 'oh got it yeah lock that down… go with that change'. Lock change 6: (a) the palette gate also compares the median luma of ALL opaque land in the 16..176 px bands on both sides of every authored seam and fails above 20 (accepted seams 2.3-17.4, the stark one 24.5; the vegetation-only check stays where vegetation exists); (b) the edit target blends each authored neighbour's edge tone (per 64 px segment, the median of its last 64 painted px before the grey) into the grey across the outer third of the kept area, fading to flat grey, so the biome transition is given as pixels. Controls first: a +30-luma outer-third synthetic fails the tone gate; the dry-run target reads the ramp inside the third and exact grey beyond it.",
+   "hashes": {
+    "cell.mjs": "79bcb9d0237a590a",
+    "plan-territory.mjs": "270aec1cef622a35",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-02T18:29:31.863Z",
+   "reason": "owner 2026-09-02 (change landed, suite 17/17): lock change 6 - (a) the palette gate also compares the median luma of ALL opaque land in the 16..176 px bands on both sides of every authored seam and fails above 20 (the stark seam 24.5; accepted seams 2.3-17.4); (b) for each authored orthogonal edge the neighbour's bleed-paint tone (per 64 px segment, the median of its last 64 px before the grey) is blended into the edit target's grey from full strength where the grey begins (256 px inside the kept edge) to flat grey a third of the kept area in; painted pixels never change. Controls: a +30-luma outer-third synthetic fails the tone gate and leaves the world untouched; the dry-run target reads the ramp at two depths within +-2 per channel and exact grey beyond the third.",
+   "hashes": {
+    "cell.mjs": "b445247a9c46ea46",
     "plan-territory.mjs": "270aec1cef622a35",
     "AGENTS.md": "0d4c3c0fc8f88b87"
    }
