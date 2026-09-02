@@ -1,0 +1,112 @@
+{
+  "cell": "c2-0",
+  "status": "quarantine candidate; fails rock-lighting gate",
+  "generation": {
+    "filename": "c2-0-source.png",
+    "exact_size_px": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "BE96F319ACF5BBAA408B7ED01C910E8C446ADB156355234A477D36F6ECF7913A",
+    "mode": "built-in imagegen edit with edit target and canon reference",
+    "edit_calls_used": 1,
+    "second_reference_attached": true,
+    "retry_used": false,
+    "whole_canvas_single_pass": true,
+    "raw_output_preserved": true,
+    "resized_cropped_or_tiled": false
+  },
+  "shipped_canvas_px": [2560, 2560],
+  "ground_extent_m": [97.6, 97.6],
+  "final_resolution_cm_per_px": 4.8,
+  "lighting_isotropy": {
+    "metric": "Repository gate formulas reproduced on the 2560 px Lanczos3 upscale with water cut out; 36-bin land-luminance-gradient peak divided by uniform-bin mean, plus circular gradient moments.",
+    "peak_vs_uniform_over_land": 1.475115,
+    "uniform_reference": 1.0,
+    "key_light_asymmetry": 0.008650,
+    "key_light_limit": 0.011,
+    "key_light_pass": true,
+    "rock_lighting_first_moment": 0.152805,
+    "rock_strong_edge_samples": 19468,
+    "rock_lighting_limit": 0.15,
+    "rock_lighting_pass": false,
+    "visual_check": "The candidate retains visible value separation between some exposed bench tops and faces. The strict one-flat-value rock rule is not established and the measured rock-only gate fails narrowly. Conifers also retain internal tonal modelling even though the aggregate key-light gate passes."
+  },
+  "median_conifer_crown_final_scale": {
+    "px_on_2560_canvas": 97.990,
+    "metres_at_4_8_cm_per_final_pixel": 4.704,
+    "source_px_equivalent": 48.0,
+    "measurement": "Median classified crown-component width across 17 isolated conifers, scaled by 2560/1254.",
+    "required_final_px_range": [84, 147],
+    "required_metres_range": [4.0, 7.0],
+    "pass": true
+  },
+  "buildable_vs_steep_fraction": {
+    "basis": "Manual visual estimate of non-water land area.",
+    "buildable": 0.35,
+    "steep": 0.16,
+    "other_dense_forest_talus_or_broken_ground": 0.49,
+    "method": "Open moor, plateau benches, and the dry mill ledge count as buildable; exposed gorge and fall faces count as steep; dense stands, talus, and broken wooded ground make up the remainder."
+  },
+  "water_footprint_fraction": 0.03507373,
+  "water_mask": {
+    "filename": "c2-0-water-source.png",
+    "exact_size_px": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "AB7BB2BCEA91DF64915F1499343871AB76E9E9DD06F35771A0423B87A8D921A9",
+    "encoding": "Opaque white water pixels on fully transparent non-water pixels; binary alpha.",
+    "derivation": "Source-raster colour classification constrained to a loose visually traced water country, connected growth through painted wet pixels, fall and spray classification, raster closure across painted boulder interruptions, wet-edge expansion, component filtering, and enclosed-hole filling; not centreline geometry.",
+    "opaque_water_pixels": 55154,
+    "logical_water_systems": 1,
+    "connected_pixel_components": 1,
+    "interior_hole_pixels": 0,
+    "intermediate_alpha_pixels": 0,
+    "non_white_opaque_pixels": 0,
+    "edge_water_pixels": {
+      "north": 0,
+      "east": 0,
+      "south": 0,
+      "west": 0
+    },
+    "pipeline_mask_completion_grown_final_px": 0,
+    "final_canvas_ring_gates": {
+      "ring_6_samples": 5590,
+      "ring_6_fringe_pixels": 0,
+      "ring_6_fringe_percent": 0.0,
+      "ring_6_limit_percent": 1.0,
+      "ring_6_pass": true,
+      "ring_48_samples": 179210,
+      "ring_48_fringe_pixels": 0,
+      "ring_48_fringe_percent": 0.0,
+      "ring_48_limit_percent": 1.0,
+      "ring_48_pass": true
+    }
+  },
+  "constraint_checks": {
+    "square_at_least_1254_px": true,
+    "single_edit_call": true,
+    "second_reference_attached": true,
+    "terrain_only": true,
+    "one_connected_closed_water_system": true,
+    "closed_water_absent_from_all_edges": true,
+    "water_mask_binary_same_dimensions_and_hole_free": true,
+    "water_mask_6_px_gate": true,
+    "water_mask_48_px_gate": true,
+    "median_conifer_scale": true,
+    "numeric_key_light_gate": true,
+    "rock_lighting_gate": false,
+    "strict_equal_value_on_all_rock_faces_visual_check": false,
+    "strict_equal_value_all_around_conifers_visual_check": false,
+    "mill_ledge_present": true
+  },
+  "verification": {
+    "full_repository_runner": "The relocated scratch runner stalled before source derivation with zero CPU and no file progress and was terminated. No live public or art-source output was touched.",
+    "replacement": "The runner's published Sharp resize, mask-completion, 6 px and 48 px ring, key-light, gradient-ratio, and rock-light formulas were executed directly against this candidate at the final 2560 px scale.",
+    "measurement_artifact": "diagnostics-water-mask/c2-0-gate-measurements-r4.json"
+  },
+  "open_risks": [
+    "Rock-only lighting measures 0.152805 against the 0.15 limit, so this candidate is rejected by the stated lighting gate despite improving materially over the previous 0.189 result.",
+    "Visual inspection still finds tone-modelled rock faces and conifer interiors; the literal same-value-on-every-side rule is not satisfied by pixels merely because the aggregate key-light metric passes.",
+    "The source is the only permitted ImageGen result for this task. A valid square output does not authorize a quality retry, so no second generation call was made.",
+    "Buildable and steep fractions are manual visual estimates rather than surveyed slope classifications.",
+    "Seam brightness, exact geology naturalism, mill-ledge usefulness, and terrain quality remain director and owner visual judgments; mechanical checks do not establish visual acceptance."
+  ]
+}
