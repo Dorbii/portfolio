@@ -582,9 +582,14 @@ size and detail in the brief. Next lock change candidate: a seam-step gate
 of the seam band (director measure `seam-step.mjs`: accepted seams
 `20.3 / 20.8`, interior lines `15.6–25.3`, the old world's bad seam `26.0`). Next lock
 change candidate: "haze continues across seams at the arriving tint" in
-the dark-forest and magical-gorge vocabularies. **c2-2 bench country
-dispatched** (edit from 3,2 east and 2,3 south; sites waystation bench and
-hot spring). Five cells stand. Briefs ready for the next cells in
+the dark-forest and magical-gorge vocabularies. **c2-2 bench country — first attempt REJECTED by the rock-lighting gate
+alone** (`0.20`; ledger R070): cylinder-shaded column walls in long regular
+runs with square corners, as the worker itself reported; steam haze weak.
+Re-bake queued behind 3,1's third attempt with the flat-face instruction
+that fixed 3,1 (`0.31 → 0.143`), broken walls and a legible steam haze.
+Next lock change: put "every column face one flat value, joints as thin
+dark lines" verbatim into the geology rule so every packet carries it.
+Five cells stand. Briefs ready for the next cells in
 adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 `brief-c3-1-r2.md` (magical gorge, rail gorge span), `brief-c2-2-r2.md`
 (bench country, waystation bench, hot spring).

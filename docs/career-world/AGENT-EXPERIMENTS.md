@@ -381,6 +381,13 @@ Steve rejected the r5 composition on two grounds the director's QA under-weighte
 - **Model-attributable observation:** each attempt fixed exactly what it was told and surfaced the next unstated thing — cylinder shading, then the corner, then the haze. The pattern is the edit model continuing STRUCTURE from the arriving band reliably and ATMOSPHERE (mist tint) only when told; the haze sentence now lives in the brief, and belongs in the dark-forest and magical-gorge biome vocabularies for the next lock change ("haze continues across seams at the arriving tint").
 - **Evidence:** `.codex-tmp/session3/regen-c3-1.log`, `.codex-tmp/session3/review/regen-c3-1-cand2-{quarter,seamband,seamband-1to1}.png`.
 
+### R070 — 2026-09-01 — c2-2 bench country, first attempt: the rock-lighting gate on a biome made of walls (codex exec via cell.mjs, gpt-5.6-sol, effort=high)
+
+- **Setup:** mixed-bench biome; sites waystation bench and hot spring; three neighbours arriving (gorge cell east, border moor south, saddle corner); brief with closed water and the scale line. `163,816` tokens, ~12 min, one edit call.
+- **Verdict: REJECTED by the rock-lighting gate alone** — `0.20` against `0.15`; everything else green (palette `dBG 0.167`, fringe `0% / 0%`, continuity ok). The worker's report names the cause before the gate did: "long, repeated column runs and several regular terrace corners", the cylinder-shading habit on a biome built from column walls. It also flagged the steam haze as weak. Candidate kept at `.codex-tmp/session3/rejected/c2-2-palisade/`.
+- **Model-attributable observation:** the flat-face instruction that fixed 3,1's second attempt (`0.31 → 0.143`) was not in this brief; the vocabulary alone ("weathered, irregular") did not stop cylinder shading. The instruction now lives in the brief; it belongs in the geology rule for the next lock change so every packet carries "every column face one flat value" verbatim.
+- **Evidence:** `.codex-tmp/session3/regen-c2-2.log`, `.codex-tmp/session3/review/regen-c2-2-cand1-quarter.png`.
+
 ## Findings backlog (flow improvements to fold into future packets)
 
 - F1: Task packets must declare required gate tier (focused / full / none) — otherwise workers default to maximal ceremony. (From R000.)
