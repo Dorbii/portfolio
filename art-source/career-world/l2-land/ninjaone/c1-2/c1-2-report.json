@@ -1,0 +1,107 @@
+{
+  "cell": "c1-2",
+  "generation": {
+    "filename": "c1-2-source.png",
+    "exact_size_px": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "A546F1E585C363BC52B8F01E60697F6329ABEB81BA7A56FE98AB72E2FD1AF3C0",
+    "mode": "built-in imagegen edit with edit target and canon reference",
+    "edit_calls_used": 1,
+    "retry_used": false,
+    "whole_canvas_single_pass": true,
+    "raw_output_preserved": true,
+    "resized_cropped_or_tiled": false
+  },
+  "shipped_canvas_px": [2560, 2560],
+  "ground_extent_m": [97.6, 97.6],
+  "final_resolution_cm_per_px": 4.8,
+  "lighting_isotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean on the delivered source; final water-mask pixels excluded and gradients below 12 luminance units excluded",
+    "peak_vs_uniform_over_land": 1.751704,
+    "uniform_reference": 1.0,
+    "directional_key_first_moment": 0.001219,
+    "directional_key_limit": 0.011,
+    "directional_key_pass_under_source_scale_reproduction": true,
+    "rock_lighting_first_moment": 0.057636,
+    "rock_lighting_limit": 0.15,
+    "rock_gradient_samples": 14005,
+    "rock_lighting_pass_under_source_scale_reproduction": true,
+    "visual_check": "No cast-shadow field or time-of-day gradient is visible, but many tussocks and basalt forms retain brighter upper edges or tops and darker lower edges or faces. The numeric aggregate gates pass; the stricter same-value-on-every-side requirement does not."
+  },
+  "median_conifer_crown_final_scale": {
+    "px_on_2560_canvas": 49.0,
+    "metres": 2.352,
+    "source_px_equivalent": 24.0,
+    "source_to_final_scale": 2.041467,
+    "measurement": "Manual median full-crown width across 20 representative isolated ordinary conifers, scaled by 2560/1254. A reproducible dark-green component detector found 45 candidates with a 22 source-pixel dark-core median, corroborating that the full crowns are materially underscale.",
+    "required_final_px_range": [84, 147],
+    "required_metres_range": [4.0, 7.0],
+    "pass": false
+  },
+  "buildable_vs_steep_fraction": {
+    "basis": "manual estimated fraction of non-water land area",
+    "buildable": 0.57,
+    "steep": 0.13,
+    "other_broken_talus_or_vegetated": 0.30,
+    "method": "The broad central clearing and coherent open moor count as buildable; exposed crag and tor faces count as steep; boulder, talus, scrub, gully, and denser conifer ground make up the remainder."
+  },
+  "water_footprint_fraction": 0.0208424,
+  "water_mask": {
+    "filename": "c1-2-water-source.png",
+    "exact_size_px": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "0A499E47616C5A7EDCDC454078DDE1F89E69C58021A00AE90022CD368052E828",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "derivation": "Connected source-raster colour classification over the inspected gully basin, followed by bounded growth through qualifying wet pixels, official blue-fringe admission, morphological closure, component filtering, edge dilation, and enclosed-hole filling. No polyline or hand-drawn shoreline supplied the boundary.",
+    "opaque_water_pixels": 32775,
+    "intermediate_alpha_pixels": 0,
+    "non_white_opaque_pixels": 0,
+    "connected_pixel_components": 3,
+    "interior_hole_pixels": 0,
+    "edge_water_pixels": {
+      "north": 0,
+      "east": 0,
+      "south": 0,
+      "west": 0
+    },
+    "source_scale_gate_proxy": {
+      "final_6px_equivalent_source_radius_px": 3,
+      "ring_6_fringe_percent": 0.0,
+      "ring_6_sample_pixels": 7506,
+      "final_48px_equivalent_source_radius_px": 24,
+      "ring_48_fringe_percent": 0.0,
+      "ring_48_sample_pixels": 54103,
+      "maximum_percent": 1.0,
+      "ring_6_pass": true,
+      "ring_48_pass": true,
+      "official_node_gate_run": false,
+      "note": "The repository blue-leaning classifier was reproduced at source radii that scale to approximately 6 px and 49 px on the 2560 px canvas because node.exe is not exposed in this managed shell."
+    }
+  },
+  "constraint_checks": {
+    "square_at_least_1254_px": true,
+    "single_edit_call": true,
+    "second_reference_attached": true,
+    "terrain_only": true,
+    "closed_water_absent_from_all_edges": true,
+    "water_mask_binary_same_dimensions_hole_free": true,
+    "water_mask_6_px_gate_local_proxy": true,
+    "water_mask_48_px_gate_local_proxy": true,
+    "numeric_directional_key_gate": true,
+    "strict_equal_value_on_all_sides_visual_check": false,
+    "conifer_scale": false,
+    "hamlet_clearing_ten_correctly_scaled_crowns_wide": false,
+    "lookout_crag_present_on_south_side": true,
+    "weathered_irregular_columnar_basalt": false,
+    "two_or_three_pool_limit": false
+  },
+  "open_risks": [
+    "The candidate is not visually compliant with the named rejection defect: repeated bright upper edges and darker lower edges or faces remain on tussocks and basalt despite the aggregate first-moment lighting gate passing.",
+    "Median conifer crowns measure about 49.0 px / 2.352 m at final canvas scale, materially below the required 84-147 px / 4-7 m range.",
+    "The central dry clearing is broad but does not read as ten correctly scaled 4-7 m conifer crowns wide; the underscale trees make the apparent crown-count misleading.",
+    "The main lookout crag and several tors still read as regular upright column bundles with repeated bright tops, contrary to the weathered irregular-basalt rule.",
+    "The painting appears to contain more than three pool-like water widenings, including a rock-sheltered side pocket, rather than the requested two or three.",
+    "The official Node authoring gates were not run because node.exe is not exposed in the managed shell; the lighting and ring figures are source-scale reproductions using the repository formulas.",
+    "Visual seam continuity, exact water-mask judgment, landform naturalism, and terrain quality remain director/owner decisions; mechanical checks do not establish visual acceptance."
+  ]
+}
