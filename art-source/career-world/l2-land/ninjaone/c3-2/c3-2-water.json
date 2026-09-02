@@ -1,0 +1,22 @@
+[
+  {
+    "class": "stream",
+    "note": "One closed gorge stream rises within the forested interior, runs through the shaded gorge, and terminates in the interior dark pool. The traced mask includes the complete painted channel, ripple highlights, reflections, wet margins, and water visible between rocks; this authored stream touches no source edge."
+  },
+  {
+    "class": "fall",
+    "note": "The closed gorge system has one upper drop and one lower stepped cascade. The mask includes the full falling-water sheets, whitewater, splash, spray, and adjacent wash at each impact."
+  },
+  {
+    "class": "lake",
+    "note": "The gorge stream ends in one dark shaded pool wholly inside the cell. The mask covers the complete painted pool surface and its wet reflective margin, with dry moor between the pool and the south edge."
+  },
+  {
+    "class": "lake",
+    "note": "The authored east-neighbour context contributes an existing tarn in the source overlap. It is traced because the water mask must cover every painted water pixel even though it is not part of this cell's closed gorge system."
+  },
+  {
+    "class": "fall",
+    "note": "The authored east-neighbour context also contributes its existing short tarn spill. Its full sheet, spray, and wet margin are traced with the arriving tarn."
+  }
+]

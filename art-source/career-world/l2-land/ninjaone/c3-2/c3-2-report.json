@@ -1,0 +1,103 @@
+{
+  "cell": "c3-2",
+  "generation": {
+    "filename": "c3-2-source.png",
+    "exact_size_px": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "D9B3E0FA20D60F504119067578A540E0B376A38C037DFED8B5806147630A3800",
+    "mode": "built-in imagegen edit",
+    "edit_calls_used": 1,
+    "whole_canvas_single_pass": true,
+    "raw_output_preserved": true,
+    "resized_cropped_or_tiled": false
+  },
+  "shipped_canvas_px": [2560, 2560],
+  "ground_extent_m": [97.6, 97.6],
+  "final_resolution_cm_per_px": 4.8,
+  "lighting_isotropy": {
+    "metric": "36-bin land-luminance-gradient peak divided by uniform-bin mean on the delivered source; water-mask pixels excluded and gradients below 12 luminance units excluded",
+    "peak_vs_uniform_over_land": 1.536446,
+    "uniform_reference": 1.0,
+    "key_light_asymmetry": 0.002020,
+    "key_light_threshold": 0.011,
+    "key_light_pass_under_source_scale_reproduction": true,
+    "visual_check": "Neutral form shading and local ambient occlusion are present; no directional cast-shadow field, sun angle, time-of-day gradient, or lit mist beams were observed."
+  },
+  "median_conifer_crown_final_scale": {
+    "px_on_2560_canvas": 71.45,
+    "metres": 3.43,
+    "source_px_equivalent": 35.0,
+    "measurement": "Median visual crown width across 20 isolated ordinary conifers, excluding the giant-tree site, scaled by 2560/1254. The source-scale crown widths sampled 29-39 px.",
+    "required_final_px_range": [84, 147],
+    "required_metres_range": [4.0, 7.0],
+    "pass": false
+  },
+  "buildable_vs_steep_fraction": {
+    "basis": "manual estimated fraction of non-water land area",
+    "buildable": 0.35,
+    "steep": 0.30,
+    "other_dense_forest_talus_or_broken_ground": 0.35,
+    "method": "Broad coherent moor, plateau, clearing, and ledge surfaces versus exposed gorge and crag faces; remaining land is dense forest floor, wet talus, or broken basalt."
+  },
+  "water_footprint_fraction": 0.030746,
+  "water_mask": {
+    "filename": "c3-2-water-source.png",
+    "exact_size_px": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "42191984D689FF9449AF5662DBE85436515321FC9759DE74145C8A9E63623A07",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "derivation": "Source-raster colour classification constrained to visually traced painted-water corridors, followed by connected growth, morphological closure, component filtering, dilation through wet margins, and enclosed-hole filling; not polyline geometry.",
+    "opaque_water_pixels": 48348,
+    "intermediate_alpha_pixels": 0,
+    "non_white_opaque_pixels": 0,
+    "logical_water_components": 2,
+    "connected_pixel_components": 6,
+    "interior_hole_pixels": 0,
+    "edge_water_fraction": {
+      "north": 0.0,
+      "east": 0.038278,
+      "south": 0.0,
+      "west": 0.0
+    },
+    "source_scale_gate_proxy": {
+      "final_6px_equivalent_source_radius_px": 3,
+      "ring_6_fringe_percent": 0.086687,
+      "final_48px_equivalent_source_radius_px": 24,
+      "ring_48_fringe_percent": 0.025783,
+      "maximum_percent": 1.0,
+      "ring_6_pass": true,
+      "ring_48_pass": true,
+      "official_node_gate_run": false,
+      "note": "The repository Node runner could not execute because Windows denied node.exe in the managed shell. This reproduction uses the same blue-leaning fringe classifier at proportionally scaled source radii."
+    }
+  },
+  "constraint_checks": {
+    "square_at_least_1254_px": true,
+    "single_edit_call": true,
+    "terrain_only": true,
+    "neutral_lighting_source_scale_gate": true,
+    "central_gorge_water_closed": true,
+    "central_gorge_water_absent_from_all_edges": true,
+    "all_painted_water_absent_from_north_edge": true,
+    "all_painted_water_absent_from_south_edge": true,
+    "all_painted_water_absent_from_west_edge": true,
+    "all_painted_water_absent_from_east_edge": false,
+    "water_mask_6_px_gate_local_proxy": true,
+    "water_mask_48_px_gate_local_proxy": true,
+    "conifer_scale": false
+  },
+  "authority_conflict": {
+    "claim_a": "The required edit target's authored neighbour paint stays in place and the stitch preserves neighbour pixels.",
+    "claim_b": "No painted water may touch any source edge.",
+    "evidence": "The supplied edit target already contains the east-neighbour tarn and spill reaching the east source edge.",
+    "ruling": "The explicit no-edge-water rule remains the validation authority, so the candidate is reported noncompliant on the east edge. Erasing or omitting the neighbour water would violate both the preservation instruction and the all-painted-water mask rule; no silent blend was made."
+  },
+  "open_risks": [
+    "The central authored gorge stream is closed and the south edge is dry, but the preserved east-neighbour tarn context reaches the source's east edge and is correctly included in the all-water mask. This conflicts with the packet's literal no-water-on-any-source-edge rule even though that water was already present in the required edit target.",
+    "Median ordinary conifer crowns measure 71.45 px / 3.43 m at final canvas scale, below the required 84-147 px / 4-7 m range.",
+    "The lower cascade contains two closely spaced drops in addition to the upper fall; owner visual review may read this as three falls rather than one lower stepped fall.",
+    "Some exposed basalt benches and the hermit's ledge retain broad straight runs; owner visual review must decide whether they repeat the rejected regular-palisade or rectangular-tabletop defect.",
+    "The official Node authoring gates were not run because node.exe execution is denied in this managed shell; the lighting and 6 px / 48 px results are local source-scale reproductions.",
+    "Visual seam continuity, crag usability, giant-tree readability, geology naturalism, and terrain quality remain owner decisions; mechanical checks do not establish visual acceptance."
+  ]
+}
