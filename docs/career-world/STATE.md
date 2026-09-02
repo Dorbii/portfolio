@@ -1057,7 +1057,8 @@ back explicitly; owner asked for this discipline 2026-09-01):**
 | 27 | "this looks weird" (4,0: the station strip as a pale graded band, a straight cut, short walls) | CLOSED: cause was my brief's "strip" and "cutting"; 4,0 replaced on brief-c4-0-r2.md and accepted (R094), the road gone; caution recorded — the land offers open ground and natural draws, never strips, cuttings, corridors or bands |
 | 28 | "the capital one is fine cause were gonna cover the land for that area anyways" (2,1 station strip) | CLOSED: 2,1 stays; the city structures cover that ground |
 | 29 | (director-found) the purple field reads as water to the fringe rings and the mask growth | lock change 7 staged (hue window on the water test) — owner's word pending; then 1,1 attempt 2 on brief r2 |
-| 30 | (director-found) 2,0 the dark-forest gorge parked after three lighting strikes; seams and composition right on the third | OPEN: owner's call — accept by eye / fourth attempt with flat-shaded east benches / leave |
+| 30 | (director-found) 2,0 the dark-forest gorge parked after three lighting strikes; seams and composition right on the third | OWNER: "go ahead and do a 4th for the dark forest" — attempt 4 dispatched on brief-c2-0-r4.md (the east benches flat-shaded, the conifers one value all round, the layout of candidate 3 kept) |
+| 31 | "so whats the ask here? Cant we just manually pass it?" (the purple field and lock change 7) | ANSWERED: the pipeline refuses to stitch a failing cell; "manually pass" = the gate fix (the hue window), which is lock change 7 — one word from the owner records it |
 | — | director-found: the control suite shares the real working dirs | FIXED for 4,3 (R073, `97eb0d6`); WORK relocation is lock change 5a |
 | — | director-found: fringe rejections are mask tracing, not art (four candidates) | lock change 5b: mask completion by bounded growth |
 | — | director-found: stale scratch deliverables hazard | worked around by hand; next lock change |
