@@ -352,6 +352,13 @@ Steve rejected the r5 composition on two grounds the director's QA under-weighte
 - **Workflow lesson banked:** in edit mode, write water topology as what the arriving paint permits (which edges carry water, which are dry), not as a prohibition; the model follows the paint.
 - **Evidence:** `.codex-tmp/session3/regen-c3-2.log`, `.codex-tmp/session3/review/regen-c3-2-cand1-quarter.png`, the worker's `c3-2-report.json` (rejected copy).
 
+### R066 — 2026-09-01 — c3-2 dark-forest gorge, second attempt: accepted (codex exec via cell.mjs, gpt-5.6-sol, effort=high)
+
+- **Setup:** same three-neighbour edit target; the brief restated the water as a CLOSED system with the dry south edge named as unmet by construction, added the crown-scale line tied to the arriving paint, and asked for a weathered, irregular crag. `203,362` tokens, ~11 min, one edit call.
+- **Verdict: ACCEPTED on all nine gates** — continuity `ok (2 crossings checked)`, fringe `0.14% / 0.02%`, key-light `0.0033`, **rock lighting `0.052` gated** (enough strong rock edges this time), land `96.4%`. `168` tiles (the widest dirty set so far: three neighbours' seams re-derived).
+- **Model-attributable observation:** stating topology as permission ("this cell's water is closed; the south edge is dry") worked where a prohibition did not; the worker kept the stream inside the cell on the first edit. The environment noise continues (it probed for ImageMagick, then triaged) without affecting the deliverable.
+- **Evidence:** `.codex-tmp/session3/regen-c3-2.log`, `.codex-tmp/session3/review/regen-c3-2-quarter.png`, ledger record (`biome: dark-forest`).
+
 ## Findings backlog (flow improvements to fold into future packets)
 
 - F1: Task packets must declare required gate tier (focused / full / none) — otherwise workers default to maximal ceremony. (From R000.)

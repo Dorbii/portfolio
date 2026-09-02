@@ -539,7 +539,17 @@ a rectilinear crag; ledger R065; candidate kept at
 `.codex-tmp/session3/rejected/c3-2-south-exit/`). Lesson: in edit mode
 state water topology as what the arriving paint permits, not as a
 prohibition. **Re-baked on a closed-water brief** (`brief-c3-2-r2.md`,
-crown scale and weathered crag added). Briefs ready for the next cells in
+crown scale and weathered crag added) — **ACCEPTED on all nine gates**
+(continuity ok 2 crossings, rock lighting `0.052` gated, fringe
+`0.14/0.02%`), `168` tiles, `203,362` tokens; committed. Eyes: gorge with
+two falls ending in a pool inside the cell, the hermit's crag an irregular
+column stack, the giant conifer in its clearing, a dry gravel wash (not a
+path) continuing the saddle's moor to the south edge. **WATCH ITEM — crown
+scale drift:** the worker measured its median conifer crown at `71 px`
+final-scale (`3.4 m`) against the `84–147 px` floor; edit mode copies the
+arriving paint's crowns, so undersize can compound along the chain. Every
+brief from here carries the scale line tied to the LARGER arriving crowns;
+a crown-size gate (tree detection) is a candidate for a later lock change. Briefs ready for the next cells in
 adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 `brief-c3-1-r2.md` (magical gorge, rail gorge span), `brief-c2-2-r2.md`
 (bench country, waystation bench, hot spring).
