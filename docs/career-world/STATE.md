@@ -532,9 +532,17 @@ deliverables cleared at dispatch; the runner retries "model at capacity"
 itself (4 attempts, `CELL_RETRY_WAIT_S`); loop presence by segment; a
 rock-only strong-edge lighting gate `<0.15` (report-only under 5000 strong
 rock edges) — real cells re-judged at `0.064 / 0.046 / 0.055`, byte-identical
-stitches. Continuing by adjacency: **c3-2 dark-forest gorge dispatched**
-(first L-shaped two-neighbour edit: coast east, saddle south; sites:
-hermit's crag, giant tree; brief `brief-c3-2-r2.md`).
+stitches. Continuing by adjacency: **c3-2 dark-forest gorge — first attempt
+REJECTED by the continuity gate, correctly** (its stream left through the
+dry south edge; the worker reported it itself, plus underscale crowns and
+a rectilinear crag; ledger R065; candidate kept at
+`.codex-tmp/session3/rejected/c3-2-south-exit/`). Lesson: in edit mode
+state water topology as what the arriving paint permits, not as a
+prohibition. **Re-baked on a closed-water brief** (`brief-c3-2-r2.md`,
+crown scale and weathered crag added). Briefs ready for the next cells in
+adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
+`brief-c3-1-r2.md` (magical gorge, rail gorge span), `brief-c2-2-r2.md`
+(bench country, waystation bench, hot spring).
 
 **IMMEDIATE NEXT ACTIONS, in order (as of the end of session 3):**
 
