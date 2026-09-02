@@ -597,9 +597,11 @@ adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 **SESSION 4, LATE (2026-09-02) — RESUME HERE.** Twelve cells stand.
 **Owner rejected 4,0's drawn station strip by eye** ("this looks weird";
 my brief asked for a "strip" and a "cutting" as geometry) — **4,0
-REPLACEMENT DISPATCHED** on `brief-c4-0-r2.md` (open soft-edged meadow, a
-natural draw, nothing that reads as built; log `regen-c4-0.log` after
-`replace-start`); 2,1's strip stays by the owner's word (the city covers
+REPLACED and ACCEPTED** (R094, commit `e081f82`: key-light `0.0015`, seam
+tone `1.5`, the worker's own check "road or station strip defect absent";
+crowns `49 px`). **0,3 the sound corner DISPATCHED** (`brief-c0-3.md`; the
+sound arrives on 1,3's west edge from 58% down; log
+`.codex-tmp/session3/regen-c0-3.log`); 2,1's strip stays by the owner's word (the city covers
 it). **1,1 the purple field, first attempt REJECTED on a gate defect**
 (R093): the water tools' "blue-leaning" test reads violet ground as water
 — fringe `14.35% / 16.67%`, growth `+31,976 px` into the purple; with a
@@ -996,7 +998,7 @@ back explicitly; owner asked for this discipline 2026-09-01):**
 | 24 | "The seams are stark here… Need a better transition" / "lock that down" (1,3 candidate 3) | LANDED as lock change 6 (R090): all-land tone gate at 20 + the tone ramp in the edit target; 1,3's fourth attempt is the first bake with it |
 | 25 | "this landscape is fucking awesome… best results we have had this entire project" | RECORDED: the owner's acceptance of the register and the ten-cell world as of 2026-09-02 |
 | 26 | "just reviewed those images, they look good" (the stitched 1,3 with the tone ramp, its north seam at 1:1, the 11-cell grid) | CLOSED: owner acceptance by eye of the first ramp seam and of 1,3 |
-| 27 | "this looks weird" (4,0: the station strip as a pale graded band, a straight cut, short walls) | OWNER REJECTION by eye; cause: the brief asked for a "strip" and a "cutting" as geometry; replacement queued behind the 1,1 bake on brief-c4-0-r2.md (open soft-edged meadow, a natural draw, nothing that reads as built). Caution added: never ask the land for strips, cuttings, corridors or bands — those are the rail and structures layers |
+| 27 | "this looks weird" (4,0: the station strip as a pale graded band, a straight cut, short walls) | CLOSED: cause was my brief's "strip" and "cutting"; 4,0 replaced on brief-c4-0-r2.md and accepted (R094), the road gone; caution recorded — the land offers open ground and natural draws, never strips, cuttings, corridors or bands |
 | 28 | "the capital one is fine cause were gonna cover the land for that area anyways" (2,1 station strip) | CLOSED: 2,1 stays; the city structures cover that ground |
 | 29 | (director-found) the purple field reads as water to the fringe rings and the mask growth | lock change 7 staged (hue window on the water test) — owner's word pending; then 1,1 attempt 2 on brief r2 |
 | — | director-found: the control suite shares the real working dirs | FIXED for 4,3 (R073, `97eb0d6`); WORK relocation is lock change 5a |
