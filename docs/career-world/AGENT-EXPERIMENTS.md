@@ -539,6 +539,15 @@ Steve rejected the r5 composition on two grounds the director's QA under-weighte
 - **The second half of the problem:** the brief said the change to the brighter shelf happens inside the cell across its outer third, the packet's Transitions section says the same, and the model brightened to the line anyway. Words do not place a transition; pixels do — the same lesson as the edit target (R057) and the canon as second input (R078). Proposed: blend the neighbour's edge-band tone into the target's grey across the outer third so the model continues a tone it can see (lock change 6b), and gate all-land dLuma at `20` (6a). The seam-step gate (5c) remains the finer instrument for structure.
 - **Evidence:** `tone-seam.mjs` output above; `review/regen-c1-3-cand3-quarter.png` (the owner's crop is its north-east quarter).
 
+### R089 — 2026-09-02 — c4-1 the coast headland, first attempt accepted; ten cells stand (codex exec via cell.mjs, gpt-5.6-sol, effort=high)
+
+- **Setup:** `brief-c4-1.md` (written before R083; 4,2's north edge read first this time: the tarn at cell-x `-104..292`, the sea at `1903..2304`, both stated as arriving water); edit mode with 4,2 (south), the canon as the second input. `151,966` tokens.
+- **Verdict: ACCEPTED on all ten gates** — key-light `0.0007` and rock lighting `0.07` (a coast cell passing the rock gate first time, unlike 1,3 three times), continuity ok with 6 crossings (the tarn corner and the sea), mask completion `+604 px` and 98 px of holes, fringe `0.08% / 0.03%`, land `86.7%`, `130` tiles. Crowns `67 px` (worker). Committed `d06a81c`. **TEN CELLS STAND.**
+- **Seam tone on all land** (`tone-seam.mjs`, the measure of R088): 4,1|4,2 reads dLuma `5.7`, d(b−g) `3` — inside the accepted range without the gate having existed yet.
+- **Eyes** (`review/stitched-c4-1-cell-half.png`): bare plateau with sparse conifers, sea-cliffs and coves along the east, the gully stream falling to the sea; the sea reaches the north-east corner as the coast continues (the brief's "no sea on the north edge" was wrong for that corner; the paint is right). The headland's tunnel-mouth shelf is not legible at half scale — an item for the owner's eye when the rail layer needs it.
+- **Model-attributable:** the same setup (canon as second input, flat-face rule) gives `0.07` here and `0.19–0.29` on 1,3 — the lit-rock habit is tied to that cell's rock-heavy sound shore, which is why the parked 1,3 wants a changed landform rather than more words.
+- **Evidence:** `.codex-tmp/session3/regen-c4-1.log`, `.codex-tmp/authoring/cells/c4-1/c4-1-report.json`, `review/territory-grid-status.png` (10 of 20).
+
 ## Findings backlog (flow improvements to fold into future packets)
 
 - F1: Task packets must declare required gate tier (focused / full / none) — otherwise workers default to maximal ceremony. (From R000.)
