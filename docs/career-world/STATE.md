@@ -594,6 +594,31 @@ adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 `brief-c3-1-r2.md` (magical gorge, rail gorge span), `brief-c2-2-r2.md`
 (bench country, waystation bench, hot spring).
 
+**SESSION 4, AFTERNOON (2026-09-02) — RESUME HERE.** Owner: "agreed on
+both" → **2,1 the capital REPLACED** on `brief-c2-1-r2.md` and accepted
+(R084, commit `b26390b`): the shelf now a brighter table ringed by broken
+terraces with the station strip; crowns `73 px`; nine cells stand (2,1
+replaced, count unchanged). **The runtime LoD test PASSED** (R085; owner
+OK'd app-side work): a dev-gated feed (`?landStream=l2dev` or
+`NEXT_PUBLIC_LAND_STREAM=l2dev`; `streamTiles.ts`, manifest
+`terrain-stream-runtime-l2dev.json`, tiles `l2-ninjaone-dev/`, generator
+`.codex-tmp/session3/l2dev-manifest.mjs`; launch config
+`career-world-worktree` in the MAIN checkout's `.claude/launch.json`)
+streams the nine cells through territory → capital (L3) → site (L1) in
+the app with no visible seam and residency `37.7 MB`; the camera's
+interactive floor (`0.0854` at 1400x900) draws L1 at about 1:1 device
+pixels, so L0 is headroom. First placement inside the capital envelope
+was hidden by the D05 city/environment plates; the dev placement is now
+`(0.38, 0.22)`. Committed `c3cb2f6`. **1,3 first attempt REJECTED**
+(R083): 1,2's beck DOES reach its south edge (world x `2954–3029`, 75 px)
+and the brief said nothing wet arrives — the director's error; plus rock
+lighting `0.288`. **Attempt 2 DISPATCHED** on `brief-c1-3-r2.md` (the
+beck required, flat slab faces, the sound edge to edge, one fall; the inlet a
+few crowns wide at the crossing as the director's default). **Lock-change
+item 5i:** the packet must list the neighbours' crossings at every shared
+edge as arriving water. Next after 1,3: 0,3, 0,2 (submerged run), 4,1
+(brief ready), then row 0; whole-territory review at the end.
+
 **SESSION 4, LATEST (2026-09-02 midday) — RESUME HERE.** **Lock change 5
 part 2 LANDED** (R080, commit `61f0dd7`, suite `16/16`): every edit-mode
 packet mandates the canon source as the SECOND input of the single edit
@@ -879,8 +904,9 @@ back explicitly; owner asked for this discipline 2026-09-01):**
 | 18 | "sure you can make it the default if its been working" (two-image edit call) | LANDED as lock change 5 part 2 (R080): every edit-mode packet mandates the canon as the second input of the single edit call; 1,2's third attempt is the first real bake on it |
 | 19 | "Can I see what cells in the territory grid we have finished?" | ANSWERED: `review/territory-grid-status.png` (grid-status.mjs renders it from the ledger and the L3 tiles) — 7 of 20 |
 | 20 | "how will we handle the coast for this bottom part?" | ANSWERED from the plan's southBorder rule and the water contract; the inlet's width at the crossing is the owner's choice when 1,3 comes up |
-| 21 | "the next step is all the layers of the pyramid?" / "shouldnt we test the LoD out then" | pyramid tiers are written by every stitch (not a step); offline LoD check DONE (R081); runtime streaming test scoped (half a day, app code) — awaiting the owner's word |
-| 22 | (director-found) the capital's shelf did not land in 2,1 though every gate passed | OPEN: owner to say replace (brief r2 ready) or keep |
+| 21 | "the next step is all the layers of the pyramid?" / "shouldnt we test the LoD out then" | CLOSED: pyramid tiers are written by every stitch; offline check (R081) and the runtime streaming test (R085) both pass; dev feed `?landStream=l2dev` |
+| 22 | (director-found) the capital's shelf did not land in 2,1 though every gate passed | CLOSED: owner 'agreed' → replaced on brief r2 and accepted (R084) |
+| 23 | (director-found) 1,3's brief denied the beck 1,2 delivers at the shared edge | attempt 2 in flight; lock-change 5i: arriving crossings listed by the packet |
 | — | director-found: the control suite shares the real working dirs | FIXED for 4,3 (R073, `97eb0d6`); WORK relocation is lock change 5a |
 | — | director-found: fringe rejections are mask tracing, not art (four candidates) | lock change 5b: mask completion by bounded growth |
 | — | director-found: stale scratch deliverables hazard | worked around by hand; next lock change |
