@@ -513,6 +513,15 @@ Steve rejected the r5 composition on two grounds the director's QA under-weighte
 - **Verdict: the LoD works in the runtime.** Tiles land where the manifest says, the crossfade takes them, residency stays far under budget, and no tier shows a seam. What the real integration still needs, none of it a land-pipeline question: the world-scale registration (placement), a streamer with more than two source tiers if L0 is ever to be shown, and the water layer reading the published footprints instead of the old land mask.
 - **Evidence:** the harness files above; screenshots in the session transcript at spans `0.37 / 0.23 / 0.139 / 0.0855`; live at `http://localhost:3000/?landStream=l2dev` while the worktree's dev server runs.
 
+### R086 — 2026-09-02 — c1-3, second attempt: the water landed, the rock stayed lit; the lit rock is global, so the third attempt paints rock from a reference (codex exec via cell.mjs, gpt-5.6-sol, effort=high)
+
+- **Setup:** `brief-c1-3-r2.md` — the arriving beck required, flat slab faces named as the measured failure, the sound edge to edge, one fall. `208,645` tokens.
+- **Verdict: REJECTED by rock lighting alone** — `0.187` against `0.15` (attempt 1: `0.288`). Everything else green: continuity ok with 2 crossings (the beck continued — the brief error of R083 is closed), fringe `0/0%`, key-light `0.0026`, the sound edge to edge, one fall, the inlet as briefed. Crowns `41 px` (worker), half size again on a coast cell.
+- **Localised** (`rocklight-map.mjs`, the gate's measure per 320 px block): the lit moment is `0.15–0.5` toward `30–70°` in nearly every block that has rock — not the shore, the whole cell — on only `11,085` strong rock edges (the accepted coast 4,2: `0.054` on `53,344`). So: soft, low-contrast rock with a consistent lit top wherever an edge is strong — a habit of form, not a tonal ramp, and the canon as the second input (which halved the moor's tussock emboss on 1,2) did not touch it.
+- **Eyes** (`review/regen-c1-3-cand2-quarter.png`): the composition is right — the bright shelf, the beck to a pool, one fall into a narrow inlet, the sound along the whole south edge, hexagonal slab pavements at the shore. Only the rock's shading and the crown size are wrong.
+- **Third attempt (`brief-c1-3-r3.md`), the experiment:** keep the composition exactly; attach a THIRD input image to the same single edit call — the accepted wild-coast cell's source (`c4-2-source.png`, rock at `0.054`) — and take the rock shading from it; a floor of 41 px on every crown. If the tool takes three images and the moment drops, that is lock-change item 5j: a per-biome reference image beside the canon (coast cells reference the accepted coast). If it refuses or the moment holds, 1,3 is parked for the owner and the lane moves to 0,3 / 4,1.
+- **Evidence:** `.codex-tmp/session3/regen-c1-3.log` (after `rebake2-start`), candidate at `.codex-tmp/session3/rejected/c1-3-cand2/`.
+
 ## Findings backlog (flow improvements to fold into future packets)
 
 - F1: Task packets must declare required gate tier (focused / full / none) — otherwise workers default to maximal ceremony. (From R000.)

@@ -612,9 +612,16 @@ was hidden by the D05 city/environment plates; the dev placement is now
 `(0.38, 0.22)`. Committed `c3cb2f6`. **1,3 first attempt REJECTED**
 (R083): 1,2's beck DOES reach its south edge (world x `2954–3029`, 75 px)
 and the brief said nothing wet arrives — the director's error; plus rock
-lighting `0.288`. **Attempt 2 DISPATCHED** on `brief-c1-3-r2.md` (the
-beck required, flat slab faces, the sound edge to edge, one fall; the inlet a
-few crowns wide at the crossing as the director's default). **Lock-change
+lighting `0.288`. **Attempt 2 REJECTED by rock lighting alone** (`0.187`; R086): the
+water landed (2 crossings met, the sound edge to edge, one fall, the
+composition right) but every rock in the cell keeps a lit top plane —
+global, on few strong edges (`11,085` vs the accepted coast's `53,344`);
+words twice and the canon as second input did not move it. **Attempt 3
+DISPATCHED** on `brief-c1-3-r3.md`: keep the composition, attach the
+accepted coast 4,2's source as a THIRD input image for the rock shading, a
+41 px crown floor. If it lands → lock-change 5j (a per-biome reference
+image beside the canon); if not → 1,3 parked for the owner, lane moves to
+4,1. **Lock-change
 item 5i:** the packet must list the neighbours' crossings at every shared
 edge as arriving water. Next after 1,3: 0,3, 0,2 (submerged run), 4,1
 (brief ready), then row 0; whole-territory review at the end.
