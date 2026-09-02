@@ -591,6 +591,14 @@ Steve rejected the r5 composition on two grounds the director's QA under-weighte
 - **Still flagged by the worker:** crowns `49 px`; some cliff runs regular; the sea reaching 93 px of the north edge at the corner (the coast continuing — correct in the paint, too literal in the brief again).
 - **Evidence:** `.codex-tmp/session3/regen-c4-0.log` (after `replace-start`), `review/stitched-c4-0-r2-cell-half.png`.
 
+### R095 — 2026-09-02 — c0-3 the sound-coast corner, first attempt accepted; thirteen cells stand (codex exec via cell.mjs, gpt-5.6-sol, effort=high)
+
+- **Setup:** `brief-c0-3.md` — the sound on the whole south edge, arriving on 1,3's west edge from 58% down (measured first), the shore turning north along the west side, a low-rock landform (rounded rock, shingle, sand — the 1,3 lesson carried over), a closed inland beck; edit mode with 1,3 (east), the canon as second input, the tone ramp in the target. `154,636` tokens.
+- **Verdict: ACCEPTED on all gates** — key-light `0.0078`, rock lighting `0.144` on `2,869` strong edges (report-only), seam tone dLuma `6.3` against 1,3, continuity ok with 2 crossings (the sound and the shore met), fringe `0/0%`, land `58.4%`, `114` tiles. **Crowns `106 px` — the first cell of the programme with its median at the floor** (the brief's "NO crown smaller than 41 px" line, third use). Committed `4c41a40`. **THIRTEEN CELLS STAND.**
+- **Worker-reported for the owner's eye:** the arriving gold-green meadow tone stays dominant further into the cell than the austere coast should allow (the ramp carries the neighbour's tone across the outer third by design; the model kept it longer); the land rendered as dense small faceted stones with lighter tops rather than smooth rounded rock — the rock gate is report-only at this edge count.
+- **Edges for the next cell:** 0,3's north edge is dry across its width; the sound holds its west edge from 53% down — so 0,2's south edge arrives dry and the sound must reach 0,2 along the territory's west side, which is where the plan's submerged run lives.
+- **Evidence:** `.codex-tmp/session3/regen-c0-3.log`, `review/stitched-c0-3-cell-half.png`, `review/territory-grid-status.png` (13 of 20).
+
 ## Findings backlog (flow improvements to fold into future packets)
 
 - F1: Task packets must declare required gate tier (focused / full / none) — otherwise workers default to maximal ceremony. (From R000.)

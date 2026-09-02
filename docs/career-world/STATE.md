@@ -599,9 +599,14 @@ adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 my brief asked for a "strip" and a "cutting" as geometry) — **4,0
 REPLACED and ACCEPTED** (R094, commit `e081f82`: key-light `0.0015`, seam
 tone `1.5`, the worker's own check "road or station strip defect absent";
-crowns `49 px`). **0,3 the sound corner DISPATCHED** (`brief-c0-3.md`; the
-sound arrives on 1,3's west edge from 58% down; log
-`.codex-tmp/session3/regen-c0-3.log`); 2,1's strip stays by the owner's word (the city covers
+crowns `49 px`). **0,3 the sound corner ACCEPTED first attempt** (R095, commit
+`4c41a40`: seam tone `6.3`, 2 crossings met, crowns `106 px` — the first
+cell at the floor; the worker flags the meadow tone carrying too far into
+the austere coast). **THIRTEEN CELLS STAND.** **2,0 the dark-forest gorge
+DISPATCHED** (`brief-c2-0.md`, the mill ledge; 2,1's north edge dry; log
+`.codex-tmp/session3/regen-c2-0.log`). `brief-c0-2.md` READY (the sound
+along the west edge, a wide calm bay in the south-west for the submerged
+run; 0,3's north edge dry, its sound holding its west edge from 53% down); 2,1's strip stays by the owner's word (the city covers
 it). **1,1 the purple field, first attempt REJECTED on a gate defect**
 (R093): the water tools' "blue-leaning" test reads violet ground as water
 — fringe `14.35% / 16.67%`, growth `+31,976 px` into the purple; with a
