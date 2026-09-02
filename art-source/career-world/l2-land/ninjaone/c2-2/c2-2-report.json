@@ -1,0 +1,103 @@
+{
+  "cell": "c2-2",
+  "generation": {
+    "filename": "c2-2-source.png",
+    "exact_size_px": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "39EC781EA60B5A53D060963A32E46FD133CDF54B623AAF4E4561FB381AE42463",
+    "mode": "built-in imagegen edit",
+    "edit_calls_used": 1,
+    "retry_used": false,
+    "whole_canvas_single_pass": true,
+    "raw_output_preserved": true,
+    "resized_cropped_or_tiled": false
+  },
+  "shipped_canvas_px": [2560, 2560],
+  "ground_extent_m": [97.6, 97.6],
+  "final_resolution_cm_per_px": 4.8,
+  "lighting_isotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean on the delivered source; final water-mask pixels excluded and gradients below 12 luminance units excluded",
+    "peak_vs_uniform_over_land": 1.594214,
+    "uniform_reference": 1.0,
+    "directional_key_first_moment": 0.002046,
+    "directional_key_limit": 0.011,
+    "directional_key_pass_under_source_scale_reproduction": true,
+    "rock_lighting_first_moment": 0.075402,
+    "rock_lighting_limit": 0.15,
+    "rock_gradient_samples": 9953,
+    "rock_lighting_pass_under_source_scale_reproduction": true,
+    "visual_check": "No global cast-shadow field, sun angle, or time-of-day gradient is visible. The aggregate lighting gates pass, but individual basalt formations still show brighter top planes and darker side planes, so those gates do not establish the stricter equal-face-value requirement."
+  },
+  "median_conifer_crown_final_scale": {
+    "px_on_2560_canvas": 57.16,
+    "metres": 2.744,
+    "source_px_equivalent": 28.0,
+    "source_to_final_scale": 2.041467,
+    "measurement": "Manual median visual crown width across 20 representative isolated ordinary conifers distributed over the source, scaled by 2560/1254; dense overlapping east-edge crowns were excluded.",
+    "required_final_px_range": [84, 147],
+    "required_metres_range": [4.0, 7.0],
+    "pass": false
+  },
+  "buildable_vs_steep_fraction": {
+    "basis": "manual estimated fraction of non-water land area",
+    "buildable": 0.45,
+    "steep": 0.18,
+    "other_broken_talus_or_vegetated": 0.37,
+    "method": "Broad open heather flats and the long dry middle bench count as buildable; exposed basalt faces and the east gorge scarp count as steep; isolated tors, scree, dense conifer cover, and broken moor make up the remainder."
+  },
+  "water_footprint_fraction": 0.02343124,
+  "water_mask": {
+    "filename": "c2-2-water-source.png",
+    "exact_size_px": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "C1F1987B9AD8A27A7E8F2B9559F8F086F75DD9AF5096225DDC1406E4D05CA0E0",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "derivation": "Connected source-raster colour classification constrained to broad inspected water-search regions, followed by attached mineral-rim and neutral fall/spray classification, morphological closure, small-component rejection, and enclosed-hole filling; no polyline supplied the mask boundary.",
+    "opaque_water_pixels": 36846,
+    "intermediate_alpha_pixels": 0,
+    "non_white_opaque_pixels": 0,
+    "logical_water_systems": 2,
+    "connected_pixel_components": 3,
+    "interior_hole_pixels": 0,
+    "edge_water_fraction": {
+      "north": 0.0,
+      "east": 0.0,
+      "south": 0.0,
+      "west": 0.0
+    },
+    "source_scale_gate_proxy": {
+      "final_6px_equivalent_source_radius_px": 3,
+      "ring_6_fringe_percent": 0.0,
+      "ring_6_sample_pixels": 4347,
+      "final_48px_equivalent_source_radius_px": 24,
+      "ring_48_fringe_percent": 0.0,
+      "ring_48_sample_pixels": 30272,
+      "maximum_percent": 1.0,
+      "ring_6_pass": true,
+      "ring_48_pass": true,
+      "official_node_gate_run": false,
+      "note": "The repository Node runner is not exposed in this managed shell. This check reproduces the repository blue-leaning classifier at source radii that scale to 6.12 px and 49.00 px on the 2560 px canvas."
+    }
+  },
+  "constraint_checks": {
+    "square_at_least_1254_px": true,
+    "single_edit_call": true,
+    "terrain_only": true,
+    "closed_water_absent_from_all_edges": true,
+    "no_sea_or_coast": true,
+    "waystation_bench_present": true,
+    "hot_spring_and_visible_steam_present": true,
+    "water_mask_6_px_gate_local_proxy": true,
+    "water_mask_48_px_gate_local_proxy": true,
+    "conifer_scale": false,
+    "equal_value_on_all_column_faces_visual_check": false,
+    "continuous_wall_defect_cleared_visual_check": false
+  },
+  "open_risks": [
+    "Median conifer crowns measure about 57.16 px / 2.744 m at final scale, below the required 84-147 px / 4-7 m range.",
+    "Individual basalt formations retain brighter top planes and darker side planes even though the aggregate key-light and rock-lighting moments pass; the stricter equal-face-value rule is not visually met.",
+    "The preserved eastern gorge arrival and its continuation read as a long connected scarp through much of the east band. It may repeat the owner-rejected continuous-wall defect despite the isolated tors elsewhere.",
+    "The official Node authoring gates were not run because node.exe is not exposed in the managed shell; the lighting and 6 px / 48 px results are source-scale reproductions.",
+    "Visual seam continuity, exact water-mask judgment, landform naturalism, and terrain quality remain director/owner decisions; mechanical checks do not establish visual acceptance."
+  ]
+}

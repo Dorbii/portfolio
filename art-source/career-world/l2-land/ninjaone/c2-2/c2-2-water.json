@@ -1,0 +1,14 @@
+[
+  {
+    "class": "lake",
+    "note": "Enclosed lower-step hot-spring pool, including the full painted water surface and attached wet pale mineral rim; drifting steam is excluded."
+  },
+  {
+    "class": "stream",
+    "note": "Closed stepped beck with upper and lower receiving pools and a short terminal reach; all classified wet pixels remain inland and touch no canvas edge."
+  },
+  {
+    "class": "fall",
+    "note": "Small drop between the beck pools, including the painted falling sheet, impact wash, and attached spray."
+  }
+]
