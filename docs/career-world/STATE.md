@@ -602,9 +602,14 @@ tone `1.5`, the worker's own check "road or station strip defect absent";
 crowns `49 px`). **0,3 the sound corner ACCEPTED first attempt** (R095, commit
 `4c41a40`: seam tone `6.3`, 2 crossings met, crowns `106 px` — the first
 cell at the floor; the worker flags the meadow tone carrying too far into
-the austere coast). **THIRTEEN CELLS STAND.** **2,0 the dark-forest gorge
-DISPATCHED** (`brief-c2-0.md`, the mill ledge; 2,1's north edge dry; log
-`.codex-tmp/session3/regen-c2-0.log`). `brief-c0-2.md` READY (the sound
+the austere coast). **THIRTEEN CELLS STAND.** **2,0 the dark-forest gorge, first attempt REJECTED by a hair on two
+gates** (R096: rock lighting `0.155`, and the new all-land tone gate at
+`20.0` — the forest painted to the line against the capital's moor, the
+neighbour's own bleed re-rendered darker; profile `74/80/80` vs
+`58/59/57`); re-bake queued on `brief-c2-0-r2.md` (the south third as open
+moor at the ARRIVING brightness, walls uncapped, one water system).
+**3,0 the bare plateau DISPATCHED** (`brief-c3-0.md`, the walk-under arch;
+3,1's north and 4,0's west edges dry; log `.codex-tmp/session3/regen-c3-0.log`). `brief-c0-2.md` READY (the sound
 along the west edge, a wide calm bay in the south-west for the submerged
 run; 0,3's north edge dry, its sound holding its west edge from 53% down); 2,1's strip stays by the owner's word (the city covers
 it). **1,1 the purple field, first attempt REJECTED on a gate defect**

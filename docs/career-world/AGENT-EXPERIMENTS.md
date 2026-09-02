@@ -599,6 +599,14 @@ Steve rejected the r5 composition on two grounds the director's QA under-weighte
 - **Edges for the next cell:** 0,3's north edge is dry across its width; the sound holds its west edge from 53% down — so 0,2's south edge arrives dry and the sound must reach 0,2 along the territory's west side, which is where the plan's submerged run lives.
 - **Evidence:** `.codex-tmp/session3/regen-c0-3.log`, `review/stitched-c0-3-cell-half.png`, `review/territory-grid-status.png` (13 of 20).
 
+### R096 — 2026-09-02 — c2-0 the dark-forest gorge, first attempt: the forest painted to the line, the walls capped (codex exec via cell.mjs, gpt-5.6-sol, effort=high)
+
+- **Setup:** `brief-c2-0.md` — the mill ledge, one closed gorge stream, the south third as the arriving moor; edit mode with 2,1 (south), the canon as second input, the tone ramp in the target. `227,689` tokens.
+- **Verdict: REJECTED by two gates, each by a hair** — rock lighting `0.155` against `0.15` (regular upright column runs with bright cap planes, as the worker reported) and the all-land tone gate at the 2,1 seam `20.0` against `20` — the first time the new gate has fired on a real bake, and on exactly the case it was built for: a dark biome next to a bright one. Everything else green: fringe `0.19/0.18%`, mask completion `+199 px`, key-light `0.0082`, crowns `71 px`. The worker also reported three disconnected water systems where the brief asked for one.
+- **Profile** (all-land luma by band from the shared line): 2,1's north bands read `74 / 80 / 80 / 80…`; the candidate's south bands read `58 / 59 / 57 / 47…` — dark from the first 64 px, i.e. the model re-rendered the neighbour's own bleed paint darker rather than continuing it, and the ramp beyond it was overridden by "dense dark conifer stands". The ramp gives the model a tone to continue; a brief that describes the whole cell as dark forest can still win. The dark-forest cell 3,2 had no such seam problem because its neighbours were dark too.
+- **Attempt 2** (`brief-c2-0-r2.md`): the two failures named with their numbers — the south third as open olive moor at the ARRIVING brightness with conifers scattered, the forest closing only past it; walls one flat value with no caps; one connected water system. Strike one, so no reframe yet. Candidate 1 at `.codex-tmp/session3/rejected/c2-0-cand1/`.
+- **Evidence:** `.codex-tmp/session3/regen-c2-0.log`, `review/regen-c2-0-cand1-quarter.png`.
+
 ## Findings backlog (flow improvements to fold into future packets)
 
 - F1: Task packets must declare required gate tier (focused / full / none) — otherwise workers default to maximal ceremony. (From R000.)
