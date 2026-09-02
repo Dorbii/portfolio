@@ -1,0 +1,120 @@
+{
+  "cell": "c0-0",
+  "status": "quarantine_candidate_not_compliant_with_all_hard_visual_constraints",
+  "generation": {
+    "filename": "c0-0-source.png",
+    "exact_size_px": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "C96A07268742761A85EE292ACB91664E87DEAB4CFA4E2B21A628944A35A23AE0",
+    "mode": "built-in imagegen edit with the edit target first and the canon second as reference only",
+    "edit_calls_used": 1,
+    "retry_used": false,
+    "both_images_attached_to_same_call": true,
+    "whole_canvas_single_pass": true,
+    "raw_output_preserved": true,
+    "resized_cropped_or_tiled": false,
+    "prompt_record": "c0-0-imagegen-prompt.txt"
+  },
+  "shipped_canvas_px": [2560, 2560],
+  "ground_extent_m": [97.6, 97.6],
+  "stated_final_resolution_cm_per_px": 4.8,
+  "lighting_isotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean; water-mask pixels excluded and gradients below 12 luminance units excluded",
+    "peak_vs_uniform_over_land": 1.639,
+    "uniform_reference": 1.0,
+    "peak_bin_degrees": [230, 240],
+    "directional_key_first_moment": 0.000942,
+    "visual_check": "No whole-cell cast-shadow field or sun angle is obvious, but many boulders have bright upper planes and dark side faces, and conifer crowns retain directional value separation. The literal same-value-all-round rule is not met."
+  },
+  "median_conifer_crown_final_scale": {
+    "px_on_2560_canvas": 44.912,
+    "metres_at_stated_4_8_cm_per_px": 2.156,
+    "source_px_equivalent": 22.0,
+    "source_to_final_scale": 2.041467,
+    "sample_count": 57,
+    "measurement": "Median connected dark-green crown-core width across 57 isolated or partially merged candidate conifer components, scaled by 2560/1254; diagnostic overlay is c0-0-conifer-components.png. The threshold can omit lighter branch tips, but many complete visible crowns remain below the required source-scale floor.",
+    "required_final_px_range": [84, 147],
+    "required_metres_range": [4.0, 7.0],
+    "pass": false
+  },
+  "buildable_vs_steep_fraction": {
+    "basis": "manual estimated fraction of non-water land area",
+    "buildable": 0.63,
+    "steep": 0.05,
+    "other_boulder_scrub_or_dense_vegetation": 0.32,
+    "method": "The open moor, south shelf glades, and sheltered grassy hollow count as buildable; only the narrow beck banks count as steep; dense conifer groups, boulder fields, outcrops, and scrub make up the remainder."
+  },
+  "water_footprint_fraction": 0.01546630,
+  "water_mask": {
+    "filename": "c0-0-water-source.png",
+    "exact_size_px": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "521F030E7685DFEC7210B9547ED703B53BE4E350DB78FADD6600830D60476095",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "derivation": "Source-raster colour classification constrained to broad painted-water search corridors, followed by local closure, small-component filtering, and enclosed-hole filling. The final boundary follows painted wet pixels rather than a supplied polyline.",
+    "opaque_water_pixels": 24321,
+    "connected_pixel_components": 9,
+    "component_note": "The main beck is intermittently occluded by channel rocks; small disconnected mask components retain visible wet highlights. The separate south-bleed pool is another component.",
+    "interior_hole_pixels": 0,
+    "intermediate_alpha_pixels": 0,
+    "non_white_water_pixels": 0,
+    "edge_water_pixels": {
+      "north": 0,
+      "east": 0,
+      "south": 73,
+      "west": 0
+    },
+    "final_canvas_gate_reproduction": {
+      "output_size_px": 2560,
+      "ring_6_source_radius_px": 3,
+      "ring_6_pixels": 5583,
+      "ring_6_unmasked_strong_water_pixels": 8,
+      "ring_6_fringe_percent": 0.143292,
+      "ring_48_source_radius_px": 24,
+      "ring_48_pixels": 35862,
+      "ring_48_unmasked_strong_water_pixels": 10,
+      "ring_48_fringe_percent": 0.027885,
+      "maximum_percent": 1.0,
+      "ring_6_pass": true,
+      "ring_48_pass": true,
+      "official_node_gate_run": false,
+      "note": "The installed Node executable was unavailable in the managed shell, so the repository-style source-radius proxy was reproduced locally with System.Drawing."
+    }
+  },
+  "authority_conflict": {
+    "claims": [
+      "The written cell brief says nothing wet arrives at the south edge and no water may touch any edge.",
+      "The mandatory edit target visibly contains painted turquoise water touching its south edge, while the mandatory edit preamble says that painted terrain stays exactly where it is."
+    ],
+    "measured_input_evidence": "The edit-target bottom row contains 189 strong water-colour pixels from x=1114 through x=1322 under the same local classifier used for the source check.",
+    "ruling": "The one-call raw edit preserved the supplied painted context; no post-generation repaint was made because that would violate the raw-output and one-edit-call contract. The resulting south-edge water is reported as a hard cell-brief failure rather than silently omitted from the mask."
+  },
+  "constraint_checks": {
+    "square_at_least_1254_px": true,
+    "single_edit_call": true,
+    "second_reference_attached": true,
+    "terrain_only": true,
+    "high_oblique_projection": true,
+    "dry_north_east_and_west_edges": true,
+    "dry_south_edge": false,
+    "one_closed_interior_beck_system": true,
+    "no_additional_painted_water_system": false,
+    "unmistakable_shepherds_fold_hollow": true,
+    "no_constructed_fold_wall_ring_or_path": true,
+    "column_stacks_terraces_and_slab_pavement_absent": true,
+    "strict_rounded_rock_flat_value_rule": false,
+    "strict_neutral_lighting": false,
+    "conifer_scale": false,
+    "water_mask_same_dimensions_binary_and_hole_free": true,
+    "water_mask_6_px_gate_local_reproduction": true,
+    "water_mask_48_px_gate_local_reproduction": true
+  },
+  "open_risks": [
+    "Hard edge-water failure: the delivered raw source includes a separate painted pool touching the south edge; the mask correctly includes 73 south-edge water pixels.",
+    "Hard scale failure: the measured median crown core is 44.912 px / 2.156 m at final scale, below the required 84-147 px / 4-7 m range; many visible crowns are smaller still.",
+    "Hard lighting and rock-value failure: boulders visibly retain bright upper planes and dark side faces despite the low aggregate directional-key first moment.",
+    "Several conifers read as isolated open-moor trees rather than being confined strictly to gullies and hollows.",
+    "The 6 px and 48 px mask-ring proxies pass, but the official Node authoring gate was unavailable in this managed shell.",
+    "Seam continuity, water-mask judgment, and overall visual quality remain director and owner decisions; this report does not claim visual acceptance."
+  ]
+}
