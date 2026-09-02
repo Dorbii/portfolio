@@ -1,0 +1,107 @@
+{
+  "cell": "c3-1",
+  "generation": {
+    "filename": "c3-1-source.png",
+    "exact_size_px": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "04FA70A6D34807A3EBF292D221BFAD41FB3E7CDED33D6BA8872E5C095F93B2A1",
+    "mode": "built-in imagegen edit",
+    "edit_calls_used": 1,
+    "whole_canvas_single_pass": true,
+    "raw_output_preserved": true,
+    "resized_cropped_or_tiled": false
+  },
+  "shipped_canvas_px": [2560, 2560],
+  "ground_extent_m": [97.6, 97.6],
+  "final_resolution_cm_per_px": 4.8,
+  "lighting_isotropy": {
+    "metric": "36-bin land-luminance-gradient peak divided by uniform-bin mean on the delivered source; water-mask pixels excluded and gradients below 12 luminance units excluded",
+    "peak_vs_uniform_over_land": 1.513609,
+    "uniform_reference": 1.0,
+    "key_light_asymmetry": 0.001536,
+    "key_light_threshold": 0.011,
+    "key_light_pass_under_source_scale_reproduction": true,
+    "visual_check": "No global cast-shadow field, sun angle, sky gradient, or time-of-day lighting was observed. Individual basalt columns still show face-direction brightness differences and bright/dark bevel treatment, so the stricter flat-face-value requirement is not met despite the global isotropy result."
+  },
+  "median_conifer_crown_final_scale": {
+    "px_on_2560_canvas": 49.0,
+    "metres": 2.35,
+    "source_px_equivalent": 24.0,
+    "measurement": "Median visual crown width across 20 isolated ordinary conifers distributed over the source, scaled by 2560/1254. An automated dark-green component threshold under-segmented branch tips and returned 17 source px / 34.70 final px / 1.67 m; that lower result is retained here as corroborating evidence that scale is below the required range, not as the primary visual measurement.",
+    "required_final_px_range": [84, 147],
+    "required_metres_range": [4.0, 7.0],
+    "pass": false
+  },
+  "buildable_vs_steep_fraction": {
+    "basis": "manual estimated fraction of non-water land area",
+    "buildable": 0.40,
+    "steep": 0.32,
+    "other_dense_forest_talus_or_broken_ground": 0.28,
+    "method": "Coherent high moor and rim shelves count as buildable; exposed chasm walls, the fall wall, and near-vertical drops count as steep; dense conifer ground, talus, floating fragments, and broken rim terrain make up the remainder."
+  },
+  "water_footprint_fraction": 0.021468,
+  "water_mask": {
+    "filename": "c3-1-water-source.png",
+    "exact_size_px": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "B2AFDD5BEFC9EB8EC2F11084B84D2669175BFDE517725E668609196167E28F06",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "derivation": "Full wet-pixel extents manually traced from the source raster around the side stream, fall, spray, luminous pool, visible cascade, south-east tarn, and tarn spill; filled surface extents rather than centerlines; low-saturation mist excluded.",
+    "opaque_water_pixels": 33759,
+    "intermediate_alpha_pixels": 0,
+    "non_white_opaque_pixels": 0,
+    "logical_water_components": 2,
+    "connected_pixel_components": 3,
+    "interior_hole_pixels": 0,
+    "edge_water_fraction": {
+      "north": 0.0,
+      "east": 0.071770,
+      "south": 0.014354,
+      "west": 0.0
+    },
+    "source_scale_gate_proxy": {
+      "final_6px_equivalent_source_radius_px": 3,
+      "ring_6_fringe_percent": 5.725191,
+      "final_48px_equivalent_source_radius_px": 24,
+      "ring_48_fringe_percent": 2.769745,
+      "maximum_percent": 1.0,
+      "ring_6_pass": false,
+      "ring_48_pass": false,
+      "official_node_gate_run": false,
+      "note": "The repository Node runner is not exposed in this managed shell. The local proxy also classifies nearby cyan-leaning conifer and crystal pixels as fringe, so its failure is not proof that those non-water pixels should be added to the mask; owner or pipeline review remains required."
+    }
+  },
+  "constraint_checks": {
+    "square_at_least_1254_px": true,
+    "single_edit_call": true,
+    "terrain_only": true,
+    "neutral_lighting_source_scale_gate": true,
+    "flat_column_face_values": false,
+    "water_mask_binary_same_dimensions_and_hole_free": true,
+    "interior_side_stream_fall_and_pool_closed": true,
+    "all_painted_water_absent_from_north_edge": true,
+    "all_painted_water_absent_from_west_edge": true,
+    "all_painted_water_absent_from_east_edge": false,
+    "required_tarn_water_present_on_south_edge": true,
+    "water_mask_6_px_gate_local_proxy": false,
+    "water_mask_48_px_gate_local_proxy": false,
+    "conifer_scale": false,
+    "crystals_limited_to_rims_and_floating_fragments": true,
+    "crystal_cluster_count_at_most_12": false
+  },
+  "authority_conflict": {
+    "claim_a": "The required edit target's authored neighbour paint stays in place and the stitch preserves neighbour pixels.",
+    "claim_b": "No painted water may touch the east source edge; only the south-east tarn contact on the south edge is allowed.",
+    "evidence": "The supplied edit target already contains the south-east tarn reaching the east side of the source window. The delivered raster and complete all-water mask therefore contain 90 wet east-edge pixels and 18 wet south-edge pixels.",
+    "ruling": "The no-east-water rule remains the validation authority, so the candidate is reported noncompliant on the east edge. Omitting those wet pixels from the mask would violate the all-painted-water rule and create a false coastline."
+  },
+  "open_risks": [
+    "Basalt columns retain bright/dark face and bevel variation rather than one flat value per face; the global key-light metric does not establish compliance with the stricter column-shading rule.",
+    "The preserved south-east tarn context reaches the east source edge and is correctly included in the all-water mask, conflicting with the literal no-east-water rule.",
+    "Median conifer crowns measure 49.0 px / 2.35 m at final canvas scale, materially below the required 84-147 px / 4-7 m range.",
+    "Visual inspection finds more than twelve violet crystal clusters, although they remain confined to chasm rims and floating fragments.",
+    "The local 6 px and 48 px water-fringe proxies fail; their detector visibly includes nearby conifer and crystal pixels, and the official Node gate could not be run in this shell.",
+    "The chasm-floor stream is mostly obscured by low-saturation mist; only distinctly painted wet pixels were masked, because mist over water is explicitly excluded.",
+    "South-band haze continuity, exact rock drum continuity at the stitch boundary, face-value flatness, crystal count, fantasy register, and overall terrain quality remain owner visual decisions; mechanical checks do not establish visual acceptance."
+  ]
+}
