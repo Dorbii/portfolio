@@ -605,11 +605,20 @@ after lock change 6b, or leave). **LOCK CHANGE 6 LANDED** (owner "lock that down
 R090; suite `17/17`; commit `09a019c`): (6a) the palette gate on ALL
 land, tone dLuma `> 20` fails; (6b) the neighbour's edge tone blended into
 the edit target's grey from full strength where the grey begins (256 px in,
-past the bleed) to flat grey a third in. Bakes resume: **1,3 fourth attempt
-DISPATCHED** on `brief-c1-3-r4.md` (a low-rock landform: shingle and sand
-shores, grassy slopes over rounded rock, no columns, terraces or pavements;
-the layout of candidates 2–3 kept) — the first bake with the ramp; measure
-its seams on all land first. A suite-level lock on the test world is queued
+past the bleed) to flat grey a third in. Bakes resumed: **1,3 ACCEPTED on the fourth attempt** (R091,
+commit `b16375b`): the low-rock landform took rock lighting to `0.088`
+(report-only, 2,107 strong edges) where three rock-heavy candidates read
+`0.19–0.29`; the first bake with the ramp put the north seam at dLuma
+`15.0` on all land (candidate 3: `24.5`), the east at `1.0`; eyes at 1:1:
+no line at the seam, a soft brightening over ~250 px into the shelf.
+**ELEVEN CELLS STAND.** Owner item: the gully below 1,3's fall came out as
+dry sand, not a drowned inlet (the loop's water crossing is a sandy gully
+unless a later pass floods it). **4,0 Kaizen DISPATCHED** (`brief-c4-0.md`:
+the largest shelf, the cutting from the headland's tunnel, the station
+strip, the line leaving west low; 4,1's north edge read first — dry across
+the kept width; log `.codex-tmp/session3/regen-c4-0.log`). Next by
+adjacency: 0,3 (sound coast west of 1,3), 3,0, 2,0, 1,1 the purple field,
+0,2 (submerged run), 0,0 / 1,0 / 2,0 row 0. A suite-level lock on the test world is queued
 (6d, tests only).
 Next cells after it: 1,3 (fourth attempt if the owner wants it), 4,0
 Kaizen, 3,0, 2,0, 1,1 the purple field, 0,x the sound coast.
@@ -954,7 +963,7 @@ back explicitly; owner asked for this discipline 2026-09-01):**
 | 20 | "how will we handle the coast for this bottom part?" | ANSWERED from the plan's southBorder rule and the water contract; the inlet's width at the crossing is the owner's choice when 1,3 comes up |
 | 21 | "the next step is all the layers of the pyramid?" / "shouldnt we test the LoD out then" | CLOSED: pyramid tiers are written by every stitch; offline check (R081) and the runtime streaming test (R085) both pass; dev feed `?landStream=l2dev` |
 | 22 | (director-found) the capital's shelf did not land in 2,1 though every gate passed | CLOSED: owner 'agreed' → replaced on brief r2 and accepted (R084) |
-| 23 | (director-found) 1,3's brief denied the beck 1,2 delivers at the shared edge | the beck landed on attempt 2; 1,3 then PARKED after three rock-lighting strikes — owner call (accept by eye / new landform / leave); lock-change 5i stays (arriving crossings in the packet) |
+| 23 | (director-found) 1,3's brief denied the beck 1,2 delivers at the shared edge | CLOSED: the beck landed on attempt 2; 1,3 accepted on attempt 4 (R091); lock-change 5i stays queued (arriving crossings in the packet) |
 | 24 | "The seams are stark here… Need a better transition" / "lock that down" (1,3 candidate 3) | LANDED as lock change 6 (R090): all-land tone gate at 20 + the tone ramp in the edit target; 1,3's fourth attempt is the first bake with it |
 | 25 | "this landscape is fucking awesome… best results we have had this entire project" | RECORDED: the owner's acceptance of the register and the ten-cell world as of 2026-09-02 |
 | — | director-found: the control suite shares the real working dirs | FIXED for 4,3 (R073, `97eb0d6`); WORK relocation is lock change 5a |
