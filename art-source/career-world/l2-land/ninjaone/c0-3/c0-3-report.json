@@ -1,0 +1,130 @@
+{
+  "cell": "c0-3",
+  "status": "quarantine_candidate_requires_director_and_owner_review",
+  "generation": {
+    "filename": "c0-3-source.png",
+    "exact_size_px": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "E53A7065481CC5D8CBA921A6D16E9D55C70DA881191E9EA131A3BE6E8ED8FF31",
+    "mode": "built-in imagegen edit with edit-target.png first and L2-seed-region-r2-source.png second as reference only",
+    "edit_calls_used": 1,
+    "retry_used": false,
+    "both_images_attached_to_same_call": true,
+    "whole_canvas_single_pass": true,
+    "raw_output_preserved": true,
+    "resized_cropped_or_tiled": false,
+    "prompt_record": "c0-3-imagegen-prompt.txt"
+  },
+  "shipped_canvas_px": [2560, 2560],
+  "ground_extent_m": [97.6, 97.6],
+  "stated_final_resolution_cm_per_px": 4.8,
+  "lighting_isotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean after a local separable Lanczos3 reproduction at the 2560 px shipped canvas; water-mask pixels and gradients below 12 luminance units excluded",
+    "peak_vs_uniform_over_land": 1.585043,
+    "uniform_reference": 1.0,
+    "key_light_asymmetry": 0.007635,
+    "gradient_samples": 2345833,
+    "rock_lighting_first_moment_source_scale": 0.073307,
+    "rock_strong_edge_samples_source_scale": 21336,
+    "rock_lighting_limit": 0.15,
+    "rock_lighting_numeric_pass": true,
+    "strict_equal_face_value_visual_check": false,
+    "visual_check": "The aggregate proxies clear the measured threshold, but multiple painted boulders retain visibly lighter upper facets and darker lower facets; the strict no-lit-side rule is not claimed."
+  },
+  "median_conifer_crown_final_scale": {
+    "px_on_2560_canvas": 106.156,
+    "metres_at_stated_4_8_cm_per_px": 5.096,
+    "source_px_equivalent": 52.0,
+    "source_to_final_scale": 2.041467,
+    "sample_count": 5,
+    "measurement": "Manual median of the five complete discernible crowns in the overlapping sheltered cluster; crowns cut by the right frame edge were excluded because their complete width is not visible. Diagnostic crops are under diagnostics/.",
+    "required_final_px_range": [84, 147],
+    "required_metres_range": [4.0, 7.0],
+    "median_pass": true,
+    "all_complete_measured_crowns_meet_41_source_px_floor": true,
+    "edge_intersecting_crowns_scale_verified": false
+  },
+  "buildable_vs_steep_fraction": {
+    "basis": "manual estimated fraction of non-water land area",
+    "buildable": 0.72,
+    "steep": 0.05,
+    "other_shingle_rock_heather_or_vegetated": 0.23,
+    "method": "The broad gently sloping inland ground counts as buildable; only the immediate shore banks and small hollow banks count as steep; shingle, exposed rock, heather, and the sheltered conifer hollow make up the remainder."
+  },
+  "water_footprint_fraction": 0.41093890,
+  "water_mask": {
+    "filename": "c0-3-water-source.png",
+    "exact_size_px": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "29950A1DF4ADE92242D7E37125E33E2DE86CD6FBD7B458D0C0B5DBCED30DA14B",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "derivation": "Source-raster hue, saturation, luminance, and wet-margin classification constrained by broad coast and inland-hydrology search envelopes, followed by source-pixel connectivity, local closure, and enclosed-hole filling. The final boundary follows painted wet pixels; no polyline supplies it.",
+    "opaque_water_pixels": 646208,
+    "intermediate_alpha_pixels": 0,
+    "non_white_water_pixels": 0,
+    "connected_pixel_components": 2,
+    "components": [
+      {
+        "kind": "sound_coast",
+        "pixels": 622496,
+        "bounds_source_px": [0, 484, 1253, 1253],
+        "touches_edges": ["east", "south", "west"]
+      },
+      {
+        "kind": "closed_beck_and_pool",
+        "pixels": 23712,
+        "bounds_source_px": [624, 158, 862, 462],
+        "touches_edges": []
+      }
+    ],
+    "interior_hole_components": 0,
+    "edge_water_pixels": {
+      "north": 0,
+      "east": 434,
+      "south": 1254,
+      "west": 754
+    },
+    "final_canvas_gate_reproduction": {
+      "output_size_px": 2560,
+      "resize": "local separable Lanczos3 reproduction",
+      "ring_6_pixels": 19127,
+      "ring_6_fringe_pixels": 0,
+      "ring_6_fringe_percent": 0.0,
+      "ring_48_pixels": 248863,
+      "ring_48_fringe_pixels": 0,
+      "ring_48_fringe_percent": 0.0,
+      "maximum_percent": 1.0,
+      "ring_6_pass": true,
+      "ring_48_pass": true,
+      "official_node_gate_run": false,
+      "note": "Node is not present in this managed PowerShell environment, so the repository formula was reproduced locally at the actual 2560 px final scale."
+    }
+  },
+  "constraint_checks": {
+    "square_at_least_1254_px": true,
+    "single_edit_call": true,
+    "second_reference_attached": true,
+    "terrain_only": true,
+    "south_edge_water_full_width": true,
+    "north_edge_dry": true,
+    "west_and_east_lower_edge_coast_present": true,
+    "inland_beck_and_pool_closed_and_edge_free": true,
+    "new_column_stacks_or_terraces_absent": true,
+    "water_mask_same_dimensions_binary_and_hole_free": true,
+    "water_mask_6_px_gate_local_reproduction": true,
+    "water_mask_48_px_gate_local_reproduction": true,
+    "rock_lighting_numeric_gate": true,
+    "strict_equal_value_on_all_rock_faces_visual_check": false,
+    "median_conifer_scale": true,
+    "all_visible_conifer_crowns_at_least_41_source_px_verified": false,
+    "austere_sound_coast_dominates_past_arriving_meadow_tone": false
+  },
+  "open_risks": [
+    "Hard lighting rule: several boulders have visibly lighter upper facets and darker lower facets despite the low aggregate directional-light proxy; strict neutral lighting is not established.",
+    "Hard rock-language rule: much of the land is rendered as dense small faceted stones with visible top faces rather than predominantly smooth, low, rounded basalt with face-free values.",
+    "Biome transition: gold-green meadow remains visually dominant well beyond the arriving neighbour tone instead of resolving into the requested austere grey-rock, pale-sand, thin-olive sound coast.",
+    "Scale rule: the five complete sheltered-hollow crowns measure in range, but crowns intersecting the right frame edge cannot be measured at full width, so the all-crowns minimum is not established.",
+    "The inland hydrology is mechanically one closed beck-and-pool component, but its trailing channel can read as an outlet rather than a beck simply ending in the pool.",
+    "Seam continuity, exact wet-pixel boundary judgment, and overall visual quality remain director and owner decisions; this report does not claim visual acceptance."
+  ]
+}
