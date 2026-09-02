@@ -380,6 +380,85 @@
      1
     ]
    }
+  },
+  "c2-3": {
+   "authoredAt": "2026-09-02T01:46:22.273Z",
+   "describe": "**You are EDITING the painted neighbour into this cell, not generating a\nscene.** The saddle arrives along your EAST edge in the edit target: open\nheather moor, a gorge belt, one beck running south. Continue it exactly as\nit arrives — same moor, same register.\n\n**Where this cell sits:** the south row of NinjaOne, on the LAND border\nwith Tanium. OWNER RULING: cells 2,3 and 3,3 carry the land side o",
+   "sourcePx": 1254,
+   "gates": [
+    {
+     "name": "key-light asymmetry",
+     "value": 0.0036,
+     "pass": true,
+     "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004"
+    },
+    {
+     "name": "gradient ratio",
+     "value": "1.579 (reported)",
+     "pass": true,
+     "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
+    },
+    {
+     "name": "rock lighting",
+     "value": "0.131 (n 3289, report-only)",
+     "pass": true,
+     "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.07"
+    },
+    {
+     "name": "land coverage",
+     "value": "98.3%",
+     "pass": true
+    },
+    {
+     "name": "water cut clear",
+     "value": "0 px",
+     "pass": true,
+     "note": "paint surviving where the mask is fully water; exact zero by construction for pipeline-derived cells"
+    },
+    {
+     "name": "water fringe",
+     "value": "0%",
+     "pass": true,
+     "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
+    },
+    {
+     "name": "water fringe (48px)",
+     "value": "0%",
+     "pass": true,
+     "note": "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)"
+    },
+    {
+     "name": "water continuity",
+     "value": "ok (0 crossings checked)",
+     "pass": true,
+     "note": "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint"
+    },
+    {
+     "name": "palette conformance",
+     "value": "no vegetated seams",
+     "pass": true,
+     "note": "vegetation medians of the bands beside each authored seam; calibrated fine=0.109/4.5 vs clash=0.294/14.6, thresholds 0.18/8"
+    }
+   ],
+   "shelf": null,
+   "features": [],
+   "waterZones": [
+    "stream"
+   ],
+   "biome": "moor",
+   "source": "art-source/career-world/l2-land/ninjaone/c2-3",
+   "stitch": {
+    "order": 5,
+    "tiles": [
+     90,
+     30,
+     12,
+     6,
+     2,
+     1,
+     1
+    ]
+   }
   }
  }
 }
