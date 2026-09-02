@@ -571,8 +571,16 @@ at `dBG 0.218`** (ledger R069): the gorge's haze in 3,2's north band
 (`0.681`) stops at the line where the candidate's south third is clear
 (`0.463`) — a mild, findable tone step by eye. Candidate kept in full at
 `.codex-tmp/session3/rejected/c3-1-palette/` (acceptable via `--from` if
-the owner rules the step fine). **Third attempt queued** behind the 2,2
-bake with haze continuity and confined crystals in the brief. Next lock
+the owner rules the step fine). **OWNER RULING on candidate 2: "close but a few seam issues"** — his two
+crops: the haze step through the trees at the line, and the column wall
+changing drum size and detail across the line (a STRUCTURE mismatch no
+current gate measures). Candidate 2 not accepted; the palette limit stays
+at 0.18. **Third attempt queued** behind the 2,2 bake with haze
+continuity, confined crystals, and rock forms continuing at the arriving
+size and detail in the brief. Next lock change candidate: a seam-step gate
+— the local luma step along the ownership curve on a pre-stitch composite
+of the seam band (director measure `seam-step.mjs`: accepted seams
+`20.3 / 20.8`, interior lines `15.6–25.3`, the old world's bad seam `26.0`). Next lock
 change candidate: "haze continues across seams at the arriving tint" in
 the dark-forest and magical-gorge vocabularies. **c2-2 bench country
 dispatched** (edit from 3,2 east and 2,3 south; sites waystation bench and
