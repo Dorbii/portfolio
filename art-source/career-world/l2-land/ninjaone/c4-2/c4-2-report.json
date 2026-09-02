@@ -4,69 +4,85 @@
     "filename": "c4-2-source.png",
     "exact_size_px": [1254, 1254],
     "format": "PNG RGB",
-    "sha256": "B911518F9972B07671BCBD5A4BB55ADE09B58D11751A1397E4CB75EFFD64A03D",
-    "mode": "built-in image generation",
+    "sha256": "B12A30991CDFC041A5525FA2289CC3FF3D677B1B9C46F140991463B15068BC90",
+    "mode": "built-in imagegen edit",
+    "edit_calls_used": 1,
     "whole_canvas_single_pass": true,
-    "resized_or_tiled": false
+    "raw_output_preserved": true,
+    "resized_cropped_or_tiled": false
   },
   "shipped_canvas_px": [2560, 2560],
   "ground_extent_m": [97.6, 97.6],
   "final_resolution_cm_per_px": 4.8,
   "lighting_isotropy": {
-    "metric": "36-bin land-luminance-gradient peak divided by uniform-bin mean; gradients below 12 luminance units excluded",
-    "peak_vs_uniform_over_land": 1.404887,
+    "metric": "36-bin land-luminance-gradient peak divided by uniform-bin mean after a local separable Lanczos3 reproduction of the 2560 px pipeline derivation; gradients below 12 luminance units excluded",
+    "peak_vs_uniform_over_land": 1.409983,
     "uniform_reference": 1.0,
-    "maximum_allowed": 1.45,
-    "pass": true,
-    "visual_check": "Neutral form shading and ambient occlusion only; no cast-shadow field or directional daylight key observed."
+    "key_light_asymmetry": 0.001057,
+    "key_light_maximum": 0.011,
+    "key_light_pass_under_local_reproduction": true,
+    "visual_check": "Neutral form shading and local ambient occlusion are present; no directional cast-shadow field, sun angle, or time-of-day treatment was observed."
   },
   "median_conifer_crown_final_scale": {
-    "px_on_2560_canvas": 90,
-    "metres": 4.3,
-    "source_px_equivalent": 44,
-    "measurement": "Median visual crown-width sample across mature conifers, converted by 2560/1254 to final canvas scale.",
+    "px_on_2560_canvas": 36.75,
+    "metres": 1.76,
+    "source_px_equivalent": 18.0,
+    "measurement": "Median bounding-box width across 17 isolated dark-green conifer crown components, scaled by 2560/1254.",
     "required_final_px_range": [84, 147],
-    "pass": true
+    "required_metres_range": [4.0, 7.0],
+    "pass": false
   },
   "buildable_vs_steep_fraction": {
-    "basis": "estimated fraction of non-water land area",
-    "buildable": 0.34,
-    "steep": 0.28,
-    "other_broken_talus_or_vegetated": 0.38,
-    "method": "Authoring-zone estimate from coherent plateau and bench surfaces versus exposed cliff faces, gorge walls, talus, and dense vegetation."
+    "basis": "manual estimated fraction of non-water land area",
+    "buildable": 0.38,
+    "steep": 0.27,
+    "other_broken_talus_or_sparse_vegetation": 0.35,
+    "method": "Broad coherent plateau and ledge surfaces versus exposed coastal, gorge, and bench faces; remaining land is broken rock, talus, or sparse cover."
   },
-  "water_footprint_fraction": 0.089999,
+  "water_footprint_fraction": 0.198328,
   "water_mask": {
     "filename": "c4-2-water-source.png",
     "exact_size_px": [1254, 1254],
     "format": "PNG RGBA",
-    "sha256": "3AEDCF323ABCEFB9078B23040C3D363486E31223C3581598F69C75DA10064F7D",
-    "encoding": "opaque white water pixels on fully transparent non-water pixels",
-    "method": "Source-registered geometry-aware classification guide followed by deterministic connected-component cleanup and enclosed-hole filling; the terrain source was not changed.",
-    "topology_at_final_scale": {
-      "connected_water_systems": 2,
-      "systems": [
-        "east-edge coast",
-        "tarn-fall-stream"
-      ],
-      "interior_holes": 0
+    "sha256": "994DA6DD4D268E2CB57D69A08FC0D200E2BB57A1FAE143FA52008C2ECD6E501F",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "derivation": "Source-raster colour classification and connected tracing of the painted sea, full surf and wash margin, tarn, fall, and stream; not polyline geometry.",
+    "opaque_water_pixels": 311874,
+    "intermediate_alpha_pixels": 0,
+    "non_white_water_pixels": 0,
+    "logical_water_components": 2,
+    "interior_holes": 0,
+    "edge_water_fraction": {
+      "north": 0.147528,
+      "east": 1.0,
+      "south": 0.137161,
+      "west": 0.0
     },
-    "pipeline_equivalent_gates_at_2560_px": {
-      "water_removed_residual_percent": 0.390288,
-      "water_removed_maximum_percent": 0.5,
-      "water_fringe_percent": 0.748385,
-      "water_fringe_maximum_percent": 1.0,
-      "pass": true
+    "local_lanczos3_pipeline_reproduction": {
+      "ring_6_fringe_percent": 0.085794,
+      "ring_48_fringe_percent": 0.053522,
+      "maximum_percent": 1.0,
+      "ring_6_pass": true,
+      "ring_48_pass": true,
+      "official_node_gate_run": false,
+      "note": "The repository checker could not execute because the managed sandbox denied node.exe script execution; this reproduction uses the same 2560 derivation, mask threshold and feather, and blue-fringe classifier."
     }
   },
+  "constraint_checks": {
+    "square_at_least_1254_px": true,
+    "single_edit_call": true,
+    "terrain_only": true,
+    "water_mask_6_px_gate_local_reproduction": true,
+    "water_mask_48_px_gate_local_reproduction": true,
+    "water_absent_from_west_edge": true,
+    "water_absent_from_north_edge": false,
+    "conifer_scale": false
+  },
   "open_risks": [
-    "Visual quality and seam acceptance remain owner decisions; mechanical checks do not establish acceptance."
-  ],
-  "image_generation": {
-    "source_calls_used": 2,
-    "candidate_selected": 1,
-    "candidate_2_rejected_reason": "Introduced sea across the south edge, violating the east-edge-only coast topology.",
-    "water_mask_revision_calls_used": 1,
-    "water_mask_revision_role": "Segmentation guide only; the selected terrain source remained byte-identical."
-  }
+    "Water occupies 185 source pixels on the north edge at the north-east corner, violating the requirement that nothing wet touch the north edge.",
+    "Median conifer crowns are materially below the required 84-147 px final-canvas range.",
+    "Several cliff and terrace runs still repeat the columnar motif in ordered bands; owner visual review must decide whether this repeats the previously rejected palisade defect.",
+    "The official Node authoring gates were not run because node.exe script execution is denied by the managed sandbox; the 6 px and 48 px results are a local final-scale reproduction.",
+    "Visual seam, cliff naturalism, ledge readability, and terrain-quality judgment remain owner decisions; mechanical checks do not establish visual acceptance."
+  ]
 }

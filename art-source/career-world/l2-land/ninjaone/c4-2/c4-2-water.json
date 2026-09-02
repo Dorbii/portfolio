@@ -1,18 +1,18 @@
 [
   {
     "class": "coast",
-    "note": "Open dark-teal sea along the east edge outside the continuous columnar sea cliff, shingle, and talus waterline."
+    "note": "East-edge sea including the complete painted surf, wash, spray, ripple highlights, wet shoreline margins, and water surrounding the offshore stacks."
   },
   {
     "class": "lake",
-    "note": "Small dark tarn on the elevated north-west plateau shelf."
-  },
-  {
-    "class": "stream",
-    "note": "Narrow rocky watercourse draining from the tarn, descending through the inland gully, and reaching the south edge."
+    "note": "Small dark rock-edged tarn on the inland plateau shelf."
   },
   {
     "class": "fall",
-    "note": "Short vertical drop immediately below the tarn lip; minor white-water steps farther downstream remain part of the stream surface."
+    "note": "Single short painted drop at the tarn lip, including its white water and spray."
+  },
+  {
+    "class": "stream",
+    "note": "One connected narrow gully stream from the tarn fall to the painted south-edge continuation."
   }
 ]

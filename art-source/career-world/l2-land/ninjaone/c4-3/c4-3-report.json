@@ -1,41 +1,48 @@
 {
   "cell": "c4-3",
-  "generation": {
-    "filename": "c4-3-source.png",
-    "exact_size_px": [1254, 1254],
-    "format": "PNG RGB",
-    "sha256": "DBC75B3F9C73B15D4F115ACDCD7BA79FC35B950D9595FC31F23C54DC49AC70A9"
-  },
+  "generation_size_px": [1254, 1254],
+  "generation_mode": "single-pass square; raw generation copied without resize, upscale, tiling, assembly, or regional patching",
   "shipped_canvas_px": [2560, 2560],
   "ground_extent_m": [97.6, 97.6],
   "final_resolution_cm_per_px": 4.8,
   "lighting_isotropy": {
     "metric": "36-bin land-luminance-gradient peak divided by uniform-bin mean",
-    "peak_vs_uniform_over_land": 1.363084,
-    "uniform_reference": 1.0,
-    "maximum_allowed": 1.45,
-    "pass": true,
-    "visual_check": "Neutral form shading and ambient occlusion only; no directional key or cast shadows observed."
+    "basis": "source pixels outside the final water mask",
+    "peak_vs_uniform": 1.3319,
+    "ideal_uniform": 1.0
   },
-  "median_conifer_crown_final_scale": {
-    "px_on_2560_canvas": 102,
-    "metres": 4.9,
-    "source_px_equivalent": 50,
-    "measurement": "Median visual crown-width sample, converted by 2560/1254 to final canvas scale.",
-    "required_final_px_range": [83, 146],
-    "pass": true
+  "median_conifer_crown": {
+    "source_px": 36,
+    "final_canvas_px": 73,
+    "metres_at_final_scale": 3.5,
+    "source_to_final_scale": 2.041467,
+    "measurement": "manual median of representative individual visible crown widths, reported at the 2560 px final-canvas scale",
+    "required_final_px_range": [84, 147],
+    "required_metres_range": [4.0, 7.0],
+    "pass": false
   },
   "buildable_vs_steep_fraction": {
-    "basis": "estimated fraction of non-water land area",
-    "buildable": 0.36,
-    "steep": 0.24,
-    "other_broken_talus_or_vegetated": 0.4,
-    "method": "Authoring-zone estimate from coherent level bench surfaces versus exposed cliff and cut faces."
+    "basis": "manual area estimate over the non-water footprint",
+    "buildable": 0.41,
+    "steep": 0.23,
+    "other_broken_vegetated_or_talus": 0.36
   },
-  "water_footprint_fraction": 0.211199,
+  "water_footprint_fraction": 0.288872,
   "water_mask": {
-    "filename": "c4-3-water-source.png",
-    "exact_size_px": [1254, 1254],
-    "encoding": "opaque white water pixels on fully transparent non-water pixels"
-  }
+    "dimensions_px": [1254, 1254],
+    "encoding": "opaque white on transparent, binary alpha",
+    "derivation": "connected colour classification from painted teal, cyan, foam, spray, surf, and wet-margin pixels; no polyline geometry",
+    "interior_holes": 0,
+    "edge_water_fraction": {
+      "north": 0.2608,
+      "east": 1.0,
+      "south": 1.0,
+      "west": 0.0183
+    }
+  },
+  "residual_risks": [
+    "Median conifer crowns measure below the required final-scale range.",
+    "The generated north-east coastal perspective exposes more sea on the north image edge than the one-stream-only seam contract allows.",
+    "The south-west sea corner contributes a small water interval on the west image edge."
+  ]
 }

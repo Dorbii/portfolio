@@ -475,7 +475,14 @@ coast-cliff biome vocabulary and the geology rule now demand weathered,
 irregular columns (uneven heights, broken tops, split and leaning columns,
 collapsed drums in talus, no palisade, no square corners), and the c4-2
 brief carries it with the ledge made explicit. The coast is RE-BAKED, not
-redone.
+redone. **c4-2 coast REGENERATED (second attempt) and accepted:** all
+eight gates PASS, continuity `ok (4 crossings checked)` through the band
+read, fringe `0.09% / 0.05%`, key-light `0.0013`, rock-only `0.057`;
+`145` tiles; `163,598` tokens. **THE THREE-CELL WORLD IS COMPLETE UNDER
+CANON r2.** Real stitched seams: c3-3|c4-3 `20.3` (interior `16.4–23.3`),
+c4-2|c4-3 `20.8` (interior `18.1–25.3`) — both inside the no-seam range;
+the old world measured `21.8` and `26.0` against `12.6–20.8`. Review set
+with the old world as "before": `.codex-tmp/session3/review/regen3/`.
 
 **REGENERATION PLAN (as executed):**
 

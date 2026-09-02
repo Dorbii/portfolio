@@ -1,18 +1,18 @@
 [
   {
     "class": "coast",
-    "note": "Open sea continues across the full east and south boundaries, including the water outside the southeast shingle cove and the southern submerged-route approach."
+    "note": "Open teal-to-turquoise sea along the full east and south edges, including surf, wash between shore rocks, wet shingle margins, and ripple highlights."
   },
   {
     "class": "lake",
-    "note": "Still green-tinted flooded quarry pit in the lowest centre-east cut; it remains visually and hydrologically distinct from the drainage run."
+    "note": "Flooded quarry pit in the lowest cut, including its complete painted wet margin and surface highlights."
   },
   {
     "class": "stream",
-    "note": "Continuous narrow drainage run entering from the northwest plateau, following the quarry gully past the pit, and reaching the south-coast cove."
+    "note": "Single drainage crossing the north edge near the north-west plateau, continuing through the quarry gully beside the pit and into the south-coast cove."
   },
   {
     "class": "fall",
-    "note": "Short vertical drop where the northwest drainage run crosses the central cut face; the lower cove descent remains part of the stream mouth."
+    "note": "One short fall where the drainage drops over a quarried cut face; spray and plunge-pool foam are included in the water mask."
   }
 ]
