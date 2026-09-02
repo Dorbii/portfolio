@@ -645,9 +645,19 @@ rock lighting `0.153` vs `0.15` and the 3,0 seam tone `20.0` vs `20` — both
 within the noise of their calibrations; key-light and crowns now pass;
 **OWNER CALL:** recalibrate the two limits on his eye (lock change 8: rock
 `0.16`, tone `21`) and `--redo` candidate 4, or a fifth attempt, or leave
-it). **1,1 the purple field, attempt 2 DISPATCHED** on the four-neighbour
-`brief-c1-1-r3.md` with lock change 7 in place (log `regen-c1-1.log` after
-`rebake2-start`). Whole-
+it). **1,1 the purple field LANDED** (attempt 2, R107, commit `6f1577cc`, every
+gate green; owner's eye pending on `review/regen-c1-1-st-*.png`). 19 of 20
+cells hold; 2,0 alone is open. **NEW OWNER THREAD (row 32), the 2,0
+candidate-4 WEST seam against 1,0:** "the seam on this one is too noticeable
+… trees and other features are legit cut in half" — the strip located by
+cross-correlation (r 0.98) at x 83..149 of the quarter preview; the preview
+draws a straight hard edge where the stitch draws a jittered, wiggled, 8-px
+feathered one (port in `.codex-tmp/session3/seam-geo.mjs`, checked against
+the stitched tiles; faithful previews via `stitch-preview.mjs`), but the
+mismatch of features across the line is real; `seam-edge2.mjs` measures the
+hard-edge excess at the real seam against the paint's own rate as the
+control, over every accepted seam. Lock change 8 (the two limits) stays
+staged and is moot unless the seam is solved. Whole-
 territory review at quarter scale: `review/territory-L2-quarter.png`. **REMAINING THREE, all waiting on
 the owner:** 1,1 the purple field (lock change 7 staged — the hue window on
 the water test; then `brief-c1-1-r2.md`), 2,0 the dark-forest gorge
@@ -1060,8 +1070,9 @@ back explicitly; owner asked for this discipline 2026-09-01):**
 | 27 | "this looks weird" (4,0: the station strip as a pale graded band, a straight cut, short walls) | CLOSED: cause was my brief's "strip" and "cutting"; 4,0 replaced on brief-c4-0-r2.md and accepted (R094), the road gone; caution recorded — the land offers open ground and natural draws, never strips, cuttings, corridors or bands |
 | 28 | "the capital one is fine cause were gonna cover the land for that area anyways" (2,1 station strip) | CLOSED: 2,1 stays; the city structures cover that ground |
 | 29 | (director-found) the purple field reads as water to the fringe rings and the mask growth | lock change 7 staged (hue window on the water test) — owner's word pending; then 1,1 attempt 2 on brief r2 |
-| 30 | "go ahead and do a 4th for the dark forest" (2,0) | DONE: attempt 4 missed rock lighting by 0.003 and the plateau seam by 0.0 (R106); owner's call — recalibrate the two limits on his eye and re-derive, a fifth attempt, or leave |
+| 30 | "go ahead and do a 4th for the dark forest" (2,0) | DONE: attempt 4 missed rock lighting by 0.003 and the plateau seam by 0.0 (R106); the owner's answer was the west seam (row 32), so lock change 8 stays staged and moot until the seam is solved |
 | 31 | "so whats the ask here? Cant we just manually pass it?" / "go" (the purple field and lock change 7) | LANDED as lock change 7 (R105): the hue window on the water test; 1,1's second attempt follows |
+| 32 | "the seam on this one is too noticeable" / "trees and other features are legit cut in half" (strip of the 2,0 candidate-4 west seam against 1,0) | IN PROGRESS: located (r 0.98); faithful-seam preview and hard-edge excess measured at every accepted seam for the control; fix to be proposed on the evidence |
 | — | director-found: the control suite shares the real working dirs | FIXED for 4,3 (R073, `97eb0d6`); WORK relocation is lock change 5a |
 | — | director-found: fringe rejections are mask tracing, not art (four candidates) | lock change 5b: mask completion by bounded growth |
 | — | director-found: stale scratch deliverables hazard | worked around by hand; next lock change |
