@@ -439,7 +439,45 @@ before and after entries; suite 9/9; hash gate intact):**
   neighbours (an L-shaped painted band); the second regenerated cell is the
   test.
 
-**REGENERATION PLAN (waits only on Q1, the seed canon):**
+**REGENERATION STATUS (2026-09-01):** canon r2 = candidate g installed
+(`seed/L2-seed-region-r2{,-source}.png`). World wiped (tiles, manifest, three
+cell sources; old scratch deliverables cleared by hand). **c4-3 quarry
+REGENERATED and accepted** (frontier, generate mode from the canon):
+all eight gates PASS incl. the 48 px ring at `0%`, key-light `0.0017`,
+rock-only strong-edge `0.041`; `124` tiles; worker `146,499` tokens,
+~10 min. Director eyes at 1/2.5 and 1:1: as briefed. **c3-3 saddle REGENERATED in
+edit mode and accepted** — the first real edit-mode bake: all eight gates
+PASS, palette at the quarry seam `dBG 0.021 / dLuma 0.9` (old pair `0.130 /
+11.7`), rock-only `0.056`; the REAL stitched seam measures `20.3` mean step
+against interior lines `16.4–23.3` — inside the no-seam range for the first
+time (old seam `21.8` vs `12.6–18.3`); `143` tiles; `188,671` tokens; two
+prior dispatches died on "model at capacity" and a director retry loop
+waited it out (pipeline should retry itself — next lock change). Eyes at
+1:1 and 1/4: seam not findable. **c4-2 coast: edit-mode bake delivered a GOOD candidate that the
+continuity gate REJECTED on a single-scanline artifact** (the first
+two-neighbour edit target composed correctly). Every other gate passed
+(both fringe rings `0%`, key-light `0.0021`); `169,510` tokens. Measured:
+on the exact shared row the quarry's stream is split by one boulder into
+runs of `10` and `17` px, both under the gate's `30` px minimum (one row
+above: `37` px; one below: `33` px), so the gate saw no quarry crossing;
+the coast's stream meets it at a `25–45` px miss, inside the `48` px
+tolerance. Eyes: the channels align and the candidate continued the
+quarry's stones and edge conifer. **Fix (needs owner approval; control
+already in the suite and FAILING on the current gate as the world did):
+the continuity gate reads crossings over a band across the shared line
+(water within 8 px either side) instead of one scanline.** Then `--redo`
+the coast candidate (no bake). The candidate's deliverables sit in
+`.codex-tmp/authoring/cells/c4-2/`. **OWNER RULING:** check 1 "is fine they
+match" → the gate band fix approved and landed; check 2 **"the cliff side
+is unnatural"** — the candidate is REJECTED by the owner: identical columns
+in a straight palisade with a square corner. Fix in two places: the
+coast-cliff biome vocabulary and the geology rule now demand weathered,
+irregular columns (uneven heights, broken tops, split and leaning columns,
+collapsed drums in talus, no palisade, no square corners), and the c4-2
+brief carries it with the ledge made explicit. The coast is RE-BAKED, not
+redone.
+
+**REGENERATION PLAN (as executed):**
 
 1. Canon: the chosen candidate copied to
    `art-source/career-world/l2-land/ninjaone/seed/L2-seed-region-r2-source.png`
@@ -591,6 +629,49 @@ this worktree (shoreline-erosion re-bake + v3 coast fill, obsolescent) —
 commit as an interim fix for the old-world serving, or discard. Untouched
 this session; NOT in this session's commits. Side cost: every worker runs
 `git status` and swallows those 400 lines into its context.
+
+**OWNER INTERJECTION CHECKLIST — session 3 (every item closes or is handed
+back explicitly; owner asked for this discipline 2026-09-01):**
+
+| # | owner item | status |
+|---|---|---|
+| 1 | register change to epic/fantastical/light | LANDED: canon r2 = candidate g installed; regeneration in progress |
+| 2 | "careful with that lighting, is that neutral?" | MEASURED (rock-only strong-edge moment; gate blind to it); fixed at the source by reference choice; a gate at ~0.15 is the next lock change |
+| 3 | less happy meadow, scenery variance | LANDED: biome map in the committed plan |
+| 4 | one purple flower field (Outward) | SOURCED + owner-corrected; biome `purple-field` at 1,1; brief when 1,1 is authored |
+| 5 | the magical-gorge crop as the model for interesting areas | LANDED: biome `magical-gorge` at 3,1 |
+| 6 | why does every generation look the same | ANSWERED (one image model + reference lineage); finish prototype exists |
+| 7 | mix Codex's and Claude's image tools | PARKED by owner (the director has no image tool) |
+| 8 | stand out from generic AI art (not a local model) | OPEN: a designed finish pass is the lever; owner to say when (Q4) |
+| 9 | water is another layer / land sub-layer | CONFIRMED: already the cell contract (concept + cut land + footprint) |
+| 10 | biome areas on the grid, transitions handled | LANDED (this session, lock history) |
+| 11 | interior cells need settlements/attractions | RECORDED; sites mechanism proposed below, next lock change |
+| 12 | direct questions with direct assets | DONE: Q1 g by director default, Q2 confirmed by owner screenshots, Q3 approved and landed, Q4 open |
+| — | director-found: stale scratch deliverables hazard | worked around by hand; next lock change |
+| — | director-found: variance map marks | owner has the biome map; marks welcome, none required |
+
+**OWNER DIRECTION (2026-09-01, interior cells):** "for the middle areas we
+should probably populate with small settlements or misc attractions/areas
+just to make it feel alive and not like a barren/uninhabited area — that
+can be an additional layer if needed." Mechanism to land in the next lock
+change: the plan gains per-cell **sites** (smaller than settlement shelves:
+hamlet clearing, waystation bench, lookout crag, shrine site, hot spring,
+crater tarn, giant tree, old quarry, hermit's crag) for at least the
+interior cells `1,2` moor, `2,2` mixed-bench, `3,2` dark-forest and the
+row-0 plateaus; `cell.mjs` writes a "Sites this cell must offer" section
+demanding the TERRAIN for each (a clearing 30 m across by the beck, a level
+bench, a crag with a view) and drawing nothing on it. The structures layer
+populates hamlets, mills, shrines and waystations on those sites later —
+the same split as the five settlement shelves, at village scale. Owner
+approval recorded here; control first, then the edit.
+
+**Next lock change to propose (found 2026-09-01, worked around by hand):**
+`cell.mjs` does not clear a cell's stale scratch deliverables before
+dispatch, so a worker that fails to deliver leaves the previous
+`<id>-source.png` in place and the pipeline would derive and gate the OLD
+generation as if it were new. The director deleted the deliverables by hand
+before the regeneration bakes; the pipeline should do it itself at dispatch
+(design so misuse is impossible). Owner approval needed, control first.
 
 **Cautions that cost lanes (carry forward):** measure against the CURRENT
 accepted artefact, never a discarded attempt's numbers; prose spatial pegs

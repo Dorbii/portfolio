@@ -345,6 +345,47 @@ test("a 100px stream offset at a shared edge is bridged in the footprint", async
   }
 });
 
+test("a stone on the shared line does not hide a stream crossing from the continuity gate", async () => {
+  // Found on the real world 2026-09-01: the quarry's stream at its north edge
+  // is split by one boulder exactly on the shared row (runs of 10 and 17 px,
+  // both under the 30 px minimum), so the coast's matching stream 25-45 px
+  // away was rejected as unmet. Crossings must be read over a band across
+  // the line, not a single scanline. Cells (1,2) west and (2,2) east share
+  // the line x=4096; the stream runs at y=5120 +-20, 60 px wide, and a dry
+  // "stone" of 5 columns straddles the line for 22 of its 40 rows.
+  const streamY = 5120, half = 20;
+  const paintWest = (x, y) => {
+    const base = F(x, y);
+    if (Math.abs(y - streamY) <= half && x >= 3400) {
+      const stone = Math.abs(x - 4096) <= 2 && y >= streamY - 11 && y <= streamY + 10;
+      return stone ? base : [40, 90, 200, 255];
+    }
+    return base;
+  };
+  const paintEast = (x, y) => (Math.abs(y - streamY) <= half && x <= 4800) ? [40, 90, 200, 255] : G(x, y);
+  const toArtefacts = (col, row, paint, isWater) => {
+    const ox = col * CELL - BLEED, oy = row * CELL - BLEED;
+    const l2 = Buffer.alloc(GEN * GEN * 4), concept = Buffer.alloc(GEN * GEN * 4), mask = Buffer.alloc(GEN * GEN * 4);
+    for (let v = 0; v < GEN; v++) for (let u = 0; u < GEN; u++) {
+      const x = ox + u, y = oy + v, [r, g, b, a] = paint(x, y), o = (v * GEN + u) * 4;
+      concept[o] = r; concept[o + 1] = g; concept[o + 2] = b; concept[o + 3] = a;
+      if (isWater(x, y)) { mask[o] = mask[o + 1] = mask[o + 2] = 255; mask[o + 3] = 255; }
+      else { l2[o] = r; l2[o + 1] = g; l2[o + 2] = b; l2[o + 3] = a; }
+    }
+    return { l2, concept, mask };
+  };
+  const westWater = (x, y) => Math.abs(y - streamY) <= half && x >= 3400 && !(Math.abs(x - 4096) <= 2 && y >= streamY - 11 && y <= streamY + 10);
+  const eastWater = (x, y) => Math.abs(y - streamY) <= half && x <= 4800;
+  await writeArtefacts(path.join(SYN, "stone-w"), "c1-2", toArtefacts(1, 2, paintWest, westWater));
+  await writeArtefacts(path.join(SYN, "stone-e"), "c2-2", toArtefacts(2, 2, paintEast, eastWater));
+  assert.match(runCell("1,2", path.join(SYN, "stone-w")), /accepted, stitched/);
+  let log;
+  try { log = runCell("2,2", path.join(SYN, "stone-e")); }
+  catch (e) { throw new Error("east cell rejected although its stream meets the west stream across a stone on the line:\n" + String(e.stdout || "").split("\n").filter((l) => /continuity|FAIL/.test(l)).join("\n")); }
+  assert.match(log, /PASS\s+water continuity/);
+  assert.match(log, /accepted, stitched/);
+});
+
 test("manifest records the contract and both cells", () => {
   const m = JSON.parse(fs.readFileSync(path.join(OUT, "manifest.json"), "utf8"));
   assert.equal(m.format, "l2-cell-pyramid");

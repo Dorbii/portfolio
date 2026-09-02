@@ -1,9 +1,9 @@
 {
- "solidifiedAt": "2026-09-01T22:48:40.292Z",
+ "solidifiedAt": "2026-09-02T00:39:58.580Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "cb0251b376811650",
-  "plan-territory.mjs": "23ba229648a15383",
+  "cell.mjs": "9d5e29f6b763c02c",
+  "plan-territory.mjs": "9872ecdf40c4496f",
   "AGENTS.md": "0d4c3c0fc8f88b87"
  },
  "history": [
@@ -130,6 +130,24 @@
    "hashes": {
     "cell.mjs": "cb0251b376811650",
     "plan-territory.mjs": "23ba229648a15383",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-02T00:31:33.146Z",
+   "reason": "owner 2026-09-01 (before the change): check 1 'is fine they match' - the coast's stream meets the quarry's within tolerance and the continuity gate's single-scanline read (the quarry stream split by one boulder on the exact shared row into 10 and 17 px runs) is the defect. Change: the continuity gate reads each crossing over a band across the shared line (min alpha over t-8..t+8 perpendicular to the line) for both cells, tolerances unchanged (30 px run, 48 px match, 150 px bridge). Control already in the suite, failing on the current gate as the world did. Also, owner check 2 'the cliff side is unnatural' (identical columns in a straight palisade with a square corner): the coast-cliff biome vocabulary and the geology rule in plan-territory.mjs now demand weathered, irregular columns - uneven heights, broken tops, split and leaning columns, collapsed drums in talus, no regular palisade, no square corners.",
+   "hashes": {
+    "cell.mjs": "cb0251b376811650",
+    "plan-territory.mjs": "23ba229648a15383",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-02T00:39:58.581Z",
+   "reason": "owner 2026-09-01 (change landed, suite 10/10): continuity gate reads crossings over a +-8 px band across the shared line for both cells (tolerances unchanged); the band-read control exposed a latent bridge bug, fixed: the outward erase pass started on the already-cleared line row and stopped at once, leaving the rerouted cell's old channel in its bleed (invisible to the stitch, which discards that bleed, but wrong in the shipped footprint). Coast-cliff biome vocabulary and the geology rule now demand weathered, irregular columns after the owner's 'the cliff side is unnatural'.",
+   "hashes": {
+    "cell.mjs": "9d5e29f6b763c02c",
+    "plan-territory.mjs": "9872ecdf40c4496f",
     "AGENTS.md": "0d4c3c0fc8f88b87"
    }
   }

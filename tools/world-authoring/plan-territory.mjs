@@ -90,7 +90,7 @@ const BIOMES = {
     wonders: "none" },
   "coast-cliff": { name: "Wild coast",
     ground: "bare basalt benches and talus above sea-cliffs, thin grass, shingle coves; no meadow",
-    rock: "tall columnar sea-cliffs with ledges partway up, stacks",
+    rock: "tall columnar sea-cliffs, WEATHERED and irregular: columns of uneven height and width, tops broken at different levels, split and leaning columns, collapsed drums lying in talus at the foot, lichen in the joints; the cliff line wanders in plan with bays and buttresses, never a straight run or a square corner, never a regular palisade of identical cylinders; a natural ledge partway up the face; sea stacks offshore",
     trees: "dark conifers only in gullies",
     water: "the sea on the seaward edge with surf and wash; an occasional tarn on a shelf",
     palette: "pale grey rock, teal to deep-blue sea, sparse green",
@@ -159,7 +159,7 @@ const plan = {
   shelves: SHELVES, loop: LOOP, railFeatures: FEATURES,
   biomes: BIOMES, cellBiomes: CELL_BIOMES,
   rules: {
-    geology: "columnar basalt, bedded and jointed, talus at cliff bases; plateau-and-gorge — columns are a feature where the biome says so, not the ground everywhere",
+    geology: "columnar basalt, bedded and jointed, talus at cliff bases; plateau-and-gorge — columns are a feature where the biome says so, not the ground everywhere. Columns are WEATHERED and irregular wherever they appear: uneven heights and widths, broken tops, split and leaning columns, collapsed drums in talus, lichen in the joints; never a regular palisade of identical cylinders, never a square corner (owner, 2026-09-01: 'the cliff side is unnatural')",
     vegetation: "conifer in gullies and shelter, thinning on exposed rock; scrub and heather on open ground; crowns 4-7 m; the biome sets the mix",
     water: "coastal cliff and shingle seaward; inland tarns on shelves draining by falls into gorges",
     buildable: "~1/3 occupiable shelf, separated by gorges and broken ground so settlements read distinct",

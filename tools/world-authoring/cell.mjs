@@ -888,7 +888,11 @@ codex exec \\
           // erase my channel through the band, following it inward and outward
           for (const dir of [1, -1]) {
             let cPrev = mine.c;
-            for (let v = 0; dir > 0 ? v <= N : v >= -BLEED; v += dir) {
+            // the outward pass starts one step beyond the line: the inward
+            // pass has already cleared v=0, and starting there ended the
+            // outward pass at once, leaving the old channel in the bleed
+            // (found by the band-read control, 2026-09-01)
+            for (let v = dir > 0 ? 0 : -1; dir > 0 ? v <= N : v >= -BLEED; v += dir) {
               const near = runsAt(f, v).filter((r) => Math.abs(r.c - cPrev) <= 90);
               if (!near.length) break;
               for (const r of near) {
@@ -1106,14 +1110,28 @@ codex exec \\
         ? (nc > col ? (col + 1) * CELL_PX : col * CELL_PX)
         : (nr > row ? (row + 1) * CELL_PX : row * CELL_PX);
       const spanT0 = vertical ? row * CELL_PX : col * CELL_PX;
+      // Each sample is the MOST water-like alpha within a band across the
+      // line (t-8..t+8 perpendicular to it), not the single scanline: a stone
+      // lying on the exact shared row split the quarry's stream into two runs
+      // under the minimum and hid a real crossing (owner-approved 2026-09-01).
+      const BAND = 8;
       const mine = new Uint8Array(CELL_PX), theirs = new Uint8Array(CELL_PX);
       for (let k = 0; k < CELL_PX; k++) {
-        const tx = vertical ? lineT : spanT0 + k;
-        const ty = vertical ? spanT0 + k : lineT;
-        const mg = [tx - (col * CELL_PX - BLEED), ty - (row * CELL_PX - BLEED)];
-        const ng = [tx - (nc * CELL_PX - BLEED), ty - (nr * CELL_PX - BLEED)];
-        mine[k] = data[(mg[1] * GEN_PX + mg[0]) * 4 + 3];
-        theirs[k] = nRaw.data[(ng[1] * GEN_PX + ng[0]) * 4 + 3];
+        let mMin = 255, tMin = 255;
+        for (let d = -BAND; d <= BAND; d++) {
+          const tx = vertical ? lineT + d : spanT0 + k;
+          const ty = vertical ? spanT0 + k : lineT + d;
+          const mg = [tx - (col * CELL_PX - BLEED), ty - (row * CELL_PX - BLEED)];
+          const ng = [tx - (nc * CELL_PX - BLEED), ty - (nr * CELL_PX - BLEED)];
+          if (mg[0] >= 0 && mg[1] >= 0 && mg[0] < GEN_PX && mg[1] < GEN_PX) {
+            mMin = Math.min(mMin, data[(mg[1] * GEN_PX + mg[0]) * 4 + 3]);
+          }
+          if (ng[0] >= 0 && ng[1] >= 0 && ng[0] < GEN_PX && ng[1] < GEN_PX) {
+            tMin = Math.min(tMin, nRaw.data[(ng[1] * GEN_PX + ng[0]) * 4 + 3]);
+          }
+        }
+        mine[k] = mMin;
+        theirs[k] = tMin;
       }
       const rm = runsOf(mine, spanT0), rt = runsOf(theirs, spanT0);
       contChecked += rm.length + rt.length;
