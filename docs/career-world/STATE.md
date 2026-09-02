@@ -613,12 +613,21 @@ commit `b16375b`): the low-rock landform took rock lighting to `0.088`
 no line at the seam, a soft brightening over ~250 px into the shelf.
 **ELEVEN CELLS STAND.** Owner item: the gully below 1,3's fall came out as
 dry sand, not a drowned inlet (the loop's water crossing is a sandy gully
-unless a later pass floods it). **4,0 Kaizen DISPATCHED** (`brief-c4-0.md`:
-the largest shelf, the cutting from the headland's tunnel, the station
-strip, the line leaving west low; 4,1's north edge read first — dry across
-the kept width; log `.codex-tmp/session3/regen-c4-0.log`). Next by
-adjacency: 0,3 (sound coast west of 1,3), 3,0, 2,0, 1,1 the purple field,
-0,2 (submerged run), 0,0 / 1,0 / 2,0 row 0. A suite-level lock on the test world is queued
+unless a later pass floods it). **4,0 Kaizen ACCEPTED first attempt** (R092, commit `f8ec99a`:
+key-light `0.0026`, rock lighting `0.075`, seam tone `3.7`, `123` tiles;
+the worker's crown measure `39 px` — the drift's worst number; the station
+strip and the cutting read at half scale). **TWELVE CELLS STAND.** **1,1 the
+purple field DISPATCHED** (`brief-c1-1.md` from the owner's Outward
+correction: a saturated magenta-violet carpet past the transition thirds
+with a clear edge, the crystal-crowned knoll, pink-blossom broadleaf
+trees, accent shrubs, the line's ground across the field; both neighbours'
+edges dry; log `.codex-tmp/session3/regen-c1-1.log`). Briefs READY, each
+written against the neighbours' measured edge water: `brief-c2-0.md` (dark
+forest gorge, mill-ledge), `brief-c0-3.md` (the sound corner; 1,3's shore
+arrives 58% down its west edge), `brief-c3-0.md` (bare plateau,
+walk-under-arch, the loop clipping its SE corner; 4,0's west edge dry).
+Then 0,2 (submerged run; after 0,3), 1,0 (crater tarn, column altar; after
+1,1), 0,1 Metrics-Service, 0,0 shepherd's fold. A suite-level lock on the test world is queued
 (6d, tests only).
 Next cells after it: 1,3 (fourth attempt if the owner wants it), 4,0
 Kaizen, 3,0, 2,0, 1,1 the purple field, 0,x the sound coast.

@@ -566,6 +566,14 @@ Steve rejected the r5 composition on two grounds the director's QA under-weighte
 - **Model-attributable:** two levers landed in one bake and both measured: a landform stated as an absence of a rock type ("no columns, terraces or pavements") changed the rock-only moment where three briefs of shading words and a rock reference image had not; and a transition given as pixels moved a seam from `24.5` to `15.0` where the Transitions text had not.
 - **Evidence:** `.codex-tmp/session3/regen-c1-3.log` (after `rebake4-start`), `review/stitched-c1-3-*`, `review/territory-grid-status.png` (11 of 20).
 
+### R092 — 2026-09-02 — c4-0 Kaizen's shelf, first attempt accepted; twelve cells stand (codex exec via cell.mjs, gpt-5.6-sol, effort=high)
+
+- **Setup:** `brief-c4-0.md` — the largest shelf, a cutting from the headland's tunnel on the south edge, the station strip, the line leaving west low, the sea along the east edge; 4,1's north edge read first (dry across the kept width; the sea only in the east bleed); edit mode with 4,1 (south), the canon as the second input, the tone ramp in the target. `162,706` tokens.
+- **Verdict: ACCEPTED on all gates** — key-light `0.0026`, rock lighting `0.075`, seam tone dLuma `3.7` on all land against 4,1, fringe `0/0%`, land `88%`, `123` tiles. Committed `f8ec99a`. **TWELVE CELLS STAND.**
+- **Worker-reported for the owner's eye:** its crown measure `38.8 px` final ("isolated dark-green components" — the smallest number of the programme, though the method under-reads merged stands); the sea reaches the north-east and south-east corners (the coast continuing, as it should; the brief's "nothing wet on the north edge" was again too literal for a coast corner); some coastal basalt runs "ordered" with light tops — the rock gate passed at `0.075`.
+- **Model-attributable:** three cells in a row (4,1, 1,3, 4,0) accepted first or fourth time with the ramp in the target and the canon beside it, seam tones `5.7 / 15.0 / 3.7` — the transition is now landing by construction. The crown drift remains the one metric no lever has held (the floor in the brief moves the median from `45` to `60–73 px` on some cells and not others); lock-change 5e (report-only crown measure in the gate table) is the next thing to land so the drift is at least visible per cell.
+- **Evidence:** `.codex-tmp/session3/regen-c4-0.log`, `review/stitched-c4-0-cell-half.png`, `review/territory-grid-status.png` (12 of 20).
+
 ## Findings backlog (flow improvements to fold into future packets)
 
 - F1: Task packets must declare required gate tier (focused / full / none) — otherwise workers default to maximal ceremony. (From R000.)
