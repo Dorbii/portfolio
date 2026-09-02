@@ -616,12 +616,21 @@ lighting `0.288`. **Attempt 2 REJECTED by rock lighting alone** (`0.187`; R086):
 water landed (2 crossings met, the sound edge to edge, one fall, the
 composition right) but every rock in the cell keeps a lit top plane —
 global, on few strong edges (`11,085` vs the accepted coast's `53,344`);
-words twice and the canon as second input did not move it. **Attempt 3
-DISPATCHED** on `brief-c1-3-r3.md`: keep the composition, attach the
-accepted coast 4,2's source as a THIRD input image for the rock shading, a
-41 px crown floor. If it lands → lock-change 5j (a per-biome reference
-image beside the canon); if not → 1,3 parked for the owner, lane moves to
-4,1. **Lock-change
+words twice and the canon as second input did not move it. **Attempt 3 REJECTED, rock lighting `0.198`** (R087): the tool took
+the third image (the accepted coast's rock) and the lit top stayed on
+every rock in the cell (`0.288 → 0.187 → 0.198`); 5j (a per-biome
+reference image) is struck — ruled out by this run. **1,3 PARKED after
+three strikes — OWNER CALL:** (a) accept candidate 3 by eye at `0.198`
+(its shore is column-top pavements under the sound, each top lit from one
+side; `review/regen-c1-3-cand3-shore-1to1.png`) with a recorded exception;
+(b) a fourth attempt on a changed landform — no pavements, terraces or
+column stacks in this cell (grass over rounded rock, shingle, the sound
+over sand and smooth ledges) so there is little strong rock edge to light;
+(c) leave it parked. Candidates 1–3 at `.codex-tmp/session3/rejected/c1-3-cand{1,2,3}/`.
+**4,1 the coast headland DISPATCHED** (`brief-c4-1.md`; 4,2's north edge
+checked first: the tarn at cell-x `-104..292`, the sea at `1903..2304`,
+both stated in the brief as arriving water; log
+`.codex-tmp/session3/regen-c4-1.log`). **Lock-change
 item 5i:** the packet must list the neighbours' crossings at every shared
 edge as arriving water. Next after 1,3: 0,3, 0,2 (submerged run), 4,1
 (brief ready), then row 0; whole-territory review at the end.
@@ -913,7 +922,7 @@ back explicitly; owner asked for this discipline 2026-09-01):**
 | 20 | "how will we handle the coast for this bottom part?" | ANSWERED from the plan's southBorder rule and the water contract; the inlet's width at the crossing is the owner's choice when 1,3 comes up |
 | 21 | "the next step is all the layers of the pyramid?" / "shouldnt we test the LoD out then" | CLOSED: pyramid tiers are written by every stitch; offline check (R081) and the runtime streaming test (R085) both pass; dev feed `?landStream=l2dev` |
 | 22 | (director-found) the capital's shelf did not land in 2,1 though every gate passed | CLOSED: owner 'agreed' → replaced on brief r2 and accepted (R084) |
-| 23 | (director-found) 1,3's brief denied the beck 1,2 delivers at the shared edge | attempt 2 in flight; lock-change 5i: arriving crossings listed by the packet |
+| 23 | (director-found) 1,3's brief denied the beck 1,2 delivers at the shared edge | the beck landed on attempt 2; 1,3 then PARKED after three rock-lighting strikes — owner call (accept by eye / new landform / leave); lock-change 5i stays (arriving crossings in the packet) |
 | — | director-found: the control suite shares the real working dirs | FIXED for 4,3 (R073, `97eb0d6`); WORK relocation is lock change 5a |
 | — | director-found: fringe rejections are mask tracing, not art (four candidates) | lock change 5b: mask completion by bounded growth |
 | — | director-found: stale scratch deliverables hazard | worked around by hand; next lock change |
