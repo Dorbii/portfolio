@@ -640,7 +640,7 @@ CELLS STAND.** **1,0 the bare plateau, first attempt REJECTED by rock lighting a
 crater tarn present); **attempt 2 ACCEPTED** (R104, commit `dccab43`: rock lighting
 `0.138`, seam tone `0.7`, the tarn and its rim; the worker flags regular
 bench runs and a block-like altar for the owner's eye). **EIGHTEEN CELLS
-STAND — the two remaining wait on the owner:** 1,1 the purple field (**LOCK CHANGE 7 LANDED** — owner "go"; R105; suite `18/18`; commit `dadbf1f`: the hue window on the water test for both rings and the growth; **1,1 attempt 2 is next on the lock** on `brief-c1-1-r2.md`) and 2,0 the dark-forest gorge (parked after three
+STAND — the two remaining wait on the owner:** 1,1 the purple field (**LOCK CHANGE 7 LANDED** — owner "go"; R105; suite `18/18`; commit `dadbf1f`: the hue window on the water test for both rings and the growth; **1,1 attempt 2 is next on the lock** on `brief-c1-1-r3.md` — rewritten for FOUR authored neighbours now that 0,1 and 1,0 stand: each neighbour's ground held about a quarter of the way in, the field the middle half and more with a clear edge, no drawn line) and 2,0 the dark-forest gorge (parked after three
 lighting strikes with seams and composition right: accept candidate 3 by
 eye / a fourth attempt with the east benches flat-shaded / leave). Whole-
 territory review at quarter scale: `review/territory-L2-quarter.png`. **REMAINING THREE, all waiting on
