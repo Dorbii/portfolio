@@ -359,6 +359,13 @@ Steve rejected the r5 composition on two grounds the director's QA under-weighte
 - **Model-attributable observation:** stating topology as permission ("this cell's water is closed; the south edge is dry") worked where a prohibition did not; the worker kept the stream inside the cell on the first edit. The environment noise continues (it probed for ImageMagick, then triaged) without affecting the deliverable.
 - **Evidence:** `.codex-tmp/session3/regen-c3-2.log`, `.codex-tmp/session3/review/regen-c3-2-quarter.png`, ledger record (`biome: dark-forest`).
 
+### R067 — 2026-09-01 — c2-3 border moor, edit mode from the saddle (codex exec via cell.mjs, gpt-5.6-sol, effort=high)
+
+- **Setup:** moor biome on the land border into Tanium (owner ruling: south edge solid ground); site border-knoll; the saddle's paint arriving on the east band and the gorge cell at the corner; brief `brief-c2-3-r2.md` with the water stated as one beck leaving south and every other edge dry. `175,757` tokens, ~11 min, one edit call.
+- **Verdict: ACCEPTED on all nine gates** on the first attempt — continuity `ok`, fringe `0% / 0%`, key-light `0.0036`, rock lighting `0.131` report-only at `3289` strong rock edges (a moor cell, little rock), land `98.3%`. `140` tiles.
+- **Model-attributable observation:** stating the water as permission worked again on the first try. The worker flagged its own inherited defect honestly: the column wall arriving from the saddle's east side "continues as a long, fairly regular column wall" — the saddle was painted before the weathered-column rule and the edit continued what arrived. The rule now lives in the biome vocabulary, so cells painted from here on carry it; the saddle itself is a candidate for a later regeneration under the rule if the owner's eye objects.
+- **Evidence:** `.codex-tmp/session3/regen-c2-3.log`, `.codex-tmp/session3/review/regen-c2-3-quarter.png`, ledger record (`biome: moor`).
+
 ## Findings backlog (flow improvements to fold into future packets)
 
 - F1: Task packets must declare required gate tier (focused / full / none) — otherwise workers default to maximal ceremony. (From R000.)

@@ -549,7 +549,13 @@ scale drift:** the worker measured its median conifer crown at `71 px`
 final-scale (`3.4 m`) against the `84–147 px` floor; edit mode copies the
 arriving paint's crowns, so undersize can compound along the chain. Every
 brief from here carries the scale line tied to the LARGER arriving crowns;
-a crown-size gate (tree detection) is a candidate for a later lock change. Briefs ready for the next cells in
+a crown-size gate (tree detection) is a candidate for a later lock change.
+**c2-3 border moor ACCEPTED first attempt** (nine gates, `140` tiles,
+`175,757` tokens; ledger R067); the worker flagged the saddle's inherited
+east column wall as fairly regular — the saddle predates the
+weathered-column rule; owner's eye decides whether it earns a regeneration.
+**c3-1 magical gorge dispatched** (the rail gorge span; wonders; brief
+`brief-c3-1-r2.md` with the scale line). Five cells stand. Briefs ready for the next cells in
 adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 `brief-c3-1-r2.md` (magical gorge, rail gorge span), `brief-c2-2-r2.md`
 (bench country, waystation bench, hot spring).
