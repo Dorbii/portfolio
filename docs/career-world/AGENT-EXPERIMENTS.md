@@ -614,6 +614,14 @@ Steve rejected the r5 composition on two grounds the director's QA under-weighte
 - **Worker-reported for the owner's eye:** a short secondary drop besides the one fall; several long bench walls with repeated upright columns and strong top-versus-face values — the rock gate read `0.114`, under `0.15`, but the owner's palisade rule is judged by eye.
 - **Evidence:** `.codex-tmp/session3/regen-c3-0.log`, `review/stitched-c3-0-cell-half.png`, `review/territory-grid-status.png` (14 of 20).
 
+### R098 — 2026-09-02 — c2-0, second attempt: the south seam held, the east seam appeared; two strikes, so the dark forest moves into the cell's core (codex exec via cell.mjs, gpt-5.6-sol, effort=high)
+
+- **Setup:** `brief-c2-0-r2.md` — the south third as open moor at the arriving brightness, walls uncapped, one water system. Between the two attempts 3,0 landed to the east, so this bake had two authored neighbours and two ramps. `200,157` tokens.
+- **Verdict: REJECTED by three gates, each by a small margin** — key-light `0.0112` (limit `0.011`; lit conifers), rock lighting `0.17` (limit `0.15`; capped column walls again), and the all-land tone gate at the NEW east seam against 3,0: `20.6` (the 2,1 seam passed this time). Everything else green; the worker also reports a water fragment on the south edge (80 px) and two systems.
+- **Profiles:** south — candidate `74 / 69 / 60 / 62` against 2,1's `74 / 80 / 80 / 80` (held at the line, darkening too soon); east — candidate `75 / 83 / 81 / 72` against 3,0's `90 / 105 / 104 / 95` (the plateau is the brightest ground in the territory; the candidate never reached it). The biome map puts the darkest biome between the two brightest, so the transition rule does the work here: both outer thirds must be the neighbours' ground and the forest lives in the core.
+- **Reframe (`brief-c2-0-r3.md`, strike three would park the cell):** both thirds held at the arriving brightness with the forest edge soft; the gorge cut in ROUNDED moss-covered rock with no columns, caps or slab faces (the 1,3 lesson); every conifer the same value all round (the key-light finding named); one closed water system; the mill ledge kept. 0,2 runs meanwhile.
+- **Evidence:** `.codex-tmp/session3/regen-c2-0.log` (after `rebake2-start`), candidate at `.codex-tmp/session3/rejected/c2-0-cand2/`, `review/regen-c2-0-cand2-quarter.png`.
+
 ## Findings backlog (flow improvements to fold into future packets)
 
 - F1: Task packets must declare required gate tier (focused / full / none) — otherwise workers default to maximal ceremony. (From R000.)

@@ -612,9 +612,17 @@ moor at the ARRIVING brightness, walls uncapped, one water system).
 key-light `0.0003`, rock lighting `0.114`, seam tone `4.1` over two seams,
 the walk-under arch legible, crowns `73 px`; the worker flags repeated
 columns on long bench walls for the owner's eye). **FOURTEEN CELLS STAND.**
-**2,0 attempt 2 DISPATCHED** (`brief-c2-0-r2.md`; log `regen-c2-0.log`
-after `rebake2-start`). Remaining: 1,1 (after lock change 7), 0,2 (brief
-ready), 1,0, 0,1, 0,0 (briefs after their neighbours land). `brief-c0-2.md` READY (the sound
+**2,0 attempt 2 REJECTED by three gates by small margins** (R098:
+key-light `0.0112`, rock lighting `0.17`, and the tone gate at the NEW east
+seam against 3,0 `20.6` — the plateau reads ~100, the candidate's east
+band ~80; the south seam held). Two strikes → reframe on
+`brief-c2-0-r3.md`: both outer thirds as the neighbours' ground at their
+brightness, the forest in the core with a soft edge, a gorge of rounded
+mossy rock (no columns), conifers the same value all round, one water
+system; attempt 3 goes after 0,2 (strike three parks the cell). **0,2 the
+west shore DISPATCHED** (`brief-c0-2.md`, the submerged-run bay; log
+`.codex-tmp/session3/regen-c0-2.log`). Remaining: 1,1 (after lock change
+7), 1,0, 0,1, 0,0 (briefs after their neighbours land). `brief-c0-2.md` READY (the sound
 along the west edge, a wide calm bay in the south-west for the submerged
 run; 0,3's north edge dry, its sound holding its west edge from 53% down); 2,1's strip stays by the owner's word (the city covers
 it). **1,1 the purple field, first attempt REJECTED on a gate defect**
