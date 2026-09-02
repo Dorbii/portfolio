@@ -1,9 +1,9 @@
 {
- "solidifiedAt": "2026-09-02T00:39:58.580Z",
+ "solidifiedAt": "2026-09-02T01:09:35.411Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "9d5e29f6b763c02c",
-  "plan-territory.mjs": "9872ecdf40c4496f",
+  "cell.mjs": "917095ca1b439df2",
+  "plan-territory.mjs": "270aec1cef622a35",
   "AGENTS.md": "0d4c3c0fc8f88b87"
  },
  "history": [
@@ -148,6 +148,24 @@
    "hashes": {
     "cell.mjs": "9d5e29f6b763c02c",
     "plan-territory.mjs": "9872ecdf40c4496f",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-02T01:05:18.750Z",
+   "reason": "owner 2026-09-01 'works for me please proceed' (before the change) on the queued lock change: (1) interior sites in the plan (plan.sites, per cell, terrain only) and a 'Sites this cell must offer' packet section; (2) stale scratch deliverables cleared at dispatch so a worker that delivers nothing cannot pass the previous generation; (3) capacity-error retry inside the runner (up to 4 attempts, wait CELL_RETRY_WAIT_S default 120 s, only when no source was delivered); (4) loop presence by segment sampling, not waypoint only; (5) rock-only strong-edge lighting gate <0.15 (accepted cells 0.04-0.07, canon r1 0.11, lit candidates 0.18-0.27), report-only under 5000 strong rock edges. Controls first.",
+   "hashes": {
+    "cell.mjs": "9d5e29f6b763c02c",
+    "plan-territory.mjs": "9872ecdf40c4496f",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-02T01:09:35.412Z",
+   "reason": "owner 2026-09-01 'works for me please proceed' (change landed, suite 12/12): interior sites in the plan and packet; stale deliverables cleared at dispatch; capacity retry inside the runner (4 attempts, CELL_RETRY_WAIT_S); loop presence by segment; rock-only strong-edge lighting gate <0.15 (report-only under 5000 strong rock edges). Controls: sites and loop assertions in the dry-run test; a fake codex on PATH that reports capacity then delivers nothing (retried once, stale source cleared, world untouched); a sawtooth-lit synthetic cell fails the rock gate while the isotropic one passes.",
+   "hashes": {
+    "cell.mjs": "917095ca1b439df2",
+    "plan-territory.mjs": "270aec1cef622a35",
     "AGENTS.md": "0d4c3c0fc8f88b87"
    }
   }

@@ -133,6 +133,7 @@ await writeArtefacts(path.join(SYN, "b-ring"), "c2-1",
 test("frontier cell stitches aligned, bleeds one ring, and removes water", async () => {
   const log = runCell("1,1", path.join(SYN, "a"));
   assert.match(log, /accepted, stitched/);
+  assert.match(log, /PASS\s+rock lighting/, "isotropic synthetic paint must pass the rock-lighting gate");
 
   // alignment: a tile deep inside the kept area equals F exactly
   const t = await tileRaw(0, 10, 10);
@@ -208,6 +209,57 @@ test("edit target carries the neighbour's concept paint byte-exact and grey else
   assert.ok(!fs.existsSync(path.join(ROOT, ".codex-tmp", "authoring", "cells", "c3-1", "context", "edit-target.png")),
     "frontier cell must not get an edit target");
   assert.match(fs.readFileSync(path.join(ROOT, ".codex-tmp", "authoring", "cells", "c3-1", "packet-c3-1.md"), "utf8"), /ONE generation, whole canvas/);
+  // interior sites (owner-directed): a cell with sites carries them as terrain to offer
+  execFileSync(process.execPath, [SCRIPT, "--cell", "2,2", "--dry-run"],
+    { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" });
+  const p22 = fs.readFileSync(path.join(ROOT, ".codex-tmp", "authoring", "cells", "c2-2", "packet-c2-2.md"), "utf8");
+  assert.match(p22, /## Sites this cell must offer/);
+  assert.match(p22, /waystation-bench/);
+  // loop presence by segment: 4,2 holds no waypoint but the line crosses it
+  const log42 = execFileSync(process.execPath, [SCRIPT, "--cell", "4,2", "--dry-run"],
+    { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" });
+  assert.match(log42, /rail\s+loop passes through/, "a segment crossing the cell counts as the loop passing through");
+});
+
+test("a worker that delivers nothing cannot pass a stale generation, and a capacity refusal is retried", () => {
+  // fake codex on PATH: first call reports capacity and fails, second call succeeds but delivers nothing
+  const fakeDir = path.join(OUT, "fake-codex");
+  fs.mkdirSync(fakeDir, { recursive: true });
+  const counter = path.join(fakeDir, "count.txt");
+  fs.rmSync(counter, { force: true });
+  fs.writeFileSync(path.join(fakeDir, "codex"), `#!/usr/bin/env bash
+n=$(( $(cat "${counter.replace(/\\/g, "/")}" 2>/dev/null || echo 0) + 1 )); echo "$n" > "${counter.replace(/\\/g, "/")}"
+if [ "$n" -eq 1 ]; then echo "ERROR: Selected model is at capacity. Please try a different model."; exit 1; fi
+echo "fake worker: delivering nothing"; exit 0
+`);
+  // a stale generation from an earlier attempt sits in the scratch cell dir
+  const cellDir = path.join(ROOT, ".codex-tmp", "authoring", "cells", "c3-2");
+  fs.mkdirSync(cellDir, { recursive: true });
+  fs.copyFileSync(path.join(SYN, "a", "c1-1-concept.png"), path.join(cellDir, "c3-2-source.png"));
+  const before = treeHash();
+  let out = "";
+  try {
+    execFileSync(process.execPath, [SCRIPT, "--cell", "3,2", "--describe", "stale-deliverable control"],
+      { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT, CELL_RETRY_WAIT_S: "0", PATH: fakeDir + path.delimiter + process.env.PATH }, encoding: "utf8" });
+    assert.fail("a dispatch that delivered nothing must not be accepted");
+  } catch (e) { out = String(e.stdout || "") + String(e.stderr || ""); }
+  assert.match(out, /no generation at .*c3-2-source\.png/, "the stale source must have been cleared, so derivation finds nothing:\n" + out.slice(-600));
+  assert.equal(fs.readFileSync(counter, "utf8").trim(), "2", "the runner must have retried once after the capacity refusal");
+  assert.ok(!fs.existsSync(path.join(cellDir, "c3-2-source.png")), "stale source must be gone");
+  assert.equal(treeHash(), before, "world untouched");
+});
+
+test("a consistent lit side on rock fails the rock-lighting gate", async () => {
+  // F is rock by hue; a sawtooth in x (slow ramp up, sharp drop) gives every
+  // strong edge the same direction, which is what a lit side looks like
+  const lit = (x, y) => { const [r, g, b, a] = F(x, y); const s = ((x % 40) / 40) * 100 - 50; const c = (v) => Math.max(0, Math.min(255, Math.round(v + s))); return [c(r), c(g), c(b), a]; };
+  await writeArtefacts(path.join(SYN, "lit"), "c4-3", genImage(4, 3, lit));
+  const before = treeHash();
+  let out = "";
+  try { runCell("4,3", path.join(SYN, "lit")); assert.fail("lit cell must be rejected"); }
+  catch (e) { out = String(e.stdout || "") + String(e.stderr || ""); }
+  assert.match(out, /FAIL\s+rock lighting\s+0\.[0-9]+/, "the rock-lighting gate must fire:\n" + out.slice(-500));
+  assert.equal(treeHash(), before, "world untouched");
 });
 
 test("a failing gate blocks the stitch entirely", async () => {

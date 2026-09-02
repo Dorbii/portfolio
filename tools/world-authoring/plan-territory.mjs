@@ -150,6 +150,29 @@ for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
   if (!b || !BIOMES[b]) throw new Error(`cell ${c},${r} has no valid biome`);
 }
 
+// Interior sites (owner, 2026-09-01: "populate with small settlements or misc
+// attractions/areas just to make it feel alive and not like a barren/
+// uninhabited area"). L2 offers the GROUND for each; the structures layer
+// builds on it later — the same split as the settlement shelves, at village
+// scale. Terrain descriptions only; nothing is drawn on them.
+const SITES = [
+  { cell: [1, 2], id: "hamlet-by-the-beck", terrain: "a level clearing about 30 m across beside the beck, sheltered by a low outcrop, dry ground" },
+  { cell: [1, 2], id: "lookout-crag", terrain: "a crag on the rail side with a flat top and a clear view over the moor" },
+  { cell: [2, 2], id: "waystation-bench", terrain: "a level bench on the middle terrace beside the loop, about 40 m long" },
+  { cell: [2, 2], id: "hot-spring", terrain: "a steaming pool on a lower bench with pale mineral rims (classify: lake)" },
+  { cell: [3, 2], id: "hermits-crag", terrain: "a crag rising above the canopy with a view into the gorge and a ledge to stand on" },
+  { cell: [3, 2], id: "giant-tree", terrain: "one conifer three times the size of any other, in a clearing of its own" },
+  { cell: [1, 0], id: "crater-tarn", terrain: "a round tarn in bare rock with a shingle rim (classify: lake)" },
+  { cell: [1, 0], id: "column-altar", terrain: "a natural altar: a level cluster of column tops standing above the plateau" },
+  { cell: [3, 0], id: "walk-under-arch", terrain: "a natural basalt arch big enough to walk under, with a level shelf beside it" },
+  { cell: [2, 0], id: "mill-ledge", terrain: "a fall with a level ledge beside its plunge pool" },
+  { cell: [0, 0], id: "shepherds-fold", terrain: "a grassy hollow among boulders" },
+  { cell: [2, 3], id: "border-knoll", terrain: "a level knoll on the land border into Tanium" },
+];
+for (const s of SITES) {
+  if (!CELL_BIOMES[`${s.cell[0]},${s.cell[1]}`]) throw new Error(`site ${s.id} is outside the grid`);
+}
+
 const plan = {
   territory: "ninjaone",
   grid: { cols: COLS, rows: ROWS, cells: COLS * ROWS },
@@ -157,7 +180,7 @@ const plan = {
     groundMetres: +cellMetres.toFixed(1) },
   territoryMetres: [+(COLS * cellMetres).toFixed(0), +(ROWS * cellMetres).toFixed(0)],
   shelves: SHELVES, loop: LOOP, railFeatures: FEATURES,
-  biomes: BIOMES, cellBiomes: CELL_BIOMES,
+  biomes: BIOMES, cellBiomes: CELL_BIOMES, sites: SITES,
   rules: {
     geology: "columnar basalt, bedded and jointed, talus at cliff bases; plateau-and-gorge — columns are a feature where the biome says so, not the ground everywhere. Columns are WEATHERED and irregular wherever they appear: uneven heights and widths, broken tops, split and leaning columns, collapsed drums in talus, lichen in the joints; never a regular palisade of identical cylinders, never a square corner (owner, 2026-09-01: 'the cliff side is unnatural')",
     vegetation: "conifer in gullies and shelter, thinning on exposed rock; scrub and heather on open ground; crowns 4-7 m; the biome sets the mix",

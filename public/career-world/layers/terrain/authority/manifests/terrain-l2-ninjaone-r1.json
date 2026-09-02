@@ -56,7 +56,7 @@
  },
  "cells": {
   "c4-3": {
-   "authoredAt": "2026-09-01T23:00:10.881Z",
+   "authoredAt": "2026-09-02T01:09:54.198Z",
    "describe": "**Style canon (binding):** `art-source/career-world/l2-land/ninjaone/seed/L2-seed-region-r2.png`\nis the accepted look of this world's terrain. Anchor to those pixels, not to\nwords: the same high-oblique map view, the same ground scale and brush\ndensity, the same palette family — pale warm basalt with the SAME value on\nevery face whichever way it faces, meadow greens warmed with gold, heather in\nma",
    "sourcePx": 1254,
    "gates": [
@@ -71,6 +71,12 @@
      "value": "1.231 (reported)",
      "pass": true,
      "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
+    },
+    {
+     "name": "rock lighting",
+     "value": 0.064,
+     "pass": true,
+     "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.07"
     },
     {
      "name": "land coverage",
@@ -97,13 +103,13 @@
     },
     {
      "name": "water continuity",
-     "value": "ok (0 crossings checked)",
+     "value": "ok (4 crossings checked)",
      "pass": true,
      "note": "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint"
     },
     {
      "name": "palette conformance",
-     "value": "no vegetated seams",
+     "value": "worst dBG 0.021 dLuma 0.9 over 1 seam(s)",
      "pass": true,
      "note": "vegetation medians of the bands beside each authored seam; calibrated fine=0.109/4.5 vs clash=0.294/14.6, thresholds 0.18/8"
     }
@@ -113,10 +119,7 @@
     "cliff run"
    ],
    "waterZones": [
-    "coast",
-    "lake",
-    "stream",
-    "fall"
+    "lake"
    ],
    "biome": "quarry",
    "source": "art-source/career-world/l2-land/ninjaone/c4-3",
@@ -134,7 +137,7 @@
    }
   },
   "c3-3": {
-   "authoredAt": "2026-09-01T23:14:24.088Z",
+   "authoredAt": "2026-09-02T01:10:11.282Z",
    "describe": "**You are EDITING the painted neighbour into this cell, not generating a\nscene.** The quarry cell's real paint arrives along your EAST edge in the\nedit target; continue it. Its west meadow rim and plateau reach your edge as\nLAND, top to bottom — no water arrives there and none may leave there.\n\n**Where this cell sits:** the south row of NinjaOne, west of the quarry.\nOWNER RULING: NinjaOne and Tani",
    "sourcePx": 1254,
    "gates": [
@@ -149,6 +152,12 @@
      "value": "1.41 (reported)",
      "pass": true,
      "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
+    },
+    {
+     "name": "rock lighting",
+     "value": 0.046,
+     "pass": true,
+     "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.07"
     },
     {
      "name": "land coverage",
@@ -208,7 +217,7 @@
    }
   },
   "c4-2": {
-   "authoredAt": "2026-09-02T00:47:52.845Z",
+   "authoredAt": "2026-09-02T01:10:28.974Z",
    "describe": "**You are EDITING the painted neighbours into this cell, not generating a\nscene.** The quarry cell's real paint arrives along your SOUTH edge in the\nedit target (and the saddle's at the south-west corner); continue it exactly.\nWhat arrives there: the sea-cliff at the east, the quarry's clifftop and its\nmeadow rim as LAND all the way to the south-east corner, the sea beyond it,\nand ONE stream leavi",
    "sourcePx": 1254,
    "gates": [
@@ -223,6 +232,12 @@
      "value": "1.416 (reported)",
      "pass": true,
      "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
+    },
+    {
+     "name": "rock lighting",
+     "value": 0.055,
+     "pass": true,
+     "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.07"
     },
     {
      "name": "land coverage",

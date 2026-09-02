@@ -475,9 +475,21 @@ const shelf = plan.shelves.find((s) => s.cell[0] === col && s.cell[1] === row);
 const features = plan.railFeatures.filter(
   (f) => Math.floor(f.at[0]) === col && Math.floor(f.at[1]) === row,
 );
-const loopHere = plan.loop.some(
-  (p) => Math.floor(p[0]) === col && Math.floor(p[1]) === row,
-);
+// the loop passes through a cell if any SEGMENT of it enters the cell's
+// square, not only if a waypoint lies inside: 4,2 was told "no loop" while
+// the headland-to-cliff-run segment crossed it (2026-09-01)
+const loopHere = plan.loop.some((p, i) => {
+  if (i === 0) return false;
+  const [ax, ay] = plan.loop[i - 1], [bx, by] = p;
+  for (let t = 0; t <= 1; t += 1 / 64) {
+    const x = ax + (bx - ax) * t, y = ay + (by - ay) * t;
+    if (Math.floor(x) === col && Math.floor(y) === row) return true;
+  }
+  return false;
+});
+// interior sites (owner-directed 2026-09-01): ground the structures layer
+// builds on later; L2 authors the terrain for each and draws nothing on it
+const sites = (plan.sites || []).filter((s) => s.cell[0] === col && s.cell[1] === row);
 
 // neighbours already authored: their stitched paint reaches into this cell's
 // window and arrives as real pixels, which is what the generator continues
@@ -674,6 +686,13 @@ ${features.map((f) => `- **${f.kind}** — ${f.note}`).join("\n")}
 Author the TERRAIN that makes this possible. Do not draw track, sleepers,
 bridges or tunnel mouths — those are built structures owned by another layer.
 ` : ""}
+${sites.length ? `## Sites this cell must offer
+
+The structures layer builds on these later; you author the GROUND for each
+and draw nothing on it — no buildings, no paths, no markers.
+
+${sites.map((s) => `- **${s.id}.** ${s.terrain}`).join("\n")}
+` : ""}
 ${editMode ? `## Neighbour context — you EDIT this cell into existence, you do not generate it
 
 \`${cellDir}/context/edit-target.png\` is your canvas: the authored
@@ -773,17 +792,44 @@ try {
     console.log(`\n  --redo: re-deriving from the existing generation, no dispatch.`);
   } else {
     console.log(`\n  dispatching (bounded: one process, effort=high)...\n`);
+    // stale deliverables from an earlier attempt must not survive into this
+    // dispatch: a worker that delivers nothing would otherwise leave the
+    // pipeline deriving the OLD generation as if it were new (2026-09-01)
+    for (const f of ["source.png", "water-source.png", "water.json", "report.json", "concept.png", "l2.png", "water.png"]) {
+      fs.rmSync(path.join(cellDir, `${id}-${f}`), { force: true });
+    }
+    // the runner retries a "model at capacity" refusal (up to 4 attempts,
+    // CELL_RETRY_WAIT_S apart, default 120) only while nothing was delivered;
+    // every attempt's output is kept in the log
     const runner = path.join(cellDir, `run-${id}.sh`);
+    const P = (f) => f.replace(/\\/g, "/");
     fs.writeFileSync(runner, `#!/usr/bin/env bash
-set -euo pipefail
-cd "${ROOT.replace(/\\/g, "/")}"
-codex exec \\
-  --sandbox workspace-write \\
-  -c sandbox_workspace_write.network_access=true \\
-  -c model=gpt-5.6-sol \\
-  -c model_reasoning_effort=high \\
-  "$(cat ${path.join(cellDir, `packet-${id}.md`).replace(/\\/g, "/")})" \\
-  < /dev/null > ${path.join(cellDir, `${id}.log`).replace(/\\/g, "/")} 2>&1
+set -uo pipefail
+cd "${P(ROOT)}"
+LOG="${P(path.join(cellDir, `${id}.log`))}"
+SRC="${P(path.join(cellDir, `${id}-source.png`))}"
+WAIT="\${CELL_RETRY_WAIT_S:-120}"
+: > "$LOG"
+for attempt in 1 2 3 4; do
+  A="$LOG.attempt$attempt"
+  echo "=== attempt $attempt $(date -Iseconds) ===" >> "$LOG"
+  codex exec \\
+    --sandbox workspace-write \\
+    -c sandbox_workspace_write.network_access=true \\
+    -c model=gpt-5.6-sol \\
+    -c model_reasoning_effort=high \\
+    "$(cat ${P(path.join(cellDir, `packet-${id}.md`))})" \\
+    < /dev/null > "$A" 2>&1
+  code=$?
+  cat "$A" >> "$LOG"
+  if [ $code -ne 0 ] && [ ! -f "$SRC" ] && grep -q 'at capacity' "$A"; then
+    echo "attempt $attempt: model at capacity, retrying in \${WAIT}s" | tee -a "$LOG" >&2
+    sleep "$WAIT"
+    continue
+  fi
+  exit $code
+done
+exit 1
 `);
     try {
       execFileSync("bash", [runner], { stdio: "inherit" });
@@ -988,6 +1034,43 @@ codex exec \\
   // canon terrain (seed + accepted cells) 0.0012-0.0036, sunned D05 detail
   // 0.0318 — threshold at the geometric midpoint.
   const keyLight = gsm ? Math.hypot(gsx, gsy) / gsm : 0;
+
+  // rock-only strong-edge moment (owner's lighting concern, 2026-09-01): a
+  // consistent lit side on rock faces hides from the key-light moment under
+  // millions of grass gradients. Inside non-vegetation, non-water pixels the
+  // strong edges (>= 80) carry it: accepted cells 0.04-0.07, canon r1 0.11,
+  // the lit seed candidates 0.18-0.27. Threshold 0.15; report-only when the
+  // rock sample is too small to mean anything.
+  let rockLight = 0, rockN = 0;
+  {
+    const hsv = (r, g, b) => {
+      const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+      let h = 0;
+      if (d) { if (mx === r) h = 60 * (((g - b) / d) % 6); else if (mx === g) h = 60 * ((b - r) / d + 2); else h = 60 * ((r - g) / d + 4); }
+      if (h < 0) h += 360;
+      return [h, mx ? d / mx : 0];
+    };
+    const rock = new Uint8Array(W * H);
+    for (let i = 0; i < W * H; i++) {
+      if (data[i * 4 + 3] < 250) continue;
+      const [h, s] = hsv(data[i * 4], data[i * 4 + 1], data[i * 4 + 2]);
+      const veg = h >= 45 && h <= 140 && s >= 0.22, water = h >= 150 && h <= 215 && s >= 0.2;
+      if (!veg && !water) rock[i] = 1;
+    }
+    let rx = 0, ry = 0, rm = 0;
+    for (let y = 1; y < H - 1; y++) {
+      for (let x = 1; x < W - 1; x++) {
+        const j = y * W + x;
+        if (!(rock[j] && rock[j - 1] && rock[j + 1] && rock[j - W] && rock[j + W])) continue;
+        const i = j * 4;
+        const gx = L(i + 4) - L(i - 4), gy = L(i + W * 4) - L(i - W * 4);
+        const mag = Math.hypot(gx, gy);
+        if (mag < 80) continue;
+        rx += gx; ry += gy; rm += mag; rockN += 1;
+      }
+    }
+    rockLight = rm ? Math.hypot(rx, ry) / rm : 0;
+  }
 
   // water contract: all three artefacts, and water zones actually removed.
   // The fringe measure is reported but does not yet gate — its threshold is
@@ -1199,6 +1282,9 @@ codex exec \\
       note: "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004" },
     { name: "gradient ratio", value: +isotropy.toFixed(3) + " (reported)", pass: true,
       note: "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate" },
+    { name: "rock lighting", value: rockN < 5000 ? `${rockLight.toFixed(3)} (n ${rockN}, report-only)` : +rockLight.toFixed(3),
+      pass: rockN < 5000 || rockLight < 0.15,
+      note: "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.07" },
     { name: "land coverage", value: +(100 * opaque / (W * H)).toFixed(1) + "%", pass: opaque > 0 },
     { name: "water cut clear", value: wetResidual === 0 ? "0 px" : `${wetResidual} px (${wetResidualPct.toFixed(2)}%)`,
       pass: wetResidual === 0,
