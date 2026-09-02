@@ -966,6 +966,7 @@ back explicitly; owner asked for this discipline 2026-09-01):**
 | 23 | (director-found) 1,3's brief denied the beck 1,2 delivers at the shared edge | CLOSED: the beck landed on attempt 2; 1,3 accepted on attempt 4 (R091); lock-change 5i stays queued (arriving crossings in the packet) |
 | 24 | "The seams are stark here… Need a better transition" / "lock that down" (1,3 candidate 3) | LANDED as lock change 6 (R090): all-land tone gate at 20 + the tone ramp in the edit target; 1,3's fourth attempt is the first bake with it |
 | 25 | "this landscape is fucking awesome… best results we have had this entire project" | RECORDED: the owner's acceptance of the register and the ten-cell world as of 2026-09-02 |
+| 26 | "just reviewed those images, they look good" (the stitched 1,3 with the tone ramp, its north seam at 1:1, the 11-cell grid) | CLOSED: owner acceptance by eye of the first ramp seam and of 1,3 |
 | — | director-found: the control suite shares the real working dirs | FIXED for 4,3 (R073, `97eb0d6`); WORK relocation is lock change 5a |
 | — | director-found: fringe rejections are mask tracing, not art (four candidates) | lock change 5b: mask completion by bounded growth |
 | — | director-found: stale scratch deliverables hazard | worked around by hand; next lock change |
