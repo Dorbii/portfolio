@@ -653,6 +653,13 @@ Steve rejected the r5 composition on two grounds the director's QA under-weighte
 - **Edges for 1,0:** 0,0's east edge is dry, so 1,0 arrives on moor with no water; its south (1,1) and east (2,0) neighbours are not authored, so it ends those edges mid-terrain.
 - **Evidence:** `.codex-tmp/session3/regen-c0-0.log`, `review/stitched-c0-0-cell-half.png`, `review/territory-grid-status.png` (17 of 20).
 
+### R103 — 2026-09-02 — c1-0 the bare plateau with the crater tarn, first attempt: lit benches (codex exec via cell.mjs, gpt-5.6-sol, effort=high)
+
+- **Setup:** `brief-c1-0.md` — bare pale benches, the round crater tarn with a shingle rim, the column altar, the west third as the arriving moor; 0,0's east edge read first (dry); edit mode with 0,0 (west), the canon as second input, the tone ramp. `136,999` tokens.
+- **Verdict: REJECTED by rock lighting alone** — `0.171` against `0.15` on `49,841` strong rock edges (the bare plateau is nearly all rock), toward `356°`: bright top planes and darker side faces on the benches, as the worker reported, plus straight runs of equal columns with square-ish corners and an altar that reads as built. Everything else green: seam tone `0.8`, vegetation `dBG 0.047`, the tarn round with a complete rim, closed water, `98.1%` land; crowns `39 px` (the worker's dark-core measure).
+- **Attempt 2** (`brief-c1-0-r2.md`): the lit rock named with its number and the neighbour's passing number (3,0 at `0.114` under the same rules), "one flat value per face" verbatim, bench edges that wander and break, the altar as weather-made rock. Strike one. Candidate 1 at `.codex-tmp/session3/rejected/c1-0-cand1/`.
+- **Evidence:** `.codex-tmp/session3/regen-c1-0.log`, `review/regen-c1-0-cand1-quarter.png`.
+
 ## Findings backlog (flow improvements to fold into future packets)
 
 - F1: Task packets must declare required gate tier (focused / full / none) — otherwise workers default to maximal ceremony. (From R000.)
