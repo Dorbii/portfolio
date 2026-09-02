@@ -677,6 +677,13 @@ Steve rejected the r5 composition on two grounds the director's QA under-weighte
 - **Controls (suite 18/18):** a saturated violet annulus (`150,60,200`, hue ~285) beside a water disc is neither fringe nor grown into and the cell stitches; the blue-ring control (`40,90,200`, hue 220) still fails the 48 px ring; the undersize-mask and haze controls unchanged. Lock history has the before and after entries; hash gate intact; commit `dadbf1f`.
 - **First use:** 1,1 the purple field, second attempt (`brief-c1-1-r2.md`: no drawn line of any kind, the moor held in the east and south thirds, the knoll north-west).
 
+### R106 — 2026-09-02 — c2-0, fourth attempt (owner: "go ahead and do a 4th"): two misses by a hair, the rest right (codex exec via cell.mjs, gpt-5.6-sol, effort=high)
+
+- **Setup:** `brief-c2-0-r4.md` — the third candidate's layout kept, the east third's benches and the mill ledge one flat value per face, conifers one value all round; now FOUR authored neighbours (1,0 landed to the west between attempts). `261,063` tokens.
+- **Verdict: REJECTED by two gates, each by the smallest margin of the programme** — rock lighting `0.153` against `0.15` (attempt 3: `0.189`; the director's own measure `0.140` on `28,339` strong edges — the two implementations differ by a hair either side of the line) and the all-land tone gate at the 3,0 seam `20.0` against `20` (the third seam, against 1,0, and the 2,1 seam pass; vegetation `dBG 0.076`). Key-light now passes (`0.0086`), crowns `98 px`, one closed water system, the mill ledge present, fringe `0/0%`.
+- **Reading:** the dark-forest biome sits between the territory's two brightest grounds and its walls are basalt; four briefs have pushed both numbers to the line and not through it. The accepted world's own range reaches `0.144` on rock lighting and `17.4` on seam tone, so both misses are within the noise of their calibrations. The pipeline does not stitch a failing candidate, so accepting this by eye means recalibrating the two limits on the owner's eye (as the palette limit was, R077) and re-deriving — lock change 8 — or a fifth attempt, or leaving the cell.
+- **Evidence:** `.codex-tmp/session3/regen-c2-0.log` (after `rebake4-start`), candidate at `.codex-tmp/session3/rejected/c2-0-cand4/`, `review/regen-c2-0-cand4-quarter.png`, `regen-c2-0-cand4-east-1to1.png`.
+
 ## Findings backlog (flow improvements to fold into future packets)
 
 - F1: Task packets must declare required gate tier (focused / full / none) — otherwise workers default to maximal ceremony. (From R000.)
