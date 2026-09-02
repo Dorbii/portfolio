@@ -1,0 +1,18 @@
+[
+  {
+    "class": "coast",
+    "note": "The sound entering at the southwest and continuing along the west edge, including its shallow wash and wet shoreline pixels."
+  },
+  {
+    "class": "lake",
+    "note": "The single organic pool on the interior settlement shelf."
+  },
+  {
+    "class": "stream",
+    "note": "The narrow continuous shelf stream joining the pool to the western shore."
+  },
+  {
+    "class": "fall",
+    "note": "The single short fall and its spray where the stream drops from the grassy brow into the sound."
+  }
+]
