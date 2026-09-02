@@ -1,0 +1,94 @@
+{
+  "cell": "c3-0",
+  "generation": {
+    "filename": "c3-0-source.png",
+    "exact_size_px": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "EF81EA24991A887B74DE5BA551471892B84E99CEECDA003CF858DDB3225E7A5C",
+    "mode": "built-in imagegen edit with edit target plus style-reference input",
+    "edit_calls_used": 1,
+    "whole_canvas_single_pass": true,
+    "raw_output_preserved": true,
+    "resized_cropped_or_tiled": false,
+    "prompt_file": "c3-0-imagegen-prompt.txt"
+  },
+  "shipped_canvas_px": [2560, 2560],
+  "ground_extent_m": [97.6, 97.6],
+  "final_resolution_cm_per_px": 4.8,
+  "lighting_isotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean on the delivered source; final water-mask pixels excluded and gradients below 12 luminance units excluded",
+    "peak_vs_uniform_over_land": 1.582,
+    "uniform_reference": 1.0,
+    "peak_bin_degrees": [220, 230],
+    "directional_key_first_moment": 0.001195,
+    "directional_key_limit": 0.011,
+    "directional_key_pass_under_source_scale_reproduction": true,
+    "visual_check": "No cast-shadow field, sun, time-of-day gradient, or lit mist beam was observed. Form shading and local ambient occlusion remain visible on the high-oblique rock faces; owner review remains authoritative for the stricter flat-value appearance rule."
+  },
+  "median_conifer_crown_final_scale": {
+    "px_on_2560_canvas": 73.49,
+    "metres": 3.53,
+    "source_px_equivalent": 36.0,
+    "measurement": "Median dark-conifer component width from 54 isolated candidate crowns, scaled by 2560/1254; source candidate widths span 9-57 px and the annotated census is diagnostics/c3-0-conifer-components.png.",
+    "required_final_px_range": [84, 147],
+    "required_metres_range": [4.0, 7.0],
+    "pass": false
+  },
+  "buildable_vs_steep_fraction": {
+    "basis": "manual estimated fraction of non-water land area",
+    "buildable": 0.52,
+    "steep": 0.18,
+    "other_broken_talus_or_vegetated": 0.30,
+    "method": "Broad coherent upper and side benches versus exposed arch, waterfall-gorge, bench-wall, and southern chasm faces; remaining ground is talus, broken basalt, gullies, or conifer cover."
+  },
+  "water_footprint_fraction": 0.015382,
+  "water_mask": {
+    "filename": "c3-0-water-source.png",
+    "exact_size_px": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "7AF4D31F094A0F067438FCC08B953F0A0500635388FC6E2DA98786503951695D",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "derivation": "Source-raster colour classification constrained to broad painted-water authoring zones, followed by connected source-pixel growth, morphological closure, component filtering, and enclosed-hole filling; the boundary is traced from painted pixels, not drawn as a polyline.",
+    "opaque_water_pixels": 24189,
+    "logical_water_systems": 1,
+    "connected_pixel_components": 2,
+    "component_note": "The upper tarn is pixel-disconnected from the fall at the dry rock lip in the painted source; the mask preserves that source-raster separation rather than filling across dry rock.",
+    "interior_hole_pixels": 0,
+    "edge_water_pixels": 0,
+    "intermediate_alpha_pixels": 0,
+    "non_white_opaque_pixels": 0,
+    "source_scale_gate_proxy": {
+      "final_6px_equivalent_source_radius_px": 3,
+      "ring_6_unmasked_strong_water_colour_pixels": 0,
+      "ring_6_pixels": 5565,
+      "final_48px_equivalent_source_radius_px": 24,
+      "ring_48_unmasked_strong_water_colour_pixels": 0,
+      "ring_48_pixels": 37682,
+      "ring_6_pass": true,
+      "ring_48_pass": true,
+      "official_node_gate_run": false,
+      "note": "node.exe exists at C:/Program Files/nodejs/node.exe, but the managed sandbox denied execution with 'Access is denied'. This local C#/System.Drawing reproduction applies the final-to-source radius conversion and the source-raster blue-green fringe classifier."
+    }
+  },
+  "constraint_checks": {
+    "square_at_least_1254_px": true,
+    "single_edit_call": true,
+    "two_input_edit_accepted": true,
+    "terrain_only": true,
+    "all_water_closed_and_inland": true,
+    "all_water_absent_from_every_edge": true,
+    "water_mask_6_px_gate_local_proxy": true,
+    "water_mask_48_px_gate_local_proxy": true,
+    "dry_level_railway_corner_present": true,
+    "walk_under_arch_and_adjacent_shelf_present": true,
+    "conifer_scale": false,
+    "exactly_one_painted_fall": false
+  },
+  "open_risks": [
+    "Median detected conifer crowns measure 73.49 px / 3.53 m at final canvas scale, below the required 84-147 px / 4-7 m range; several isolated crowns are materially smaller.",
+    "The drainage contains the required tall principal fall but also a visually distinct short secondary drop before the lower pool, so the literal one-fall constraint is not met.",
+    "Several long bench walls retain repeated upright columns and strong top-versus-face form values; owner review must decide whether they cross the prohibited regular-palisade or lit-side appearance boundary.",
+    "The generated right and lower transition tones visually continue the supplied neighbours, but stitch-seam quality and terrain naturalism remain human visual judgments.",
+    "The official Node authoring gate was not run because the managed sandbox denied execution of the installed C:/Program Files/nodejs/node.exe with 'Access is denied'; dimensions, alpha, mask topology, water footprint, lighting statistics, and scaled fringe gates were reproduced locally with System.Drawing."
+  ]
+}
