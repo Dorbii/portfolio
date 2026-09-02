@@ -22,6 +22,29 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SCRIPT = path.join(ROOT, "tools", "world-authoring", "cell.mjs");
 const OUT = path.join(ROOT, ".codex-tmp", "dir-stitch", "test-world");
 const CELL = 2048, BLEED = 256, GEN = 2560, TILE = 256;
+// cell.mjs keeps its working dir under the output tree when L2_OUT_ROOT is set
+// (lock change 5a): the suite must never read or write the real cells' dirs.
+const WORKT = path.join(OUT, "work");
+const REAL_WORK = path.join(ROOT, ".codex-tmp", "authoring", "cells");
+// fingerprint of the real working dirs (names, sizes, mtimes), skipping any
+// cell a live bake is writing right now (a file touched in the last hour)
+function realWorkFingerprint(include) {
+  const rows = [], cells = [];
+  if (fs.existsSync(REAL_WORK)) {
+    for (const e of fs.readdirSync(REAL_WORK, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+      if (!e.isDirectory()) continue;
+      const d = path.join(REAL_WORK, e.name), files = [];
+      const walk = (p) => { for (const f of fs.readdirSync(p, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) { const q = path.join(p, f.name); if (f.isDirectory()) walk(q); else files.push(q); } };
+      walk(d);
+      const live = files.some((f) => Date.now() - fs.statSync(f).mtimeMs < 3600e3);
+      if (include ? !include.includes(e.name) : live) continue;
+      cells.push(e.name);
+      for (const f of files) { const s = fs.statSync(f); rows.push(`${f}|${s.size}|${s.mtimeMs}`); }
+    }
+  }
+  return { hash: crypto.createHash("sha256").update(rows.join("\n")).digest("hex"), cells };
+}
+const REAL_WORK_BEFORE = realWorkFingerprint();
 
 // synthetic paints: low-frequency sines make bytes position-sensitive (a 1px
 // misalignment changes values), and seeded white noise supplies the isotropic
@@ -47,7 +70,7 @@ const G = (x, y) => {
     Math.round(0.5 * g + 6 * Math.sin((x - y) / 19.7)), 255];
 };
 
-function genImage(col, row, paint, { waterDisc, keepWaterPaint, paintedRing } = {}) {
+function genImage(col, row, paint, { waterDisc, keepWaterPaint, paintedRing, hazeArc } = {}) {
   const ox = col * CELL - BLEED, oy = row * CELL - BLEED;
   const l2 = Buffer.alloc(GEN * GEN * 4);
   const concept = Buffer.alloc(GEN * GEN * 4);
@@ -64,6 +87,10 @@ function genImage(col, row, paint, { waterDisc, keepWaterPaint, paintedRing } = 
           concept[o] = 40; concept[o + 1] = 90; concept[o + 2] = 200;
           mask[o] = mask[o + 1] = mask[o + 2] = 255; mask[o + 3] = 255;
           if (!keepWaterPaint) { l2[o] = l2[o + 1] = l2[o + 2] = l2[o + 3] = 0; }
+        } else if (hazeArc && ox + u > waterDisc[0] && d >= waterDisc[2] + hazeArc[0] && d < waterDisc[2] + hazeArc[1]) {
+          // a flat blue-grey haze touching the water: sat 0.12, under the
+          // classifier's 0.25 — growth must NOT absorb it
+          concept[o] = l2[o] = 150; concept[o + 1] = l2[o + 1] = 160; concept[o + 2] = l2[o + 2] = 170;
         } else if (paintedRing && d >= waterDisc[2] + paintedRing[0] && d < waterDisc[2] + paintedRing[1]) {
           // water paint left on LAND in an annulus beyond the mask: a strip of
           // dry paint separates it from the mask edge so the 6px ring gate
@@ -116,9 +143,6 @@ function treeHash() {
 
 // fresh scratch world and synthetic sources
 fs.rmSync(OUT, { recursive: true, force: true });
-for (const id of ["c1-1", "c2-1", "c3-1", "c4-1"]) {
-  fs.rmSync(path.join(ROOT, ".codex-tmp", "authoring", "cells", id), { recursive: true, force: true });
-}
 const SYN = path.join(OUT, "synthetic");
 await writeArtefacts(path.join(SYN, "a"), "c1-1",
   genImage(1, 1, F, { waterDisc: [3072, 3072, 300] }));
@@ -178,7 +202,7 @@ test("edit target carries the neighbour's concept paint byte-exact and grey else
   const log = execFileSync(process.execPath, [SCRIPT, "--cell", "2,1", "--dry-run"],
     { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" });
   assert.match(log, /edit target/);
-  const f = path.join(ROOT, ".codex-tmp", "authoring", "cells", "c2-1", "context", "edit-target.png");
+  const f = path.join(WORKT, "c2-1", "context", "edit-target.png");
   const { data, info } = await sharp(f).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   assert.equal(info.width, GEN); assert.equal(info.height, GEN);
   const px = (x, y) => { const o = (y * GEN + x) * 4; return [data[o], data[o + 1], data[o + 2]]; };
@@ -194,7 +218,7 @@ test("edit target carries the neighbour's concept paint byte-exact and grey else
     assert.deepEqual(px(x, y), [96, 104, 88], `grey at ${x},${y}`);
   }
   // the packet mandates edit mode with the verbatim framing preamble
-  const packet = fs.readFileSync(path.join(ROOT, ".codex-tmp", "authoring", "cells", "c2-1", "packet-c2-1.md"), "utf8");
+  const packet = fs.readFileSync(path.join(WORKT, "c2-1", "packet-c2-1.md"), "utf8");
   assert.match(packet, /EDIT mode/);
   assert.match(packet, /same framing and extent/);
   // biome map (owner-directed 2026-09-01): vocabulary and transitions in every packet
@@ -206,13 +230,13 @@ test("edit target carries the neighbour's concept paint byte-exact and grey else
   const log3 = execFileSync(process.execPath, [SCRIPT, "--cell", "3,1", "--dry-run"],
     { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" });
   assert.doesNotMatch(log3, /edit target/);
-  assert.ok(!fs.existsSync(path.join(ROOT, ".codex-tmp", "authoring", "cells", "c3-1", "context", "edit-target.png")),
+  assert.ok(!fs.existsSync(path.join(WORKT, "c3-1", "context", "edit-target.png")),
     "frontier cell must not get an edit target");
-  assert.match(fs.readFileSync(path.join(ROOT, ".codex-tmp", "authoring", "cells", "c3-1", "packet-c3-1.md"), "utf8"), /ONE generation, whole canvas/);
+  assert.match(fs.readFileSync(path.join(WORKT, "c3-1", "packet-c3-1.md"), "utf8"), /ONE generation, whole canvas/);
   // interior sites (owner-directed): a cell with sites carries them as terrain to offer
   execFileSync(process.execPath, [SCRIPT, "--cell", "2,2", "--dry-run"],
     { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" });
-  const p22 = fs.readFileSync(path.join(ROOT, ".codex-tmp", "authoring", "cells", "c2-2", "packet-c2-2.md"), "utf8");
+  const p22 = fs.readFileSync(path.join(WORKT, "c2-2", "packet-c2-2.md"), "utf8");
   assert.match(p22, /## Sites this cell must offer/);
   assert.match(p22, /waystation-bench/);
   // loop presence by segment: 4,2 holds no waypoint but the line crosses it
@@ -233,7 +257,7 @@ if [ "$n" -eq 1 ]; then echo "ERROR: Selected model is at capacity. Please try a
 echo "fake worker: delivering nothing"; exit 0
 `);
   // a stale generation from an earlier attempt sits in the scratch cell dir
-  const cellDir = path.join(ROOT, ".codex-tmp", "authoring", "cells", "c3-2");
+  const cellDir = path.join(WORKT, "c3-2");
   fs.mkdirSync(cellDir, { recursive: true });
   fs.copyFileSync(path.join(SYN, "a", "c1-1-concept.png"), path.join(cellDir, "c3-2-source.png"));
   const before = treeHash();
@@ -317,7 +341,7 @@ test("re-stitching a cell from the same source is byte-idempotent", async () => 
 test("edit target for a replacement never carries the cell's own previous paint", async () => {
   execFileSync(process.execPath, [SCRIPT, "--cell", "2,1", "--dry-run", "--force"],
     { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" });
-  const f = path.join(ROOT, ".codex-tmp", "authoring", "cells", "c2-1", "context", "edit-target.png");
+  const f = path.join(WORKT, "c2-1", "context", "edit-target.png");
   const { data } = await sharp(f).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const px = (x, y) => { const o = (y * GEN + x) * 4; return [data[o], data[o + 1], data[o + 2]]; };
   // c2-1 is authored (G), yet its own kept interior must be grey, not G
@@ -344,7 +368,7 @@ test("a 100px stream offset at a shared edge is bridged in the footprint", async
   // E crosses its west edge at 3172 — inside the (48..150] bridge window.
   const SRC = 1254;
   async function writeSources(id, col, row, stripe) {
-    const dir = path.join(ROOT, ".codex-tmp", "authoring", "cells", id);
+    const dir = path.join(WORKT, id);
     fs.mkdirSync(dir, { recursive: true });
     const art = Buffer.alloc(SRC * SRC * 4), wat = Buffer.alloc(SRC * SRC * 4);
     const ox = col * CELL - BLEED, oy = row * CELL - BLEED;
@@ -449,6 +473,73 @@ test("manifest records the contract and both cells", () => {
   // success: clear the scratch world (kept on failure for diagnosis)
   fs.rmSync(OUT, { recursive: true, force: true });
   for (const id of ["c1-1", "c2-1", "c3-1", "c4-1"]) {
-    fs.rmSync(path.join(ROOT, ".codex-tmp", "authoring", "cells", id), { recursive: true, force: true });
+    fs.rmSync(path.join(WORKT, id), { recursive: true, force: true });
   }
+});
+
+// ---- mask completion (owner 2026-09-02, lock change 5b): through the derivation path ----
+// A --redo run derives concept/l2/water from <id>-source.png and <id>-water-source.png
+// in the working dir, exactly as a real bake does after the worker delivers.
+async function supplyGeneration(id, col, row, sourceImg, maskImg) {
+  const dir = path.join(WORKT, id); fs.mkdirSync(dir, { recursive: true });
+  const save = (buf, name) => sharp(buf, { raw: { width: GEN, height: GEN, channels: 4 } }).png().toFile(path.join(dir, `${id}-${name}.png`));
+  await save(sourceImg.concept, "source");
+  await save(maskImg.mask, "water-source");
+  fs.writeFileSync(path.join(dir, `${id}-water.json`), JSON.stringify([{ class: "lake", note: "synthetic control" }]));
+}
+function redoCell(cellArg, extra = []) {
+  return execFileSync(process.execPath, [SCRIPT, "--cell", cellArg, "--redo", "--describe", "mask completion control", ...extra],
+    { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" });
+}
+const C41 = [4 * CELL + 1024, 1 * CELL + 1024];   // cell 4,1's centre in territory px
+
+test("a mask that stops 20px short of the painted shore is completed, and the rings read 0%", async () => {
+  await supplyGeneration("c4-1", 4, 1,
+    genImage(4, 1, G, { waterDisc: [C41[0], C41[1], 300], keepWaterPaint: true }),
+    genImage(4, 1, G, { waterDisc: [C41[0], C41[1], 280] }));
+  const out = redoCell("4,1");
+  const m = out.match(/mask\s+completed: \+(\d+) px/);
+  assert.ok(m, "growth must be reported:\n" + out.slice(-600));
+  const grown = +m[1], expect = Math.PI * (300 * 300 - 280 * 280);
+  assert.ok(grown > expect * 0.85 && grown < expect * 1.15, `grown ${grown} px, expected about ${Math.round(expect)}`);
+  assert.match(out, /PASS\s+water fringe\s+0%/, "the 6px ring must read 0% after completion");
+  assert.match(out, /PASS\s+water fringe \(48px\)\s+0%/, "the 48px ring must read 0% after completion");
+  assert.match(out, /accepted, stitched/);
+  // the completed mask was the one cut: the water zone at the shore is clear in the L2 tile
+  const px = await tileRaw(0, Math.floor((C41[0] + 290) / TILE), Math.floor(C41[1] / TILE));
+  const o = (((C41[1]) % TILE) * TILE + ((C41[0] + 290) % TILE)) * 4;
+  assert.equal(px[o + 3], 0, "painted water 290px from the centre (inside the grown mask) must be cut");
+});
+
+test("dry paint between the mask and painted water stops the growth: the polyline defect still fails", async () => {
+  const before = treeHash();
+  await supplyGeneration("c4-1", 4, 1,
+    genImage(4, 1, G, { waterDisc: [C41[0], C41[1], 260], keepWaterPaint: true, paintedRing: [12, 40] }),
+    genImage(4, 1, G, { waterDisc: [C41[0], C41[1], 260] }));
+  let out = "";
+  try { redoCell("4,1", ["--force"]); assert.fail("the ring beyond a dry strip must still be rejected"); }
+  catch (e) { out = String(e.stdout || "") + String(e.stderr || ""); }
+  assert.match(out, /FAIL\s+water fringe \(48px\)/, "the wide ring must still fire:\n" + out.slice(-600));
+  const m = out.match(/mask\s+completed: \+(\d+) px/);
+  assert.ok(!m || +m[1] < 2000, "growth must not cross the dry strip");
+  assert.equal(treeHash(), before, "world untouched");
+});
+
+test("a low-saturation haze touching the water is not absorbed by the growth", async () => {
+  await supplyGeneration("c4-1", 4, 1,
+    genImage(4, 1, G, { waterDisc: [C41[0], C41[1], 300], keepWaterPaint: true, hazeArc: [0, 60] }),
+    genImage(4, 1, G, { waterDisc: [C41[0], C41[1], 300] }));
+  const out = redoCell("4,1", ["--force"]);
+  const m = out.match(/mask\s+completed: \+(\d+) px/);
+  assert.ok(!m || +m[1] < 500, "an exact mask beside a flat haze must grow by (almost) nothing: " + (m ? m[1] : 0));
+  assert.match(out, /accepted, stitched/);
+  // the haze stays land: opaque in the L2 tile 330px east of the centre
+  const px = await tileRaw(0, Math.floor((C41[0] + 330) / TILE), Math.floor(C41[1] / TILE));
+  const o = (((C41[1]) % TILE) * TILE + ((C41[0] + 330) % TILE)) * 4;
+  assert.equal(px[o + 3], 255, "haze pixels must remain land");
+});
+
+test("the suite never touches the real working directories", () => {
+  const after = realWorkFingerprint(REAL_WORK_BEFORE.cells);
+  assert.equal(after.hash, REAL_WORK_BEFORE.hash, "the real .codex-tmp/authoring/cells tree changed during the suite: " + REAL_WORK_BEFORE.cells.join(", "));
 });

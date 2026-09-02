@@ -632,12 +632,17 @@ COMPOUNDING:** seed `0.0008` → 4,3 `0.0026` → 3,3 `0.0035` → 4,2
 `0.0024` → 3,2 `0.0052 @ 14°` → 2,2 `0.0121 @ 34°` (passed at `0.0108`,
 no headroom) → 1,2 `0.0205 @ 33°`; same mechanism as the crown drift
 (`71 → 57 → 45 px`). The canon never reaches the image model in edit
-mode. **Attempt 2 DISPATCHED** on `brief-c1-2-r2.md` (the emboss named
-exactly, size anchors in crowns; log after `rebake2-start`) — the
-experiment: do concrete words move the global moment as they moved the
-rock-only one on 3,1? If not, lock change 5h (headroom flag + a canon
-ghost in the edit target) is the lever. Candidate 1 at
-`.codex-tmp/session3/rejected/c1-2-cand1/`. `brief-c4-1.md` (coast headland,
+mode. **Attempt 2 REJECTED on the same gate** (R076): `0.0186 @ 36°`
+from `0.021 @ 33°` — the concrete no-lit-side brief moved the emboss by a
+tenth and the direction not at all; crowns recovered to `69 px` once tied
+to the largest arriving crowns; the sheltering outcrop came out as a
+regular column fence. **Two strikes: no third bake under the same
+conditions.** 1,2 waits on a pipeline anchor for the lineage (lock change
+5h): first probe whether the built-in edit call accepts the canon as a
+SECOND input image (packet text only); failing that, ghost the canon's
+paint into the target's grey at low opacity. One owner-authorised probe
+run outside the pipeline decides it (measure the moment and the seam
+fidelity). Candidates at `.codex-tmp/session3/rejected/c1-2-cand{1,2}/`. `brief-c4-1.md` (coast headland,
 tunnel mouth shelf) is written but DEFERRED: authoring 4,1 would give 3,1 a
 third authored neighbour before its fourth attempt. **Incident
 fixed (R073):** the control suite shares `.codex-tmp/authoring/cells` with
@@ -800,6 +805,9 @@ back explicitly; owner asked for this discipline 2026-09-01):**
 | 11 | interior cells need settlements/attractions | RECORDED; sites mechanism proposed below, next lock change |
 | 12 | direct questions with direct assets | DONE: Q1 g by director default, Q2 confirmed by owner screenshots, Q3 approved and landed, Q4 open |
 | 13 | "close but a few seam issues" (3,1 candidate 2 crops) | OPEN: attempt 3 holds the wall's drum size across the line; the haze step is now a mild tone line (`dBG 0.189` vs `0.18`); owner rules on candidate 3's 1:1 seam or approves lock change 5 before a fourth attempt |
+| 14 | "youre being way too harsh… just fix that water issue… all of these look pretty great" (3,1 candidate 3) | OWNER RULING 2026-09-02: candidate 3 stands, subject to the mask; the seam at `dBG 0.189` reads fine, so the palette limit recalibrates to `0.20`; mask completion by growth fixes the water by construction; `--redo` 3,1 once lock change 5 part 1 lands (the lock record needs the owner's own keystroke) |
+| 15 | "the water falls into a cavern perfectly fine" (3,1 fall and pool crop) | NOTED: the art stands; the growth adds only the painted pool surface before the overhang and the tarn's south edge |
+| 16 | "you can run it thats fine" (the lock record) | the director's run of the record command is blocked by the permission classifier regardless; owner runs it or adds a permission rule |
 | — | director-found: the control suite shares the real working dirs | FIXED for 4,3 (R073, `97eb0d6`); WORK relocation is lock change 5a |
 | — | director-found: fringe rejections are mask tracing, not art (four candidates) | lock change 5b: mask completion by bounded growth |
 | — | director-found: stale scratch deliverables hazard | worked around by hand; next lock change |
