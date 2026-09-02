@@ -144,6 +144,11 @@ function treeHash() {
 // fresh scratch world and synthetic sources
 fs.rmSync(OUT, { recursive: true, force: true });
 const SYN = path.join(OUT, "synthetic");
+// the edit-mode packet mandates the style canon as the second input of the edit
+// call (lock change 5 part 2); the test world carries a synthetic one
+{ const seed = path.join(OUT, "sources", "seed"); fs.mkdirSync(seed, { recursive: true });
+  await sharp(genImage(0, 0, F).concept, { raw: { width: GEN, height: GEN, channels: 4 } }).png()
+    .toFile(path.join(seed, "L2-seed-region-r2-source.png")); }
 await writeArtefacts(path.join(SYN, "a"), "c1-1",
   genImage(1, 1, F, { waterDisc: [3072, 3072, 300] }));
 await writeArtefacts(path.join(SYN, "b-bad"), "c2-1",
@@ -221,6 +226,10 @@ test("edit target carries the neighbour's concept paint byte-exact and grey else
   const packet = fs.readFileSync(path.join(WORKT, "c2-1", "packet-c2-1.md"), "utf8");
   assert.match(packet, /EDIT mode/);
   assert.match(packet, /same framing and extent/);
+  // lock change 5 part 2: the canon rides along as the second input of the one call
+  assert.match(packet, /BOTH images attached/);
+  assert.match(packet, /The second image is a reference only/);
+  assert.match(packet, /L2-seed-region-r2-source\.png/);
   // biome map (owner-directed 2026-09-01): vocabulary and transitions in every packet
   assert.match(packet, /## Biome: /);
   assert.match(packet, /## Transitions/);

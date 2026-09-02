@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-02T15:20:35.156Z",
+ "solidifiedAt": "2026-09-02T16:22:13.049Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "23c75fa4de366ac2",
+  "cell.mjs": "79bcb9d0237a590a",
   "plan-territory.mjs": "270aec1cef622a35",
   "AGENTS.md": "0d4c3c0fc8f88b87"
  },
@@ -183,6 +183,24 @@
    "reason": "owner 2026-09-02 (change landed, suite 16/16): lock change 5 part 1 - (a) the working dir follows L2_OUT_ROOT, the suite fingerprints the real cells' dirs and asserts them untouched; (b) mask completion by bounded growth (48 px, speckle holes <=64 px, bridge bands exempt) before the cut, reported as a gate-table row and a ledger field; (c) palette limit 0.18 -> 0.20 on the owner's eye. Controls: an undersize disc mask completes and both rings read 0%; a dry strip between mask and paint still fails the 48 px ring; a low-saturation haze beside the water is not absorbed.",
    "hashes": {
     "cell.mjs": "23c75fa4de366ac2",
+    "plan-territory.mjs": "270aec1cef622a35",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-02T16:16:58.406Z",
+   "reason": "owner 2026-09-02: 'sure you can make it the default if its been working. The images and seams look good to me!' Lock change 5 part 2: every edit-mode packet mandates the style canon source as the SECOND input image of the single edit call, with a verbatim reference paragraph (flat lighting, brush, palette family, ground scale); the pipeline refuses edit mode without the canon file. Basis: probe R078 - key light 0.0093 vs 0.019-0.020 for the two pipeline attempts from the same target, seam-band fidelity 0.759 vs 0.84-0.88. Control: the dry-run packet asserts the two-image instruction and the canon path; the test world carries a synthetic canon.",
+   "hashes": {
+    "cell.mjs": "23c75fa4de366ac2",
+    "plan-territory.mjs": "270aec1cef622a35",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-02T16:22:13.050Z",
+   "reason": "owner 2026-09-02 (change landed, suite 16/16): lock change 5 part 2 - the edit-mode packet mandates the style canon source (seed/L2-seed-region-r2-source.png under the sources root) as the SECOND input image of the single edit call, with the framing paragraph reworded to 'the first image' and a verbatim reference paragraph (flat lighting, brush, palette family, ground scale); the pipeline refuses edit mode without the canon file; a tool refusal means report and stop, never a second call. The first application put the canon-path check above its constant (TDZ) and every control failed; moved below the constants, suite 16/16. Control: the dry-run packet asserts 'BOTH images attached', the reference paragraph and the canon path; the test world carries a synthetic canon.",
+   "hashes": {
+    "cell.mjs": "79bcb9d0237a590a",
     "plan-territory.mjs": "270aec1cef622a35",
     "AGENTS.md": "0d4c3c0fc8f88b87"
    }

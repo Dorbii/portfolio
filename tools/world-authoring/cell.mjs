@@ -606,7 +606,14 @@ if (authoredNeighbours.length) {
 // instead of generating from a prompt, so pegs are paint rather than prose.
 // A frontier cell has nothing to continue and stays in generate mode.
 const editMode = authoredNeighbours.length > 0;
-const FRAMING_PREAMBLE = "Edit this image in place. The output must be a SQUARE image with exactly the same framing and extent as the input: the painted terrain stays exactly where it is, at the same scale, and the flat grey area is painted in. Do not change the aspect ratio, do not crop, do not zoom, do not extend the canvas beyond the input. Paint the grey area as a seamless continuation of the painted ground so the join is invisible. Keep exactly the same painterly style, palette, brush density, rock shading and view as the existing paint.";
+// the canon rides along as a second input of the SAME edit call: the hand the
+// model continues is then the canon's in the interior and the neighbour's at
+// the band (probe R078: key light 0.0093 vs 0.019-0.020 without it)
+const REFERENCE_PARAGRAPH = "The second image is a reference only and must not appear in the output: take from it the brush, the palette family, the ground scale and above all the FLAT LIGHTING — every tussock, boulder, column and bank the same value on every side, no bright upper edge, no dark lower edge, no lit side anywhere, ambient occlusion only.";
+const CANON_SOURCE = "seed/L2-seed-region-r2-source.png";   // under paths.sources
+const FRAMING_PREAMBLE = "Edit the first image in place. The output must be a SQUARE image with exactly the same framing and extent as the first image: the painted terrain stays exactly where it is, at the same scale, and the flat grey area is painted in. Do not change the aspect ratio, do not crop, do not zoom, do not extend the canvas beyond the input. Paint the grey area as a seamless continuation of the painted ground so the join is invisible. Keep exactly the same view as the first image.";
+const canonPath = path.join(paths.sources, CANON_SOURCE);
+if (editMode && !fs.existsSync(canonPath)) die(`edit mode needs the style canon at ${canonPath}`);
 
 // transitions: a biome change lives INSIDE the later-authored cell, across its
 // outer third on that side, so the biome boundary never lies on a cell seam
@@ -702,13 +709,20 @@ ${editMode ? `## Neighbour context — you EDIT this cell into existence, you do
 
 \`${cellDir}/context/edit-target.png\` is your canvas: the authored
 neighbours' real paint wherever it reaches into this cell's window, and flat
-grey wherever this cell is still unpainted. Load it with the built-in
-\`view_image\` tool, then make ONE \`image_gen\` call in EDIT mode on that
-image. Your edit prompt begins with this paragraph VERBATIM, followed by the
-brief above written as what the ground IS and what CONTINUES from the painted
-edge — never as coordinates or percentages:
+grey wherever this cell is still unpainted. \`${canonPath}\` is the
+style canon of this world. Load both with the built-in \`view_image\` tool,
+then make ONE \`image_gen\` call in EDIT mode with BOTH images attached — the
+edit target as the image to edit, the canon as a second input that is a
+reference only. Your edit prompt begins with these two paragraphs VERBATIM,
+followed by the brief above written as what the ground IS and what CONTINUES
+from the painted edge — never as coordinates or percentages:
 
 > ${FRAMING_PREAMBLE}
+
+> ${REFERENCE_PARAGRAPH}
+
+If the tool refuses the second image, say so in the report and stop — never
+a second call, never generate mode.
 
 The stitch preserves the neighbours' pixels no matter what you paint over
 them, so the join you paint at the grey boundary is the seam the world will
