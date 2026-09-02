@@ -978,6 +978,7 @@ back explicitly; owner asked for this discipline 2026-09-01):**
 | 26 | "just reviewed those images, they look good" (the stitched 1,3 with the tone ramp, its north seam at 1:1, the 11-cell grid) | CLOSED: owner acceptance by eye of the first ramp seam and of 1,3 |
 | 27 | "this looks weird" (4,0: the station strip as a pale graded band, a straight cut, short walls) | OWNER REJECTION by eye; cause: the brief asked for a "strip" and a "cutting" as geometry; replacement queued behind the 1,1 bake on brief-c4-0-r2.md (open soft-edged meadow, a natural draw, nothing that reads as built). Caution added: never ask the land for strips, cuttings, corridors or bands — those are the rail and structures layers |
 | 28 | "the capital one is fine cause were gonna cover the land for that area anyways" (2,1 station strip) | CLOSED: 2,1 stays; the city structures cover that ground |
+| 29 | (director-found) the purple field reads as water to the fringe rings and the mask growth | lock change 7 staged (hue window on the water test) — owner's word pending; then 1,1 attempt 2 on brief r2 |
 | — | director-found: the control suite shares the real working dirs | FIXED for 4,3 (R073, `97eb0d6`); WORK relocation is lock change 5a |
 | — | director-found: fringe rejections are mask tracing, not art (four candidates) | lock change 5b: mask completion by bounded growth |
 | — | director-found: stale scratch deliverables hazard | worked around by hand; next lock change |
