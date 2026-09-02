@@ -624,9 +624,20 @@ both seams continuous at 1:1 (`review/stitched-c2-2-seam-*`); ONE item
 for the owner's eye — a long wandering escarpment of broken column stubs
 through the east third (`review/stitched-c2-2-east-scarp-1to1.png`),
 uneven and cornerless but one connected edge about 1,300 px long. **1,2
-heather moor DISPATCHED** (`brief-c1-2.md`: hamlet clearing by the beck,
-lookout crag on the south side, closed water; log
-`.codex-tmp/session3/regen-c1-2.log`). `brief-c4-1.md` (coast headland,
+heather moor, first attempt REJECTED by the key-light gate** (R075):
+`0.021` vs `0.011` — an emboss on every tussock and boulder, the same
+way up everywhere (`keylight-map.mjs`: moment `0.02–0.05` in nearly every
+block at `0–60°`, no tonal ramp). **THE LIGHT IS INHERITED AND
+COMPOUNDING:** seed `0.0008` → 4,3 `0.0026` → 3,3 `0.0035` → 4,2
+`0.0024` → 3,2 `0.0052 @ 14°` → 2,2 `0.0121 @ 34°` (passed at `0.0108`,
+no headroom) → 1,2 `0.0205 @ 33°`; same mechanism as the crown drift
+(`71 → 57 → 45 px`). The canon never reaches the image model in edit
+mode. **Attempt 2 DISPATCHED** on `brief-c1-2-r2.md` (the emboss named
+exactly, size anchors in crowns; log after `rebake2-start`) — the
+experiment: do concrete words move the global moment as they moved the
+rock-only one on 3,1? If not, lock change 5h (headroom flag + a canon
+ghost in the edit target) is the lever. Candidate 1 at
+`.codex-tmp/session3/rejected/c1-2-cand1/`. `brief-c4-1.md` (coast headland,
 tunnel mouth shelf) is written but DEFERRED: authoring 4,1 would give 3,1 a
 third authored neighbour before its fourth attempt. **Incident
 fixed (R073):** the control suite shares `.codex-tmp/authoring/cells` with
