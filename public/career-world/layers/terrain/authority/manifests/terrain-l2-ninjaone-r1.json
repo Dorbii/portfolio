@@ -56,7 +56,7 @@
  },
  "cells": {
   "c4-3": {
-   "authoredAt": "2026-09-02T01:09:54.198Z",
+   "authoredAt": "2026-09-02T05:37:42.721Z",
    "describe": "**Style canon (binding):** `art-source/career-world/l2-land/ninjaone/seed/L2-seed-region-r2.png`\nis the accepted look of this world's terrain. Anchor to those pixels, not to\nwords: the same high-oblique map view, the same ground scale and brush\ndensity, the same palette family — pale warm basalt with the SAME value on\nevery face whichever way it faces, meadow greens warmed with gold, heather in\nma",
    "sourcePx": 1254,
    "gates": [
@@ -119,7 +119,10 @@
     "cliff run"
    ],
    "waterZones": [
-    "lake"
+    "coast",
+    "lake",
+    "stream",
+    "fall"
    ],
    "biome": "quarry",
    "source": "art-source/career-world/l2-land/ninjaone/c4-3",
