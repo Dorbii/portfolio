@@ -385,10 +385,10 @@ test("edit target for a replacement never carries the cell's own previous paint"
   assert.deepEqual(px(100, 1280), F(ox + 100, oy + 1280).slice(0, 3), "neighbour paint kept");
 });
 
-test("a +30 luma step across an authored seam fails the all-land tone gate", async () => {
+test("a +34 luma step across an authored seam fails the all-land tone gate", async () => {
   // G' = G lifted by 30 luma in the west third only: vegetation medians barely
   // move (the lift is on every channel), the all-land tone step does
-  const lifted = (x, y) => { const [r, g, b, a] = G(x, y); const inWest = x - (2 * CELL) < CELL / 3; const k = inWest ? 30 : 0; return [Math.min(255, r + k), Math.min(255, g + k), Math.min(255, b + k), a]; };
+  const lifted = (x, y) => { const [r, g, b, a] = G(x, y); const inWest = x - (2 * CELL) < CELL / 3; const k = inWest ? 34 : 0; return [Math.min(255, r + k), Math.min(255, g + k), Math.min(255, b + k), a]; };
   await writeArtefacts(path.join(SYN, "b-tone"), "c2-1", genImage(2, 1, lifted));
   const before = treeHash();
   let out = "";

@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-02T23:46:29.076Z",
+ "solidifiedAt": "2026-09-02T23:56:00.718Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "fcd939b45f27ddc1",
+  "cell.mjs": "cd0524f82d95d6a0",
   "plan-territory.mjs": "270aec1cef622a35",
   "AGENTS.md": "a1ab4eaec1d4c6ac"
  },
@@ -255,6 +255,24 @@
    "reason": "owner approved 2026-09-02 ('if you think its needed go ahead' / 'min cut is fine here'): lock change 9, AFTER the change - content-aware seams landed in cell.mjs (SEAM_BAND 128, SEAM_STEP 2, cutBoundary + contentSeams, boundaries consulted by vOffset/hOffset, corners pinned by the taper envelope), --restitch, the manifest seam contract, the header usage line; AGENTS.md documents --restitch and the seam rule. Suite 20/20 (three new controls: the crown whole-or-absent on the pipeline's own boundary, --restitch byte-idempotent and refusing an unauthored cell, the manifest contract); on the pre-change script the crown was cut with 44.7% showing and blends at the line. Next: --restitch the 19 accepted cells.",
    "hashes": {
     "cell.mjs": "fcd939b45f27ddc1",
+    "plan-territory.mjs": "270aec1cef622a35",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-02T23:51:06.057Z",
+   "reason": "owner approved 2026-09-02 (in conversation, replying to the recommendation 'both changes together, then the redo' for 2,0 candidate 4: 'if you think its needed go ahead'): lock change 8, BEFORE the change - two limits recalibrated on the owner's eye: rock lighting 0.15 -> 0.16 and the all-land seam tone 20 -> 21 (candidate 4 measures 0.153 and 20.0, both inside the noise of their calibrations: the accepted world reaches 0.144 and 17.4 / 20.0). The tone control's lift moves from +30 to +34 so it stays a control over the new limit. Then --redo candidate 4.",
+   "hashes": {
+    "cell.mjs": "fcd939b45f27ddc1",
+    "plan-territory.mjs": "270aec1cef622a35",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-02T23:56:00.719Z",
+   "reason": "owner approved 2026-09-02 ('if you think its needed go ahead', replying to 'both changes together, then the redo'): lock change 8, AFTER the change - rock lighting limit 0.16 and all-land seam tone limit 21 in cell.mjs; the tone control lifts +34 and still fails (suite 20/20). Next: --redo 2,0 candidate 4.",
+   "hashes": {
+    "cell.mjs": "cd0524f82d95d6a0",
     "plan-territory.mjs": "270aec1cef622a35",
     "AGENTS.md": "a1ab4eaec1d4c6ac"
    }

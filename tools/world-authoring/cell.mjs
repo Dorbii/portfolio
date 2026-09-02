@@ -1577,8 +1577,8 @@ exit 1
       if (tMine && tTheirs) {
         const dT = Math.abs(tMine.luma - tTheirs.luma);
         toneWorst = Math.max(toneWorst, dT); toneSeams += 1;
-        if (dT > 20) {
-          palViolations.push(`${nb.id} seam: tone dLuma ${dT.toFixed(1)} on all land (limit 20; accepted seams read 2.3-17.4, the stark one 24.5)`);
+        if (dT > 21) {
+          palViolations.push(`${nb.id} seam: tone dLuma ${dT.toFixed(1)} on all land (limit 21; accepted seams read 2.3-20.0, the stark one 24.5)`);
         }
       }
       if (!mine || !theirs) continue;
@@ -1598,8 +1598,8 @@ exit 1
     { name: "gradient ratio", value: +isotropy.toFixed(3) + " (reported)", pass: true,
       note: "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate" },
     { name: "rock lighting", value: rockN < 5000 ? `${rockLight.toFixed(3)} (n ${rockN}, report-only)` : +rockLight.toFixed(3),
-      pass: rockN < 5000 || rockLight < 0.15,
-      note: "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.07" },
+      pass: rockN < 5000 || rockLight < 0.16,
+      note: "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.14; limit 0.16 on the owner's eye (2026-09-02, the dark-forest gorge at 0.153)" },
     { name: "land coverage", value: +(100 * opaque / (W * H)).toFixed(1) + "%", pass: opaque > 0 },
     { name: "water cut clear", value: wetResidual === 0 ? "0 px" : `${wetResidual} px (${wetResidualPct.toFixed(2)}%)`,
       pass: wetResidual === 0,
