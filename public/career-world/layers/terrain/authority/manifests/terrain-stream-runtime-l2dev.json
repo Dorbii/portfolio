@@ -15,6 +15,38 @@
   },
   "tiles": [
     {
+      "id": "l2dev-c0-2",
+      "minimumTier": "capital",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone-dev/c0-2-capital.webp",
+          "dimensions": [
+            256,
+            256
+          ],
+          "decodedBytes": 262144
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone-dev/c0-2-site.webp",
+          "dimensions": [
+            1024,
+            1024
+          ],
+          "decodedBytes": 4194304
+        }
+      },
+      "worldBounds": {
+        "origin": [
+          0.38,
+          0.33515386648224055
+        ],
+        "span": [
+          0.03240424293055872,
+          0.05757693324112028
+        ]
+      }
+    },
+    {
       "id": "l2dev-c0-3",
       "minimumTier": "capital",
       "sources": {

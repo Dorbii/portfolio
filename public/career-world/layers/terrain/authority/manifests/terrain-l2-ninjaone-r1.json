@@ -1258,6 +1258,96 @@
      1
     ]
    }
+  },
+  "c0-2": {
+   "authoredAt": "2026-09-02T20:26:07.555Z",
+   "describe": "**You are EDITING the painted neighbours into this cell, not generating a\nscene.** Two neighbours arrive in the edit target: along your EAST edge the\nheather moor (open moor, weathered tors, the beck country's west end, dry\nat the line) and along your SOUTH edge the sound-coast corner (olive moor\nover rounded rock with a shingle shore that runs off its west side; its\nnorth edge, your south edge, i",
+   "sourcePx": 1254,
+   "gates": [
+    {
+     "name": "key-light asymmetry",
+     "value": 0.002,
+     "pass": true,
+     "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004"
+    },
+    {
+     "name": "gradient ratio",
+     "value": "1.626 (reported)",
+     "pass": true,
+     "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
+    },
+    {
+     "name": "rock lighting",
+     "value": 0.131,
+     "pass": true,
+     "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.07"
+    },
+    {
+     "name": "land coverage",
+     "value": "69.6%",
+     "pass": true
+    },
+    {
+     "name": "water cut clear",
+     "value": "0 px",
+     "pass": true,
+     "note": "paint surviving where the mask is fully water; exact zero by construction for pipeline-derived cells"
+    },
+    {
+     "name": "mask completion",
+     "value": "+0 px grown, 0 px holes filled (reported)",
+     "pass": true,
+     "note": "the delivered mask grown into contiguous painted water within 48 px and speckle holes <=64 px filled before the cut (owner 2026-09-02); dry paint stops the growth, so a polyline mask still fails the rings"
+    },
+    {
+     "name": "water fringe",
+     "value": "0%",
+     "pass": true,
+     "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
+    },
+    {
+     "name": "water fringe (48px)",
+     "value": "0%",
+     "pass": true,
+     "note": "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)"
+    },
+    {
+     "name": "water continuity",
+     "value": "ok (0 crossings checked)",
+     "pass": true,
+     "note": "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint"
+    },
+    {
+     "name": "palette conformance",
+     "value": "veg worst dBG 0.117 dLuma 3.6 over 1 seam(s); tone worst dLuma 7.6 on all land over 2 seam(s)",
+     "pass": true,
+     "note": "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13"
+    }
+   ],
+   "shelf": null,
+   "features": [
+    "submerged run"
+   ],
+   "waterZones": [
+    "coast",
+    "submerged",
+    "stream",
+    "lake"
+   ],
+   "biome": "sound-coast",
+   "source": "art-source/career-world/l2-land/ninjaone/c0-2",
+   "stitch": {
+    "order": 15,
+    "tiles": [
+     90,
+     30,
+     12,
+     6,
+     2,
+     1,
+     1
+    ]
+   }
   }
  }
 }

@@ -1,0 +1,18 @@
+[
+  {
+    "class": "coast",
+    "note": "The deep-teal sound, broad clear bay, turquoise shallows, submerged rounded rock, pale wash, wet shingle, and every visibly wet shore pixel along the west-side coast. The source also paints this coast across part of the north edge and stops before the south-west corner; the mask follows those painted pixels instead of concealing either source defect."
+  },
+  {
+    "class": "submerged",
+    "note": "The broad calm clear-water run over pale sand and smooth submerged rock inside the sound, classified as terrain support for the future submerged railway; no track, portal, or structure is painted."
+  },
+  {
+    "class": "stream",
+    "note": "The complete narrow dark beck surface in the inland hollow, including muted reflected sections between brighter blue-green pixels; it remains closed and touches no image edge."
+  },
+  {
+    "class": "lake",
+    "note": "The complete small inland pool at the end of the beck, including its pale wet rim and surface highlights; it remains closed and touches no image edge."
+  }
+]
