@@ -638,6 +638,13 @@ Steve rejected the r5 composition on two grounds the director's QA under-weighte
 - **Parked after three strikes — the owner's call:** (a) accept candidate 3 by eye with a recorded exception (`0.0117 / 0.189` — the rock number is not marginal, the look is mild); (b) a fourth attempt with the east third's benches explicitly flat-shaded ("every bench top and column face one value, jointed by thin lines only"), which is the one instruction the third brief did not carry for that third; (c) leave it parked. Candidates 1–3 at `.codex-tmp/session3/rejected/c2-0-cand{1,2,3}/`.
 - **Evidence:** `.codex-tmp/session3/regen-c2-0.log` (after `rebake3-start`), `rocklight-map.mjs` output in the session transcript.
 
+### R101 — 2026-09-02 — c0-1 the Metrics-Service shelf, first attempt accepted; sixteen cells stand (codex exec via cell.mjs, gpt-5.6-sol, effort=high)
+
+- **Setup:** `brief-c0-1.md` — the shelf a third of the cell on the sound coast, the sound arriving on the south edge's west fifth (0,2's north edge read first: water over its west 456 px) and up the west side, open ground for the station and the line with "nothing that reads as a route", a low-rock landform; edit mode with 0,2 (south), the canon as second input, the tone ramp. `170,372` tokens.
+- **Verdict: ACCEPTED on all gates** — key-light `0.004`, rock lighting `0.142` on `3,245` strong edges (report-only), seam tone dLuma `6.5` on all land, continuity ok with 2 crossings of which 1 bridged (the pipeline rerouted the footprint of one crossing to meet 0,2's within the 48..150 px reach — the first bridge of the regenerated world), fringe `0/0%`, land `87.4%`, `141` tiles. The worker confirms "route or path mark absent" — the drawn-line lesson holds. Crowns `51 px` by its measure. Committed `e6920ed`. **SIXTEEN CELLS STAND.**
+- **Edges for the last cells:** 0,1's north and east edges are dry, so 0,0 arrives on the shelf's meadow with no water, and 1,1 (when it comes) meets a dry west edge.
+- **Evidence:** `.codex-tmp/session3/regen-c0-1.log`, `review/stitched-c0-1-cell-half.png`, `review/territory-grid-status.png` (16 of 20).
+
 ## Findings backlog (flow improvements to fold into future packets)
 
 - F1: Task packets must declare required gate tier (focused / full / none) — otherwise workers default to maximal ceremony. (From R000.)

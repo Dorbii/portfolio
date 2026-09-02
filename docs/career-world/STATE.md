@@ -629,8 +629,17 @@ key-light `0.0117`, rock lighting `0.189`; the reframe fixed both seams
 plateau benches, not the forest floor — tested). **2,0 PARKED after three
 strikes — OWNER CALL:** accept candidate 3 by eye with a recorded
 exception, a fourth attempt with the east benches explicitly flat-shaded,
-or leave it. **0,1 the Metrics-Service shelf DISPATCHED** (`brief-c0-1.md`;
-log `.codex-tmp/session3/regen-c0-1.log`). `brief-c0-1.md` READY (the
+or leave it. **0,1 the Metrics-Service shelf ACCEPTED first attempt** (R101, commit
+`e6920ed`: seam tone `6.5`, 2 crossings met with 1 bridged, no route marks,
+`141` tiles; crowns `51 px`). **SIXTEEN CELLS STAND.** **0,0 the moor with
+the shepherd's fold DISPATCHED** (`brief-c0-0.md`; 0,1's north edge dry;
+log `.codex-tmp/session3/regen-c0-0.log`). **REMAINING THREE, all waiting on
+the owner:** 1,1 the purple field (lock change 7 staged — the hue window on
+the water test; then `brief-c1-1-r2.md`), 2,0 the dark-forest gorge
+(parked after three lighting strikes; accept by eye / fourth attempt with
+flat-shaded east benches / leave), and 1,0 the bare plateau with the crater
+tarn and the column altar (its three neighbours are 1,1, 2,0 and 0,0 — brief
+it once at least 0,0 stands; as a frontier cell otherwise). `brief-c0-1.md` READY (the
 Metrics-Service shelf: the sound arriving on its south edge's west 22% and
 up the west side; the line from the south edge near the middle to the
 station and out east a fifth of the way down). Remaining: 1,1 (after lock
