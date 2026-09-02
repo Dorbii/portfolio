@@ -608,8 +608,13 @@ gates** (R096: rock lighting `0.155`, and the new all-land tone gate at
 neighbour's own bleed re-rendered darker; profile `74/80/80` vs
 `58/59/57`); re-bake queued on `brief-c2-0-r2.md` (the south third as open
 moor at the ARRIVING brightness, walls uncapped, one water system).
-**3,0 the bare plateau DISPATCHED** (`brief-c3-0.md`, the walk-under arch;
-3,1's north and 4,0's west edges dry; log `.codex-tmp/session3/regen-c3-0.log`). `brief-c0-2.md` READY (the sound
+**3,0 the bare plateau ACCEPTED first attempt** (R097, commit `71a74f1`:
+key-light `0.0003`, rock lighting `0.114`, seam tone `4.1` over two seams,
+the walk-under arch legible, crowns `73 px`; the worker flags repeated
+columns on long bench walls for the owner's eye). **FOURTEEN CELLS STAND.**
+**2,0 attempt 2 DISPATCHED** (`brief-c2-0-r2.md`; log `regen-c2-0.log`
+after `rebake2-start`). Remaining: 1,1 (after lock change 7), 0,2 (brief
+ready), 1,0, 0,1, 0,0 (briefs after their neighbours land). `brief-c0-2.md` READY (the sound
 along the west edge, a wide calm bay in the south-west for the submerged
 run; 0,3's north edge dry, its sound holding its west edge from 53% down); 2,1's strip stays by the owner's word (the city covers
 it). **1,1 the purple field, first attempt REJECTED on a gate defect**

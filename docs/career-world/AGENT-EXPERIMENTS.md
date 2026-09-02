@@ -607,6 +607,13 @@ Steve rejected the r5 composition on two grounds the director's QA under-weighte
 - **Attempt 2** (`brief-c2-0-r2.md`): the two failures named with their numbers — the south third as open olive moor at the ARRIVING brightness with conifers scattered, the forest closing only past it; walls one flat value with no caps; one connected water system. Strike one, so no reframe yet. Candidate 1 at `.codex-tmp/session3/rejected/c2-0-cand1/`.
 - **Evidence:** `.codex-tmp/session3/regen-c2-0.log`, `review/regen-c2-0-cand1-quarter.png`.
 
+### R097 — 2026-09-02 — c3-0 the bare plateau with the walk-under arch, first attempt accepted; fourteen cells stand (codex exec via cell.mjs, gpt-5.6-sol, effort=high)
+
+- **Setup:** `brief-c3-0.md` — bare pale benches, one tarn with a thin fall, the walk-under arch with its shelf, the loop clipping the south-east corner; 3,1's north and 4,0's west edges read first (dry); edit mode with two authored neighbours (an L-shaped band), the canon as second input, the tone ramp on both edges. `204,388` tokens.
+- **Verdict: ACCEPTED on all gates** — key-light `0.0003` (the flattest of the programme), rock lighting `0.114`, seam tone dLuma `4.1` on all land over two seams and vegetation `dBG 0.152` (both under their limits), fringe `0/0%`, closed water, land `98%`, `111` tiles; crowns `73 px`. The worker confirms the arch and its shelf and the dry level corner for the line. Committed `71a74f1`. **FOURTEEN CELLS STAND.**
+- **Worker-reported for the owner's eye:** a short secondary drop besides the one fall; several long bench walls with repeated upright columns and strong top-versus-face values — the rock gate read `0.114`, under `0.15`, but the owner's palisade rule is judged by eye.
+- **Evidence:** `.codex-tmp/session3/regen-c3-0.log`, `review/stitched-c3-0-cell-half.png`, `review/territory-grid-status.png` (14 of 20).
+
 ## Findings backlog (flow improvements to fold into future packets)
 
 - F1: Task packets must declare required gate tier (focused / full / none) — otherwise workers default to maximal ceremony. (From R000.)
