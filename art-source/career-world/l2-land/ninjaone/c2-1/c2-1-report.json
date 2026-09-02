@@ -1,0 +1,104 @@
+{
+  "cell": "c2-1",
+  "generation": {
+    "filename": "c2-1-source.png",
+    "exact_size_px": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "E7D2402EF2E3A2843B5C995595CE42EE34BA2951F5B913AE5E2D210A9ABBCCE7",
+    "mode": "built-in imagegen edit",
+    "successful_edit_calls": 1,
+    "imagegen_invocations": 2,
+    "pre_generation_transport_failures": 1,
+    "transport_failure": "The first invocation failed in the local referenced-image loader before either image was submitted or any generation began: invalid base64 input length for the 6.97 MB edit target.",
+    "transport_fix": "A lossless PNG recompression of the edit target reduced its transport size to 4.39 MB; decoded RGBA SHA-256 matched the original exactly before the one successful edit call.",
+    "whole_canvas_single_pass": true,
+    "raw_output_preserved": true,
+    "resized_cropped_or_tiled": false
+  },
+  "shipped_canvas_px": [2560, 2560],
+  "ground_extent_m": [97.6, 97.6],
+  "final_resolution_cm_per_px": 4.8,
+  "lighting_isotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean on the delivered source; final water-mask pixels excluded and gradients below 12 luminance units excluded",
+    "peak_vs_uniform_over_land": 1.571910,
+    "uniform_reference": 1.0,
+    "directional_key_first_moment": 0.001151,
+    "rock_lighting_first_moment": 0.080628,
+    "land_gradient_samples": 1269676,
+    "rock_gradient_samples": 22994,
+    "visual_check": "No global cast-shadow field or time-of-day gradient is obvious, but basalt and conifers retain brighter upper planes and darker side values. The aggregate isotropy result does not establish the stricter equal-value-on-every-side rule."
+  },
+  "median_conifer_crown_final_scale": {
+    "px_on_2560_canvas": 44.91,
+    "metres_at_4_8_cm_per_px": 2.156,
+    "source_px_equivalent": 22.0,
+    "source_to_final_scale": 2.041467,
+    "measurement": "Median dark-green connected-component crown width across 51 isolated candidate conifers, scaled by 2560/1254. The threshold can under-segment branch tips, but visual inspection independently confirms that many crowns are materially below the required range.",
+    "required_final_px_range": [84, 147],
+    "required_metres_range": [4.0, 7.0],
+    "pass": false
+  },
+  "buildable_vs_steep_fraction": {
+    "basis": "manual estimated fraction of non-water land area",
+    "buildable": 0.68,
+    "steep": 0.04,
+    "other_broken_rock_or_vegetated": 0.28,
+    "method": "Broad meadow and heather flats count as buildable; the exposed face at the main fall counts as steep; tors, scree, dense conifer groups, and broken ground make up the remainder. The estimate measures occupancy, not whether the bright capital shelf reads clearly."
+  },
+  "water_footprint_fraction": 0.02927156,
+  "water_mask": {
+    "filename": "c2-1-water-source.png",
+    "exact_size_px": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "6842D7ADAF6FBFCA7C30DDB7B43F73EDE96022FD55485559CEE920EACECD4304",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "derivation": "Connected source-raster cyan and blue classification constrained to loose inspected water-search corridors, followed by attached pale fall and spray classification, morphological closure, small-component rejection, one-pixel wet-margin dilation, and enclosed-hole filling; no polyline defines the mask boundary.",
+    "opaque_water_pixels": 46030,
+    "intermediate_alpha_pixels": 0,
+    "non_white_opaque_pixels": 0,
+    "logical_water_systems": 1,
+    "connected_pixel_components": 3,
+    "interior_hole_pixels": 0,
+    "edge_water_fraction": {
+      "north": 0.0,
+      "east": 0.0,
+      "south": 0.0,
+      "west": 0.0
+    },
+    "source_scale_gate_proxy": {
+      "final_6px_equivalent_source_radius_px": 3,
+      "ring_6_fringe_percent": 0.711213,
+      "ring_6_sample_pixels": 11389,
+      "final_48px_equivalent_source_radius_px": 24,
+      "ring_48_fringe_percent": 0.407014,
+      "ring_48_sample_pixels": 68548,
+      "maximum_percent": 1.0,
+      "ring_6_pass": true,
+      "ring_48_pass": true,
+      "official_node_gate_run": false,
+      "note": "The repository Node runner is not exposed in this managed shell. This local reproduction uses the repository blue-leaning fringe classifier at source radii that scale to the requested 6 px and 48 px checks on the 2560 px canvas."
+    }
+  },
+  "constraint_checks": {
+    "square_at_least_1254_px": true,
+    "one_successful_generation_edit": true,
+    "terrain_only": true,
+    "closed_water_absent_from_all_edges": true,
+    "water_mask_binary_same_dimensions_and_hole_free": true,
+    "water_mask_6_px_gate_local_proxy": true,
+    "water_mask_48_px_gate_local_proxy": true,
+    "conifer_scale": false,
+    "strict_equal_value_on_all_sides_visual_check": false,
+    "single_painted_fall": false,
+    "distinct_luminous_capital_shelf_visual_check": false,
+    "clear_station_and_cross_cell_open_ground_corridors_visual_check": false
+  },
+  "open_risks": [
+    "The generated centre reads as broadly flat moor rather than a distinct luminous gold-green capital shelf; the long station strip and clear west-to-east railway ground line are not compositionally explicit.",
+    "Median detected conifer crowns measure about 44.91 px / 2.156 m at final scale, materially below the required 84-147 px / 4-7 m range.",
+    "The source visibly contains two falls: a short drop below the spring basin and the requested shelf-edge fall into the terminal pool.",
+    "Basalt and conifers retain brighter upper planes and darker side values, so the strict neutral-lighting rule is not visually met even though aggregate directional asymmetry is low.",
+    "The first imagegen invocation failed before generation in the local image loader; one successful edit generation was made after lossless transport recompression.",
+    "Exact seam continuity, terrain naturalism, water-mask judgment, and overall visual quality remain director and owner decisions; mechanical checks do not establish visual acceptance."
+  ]
+}
