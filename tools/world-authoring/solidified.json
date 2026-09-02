@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-02T01:09:35.411Z",
+ "solidifiedAt": "2026-09-02T15:20:35.156Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "917095ca1b439df2",
+  "cell.mjs": "23c75fa4de366ac2",
   "plan-territory.mjs": "270aec1cef622a35",
   "AGENTS.md": "0d4c3c0fc8f88b87"
  },
@@ -165,6 +165,24 @@
    "reason": "owner 2026-09-01 'works for me please proceed' (change landed, suite 12/12): interior sites in the plan and packet; stale deliverables cleared at dispatch; capacity retry inside the runner (4 attempts, CELL_RETRY_WAIT_S); loop presence by segment; rock-only strong-edge lighting gate <0.15 (report-only under 5000 strong rock edges). Controls: sites and loop assertions in the dry-run test; a fake codex on PATH that reports capacity then delivers nothing (retried once, stale source cleared, world untouched); a sawtooth-lit synthetic cell fails the rock gate while the isotropic one passes.",
    "hashes": {
     "cell.mjs": "917095ca1b439df2",
+    "plan-territory.mjs": "270aec1cef622a35",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-02T15:16:47.194Z",
+   "reason": "owner 2026-09-02 in chat: 'youre being way too harsh… just fix that water issue… all of these looks pretty great', 'the water falls into a cavern perfectly fine', 'you can run it thats fine', 'got this but you can run it idc' (the owner tried to record this himself from the main checkout, where the pipeline dir does not exist, and told the director to record it). Lock change 5 part 1: (a) the working dir follows L2_OUT_ROOT so the control suite never writes into the real cells' dirs; (b) mask completion by bounded growth (48 px, speckle holes <=64 px) before the cut, reported in the gate table and the ledger; (c) palette limit 0.18 -> 0.20 calibrated on the owner's eye (fine 0.109/0.189, clash 0.218/0.294). Controls first, then --redo 3,1.",
+   "hashes": {
+    "cell.mjs": "917095ca1b439df2",
+    "plan-territory.mjs": "270aec1cef622a35",
+    "AGENTS.md": "0d4c3c0fc8f88b87"
+   }
+  },
+  {
+   "at": "2026-09-02T15:20:35.157Z",
+   "reason": "owner 2026-09-02 (change landed, suite 16/16): lock change 5 part 1 - (a) the working dir follows L2_OUT_ROOT, the suite fingerprints the real cells' dirs and asserts them untouched; (b) mask completion by bounded growth (48 px, speckle holes <=64 px, bridge bands exempt) before the cut, reported as a gate-table row and a ledger field; (c) palette limit 0.18 -> 0.20 on the owner's eye. Controls: an undersize disc mask completes and both rings read 0%; a dry strip between mask and paint still fails the 48 px ring; a low-saturation haze beside the water is not absorbed.",
+   "hashes": {
+    "cell.mjs": "23c75fa4de366ac2",
     "plan-territory.mjs": "270aec1cef622a35",
     "AGENTS.md": "0d4c3c0fc8f88b87"
    }
