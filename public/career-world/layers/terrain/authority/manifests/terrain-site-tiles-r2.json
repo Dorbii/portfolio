@@ -3,11 +3,6 @@
   "id": "career-world/terrain-site-tiles@r2",
   "status": "phase-6-structure-sites",
   "coordinateSpace": "normalized-world-top-left",
-  "sourceDetailPath": "/career-world/layers/terrain/authority/textures/terrain-relief-r6-detail-4x.png",
-  "sourceDimensions": [
-    6688,
-    3764
-  ],
   "tiles": [
     {
       "id": "tanium-capital-site",

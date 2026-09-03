@@ -163,7 +163,6 @@ test("every capital ground integration is territory-owned and bounded", async ()
     false,
   );
 
-  const [sourceWidth, sourceHeight] = siteManifest.sourceDimensions;
   for (const capital of structures.nodes) {
     const tile = capitalTiles.find(
       ({ ownerId }) => ownerId === capital.id,
@@ -186,12 +185,6 @@ test("every capital ground integration is territory-owned and bounded", async ()
 
     const [tileOriginX, tileOriginY] = tile.worldBounds.origin;
     const [tileSpanX, tileSpanY] = tile.worldBounds.span;
-    const [cropX, cropY] = tile.sourceCropPixels.origin;
-    const [cropWidth, cropHeight] = tile.sourceCropPixels.size;
-    assert.ok(Math.abs(tileOriginX - cropX / sourceWidth) < 1e-12);
-    assert.ok(Math.abs(tileOriginY - cropY / sourceHeight) < 1e-12);
-    assert.ok(Math.abs(tileSpanX - cropWidth / sourceWidth) < 1e-12);
-    assert.ok(Math.abs(tileSpanY - cropHeight / sourceHeight) < 1e-12);
     const [anchorX, anchorY] = territory.development.capitalAnchor;
     const envelope = territory.development.capitalEnvelope;
     assert.ok(tileOriginX >= envelope.origin[0]);
