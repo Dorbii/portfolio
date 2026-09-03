@@ -1,0 +1,182 @@
+[
+ {
+  "id": "c0-0",
+  "biome": "Heather moor",
+  "med": 46,
+  "maskPct": 21.9,
+  "countedPct": 18.5,
+  "mergedPct": 69.5,
+  "biggestBlobPx": 379409
+ },
+ {
+  "id": "c1-0",
+  "biome": "Bare plateau",
+  "med": 57,
+  "maskPct": 8.1,
+  "countedPct": 35.2,
+  "mergedPct": 50.4,
+  "biggestBlobPx": 171988
+ },
+ {
+  "id": "c2-0",
+  "biome": "Dark forest gorge",
+  "med": 56,
+  "maskPct": 37.3,
+  "countedPct": 15.6,
+  "mergedPct": 78.4,
+  "biggestBlobPx": 494463
+ },
+ {
+  "id": "c3-0",
+  "biome": "Bare plateau",
+  "med": 97,
+  "maskPct": 7.4,
+  "countedPct": 57.3,
+  "mergedPct": 34.6,
+  "biggestBlobPx": 31482
+ },
+ {
+  "id": "c4-0",
+  "biome": "Settlement shelf",
+  "med": 64,
+  "maskPct": 12.2,
+  "countedPct": 50.4,
+  "mergedPct": 26.9,
+  "biggestBlobPx": 47741
+ },
+ {
+  "id": "c0-1",
+  "biome": "Settlement shelf",
+  "med": 60,
+  "maskPct": 11.3,
+  "countedPct": 40.2,
+  "mergedPct": 46,
+  "biggestBlobPx": 61695
+ },
+ {
+  "id": "c1-1",
+  "biome": "The purple field (unique)",
+  "med": 96,
+  "maskPct": 5.9,
+  "countedPct": 50.9,
+  "mergedPct": 37.7,
+  "biggestBlobPx": 34975
+ },
+ {
+  "id": "c2-1",
+  "biome": "Settlement shelf",
+  "med": 112,
+  "maskPct": 7.6,
+  "countedPct": 75.5,
+  "mergedPct": 11.6,
+  "biggestBlobPx": 36830
+ },
+ {
+  "id": "c3-1",
+  "biome": "Magical gorge (moment)",
+  "med": 85,
+  "maskPct": 14.2,
+  "countedPct": 52,
+  "mergedPct": 34.1,
+  "biggestBlobPx": 177347
+ },
+ {
+  "id": "c4-1",
+  "biome": "Wild coast",
+  "med": 97,
+  "maskPct": 5,
+  "countedPct": 51.1,
+  "mergedPct": 42.6,
+  "biggestBlobPx": 89724
+ },
+ {
+  "id": "c0-2",
+  "biome": "Sound coast",
+  "med": 96,
+  "maskPct": 1.5,
+  "countedPct": 33,
+  "mergedPct": 56.2,
+  "biggestBlobPx": 35295
+ },
+ {
+  "id": "c1-2",
+  "biome": "Heather moor",
+  "med": 54,
+  "maskPct": 1.3,
+  "countedPct": 83,
+  "mergedPct": 0,
+  "biggestBlobPx": 0
+ },
+ {
+  "id": "c2-2",
+  "biome": "Bench country",
+  "med": 76,
+  "maskPct": 6.9,
+  "countedPct": 45.1,
+  "mergedPct": 49.4,
+  "biggestBlobPx": 91288
+ },
+ {
+  "id": "c3-2",
+  "biome": "Dark forest gorge",
+  "med": 51,
+  "maskPct": 28.4,
+  "countedPct": 5.7,
+  "mergedPct": 89.7,
+  "biggestBlobPx": 520297
+ },
+ {
+  "id": "c4-2",
+  "biome": "Wild coast",
+  "med": 71,
+  "maskPct": 1,
+  "countedPct": 59.4,
+  "mergedPct": 0,
+  "biggestBlobPx": 0
+ },
+ {
+  "id": "c0-3",
+  "biome": "Sound coast",
+  "med": 63,
+  "maskPct": 0.9,
+  "countedPct": 5.3,
+  "mergedPct": 79.8,
+  "biggestBlobPx": 28533
+ },
+ {
+  "id": "c1-3",
+  "biome": "Settlement shelf",
+  "med": 105,
+  "maskPct": 2.1,
+  "countedPct": 90.5,
+  "mergedPct": 0,
+  "biggestBlobPx": 0
+ },
+ {
+  "id": "c2-3",
+  "biome": "Heather moor",
+  "med": 111,
+  "maskPct": 2.5,
+  "countedPct": 91.5,
+  "mergedPct": 0,
+  "biggestBlobPx": 0
+ },
+ {
+  "id": "c3-3",
+  "biome": "Heather moor",
+  "med": 90,
+  "maskPct": 6.6,
+  "countedPct": 39.8,
+  "mergedPct": 53.6,
+  "biggestBlobPx": 101509
+ },
+ {
+  "id": "c4-3",
+  "biome": "Construction quarry",
+  "med": 59,
+  "maskPct": 1.6,
+  "countedPct": 21.5,
+  "mergedPct": 68.4,
+  "biggestBlobPx": 45370
+ }
+]
