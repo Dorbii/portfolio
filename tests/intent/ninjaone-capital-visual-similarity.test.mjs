@@ -23,7 +23,7 @@ test("NinjaOne Capital live composition reaches the concept-level city-region in
   const { acceptance, capture, metric } = result.evidence;
   assert.deepEqual(capture.referenceDimensions, [1448, 1086]);
   assert.deepEqual(capture.camera.origin, [0.125, 0]);
-  assert.deepEqual(capture.camera.span, [0.25, 1 / 3]);
+  assert.deepEqual(capture.camera.span, [0.125, 1 / 6]);
   assert.equal(metric.ignores, "UI and accepted L1-L3 background pixels");
   assert.deepEqual(
     metric.districtMetrics.map(({ id }) => id),

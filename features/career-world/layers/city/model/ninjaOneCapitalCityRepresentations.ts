@@ -378,7 +378,7 @@ Readonly<Record<NinjaOneCapitalCityProofViewId, DetailTierId>> = Object.freeze({
 });
 
 export const NINJAONE_CAPITAL_CITY_DETAIL_POLICY = Object.freeze({
-  closeAssetPreloadSpan: 0.12,
+  closeAssetPreloadSpan: 0.06,
   siteAssetPreloadSpan: DETAIL_POLICY.siteAssetPreloadSpan,
   tierMaximumSpan: Object.freeze({
     capital: DETAIL_POLICY.tierMaximumSpan.capital,

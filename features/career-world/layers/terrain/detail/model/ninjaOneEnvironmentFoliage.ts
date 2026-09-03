@@ -101,7 +101,7 @@ const EXPECTED_SOURCE_MASTER_PATH =
 const RESOURCE_PATH_PREFIX =
   "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/";
 const ENVIRONMENT_WORLD_ORIGIN = Object.freeze([0.125, 0] as Pair);
-const ENVIRONMENT_WORLD_SPAN = Object.freeze([0.25, 1 / 3] as Pair);
+const ENVIRONMENT_WORLD_SPAN = Object.freeze([0.125, 1 / 6] as Pair);
 const RUNTIME_TARGET_DIMENSIONS = Object.freeze([5760, 4320] as Pair);
 
 function finitePair(values: readonly number[], label: string): Pair {
@@ -156,13 +156,13 @@ if (
   || manifest.sourceMaster.sha256.length !== 64
   || registrationArtboard.join(",") !== "1440,1080"
   || manifest.registration.boundingWorldView.origin.join(",") !== "0.125,0"
-  || manifest.registration.boundingWorldView.span.join(",") !== `0.25,${1 / 3}`
+  || manifest.registration.boundingWorldView.span.join(",") !== `0.125,${1 / 6}`
   || manifest.registration.masterDimensions.join(",") !== "5760,4320"
   || manifest.registration.runtimeAtlasPageGrid.join(",") !== "3,3"
   || manifest.registration.sourcePixelsPerArtboardUnit !== 4
   || manifest.registration.runtimeAtlasPixelsPerArtboardUnit !== 4
-  || manifest.eligibility.maxDetailEnterSpan !== 0.12
-  || manifest.eligibility.maxDetailRetainSpan !== 0.14
+  || manifest.eligibility.maxDetailEnterSpan !== 0.06
+  || manifest.eligibility.maxDetailRetainSpan !== 0.07
   || manifest.eligibility.viewportOverscanRatio !== 0.25
   || manifest.budgets.maximumSelectedGroups !== 32
   || manifest.budgets.maximumSupplementalNodes !== 64

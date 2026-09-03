@@ -24,7 +24,7 @@
     "landMaskIoU": 0.8872321242804633,
     "skillAnchorRole": "promotion-point-with-explicit-ground-offset",
     "worldOrigin": [0.125, 0],
-    "worldSpan": [0.25, 0.3333333333333333]
+    "worldSpan": [0.125, 0.16666666666666666]
   },
   "runtimePolicy": {
     "renderUnit": "individual-node",

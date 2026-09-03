@@ -55,17 +55,19 @@ const TIERS = Object.freeze({
 // The owner-approved interactive floor presents the full canon at 1:1. The
 // capital derivative must never be enlarged past its native width; the
 // intermediate derivative occupies the remaining approach to that floor.
-export const NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN = 0.0825;
+export const NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN = 0.04125;
 
-// 0.0825 above is a bare span, so it only lands on 1:1 for one window width
+// 0.04125 above is a bare span, so it only lands on 1:1 for one window width
 // (about 1303px). On a wider viewport the same span magnifies the canon --
 // roughly 1.5x at 1948px -- which is the softness seen when the camera is
 // allowed past the art. Derive the floor from the live viewport instead.
 //
-// The capital envelope's world span is immutable at 0.25 (world-territories-r4,
-// asserted by test) and the master artboard is 1448 wide.
+// The capital envelope's world span is DERIVED, not immutable: it expresses
+// D05's ground footprint against the world plane, so it halved to 0.125 when
+// the plane's pixels doubled (owner ruling 2026-09-03, Option B). D05 itself
+// does not move, and the master artboard is still 1448 wide.
 const MASTER_ARTBOARD_WIDTH = 1448;
-const CAPITAL_ENVELOPE_WORLD_SPAN_X = 0.25;
+const CAPITAL_ENVELOPE_WORLD_SPAN_X = 0.125;
 const D05_CANON_WORLD_SPAN_X =
   (registration.destinationMasterBounds[2]
     - registration.destinationMasterBounds[0])

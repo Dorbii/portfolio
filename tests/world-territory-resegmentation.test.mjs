@@ -141,6 +141,6 @@ test("territory resegmentation assigns every significant island to its ruled own
   const ninjaOne = manifest.territories.find(({ id }) => id === "ninjaone");
   assert.deepEqual(ninjaOne.development.capitalEnvelope, {
     origin: [0.125, 0],
-    span: [0.25, 0.3333333333333333],
+    span: [0.125, 0.16666666666666666],
   });
 });

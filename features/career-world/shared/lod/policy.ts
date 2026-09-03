@@ -8,36 +8,36 @@ export type DetailTierId =
   | "close";
 
 const POLICY_CAMERA_MINIMUM_SPAN:
-  typeof import("../camera.ts").CAMERA_MINIMUM_SPAN = 0.04;
+  typeof import("../camera.ts").CAMERA_MINIMUM_SPAN = 0.02;
 
 export const DETAIL_POLICY = Object.freeze({
   cameraMinimumSpan: POLICY_CAMERA_MINIMUM_SPAN,
-  territoryAssetPreloadSpan: 0.9,
-  capitalAssetPreloadSpan: 0.4,
-  siteAssetPreloadSpan: 0.16,
-  closeAssetPreloadSpan: 0.1,
+  territoryAssetPreloadSpan: 0.45,
+  capitalAssetPreloadSpan: 0.2,
+  siteAssetPreloadSpan: 0.08,
+  closeAssetPreloadSpan: 0.05,
   tierMaximumSpan: Object.freeze({
     world: 1,
-    territory: 0.78,
-    capital: 0.34,
-    site: 0.1,
-    close: 0.075,
+    territory: 0.39,
+    capital: 0.17,
+    site: 0.05,
+    close: 0.0375,
   }),
   worldToTerritory: Object.freeze({
-    startSpan: 0.86,
-    endSpan: 0.64,
+    startSpan: 0.43,
+    endSpan: 0.32,
   }),
   territoryToCapital: Object.freeze({
-    startSpan: 0.38,
-    endSpan: 0.27,
+    startSpan: 0.19,
+    endSpan: 0.135,
   }),
   capitalToSite: Object.freeze({
-    startSpan: 0.15,
-    endSpan: 0.1,
+    startSpan: 0.075,
+    endSpan: 0.05,
   }),
   siteToClose: Object.freeze({
-    startSpan: 0.09,
-    endSpan: 0.075,
+    startSpan: 0.045,
+    endSpan: 0.0375,
   }),
   renderScale: Object.freeze({
     world: 1,

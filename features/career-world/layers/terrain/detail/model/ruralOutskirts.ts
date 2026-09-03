@@ -45,8 +45,8 @@ interface Bounds {
   readonly bottom: number;
 }
 
-const MIN_FOOTPRINT_SPAN = 0.003;
-const MAX_FOOTPRINT_SPAN = 0.03;
+const MIN_FOOTPRINT_SPAN = 0.0015;
+const MAX_FOOTPRINT_SPAN = 0.015;
 const MIN_SCENERY_SCALE = 0.65;
 const MAX_SCENERY_SCALE = 1.4;
 

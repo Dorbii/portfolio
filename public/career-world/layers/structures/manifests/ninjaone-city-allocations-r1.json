@@ -14,12 +14,12 @@
       "ownerId": "project-kaizen-agent",
       "bounds": {
         "origin": [
-          0.04,
-          0.02
+          0.0825,
+          0.01
         ],
         "span": [
-          0.26,
-          0.4
+          0.13,
+          0.2
         ]
       },
       "color": "#7fc2d9"

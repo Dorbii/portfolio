@@ -28,12 +28,12 @@
         0.988148
       ],
       "footprintSpan": [
-        0.0146,
-        0.02596
+        0.0073,
+        0.01298
       ],
       "territoryAnchor": [
-        0.23,
-        0.189
+        0.1775,
+        0.0945
       ],
       "supportedSkillArchetypeIds": [
         "safe-writes",

@@ -10,12 +10,12 @@
       "id": "ninjaone-northwest-furrows",
       "kind": "field-furrows",
       "anchor": [
-        0.082,
-        0.118
+        0.1035,
+        0.059
       ],
       "footprintSpan": [
-        0.022,
-        0.014
+        0.011,
+        0.007
       ],
       "headingDegrees": 8,
       "scale": 1.08
@@ -24,12 +24,12 @@
       "id": "ninjaone-northwest-grove",
       "kind": "grove",
       "anchor": [
-        0.166,
-        0.105
+        0.1455,
+        0.0525
       ],
       "footprintSpan": [
-        0.017,
-        0.016
+        0.0085,
+        0.008
       ],
       "headingDegrees": 350,
       "scale": 0.96
@@ -38,12 +38,12 @@
       "id": "ninjaone-upper-meadow-wall",
       "kind": "stone-wall",
       "anchor": [
-        0.18,
-        0.135
+        0.1525,
+        0.0675
       ],
       "footprintSpan": [
-        0.021,
-        0.011
+        0.0105,
+        0.0055
       ],
       "headingDegrees": 14,
       "scale": 1.04
@@ -52,12 +52,12 @@
       "id": "ninjaone-kaizen-south-clearing",
       "kind": "clearing",
       "anchor": [
-        0.24,
-        0.35
+        0.1825,
+        0.175
       ],
       "footprintSpan": [
-        0.019,
-        0.015
+        0.0095,
+        0.0075
       ],
       "headingDegrees": 10,
       "scale": 0.98
@@ -66,12 +66,12 @@
       "id": "ninjaone-western-hedgerow",
       "kind": "hedgerow",
       "anchor": [
-        0.105,
-        0.305
+        0.115,
+        0.1525
       ],
       "footprintSpan": [
-        0.022,
-        0.012
+        0.011,
+        0.006
       ],
       "headingDegrees": 164,
       "scale": 1.04
@@ -81,12 +81,12 @@
     {
       "id": "ninjaone-easter-egg-slot-northwest-hollow",
       "anchor": [
-        0.12,
-        0.17
+        0.1225,
+        0.085
       ],
       "footprintSpan": [
-        0.012,
-        0.012
+        0.006,
+        0.006
       ],
       "headingDegrees": 0,
       "content": null
@@ -94,12 +94,12 @@
     {
       "id": "ninjaone-easter-egg-slot-kaizen-south",
       "anchor": [
-        0.165,
-        0.34
+        0.145,
+        0.17
       ],
       "footprintSpan": [
-        0.012,
-        0.012
+        0.006,
+        0.006
       ],
       "headingDegrees": 0,
       "content": null

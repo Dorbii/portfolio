@@ -14,8 +14,8 @@
       "physicalScaleClaim": false,
       "spatialContract": "registered semantic envelope; not a physical city scale",
       "canonHandoff": {
-        "startsAtMaximumCameraSpan": 0.34,
-        "completesAtMaximumCameraSpan": 0.27,
+        "startsAtMaximumCameraSpan": 0.17,
+        "completesAtMaximumCameraSpan": 0.135,
         "tier": "capital"
       }
     }

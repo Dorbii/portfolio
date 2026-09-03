@@ -68,7 +68,7 @@ test("environment proof owns a semantic city-free B1 B2 C1 C2 stack", async () =
   assert.deepEqual(NINJAONE_ENVIRONMENT_GRID_CELLS, ["B1", "B2", "C1", "C2"]);
   assert.deepEqual(manifest.registration.gridCells, ["B1", "B2", "C1", "C2"]);
   assert.deepEqual(NINJAONE_ENVIRONMENT_WORLD_ORIGIN, [0.125, 0]);
-  assert.deepEqual(NINJAONE_ENVIRONMENT_WORLD_SPAN, [0.25, 1 / 3]);
+  assert.deepEqual(NINJAONE_ENVIRONMENT_WORLD_SPAN, [0.125, 1 / 6]);
   assert.deepEqual(NINJAONE_ENVIRONMENT_ARTBOARD, [1440, 1080]);
   assert.deepEqual(NINJAONE_ENVIRONMENT_LAYER_ORDER, [
     "terrain-geology",

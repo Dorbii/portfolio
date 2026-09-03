@@ -172,7 +172,7 @@ const EXPECTED_VOID_MASK_TILE_IDS = Object.freeze([
   "r1-c3",
 ] as const);
 const ENVIRONMENT_WORLD_ORIGIN = Object.freeze([0.125, 0] as Pair);
-const ENVIRONMENT_WORLD_SPAN = Object.freeze([0.25, 1 / 3] as Pair);
+const ENVIRONMENT_WORLD_SPAN = Object.freeze([0.125, 1 / 6] as Pair);
 
 function finitePair(values: readonly number[], label: string): Pair {
   if (values.length !== 2 || values.some((value) => !Number.isFinite(value))) {
