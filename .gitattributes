@@ -4,7 +4,13 @@
 *.jpeg binary
 *.webp binary
 *.woff2 binary
-public/career-world/capitals/ninjaone/environment/manifests/inland-water-r1.json text eol=lf
+# Generated manifests are written LF by their builders and hashed byte-wise by
+# the determinism and asset-hash tests. Letting checkout convert them to CRLF
+# makes those tests pass or fail depending on whether a builder has run since
+# checkout - measured 2026-09-03 on the foliage suite: 9/0 with LF, 8/1 with
+# CRLF, same code. The single-file rule this replaces was the same fix, found
+# once and not generalised.
+public/career-world/**/*.json text eol=lf
 # the solidified gate hashes raw bytes; line-ending conversion on checkout
 # would false-trip it, so these stay LF everywhere
 tools/world-authoring/* text eol=lf
