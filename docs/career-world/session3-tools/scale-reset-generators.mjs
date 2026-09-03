@@ -24,6 +24,9 @@ function sub(path, find, replace, label, count = 1) {
   const crlf = raw.includes("\r\n");
   const text = raw.replace(/\r\n/g, "\n");
   const hits = text.split(find).length - 1;
+  // Already present is a no-op, not an error: these are exact text edits, so
+  // the script stays a re-runnable record of the pass rather than a one-shot.
+  if (hits === 0 && text.includes(replace)) { changes.push(`${path}  ${label}  (already applied)`); return; }
   if (hits !== count) throw new Error(`${path}: expected ${count} of ${JSON.stringify(find)}, found ${hits}`);
   const after = text.split(find).join(replace);
   changes.push(`${path}  ${label}`);
