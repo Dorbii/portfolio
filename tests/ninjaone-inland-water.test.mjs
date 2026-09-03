@@ -89,7 +89,7 @@ test("inland ownership texture localizes waterfall impact energy", async () => {
       "art-source/career-world/ninjaone-environment/production-r2/inland-water-r1/ninjaone-inland-water-authority-r1.json",
     ),
     readJson(
-      "public/career-world/capitals/ninjaone/environment/manifests/inland-water-r1.json",
+      "public/career-world/layers/inland-water/manifests/inland-water-r1.json",
     ),
   ]);
   const impactDescription = manifest.terrainEraseMask.channels.b;
@@ -173,7 +173,7 @@ test("inland effects preserve terrain ownership and break up cascade spray", asy
 
 test("non-water field pixels encode neutral flow", async () => {
   const manifest = await readJson(
-    "public/career-world/capitals/ninjaone/environment/manifests/inland-water-r1.json",
+    "public/career-world/layers/inland-water/manifests/inland-water-r1.json",
   );
   const { data, info } = await sharp(
     runtimeAssetFile(manifest.field.path),
@@ -305,7 +305,7 @@ test("production inland-habitat sprites are compact verified alpha derivatives",
 
 test("pond habitat stays inside the registered B2 tarn authority", async () => {
   const manifest = await readJson(
-    "public/career-world/capitals/ninjaone/environment/manifests/inland-water-r1.json",
+    "public/career-world/layers/inland-water/manifests/inland-water-r1.json",
   );
   const tarn = manifest.segments.find(({ id }) => id === "b2-tarn");
   assert.ok(tarn);

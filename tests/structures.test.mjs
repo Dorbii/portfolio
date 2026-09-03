@@ -9,10 +9,6 @@ import {
 } from "../features/career-world/shared/lod.ts";
 import { WORLD_PLANE } from "../features/career-world/shared/world.ts";
 import { DETAIL_POLICY } from "../features/career-world/shared/lod.ts";
-import {
-  NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN,
-  resolveD05CanonOneToOneMinimumSpan,
-} from "../features/career-world/layers/city/model/ninjaOneCapitalD05Concept.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -921,28 +917,19 @@ test("NinjaOne controls expose progressive map destinations without affecting la
     /interactiveArtResolvingMinimumSpan\([\s\S]*?DETAIL_POLICY\.cameraMinimumSpan/,
   );
   assert.match(scene, /interactiveCameraMinimumSpan\(camera, viewportSize\)/);
-  // The floor is derived from the live viewport rather than a bare span, so a
-  // wide window can no longer zoom past the canon's 1:1 resolving power.
-  // It must still reproduce the owner-approved cap at its reference width.
-  assert.ok(
-    Math.abs(
-      resolveD05CanonOneToOneMinimumSpan(1303)
-        - NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN,
-    ) < NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN * 6e-4,
+  // The zoom floor is still derived from the live viewport and from the finest
+  // art on screen, so a wide window cannot magnify pixels no source carries.
+  // What supplies that art changed - it was the D05 canon, it is now the
+  // authored land - so the rule is asserted against the scene rather than
+  // against a constant the capital used to export.
+  assert.match(scene, /LAND_SITE_TILE_PX = 2048/);
+  assert.match(
+    scene,
+    /LAND_ART_PX_PER_WORLD_PX = LAND_SITE_TILE_PX \/ \(WORLD_PLANE\.width \/ 16\)/,
   );
-  assert.ok(
-    resolveD05CanonOneToOneMinimumSpan(1948)
-      > NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN,
-    "a wider viewport must stop the camera sooner, not later",
-  );
-  for (const width of [320, 1303, 1948, 2560, 3840]) {
-    const floor = resolveD05CanonOneToOneMinimumSpan(width);
-    assert.ok(floor > 0 && floor <= 1, `floor out of range at ${width}`);
-  }
-  assert.equal(
-    resolveD05CanonOneToOneMinimumSpan(0),
-    NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN,
-    "an unmeasured viewport must fall back to the owner-approved cap",
+  assert.match(
+    scene,
+    /viewportSize\[0\] \/ \(WORLD_PLANE\.width \* LAND_ART_PX_PER_WORLD_PX\)/,
   );
   assert.ok(DETAIL_POLICY.cameraMinimumSpan > 0);
   assert.match(scene, /resolveProjectFocusView/);
