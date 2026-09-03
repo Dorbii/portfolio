@@ -739,7 +739,7 @@ async function build() {
     registration: {
       artboard: ARTBOARD,
       boundingWorldView: {
-        origin: [0.125, 0],
+        origin: [0.278125, 0.2],
         span: [0.125, 1 / 6],
       },
       coveredGridCells: [...new Set(instances.map(({ gridCell }) => gridCell))].sort(),

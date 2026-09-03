@@ -25,7 +25,7 @@ const DETAIL_DIMENSIONS = Object.freeze([512, 512] as const);
 const RIVERBED_DIMENSIONS = Object.freeze([512, 512] as const);
 const SURFACE_DIMENSIONS = Object.freeze([1024, 512] as const);
 const OWNERSHIP_DIMENSIONS = Object.freeze([576, 912] as const);
-const REGION_ORIGIN = Object.freeze([0.125, 0] as const);
+const REGION_ORIGIN = Object.freeze([0.278125, 0.2] as const);
 const REGION_SPAN = Object.freeze([0.125, 1 / 6] as const);
 
 const UNIFORM_NAMES = [

@@ -100,7 +100,7 @@ const EXPECTED_SOURCE_MASTER_PATH =
   "/art-source/career-world/ninjaone-environment/production-r2/ninjaone-environment-terrain-master-detail-r8.png";
 const RESOURCE_PATH_PREFIX =
   "/career-world/capitals/ninjaone/environment/shared/foliage-native-r4/";
-const ENVIRONMENT_WORLD_ORIGIN = Object.freeze([0.125, 0] as Pair);
+const ENVIRONMENT_WORLD_ORIGIN = Object.freeze([0.278125, 0.2] as Pair);
 const ENVIRONMENT_WORLD_SPAN = Object.freeze([0.125, 1 / 6] as Pair);
 const RUNTIME_TARGET_DIMENSIONS = Object.freeze([5760, 4320] as Pair);
 
@@ -155,7 +155,7 @@ if (
   || manifest.sourceMaster.dimensions.join(",") !== "5760,4320"
   || manifest.sourceMaster.sha256.length !== 64
   || registrationArtboard.join(",") !== "1440,1080"
-  || manifest.registration.boundingWorldView.origin.join(",") !== "0.125,0"
+  || manifest.registration.boundingWorldView.origin.join(",") !== "0.278125,0.2"
   || manifest.registration.boundingWorldView.span.join(",") !== `0.125,${1 / 6}`
   || manifest.registration.masterDimensions.join(",") !== "5760,4320"
   || manifest.registration.runtimeAtlasPageGrid.join(",") !== "3,3"

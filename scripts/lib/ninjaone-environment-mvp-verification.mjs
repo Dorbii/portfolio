@@ -104,7 +104,7 @@ export const NINJAONE_MVP_FOLIAGE_CAMERA = Object.freeze({
   origin: Object.freeze([0.16875, 0.04375]),
   span: Object.freeze([0.0375, 0.0375]),
 });
-const ENVIRONMENT_ORIGIN = Object.freeze([0.125, 0]);
+const ENVIRONMENT_ORIGIN = Object.freeze([0.278125, 0.2]);
 const ENVIRONMENT_SPAN = Object.freeze([0.125, 1 / 6]);
 const ARTBOARD = Object.freeze([1440, 1080]);
 const TILE_DIMENSIONS = Object.freeze([1448, 1086]);

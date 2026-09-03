@@ -219,7 +219,7 @@ export const NINJAONE_ENVIRONMENT_WORLD_SPAN = finitePair(
   "registration.boundingWorldView.span",
 );
 export const NINJAONE_ENVIRONMENT_CAMERA: CameraView = Object.freeze({
-  origin: Object.freeze([0.11, 0] as Pair),
+  origin: Object.freeze([0.263125, 0.2] as Pair),
   span: Object.freeze([0.18, 0.18] as Pair),
 });
 export const NINJAONE_ENVIRONMENT_LAYER_ORDER = EXPECTED_LAYER_ORDER;

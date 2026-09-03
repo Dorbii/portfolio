@@ -253,7 +253,7 @@ const RESOURCE_DEFINITIONS = Object.freeze(
 const SELECTOR_CHECKPOINTS = Object.freeze({
   fixedB2Internal: Object.freeze({
     camera: Object.freeze({
-      origin: Object.freeze([0.14625, 0.115]),
+      origin: Object.freeze([0.299375, 0.315]),
       span: Object.freeze([0.02, 0.02]),
     }),
     expectedResourceIds: Object.freeze([
@@ -263,7 +263,7 @@ const SELECTOR_CHECKPOINTS = Object.freeze({
   }),
   fixedC2Internal: Object.freeze({
     camera: Object.freeze({
-      origin: Object.freeze([0.20875, 0.115]),
+      origin: Object.freeze([0.361875, 0.315]),
       span: Object.freeze([0.02, 0.02]),
     }),
     expectedResourceIds: Object.freeze([
@@ -292,8 +292,8 @@ function clampByte(value) {
 function cameraArtboardView(camera) {
   return Object.freeze({
     origin: Object.freeze([
-      (camera.origin[0] - 0.125) / 0.125 * ARTBOARD[0],
-      camera.origin[1] / (1 / 6) * ARTBOARD[1],
+      (camera.origin[0] - 0.278125) / 0.125 * ARTBOARD[0],
+      (camera.origin[1] - 0.2) / (1 / 6) * ARTBOARD[1],
     ]),
     span: Object.freeze([
       camera.span[0] / 0.125 * ARTBOARD[0],

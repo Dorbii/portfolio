@@ -3,13 +3,22 @@
   "id": "career-world/world-territories@r4",
   "status": "candidate-qa",
   "worldView": {
-    "origin": [0, 0],
-    "span": [1, 1]
+    "origin": [
+      0,
+      0
+    ],
+    "span": [
+      1,
+      1
+    ]
   },
   "segmentationMask": "../masks/territory-segmentation-r4.svg",
   "developmentContract": {
     "coordinateSpace": "normalized-world-top-left",
-    "consumerLayers": ["infrastructure", "structures"],
+    "consumerLayers": [
+      "infrastructure",
+      "structures"
+    ],
     "policy": [
       "The capital envelope is a registered boundary for the capital core, not the boundary of its territory or project towns.",
       "Capital-core work conforms to the accepted terrain inside the capital envelope; project towns are independently placed inside the owning territory mask.",
@@ -23,14 +32,29 @@
       "landmassId": "mainland",
       "maskColor": "#71b7d3",
       "focusView": {
-        "origin": [0, 0],
-        "span": [0.72, 0.72]
+        "origin": [
+          0,
+          0
+        ],
+        "span": [
+          0.72,
+          0.72
+        ]
       },
       "development": {
-        "capitalAnchor": [0.21,0.119135],
+        "capitalAnchor": [
+          0.340625,
+          0.2833333333333333
+        ],
         "capitalEnvelope": {
-          "origin": [0.125, 0],
-          "span": [0.125, 0.16666666666666666]
+          "origin": [
+            0.278125,
+            0.2
+          ],
+          "span": [
+            0.125,
+            0.16666666666666666
+          ]
         },
         "minimumLandCoverage": 0.7,
         "firstDetailTier": "territory",
@@ -49,14 +73,29 @@
       "landmassId": "mainland",
       "maskColor": "#d58a6d",
       "focusView": {
-        "origin": [0.27, 0.24],
-        "span": [0.52, 0.52]
+        "origin": [
+          0.27,
+          0.24
+        ],
+        "span": [
+          0.52,
+          0.52
+        ]
       },
       "development": {
-        "capitalAnchor": [0.4433, 0.5422],
+        "capitalAnchor": [
+          0.4433,
+          0.5422
+        ],
         "capitalEnvelope": {
-          "origin": [0.3977, 0.4782],
-          "span": [0.1256, 0.1328]
+          "origin": [
+            0.3977,
+            0.4782
+          ],
+          "span": [
+            0.1256,
+            0.1328
+          ]
         },
         "minimumLandCoverage": 0.7,
         "firstDetailTier": "territory",
@@ -75,14 +114,29 @@
       "landmassId": "independent-island",
       "maskColor": "#a9ba72",
       "focusView": {
-        "origin": [0.4873, 0.782],
-        "span": [0.18, 0.2]
+        "origin": [
+          0.4873,
+          0.782
+        ],
+        "span": [
+          0.18,
+          0.2
+        ]
       },
       "development": {
-        "capitalAnchor": [0.5773, 0.882],
+        "capitalAnchor": [
+          0.5773,
+          0.882
+        ],
         "capitalEnvelope": {
-          "origin": [0.5323, 0.8289],
-          "span": [0.0897, 0.1063]
+          "origin": [
+            0.5323,
+            0.8289
+          ],
+          "span": [
+            0.0897,
+            0.1063
+          ]
         },
         "minimumLandCoverage": 0.7,
         "firstDetailTier": "territory",
@@ -100,14 +154,29 @@
       "landmassId": "column-island",
       "maskColor": "#9b82ce",
       "focusView": {
-        "origin": [0.7001, 0.5552],
-        "span": [0.28, 0.3]
+        "origin": [
+          0.7001,
+          0.5552
+        ],
+        "span": [
+          0.28,
+          0.3
+        ]
       },
       "development": {
-        "capitalAnchor": [0.8401, 0.7052],
+        "capitalAnchor": [
+          0.8401,
+          0.7052
+        ],
         "capitalEnvelope": {
-          "origin": [0.8014, 0.6482],
-          "span": [0.1017, 0.1169]
+          "origin": [
+            0.8014,
+            0.6482
+          ],
+          "span": [
+            0.1017,
+            0.1169
+          ]
         },
         "minimumLandCoverage": 0.7,
         "firstDetailTier": "territory",
@@ -125,14 +194,29 @@
       "landmassId": "column-island",
       "maskColor": "#d8bb65",
       "focusView": {
-        "origin": [0.6236, 0.5408],
-        "span": [0.26, 0.3]
+        "origin": [
+          0.6236,
+          0.5408
+        ],
+        "span": [
+          0.26,
+          0.3
+        ]
       },
       "development": {
-        "capitalAnchor": [0.7536, 0.6908],
+        "capitalAnchor": [
+          0.7536,
+          0.6908
+        ],
         "capitalEnvelope": {
-          "origin": [0.7, 0.63],
-          "span": [0.0897, 0.1063]
+          "origin": [
+            0.7,
+            0.63
+          ],
+          "span": [
+            0.0897,
+            0.1063
+          ]
         },
         "minimumLandCoverage": 0.7,
         "firstDetailTier": "territory",

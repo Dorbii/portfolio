@@ -1,4 +1,4 @@
 export const WORLD_PLANE = Object.freeze({
-  width: 3344,
-  height: 1882,
+  width: 3472,
+  height: 1953,
 });

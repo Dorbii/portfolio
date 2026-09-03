@@ -147,7 +147,7 @@ export const NINJAONE_CAPITAL_CITY_LAYER_ARTBOARD = finitePair(
 export const NINJAONE_CAPITAL_CITY_LAYER_WORLD_ORIGIN = NINJAONE_ENVIRONMENT_WORLD_ORIGIN;
 export const NINJAONE_CAPITAL_CITY_LAYER_WORLD_SPAN = NINJAONE_ENVIRONMENT_WORLD_SPAN;
 export const NINJAONE_CAPITAL_CITY_LAYER_CAMERA: CameraView = Object.freeze({
-  origin: Object.freeze([5 / 48, 0] as Pair),
+  origin: Object.freeze([0.257291667, 0.2] as Pair),
   span: Object.freeze([1 / 6, 1 / 6] as Pair),
 });
 export const NINJAONE_CAPITAL_CITY_CONCEPT_CAMERA: CameraView = Object.freeze({
