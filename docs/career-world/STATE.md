@@ -731,10 +731,29 @@ nine self-checks against STATE's own figures:
   generated shaders plus generated `worldFields.ts`; **change the source,
   `art-source/ocean-animation/src/export_web.py`, and re-export.**
 
-**NEXT STEP:** scale reset step 1 (the no-op audit), then 2-5 in
-`SCALE-RESET-APPLY.md`, ending with registering the 20 cells — which is what
-makes the LoD test meaningful. Also fix the lock-10 `excludedElements` flaw
-above.
+**NEXT STEP — the scale-reset derivation pass.** Step 1 is DONE (the audit found
+no conflation to fix) and step 2 was ATTEMPTED AND REVERTED; read
+`docs/career-world/SCALE-RESET-APPLY.md` from the top, especially "Step 2
+ATTEMPTED AND REVERTED". It is a derivation pass, not a find-and-replace:
+**5 manifests hold a copy of the NinjaOne registration, 5 span literals are
+hardcoded in TS guards, and ~17 normalized span constants** (`maxDetailEnterSpan`,
+`maxDetailRetainSpan`, `viewportOverscanRatio`, ...) are relative to the plane.
+Enumerate all 27 with current value and derived candidate FIRST, then apply the
+whole set in one commit — editing until the app stops throwing is what failed.
+Every constant halves, which preserves current behaviour exactly (detail enters
+at the same ground zoom); that is arithmetic, not taste.
+
+**Control to use:** `node --experimental-strip-types --test
+tests/world-territory-resegmentation.test.mjs tests/ninjaone-environment-proof.test.mjs`
+is **16 pass / 1 fail, stable across runs**, and the one failure is a known red.
+Do NOT gate on the full suite — it carries 8 known reds (see SUITE HEALTH).
+The guards fail closed and caught every divergence loudly; trust them.
+
+**Then:** step 5, register the 20 cells -> the LoD test that has never run ->
+step 7, retire `stream-r3` (owner-authorised, but ONLY in that order: it is
+still the only tileset the runtime serves). Also fix the lock-10
+`excludedElements` flaw above, which would block c3-2 for containing its own
+briefed `giant-tree`.
 
 **OWNER RULING 2026-09-03 — the ocean/water layer is being REWORKED; ignore its
 current state.** *"honestly you can just ignore all the work for ocean/water
