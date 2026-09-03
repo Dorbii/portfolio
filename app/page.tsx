@@ -1,5 +1,4 @@
 import { CareerWorld } from "@/features/career-world";
-import type { NinjaOneCapitalCityProofViewId } from "@/features/career-world/layers/city";
 
 interface HomePageProps {
   readonly searchParams?: Promise<{
@@ -14,41 +13,16 @@ function primaryView(value: string | readonly string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
 
-function cityProofView(
-  value: string | readonly string[] | undefined,
-): NinjaOneCapitalCityProofViewId | null {
-  const candidate = primaryView(value);
-  return candidate === "world"
-    || candidate === "territory"
-    || candidate === "capital"
-    || candidate === "d01-site"
-    || candidate === "d01-close"
-    || candidate === "d02-site"
-    || candidate === "d02-close"
-    || candidate === "d03-site"
-    || candidate === "d03-close"
-    || candidate === "d04-site"
-    || candidate === "d04-close"
-    || candidate === "d05-site"
-    || candidate === "d05-close"
-    ? candidate
-    : null;
-}
-
 export default async function HomePage({ searchParams }: HomePageProps) {
   const resolvedSearchParams = await searchParams;
   const intent = primaryView(resolvedSearchParams?.intent);
-  const proofView = cityProofView(resolvedSearchParams?.lod);
   const view = primaryView(resolvedSearchParams?.view);
 
   switch (view) {
-    case "ninjaone-environment":
-      return <CareerWorld enableDevelopmentTools environmentProof />;
     case "ninjaone-capital-city-layer":
       return (
         <CareerWorld
           cityLayerProof
-          cityProofView={proofView}
           cityVisualIntent={intent === "concept"}
           enableDevelopmentTools
           enablePerformanceProbe

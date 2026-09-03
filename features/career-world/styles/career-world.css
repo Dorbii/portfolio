@@ -1477,21 +1477,6 @@ g[data-owner-id="project-kaizen-agent"].ambient-structure {
   aspect-ratio: 4 / 3;
 }
 
-.career-world:has(.career-world__viewport:not([data-city-proof-view="interactive"])) {
-  width: 100%;
-  padding: 0;
-  gap: 0;
-}
-
-.career-world:has(.career-world__viewport:not([data-city-proof-view="interactive"]))
-  .career-world__header {
-  display: none;
-}
-
-.career-world__viewport:not([data-city-proof-view="interactive"]) {
-  aspect-ratio: 4 / 3;
-}
-
 .ninjaone-capital-city {
   z-index: 8;
   width: 100%;
@@ -1570,11 +1555,6 @@ g[data-owner-id="project-kaizen-agent"].ambient-structure {
 
 .career-world__viewport[data-city-layer-proof="true"]:not([data-detail-tier="world"])
   .career-world__world-markers {
-  display: none;
-}
-
-.career-world__viewport:not([data-city-proof-view="interactive"])
-  :is(.career-world__controls, .career-world__status-panel, .career-world__layer-inspector) {
   display: none;
 }
 
