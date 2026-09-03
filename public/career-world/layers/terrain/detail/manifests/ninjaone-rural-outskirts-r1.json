@@ -10,8 +10,8 @@
       "id": "ninjaone-northwest-furrows",
       "kind": "field-furrows",
       "anchor": [
-        0.3855,
-        0.082777778
+        0.38575,
+        0.119277778
       ],
       "footprintSpan": [
         0.011,
@@ -24,8 +24,8 @@
       "id": "ninjaone-northwest-grove",
       "kind": "grove",
       "anchor": [
-        0.4275,
-        0.076277778
+        0.42775,
+        0.112777778
       ],
       "footprintSpan": [
         0.0085,
@@ -38,8 +38,8 @@
       "id": "ninjaone-upper-meadow-wall",
       "kind": "stone-wall",
       "anchor": [
-        0.4345,
-        0.091277778
+        0.43475,
+        0.127777778
       ],
       "footprintSpan": [
         0.0105,
@@ -52,8 +52,8 @@
       "id": "ninjaone-kaizen-south-clearing",
       "kind": "clearing",
       "anchor": [
-        0.4645,
-        0.198777778
+        0.46475,
+        0.235277778
       ],
       "footprintSpan": [
         0.0095,
@@ -66,8 +66,8 @@
       "id": "ninjaone-western-hedgerow",
       "kind": "hedgerow",
       "anchor": [
-        0.397,
-        0.176277778
+        0.39725,
+        0.212777778
       ],
       "footprintSpan": [
         0.011,
@@ -81,8 +81,8 @@
     {
       "id": "ninjaone-easter-egg-slot-northwest-hollow",
       "anchor": [
-        0.4045,
-        0.108777778
+        0.40475,
+        0.145277778
       ],
       "footprintSpan": [
         0.006,
@@ -94,8 +94,8 @@
     {
       "id": "ninjaone-easter-egg-slot-kaizen-south",
       "anchor": [
-        0.427,
-        0.193777778
+        0.42725,
+        0.230277778
       ],
       "footprintSpan": [
         0.006,
