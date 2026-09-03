@@ -147,31 +147,31 @@ test("one camera span resolves the detail tier for every layer", () => {
     "world",
   );
   assert.equal(
-    resolveDetailState({ origin: [0.2, 0.2], span: [0.5, 0.5] }).tier.id,
+    resolveDetailState({ origin: [0.2, 0.2], span: [0.25, 0.25] }).tier.id,
     "territory",
   );
   const capital = resolveDetailState({
     origin: [0.45, 0.45],
-    span: [0.15, 0.15],
+    span: [0.075, 0.075],
   }).tier;
   assert.equal(capital.id, "capital");
   assert.equal(capital.requiresAuthoredTile, true);
   const site = resolveDetailState({
     origin: [0.45, 0.45],
-    span: [0.085, 0.085],
+    span: [0.0425, 0.0425],
   }).tier;
   assert.equal(site.id, "site");
   assert.equal(site.requiresAuthoredTile, true);
   const close = resolveDetailState({
     origin: [0.45, 0.45],
-    span: [0.075, 0.075],
+    span: [0.0375, 0.0375],
   }).tier;
   assert.equal(close.id, "close");
   assert.equal(close.requiresAuthoredTile, true);
 });
 
 test("one central LOD policy owns thresholds and render budget", () => {
-  assert.equal(DETAIL_POLICY.cameraMinimumSpan, 0.04);
+  assert.equal(DETAIL_POLICY.cameraMinimumSpan, 0.02);
   assert.ok(
     DETAIL_POLICY.capitalAssetPreloadSpan
       > DETAIL_POLICY.territoryToCapital.startSpan,
@@ -192,10 +192,10 @@ test("one central LOD policy owns thresholds and render budget", () => {
     DETAIL_POLICY.tierMaximumSpan,
     {
       world: 1,
-      territory: 0.78,
-      capital: 0.34,
-      site: 0.1,
-      close: 0.075,
+      territory: 0.39,
+      capital: 0.17,
+      site: 0.05,
+      close: 0.0375,
     },
   );
   assert.equal(
@@ -310,23 +310,23 @@ test("LOD nodes and registered rasters share semantic transition weights", () =>
   });
   const transition = resolveDetailState({
     origin: [0.1, 0.1],
-    span: [0.75, 0.75],
+    span: [0.375, 0.375],
   });
   const territory = resolveDetailState({
     origin: [0.2, 0.2],
-    span: [0.41, 0.41],
+    span: [0.205, 0.205],
   });
   const capital = resolveDetailState({
     origin: [0.4, 0.4],
-    span: [0.12, 0.12],
+    span: [0.06, 0.06],
   });
   const site = resolveDetailState({
     origin: [0.45, 0.45],
-    span: [0.09, 0.09],
+    span: [0.045, 0.045],
   });
   const close = resolveDetailState({
     origin: [0.45, 0.45],
-    span: [0.075, 0.075],
+    span: [0.0375, 0.0375],
   });
 
   assert.equal(world.worldToTerritory, 0);

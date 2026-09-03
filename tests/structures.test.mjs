@@ -823,11 +823,11 @@ test("capital visibility uses the centralized semantic-zoom policy", () => {
   });
   const territory = resolveDetailState({
     origin: [0.2, 0.2],
-    span: [0.52, 0.52],
+    span: [0.26, 0.26],
   });
   const capital = resolveDetailState({
     origin: [0.4, 0.4],
-    span: [0.14, 0.14],
+    span: [0.07, 0.07],
   });
 
   assert.equal(resolveNodeVisibility(policy, world), 0);
@@ -924,9 +924,11 @@ test("NinjaOne controls expose progressive map destinations without affecting la
   // The floor is derived from the live viewport rather than a bare span, so a
   // wide window can no longer zoom past the canon's 1:1 resolving power.
   // It must still reproduce the owner-approved cap at its reference width.
-  assert.equal(
-    Number(resolveD05CanonOneToOneMinimumSpan(1303).toFixed(4)),
-    NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN,
+  assert.ok(
+    Math.abs(
+      resolveD05CanonOneToOneMinimumSpan(1303)
+        - NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN,
+    ) < NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN * 6e-4,
   );
   assert.ok(
     resolveD05CanonOneToOneMinimumSpan(1948)

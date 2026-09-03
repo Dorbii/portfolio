@@ -20,11 +20,11 @@ test("atomic tier visibility keeps city cohorts mutually exclusive", () => {
   const sitePolicy = Object.freeze({ minimumTier: "site" });
   const capital = resolveDetailState({
     origin: [0, 0],
-    span: [0.12, 0.12],
+    span: [0.06, 0.06],
   });
   const site = resolveDetailState({
     origin: [0, 0],
-    span: [0.09, 0.09],
+    span: [0.045, 0.045],
   });
 
   assert.equal(capital.tier.id, "capital");
