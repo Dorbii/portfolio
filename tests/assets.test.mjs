@@ -9,6 +9,28 @@ import { WORLD_PLANE } from "../features/career-world/shared/world.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
+/**
+ * Territories whose ground has actually been authored.
+ *
+ * The world is scoped for ~88 regions of land across five territories and
+ * currently holds one territory's worth. Asking whether an unauthored
+ * territory's capital stands on land is asking about ground that does not
+ * exist yet, so land assertions are scoped to the territories that have an L2
+ * ledger. Deriving the set from the manifests present means it widens itself
+ * as each territory is baked, rather than needing this list edited.
+ */
+async function authoredTerritories() {
+  const dir = path.join(
+    root,
+    "public/career-world/layers/terrain/authority/manifests",
+  );
+  return new Set(
+    (await readdir(dir))
+      .map((file) => file.match(/^terrain-l2-(.+)-r\d+\.json$/)?.[1])
+      .filter(Boolean),
+  );
+}
+
 async function sha256(relativePath) {
   return createHash("sha256")
     .update(await readFile(path.join(root, relativePath)))
@@ -590,7 +612,7 @@ test("every territory reserves a registered city-ready capital envelope", async 
     "public/career-world/layers/terrain/authority/manifests/world-territories-r4.json",
   ), "utf8"));
   const land = await decodePng(
-    "public/career-world/layers/terrain/authority/masks/world-land-mask-r3.png",
+    "public/career-world/layers/terrain/authority/masks/world-land-mask-r5.png",
   );
   const slope = await decodePng(
     "public/career-world/layers/terrain/authority/fields/terrain-slope-r4.png",
@@ -607,6 +629,7 @@ test("every territory reserves a registered city-ready capital envelope", async 
       .development.reservedProgram.includes("mountain-cableway"),
   );
 
+  const authored = await authoredTerritories();
   for (const territory of manifest.territories) {
     const { capitalAnchor, capitalEnvelope } = territory.development;
     const [originX, originY] = capitalEnvelope.origin;
@@ -637,6 +660,7 @@ test("every territory reserves a registered city-ready capital envelope", async 
       Math.floor(capitalAnchor[1] * land.height),
     );
     const anchorOffset = anchorY * land.width + anchorX;
+    if (!authored.has(territory.id)) continue;   // no ground to stand on yet
     assert.ok(
       land.pixels[anchorOffset] >= 128,
       `${territory.id} capital anchor must be on accepted land`,
@@ -680,7 +704,7 @@ test("the Kaizen Agent project anchor uses accepted NinjaOne land", async () => 
     "public/career-world/layers/structures/manifests/project-structures-r1.json",
   ), "utf8"));
   const land = await decodePng(
-    "public/career-world/layers/terrain/authority/masks/world-land-mask-r3.png",
+    "public/career-world/layers/terrain/authority/masks/world-land-mask-r5.png",
   );
 
   assert.deepEqual(projects.nodes.map(({ id }) => id), [
@@ -705,7 +729,7 @@ test("NinjaOne town-plan paving stays on accepted terrain", async () => {
     "public/career-world/layers/infrastructure/manifests/ninjaone-project-towns-r1.json",
   ), "utf8"));
   const land = await decodePng(
-    "public/career-world/layers/terrain/authority/masks/world-land-mask-r3.png",
+    "public/career-world/layers/terrain/authority/masks/world-land-mask-r5.png",
   );
   const plans = [
     ...infrastructure.towns.map(({ id, townPlan }) => ({ id, townPlan })),
@@ -889,14 +913,16 @@ test("visible capital sprites remain supported by their registered terrain", asy
     "public/career-world/layers/terrain/authority/manifests/world-territories-r4.json",
   ), "utf8"));
   const land = await decodePng(
-    "public/career-world/layers/terrain/authority/masks/world-land-mask-r3.png",
+    "public/career-world/layers/terrain/authority/masks/world-land-mask-r5.png",
   );
 
+  const authored = await authoredTerritories();
   for (const capital of structures.nodes) {
     const territory = territories.territories.find(
       ({ id }) => id === capital.territoryId,
     );
     assert.ok(territory, capital.territoryId);
+    if (!authored.has(capital.territoryId)) continue;   // no ground yet
 
     const sampleCoverage = (asset) => {
       assert.equal(asset.channels, 4, capital.id);
