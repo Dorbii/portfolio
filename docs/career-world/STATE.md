@@ -736,6 +736,26 @@ nine self-checks against STATE's own figures:
 makes the LoD test meaningful. Also fix the lock-10 `excludedElements` flaw
 above.
 
+**OWNER RULING 2026-09-03 — the ocean/water layer is being REWORKED; ignore its
+current state.** *"honestly you can just ignore all the work for ocean/water
+layer as long as we continue the rule of layer separation and keep providing
+the art with and without the water in it as we have been. I am gonna need to
+re-work that entire part."* So: do NOT investigate, repair or re-baseline
+anything ocean/water — that includes suite failures 134 (water/foliage wind
+coupling) and 140 (`profile.ocean.weather < 0.5`), the ocean coast-field
+disagreement in 21, and the ocean-generated shader constants in the scale
+reset. **Two things still bind and must not lapse while that rework happens:**
+(1) **layer separation from the first pixel** — a fused raster is an automatic
+FAIL; (2) **every L2 cell keeps delivering the art BOTH ways** — the paint with
+water cut out of the land layer, plus the water mask at source resolution, as
+`cell.mjs` does today. That contract is what makes the rework possible, so it
+is not negotiable even though the consumer is changing.
+
+**Closed as moot:** whether the ~405 `stream-r3` files an earlier session
+called "phantom stat-dirty" were really rebuilt tiles. Owner: *"does it matter
+since we are making new tiles anyways?"* — it does not. `stream-r3` is retired
+by the L2 registration; do not spend time resolving it.
+
 **SUITE HEALTH (measured 2026-09-03, R113).** From a pristine tree the suite is
 **9 failures, stable, tree stays clean**. STATE previously claimed one known red
 at `tests/ninjaone-capital-city-lod-routing.test.mjs` - **that file does not
