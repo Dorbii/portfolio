@@ -4,8 +4,15 @@
 // read "territory-local; world placement pending the world-scale-reset
 // re-derivation" since the cells were baked.
 //
+// Tile sizes come from the ART, not from the dev feed. A cell is 2048 kept art
+// px over 217 world px = 9.44 image px per world px (the ledger's
+// artPxPerWorldPx). The dev feed's 256/1024 was sized for a quarter-scale dev
+// placement; copying it here threw away most of the authored resolution and
+// made zoom blurry. site takes L0 (2048), capital takes L1 (1024) -- better
+// than stream-r3 managed at both tiers (3.85 and 9.63 px per world px).
+//
 // It follows `l2dev-manifest.mjs`, which proved the slicing, and differs in
-// the two ways that make it a registration rather than a dev placement:
+// the ways that make it a registration rather than a dev placement:
 //
 //   * cell bounds come from the LATTICE, not from a fraction of the territory
 //     plate -- cell (c,r) of the block at [3,1] is [(3+c)/16, (1+r)/9], span
@@ -60,15 +67,15 @@ for (const id of Object.keys(ledger.cells).sort()) {
   const [col, row] = id.slice(1).split("-").map(Number);
   const cap = `${id}-capital.webp`, site = `${id}-site.webp`;
   if (!DRY) {
-    await (await cellImage(3, col, row)).webp({ quality: 90, alphaQuality: 100 }).toFile(path.join(OUT_DIR, cap));
-    await (await cellImage(1, col, row)).webp({ quality: 90, alphaQuality: 100 }).toFile(path.join(OUT_DIR, site));
+    await (await cellImage(1, col, row)).webp({ quality: 90, alphaQuality: 100 }).toFile(path.join(OUT_DIR, cap));
+    await (await cellImage(0, col, row)).webp({ quality: 90, alphaQuality: 100 }).toFile(path.join(OUT_DIR, site));
   }
   tiles.push({
     id: `l2-${id}`,
     minimumTier: "capital",
     sources: {
-      capital: { path: base + cap, dimensions: [256, 256], decodedBytes: 256 * 256 * 4 },
-      site: { path: base + site, dimensions: [1024, 1024], decodedBytes: 1024 * 1024 * 4 },
+      capital: { path: base + cap, dimensions: [1024, 1024], decodedBytes: 1024 * 1024 * 4 },
+      site: { path: base + site, dimensions: [2048, 2048], decodedBytes: 2048 * 2048 * 4 },
     },
     worldBounds: {
       origin: [(BLOCK[0] + col) / COLS, (BLOCK[1] + row) / ROWS],

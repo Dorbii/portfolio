@@ -22,18 +22,18 @@
         "capital": {
           "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-0-capital.webp",
           "dimensions": [
-            256,
-            256
-          ],
-          "decodedBytes": 262144
-        },
-        "site": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-0-site.webp",
-          "dimensions": [
             1024,
             1024
           ],
           "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-0-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
         }
       },
       "worldBounds": {
@@ -54,18 +54,18 @@
         "capital": {
           "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-1-capital.webp",
           "dimensions": [
-            256,
-            256
-          ],
-          "decodedBytes": 262144
-        },
-        "site": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-1-site.webp",
-          "dimensions": [
             1024,
             1024
           ],
           "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-1-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
         }
       },
       "worldBounds": {
@@ -86,18 +86,18 @@
         "capital": {
           "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-2-capital.webp",
           "dimensions": [
-            256,
-            256
-          ],
-          "decodedBytes": 262144
-        },
-        "site": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-2-site.webp",
-          "dimensions": [
             1024,
             1024
           ],
           "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-2-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
         }
       },
       "worldBounds": {
@@ -118,18 +118,18 @@
         "capital": {
           "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-3-capital.webp",
           "dimensions": [
-            256,
-            256
-          ],
-          "decodedBytes": 262144
-        },
-        "site": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-3-site.webp",
-          "dimensions": [
             1024,
             1024
           ],
           "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-3-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
         }
       },
       "worldBounds": {
@@ -150,18 +150,18 @@
         "capital": {
           "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c1-0-capital.webp",
           "dimensions": [
-            256,
-            256
-          ],
-          "decodedBytes": 262144
-        },
-        "site": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c1-0-site.webp",
-          "dimensions": [
             1024,
             1024
           ],
           "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c1-0-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
         }
       },
       "worldBounds": {
@@ -182,18 +182,18 @@
         "capital": {
           "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c1-1-capital.webp",
           "dimensions": [
-            256,
-            256
-          ],
-          "decodedBytes": 262144
-        },
-        "site": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c1-1-site.webp",
-          "dimensions": [
             1024,
             1024
           ],
           "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c1-1-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
         }
       },
       "worldBounds": {
@@ -214,18 +214,18 @@
         "capital": {
           "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c1-2-capital.webp",
           "dimensions": [
-            256,
-            256
-          ],
-          "decodedBytes": 262144
-        },
-        "site": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c1-2-site.webp",
-          "dimensions": [
             1024,
             1024
           ],
           "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c1-2-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
         }
       },
       "worldBounds": {
@@ -246,18 +246,18 @@
         "capital": {
           "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c1-3-capital.webp",
           "dimensions": [
-            256,
-            256
-          ],
-          "decodedBytes": 262144
-        },
-        "site": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c1-3-site.webp",
-          "dimensions": [
             1024,
             1024
           ],
           "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c1-3-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
         }
       },
       "worldBounds": {
@@ -278,18 +278,18 @@
         "capital": {
           "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-0-capital.webp",
           "dimensions": [
-            256,
-            256
-          ],
-          "decodedBytes": 262144
-        },
-        "site": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-0-site.webp",
-          "dimensions": [
             1024,
             1024
           ],
           "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-0-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
         }
       },
       "worldBounds": {
@@ -310,18 +310,18 @@
         "capital": {
           "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-1-capital.webp",
           "dimensions": [
-            256,
-            256
-          ],
-          "decodedBytes": 262144
-        },
-        "site": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-1-site.webp",
-          "dimensions": [
             1024,
             1024
           ],
           "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-1-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
         }
       },
       "worldBounds": {
@@ -342,18 +342,18 @@
         "capital": {
           "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-2-capital.webp",
           "dimensions": [
-            256,
-            256
-          ],
-          "decodedBytes": 262144
-        },
-        "site": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-2-site.webp",
-          "dimensions": [
             1024,
             1024
           ],
           "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-2-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
         }
       },
       "worldBounds": {
@@ -374,18 +374,18 @@
         "capital": {
           "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-3-capital.webp",
           "dimensions": [
-            256,
-            256
-          ],
-          "decodedBytes": 262144
-        },
-        "site": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-3-site.webp",
-          "dimensions": [
             1024,
             1024
           ],
           "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-3-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
         }
       },
       "worldBounds": {
@@ -406,18 +406,18 @@
         "capital": {
           "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-0-capital.webp",
           "dimensions": [
-            256,
-            256
-          ],
-          "decodedBytes": 262144
-        },
-        "site": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-0-site.webp",
-          "dimensions": [
             1024,
             1024
           ],
           "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-0-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
         }
       },
       "worldBounds": {
@@ -438,18 +438,18 @@
         "capital": {
           "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-1-capital.webp",
           "dimensions": [
-            256,
-            256
-          ],
-          "decodedBytes": 262144
-        },
-        "site": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-1-site.webp",
-          "dimensions": [
             1024,
             1024
           ],
           "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-1-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
         }
       },
       "worldBounds": {
@@ -470,18 +470,18 @@
         "capital": {
           "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-2-capital.webp",
           "dimensions": [
-            256,
-            256
-          ],
-          "decodedBytes": 262144
-        },
-        "site": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-2-site.webp",
-          "dimensions": [
             1024,
             1024
           ],
           "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-2-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
         }
       },
       "worldBounds": {
@@ -502,18 +502,18 @@
         "capital": {
           "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-3-capital.webp",
           "dimensions": [
-            256,
-            256
-          ],
-          "decodedBytes": 262144
-        },
-        "site": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-3-site.webp",
-          "dimensions": [
             1024,
             1024
           ],
           "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-3-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
         }
       },
       "worldBounds": {
@@ -534,18 +534,18 @@
         "capital": {
           "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-0-capital.webp",
           "dimensions": [
-            256,
-            256
-          ],
-          "decodedBytes": 262144
-        },
-        "site": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-0-site.webp",
-          "dimensions": [
             1024,
             1024
           ],
           "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-0-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
         }
       },
       "worldBounds": {
@@ -566,18 +566,18 @@
         "capital": {
           "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-1-capital.webp",
           "dimensions": [
-            256,
-            256
-          ],
-          "decodedBytes": 262144
-        },
-        "site": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-1-site.webp",
-          "dimensions": [
             1024,
             1024
           ],
           "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-1-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
         }
       },
       "worldBounds": {
@@ -598,18 +598,18 @@
         "capital": {
           "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-2-capital.webp",
           "dimensions": [
-            256,
-            256
-          ],
-          "decodedBytes": 262144
-        },
-        "site": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-2-site.webp",
-          "dimensions": [
             1024,
             1024
           ],
           "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-2-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
         }
       },
       "worldBounds": {
@@ -630,18 +630,18 @@
         "capital": {
           "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-3-capital.webp",
           "dimensions": [
-            256,
-            256
-          ],
-          "decodedBytes": 262144
-        },
-        "site": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-3-site.webp",
-          "dimensions": [
             1024,
             1024
           ],
           "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-3-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
         }
       },
       "worldBounds": {
