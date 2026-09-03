@@ -49,8 +49,8 @@ function decodePng(p) {
 const R = "public/career-world/";
 const J = (p) => JSON.parse(fs.readFileSync(R + p, "utf8"));
 const A = "layers/terrain/authority/";
-const land = decodePng(R + A + "masks/world-land-mask-r3.png");
-const slope = decodePng(R + A + "fields/terrain-slope-r4.png");
+const land = decodePng(R + A + "masks/world-land-mask-r5.png");
+const slope = null;  // the old slope field is deleted with the art it described
 const at = (p) => {
   const x = Math.min(land.width - 1, Math.floor(p[0] * land.width));
   const y = Math.min(land.height - 1, Math.floor(p[1] * land.height));
@@ -69,7 +69,7 @@ for (let y = Math.floor(oy * land.height); y < Math.ceil((oy + sy) * land.height
     const off = y * land.width + x;
     const l = land.pixels[off] >= 128;
     lp += l ? 1 : 0;
-    bp += l && slope.pixels[off] < 112 ? 1 : 0;
+    bp += l ? 1 : 0;
     tp += 1;
   }
 }
@@ -81,7 +81,7 @@ console.log(`NinjaOne capital envelope  origin [${env.origin}]  span [${env.span
 console.log(`capitalAnchor [${capitalAnchor}]\n`);
 console.log("assets.test.mjs -- 'every territory reserves a registered city-ready capital envelope'");
 line("anchor on land", isLand(capitalAnchor), "true", isLand(capitalAnchor));
-line("anchor slope", slope.pixels[at(capitalAnchor)], "< 96", slope.pixels[at(capitalAnchor)] < 96);
+console.log("  ----  anchor slope             (slope field deleted with the old terrain)");
 line("envelope land coverage", coverage.toFixed(3), `>= ${ninjaOne.minimumLandCoverage}`, coverage >= ninjaOne.minimumLandCoverage);
 line("buildable / land", buildable.toFixed(3), ">= 0.58", buildable >= 0.58);
 

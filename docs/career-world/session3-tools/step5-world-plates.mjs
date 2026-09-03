@@ -71,8 +71,11 @@ for (let i = 0; i < mask.length; i += 1) {
   landPx += a ? 1 : 0;
 }
 if (!DRY) {
+  // MUST be single-channel greyscale. Every consumer -- assets.test.mjs
+  // included -- indexes the mask as `pixels[y * width + x]`, which silently
+  // reads the wrong bytes if sharp promotes it to RGB, as it does by default.
   await sharp(mask, { raw: { width: info.width, height: info.height, channels: 1 } })
-    .png().toFile(A + "masks/world-land-mask-r5.png");
+    .toColourspace("b-w").png().toFile(A + "masks/world-land-mask-r5.png");
 }
 const M = 0.4503, PLANE_M = [3472 * M, 1953 * M], REGION_A = (218 * M) ** 2;
 const frac = landPx / mask.length;
