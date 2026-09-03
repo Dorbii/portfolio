@@ -321,10 +321,10 @@ test("native close detail streams accepted lossless tiles within a bounded budge
 
 test("native detail selection never mounts an unbounded tile or supplemental set", () => {
   const cameras = [
-    { origin: [0.198, 0.18], span: [0.04, 0.04] },
-    { origin: [0.235, 0.145], span: [0.05, 0.05] },
-    { origin: [0.34, 0.02], span: [0.045, 0.045] },
-    { origin: [0.13, 0.26], span: [0.06, 0.06] },
+    { origin: [0.1615, 0.09], span: [0.02, 0.02] },
+    { origin: [0.18, 0.0725], span: [0.025, 0.025] },
+    { origin: [0.2325, 0.01], span: [0.0225, 0.0225] },
+    { origin: [0.1275, 0.13], span: [0.03, 0.03] },
   ];
   const allInstances = Array.from({ length: 9 }, (_, index) => ({
     animation: "canopy-sway",

@@ -39,8 +39,8 @@ const MAXIMUM_TERRAIN_TILES = 4;
 const MAXIMUM_SUPPLEMENTAL_NODES = 64;
 const MAXIMUM_SELECTED_GROUPS = 32;
 const NODES_PER_GROUP = 2;
-const MAX_DETAIL_ENTER_SPAN = 0.12;
-const MAX_DETAIL_RETAIN_SPAN = 0.14;
+const MAX_DETAIL_ENTER_SPAN = 0.06;
+const MAX_DETAIL_RETAIN_SPAN = 0.07;
 const TARGET_MASTER_DIMENSIONS = MASTER_SOURCE_DIMENSIONS;
 const TARGET_CELL_DIMENSIONS = Object.freeze([2880, 2160]);
 const TRIM_PADDING = 1;
@@ -740,7 +740,7 @@ async function build() {
       artboard: ARTBOARD,
       boundingWorldView: {
         origin: [0.125, 0],
-        span: [0.25, 1 / 3],
+        span: [0.125, 1 / 6],
       },
       coveredGridCells: [...new Set(instances.map(({ gridCell }) => gridCell))].sort(),
       grid: GRID,

@@ -42,29 +42,29 @@ const EXPECTED_SOURCE_IDS = Object.freeze([
   "r3-c0", "r3-c1", "r3-c2", "r3-c3",
 ]);
 const FIXED_CAMERAS = Object.freeze({
-  B2: Object.freeze({ origin: Object.freeze([0.1675, 0.23]), span: Object.freeze([0.04, 0.04]) }),
+  B2: Object.freeze({ origin: Object.freeze([0.14625, 0.115]), span: Object.freeze([0.02, 0.02]) }),
   C1: Object.freeze({
-    origin: Object.freeze([0.2925, 1 / 12 - 0.02]),
-    span: Object.freeze([0.04, 0.04]),
+    origin: Object.freeze([0.20875, 1 / 24 - 0.01]),
+    span: Object.freeze([0.02, 0.02]),
   }),
-  C2: Object.freeze({ origin: Object.freeze([0.2925, 0.23]), span: Object.freeze([0.04, 0.04]) }),
+  C2: Object.freeze({ origin: Object.freeze([0.20875, 0.115]), span: Object.freeze([0.02, 0.02]) }),
 });
 const INTERCELL_CAMERAS = Object.freeze({
   dense: Object.freeze({
-    origin: Object.freeze([0.1875, 0.18459422958870475]),
-    span: Object.freeze([0.074, 0.074]),
+    origin: Object.freeze([0.15625, 0.092297114794]),
+    span: Object.freeze([0.037, 0.037]),
   }),
   boundary: Object.freeze({
-    origin: Object.freeze([0.21958333305493183, 0.1883333333041626]),
-    span: Object.freeze([0.04, 0.04]),
+    origin: Object.freeze([0.172291666527, 0.094166666652]),
+    span: Object.freeze([0.02, 0.02]),
   }),
   horizontal: Object.freeze({
-    origin: Object.freeze([0.2925, 0.14666666666666667]),
-    span: Object.freeze([0.04, 0.04]),
+    origin: Object.freeze([0.20875, 0.073333333333]),
+    span: Object.freeze([0.02, 0.02]),
   }),
   waterfall: Object.freeze({
-    origin: Object.freeze([0.21958333305493183, 0.21296296296296297]),
-    span: Object.freeze([0.04, 0.04]),
+    origin: Object.freeze([0.172291666527, 0.106481481481]),
+    span: Object.freeze([0.02, 0.02]),
   }),
 });
 

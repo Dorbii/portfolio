@@ -7,7 +7,7 @@ import sharp from "sharp";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, "..");
-const WORLD_PLANE = Object.freeze({ width: 1672, height: 941 });
+const WORLD_PLANE = Object.freeze({ width: 3344, height: 1882 });
 const LAYER_PATH = path.join(
   ROOT,
   "features",

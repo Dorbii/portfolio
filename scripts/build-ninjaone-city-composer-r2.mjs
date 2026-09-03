@@ -26,7 +26,7 @@ const GRADE_PROFILES = Object.freeze({
 const RECOMMENDED_GRADE = GRADE_PROFILES.medium;
 const DUSK_CROP = Object.freeze({ left: 160, top: 350, width: 420, height: 430 });
 const CITY_WORLD_ORIGIN = Object.freeze([0.125, 0]);
-const CITY_WORLD_SPAN = Object.freeze([0.25, 1 / 3]);
+const CITY_WORLD_SPAN = Object.freeze([0.125, 1 / 6]);
 const S10_ISOLATION_CROP = Object.freeze({ left: 220, top: 543, width: 350, height: 332 });
 const ISOLATION_PASSES = Object.freeze([
   "district-mask-clip",

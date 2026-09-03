@@ -63,19 +63,19 @@ export const NINJAONE_MVP_CLOSE_ASSET_PRELOAD_MAXIMUM_CAMERA_SPAN = 0.075;
 export const NINJAONE_MVP_NATIVE_RELEASE_MAXIMUM_CAMERA_SPAN = 0.0875;
 export const NINJAONE_MVP_FIXED_CAMERAS = Object.freeze({
   B2: Object.freeze({
-    center: Object.freeze([0.1875, 0.25]),
-    origin: Object.freeze([0.1675, 0.23]),
-    span: Object.freeze([0.04, 0.04]),
+    center: Object.freeze([0.15625, 0.125]),
+    origin: Object.freeze([0.14625, 0.115]),
+    span: Object.freeze([0.02, 0.02]),
   }),
   C1: Object.freeze({
-    center: Object.freeze([0.3125, 1 / 12]),
-    origin: Object.freeze([0.2925, 1 / 12 - 0.02]),
-    span: Object.freeze([0.04, 0.04]),
+    center: Object.freeze([0.21875, 1 / 24]),
+    origin: Object.freeze([0.20875, 1 / 24 - 0.01]),
+    span: Object.freeze([0.02, 0.02]),
   }),
   C2: Object.freeze({
-    center: Object.freeze([0.3125, 0.25]),
-    origin: Object.freeze([0.2925, 0.23]),
-    span: Object.freeze([0.04, 0.04]),
+    center: Object.freeze([0.21875, 0.125]),
+    origin: Object.freeze([0.20875, 0.115]),
+    span: Object.freeze([0.02, 0.02]),
   }),
 });
 export const NINJAONE_MVP_CHECKPOINT_REFERENCES = Object.freeze({
@@ -100,19 +100,19 @@ export const NINJAONE_MVP_RESIDENCY_VISUAL_ISOLATION = Object.freeze({
   water: "visibility:hidden!important",
 });
 export const NINJAONE_MVP_FOLIAGE_CAMERA = Object.freeze({
-  center: Object.freeze([0.25, 0.125]),
-  origin: Object.freeze([0.2125, 0.0875]),
-  span: Object.freeze([0.075, 0.075]),
+  center: Object.freeze([0.1875, 0.0625]),
+  origin: Object.freeze([0.16875, 0.04375]),
+  span: Object.freeze([0.0375, 0.0375]),
 });
 const ENVIRONMENT_ORIGIN = Object.freeze([0.125, 0]);
-const ENVIRONMENT_SPAN = Object.freeze([0.25, 1 / 3]);
+const ENVIRONMENT_SPAN = Object.freeze([0.125, 1 / 6]);
 const ARTBOARD = Object.freeze([1440, 1080]);
 const TILE_DIMENSIONS = Object.freeze([1448, 1086]);
 const ALPHA_PRESENT = 16;
 const FRAME_DIFF_THRESHOLD = 6;
 const MAX_MOTION_MASK_COVERAGE = 0.25;
 const NATIVE_BUDGET_SWEEP_SPANS = Object.freeze([
-  0.04, 0.05, 0.055, 0.06, 0.061, 0.074, 0.075, 0.08, 0.0875, 0.09,
+  0.02, 0.025, 0.0275, 0.03, 0.0305, 0.037, 0.0375, 0.04, 0.04375, 0.045,
 ]);
 
 function foliageArtboardView(camera) {
@@ -1618,8 +1618,8 @@ export function auditCameraDecodedBudgets({
   for (const [id, checkpoint] of Object.entries(NINJAONE_MVP_FIXED_CAMERAS)) {
     addCamera(`checkpoint-${id}`, checkpoint);
   }
-  for (let x = 0.16; x <= 0.36; x += 0.00625) {
-    for (let y = 0.04; y <= 0.3; y += 0.00625) {
+  for (let x = 0.1425; x <= 0.2425; x += 0.003125) {
+    for (let y = 0.02; y <= 0.15; y += 0.003125) {
       for (const span of NATIVE_BUDGET_SWEEP_SPANS) {
         addCamera(`sweep-${round(x, 5)}-${round(y, 5)}-${span}`, {
             origin: [x - span / 2, y - span / 2],
