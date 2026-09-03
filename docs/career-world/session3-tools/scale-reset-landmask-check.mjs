@@ -58,6 +58,27 @@ const rederive = (p) => [ENV_O[0] + (p[0] - ENV_O[0]) * 0.5, ENV_O[1] + (p[1] - 
 const R = "public/career-world/";
 const J = (p) => JSON.parse(fs.readFileSync(R + p, "utf8"));
 
+// This script reads the LIVE manifests and applies the transform to what it
+// finds, so it only means anything BEFORE the apply. Run after, it transforms
+// already-transformed values and reports a second halving as if it were the
+// first -- which it did once, claiming 21 regressions where the real answer
+// was 4. Refuse rather than mislead.
+{
+  const span = J("layers/terrain/authority/manifests/world-territories-r4.json")
+    .territories.find(({ id }) => id === "ninjaone").development.capitalEnvelope.span;
+  if (Math.abs(span[0] - 0.25) > 1e-9) {
+    console.error(
+      `The scale reset is already applied (ninjaone capitalEnvelope.span is`
+      + ` [${span}], not [0.25, 1/3]).\n`
+      + `This script predicts the effect of applying it, so there is nothing`
+      + ` left for it to predict.\n`
+      + `To ask whether the capital stands on land NOW, test the manifest`
+      + ` positions as they are, without the transform.`,
+    );
+    process.exit(2);
+  }
+}
+
 // Every NinjaOne capital point the inventory re-derives.
 const points = [];
 const push = (label, p) => points.push([label, p]);
