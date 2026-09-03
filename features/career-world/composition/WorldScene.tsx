@@ -801,7 +801,6 @@ export function WorldScene({
         <TerritoryLandform
           camera={camera}
           detailState={detailState}
-          suppressDetailedStreaming={ninjaOneEnvironmentOwnsCamera}
         />
       ) : null}
       {oceanAuthorityVisible ? (
@@ -833,64 +832,24 @@ export function WorldScene({
           />
         ) : null}
       <>
-          {terrainAuthorityVisible ? (
-            <NinjaOneEnvironmentProof
-              active={isPageVisible}
-              camera={camera}
-              detailState={detailState}
-              onGeologyReadyChange={setNinjaOneGeologyReady}
-              proofMode={environmentProof}
-              showFoliage={terrainFoliageVisible}
-              showSupplementalDetail={terrainDetailVisible}
-            />
-          ) : null}
-          {!environmentProof && !focusIsDetailedNinjaOneCapital ? (
-            <>
-              <InfrastructureLayer
-                camera={camera}
-                detailState={detailState}
-                light={WORLD_LIGHT}
-              />
-              {terrainDetailVisible ? (
-                <TerrainDetailLayer
-                  camera={camera}
-                  detailState={detailState}
-                  light={WORLD_LIGHT}
-                />
-              ) : null}
-              <ActorsEffectsLayer
-                camera={camera}
-                detailState={detailState}
-                light={WORLD_LIGHT}
-              />
-              <StructuresLayer
-                camera={camera}
-                detailState={detailState}
-                light={WORLD_LIGHT}
-                onKaizenVisualReadyChange={setKaizenVisualReady}
-              />
-              {terrainFoliageVisible ? (
-                <FoliageLayer
-                  camera={camera}
-                  detailState={detailState}
-                />
-              ) : null}
-            </>
-          ) : null}
+          <InfrastructureLayer
+            camera={camera}
+            detailState={detailState}
+            light={WORLD_LIGHT}
+          />
+          <ActorsEffectsLayer
+            camera={camera}
+            detailState={detailState}
+            light={WORLD_LIGHT}
+          />
+          <StructuresLayer
+            camera={camera}
+            detailState={detailState}
+            light={WORLD_LIGHT}
+            onKaizenVisualReadyChange={setKaizenVisualReady}
+          />
       </>
-      {showNinjaOneCapital && cityAuthorityVisible ? (
-        <NinjaOneCapitalCityLayer
-          camera={camera}
-          detailState={detailState}
-          focusDistrict={focusedCityDistrict}
-          light={WORLD_LIGHT}
-          nativeFoliageFallback={cityProofView !== null || !terrainFoliageVisible}
-          preloadDistrict={cameraCityDistrict}
-          presentationOpacity={cityPresentationOpacity}
-          visibility={environmentLayerVisibility}
-          waterEffectTuning={d05WaterEffectTuning}
-        />
-      ) : null}
+
       {enableDevelopmentTools
           && (showGrid || showTopography || showTerritoryQa) ? (
         <DevelopmentOverlay
