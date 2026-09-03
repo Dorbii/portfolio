@@ -4,7 +4,14 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-03, later (current):** the NinjaOne L2 land territory is **20 of 20 cells** on `codex/land-lod-completion`, tree clean, nothing pushed. **The scale reset is DERIVED AND APPLIED.** The world plane is `3344 x 1882`, NinjaOne's capital envelope fraction is halved, and every camera/LoD span halved with it. One consequence is open and needs an owner ruling. **Resume from `SESSION 6 (2026-09-03) - RESUME HERE, ANY MODEL`** immediately below; everything under `SESSION 5` is older history.
+**2026-09-03, LATEST (current):** **STEP 5 IS DONE.** The world is a 16 x 9
+lattice of 97.7 m cells (`WORLD_PLANE 3472 x 1953`, cell 217 px); NinjaOne's
+20 authored cells are registered at cell `[3,1]` and the runtime serves them;
+the capital derives from `plan.json`'s capital shelf; and **the old land art is
+deleted** - 482 files including `stream-r3`, `terrain-relief-r6` and every
+`world-land-mask` r1-r4. Resume from `SESSION 7` immediately below.
+
+**2026-09-03, earlier:** the NinjaOne L2 land territory is **20 of 20 cells** on `codex/land-lod-completion`, tree clean, nothing pushed. **The scale reset is DERIVED AND APPLIED.** The world plane is `3344 x 1882`, NinjaOne's capital envelope fraction is halved, and every camera/LoD span halved with it. One consequence is open and needs an owner ruling. **Resume from `SESSION 6 (2026-09-03) - RESUME HERE, ANY MODEL`** immediately below; everything under `SESSION 5` is older history.
 
 The old D06 district was **deleted outright by owner ruling** ("nuke and boot") — all 67 asset paths and every code path; the app is green without it (typecheck PASS, focused suites green, production build PASS). The rebuild is in its survey/concept phase and is governed by a new **scale contract** and a **settled territory map**. One blocker stands between here and re-authoring D06: the site re-survey at correct resolution.
 
@@ -604,6 +611,87 @@ Five cells stand. Briefs ready for the next cells in
 adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 `brief-c3-1-r2.md` (magical gorge, rail gorge span), `brief-c2-2-r2.md`
 (bench country, waystation bench, hot spring).
+
+**SESSION 7 (2026-09-03) — RESUME HERE, ANY MODEL.** Step 5 landed. Read
+`SCALE-RESET-APPLY.md` for the arc; SESSION 6 below is the scale reset that
+preceded it.
+
+## THE RULING THAT CHANGED EVERYTHING
+
+Owner: *"all old constraints minus the tech ones should be gone — there
+shouldn't be any additional constraint for capital or territory minus the ones
+we have with the new work"*, and *"the authored grid is authoritative ... then
+we expand that grid as needed"*.
+
+A whole session was spent fitting the capital to `world-land-mask-r3`, which
+was **the old placeholder world**. The only surviving capital constraints are
+the scale contract (`0.13 m` per master unit, fixing D05 at `188.2 x 141.2 m`)
+and `plan.json`. Everything else — the envelope ORIGIN, `capitalAnchor`, the
+DEM, the site tiles, the segmentation shape — was old-world scaffolding.
+
+## THE WORLD IS A LATTICE
+
+`WORLD_PLANE 3472 x 1953 px` = **16 x 9 cells of 217 px**, exactly 16:9 with
+integer pixels. A cell is `97.72 m`; a region is 218 px; **they are the same
+thing to half a percent**, so the world is simply ~88 land cells and NinjaOne
+owns 20 of them. **Cell (c,r) is at `[c/16, r/9]`** — every registration an
+exact fraction. NinjaOne's block: cell `[3,1]`, 5 x 4.
+
+D05's master is exactly 4:3 and 2 x 1.5 cells is exactly 4:3, so the capital
+envelope IS `2 x 1.5` cells — span `[1/8, 1/6]`, origin `[0.278125, 0.2]`
+derived from the capital shelf at cell `[2,1]` off `[0.45, 0.55]`.
+
+**The coverage problem is resolved:** envelope land coverage **`0.983`**
+against a `0.700` gate (the old world managed `0.715`). Measured by
+`session3-tools/capital-on-land-check.mjs`.
+
+## WHAT THE OLD ART LEFT BEHIND
+
+Two defects worth remembering:
+
+- **sharp writes PNG as RGB by default.** The new land mask came out
+  3-channel, and every consumer indexes a mask as `pixels[y * width + x]` —
+  three channels reads the wrong bytes SILENTLY. `{ colours: 2 }` was worse (a
+  palette PNG). Use `toColourspace("b-w")` and **verify colour type 0 on disk**;
+  sharp's own metadata reports 3 channels either way.
+- **Content registered in world coordinates does not follow what it belongs
+  to.** Kaizen's foundry district and the capital's rural fringe stayed put
+  when Kaizen and the envelope moved; every one of their 170 points was in the
+  sea until they were carried across. Now 13 of 170.
+
+## SUITE: 158 pass / 22 fail (and three of those are already fixed)
+
+The run predates the last commit, so 14/15/17 now pass. Of the rest:
+
+- **~13 test DELETED ART and should be deleted with it** — 7, 8, 9, 10, 11,
+  12, 18, 19, 21, 22, 23, 125, 129. They assert the old relief's edge glow, the
+  old shoreline materials, the old topology model, `stream-r3` tiling, and
+  hashes of files that no longer exist. **Owner call: delete, or repoint the
+  ones whose RULE still applies to the new art (edge glow, content hashes).**
+- **3 are real content:** 16 and 164 (Kaizen's foundry district has block and
+  seam vertices on the authored coastline at its cell edge — 13 of 170 points,
+  wants an eye) and 101 (rural outskirts determinism, after their move).
+- **3 are the known baseline:** 49 (INTERIM hash pin), 134 and 140 (ocean).
+
+## NOT DELETED, AND WHY
+
+`terrain-dem-r4`, `terrain-height/slope-r4`, `terrain-site-tiles-r2` and
+`territory-segmentation-r4.svg`. The first three are what the buildability
+gates read; the segmentation still carries the five-territory topology, which
+is scoped and binding even though its SHAPE is stale. They need the other
+territories authored before they can be re-derived rather than dropped.
+
+**The old continents still show as black silhouettes** — that is the OCEAN
+layer drawing against its baked phase and flow fields, which encode the old
+coastline. Confirmed by hiding the water canvas. Owner-excluded; it clears when
+those fields are re-solved.
+
+## NEXT
+
+Rule on the ~13 tests of deleted art. Then Kaizen's foundry district against
+the coastline. Then Tanium's L2 land, planned against NinjaOne's block — the
+grid expands from here, and the world is scoped for ~88 land cells against the
+44.8 the old art held.
 
 **SESSION 6 (2026-09-03) — RESUME HERE, ANY MODEL.** The scale reset is
 **applied**: `docs/career-world/SCALE-RESET-APPLY.md` carries the full record,
