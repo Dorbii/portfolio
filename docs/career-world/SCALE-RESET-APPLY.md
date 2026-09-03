@@ -490,3 +490,69 @@ and the stream tilesets are addressed by fraction and do not move; re-cropping
 terrain is step 5's work. `viewportOverscanRatio` is dimensionless.
 `tierMaximumSpan.world` stays `1`. `camera.test.mjs` keeps its `[0.25, 1/3]`
 bounds rectangle and its `[1672, 941]` literal — neither is a registration.
+
+---
+
+## OWNER RULING 2026-09-03 — the authored grid is authoritative
+
+*"this is what I want and then we expand that grid as needed"*, on: the
+authored L2 grid defines NinjaOne's shape; the segmentation and coastline are
+re-derived **from** it; the mainland's shape changes; Tanium's L2 is planned
+against NinjaOne's new block.
+
+This retires a whole class of constraint. The capital had no business being
+fitted to `world-land-mask-r3` — that mask, `terrain-relief-r6`, the
+segmentation SVG cut from them, and the `stream-r3` tileset are the old world.
+The only capital constraints that survive are from the new work:
+
+- **the scale contract** — `0.13 m` per master unit, measured from D05's
+  masonry and a `2.1 m` doorway. It fixes D05's ground size at
+  `188.2 x 141.2 m`, and therefore the envelope SPAN. That part of the applied
+  reset stands on its own: `188.2 / 1506 = 0.125`, `141.2 / 847 = 1/6`.
+- **`plan.json`** — capital at cell `[2,1]` off `[0.45, 0.55]`, Kaizen `[4,0]`,
+  metrics-service `[0,1]`, vendy `[1,3]`, construction `[4,3]`; sound west,
+  cliffs east, land border south into Tanium.
+
+The envelope ORIGIN was the only thing being carried from the old world, and it
+is what put the capital in the sea. It now derives from the capital shelf.
+
+### The world is a lattice, and it is half-built
+
+Measured (`session3-tools/territory-budget-check.mjs`):
+
+| territory | % plane | regions | budget |
+|---|---|---|---|
+| ninjaone | 15.3% | 20.3 | 21 |
+| tanium | 10.8% | 14.3 | 21 |
+| column-technologies | 3.8% | 5.1 | |
+| ace-hardware | 2.5% | 3.3 | |
+| independent | 1.3% | 1.8 | |
+| **total** | **33.8%** | **44.8** | ~88 scoped |
+
+**The world holds half the land it is scoped for.** A cell (`97.6 m`) and a
+region (`98.2 m`) are the same thing to within 0.6%, so the world is simply a
+lattice of cells, ~88 of which are land, and NinjaOne owns 20 of them.
+
+### A foundation fix worth making now
+
+The current plane is **`15.43 x 8.68` cells — not an integer count**, so every
+future territory lands on an arbitrary fraction. `16 x 9` cells is
+`1561.6 x 878.4 m` = **`3468 x 1951 px`**, aspect `1.7778` — exactly the `16:9`
+that `world-land-layout-r1.json` already declares (the current plane is
+`1.7768`, missing it by 0.06%). That gives 144 cells, 96 at 2/3 land, and every
+territory boundary on a lattice line. One more `WORLD_PLANE` edit now; a
+permanent source of off-lattice fractions if not.
+
+### Step 5, restated
+
+1. Place NinjaOne's 5 x 4 block on the lattice.
+2. Derive the capital envelope from the capital shelf; Kaizen and the project
+   cities from theirs. Delete `capitalAnchor`'s old value.
+3. Re-derive the segmentation and land mask from the L2 art, composited into
+   the plane where it is authored and the old plate elsewhere.
+4. Retire the legacy scaffolding for NinjaOne's ground: DEM shelves, site
+   tiles, rural outskirts, the Kaizen foundry town plan.
+5. Point the release feed at `l2-ninjaone-r1`; then step 7 deletes `stream-r3`.
+
+The four failing tests are all questions the old mask asks. They die with it,
+or move to the L2 water masks as their source.
