@@ -67,7 +67,7 @@ test("environment proof owns a semantic city-free B1 B2 C1 C2 stack", async () =
   assert.equal(manifest.status, "environment-only-proof");
   assert.deepEqual(NINJAONE_ENVIRONMENT_GRID_CELLS, ["B1", "B2", "C1", "C2"]);
   assert.deepEqual(manifest.registration.gridCells, ["B1", "B2", "C1", "C2"]);
-  assert.deepEqual(NINJAONE_ENVIRONMENT_WORLD_ORIGIN, [0.125, 0]);
+  assert.deepEqual(NINJAONE_ENVIRONMENT_WORLD_ORIGIN, [0.278125, 0.2]);
   assert.deepEqual(NINJAONE_ENVIRONMENT_WORLD_SPAN, [0.125, 1 / 6]);
   assert.deepEqual(NINJAONE_ENVIRONMENT_ARTBOARD, [1440, 1080]);
   assert.deepEqual(NINJAONE_ENVIRONMENT_LAYER_ORDER, [
@@ -321,10 +321,10 @@ test("native close detail streams accepted lossless tiles within a bounded budge
 
 test("native detail selection never mounts an unbounded tile or supplemental set", () => {
   const cameras = [
-    { origin: [0.1615, 0.09], span: [0.02, 0.02] },
-    { origin: [0.18, 0.0725], span: [0.025, 0.025] },
-    { origin: [0.2325, 0.01], span: [0.0225, 0.0225] },
-    { origin: [0.1275, 0.13], span: [0.03, 0.03] },
+    { origin: [0.314625, 0.29], span: [0.02, 0.02] },
+    { origin: [0.333125, 0.2725], span: [0.025, 0.025] },
+    { origin: [0.385625, 0.21], span: [0.0225, 0.0225] },
+    { origin: [0.280625, 0.33], span: [0.03, 0.03] },
   ];
   const allInstances = Array.from({ length: 9 }, (_, index) => ({
     animation: "canopy-sway",

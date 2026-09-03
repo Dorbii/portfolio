@@ -67,12 +67,12 @@ import {
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 const FIXED_CAMERAS = Object.freeze({
-  B2: Object.freeze({ origin: [0.14625, 0.115], span: [0.02, 0.02] }),
+  B2: Object.freeze({ origin: [0.299375, 0.315], span: [0.02, 0.02] }),
   C1: Object.freeze({
-    origin: [0.20875, 1 / 24 - 0.01],
+    origin: [0.361875, 1 / 24 + 0.19],
     span: [0.02, 0.02],
   }),
-  C2: Object.freeze({ origin: [0.20875, 0.115], span: [0.02, 0.02] }),
+  C2: Object.freeze({ origin: [0.361875, 0.315], span: [0.02, 0.02] }),
 });
 
 function centeredCamera(center, span) {
@@ -106,9 +106,9 @@ function decodedTerrainKeys(plan) {
 
 test("world and territory keep native sources absent while the configured close preload admits detail", () => {
   const world = centeredCamera([0.5, 0.5], 1);
-  const territory = centeredCamera([0.1875, 0.1], 0.15);
-  const siteBeforePreload = centeredCamera([0.21875, 0.125], 0.0505);
-  const sitePreload = centeredCamera([0.21875, 0.125], 0.05);
+  const territory = centeredCamera([0.340625, 0.3], 0.15);
+  const siteBeforePreload = centeredCamera([0.371875, 0.325], 0.0505);
+  const sitePreload = centeredCamera([0.371875, 0.325], 0.05);
   const close = FIXED_CAMERAS.C2;
 
   for (const camera of [world, territory, siteBeforePreload]) {
@@ -141,7 +141,7 @@ test("close residency uses zoom hysteresis and survives rapid reverse zoom", () 
 });
 
 test("animated foliage enters through .06 and retains through .07", () => {
-  const cameraAtSpan = (span) => centeredCamera([0.1775, 0.055], span);
+  const cameraAtSpan = (span) => centeredCamera([0.330625, 0.255], span);
   const eligible = (span, previousEligible) => (
     resolveNinjaOneEnvironmentFoliageEligibility({
       active: true,
@@ -166,7 +166,7 @@ test("animated foliage enters through .06 and retains through .07", () => {
 });
 
 test("required seam nodes take priority before atomic two-node foliage groups", () => {
-  const westFoliageCamera = { origin: [0.16875, 0.04375], span: [0.0375, 0.0375] };
+  const westFoliageCamera = { origin: [0.321875, 0.24375], span: [0.0375, 0.0375] };
   const groupCapacity = (requiredSupplementalNodes) => (
     resolveNinjaOneEnvironmentOptionalGroupCapacity({
       maximumGroups: 3,
@@ -830,7 +830,7 @@ test("full required-supplement remount clears overlap readiness before promotion
 test("promotion cannot expose a six-tile preload view or create a visible gap", () => {
   // This view straddles three tile columns and two rows while still inside
   // the close preload threshold.
-  const crossing = centeredCamera([0.171875, 0.125], 0.0375);
+  const crossing = centeredCamera([0.325, 0.325], 0.0375);
   const plan = planFor(crossing);
   assert.ok(plan.visibleTerrainTileCount > NINJAONE_ENVIRONMENT_NATIVE_MAX_MOUNTED_TILES);
   assert.equal(plan.terrainTiles.length, NINJAONE_ENVIRONMENT_NATIVE_MAX_MOUNTED_TILES);

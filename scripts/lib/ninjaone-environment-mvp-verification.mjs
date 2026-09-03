@@ -63,18 +63,18 @@ export const NINJAONE_MVP_CLOSE_ASSET_PRELOAD_MAXIMUM_CAMERA_SPAN = 0.0375;
 export const NINJAONE_MVP_NATIVE_RELEASE_MAXIMUM_CAMERA_SPAN = 0.04375;
 export const NINJAONE_MVP_FIXED_CAMERAS = Object.freeze({
   B2: Object.freeze({
-    center: Object.freeze([0.15625, 0.125]),
-    origin: Object.freeze([0.14625, 0.115]),
+    center: Object.freeze([0.309375, 0.325]),
+    origin: Object.freeze([0.299375, 0.315]),
     span: Object.freeze([0.02, 0.02]),
   }),
   C1: Object.freeze({
-    center: Object.freeze([0.21875, 1 / 24]),
-    origin: Object.freeze([0.20875, 1 / 24 - 0.01]),
+    center: Object.freeze([0.371875, 1 / 24 + 0.2]),
+    origin: Object.freeze([0.361875, 1 / 24 + 0.19]),
     span: Object.freeze([0.02, 0.02]),
   }),
   C2: Object.freeze({
-    center: Object.freeze([0.21875, 0.125]),
-    origin: Object.freeze([0.20875, 0.115]),
+    center: Object.freeze([0.371875, 0.325]),
+    origin: Object.freeze([0.361875, 0.315]),
     span: Object.freeze([0.02, 0.02]),
   }),
 });
@@ -100,8 +100,8 @@ export const NINJAONE_MVP_RESIDENCY_VISUAL_ISOLATION = Object.freeze({
   water: "visibility:hidden!important",
 });
 export const NINJAONE_MVP_FOLIAGE_CAMERA = Object.freeze({
-  center: Object.freeze([0.1875, 0.0625]),
-  origin: Object.freeze([0.16875, 0.04375]),
+  center: Object.freeze([0.340625, 0.2625]),
+  origin: Object.freeze([0.321875, 0.24375]),
   span: Object.freeze([0.0375, 0.0375]),
 });
 const ENVIRONMENT_ORIGIN = Object.freeze([0.278125, 0.2]);
@@ -1618,8 +1618,8 @@ export function auditCameraDecodedBudgets({
   for (const [id, checkpoint] of Object.entries(NINJAONE_MVP_FIXED_CAMERAS)) {
     addCamera(`checkpoint-${id}`, checkpoint);
   }
-  for (let x = 0.1425; x <= 0.2425; x += 0.003125) {
-    for (let y = 0.02; y <= 0.15; y += 0.003125) {
+  for (let x = 0.295625; x <= 0.395625; x += 0.003125) {
+    for (let y = 0.22; y <= 0.35; y += 0.003125) {
       for (const span of NATIVE_BUDGET_SWEEP_SPANS) {
         addCamera(`sweep-${round(x, 5)}-${round(y, 5)}-${span}`, {
             origin: [x - span / 2, y - span / 2],

@@ -255,7 +255,7 @@ test("native foliage ownership rejects experimental additive families", () => {
 
 test("the reported lower-ridge camera mounts native trees and gates motion to the actual viewport", () => {
   const camera = Object.freeze({
-    origin: Object.freeze([0.193241392849, 0.070596704833]),
+    origin: Object.freeze([0.346366393, 0.270596705]),
     span: Object.freeze([0.0375, 0.0375]),
   });
   const selected = selectNinjaOneEnvironmentFoliageInstances(camera, true, 32);
@@ -274,7 +274,7 @@ test("the reported lower-ridge camera mounts native trees and gates motion to th
 
 test("an admitted foliage cohort is filtered before the shared residency budget", () => {
   const camera = Object.freeze({
-    origin: Object.freeze([0.162685985124, 0.040707314109]),
+    origin: Object.freeze([0.315810985, 0.240707314]),
     span: Object.freeze([0.0472907037110096, 0.06305427161467947]),
   });
   const admittedIds = new Set([
@@ -297,7 +297,7 @@ test("an admitted foliage cohort is filtered before the shared residency budget"
 test("foliage LoD uses hysteresis and cannot mount outside close detail", () => {
   assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_ENTER_SPAN, 0.06);
   assert.equal(NINJAONE_ENVIRONMENT_FOLIAGE_MAX_DETAIL_RETAIN_SPAN, 0.07);
-  const camera = { origin: [0.1625, 0.05], span: [0.065, 0.065] };
+  const camera = { origin: [0.315625, 0.25], span: [0.065, 0.065] };
   assert.equal(resolveNinjaOneEnvironmentFoliageEligibility({
     active: true,
     camera,
@@ -313,7 +313,7 @@ test("foliage LoD uses hysteresis and cannot mount outside close detail", () => 
     showFoliage: true,
   }), true);
   assert.deepEqual(selectNinjaOneEnvironmentFoliageInstances(
-    { origin: [0.1625, 0.05], span: [0.075, 0.075] },
+    { origin: [0.315625, 0.25], span: [0.075, 0.075] },
     true,
     32,
   ), []);
