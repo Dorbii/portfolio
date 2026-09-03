@@ -1,0 +1,1384 @@
+
+> steven-doris-career-world@0.1.0 test
+> node --experimental-strip-types --test --test-concurrency=1 tests/index.test.mjs
+
+TAP version 13
+# (node:36852) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: removed NinjaOne cities leave no modular ambient registry
+ok 1 - removed NinjaOne cities leave no modular ambient registry
+  ---
+  duration_ms: 13.3191
+  type: 'test'
+  ...
+# Subtest: authored town foundations separate semantic overlays from plate-owned fillers
+ok 2 - authored town foundations separate semantic overlays from plate-owned fillers
+  ---
+  duration_ms: 2.5998
+  type: 'test'
+  ...
+# Subtest: Kaizen semantic buildings reuse the registered shared city pool
+ok 3 - Kaizen semantic buildings reuse the registered shared city pool
+  ---
+  duration_ms: 0.7106
+  type: 'test'
+  ...
+# Subtest: Kaizen city source assets stay registered while the live mount remains disabled
+ok 4 - Kaizen city source assets stay registered while the live mount remains disabled
+  ---
+  duration_ms: 614.8213
+  type: 'test'
+  ...
+# Subtest: Kaizen semantic buildings use registered shared transparent assets
+ok 5 - Kaizen semantic buildings use registered shared transparent assets
+  ---
+  duration_ms: 506.3527
+  type: 'test'
+  ...
+# Subtest: Kaizen runtime LODs remain registered to one high-detail master
+ok 6 - Kaizen runtime LODs remain registered to one high-detail master
+  ---
+  duration_ms: 405.024
+  type: 'test'
+  ...
+# Subtest: terrain relief publishes canonical geography without edge glow
+ok 7 - terrain relief publishes canonical geography without edge glow
+  ---
+  duration_ms: 145.1383
+  type: 'test'
+  ...
+# Subtest: runtime land registers its authored base material against the composite mask
+not ok 8 - runtime land registers its authored base material against the composite mask
+  ---
+  duration_ms: 869.2053
+  type: 'test'
+  location: 'C:\\Users\\Steve\\Documents\\Github\\portfolio\\.claude\\worktrees\\land-lod-completion\\tests\\assets.test.mjs:232:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'E7799E7641F6307483724F7D1137519AFE39C932DB14DA1E04B7C5E628874427'
+    - '25F94A3E25B3D8A86BD74986F59DDACAB01EA5B8100F76E65BFBAF20B2FE5808'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: '25F94A3E25B3D8A86BD74986F59DDACAB01EA5B8100F76E65BFBAF20B2FE5808'
+  actual: 'E7799E7641F6307483724F7D1137519AFE39C932DB14DA1E04B7C5E628874427'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/tests/assets.test.mjs:255:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: the canonical B1/B2 topology promotion carries registered terrain material
+not ok 9 - the canonical B1/B2 topology promotion carries registered terrain material
+  ---
+  duration_ms: 82.4344
+  type: 'test'
+  location: 'C:\\Users\\Steve\\Documents\\Github\\portfolio\\.claude\\worktrees\\land-lod-completion\\tests\\assets.test.mjs:312:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    8137 !== 6414
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 6414
+  actual: 8137
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/tests/assets.test.mjs:360:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: authored shoreline confines deep shadows to cliff terrain
+ok 10 - authored shoreline confines deep shadows to cliff terrain
+  ---
+  duration_ms: 142.0724
+  type: 'test'
+  ...
+# Subtest: shoreline material visibly distinguishes beach and cliff response
+ok 11 - shoreline material visibly distinguishes beach and cliff response
+  ---
+  duration_ms: 155.0259
+  type: 'test'
+  ...
+# Subtest: one topology model publishes elevation, slope, and QA contours
+ok 12 - one topology model publishes elevation, slope, and QA contours
+  ---
+  duration_ms: 1153.5381
+  type: 'test'
+  ...
+# Subtest: terrain authoring declares six connected mountain systems
+ok 13 - terrain authoring declares six connected mountain systems
+  ---
+  duration_ms: 1.1531
+  type: 'test'
+  ...
+# Subtest: every territory reserves a registered city-ready capital envelope
+ok 14 - every territory reserves a registered city-ready capital envelope
+  ---
+  duration_ms: 51.9033
+  type: 'test'
+  ...
+# Subtest: the Kaizen Agent project anchor uses accepted NinjaOne land
+ok 15 - the Kaizen Agent project anchor uses accepted NinjaOne land
+  ---
+  duration_ms: 24.5709
+  type: 'test'
+  ...
+# Subtest: NinjaOne town-plan paving stays on accepted terrain
+ok 16 - NinjaOne town-plan paving stays on accepted terrain
+  ---
+  duration_ms: 39.1033
+  type: 'test'
+  ...
+# Subtest: visible capital sprites remain supported by their registered terrain
+ok 17 - visible capital sprites remain supported by their registered terrain
+  ---
+  duration_ms: 349.1458
+  type: 'test'
+  ...
+# Subtest: capital site tiles stay bounded to land and add local density
+ok 18 - capital site tiles stay bounded to land and add local density
+  ---
+  duration_ms: 1621.7156
+  type: 'test'
+  ...
+# Subtest: close land detail is split into bounded camera-streamed tiles
+not ok 19 - close land detail is split into bounded camera-streamed tiles
+  ---
+  duration_ms: 85.2702
+  type: 'test'
+  location: 'C:\\Users\\Steve\\Documents\\Github\\portfolio\\.claude\\worktrees\\land-lod-completion\\tests\\assets.test.mjs:1085:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + '86EF974DBD3AD8741779874EF1194AF18E43D655FCA2644C27F7151EFD13EF7D'
+    - '48A4C1BED0699BB01208852B2CAC80C81C8F31B7D062510B336A96BE5487052A'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: '48A4C1BED0699BB01208852B2CAC80C81C8F31B7D062510B336A96BE5487052A'
+  actual: '86EF974DBD3AD8741779874EF1194AF18E43D655FCA2644C27F7151EFD13EF7D'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/tests/assets.test.mjs:1225:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: close land tiles are authored from dedicated high-fidelity materials
+ok 20 - close land tiles are authored from dedicated high-fidelity materials
+  ---
+  duration_ms: 159.9287
+  type: 'test'
+  ...
+# Subtest: coast field is derived across the complete authored shoreline
+not ok 21 - coast field is derived across the complete authored shoreline
+  ---
+  duration_ms: 82.9227
+  type: 'test'
+  location: 'C:\\Users\\Steve\\Documents\\Github\\portfolio\\.claude\\worktrees\\land-lod-completion\\tests\\assets.test.mjs:1339:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/tests/assets.test.mjs:1358:14)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: coast materials derive beach and cliff variation from topology
+ok 22 - coast materials derive beach and cliff variation from topology
+  ---
+  duration_ms: 148.1853
+  type: 'test'
+  ...
+# Subtest: generated asset manifests carry exact content hashes
+not ok 23 - generated asset manifests carry exact content hashes
+  ---
+  duration_ms: 7.7245
+  type: 'test'
+  location: 'C:\\Users\\Steve\\Documents\\Github\\portfolio\\.claude\\worktrees\\land-lod-completion\\tests\\assets.test.mjs:1459:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'E7799E7641F6307483724F7D1137519AFE39C932DB14DA1E04B7C5E628874427'
+    - '25F94A3E25B3D8A86BD74986F59DDACAB01EA5B8100F76E65BFBAF20B2FE5808'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: '25F94A3E25B3D8A86BD74986F59DDACAB01EA5B8100F76E65BFBAF20B2FE5808'
+  actual: 'E7799E7641F6307483724F7D1137519AFE39C932DB14DA1E04B7C5E628874427'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/tests/assets.test.mjs:1473:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: the solved ocean fields are the accepted checkpoint
+ok 24 - the solved ocean fields are the accepted checkpoint
+  ---
+  duration_ms: 3.5137
+  type: 'test'
+  ...
+# Subtest: camera normalization keeps every view on the world plane
+ok 25 - camera normalization keeps every view on the world plane
+  ---
+  duration_ms: 0.2157
+  type: 'test'
+  ...
+# Subtest: zoom preserves the world point beneath the viewport anchor
+ok 26 - zoom preserves the world point beneath the viewport anchor
+  ---
+  duration_ms: 0.1665
+  type: 'test'
+  ...
+# Subtest: zoom minimum preserves a non-square camera aspect ratio
+ok 27 - zoom minimum preserves a non-square camera aspect ratio
+  ---
+  duration_ms: 0.0873
+  type: 'test'
+  ...
+# Subtest: bounded cameras retain their span while clamping panning
+ok 28 - bounded cameras retain their span while clamping panning
+  ---
+  duration_ms: 0.1128
+  type: 'test'
+  ...
+# Subtest: pan and interpolation retain one normalized orthographic camera
+ok 29 - pan and interpolation retain one normalized orthographic camera
+  ---
+  duration_ms: 0.2668
+  type: 'test'
+  ...
+# Subtest: CSS world-plane transform is derived from the same camera contract
+ok 30 - CSS world-plane transform is derived from the same camera contract
+  ---
+  duration_ms: 0.0878
+  type: 'test'
+  ...
+# Subtest: SVG camera crops rerasterize from the same normalized view
+ok 31 - SVG camera crops rerasterize from the same normalized view
+  ---
+  duration_ms: 0.069
+  type: 'test'
+  ...
+# Subtest: L1 through L4 expose authority roots and explicit child modules
+ok 32 - L1 through L4 expose authority roots and explicit child modules
+  ---
+  duration_ms: 2.3893
+  type: 'test'
+  ...
+# Subtest: environment registry gives every child one authority parent
+ok 33 - environment registry gives every child one authority parent
+  ---
+  duration_ms: 0.2412
+  type: 'test'
+  ...
+# Subtest: authority visibility cascades without erasing child selections
+ok 34 - authority visibility cascades without erasing child selections
+  ---
+  duration_ms: 0.1592
+  type: 'test'
+  ...
+# Subtest: coastal ambience defaults on and stays independently toggleable
+ok 35 - coastal ambience defaults on and stays independently toggleable
+  ---
+  duration_ms: 0.0829
+  type: 'test'
+  ...
+# Subtest: terrain detail and foliage motion are independently toggleable
+ok 36 - terrain detail and foliage motion are independently toggleable
+  ---
+  duration_ms: 0.0913
+  type: 'test'
+  ...
+# Subtest: city children preserve their selections when the L4 authority is disabled
+ok 37 - city children preserve their selections when the L4 authority is disabled
+  ---
+  duration_ms: 0.066
+  type: 'test'
+  ...
+# Subtest: B2 authority retains the terrain-supported two-stage waterfall
+ok 38 - B2 authority retains the terrain-supported two-stage waterfall
+  ---
+  duration_ms: 1.1897
+  type: 'test'
+  ...
+# Subtest: inland ownership texture localizes waterfall impact energy
+ok 39 - inland ownership texture localizes waterfall impact energy
+  ---
+  duration_ms: 13.2902
+  type: 'test'
+  ...
+# Subtest: inland effects preserve terrain ownership and break up cascade spray
+ok 40 - inland effects preserve terrain ownership and break up cascade spray
+  ---
+  duration_ms: 0.915
+  type: 'test'
+  ...
+# Subtest: non-water field pixels encode neutral flow
+ok 41 - non-water field pixels encode neutral flow
+  ---
+  duration_ms: 45.114
+  type: 'test'
+  ...
+# Subtest: inland habitat separates submerged bed detail from bank contact detail
+ok 42 - inland habitat separates submerged bed detail from bank contact detail
+  ---
+  duration_ms: 1.2953
+  type: 'test'
+  ...
+# Subtest: production inland-habitat sprites are compact verified alpha derivatives
+ok 43 - production inland-habitat sprites are compact verified alpha derivatives
+  ---
+  duration_ms: 6.171
+  type: 'test'
+  ...
+# Subtest: pond habitat stays inside the registered B2 tarn authority
+ok 44 - pond habitat stays inside the registered B2 tarn authority
+  ---
+  duration_ms: 0.7712
+  type: 'test'
+  ...
+# Subtest: environment proof owns a semantic city-free B1 B2 C1 C2 stack
+ok 45 - environment proof owns a semantic city-free B1 B2 C1 C2 stack
+  ---
+  duration_ms: 0.6414
+  type: 'test'
+  ...
+# Subtest: zoom tiers retain one authored terrain geometry without detached asset substitutions
+ok 46 - zoom tiers retain one authored terrain geometry without detached asset substitutions
+  ---
+  duration_ms: 0.1959
+  type: 'test'
+  ...
+# Subtest: registered plates retain one 4:3 geometry and transparent layering
+ok 47 - registered plates retain one 4:3 geometry and transparent layering
+  ---
+  duration_ms: 20.2313
+  type: 'test'
+  ...
+# Subtest: regional terrain detail uses one coherent cohort and a registered contact repair
+ok 48 - regional terrain detail uses one coherent cohort and a registered contact repair
+  ---
+  duration_ms: 2.2538
+  type: 'test'
+  ...
+# Subtest: interim terrain transition is wide, reversible, and pixel-bounded
+not ok 49 - interim terrain transition is wide, reversible, and pixel-bounded
+  ---
+  duration_ms: 737.7751
+  type: 'test'
+  location: 'C:\\Users\\Steve\\Documents\\Github\\portfolio\\.claude\\worktrees\\land-lod-completion\\tests\\ninjaone-environment-proof.test.mjs:174:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    public/career-world/layers/inland-water/authority/masks/ninjaone-inland-terrain-erase-r1.png changed during T40
+    + actual - expected
+    
+    + 'fadb11130e6743d821040a10d0a5d314f83b35dd9aece5f91bd6280315021ae6'
+    - '4667a357373c94d36b9a8f07552ce38c38347a2e4dfb2aca74abddcc6f9bb7b2'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: '4667a357373c94d36b9a8f07552ce38c38347a2e4dfb2aca74abddcc6f9bb7b2'
+  actual: 'fadb11130e6743d821040a10d0a5d314f83b35dd9aece5f91bd6280315021ae6'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/tests/ninjaone-environment-proof.test.mjs:232:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: environment registration does not expose a legacy static hydrology plate
+ok 50 - environment registration does not expose a legacy static hydrology plate
+  ---
+  duration_ms: 0.837
+  type: 'test'
+  ...
+# Subtest: environment density uses bounded shared resource pools
+ok 51 - environment density uses bounded shared resource pools
+  ---
+  duration_ms: 6.7388
+  type: 'test'
+  ...
+# Subtest: native close detail streams accepted lossless tiles within a bounded budget
+ok 52 - native close detail streams accepted lossless tiles within a bounded budget
+  ---
+  duration_ms: 79.2385
+  type: 'test'
+  ...
+# Subtest: native detail selection never mounts an unbounded tile or supplemental set
+ok 53 - native detail selection never mounts an unbounded tile or supplemental set
+  ---
+  duration_ms: 1.0529
+  type: 'test'
+  ...
+# Subtest: native terrain delegates foliage to a separate production manifest
+ok 54 - native terrain delegates foliage to a separate production manifest
+  ---
+  duration_ms: 2.5324
+  type: 'test'
+  ...
+# Subtest: registered native tiles keep canonical native-original provenance
+ok 55 - registered native tiles keep canonical native-original provenance
+  ---
+  duration_ms: 0.4355
+  type: 'test'
+  ...
+# Subtest: the visible row uses four independent accepted native originals
+ok 56 - the visible row uses four independent accepted native originals
+  ---
+  duration_ms: 0.2474
+  type: 'test'
+  ...
+# Subtest: C1 void alpha has separate source provenance and no runtime mask residency
+ok 57 - C1 void alpha has separate source provenance and no runtime mask residency
+  ---
+  duration_ms: 0.1401
+  type: 'test'
+  ...
+# Subtest: close detail mounts additive layers only and page visibility suspends runtime work
+ok 58 - close detail mounts additive layers only and page visibility suspends runtime work
+  ---
+  duration_ms: 4.136
+  type: 'test'
+  ...
+# Subtest: production native authoring is standalone and package-addressable
+ok 59 - production native authoring is standalone and package-addressable
+  ---
+  duration_ms: 1.0746
+  type: 'test'
+  ...
+# Subtest: the root-selectable environment proof renders semantic terrain and suppresses the city stack
+ok 60 - the root-selectable environment proof renders semantic terrain and suppresses the city stack
+  ---
+  duration_ms: 2.7367
+  type: 'test'
+  ...
+# Subtest: world and territory keep native sources absent while the configured close preload admits detail
+ok 61 - world and territory keep native sources absent while the configured close preload admits detail
+  ---
+  duration_ms: 0.689
+  type: 'test'
+  ...
+# Subtest: close residency uses zoom hysteresis and survives rapid reverse zoom
+ok 62 - close residency uses zoom hysteresis and survives rapid reverse zoom
+  ---
+  duration_ms: 0.2478
+  type: 'test'
+  ...
+# Subtest: animated foliage enters through .12 and retains through .14
+ok 63 - animated foliage enters through .12 and retains through .14
+  ---
+  duration_ms: 0.3636
+  type: 'test'
+  ...
+# Subtest: required seam nodes take priority before atomic two-node foliage groups
+ok 64 - required seam nodes take priority before atomic two-node foliage groups
+  ---
+  duration_ms: 0.7254
+  type: 'test'
+  ...
+# Subtest: foliage residency reports incoming until the exact epoch cohort is mounted
+ok 65 - foliage residency reports incoming until the exact epoch cohort is mounted
+  ---
+  duration_ms: 1.1066
+  type: 'test'
+  ...
+# Subtest: fixed B2 C1 C2 cameras select complete deterministic four-tile cohorts
+ok 66 - fixed B2 C1 C2 cameras select complete deterministic four-tile cohorts
+  ---
+  duration_ms: 11.8394
+  type: 'test'
+  ...
+# Subtest: fixed B2 and C2 select only their two native seam integrations
+ok 67 - fixed B2 and C2 select only their two native seam integrations
+  ---
+  duration_ms: 0.2517
+  type: 'test'
+  ...
+# Subtest: seam coverage audits every native adjacency, not only center checkpoints
+ok 68 - seam coverage audits every native adjacency, not only center checkpoints
+  ---
+  duration_ms: 0.4795
+  type: 'test'
+  ...
+# Subtest: native terrain uses only 1448x1086 originals and baked masks consume no runtime nodes
+ok 69 - native terrain uses only 1448x1086 originals and baked masks consume no runtime nodes
+  ---
+  duration_ms: 0.3148
+  type: 'test'
+  ...
+# Subtest: close detail has one pooled foliage renderer and no legacy shared-foliage mapping
+ok 70 - close detail has one pooled foliage renderer and no legacy shared-foliage mapping
+  ---
+  duration_ms: 2.615
+  type: 'test'
+  ...
+# Subtest: same-tier pan never presents a stale cohort and waits for late decode
+ok 71 - same-tier pan never presents a stale cohort and waits for late decode
+  ---
+  duration_ms: 0.5305
+  type: 'test'
+  ...
+# Subtest: decode cohort identity ignores same-set paint reordering
+ok 72 - decode cohort identity ignores same-set paint reordering
+  ---
+  duration_ms: 0.3321
+  type: 'test'
+  ...
+# Subtest: partial-overlap pan evicts before epoch-remount and rejects stale loads
+ok 73 - partial-overlap pan evicts before epoch-remount and rejects stale loads
+  ---
+  duration_ms: 0.1853
+  type: 'test'
+  ...
+# Subtest: rapid A B A retarget requires the newest epoch load
+ok 74 - rapid A B A retarget requires the newest epoch load
+  ---
+  duration_ms: 0.1123
+  type: 'test'
+  ...
+# Subtest: required seam and coast promotion is atomic across overlap and A B A
+ok 75 - required seam and coast promotion is atomic across overlap and A B A
+  ---
+  duration_ms: 1.2377
+  type: 'test'
+  ...
+# Subtest: full required-supplement remount clears overlap readiness before promotion
+ok 76 - full required-supplement remount clears overlap readiness before promotion
+  ---
+  duration_ms: 0.3251
+  type: 'test'
+  ...
+# Subtest: promotion cannot expose a six-tile preload view or create a visible gap
+ok 77 - promotion cannot expose a six-tile preload view or create a visible gap
+  ---
+  duration_ms: 0.1734
+  type: 'test'
+  ...
+# Subtest: hard decoded-byte admission blocks terrain instead of weakening the ceiling
+ok 78 - hard decoded-byte admission blocks terrain instead of weakening the ceiling
+  ---
+  duration_ms: 0.128
+  type: 'test'
+  ...
+# Subtest: terrain and supplemental residency stay under the 4 6 32 MiB ceilings
+ok 79 - terrain and supplemental residency stay under the 4 6 32 MiB ceilings
+  ---
+  duration_ms: 1.2319
+  type: 'test'
+  ...
+# Subtest: paged foliage runtime selection preserves transition headroom at every camera
+ok 80 - paged foliage runtime selection preserves transition headroom at every camera
+  ---
+  duration_ms: 806.7383
+  type: 'test'
+  ...
+# Subtest: automated camera sweep counts foliage and seams in the 32 MiB union
+ok 81 - automated camera sweep counts foliage and seams in the 32 MiB union
+  ---
+  duration_ms: 168799.2182
+  type: 'test'
+  ...
+# Subtest: exhaustive budget admission drops whole foliage groups behind required seams
+ok 82 - exhaustive budget admission drops whole foliage groups behind required seams
+  ---
+  duration_ms: 158.3848
+  type: 'test'
+  ...
+# Subtest: package commands resolve to visible deterministic builders and verifier fails closed
+not ok 83 - package commands resolve to visible deterministic builders and verifier fails closed
+  ---
+  duration_ms: 350.3062
+  type: 'test'
+  location: 'C:\\Users\\Steve\\Documents\\Github\\portfolio\\.claude\\worktrees\\land-lod-completion\\tests\\ninjaone-environment-runtime.test.mjs:1099:1'
+  failureType: 'testCodeFailure'
+  error: "ENOENT: no such file or directory, stat 'C:\\Users\\Steve\\Documents\\Github\\portfolio\\.claude\\worktrees\\land-lod-completion\\scripts\\build-t42b-layered-river.mjs'"
+  code: 'ENOENT'
+  stack: |-
+    async stat (node:internal/fs/promises:1031:18)
+    async TestContext.<anonymous> (file:///C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/tests/ninjaone-environment-runtime.test.mjs:1130:19)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: native terrain preserves every authoritative source RGB byte
+ok 84 - native terrain preserves every authoritative source RGB byte
+  ---
+  duration_ms: 1750.9834
+  type: 'test'
+  ...
+# STATIC_R4_EXACTNESS [{"byteExactSourceCopy":false,"changedRgbPixels":0,"changedVisibleRgbPixels":0,"id":"r0-c2","runtimeSha256":"4AE450B2EA11720349F1C26D8C235FF2A4BC07F877611789B8CDA25AC16BE822","sourceSha256":"F351A83EA54B3EA30A8C948B68F9E70CD13C6AF0870A5827123BEB36B50E19C7","voidMaskId":"r0-c2-void-mask"},{"byteExactSourceCopy":false,"changedRgbPixels":0,"changedVisibleRgbPixels":0,"id":"r0-c3","runtimeSha256":"4A980272E093F71AB50B5423154E858F154A124024842B6C2417F063DEDE1B94","sourceSha256":"D2E7261BAF396C85676CE37A90579762FEEAC8231EB93B2751DA5BFEE6D3E98A","voidMaskId":"r0-c3-void-mask"},{"byteExactSourceCopy":false,"changedRgbPixels":0,"changedVisibleRgbPixels":0,"id":"r1-c2","runtimeSha256":"94770B062DB8F71C7FEA07554824DD7487BB098B4B2E8E733BAC9D8D2137CA49","sourceSha256":"B92EBAD7F6CCC885F18D3D144E95304A206F198D8E15D06334CC371185CDA69D","voidMaskId":"r1-c2-void-mask"},{"byteExactSourceCopy":false,"changedRgbPixels":0,"changedVisibleRgbPixels":0,"id":"r1-c3","runtimeSha256":"2B99A938D11B6EC6DCA9505848E5B9F2D6A7AB55258C3EA9057A10921185C448","sourceSha256":"422F663D700D42D5996B844F904441D21765E1DC7384B536B00F5083D33E82AA","voidMaskId":"r1-c3-void-mask"},{"byteExactSourceCopy":true,"changedRgbPixels":0,"changedVisibleRgbPixels":0,"id":"r2-c0","runtimeSha256":"5C7D5852546E68AFDD377EB86875A43F83F4DD6A59DEF5FA9020C8DD3A5E7520","sourceSha256":"5C7D5852546E68AFDD377EB86875A43F83F4DD6A59DEF5FA9020C8DD3A5E7520","voidMaskId":null},{"byteExactSourceCopy":true,"changedRgbPixels":0,"changedVisibleRgbPixels":0,"id":"r2-c1","runtimeSha256":"2CD7FB2A2D55A2267E59DF6798F02285BB3F6C8776C8512843E7E0A44A9AF84F","sourceSha256":"2CD7FB2A2D55A2267E59DF6798F02285BB3F6C8776C8512843E7E0A44A9AF84F","voidMaskId":null},{"byteExactSourceCopy":true,"changedRgbPixels":0,"changedVisibleRgbPixels":0,"id":"r2-c2","runtimeSha256":"2DECAEB59F38EE8E0ED47C4337B7AF71DEE076E3455726DA2216128AB1FC0D05","sourceSha256":"2DECAEB59F38EE8E0ED47C4337B7AF71DEE076E3455726DA2216128AB1FC0D05","voidMaskId":null},{"byteExactSourceCopy":true,"changedRgbPixels":0,"changedVisibleRgbPixels":0,"id":"r2-c3","runtimeSha256":"48BE8AC5369F2F4F7FC394E3171B6A74C97FABEBC4A1FEDB8440E74B4AEA567F","sourceSha256":"48BE8AC5369F2F4F7FC394E3171B6A74C97FABEBC4A1FEDB8440E74B4AEA567F","voidMaskId":null},{"byteExactSourceCopy":true,"changedRgbPixels":0,"changedVisibleRgbPixels":0,"id":"r3-c0","runtimeSha256":"D1CFA21F534AAE3FB0D968E44A6CC1564452273372338585E1C3B072226C7CC0","sourceSha256":"D1CFA21F534AAE3FB0D968E44A6CC1564452273372338585E1C3B072226C7CC0","voidMaskId":null},{"byteExactSourceCopy":true,"changedRgbPixels":0,"changedVisibleRgbPixels":0,"id":"r3-c1","runtimeSha256":"825F596CE91D3CCA55673BF902F109BE29C168C939010D0C3866495A2B2B7888","sourceSha256":"825F596CE91D3CCA55673BF902F109BE29C168C939010D0C3866495A2B2B7888","voidMaskId":null},{"byteExactSourceCopy":true,"changedRgbPixels":0,"changedVisibleRgbPixels":0,"id":"r3-c2","runtimeSha256":"DE30BA48BB30DF7D85CE2C0260386D21016CDFE618B8747EF808999A04407ADD","sourceSha256":"DE30BA48BB30DF7D85CE2C0260386D21016CDFE618B8747EF808999A04407ADD","voidMaskId":null},{"byteExactSourceCopy":true,"changedRgbPixels":0,"changedVisibleRgbPixels":0,"id":"r3-c3","runtimeSha256":"8D5B76EB06A45A7926524596DC951EC456660610B621228C2A2A3885A9C09B31","sourceSha256":"8D5B76EB06A45A7926524596DC951EC456660610B621228C2A2A3885A9C09B31","voidMaskId":null}]
+# Subtest: C1 contour matte caps every rendered boundary pixel and preserves rock shadows
+ok 85 - C1 contour matte caps every rendered boundary pixel and preserves rock shadows
+  ---
+  duration_ms: 2495.4834
+  type: 'test'
+  ...
+# STATIC_R4_FRINGE {"citedCrop":[527,52,96,96],"citedCropDarkPartialPixels":4,"citedCropDarkPartialPixelsAboveMinimumAlpha":0,"citedCropMaximumPartialCompositeLuminanceDrop256":1015,"oldAlpha128AtOrBelow12":10555,"oldAlpha128AtOrBelow16":13778,"oldAlpha128BoundaryPixels":18242,"oldFullyOpaqueNominalFalloffPixels":4518,"currentFullyOpaqueNominalFalloffPixels":0,"criticPixel":{"at":[1399,832],"compositeRgb":[56,74,72],"rgba":[73,68,54,148],"renderedMetrics":{"compositeLuminanceDrop256":624,"maximumChannelDelta":24,"oklabDeltaMilli":44},"tileId":"r1-c3"},"perTile":[{"alpha128AtOrBelow12":0,"alpha128AtOrBelow16":0,"boundaryPixels":15989,"boundaryPixelsExceedingCompositeLuminanceDrop":0,"boundaryPixelsExceedingRenderedColorDelta":0,"darkPartialPixels":145,"darkPartialPixelsAboveMinimumAlpha":0,"fullyOpaqueFalloffPixelsByDistance":[0,0],"id":"r0-c2","maximumBoundaryCompositeLuminanceDrop256":1024,"observedMaximumRenderedChannelDeltaByDistance":[12,24],"observedMaximumRenderedOklabDeltaMilliByDistance":[25,50]},{"alpha128AtOrBelow12":0,"alpha128AtOrBelow16":0,"boundaryPixels":5708,"boundaryPixelsExceedingCompositeLuminanceDrop":0,"boundaryPixelsExceedingRenderedColorDelta":0,"darkPartialPixels":74,"darkPartialPixelsAboveMinimumAlpha":0,"fullyOpaqueFalloffPixelsByDistance":[0,0],"id":"r0-c3","maximumBoundaryCompositeLuminanceDrop256":1023,"observedMaximumRenderedChannelDeltaByDistance":[12,24],"observedMaximumRenderedOklabDeltaMilliByDistance":[24,50]},{"alpha128AtOrBelow12":0,"alpha128AtOrBelow16":0,"boundaryPixels":22659,"boundaryPixelsExceedingCompositeLuminanceDrop":0,"boundaryPixelsExceedingRenderedColorDelta":0,"darkPartialPixels":463,"darkPartialPixelsAboveMinimumAlpha":0,"fullyOpaqueFalloffPixelsByDistance":[0,0],"id":"r1-c2","maximumBoundaryCompositeLuminanceDrop256":1024,"observedMaximumRenderedChannelDeltaByDistance":[12,24],"observedMaximumRenderedOklabDeltaMilliByDistance":[25,50]},{"alpha128AtOrBelow12":0,"alpha128AtOrBelow16":0,"boundaryPixels":15520,"boundaryPixelsExceedingCompositeLuminanceDrop":0,"boundaryPixelsExceedingRenderedColorDelta":0,"darkPartialPixels":402,"darkPartialPixelsAboveMinimumAlpha":0,"fullyOpaqueFalloffPixelsByDistance":[0,0],"id":"r1-c3","maximumBoundaryCompositeLuminanceDrop256":1024,"observedMaximumRenderedChannelDeltaByDistance":[12,24],"observedMaximumRenderedOklabDeltaMilliByDistance":[25,50]}]}
+# Subtest: native generator is tracked, source-bound, and idempotent
+ok 86 - native generator is tracked, source-bound, and idempotent
+  ---
+  duration_ms: 4977.7798
+  type: 'test'
+  ...
+# Subtest: native registration and baked masks remain inside the decoded budget
+ok 87 - native registration and baked masks remain inside the decoded budget
+  ---
+  duration_ms: 0.8132
+  type: 'test'
+  ...
+# STATIC_R2_RESIDENCY {"maximumDecodedBytes":33554432,"maximumMountedTerrainTiles":4,"maximumMountedVoidMasks":0,"worstCaseDecodedBytes":25160448}
+# Subtest: active authored LODs retain B1-C1 and C1-C2 contact continuity
+ok 88 - active authored LODs retain B1-C1 and C1-C2 contact continuity # SKIP
+  ---
+  duration_ms: 0.0709
+  type: 'test'
+  ...
+# Subtest: the D06 removal contract has no station runtime assets or replacement records
+ok 89 - the D06 removal contract has no station runtime assets or replacement records
+  ---
+  duration_ms: 0.2301
+  type: 'test'
+  ...
+# Subtest: the protected complement assets remain mounted and readable
+ok 90 - the protected complement assets remain mounted and readable
+  ---
+  duration_ms: 2.7822
+  type: 'test'
+  ...
+# Subtest: the territory register remains symbolic until the capital-detail hand-off
+ok 91 - the territory register remains symbolic until the capital-detail hand-off
+  ---
+  duration_ms: 0.233
+  type: 'test'
+  ...
+# Subtest: atomic tier visibility keeps city cohorts mutually exclusive
+ok 92 - atomic tier visibility keeps city cohorts mutually exclusive
+  ---
+  duration_ms: 0.0969
+  type: 'test'
+  ...
+# Subtest: same-tier pan cohorts crossfade atomically without dimming overlap
+ok 93 - same-tier pan cohorts crossfade atomically without dimming overlap
+  ---
+  duration_ms: 0.3845
+  type: 'test'
+  ...
+# Subtest: a rapid second pan promotion preserves current per-key opacity
+ok 94 - a rapid second pan promotion preserves current per-key opacity
+  ---
+  duration_ms: 0.1231
+  type: 'test'
+  ...
+# Subtest: rapid zoom-out retains the outgoing tier through its full fade
+ok 95 - rapid zoom-out retains the outgoing tier through its full fade
+  ---
+  duration_ms: 0.1167
+  type: 'test'
+  ...
+# Subtest: reverse zoom pins only decoded keys from visible LOD presentations
+ok 96 - reverse zoom pins only decoded keys from visible LOD presentations
+  ---
+  duration_ms: 0.196
+  type: 'test'
+  ...
+# Subtest: a late territory decode fades toward the current semantic weight
+ok 97 - a late territory decode fades toward the current semantic weight
+  ---
+  duration_ms: 0.0643
+  type: 'test'
+  ...
+# Subtest: site presentation retires capital only after the site can replace it
+ok 98 - site presentation retires capital only after the site can replace it
+  ---
+  duration_ms: 0.0881
+  type: 'test'
+  ...
+# Subtest: reverse zoom holds the outgoing site until capital is ready
+ok 99 - reverse zoom holds the outgoing site until capital is ready
+  ---
+  duration_ms: 0.0439
+  type: 'test'
+  ...
+# Subtest: territory renderer consumes cohort epochs and retains outgoing sources
+ok 100 - territory renderer consumes cohort epochs and retains outgoing sources
+  ---
+  duration_ms: 3.5194
+  type: 'test'
+  ...
+# Subtest: NinjaOne rural outskirts are deterministic close-detail outside towns
+ok 101 - NinjaOne rural outskirts are deterministic close-detail outside towns
+  ---
+  duration_ms: 2.8054
+  type: 'test'
+  ...
+# Subtest: rural easter-egg slots are stable, empty, and semantically inert
+ok 102 - rural easter-egg slots are stable, empty, and semantically inert
+  ---
+  duration_ms: 0.7961
+  type: 'test'
+  ...
+# Subtest: the environment renderer keeps rural scenery decorative and omits empty slots
+ok 103 - the environment renderer keeps rural scenery decorative and omits empty slots
+  ---
+  duration_ms: 0.7907
+  type: 'test'
+  ...
+# Subtest: capital registry omits NinjaOne while retaining other territory capitals
+ok 104 - capital registry omits NinjaOne while retaining other territory capitals
+  ---
+  duration_ms: 0.8244
+  type: 'test'
+  ...
+# Subtest: capital manifest consumes Phase 3 anchors without duplicating them
+ok 105 - capital manifest consumes Phase 3 anchors without duplicating them
+  ---
+  duration_ms: 0.3671
+  type: 'test'
+  ...
+# Subtest: every capital footprint stays inside its capital envelope
+ok 106 - every capital footprint stays inside its capital envelope
+  ---
+  duration_ms: 0.6819
+  type: 'test'
+  ...
+# Subtest: every capital uses a distinct authored texture asset
+ok 107 - every capital uses a distinct authored texture asset
+  ---
+  duration_ms: 1.0369
+  type: 'test'
+  ...
+# Subtest: every capital ground integration is territory-owned and bounded
+ok 108 - every capital ground integration is territory-owned and bounded
+  ---
+  duration_ms: 1.4196
+  type: 'test'
+  ...
+# Subtest: Kaizen Agent is the only retained NinjaOne project city
+ok 109 - Kaizen Agent is the only retained NinjaOne project city
+  ---
+  duration_ms: 1.4289
+  type: 'test'
+  ...
+# Subtest: shared skill definitions instantiate only for Kaizen Agent
+ok 110 - shared skill definitions instantiate only for Kaizen Agent
+  ---
+  duration_ms: 1.9684
+  type: 'test'
+  ...
+# Subtest: removed NinjaOne cities leave no legacy support structures
+ok 111 - removed NinjaOne cities leave no legacy support structures
+  ---
+  duration_ms: 0.5582
+  type: 'test'
+  ...
+# Subtest: Kaizen allocation remains development-only without a broad coverage claim
+ok 112 - Kaizen allocation remains development-only without a broad coverage claim
+  ---
+  duration_ms: 0.6278
+  type: 'test'
+  ...
+# Subtest: NinjaOne requires one authored town plan for Kaizen Agent
+ok 113 - NinjaOne requires one authored town plan for Kaizen Agent
+  ---
+  duration_ms: 2.0165
+  type: 'test'
+  ...
+# Subtest: town-plan model rejects invalid topology and structure coverage
+ok 114 - town-plan model rejects invalid topology and structure coverage
+  ---
+  duration_ms: 0.6992
+  type: 'test'
+  ...
+# Subtest: town-plan rendering keeps mixed surfaces sparse and hierarchical
+ok 115 - town-plan rendering keeps mixed surfaces sparse and hierarchical
+  ---
+  duration_ms: 1.4313
+  type: 'test'
+  ...
+# Subtest: capital visibility uses the centralized semantic-zoom policy
+ok 116 - capital visibility uses the centralized semantic-zoom policy
+  ---
+  duration_ms: 0.1233
+  type: 'test'
+  ...
+# Subtest: structures use deterministic ground-anchor depth ordering
+ok 117 - structures use deterministic ground-anchor depth ordering
+  ---
+  duration_ms: 0.5564
+  type: 'test'
+  ...
+# Subtest: structures share composition camera, LOD, and light contracts
+ok 118 - structures share composition camera, LOD, and light contracts
+  ---
+  duration_ms: 1.308
+  type: 'test'
+  ...
+# Subtest: NinjaOne controls expose progressive map destinations without affecting layout
+ok 119 - NinjaOne controls expose progressive map destinations without affecting layout
+  ---
+  duration_ms: 1.4244
+  type: 'test'
+  ...
+# Subtest: screen-space terrain margins convert independently on each axis
+ok 120 - screen-space terrain margins convert independently on each axis
+  ---
+  duration_ms: 0.185
+  type: 'test'
+  ...
+# Subtest: visible retries preempt enough active prefetch requests
+ok 121 - visible retries preempt enough active prefetch requests
+  ---
+  duration_ms: 0.1512
+  type: 'test'
+  ...
+# Subtest: visible terrain is not admitted when its decoded size exceeds budget
+ok 122 - visible terrain is not admitted when its decoded size exceeds budget
+  ---
+  duration_ms: 0.4
+  type: 'test'
+  ...
+# Subtest: ordered tier candidates fall back to a plan that fits the hard budget
+ok 123 - ordered tier candidates fall back to a plan that fits the hard budget
+  ---
+  duration_ms: 0.3758
+  type: 'test'
+  ...
+# Subtest: pinned outgoing sources survive reverse zoom and count once
+ok 124 - pinned outgoing sources survive reverse zoom and count once
+  ---
+  duration_ms: 0.1612
+  type: 'test'
+  ...
+# Subtest: real 4K site view stages territory retirement within the land budget
+ok 125 - real 4K site view stages territory retirement within the land budget
+  ---
+  duration_ms: 2.7283
+  type: 'test'
+  ...
+# Subtest: prefetch and retention only consume spare decoded-byte budget
+ok 126 - prefetch and retention only consume spare decoded-byte budget
+  ---
+  duration_ms: 0.3821
+  type: 'test'
+  ...
+# Subtest: retention prefers already decoded tiles to cold placeholders
+ok 127 - retention prefers already decoded tiles to cold placeholders
+  ---
+  duration_ms: 0.1965
+  type: 'test'
+  ...
+# Subtest: tiles with a single authored tier only consume that source
+ok 128 - tiles with a single authored tier only consume that source
+  ---
+  duration_ms: 0.1898
+  type: 'test'
+  ...
+# Subtest: territory resegmentation assigns every significant island to its ruled owners
+ok 129 - territory resegmentation assigns every significant island to its ruled owners
+  ---
+  duration_ms: 173.364
+  type: 'test'
+  ...
+# Subtest: retained Kaizen activity is explicit, route-bound, and bounded
+ok 130 - retained Kaizen activity is explicit, route-bound, and bounded
+  ---
+  duration_ms: 2.8292
+  type: 'test'
+  ...
+# Subtest: Kaizen authored foundation has no legacy manifest activity props
+ok 131 - Kaizen authored foundation has no legacy manifest activity props
+  ---
+  duration_ms: 0.5742
+  type: 'test'
+  ...
+# Subtest: Kaizen authored foundation suppresses duplicate activity visuals
+ok 132 - Kaizen authored foundation suppresses duplicate activity visuals
+  ---
+  duration_ms: 5.1314
+  type: 'test'
+  ...
+# Subtest: town activity uses the declared layer order and centralized LOD
+ok 133 - town activity uses the declared layer order and centralized LOD
+  ---
+  duration_ms: 1.1387
+  type: 'test'
+  ...
+# Subtest: Kaizen foliage reuses authored city and forest groups with pooled wind
+not ok 134 - Kaizen foliage reuses authored city and forest groups with pooled wind
+  ---
+  duration_ms: 3.8546
+  type: 'test'
+  location: 'C:\\Users\\Steve\\Documents\\Github\\portfolio\\.claude\\worktrees\\land-lod-completion\\tests\\town-activity.test.mjs:440:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input did not match the regular expression /DEFAULT_WORLD_WIND_STATE\.motion/. Input:
+    
+    'import {\r\n' +
+      '  DEFAULT_WATER_TUNING,\r\n' +
+      '  readWaterTuningUrlOverrides,\r\n' +
+      '} from "../../../shared/waterTuning.ts";\r\n' +
+      'import { CAREER_WORLD_WATER_REALISM_PROFILE } from "./profiles.ts";\r\n' +
+      '\r\n' +
+      '/**\r\n' +
+      ' * Everything the ocean exposes at runtime.\r\n' +
+      ' *\r\n' +
+      ' * The old surface had thirty dials, one per hand-authored effect layer. There is\r\n' +
+      ' * nothing left to dial that way: the sea is solved, and the three tuned states\r\n' +
+      ' * carry ~170 uniforms between them that are generated from the offline presets\r\n' +
+      ' * rather than typed in here. What is left is the art direction — where on the\r\n' +
+      ' * calm/windy/heavy scale this world sits — plus the two knobs the composition\r\n' +
+      ' * genuinely needs.\r\n' +
+      ' */\r\n' +
+      'export interface WaterSurfaceState {\r\n' +
+      '  /** 0 calm swell, 0.5 windy rolling surf, 1 heavy crashing surf. */\r\n' +
+      '  readonly weather: number;\r\n' +
+      '  /** Multiplier on the wave clock; 1 is the rate the states were tuned at. */\r\n' +
+      '  readonly timeScale: number;\r\n' +
+      '  readonly opacity: number;\r\n' +
+      '}\r\n' +
+      '\r\n' +
+      'export const DEFAULT_WATER_SURFACE_STATE: WaterSurfaceState = Object.freeze({\r\n' +
+      '  weather: CAREER_WORLD_WATER_REALISM_PROFILE.ocean.weather,\r\n' +
+      '  timeScale: CAREER_WORLD_WATER_REALISM_PROFILE.ocean.timeScale,\r\n' +
+      '  opacity: DEFAULT_WATER_TUNING.oceanOpacity,\r\n' +
+      '});\r\n' +
+      '\r\n' +
+      'function clamp(value: number, minimum: number, maximum: number): number {\r\n' +
+      '  return Math.min(maximum, Math.max(minimum, value));\r\n' +
+      '}\r\n' +
+      '\r\n' +
+      'function finiteOr(value: unknown, fallback: number): number {\r\n' +
+      '  const numeric = Number(value);\r\n' +
+      '  return Number.isFinite(numeric) ? numeric : fallback;\r\n' +
+      '}\r\n' +
+      '\r\n' +
+      'export function normalizeWaterSurfaceState(\r\n' +
+      '  input: Partial<WaterSurfaceState> = {},\r\n' +
+      '): WaterSurfaceState {\r\n' +
+      '  const candidate = { ...DEFAULT_WATER_SURFACE_STATE, ...input };\r\n' +
+      '  const fallback = DEFAULT_WATER_SURFACE_STATE;\r\n' +
+      '\r\n' +
+      '  return Object.freeze({\r\n' +
+      '    weather: clamp(finiteOr(candidate.weather, fallback.weather), 0, 1),\r\n' +
+      '    timeScale: clamp(finiteOr(candidate.timeScale, fallback.timeScale), 0, 3),\r\n' +
+      '    opacity: clamp(finiteOr(candidate.opacity, fallback.opacity), 0.2, 1),\r\n' +
+      '  });\r\n' +
+      '}\r\n' +
+      '\r\n' +
+      'export function readWaterSurfaceUrlOverrides(\r\n' +
+      '  search = typeof window === "undefined" ? "" : window.location.search,\r\n' +
+      '): Partial<WaterSurfaceState> {\r\n' +
+      '  const tuning = readWaterTuningUrlOverrides(search);\r\n' +
+      '  return Object.fromEntries([\r\n' +
+      '    ["weather", tuning.oceanWeather],\r\n' +
+      '    ["timeScale", tuning.oceanTimeScale],\r\n' +
+      '    ["opacity", tuning.oceanOpacity],\r\n' +
+      '  ].filter(([, value]) => value !== undefined)) as Partial<WaterSurfaceState>;\r\n' +
+      '}\r\n'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: |-
+    import {
+      DEFAULT_WATER_TUNING,
+      readWaterTuningUrlOverrides,
+    } from "../../../shared/waterTuning.ts";
+    import { CAREER_WORLD_WATER_REALISM_PROFILE } from "./profiles.ts";
+    
+    /**
+     * Everything the ocean exposes at runtime.
+     *
+     * The old surface had thirty dials, one per hand-authored effect layer. There is
+     * nothing left to dial that way: the sea is solved, and the three tuned states
+     * carry ~170 uniforms between them that are generated from the offline presets
+     * rather than typed in here. What is left is the art direction — where on the
+     * calm/windy/heavy scale this world sits — plus the two knobs the composition
+     * genuinely needs.
+     */
+    export interface WaterSurfaceState {
+      /** 0 calm swell, 0.5 windy rolling surf, 1 heavy crashing surf. */
+      readonly weather: number;
+      /** Multiplier on the wave clock; 1 is the rate the states were tuned at. */
+      readonly timeScale: number;
+      readonly opacity: number;
+    }
+    
+    export const DEFAULT_WATER_SURFACE_STATE: WaterSurfaceState = Object.freeze({
+      weather: CAREER_WORLD_WATER_REALISM_PROFILE.ocean.weather,
+      timeScale: CAREER_WORLD_WATER_REALISM_PROFILE.ocean.timeScale,
+      opacity: DEFAULT_WATER_TUNING.oceanOpacity,
+    });
+    
+    function clamp(value: number, minimum: number, maximum: number): number {
+      return Math.min(maximum, Math.max(minimum, value));
+    }
+    
+    function finiteOr(value: unknown, fallback: number): number {
+      const numeric = Number(value);
+      return Number.isFinite(numeric) ? numeric : fallback;
+    }
+    
+    export function normalizeWaterSurfaceState(
+      input: Partial<WaterSurfaceState> = {},
+    ): WaterSurfaceState {
+      const candidate = { ...DEFAULT_WATER_SURFACE_STATE, ...input };
+      const fallback = DEFAULT_WATER_SURFACE_STATE;
+    
+      return Object.freeze({
+        weather: clamp(finiteOr(candidate.weather, fallback.weather), 0, 1),
+        timeScale: clamp(finiteOr(candidate.timeScale, fallback.timeScale), 0, 3),
+        opacity: clamp(finiteOr(candidate.opacity, fallback.opacity), 0.2, 1),
+      });
+    }
+    
+    export function readWaterSurfaceUrlOverrides(
+      search = typeof window === "undefined" ? "" : window.location.search,
+    ): Partial<WaterSurfaceState> {
+      const tuning = readWaterTuningUrlOverrides(search);
+      return Object.fromEntries([
+        ["weather", tuning.oceanWeather],
+        ["timeScale", tuning.oceanTimeScale],
+        ["opacity", tuning.oceanOpacity],
+      ].filter(([, value]) => value !== undefined)) as Partial<WaterSurfaceState>;
+    }
+    
+  operator: 'match'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/tests/town-activity.test.mjs:671:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: registered sprite scales convert plate pixels into world units
+ok 135 - registered sprite scales convert plate pixels into world units
+  ---
+  duration_ms: 0.7566
+  type: 'test'
+  ...
+# Subtest: Kaizen live click target and label stay disabled
+ok 136 - Kaizen live click target and label stay disabled
+  ---
+  duration_ms: 0.6639
+  type: 'test'
+  ...
+# Subtest: Kaizen authored foundation replaces the modular NinjaOne town registry
+ok 137 - Kaizen authored foundation replaces the modular NinjaOne town registry
+  ---
+  duration_ms: 0.5053
+  type: 'test'
+  ...
+# Subtest: Kaizen authored city layout stays isolated from the live structure stack
+ok 138 - Kaizen authored city layout stays isolated from the live structure stack
+  ---
+  duration_ms: 0.7268
+  type: 'test'
+  ...
+# Subtest: water state clamps external inputs without changing its contract
+ok 139 - water state clamps external inputs without changing its contract
+  ---
+  duration_ms: 0.1922
+  type: 'test'
+  ...
+# Subtest: ocean realism profile is revisioned, deeply frozen, and range checked
+not ok 140 - ocean realism profile is revisioned, deeply frozen, and range checked
+  ---
+  duration_ms: 4.5995
+  type: 'test'
+  location: 'C:\\Users\\Steve\\Documents\\Github\\portfolio\\.claude\\worktrees\\land-lod-completion\\tests\\water-state.test.mjs:61:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert.ok(profile.ocean.weather < 0.5)
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/tests/water-state.test.mjs:72:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: water URL overrides are opt-in, numeric, and normalized by the state boundary
+ok 141 - water URL overrides are opt-in, numeric, and normalized by the state boundary
+  ---
+  duration_ms: 0.6458
+  type: 'test'
+  ...
+# Subtest: water tuning panel values clamp and serialize in one canonical order
+ok 142 - water tuning panel values clamp and serialize in one canonical order
+  ---
+  duration_ms: 1.1198
+  type: 'test'
+  ...
+# Subtest: wind direction produces a normalized world vector
+ok 143 - wind direction produces a normalized world vector
+  ---
+  duration_ms: 0.1499
+  type: 'test'
+  ...
+# Subtest: one camera span resolves the detail tier for every layer
+ok 144 - one camera span resolves the detail tier for every layer
+  ---
+  duration_ms: 0.152
+  type: 'test'
+  ...
+# Subtest: one central LOD policy owns thresholds and render budget
+ok 145 - one central LOD policy owns thresholds and render budget
+  ---
+  duration_ms: 0.1055
+  type: 'test'
+  ...
+# Subtest: animated water resizes only when its observer or LOD requests it
+ok 146 - animated water resizes only when its observer or LOD requests it
+  ---
+  duration_ms: 2.6167
+  type: 'test'
+  ...
+# Subtest: live foliage does not trigger full-page layout on every animation frame
+ok 147 - live foliage does not trigger full-page layout on every animation frame
+  ---
+  duration_ms: 0.7684
+  type: 'test'
+  ...
+# Subtest: layer detail contracts require a world source
+ok 148 - layer detail contracts require a world source
+  ---
+  duration_ms: 0.2317
+  type: 'test'
+  ...
+# Subtest: LOD nodes and registered rasters share semantic transition weights
+ok 149 - LOD nodes and registered rasters share semantic transition weights
+  ---
+  duration_ms: 0.304
+  type: 'test'
+  ...
+# Subtest: LOD transition boundaries and midpoint weights are deterministic
+ok 150 - LOD transition boundaries and midpoint weights are deterministic
+  ---
+  duration_ms: 0.2524
+  type: 'test'
+  ...
+# Subtest: LOD readiness catch-up fades complete once on elapsed time
+ok 151 - LOD readiness catch-up fades complete once on elapsed time
+  ---
+  duration_ms: 0.0938
+  type: 'test'
+  ...
+# Subtest: every uniform the ocean shaders declare is written by someone
+ok 152 - every uniform the ocean shaders declare is written by someone
+  ---
+  duration_ms: 0.4802
+  type: 'test'
+  ...
+# Subtest: no preset uniform is also claimed by the per-frame path
+ok 153 - no preset uniform is also claimed by the per-frame path
+  ---
+  duration_ms: 0.0978
+  type: 'test'
+  ...
+# Subtest: each stateful pass reads its own previous frame, not another's texture
+ok 154 - each stateful pass reads its own previous frame, not another's texture
+  ---
+  duration_ms: 0.1246
+  type: 'test'
+  ...
+# Subtest: the shipped weather default lands exactly on the state the world was baked from
+ok 155 - the shipped weather default lands exactly on the state the world was baked from
+  ---
+  duration_ms: 0.287
+  type: 'test'
+  ...
+# Subtest: the camera conversion claims only uniforms that exist, and never both ways
+ok 156 - the camera conversion claims only uniforms that exist, and never both ways
+  ---
+  duration_ms: 0.0997
+  type: 'test'
+  ...
+# Subtest: the wave field is solved offline, so no pass carries an eikonal solver
+ok 157 - the wave field is solved offline, so no pass carries an eikonal solver
+  ---
+  duration_ms: 0.2765
+  type: 'test'
+  ...
+# Subtest: content-aware vertical seam follows the low-error diagonal and remains continuous
+ok 158 - content-aware vertical seam follows the low-error diagonal and remains continuous
+  ---
+  duration_ms: 0.3284
+  type: 'test'
+  ...
+# Subtest: content-aware horizontal seam follows a low-error contour
+ok 159 - content-aware horizontal seam follows a low-error contour
+  ---
+  duration_ms: 0.1824
+  type: 'test'
+  ...
+# Subtest: equal costs choose a reproducible straight path
+ok 160 - equal costs choose a reproducible straight path
+  ---
+  duration_ms: 0.0742
+  type: 'test'
+  ...
+# Subtest: overlap orientation and rectangle fallback agree with strip geometry
+ok 161 - overlap orientation and rectangle fallback agree with strip geometry
+  ---
+  duration_ms: 0.1568
+  type: 'test'
+  ...
+# Subtest: cost surface includes registered color and gradient difference
+ok 162 - cost surface includes registered color and gradient difference
+  ---
+  duration_ms: 0.3412
+  type: 'test'
+  ...
+# Subtest: procedural town-plan surfaces exclude the authored Kaizen foundation
+ok 163 - procedural town-plan surfaces exclude the authored Kaizen foundation
+  ---
+  duration_ms: 1.9996
+  type: 'test'
+  ...
+# Subtest: Kaizen route and structure semantics stay on buildable topography
+ok 164 - Kaizen route and structure semantics stay on buildable topography
+  ---
+  duration_ms: 13.2333
+  type: 'test'
+  ...
+# Subtest: disabled Kaizen authored visual sources are not duplicated in live structures
+ok 165 - disabled Kaizen authored visual sources are not duplicated in live structures # SKIP
+  ---
+  duration_ms: 0.1079
+  type: 'test'
+  ...
+# Subtest: obsolete Kaizen procedural visual pipeline stays removed
+ok 166 - obsolete Kaizen procedural visual pipeline stays removed
+  ---
+  duration_ms: 1.8099
+  type: 'test'
+  ...
+# Subtest: r2 seam authority binds all exact native originals and excludes banned fidelity sources
+ok 167 - r2 seam authority binds all exact native originals and excludes banned fidelity sources
+  ---
+  duration_ms: 44.6601
+  type: 'test'
+  ...
+# Subtest: four accepted 64px internal assets preserve detail; rejected inter-cell assets are absent
+ok 168 - four accepted 64px internal assets preserve detail; rejected inter-cell assets are absent
+  ---
+  duration_ms: 219.709
+  type: 'test'
+  ...
+# Subtest: full native sweep fails closed on all four unselected inter-cell segments
+ok 169 - full native sweep fails closed on all four unselected inter-cell segments
+  ---
+  duration_ms: 0.5054
+  type: 'test'
+  ...
+# Subtest: maximum seam union keeps the accepted internal cohort within its declared budget
+ok 170 - maximum seam union keeps the accepted internal cohort within its declared budget
+  ---
+  duration_ms: 0.1364
+  type: 'test'
+  ...
+# Subtest: canonical cohort epochs reject A-B-A stale completions and preserve same-set identity
+ok 171 - canonical cohort epochs reject A-B-A stale completions and preserve same-set identity
+  ---
+  duration_ms: 0.1721
+  type: 'test'
+  ...
+# Subtest: component preload lifecycle is epoch-safe, cancellable, static, and reports mounted accounting
+ok 172 - component preload lifecycle is epoch-safe, cancellable, static, and reports mounted accounting
+  ---
+  duration_ms: 0.8305
+  type: 'test'
+  ...
+# Subtest: r2 generator is deterministic and idempotent without mutating native sources
+ok 173 - r2 generator is deterministic and idempotent without mutating native sources
+  ---
+  duration_ms: 1382.5366
+  type: 'test'
+  ...
+# Subtest: r6 foliage is a native-conifer replacement layer with no supplemental sources
+ok 174 - r6 foliage is a native-conifer replacement layer with no supplemental sources
+  ---
+  duration_ms: 14.3284
+  type: 'test'
+  ...
+# Subtest: spatially paged atlases preserve full source resolution and every replacement tree is exact at rest
+ok 175 - spatially paged atlases preserve full source resolution and every replacement tree is exact at rest
+  ---
+  duration_ms: 663.9584
+  type: 'test'
+  ...
+# Subtest: registered conifers retain terrain coordinates and restrained motion
+ok 176 - registered conifers retain terrain coordinates and restrained motion
+  ---
+  duration_ms: 2.6648
+  type: 'test'
+  ...
+# Subtest: native foliage ownership rejects experimental additive families
+ok 177 - native foliage ownership rejects experimental additive families
+  ---
+  duration_ms: 0.1781
+  type: 'test'
+  ...
+# Subtest: the reported lower-ridge camera mounts native trees and gates motion to the actual viewport
+ok 178 - the reported lower-ridge camera mounts native trees and gates motion to the actual viewport
+  ---
+  duration_ms: 0.4855
+  type: 'test'
+  ...
+# Subtest: an admitted foliage cohort is filtered before the shared residency budget
+ok 179 - an admitted foliage cohort is filtered before the shared residency budget
+  ---
+  duration_ms: 0.1325
+  type: 'test'
+  ...
+# Subtest: foliage LoD uses hysteresis and cannot mount outside close detail
+ok 180 - foliage LoD uses hysteresis and cannot mount outside close detail
+  ---
+  duration_ms: 0.0963
+  type: 'test'
+  ...
+# Subtest: one renderer batches spatial atlas pages and animates the buffered cohort with rooted deformation
+ok 181 - one renderer batches spatial atlas pages and animates the buffered cohort with rooted deformation
+  ---
+  duration_ms: 3.5143
+  type: 'test'
+  ...
+# Subtest: the foliage build is deterministic
+ok 182 - the foliage build is deterministic
+  ---
+  duration_ms: 24155.3417
+  type: 'test'
+  ...
+1..182
+# tests 182
+# suites 0
+# pass 171
+# fail 9
+# cancelled 0
+# skipped 2
+# todo 0
+# duration_ms 214026.047

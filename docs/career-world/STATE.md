@@ -736,6 +736,21 @@ nine self-checks against STATE's own figures:
 makes the LoD test meaningful. Also fix the lock-10 `excludedElements` flaw
 above.
 
+**SUITE HEALTH (measured 2026-09-03, R113).** From a pristine tree the suite is
+**9 failures, stable, tree stays clean**. STATE previously claimed one known red
+at `tests/ninjaone-capital-city-lod-routing.test.mjs` - **that file does not
+exist**, removed with the D06 nuke-and-boot. Of the nine, **exactly one was
+stale** (three npm scripts naming deleted builders, pruned in `5820cdf4`). The
+rest are REAL and must not be pruned: the relief plate manifest lags its PNG;
+32 stream-r3 tile hashes lag a source plate regenerated 18 days after the tiles;
+`world-land-mask-r4.png` and the ocean coast field disagree; an
+`INTERIM-owner-guard-treatment` pin needs an owner ruling
+(`ninjaone-inland-terrain-erase-r1.png` changed deliberately at `1840e4d4`);
+and two are the ocean lane's (`profile.ocean.weather < 0.5`, and the
+water/foliage wind coupling). The stream-r3 drift is confined to the tileset the
+L2 registration retires - leave it. Audit tool:
+`session3-tools/manifest-hash-audit.mjs`.
+
 **Rules that still bind:** one bake at a time; `tools/world-authoring/`
 solidified (owner words + `check-solidified.mjs --approve` before and after,
 controls first, `npm run check:world-authoring`); **never run the control suite
