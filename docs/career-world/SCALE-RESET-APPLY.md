@@ -197,3 +197,57 @@ in the ledger, not quietly edited.
 skipped** — twelve pre-existing failures, where STATE records only one known
 red (the D05 hash mismatch). The failing set is captured so the post-change run
 can be compared against it rather than against an assumption of green.
+
+---
+
+## Step 2 ATTEMPTED AND REVERTED — 2026-09-03. The edit list was wrong again.
+
+The five edits were made, `typecheck` stayed clean, and the targeted control
+(`world-territory-resegmentation` + `ninjaone-environment-proof`) came back
+`16 pass / 1 fail` — **identical to its baseline, twice.** Both spans were
+halved and the arithmetic proved Option B does what it claims: the capital
+measures `188.2 x 141.2 m` before and after, D05 unmoved.
+
+**Then the app threw**, and kept throwing as each fail-closed contract caught
+the next divergence:
+
+1. `NinjaOne Capital city authority does not match package, terrain, and LOD
+   contracts.` — a **third** copy in `city-package-authority-r4.json`
+   (`registration.worldSpan`), cross-checked against the constant.
+2. Halved that plus two more copies found by grep
+   (`foliage-native-r4.json`, `inland-water-r1.json`).
+3. `NinjaOne pooled foliage registration contract is invalid.` — because the
+   expected span is **hardcoded in the guard itself**, not only in the manifest:
+   `manifest.registration.boundingWorldView.span.join(",") !== ` + "`0.25,${1 / 3}`"
+
+**The working tree was reverted. Nothing was committed and the app is green
+again.**
+
+### The true scope
+
+| what | count |
+|---|---|
+| manifests holding a copy of the registration | **5** |
+| hardcoded `0.25 / 1÷3` span literals in TS guards | **5** |
+| normalized span constants relative to the plane (`maxDetailEnterSpan`, `maxDetailRetainSpan`, `viewportOverscanRatio`, …) | **~17** |
+
+STATE said this plainly and it was under-read: *"Every existing registration is
+re-derived: D05 master bounds, territory envelopes, **LoD span constants**."*
+The last three words are the work.
+
+**This is a derivation pass, not a find-and-replace**, and it needs judgement,
+not only arithmetic: halving a *registration* keeps its ground meaning, but the
+LoD and detail-enter thresholds are camera spans that were plausibly tuned by
+eye. Whether `maxDetailEnterSpan: 0.12` should become `0.06` (same ground) or
+stay `0.12` (same camera feel) is an owner-facing question per constant, not a
+mechanical substitution.
+
+### What the failed attempt bought
+
+The fail-closed guards are **good** — every divergence was caught loudly and
+immediately, none silently. And the exercise produced the inventory above,
+which is what the apply actually needs. Recommended next step: enumerate all
+five manifests, five literals and seventeen constants with each one's current
+value and its derived candidate, get the LoD thresholds ruled on, then apply
+the whole set in one commit against the targeted control — rather than editing
+until the app stops throwing.
