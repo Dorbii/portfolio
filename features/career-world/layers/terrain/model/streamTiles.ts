@@ -1,20 +1,15 @@
 import releaseManifest from "@/public/career-world/layers/terrain/authority/manifests/terrain-stream-runtime-r4.json";
-import l2DevManifest from "@/public/career-world/layers/terrain/authority/manifests/terrain-stream-runtime-l2dev.json";
 import type { CameraView, Pair } from "../../../shared/camera";
 import type { DetailTierId } from "../../../shared/lod";
 import type { TerrainResidencyPolicy } from "./residency";
 
-// DEV ONLY (owner OK 2026-09-02, LoD test): NEXT_PUBLIC_LAND_STREAM=l2dev feeds the
-// L2 land pyramid to this renderer at a dev placement instead of the r4 plate tiles.
-const useL2DevStream = (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_LAND_STREAM === "l2dev")
-  || (typeof window !== "undefined"
-    && new URLSearchParams(window.location.search).get("landStream") === "l2dev");
-const manifest = useL2DevStream ? l2DevManifest : releaseManifest;
+// The release feed serves the authored L2 land. The `l2dev` switch and the
+// `stream-r3` tileset it stood beside are both gone: the dev placement existed
+// only to exercise the streamer before the land had a world registration, and
+// stream-r3 was the placeholder tiling that registration replaced.
+const manifest = releaseManifest;
 const STREAM_PATH_PREFIXES = [
-  // The registered authored land. `stream-r3` stays only until its removal.
   "/career-world/layers/terrain/authority/tiles/l2-ninjaone/",
-  "/career-world/layers/terrain/authority/tiles/stream-r3/",
-  "/career-world/layers/terrain/authority/tiles/l2-ninjaone-dev/",
 ];
 
 export type TerrainStreamSourceTier = Extract<

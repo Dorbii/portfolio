@@ -3,11 +3,11 @@ import { TERRAIN_SITE_TILES } from "./siteTiles";
 import { TERRAIN_STREAM_TILES } from "./streamTiles";
 
 const WORLD_PLATE =
-  "/career-world/layers/terrain/authority/textures/terrain-relief-r6.png?v=ninjaone-b1-topology-r1";
+  "/career-world/layers/terrain/authority/textures/world-land-r1.png?v=l2-ninjaone-r1";
 const TERRITORY_PLATE =
-  "/career-world/layers/terrain/authority/textures/terrain-relief-r6-detail-4x.png?v=ninjaone-b1-topology-r1";
-const WORLD_PLATE_DIMENSIONS = [1672, 941] as const;
-const TERRITORY_PLATE_DIMENSIONS = [6688, 3764] as const;
+  "/career-world/layers/terrain/authority/textures/world-land-detail-4x-r1.png?v=l2-ninjaone-r1";
+const WORLD_PLATE_DIMENSIONS = [1664, 936] as const;
+const TERRITORY_PLATE_DIMENSIONS = [6656, 3744] as const;
 
 export const LAND_PLATE_DECODED_BYTES = Object.freeze({
   world:
@@ -22,7 +22,7 @@ export const LAND_ASSETS = Object.freeze({
   plate: WORLD_PLATE,
   detailPlate: TERRITORY_PLATE,
   mask:
-    "/career-world/layers/terrain/authority/masks/world-land-mask-r4.png",
+    "/career-world/layers/terrain/authority/masks/world-land-mask-r5.png",
   topologyQa:
     "/career-world/layers/terrain/authority/overlays/terrain-contours-r4-detail-4x.png",
   territoryQa:
