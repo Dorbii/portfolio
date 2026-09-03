@@ -21,12 +21,23 @@ function sub(path, find, replace, label, count = 1) {
   const crlf = raw.includes("\r\n");
   const text = raw.replace(/\r\n/g, "\n");
   const hits = text.split(find).length - 1;
+  // Every edit here is an exact text replacement, so skipping one that is
+  // already present is safe and keeps this file re-runnable as a whole record.
+  if (hits === 0 && text.includes(replace)) { changes.push(`${path}  ${label}  (already applied)`); return; }
   if (hits !== count) throw new Error(`${path}: expected ${count} of ${JSON.stringify(find)}, found ${hits}`);
   changes.push(`${path}  ${label}`);
   if (!DRY) fs.writeFileSync(path, crlf ? text.split(find).join(replace).replace(/\n/g, "\r\n") : text.split(find).join(replace));
 }
 
 const V = "scripts/lib/ninjaone-environment-mvp-verification.mjs";
+
+// The two spans that classify a sweep camera's demand mode. Leaving them made
+// every halved sweep span "fresh-or-retained", so the audit's "retained-only"
+// bucket emptied and the 32 MiB union test failed on a count of zero -- the
+// hysteresis band still existed, but no sample could land in it.
+sub(V, "export const NINJAONE_MVP_CLOSE_ASSET_PRELOAD_MAXIMUM_CAMERA_SPAN = 0.075;\nexport const NINJAONE_MVP_NATIVE_RELEASE_MAXIMUM_CAMERA_SPAN = 0.0875;",
+  "export const NINJAONE_MVP_CLOSE_ASSET_PRELOAD_MAXIMUM_CAMERA_SPAN = 0.0375;\nexport const NINJAONE_MVP_NATIVE_RELEASE_MAXIMUM_CAMERA_SPAN = 0.04375;",
+  "MVP demand-mode spans");
 
 // -------------------------------------- the third copy of the checkpoints
 sub(V,

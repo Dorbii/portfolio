@@ -59,8 +59,8 @@ export const NINJAONE_MVP_LIMITS = Object.freeze({
   maximumSupplementalNodes: 64,
   maximumTerrainTiles: 4,
 });
-export const NINJAONE_MVP_CLOSE_ASSET_PRELOAD_MAXIMUM_CAMERA_SPAN = 0.075;
-export const NINJAONE_MVP_NATIVE_RELEASE_MAXIMUM_CAMERA_SPAN = 0.0875;
+export const NINJAONE_MVP_CLOSE_ASSET_PRELOAD_MAXIMUM_CAMERA_SPAN = 0.0375;
+export const NINJAONE_MVP_NATIVE_RELEASE_MAXIMUM_CAMERA_SPAN = 0.04375;
 export const NINJAONE_MVP_FIXED_CAMERAS = Object.freeze({
   B2: Object.freeze({
     center: Object.freeze([0.15625, 0.125]),
