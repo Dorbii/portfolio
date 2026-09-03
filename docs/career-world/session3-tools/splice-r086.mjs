@@ -1,0 +1,8 @@
+import fs from "node:fs";
+{ const p = "docs/career-world/AGENT-EXPERIMENTS.md"; let t = fs.readFileSync(p, "utf8");
+  if (!t.includes("### R086")) { const k = "## Findings backlog"; const i = t.indexOf(k); t = t.slice(0, i) + fs.readFileSync(".codex-tmp/session3/r086.md", "utf8") + t.slice(i); fs.writeFileSync(p, t); console.log("ledger: R086 spliced"); } else console.log("ledger: present"); }
+{ const p = "docs/career-world/STATE.md"; let t = fs.readFileSync(p, "utf8");
+  const anchor = "**Attempt 2 DISPATCHED** on `brief-c1-3-r2.md` (the\nbeck required, flat slab faces, the sound edge to edge, one fall; the inlet a\nfew crowns wide at the crossing as the director's default).";
+  const repl = "**Attempt 2 REJECTED by rock lighting alone** (`0.187`; R086): the\nwater landed (2 crossings met, the sound edge to edge, one fall, the\ncomposition right) but every rock in the cell keeps a lit top plane —\nglobal, on few strong edges (`11,085` vs the accepted coast's `53,344`);\nwords twice and the canon as second input did not move it. **Attempt 3\nDISPATCHED** on `brief-c1-3-r3.md`: keep the composition, attach the\naccepted coast 4,2's source as a THIRD input image for the rock shading, a\n41 px crown floor. If it lands → lock-change 5j (a per-biome reference\nimage beside the canon); if not → 1,3 parked for the owner, lane moves to\n4,1.";
+  if (t.includes(anchor)) { t = t.replace(anchor, repl); console.log("state: 1,3 attempts recorded"); } else if (t.includes("Attempt 2 REJECTED by rock lighting alone")) console.log("state: present"); else throw new Error("state anchor missing");
+  fs.writeFileSync(p, t); }

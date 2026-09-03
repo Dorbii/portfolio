@@ -1,0 +1,8 @@
+import fs from "node:fs";
+{ const p = "docs/career-world/AGENT-EXPERIMENTS.md"; let t = fs.readFileSync(p, "utf8");
+  if (!t.includes("### R104")) { const k = "## Findings backlog"; const i = t.indexOf(k); t = t.slice(0, i) + fs.readFileSync(".codex-tmp/session3/r104.md", "utf8") + t.slice(i); fs.writeFileSync(p, t); console.log("ledger: R104 spliced"); } else console.log("ledger: present"); }
+{ const p = "docs/career-world/STATE.md"; let t = fs.readFileSync(p, "utf8");
+  const anchor = "**attempt 2 DISPATCHED** on `brief-c1-0-r2.md` (the\nlit rock named, one flat value per face verbatim, bench edges that wander,\nthe altar as weather-made rock; log after `rebake2-start`).";
+  const repl = "**attempt 2 ACCEPTED** (R104, commit `dccab43`: rock lighting\n`0.138`, seam tone `0.7`, the tarn and its rim; the worker flags regular\nbench runs and a block-like altar for the owner's eye). **EIGHTEEN CELLS\nSTAND — the two remaining wait on the owner:** 1,1 the purple field (lock\nchange 7 staged and anchor-verified: the hue window on the water test;\nthen `brief-c1-1-r2.md`) and 2,0 the dark-forest gorge (parked after three\nlighting strikes with seams and composition right: accept candidate 3 by\neye / a fourth attempt with the east benches flat-shaded / leave). Whole-\nterritory review at quarter scale: `review/territory-L2-quarter.png`.";
+  if (t.includes(anchor)) { t = t.replace(anchor, repl); console.log("state: 1,0 accepted recorded"); } else if (t.includes("EIGHTEEN CELLS\nSTAND")) console.log("state: present"); else throw new Error("state anchor missing");
+  fs.writeFileSync(p, t); }

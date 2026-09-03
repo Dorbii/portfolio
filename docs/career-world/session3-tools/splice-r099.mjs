@@ -1,0 +1,8 @@
+import fs from "node:fs";
+{ const p = "docs/career-world/AGENT-EXPERIMENTS.md"; let t = fs.readFileSync(p, "utf8");
+  if (!t.includes("### R099")) { const k = "## Findings backlog"; const i = t.indexOf(k); t = t.slice(0, i) + fs.readFileSync(".codex-tmp/session3/r099.md", "utf8") + t.slice(i); fs.writeFileSync(p, t); console.log("ledger: R099 spliced"); } else console.log("ledger: present"); }
+{ const p = "docs/career-world/STATE.md"; let t = fs.readFileSync(p, "utf8");
+  const anchor = "**0,2 the\nwest shore DISPATCHED** (`brief-c0-2.md`, the submerged-run bay; log\n`.codex-tmp/session3/regen-c0-2.log`). Remaining: 1,1 (after lock change\n7), 1,0, 0,1, 0,0 (briefs after their neighbours land).";
+  const repl = "**0,2 the\nwest shore ACCEPTED first attempt** (R099, commit `3aafb2b`: seam tones\n`7.6` and under over two seams, the bay present, `141` tiles; the sound\nruns off its north edge over the west `456 px`). **FIFTEEN CELLS STAND.**\n**2,0 attempt 3 DISPATCHED** on the reframed `brief-c2-0-r3.md` (log after\n`rebake3-start`; strike three parks the cell). `brief-c0-1.md` READY (the\nMetrics-Service shelf: the sound arriving on its south edge's west 22% and\nup the west side; the line from the south edge near the middle to the\nstation and out east a fifth of the way down). Remaining: 1,1 (after lock\nchange 7), 0,1, 1,0, 0,0.";
+  if (t.includes(anchor)) { t = t.replace(anchor, repl); console.log("state: 0,2 recorded"); } else if (t.includes("west shore ACCEPTED first attempt")) console.log("state: present"); else throw new Error("state anchor missing");
+  fs.writeFileSync(p, t); }

@@ -1,0 +1,8 @@
+import fs from "node:fs";
+{ const p = "docs/career-world/AGENT-EXPERIMENTS.md"; let t = fs.readFileSync(p, "utf8");
+  if (!t.includes("### R098")) { const k = "## Findings backlog"; const i = t.indexOf(k); t = t.slice(0, i) + fs.readFileSync(".codex-tmp/session3/r098.md", "utf8") + t.slice(i); fs.writeFileSync(p, t); console.log("ledger: R098 spliced"); } else console.log("ledger: present"); }
+{ const p = "docs/career-world/STATE.md"; let t = fs.readFileSync(p, "utf8");
+  const anchor = "**2,0 attempt 2 DISPATCHED** (`brief-c2-0-r2.md`; log `regen-c2-0.log`\nafter `rebake2-start`). Remaining: 1,1 (after lock change 7), 0,2 (brief\nready), 1,0, 0,1, 0,0 (briefs after their neighbours land).";
+  const repl = "**2,0 attempt 2 REJECTED by three gates by small margins** (R098:\nkey-light `0.0112`, rock lighting `0.17`, and the tone gate at the NEW east\nseam against 3,0 `20.6` — the plateau reads ~100, the candidate's east\nband ~80; the south seam held). Two strikes → reframe on\n`brief-c2-0-r3.md`: both outer thirds as the neighbours' ground at their\nbrightness, the forest in the core with a soft edge, a gorge of rounded\nmossy rock (no columns), conifers the same value all round, one water\nsystem; attempt 3 goes after 0,2 (strike three parks the cell). **0,2 the\nwest shore DISPATCHED** (`brief-c0-2.md`, the submerged-run bay; log\n`.codex-tmp/session3/regen-c0-2.log`). Remaining: 1,1 (after lock change\n7), 1,0, 0,1, 0,0 (briefs after their neighbours land).";
+  if (t.includes(anchor)) { t = t.replace(anchor, repl); console.log("state: 2,0 attempt 2 recorded"); } else if (t.includes("2,0 attempt 2 REJECTED by three gates")) console.log("state: present"); else throw new Error("state anchor missing");
+  fs.writeFileSync(p, t); }

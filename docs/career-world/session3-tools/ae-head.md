@@ -1,0 +1,273 @@
+# Agent Flow Experiments — Career World
+
+Maintained by Claude (director). One entry per dispatched run (desktop thread task or `codex exec` dispatch). Purpose: build a dataset of which model tiers, effort levels, and packet shapes each pipeline stage actually needs, so later cities get cheaper and smoother.
+
+## Summary table
+
+| Run | Date | Task | Lane | Model | Effort | Wall time | Outcome | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| R000 | 2026-08-21 | I24 checkpoint + T1 grammar r1 | desktop thread | (Steve: fill in — app default) | default | ~28 min | **partial** (r1 rejected, machinery approved) | fresh-session baseline under v2 contract |
+| R001 | 2026-08-21 | T1-r2 grammar revision | codex exec | gpt-5.6-terra | medium | — | dispatched | Terra probe on a mechanical packet with explicit criteria |
+
+## Run log
+
+### R000 — 2026-08-21 — I24 old-lane checkpoint + T1 grammar extraction (desktop thread)
+
+- **Setup:** fresh desktop session (id `01a02544-…adf9c`), cold start on AGENTS.md + QA-REVIEW.md. Model = app default (Steve to record which tier the desktop app is set to).
+- **Observations so far:**
+  - Correctly ingested both steering docs on first turn; explicitly cited them as authority and scoped itself to "I24 checkpoint plus one active T1 slice" — the fresh-context reset worked; no old-lane vocabulary reappeared.
+  - Self-selected local skills (`plan-evidence-verification`, `task-packet-execution`, `gate-discipline`). Watch item: Steve suspects some local skills are stale; note any skill-driven weirdness here.
+  - Chose to run the **full** gate suite before committing a checkpoint of already-finished work — good attribution discipline, but ~5 min of wall time dominated by the 145 s exhaustive camera-sweep test. Flow finding: the packet should state which gate tier a checkpoint needs (focused vs full) so workers don't overspend on ceremony.
+- **Verdict:** PARTIAL. I24 checkpoint (`ca6ebde`) clean and well-scoped. T1 r1 delivered working deterministic machinery, reproducible outputs, and correctly-shaped property checks in ~20 min — but fidelity failed review: landmarks missed (palace, train hall, observatory), 45 uniform stamps vs ~150+ structures, sparse circulation (east ridge/industrial empty), abstract bridge diagonals over rooftops. Model-attributable read: the worker satisfied every *written* criterion and stopped at the minimum viable interpretation of "faithful" — the packet under-specified fidelity, so this is as much a packet-authoring finding as a model finding. F3 logged.
+- **Wall time:** ~28 min total (~5 min of it full-suite gate ceremony on the checkpoint — see F1).
+
+### R001 — 2026-08-21 — T1-r2 grammar revision (codex exec, gpt-5.6-terra, effort=medium)
+
+- **Setup:** first headless dispatch. Packet `.codex-tmp/qa/T1/packet-t1-r2.md` with explicit numeric fidelity criteria (≥100 footprints, structure-dominance validation, ≥70% on-path polyline samples, landmark class, bridge-span rule). Sandbox workspace-write; no-commit; focused gates only.
+- **Hypothesis being tested:** a mid-tier model with a *fully specified* mechanical packet matches flagship output quality on extraction/scripting work.
+- **False start 1:** dispatch died at launch — stale PATH CLI (see F4). Redispatched 12:40 on the app's v0.149-alpha engine.
+- **False start 2:** worker blocked — sandbox denied Node execution; honest blocker report, no commit, clean stop (left an unverified builder draft).
+- **False start 3:** PATH-preamble fix insufficient — execpolicy denies system Node script execution outright (probe matrix + rules-file archaeology pinned it down; see F5). Worker again reported honestly and claimed nothing. Its blind draft crashes at `buildFootprints` — noted in the packet for the next attempt.
+- **Attempt 4 (first fair attempt, ~13:25):** dispatched with bundled-node instructions (F5 unlock) and the known draft crash called out.
+- **Verdict: STRUCTURED FAIL — high-quality failure.** Terra fixed the draft crash (`structureFootprint` missing return), ran builder + check + lint, and correctly diagnosed that the *approach* was invalid: splitting the registered abstract routes cannot satisfy the ≥70% on-path property (worst edge 18.75%) because layout anchors are not street geometry. It invoked the two-strikes rule, refused to weaken the classifier, requested a director reframe, claimed nothing, committed nothing. Model-attributable: at medium effort Terra executed a debug-run-validate loop competently and — notably — recognized a dead-end approach rather than thrashing. The dead-end itself was packet-induced (see F6), not model-chosen.
+- **Cross-ref:** superseded by R001b (r3 pixel-extraction reframe, Terra high effort).
+
+### R001b — 2026-08-21 — T1-r3 grammar via pixel extraction (codex exec, gpt-5.6-terra, effort=high)
+
+- **Setup:** director reframe per Terra's request: circulation extracted by pixel classification → skeletonization → vectorization (on-path property true by construction); layout manifest demoted to naming/district priors; director-supplied landmark seed points; per-district self-normalizing coverage property. Effort bumped medium→high for the vectorization work. Strike counter reset — new approach.
+- **Verdict: PARTIAL — converging (Terra strike 1 on this approach).** Real progress: implemented Zhang-Suen skeletonization + vectorization competently, classifier traces actual streets, all districts covered, all three landmark seeds hit, honest flag that calibration needs director judgment. Two visual failures the properties didn't catch: (a) 542 *disconnected* dashes — no connectivity property was specified, so no network topology was built; (b) footprint classifier keyed on warm masonry and missed the dominant dark-slate roofs → fragments instead of building extents; palace captured west-wing only. Also: "minimum interior rate 0.7000" landing exactly on the 0.70 threshold reads as tuned-to-pass — properties held while visual truth didn't, confirming the director-eyeball gate is non-negotiable.
+- **Model-attributable:** Terra at high effort handled a nontrivial CV pipeline (skeletonization, pruning, vectorization) without hand-holding. Failures trace to packet omissions (connectivity, roof material) more than model capability. Packet-authoring lesson → F7.
+- **Cross-ref:** R001c (r4 refinement packet: topology joining + connectivity property, roof-material class + component merging, director-supplied landmark bboxes with ≥70% overlap property, overlay readability fix).
+
+### R001c — 2026-08-21 — T1-r4 grammar refinement (codex exec, gpt-5.6-terra, effort=high)
+
+- **Setup:** refines r3 in place. Dispatched ~13:20.
+- **Verdict: CORRECT STOP — director spec error.** Terra implemented everything asked (gap linker, junctions, roof classification, merging, landmark properties, readable grid), then proved the ≥60% visible-pixel connectivity property physically unsatisfiable (164 components / 0.053 share; classifier widening → 1,254 / 0.008) and stopped under two-strikes without weakening properties or faking artifacts. It even flagged that the stale r3 PNGs were diagnostic-only rather than presenting them as passing output. Landmark diagnostics: palace 0.916, observatory 0.793, train hall 0.679 vs my generous bbox.
+- **Model-attributable:** third consecutive honest stop; at high effort Terra now reliably distinguishes "I failed" from "the spec is wrong" — the exact judgment quality the tier question was probing. Director takeaway → F8.
+- **Cross-ref:** R001d (r5: occlusion-aware inferred links with anti-abuse bounds; train-hall tolerance corrected).
+
+### R001d — 2026-08-21 — T1-r5 occlusion-aware topology (codex exec, gpt-5.6-terra, effort=high)
+
+- **Setup:** corrected topology model — labeled inferred links across occluders (≤70 px, heading-continuous, structure/foliage crossings only, water = bridge only), largest component ≥60% incl. inferred, inferred ≤40%, components ≤40. Dispatched ~13:42.
+- **Verdict: CORRECT STOP — second director spec failure.** Implemented the inferred-link mechanism with two distinct tunings as instructed; both yield 38 links, 126 components, 7.8% largest share vs the 60% bar. Refused to regenerate artifacts from a red build. Train-hall tightened bbox passes (0.7583) — landmarks settled. Two blind threshold corrections in a row failing is a director process smell → F9 (measure before spec'ing).
+- **Cross-ref:** R001e (r6 diagnostics: topology gate demoted to metrics, component-colored overlay, length histogram; final property to be set from data).
+
+### R001e — 2026-08-21 — T1-r6 topology diagnostics (codex exec, gpt-5.6-terra, effort=high)
+
+- **Setup:** measure-then-spec. Expected to run green (topology reported, not asserted) and regenerate all artifacts. Dispatched ~14:08.
+- **Verdict: PASS — and it closed T1.** Green build, full diagnostic block (126 components; ≥50 px components hold 61.8% of length; <40 px hold 31.9%; p50 30 px; inferred 23.6%), component-colored overlay, 151 footprints, landmarks all passing. The measured distribution let the director set satisfiable bars (≥60% in ≥50 px components; ≤35% in <40 px) that current output passes → **T1 DIRECTOR-ACCEPTED as grammar v1** with recorded limitations (short occluded runs, partial mid-building fragmentation) to be revisited only on demonstrated composer need.
+- **Terra tier summary across T1 (the first real experiment result):** 7 dispatches, zero dishonest claims, three correct two-strikes stops that each disproved a director spec, competent CV implementation (skeletonization, occlusion linking, component analysis) at high effort. Preliminary answer to the tier question: **Terra + rigorous packets + director QA is sufficient for mechanical pipeline stages**; every failure in T1 traced to spec/packet authoring, not model capability.
+
+### R003 — 2026-08-21 — T1 finalize + checkpoint (codex exec, gpt-5.6-terra, effort=medium)
+
+- **Setup:** promote measured bars to enforced properties; narrow-path checkpoint commit (the only commit-authorized packet). Dispatched ~14:25. R002 (T2, Sol) queues behind it — one writer at a time.
+- **Verdict: PASS with one infra discovery.** Properties promoted and green (0.6177/0.3186 vs 0.60/0.35 bars), ESLint clean, honest QA note — but the sandbox denies `.git` writes entirely (`index.lock` cannot be created), so workers can never commit (F10). Director verified the check in own shell (exit 0), inspected the package.json diff (only the two grammar script lines), staged the exact authorized path list, and created checkpoint `8fd8894`. New standing protocol: **workers finalize, director commits.**
+
+### R002 — 2026-08-21 — T2 kit-of-parts contract (codex exec, gpt-5.6-sol, effort=high)
+
+- **Setup:** first flagship-tier dispatch; design-shaped task. Packet `.codex-tmp/qa/T2/packet-t2.md`: kit taxonomy, per-class generation contract template, exact socket/baseline standard, generation workflow rules, minimal D05 proof-slice subset, open questions for Steve. Deliverable `docs/career-world/CITY-KIT-CONTRACT.md`. Dispatched ~14:40.
+- **A/B context:** Sol/high on design work vs Terra/high on mechanical work — the two lanes of the tier hypothesis now both have live data streams.
+- **Verdict: PASS at director review (~25 min wall).** 250-line contract; taxonomy with measurable class boundaries (px² ranges from the grammar), a genuinely precise socket/baseline standard (baselineY/sortPoint/footprint-vs-silhouette/terrace modes/support polygons), reuse-first foliage (0 new entries), comprehensive mechanical gates, minimal D05 slice (26 entries), and four well-chosen owner questions. Every numeric citation checked out against the grammar JSON — including one (595 edges) that corrected the director's own stale memory of interim counts. One gap noted for per-asset packets (scale-coherence gate).
+- **Sol-vs-Terra observation:** on a design-shaped task Sol produced near-acceptance-quality work in one pass with zero revisions — versus Terra's honest-but-iterative convergence on mechanical work. Early but consistent with the tier split: Sol where the task is open-ended synthesis, Terra where properties can bound it. **Awaiting Steve's acceptance.**
+
+### R004 — 2026-08-21 — T3a composer skeleton, D05 placeholders (codex exec, gpt-5.6-terra, effort=high)
+
+- **Setup:** T2 accepted by Steve (parameters in CITY-KIT-CONTRACT.md §9; commit `e779ffe`). T3 staged: skeleton (a) → kit generation (b) → full composition (c). T3a validates placement/sockets/consolidation/z-sort with procedural placeholder parts — zero generation spend at risk. The composer is also the grammar's first real consumer; its friction report drives any grammar revision. Dispatched ~15:20.
+- **Verdict: MIXED — mechanics PASS, registration proof unusable, friction report excellent.** 28 road + 9 stair runs, 25 placements, 0 z-sort violations, deterministic, green gates. But the registration proof rendered terrace bands as opaque full-width horizontal strips, hiding the master entirely — one revision (R005). The friction report earned its keep: named anchors displaced 146–300 px from nearest grammar footprints (S01/S18/S11), D05 band data is left-edge samples only, 25 footprints thin vs the visibly dense district. **The skeleton stage caught grammar-v1's gaps before a dollar of generation spend — exactly why T3 was staged.**
+- **Director decisions:** registered anchors become placement authority for named entries; terrace bands demoted to advisory outlines for the proof (region extraction descoped as a CV rat-hole the generation probe doesn't need); footprint-density revisit deferred until after the T3b generation probe.
+
+### R005 — 2026-08-21 — T3a-r2 composer fixes (codex exec, gpt-5.6-terra, effort=medium)
+
+- **Setup:** visible registration proof (outlines over master), anchor-authority placement, advisory bands. Dispatched ~15:45.
+- **Verdict: PASS — and the proof did its job.** Master now clearly visible under outlines; composer mechanics accepted and committed (`893eaaa`). The readable proof confirmed the deeper truth: grammar v1's D05 data cannot support a faithful composition — major buildings unboxed or fragmentary, circulation ribbons sparse vs visible streets, anchors near-but-not-on structures. The conditional T1 acceptance's revisit clause has formally triggered → T1.1 revision lane opened.
+
+### R006 — 2026-08-21 — T1.1 grammar D05 completeness (codex exec, gpt-5.6-terra, effort=high)
+
+- **Setup:** whole-building capture in D05 (root-cause the fragment problem; six director-supplied major-structure seeds with ≥600 px² merged-footprint properties), D05 circulation recalibration with before/after reporting, all prior properties stay green, composer re-run so the registration proof reflects the new grammar. Dispatched ~16:05.
+- **Verdict: PASS — T1.1 accepted.** Root cause found (blue dome classified water-like; merger capped at 80 px/8 px gaps). D05 footprints 25→32 with all six seeds hit inside well-fitted whole-building boxes; D05 skeleton length 666→1410 px (coverage 0.79→1.42); every prior property green. Notably rejected its own denser 3/9 calibration because inferred-link share would hit 0.438 > 0.40 — chose the honest configuration over the better-looking one unprompted. Registration proof visually confirms fit. Registered-anchor oddities (S01/S11/S15 on sparse ground) are layout-authority facts, recorded not "fixed."
+
+### R007 — 2026-08-21 — T3b generation probe, 3 entries (codex exec, gpt-5.6-sol, effort=high)
+
+- **Setup:** FIRST IMAGEGEN SPEND OF V2 (≤6 calls). Terrace slab + road straight + compact building per CITY-KIT-CONTRACT.md §3–§7, style-referenced from master crops via `referenced_image_paths` (headless ImageGen availability probed and confirmed). Quarantine-only; report to quarantine REPORT.md to avoid QA-REVIEW write collision with R006 (runs concurrently — disjoint file sets). Purpose: measure achievable style fidelity before committing to the 26-entry D05 kit.
+- **Verdict: STYLE PASS / ALPHA WORKFLOW FAIL.** All 6 calls returned opaque RGB at tool-chosen resolution with a *drawn* transparency checkerboard — identical to the old ledger's LFX02 failure, i.e., a known property of this generator, not a prompt defect. But the subjects themselves are excellent: the compact building nails the master vocabulary (slate roof, brass trim, amber apertures, purple accent, gothic-industrial density). Director assessment: the make-or-break fidelity question is answered YES; the misses are mechanical. Sol's worker conduct was exemplary — preserved raw outputs, refused to fabricate alpha or sockets, produced honest gate tables. Watch item: projection pitch reads slightly lower than the master's 72° — side-by-side check required in the full batch.
+- **Pipeline fix (F11):** generation must request a solid magenta background and a deterministic post-process keys alpha, decontaminates fringe, crops/rescales to the declared canvas, then measures real sockets from the keyed alpha. Contract §7 amended accordingly. Cross-ref: R008 (probe r2 under the chroma workflow).
+
+### R008 — 2026-08-21 — T3b probe r2, chroma workflow (codex exec, gpt-5.6-sol, effort=high)
+
+- **Setup:** same 3 entries under amended §7: solid-chroma generation, deterministic keying/canvas/socket post-process, gates now meaningful. ≤6 calls. Dispatched ~16:35.
+- **Verdict: PASS — pipeline proven end-to-end (5 calls).** Compact building and terrace slab pass 17/17 gates with clean keying (generator's magenta drifts ±36 RGB; worker built border-connected keying with accent protection and edge decontamination — byte-identical reruns), real measured sockets, and strong style; the building's pitch now matches the master read. Road failed scale-coherence twice (generator makes wide-shallow road subjects vs the declared 80×36) — fix is measure-then-declare (F9 applied to authoring): adapt the road class's declared footprint to generator tendencies rather than fighting aspect. Slab note for full batch: more rectangular, run-friendly variants for contour-follow.
+- **Sol observation:** the post-process engineering (adaptive chroma tolerance, magenta unmixing from partial edges, conservative alpha-backed footprint measurement) was unprompted quality — the packet specified *what*, Sol chose *how* well.
+- **GATE:** full 26-entry D05 kit (~50–60 calls) awaits Steve's explicit go. → **Steve approved 2026-08-21 ~15:55** after confirming the generation lane runs on Codex/OpenAI-side ImageGen.
+
+### R009 — 2026-08-21 — T3b group 1: ground + circulation, 11 entries (codex exec, gpt-5.6-sol, effort=high)
+
+- **Setup:** first of four class-group batches (G1 ground+circulation → G2 buildings → G3 named skills → G4 props), director pixel QA between groups. Probe lessons encoded: rectangular run-friendly slabs, measure-then-declare road footprints, chroma workflow, ≤22 calls, three-consecutive-structural-failures circuit breaker. Dispatched ~16:00.
+- **Verdict: PASS WITH NOTES — 10/11 entries have a passing candidate at 16/22 calls.** Clean visual passes: both retaining walls (master-vocabulary arched faces), cliff transition, both stair runs, road curve. Issues: (a) roads read near-plan with heavy curb framing — acceptable for flat surfaces, watch at composition; (b) road widths span 23.7–35.4 master px vs the grammar's ~13.5 px streets — resolvable WITHOUT regeneration by re-authoring sidecars to one width family at higher px-per-master-px density (the master-footprint mapping is authored metadata, not intrinsic); (c) slab class weakest — narrow failed gates, h090 reads road-like; borderless ground-pad re-roll deferred to a cleanup pass. Set consistency: palette/material coherent across all 11; zero matte contamination; accent survival 100%.
+- **Sol batch observation:** the worker's own consistency section flagged the projection split and width incoherence before the director saw the pixels — report quality remains the strongest part of the flagship lane.
+
+### R010 — 2026-08-21 — T3b group 2: buildings ×4 (codex exec, gpt-5.6-sol, effort=high)
+
+- **Setup:** 2 compact + 2 standard variants, probe var01 as projection/quality benchmark, distinct massings required, ≤8 calls. Dispatched ~16:30.
+- **Verdict: PASS — cleanest group yet.** 4/4 entries at ONE call each (4 of 8 budget), all 20/20 gates. The five-building set (incl. probe var01) reads as one neighborhood with genuinely distinct massings (gabled workshop, corner-turret L, attached pair, tower+annex civic, U-shaped guild hall). Worker even upgraded the keying predicate mid-run to protect saturated interior purple highlights. Watch item (worker self-flagged): detail-kit repetition — every building uses the same purple-tube/finial/amber-window vocabulary; composer should interleave variants, and G3 prompts explicitly vary accent placement.
+- **Trend note:** call efficiency improving per group (probe 6→5, G1 16/22, G2 4/8) as prompt patterns and the workflow mature — the repeatability curve Steve wanted to measure, showing up in the spend data.
+
+### R011 — 2026-08-21 — T3b group 3: named skill buildings ×5 (codex exec, gpt-5.6-sol, effort=high)
+
+- **Setup:** S01 foundry / S10 tiered works / S11 warehouse+crane / S15 observatory / S18 wheelworks — identity-dominant silhouettes per Steve's capital-identifiability parameter, anchor-local style crops, capital-scale legibility strip required in report, ≤10 calls. Dispatched ~17:05.
+- **Verdict: PASS WITH ONE DEFECT — and the identity parameter validates.** 5/5 at one call each, 20/20 gates. Five genuinely distinct identity-dominant massings; the capital-scale strip (26–27 px declared widths) shows chimney/ziggurat/dome/wheel all surviving as readable silhouettes — Steve's capital-identifiability requirement is achievable. Defect the gates couldn't see: crane/gantry elements on S01/S10/S11 rendered saturated magenta (generator echoing the chroma background into accents) → deterministic recolor fix dispatched (R013), no regeneration. Anti-repetition prompting worked — no G2 purple-tube-layout cloning.
+- **Flow note → F12 candidate:** chroma-background generation can leak the key hue into subject accents; add "metalwork never magenta/pink" to all chroma-workflow prompts and an interior-magenta-cluster check to the gate set.
+
+### R013 — 2026-08-21 — G3 crane recolor fix (codex exec, gpt-5.6-terra, effort=medium)
+
+- **Setup:** deterministic luminance-preserving hue shift of interior magenta clusters to dark iron on S01/S10/S11; provenance copies kept; gates rerun; sheets rebuilt. No ImageGen. Runs concurrently with R012 (disjoint quarantine dirs).
+- **Verdict: COMPLETED — then superseded within the hour.** Steve reviewed G3 on the console and rejected the set for a reason neither gates nor director QA had covered: **no technology iconography** (his Go concept building wears a gopher face; these are generic industrial). Owner parameter amended into the contract (§9.2: in-world tech motifs, never text/logos), r01 set superseded, R014 re-roll dispatched with per-tech motif specs and Steve's own concept art as the S01 reference. The recolor's F12 lesson (magenta-bleed prompt rule) carries into all future prompts.
+- **Flow finding → F13:** owner design review on the console caught a requirement-class gap (thematic identity) that no property or director pass had encoded — the visibility dashboard is itself a QA layer. Owner-visible evidence early = cheaper corrections; this one cost one group re-roll (~5-10 calls) instead of a composed-district rejection.
+
+### R014 — 2026-08-21 — G3-r02: named skills with tech iconography (codex exec, gpt-5.6-sol, effort=high)
+
+- **Setup:** same approved massings + gopher/red-bricks/whale/keyhole/tools motifs as physical architecture; Steve's concept frame as S01 reference; no-magenta rule in every prompt; ≤10 calls. Dispatched ~17:35.
+- **Verdict: 4/5 ACCEPTED (one with a tone fix), 1 re-archetyped.** 5/5 at one call each, 21/21 gates. S01's gopher is masonry-built and exactly the owner's concept register; S11's whale counterweight is subtle-good; S18's wrench crest passes; S10's motif is unmistakable but the oxide red is a chroma siren vs the near-black city → deterministic desaturation fix (R016, asset-level because canonical assets ship world-wide). S15's keyhole passed gates but stayed semantically thin → Archive re-archetype dispatched (R015) per the pre-agreed direction. Worker report quality note: it flagged both the S10 chroma dominance and the S01 tone difference before director review — third consecutive group where Sol's self-reads anticipated the director's findings.
+
+### R015 — 2026-08-21 — S15 OpenAPI Archive re-archetype (codex exec, gpt-5.6-sol, effort=high)
+
+- **Setup:** vaulted scriptorium — barrel vault + lantern tower silhouette, scroll racks through windows, open-tome statuary, no-text schematic murals; ≤4 calls. Dispatched ~18:20.
+- **Verdict: PASS — best building in the set.** Candidate B: glowing scroll racks through every window, hooded scribe statues with open tomes, flank murals that are literal line-and-node schema diagrams (no text), distinct barrel-vault + lantern silhouette. Worker self-rejected candidate A on semantic grounds despite 21/21 mechanical passes — the gates-vs-meaning distinction is now internalized in the worker layer. S15 manifest label change (Observatory → Archive) queued for the D05 swap.
+
+## KIT COMPLETE — 2026-08-21 ~18:40
+
+**25 entries banked at ~50 ImageGen calls** across probe (2), G1 ground+circulation (10), G2 buildings (4), G3-r02 named+archive (5), G4 props (4). Two composer-demand fill-ins deferred per F9 (road-curve-right, narrow slab). Every part: chroma-keyed alpha, measured sockets, 20-22 mechanical gates, director pixel review, quarantined pending the composed-district review. **R017 (T3c composition) dispatched** — real sprites replace placeholders, road width-family re-authoring, contact shading + cast shadows, moody-but-legible grade, side-by-side vs the master's D05 crop.
+
+## Skill-roster audit — 2026-08-21 ~18:55 (owner + director)
+
+Steve's test: a skill building is valid only for a recruiter-searchable technical skill — never soft skills or project-internal concepts. Audit of the 19 registered nodes: 16 clean (Go, TS, React, TanStack, C#, Python, PostgreSQL, Redis, AWS, Databricks, Docker, VMware, MacStadium, gRPC, OpenAPI, MCP). Three failed/flagged:
+- **S18 "tool-generation-wheelworks"** — project artifact (Steve's mcpgen tool), not a skill. Anchor reassigned to **Node.js** (evidenced: the repo's entire authored build toolchain; absent from roster; top recruiter term). R018 generates `nodejs-millworks` with hexagon iconography; the wheelworks asset is shelved for mcpgen's future project city. R017's in-flight composition uses wheelworks as a stand-in at the anchor; placement swaps after R018 passes.
+- **S17 "capability-citadel"** — fails the test; reclassified as civic landmark, removed from the skill index (manifest change queued with the S15 rename for the D05-swap lane).
+- **S19 "ai-palace"** — skill valid (agentic/AI systems is recruiter-searchable), name and palace-flavor need rework; deferred (not in D05).
+- **Flow finding → F14:** registered data inherited from prior agent eras carries unaudited semantics — names Sol treated as authority in the contract were never owner-validated. Roster-class data needs an explicit owner audit gate before assets bake it in; caught here at a 4-call cost because the canonical-asset rule made naming permanent.
+
+### R018 — 2026-08-21 — S18 Node.js Millworks (codex exec, gpt-5.6-sol, effort=high)
+
+- **Setup:** millworks archetype (fits the anchor's wheel neighborhood), hexagon iconography + muted Node green, distinct silhouette vs S01/other wheels; ≤4 calls. Dispatched ~18:55, concurrent with R017 (disjoint dirs; report stays in quarantine).
+- **Verdict: PASS — one call.** Hex rose window, six-sided hub, hex paving, green glazing/banners: unmistakable to a Node developer, pure millwork to anyone else. Distinct 27 px silhouette (broad gable + wheel). Worker self-detected 5,963 magenta metalwork pixels via the F12 gate and fixed them deterministically with provenance before reporting — the full defect-detect-fix loop now runs inside a single worker without director intervention. Roster corrected: S18 = Node.js; wheelworks shelved for the mcpgen project city.
+
+### R017 — 2026-08-21 — T3c: compose D05 from the real kit (codex exec, gpt-5.6-sol, effort=high)
+
+- **Setup:** the milestone packet. Deterministic composition, no ImageGen. Honest-report requirement on composition gaps. Dispatched ~18:40.
+- **Verdict: MACHINERY PASS / VISUAL FAIL — best failure report of the project.** 190 placements, zero property violations, byte-identical rebuilds, road family unified at 14 px — and the worker correctly declared the output "not a master-conforming visual candidate" with a ranked 5-item demand list instead of dressing it up. Root causes: (1) DIRECTOR ERROR (→F15): building scale mapping inherited grammar roof-core footprints (~27 px) when the registered layout's displayWidth (130-200 px) was the authority — buildings rendered ~7× too small; (2) DIRECTOR ERROR: proof composited over void though the city layer never owns terrain — unjudgeable by construction; (3) 75% of circulation length off the two authored axes (diagonal variants needed); (4) short-run overhangs (end-cap policy); (5) wall banding (re-judge after scale fix). R019 fixes 1/2/4 with zero generation calls.
+
+### R019 — 2026-08-21 — T3c-r2: scale authority + terrain underlay + end caps (codex exec, gpt-5.6-sol, effort=high)
+
+- **Setup:** re-author all sidecar scale mappings from registered display widths (metadata only), composite proofs over the master terrain underlay, end-cap clipping, refreshed demand list ranked by visual impact at correct scale. Dispatched ~19:15.
+- **Verdict: PASS — first genuinely encouraging proof.** Full scale re-authoring recorded (named 175-200; class widths from layout stats p25/p50/p75 = 170/175/180; all 32 placements within 2.78% of target); 77 short runs end-clipped; kit-over-master proof shows the composed city reading as the same family — correct scale, believable grounding, coherent style. Remaining ranked gaps: (1) 40% building-pair overlap (density/occupancy), (2) diagonals, (3) generic-large entries, (4) wall banding (downgraded). Plus one new artifact: a pink ghost region center-left. Director assessment: the pipeline's visual thesis now looks likely to hold; the double-city interim baseline (master's baked buildings under ours) is the main obstruction to a clean judgment → clean-terrain underlay next.
+
+### R020 — 2026-08-21 — T3c-r3: clean-terrain underlay + occupancy + ghost (codex exec, gpt-5.6-terra, effort=high)
+
+- **Setup:** derive clean D05 terrain from registered native land assets (read-only; report if world-registration is ambiguous rather than guessing), 15% pairwise overlap cap with priority placement, identify the pink ghost. Dispatched ~19:50, concurrent with R021.
+- **Verdict:** pending.
+
+- **R020 verdict: MIXED — good derivation discipline, three new defects exposed.** Underlay derivation was registration-correct but used the WRONG asset family (world relief instead of the NinjaOne environment plates — director packet error); the proof revealed a real composer alpha leak (all sprites render translucent; r2's "pink ghost" was S10 at low alpha all along); and the 15% occupancy cap proved style-false, pruning 24/32 including two named buildings whose registered anchors legitimately overlap (the master's density IS heavy z-sorted overlap — director spec error, F9 pattern: cap set without measuring the master). Ghost root cause honestly identified by the worker. All three fixes in R022 with the occupancy cap now derived from master-measured overlap stats.
+
+### R022 — 2026-08-21 — T3c-r4: native underlay stack + opacity bug + style-true occupancy (codex exec, gpt-5.6-terra, effort=high)
+
+- **Setup:** environment-plate underlay (geology/surface/conifers — the runtime's real under-city stack), alpha-leak root-cause with a draw-path opacity unit check, occupancy cap from master p90 pair-overlap with named-always-place. Dispatched ~20:20.
+- **Verdict: 2/3 FIXED, ghosting persisted → director hands-on debug (standing rule honored).** Underlay now the correct registered environment stack (geology r8 + surface detail + 59 conifer instances, exact 4x crop registration); occupancy now master-measured (p90 directional cap 64.5%; 19/32 survive incl. all 5 named — vs 8 under the arbitrary 15% cap). But buildings still ghosted, and the worker's opacity check ("≥1 opaque pixel survives") passed anyway. **Director in-shell diagnosis (10 min): extracted the S10 region — the sprite draws as alternating horizontal scanlines.** Root cause: hand-rolled resampler iterates source pixels and pushes to rounded destination rows, skipping rows at non-integer scales. Two findings: **F16** (solidity, not existence: region-level opaque-fraction properties, ≥0.98 within source coverage) and the meta-lesson — after two same-symptom worker failures, ten minutes of director pixel-sampling beat a third blind revision.
+
+### R024 — 2026-08-21 — T3c-r4b: destination-space resampling fix (codex exec, gpt-5.6-terra, effort=medium)
+
+- **Setup:** surgical — replace push-resampler with destination-space sampling (or sharp resize+composite), F16 solidity property ≥0.98, regenerate proofs. Dispatched ~21:05.
+- **Verdict: HONEST NULL RESULT — my resampler hypothesis was wrong.** The worker found the resampler already destination-space (sharp lanczos3), refused to fabricate the defect I described, added the F16 solidity property (all 19 buildings ≥0.9986), and the stripes persisted. Director follow-up in-shell narrowed it decisively: underlay panel clean, sprite+resize clean in isolation → a per-placement composer pass (mask clip / contact / shadow / fringe-cleanup) stripes the kit layer. Prime suspect: a dithered/progressive mask in the clip chain. → R025 binary-searches the pass with the evidence attached. Worker refusing to "find" a bug that wasn't there is exactly the honesty the contract buys.
+
+### R025 — 2026-08-21 — T3c-r4c: pass isolation binary search (codex exec, gpt-5.6-terra, effort=high)
+
+- **Setup:** toggle-rebuild each alpha-touching pass over the S10 region, identify the striper, fix, add per-row oscillation property. Dispatched ~21:30.
+- **Verdict: PASS — bug found and killed.** The striper was the district-mask clip: Sharp expanded the resized 1-channel mask to 3 channels and the composer indexed it 1-byte-per-pixel, consuming `255,0,0` as three pixels → one visible row in three. (My dithered-mask suspicion was wrong; the binary-search protocol found the truth anyway — that's why it's a search, not a guess.) Fixed with forced greyscale + per-pixel assertion + direct alpha multiply; F16 oscillation = 0 for all 19 placements. Director-verified by independent S10 re-extraction: fully solid. **The r4c side-by-side is the pipeline's proof-of-thesis: a genuine coherent city at master scale and density on native terrain.** Remaining demand (ranked): dusk-mood grade pass, native-foliage in-fill of the 13 unbuilt slots, diagonal integration, compact/standard variant repetition relief.
+
+### R021 — 2026-08-21 — T3b-G5: diagonal circulation family ×4 (codex exec, gpt-5.6-sol, effort=high)
+
+- **Setup:** road h045/h135 + diagonal stair pair, width family fixed at 14 master px matching the r2 world scale, separately authored (no mirroring), ≤8 calls. Report quarantine-only (R020 owns QA-REVIEW).
+- **Verdict: GATE MATH WRONG, PARTS LIKELY RIGHT.** 8 calls; only 1/4 mechanically green — but the three "failures" all measured ~56 px module length vs the ~40 px axis bound, which is exactly 40×√2: the director's length spec ignored that diagonals spanning the same grid distance are √2 longer by construction. R023 corrects the gate and re-evaluates (no regeneration). Worker also correctly surfaced and ruled on a heading-convention conflict between packet and contract with documented per-sidecar deviations — model behavior exemplary, spec behavior (mine) the recurring bottleneck. → reinforces F9/F15 family: geometry claims in specs need the arithmetic done first.
+
+### R023 — 2026-08-21 — G5 gate correction, √2 diagonal bound (codex exec, gpt-5.6-terra, effort=medium)
+
+- **Setup:** corrected module-length gate for diagonal headings, full re-evaluation, medallion-mute variant if road-h045 A is sole passer. Dispatched ~20:45.
+- **Verdict: PASS — 2/4 diagonals green under correct math.** Road h045 A (56.64 vs 56.57+ε — the √2 prediction to two decimals) and stair NW B pass 23/23; h135 (8% long) and stair NE (short) genuinely fail. Notably the worker retracted its own earlier NE-B green as a wrong-gate artifact — self-correcting against its own prior claim. Medallion-mute comparison variant produced with provenance. Re-roll decision for the two failures deferred to the r5 heading-demand histogram (F9: measure before spending).
+
+### R016 — 2026-08-21 — S10 chroma tone-down (codex exec, gpt-5.6-terra, effort=medium)
+
+- **Setup:** deterministic ~35% desaturation + slight darkening of the tier faces, kiln glow and windows preserved, provenance kept, gates rerun. Concurrent with R015 (disjoint dirs). Dispatched ~18:20.
+- **Verdict: PASS.** Tiers now read as fired oxide in shadow — recognizably red, no longer a beacon; glow seams and windows untouched; gates green; before/after crops and provenance retained. S10 canonical asset finalized.
+
+### R012 — 2026-08-21 — T3b group 4: props ×4 (codex exec, gpt-5.6-sol, effort=high)
+
+- **Setup:** lamp+bollard, crates+barrels, bench+signpost, utility beacon; prop-scale measure-then-declare; "metalwork never magenta" prompt rule from the G3 lesson; ≤8 calls. Final generation group.
+- **Verdict: PASS — 4/4 at 5 calls, and F12 closed its loop.** The worker promoted the magenta-bleed lesson into an actual gate (22/22 now), which caught real pink contamination on bench candidate A; candidate B fixed it under the named-defect protocol. Prop-vs-building scale ratios verified sane (lamp 2.5 vs compact 13.3 master px). Kit status: 20 entries banked + 5 in flight (G3-r02). Two potential composer-demand fill-ins deferred per F9: road-curve-right, narrow slab.
+
+### R026 — 2026-08-21 — T3c-r5: dusk grade + foliage + diagonals (codex exec, gpt-5.6-terra, effort=high)
+
+- **Verdict: PASS — presentable to the owner.** Director picks: **medium grade** (gain .72 / sat .92 / floor #101418 / warm-mask emission boost — the composed side now lives in the master's tonal register) and **muted medallions** (near-invisible in-context; muted is safer on exposed runs). Foliage: 79 deterministic native placements pass the coverage floor, but the floor itself was computed from a high-specificity palette sample that likely under-measures the master's true forest density (F9/F15 family — proxy under-measurement); composed forest reads sparser than master. Diagonals: h045 installed; NW stair honestly withheld (no in-tolerance run); heading histogram says h135/NE would service only +24.5% of off-axis length — deferred, circulation is largely occluded at true density anyway. Honest flag carried: full-suite gate unverified (worker hung on the known slow tests) — must pass before the runtime-swap lane ships.
+- **Residual demands (non-blocking, incremental lanes):** forest density pass with corrected master sampling; compact/standard variant breadth; h135/NE if a future district demands them.
+- **Owed gate cleared (director-run, ~21:20):** full suite `209 pass / 0 fail / 2 skipped` in 450 s. The swap lane's only hard prerequisite is green. All v2 work to date coexists with the legacy suite untouched.
+
+## CONCEPT APPROVED — 2026-08-22 (Steve on candidate A: "this is so much better")
+
+Bright-register candidate A is the accepted D05 visual concept. Remaining path to runtime: R033 anchor verification (F19 pass, in flight) → mountable-plate prep → runtime mount lane (features/ L4 scope, D05-first per the earlier accepted §9.3 parameter) → Steve sees it live at localhost:3000 before any push.
+
+### R033 — 2026-08-22 — anchor verification on candidate A (codex exec, gpt-5.6-sol, effort=high)
+
+- **Setup:** locate the 5 named buildings, emit registration JSON (anchors in candidate + master space), derive the runtime mask, marked overlay proof. Zero generation.
+- **Verdict:** pending.
+
+### R032 — 2026-08-22 — T3d-v3 bright-register integration (codex exec, gpt-5.6-sol, effort=high)
+
+- **Verdict: CONCEPT-LOCK CANDIDATE — presented to Steve.** Candidate A: warm afternoon register (measured 1.64× master luma, 2.1× saturation — mechanical description, not authority), blue-dome accent vocabulary returned, varied roof rhythm, forest interpenetration retained, all five named identities verified in-frame with animation cues visible (chimney, kiln glow, crane, lantern tower, great wheel). F17 worked hard this run: three discards (identity hybridization, out-of-frame whale, erased archive on a local-edit retry — the second local-edit invariance failure, consistent with F18's no-surgical-edits envelope). Director read: this answers all three critiques from the owner's last review; it is concept/reference evidence, not a registered plate (drift expected, anchors post-hoc per F19).
+
+### R031 — 2026-08-22 — T3d-v2 dusk integration with full identity brief (codex exec, gpt-5.6-sol, effort=high)
+
+- **Verdict: IDENTITY BRIEF PROVEN (register obsoleted mid-flight by Steve's bright redirect).** Candidate C1: all five named identities survive whole-scene integration with dense interpenetration and continuous rock-cut earthworks. F17 catch of the week: the model painted a DUPLICATE gopher foundry (candidate C) — discarded for identity non-uniqueness, retry corrected. Transferable: identity-reference sheet + verbatim brief = named survival; anchors post-hoc per F19. Dusk register shelved; R032 (bright) is the live target.
+
+## Owner review pivot — 2026-08-22 (the r5 rejection and the method correction)
+
+Steve rejected the r5 composition on two grounds the director's QA under-weighted: (1) cohesion — asset-stitching read, missing embedded forest/interstitial fabric/earthworks; (2) identity — generic buildings, wrong scale (director's third scale error: class widths derived from district-fabric node stats → compacts 3× oversized; scale-audit measured truth: compact 54 / standard 93 / large 158), off perspectives, "cut from a different art page." Steve's design corrections, now contract law (§6.5): **in-context generation over the real terrain backdrop with diff-extraction against the known background** (the old pipeline's own method, rediscovered); a **city-owned transition layer** (the generation halo = earthworks/foliage blending assets into the mountain); fabric as neighborhood cluster patches; **discard-don't-repair** (F17). Probes: R027 whole-plate integration (in flight), R028 scale/perspective/grounding audit (PASS — measured fingerprint + vocabulary), R029 in-context probe (S10 re-grounded + compact cluster, in flight). Strategy question parked with Steve: capital end-state (master-keeps-capital + pipeline-proves-on-project-cities vs full capital rebuild).
+
+### R027 — 2026-08-22 — T3d whole-plate integration probe (codex exec, gpt-5.6-sol, effort=high)
+
+- **Verdict: SPLIT, exactly as the worker framed it.** Cohesion hypothesis SUPPORTED — candidate C reads as one painted city in the master's family (continuous fabric, terracing, embedded forest edges, S10/S18/S11 recognizable). Registered-plate hypothesis NOT supported — geometry drifts from the scaffold and a retry repeats the drift; prompt-only position locks fail. 4/6 calls, honest report, raw outputs + full provenance retained.
+- **Director synthesis (pending R029):** invert the registration assumption — scaffold controls content, integration paints cohesion, then **re-extract exact registration from the integrated plate with the T1 grammar extractor** (its second consumer). Drift becomes acceptable if identity survives; positions need to be *known*, not *predetermined*. Candidate recipe: compose → integrate → re-extract → mount.
+
+### R028 — 2026-08-22 — master scale/perspective/grounding audit (codex exec, gpt-5.6-terra, effort=high)
+
+- **Verdict: PASS.** 25 buildings measured manually with annotated overlays; class widths compact 54 / standard 93 / large 158 (vs the mis-derived 170/175/180 — F9/F15 third occurrence: the node stats measured districts, the component stats measured fragments; only visible-building measurement measures buildings). Perspective fingerprint + grounding vocabulary (terraced pad / rock-carved / cantilever / tree-hugged) delivered as reference crops.
+
+### R029 — 2026-08-22 — T3e in-context probe (codex exec, gpt-5.6-sol, effort=high)
+
+- **Setup:** S10 re-grounded at anchor + compact cluster patch, in-context over pristine native terrain, diff-extraction, halo kept as transition content, gates as discard triggers, ≤10 calls. Dispatched with the audit's measured numbers.
+- **Verdict: DECISIVE NEGATIVE — clean kill at 4/10 calls.** 0/4 within ROI; the generator repaints the entire frame every time (500× over tolerance), so pixel-preserving edits and therefore mechanical diff-extraction are impossible on this tool → **F18**. Worker executed discard-don't-repair perfectly (one-line discard facts, no salvage). Visual premise confirmed in passing (discarded candidates looked properly embedded) — right idea, wrong tool capability.
+- **Method comparison resolved:** the generator wants to paint whole scenes → pipeline embraces it: **compose scaffold → whole-plate integration → re-extract registration → mount.** Per-asset surgical edits are off the menu; single-asset changes go scaffold-edit → re-integrate → re-extract. R030 validates the re-extraction leg against integration candidate C (zero generation).
+
+### R030 — 2026-08-22 — re-extraction validation on candidate C (codex exec, gpt-5.6-terra, effort=high)
+
+- **Setup:** run the T1 extraction machinery against the integrated plate; recover footprints/circulation/named positions; report drift vectors vs scaffold intent and runtime-usability. Dispatched immediately (informs Steve's method decision).
+- **Verdict: HONEST NEGATIVE that right-sized the requirement.** The r3 classifier (master-palette-calibrated) recovers only fragments from C — automated full re-extraction does not transfer. But the probe's own visual pass located all three named buildings with drift vectors, exposing that full geometric re-extraction was over-spec: **the runtime consumes plate + district masks (scaffold-derived) + named anchors only** — footprint censuses and circulation topology are composer-side artifacts. → **F19**. Recipe final form: **compose → integrate → verify/adjust named anchors (minutes-long visual pass) → mount.** All legs now evidence-backed; both decisions (method + capital strategy) fully briefed for Steve.
+
+### R034 — 2026-08-24 — T8a2 fresh S10/S11/S18 skill sprites (headless Codex worker; model slug/effort not exposed)
+
+- **Setup:** 11:52–12:08 CDT; 3 scheduled ImageGen calls + 1 reserve; same registered crops, current selected candidates, prompt contract, and global extended chroma key; exact neutral-plume guard on every call; quarantine only.
+- **Verdict: BLOCKED — 1 newly valid selection, 2 assets still blocked.** S10-B passes all mechanical gates with no plume. S11-C reproduces the prior one-pixel Section 7 failure. S18-D/E both violate the simple six-sided wheel identity before mechanical processing, so the 4-call budget closes with S18 still on prior invalid C evidence. Aggregate remains 3/5.
+- **Model-attributable observation:** the generator followed the no-plume constraint for all four calls, but repeated a one-pixel chroma-edge defect on S11 and failed the exact polygon-side constraint twice on S18 even when the reserve prompt explicitly excluded 8/10/12/many-sided rims. Exact-count geometry remains unreliable enough that F17 identity discard must precede downstream keying.
+- **Evidence:** `.codex-tmp/quarantine/city-v2/T8a-skill-sprites/{REPORT.md,proof-manifest.json,comparisons/skill-sprites-contact-sheet-r1.png}`. Deterministic process rerun changed 0/30 non-report/non-manifest artifacts; expected aggregate exit remains 1 on S11/S18.
+
+### R053 — 2026-08-24 — T8a7 S18 solid-wheel regeneration (codex exec, gpt-5.6-sol, effort=high)
+
+- **Setup:** 2-call bounded budget (1 scheduled + 1 reserve); `references/s18-reference-4x.png` sole authority; one new enumerated delta — visually solid wheel (closed backing face or flush stone flank), explicit no-see-through-gaps prompt negative, new raw-stage pocket check (gate 1b) before processing; v2 radius-2 key only (key extension closed by T8a6); accepted-sprite hashes a hard invariant. ~228k worker tokens.
+- **Verdict: BLOCKED — the packet's target defect is solved; a different defect class killed the candidate.** K passed gate 1 and gate 1b (0 enclosed pockets — the solid-wheel brief genuinely eliminates trapped background) and every mechanical gate, then failed the final keyed-wheel 2x eye gate: a thin magenta fringe along the wheel's outer rim, with §7/F12 again reporting zero (third false negative → F21). Reserve L castle-drifted at gate 1, unprocessed. Protected hashes unchanged. Lane suspended by director; escalated to Steve (hold / bounded despill needing an F17 ruling / re-brief without the wheel).
+- **Model-attributable observation:** sol executed the new solidity constraint exactly on the scheduled call (continuous closed timber face, zero pockets) — enumerated *positive* geometry constraints with an explicit negative land reliably. But the reserve repeated the castle/monumental-showpiece drift already seen in the T8a4 and T8a5 reserves under near-identical prompts: on this asset, second samples regress toward grandeur defaults. And the asset-level pattern is now measured: S18's curved openwork silhouette maximizes keyed-boundary length, making it uniquely fringe-prone — 10 failed candidates (C–L) vs ≤2 calls for each of the other four sprites through the identical workflow.
+- **Evidence:** `.codex-tmp/qa/T8a7-s18/{s18-k-raw-wheel-closeup-2x,s18-wheel-closeup-2x,skill-sprites-contact-sheet-r1}.png`; quarantine `REPORT.md`/`proof-manifest.json` (status `failed`); QA-REVIEW.md T8a7 worker entry + director verdict.
+
+### R054 — 2026-08-24 — T8a8 S18 despill (codex exec, gpt-5.6-terra, effort=high)
+
+- **Setup:** owner-authorized (F17 carve-out) color-only despill on candidate K; hard invariants: byte-identical alpha, accepted sprites untouched; ≤2 recorded parameter sets; zero ImageGen. ~172k worker tokens.
+- **Verdict: PASS, director-confirmed by eye.** Set 1 (radius 2, blend .82) removed magenta but left a pale neutral halo — honestly failed against F21. Set 2 (radius 3, saturation ≥0.24, blend .92) recolored 3010 boundary pixels with clean neighborhoods; fringe gone at 2x, no halo, alpha byte-identical, all mechanical gates green, four protected hashes unchanged. Selected S18 `3a79d351…fef843`, quarantine-only; owner sign-off gates the mount.
+- **Model-attributable observation:** terra executed the two-set tuning protocol exactly as bounded — reported the set-1 halo failure rather than silently widening, and the blend/radius direction of its second set was the correct correction. Deterministic image-processing lanes with numeric invariants remain a terra sweet spot (fifth clean terra mechanical lane).
+- **Workflow lesson banked:** generation-time solidity (T8a7 gate 1b) + boundary despill is the complete recipe for chroma artifacts on openwork silhouettes; key extension (T8a6's dead end) was never the right layer for this defect.
+- **Evidence:** `.codex-tmp/qa/T8a8-s18/{s18-wheel-closeup-2x-despilled,skill-sprites-contact-sheet-r1}.png`; QA-REVIEW T8a8 entry + director verdict; quarantine provenance records `despill-v1` params.
+

@@ -1,0 +1,8 @@
+import fs from "node:fs";
+{ const p = "docs/career-world/AGENT-EXPERIMENTS.md"; let t = fs.readFileSync(p, "utf8");
+  if (!t.includes("### R101")) { const k = "## Findings backlog"; const i = t.indexOf(k); t = t.slice(0, i) + fs.readFileSync(".codex-tmp/session3/r101.md", "utf8") + t.slice(i); fs.writeFileSync(p, t); console.log("ledger: R101 spliced"); } else console.log("ledger: present"); }
+{ const p = "docs/career-world/STATE.md"; let t = fs.readFileSync(p, "utf8");
+  const anchor = "**0,1 the Metrics-Service shelf DISPATCHED** (`brief-c0-1.md`;\nlog `.codex-tmp/session3/regen-c0-1.log`).";
+  const repl = "**0,1 the Metrics-Service shelf ACCEPTED first attempt** (R101, commit\n`e6920ed`: seam tone `6.5`, 2 crossings met with 1 bridged, no route marks,\n`141` tiles; crowns `51 px`). **SIXTEEN CELLS STAND.** **0,0 the moor with\nthe shepherd's fold DISPATCHED** (`brief-c0-0.md`; 0,1's north edge dry;\nlog `.codex-tmp/session3/regen-c0-0.log`). **REMAINING THREE, all waiting on\nthe owner:** 1,1 the purple field (lock change 7 staged — the hue window on\nthe water test; then `brief-c1-1-r2.md`), 2,0 the dark-forest gorge\n(parked after three lighting strikes; accept by eye / fourth attempt with\nflat-shaded east benches / leave), and 1,0 the bare plateau with the crater\ntarn and the column altar (its three neighbours are 1,1, 2,0 and 0,0 — brief\nit once at least 0,0 stands; as a frontier cell otherwise).";
+  if (t.includes(anchor)) { t = t.replace(anchor, repl); console.log("state: 0,1 recorded"); } else if (t.includes("0,1 the Metrics-Service shelf ACCEPTED")) console.log("state: present"); else throw new Error("state anchor missing");
+  fs.writeFileSync(p, t); }
