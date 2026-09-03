@@ -4,7 +4,7 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-02, night (current):** the NinjaOne L2 land territory is **20 of 20 cells** on `codex/land-lod-completion`, tree clean, nothing pushed; seams are content-aware (lock change 9) and the world is restitched; the owner has accepted the result and authorised the next step (whole-territory review at reduced zoom, then the territory tier). **Resume from the block titled `SESSION 4, NIGHT (2026-09-02) — RESUME HERE, ANY MODEL`** further down; the paragraph below it is the older D06 arc, kept for history.
+**2026-09-03 (current):** the NinjaOne L2 land territory is **20 of 20 cells** on `codex/land-lod-completion`, tree clean, nothing pushed, and **the world was not changed at all this session** - the whole-territory review found nothing to change for either named watch item, and all three authorised replacements are briefed but unbaked. **The codex dispatch path is 404ing and that is the blocker.** **Resume from the block titled `SESSION 5 (2026-09-03) - RESUME HERE, ANY MODEL`** further down; everything below it is older history, kept for the record.
 
 The old D06 district was **deleted outright by owner ruling** ("nuke and boot") — all 67 asset paths and every code path; the app is green without it (typecheck PASS, focused suites green, production build PASS). The rebuild is in its survey/concept phase and is governed by a new **scale contract** and a **settled territory map**. One blocker stands between here and re-authoring D06: the site re-survey at correct resolution.
 
@@ -604,6 +604,122 @@ Five cells stand. Briefs ready for the next cells in
 adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 `brief-c3-1-r2.md` (magical gorge, rail gorge span), `brief-c2-2-r2.md`
 (bench country, waystation bench, hot spring).
+
+**SESSION 5 (2026-09-03) — RESUME HERE, ANY MODEL.** **THE WORLD IS UNCHANGED
+THIS SESSION.** The NinjaOne territory is still 20 of 20 on
+`codex/land-lod-completion` (worktree `.claude/worktrees/land-lod-completion`),
+tree clean, nothing pushed, nothing stitched. Every gate run this session ended
+with "the world is unchanged".
+
+**BLOCKER, and it is the owner's to clear: the codex dispatch path is
+unavailable.** A bare one-line read-only probe (`codex exec --sandbox read-only
+-c model=gpt-5.6-sol "reply with the single word: ok"`) fails exactly as the
+bake did: `404 Not Found` on `wss://chatgpt.com/backend-api/codex/responses`,
+then the same 404 after falling back to HTTPS transport. So this is NOT the
+packet, the brief, the cell or the model slug. `codex-cli 0.149.0` (correct per
+F4), no stale `cell.lock`. `~/.codex/auth.json` last refreshed
+`2026-08-27T22:25Z` with an `id_token` that expired an hour later — but a 404
+rather than a 401, on the ChatGPT-account endpoint, points at that endpoint or
+the account's Codex access rather than a plain token expiry. Two bakes ran fine
+earlier the same morning (09:31, 09:51) and the third failed at 09:54, so it
+may be transient. **Probe before assuming it is still broken; do not spend
+bakes against a dead endpoint.**
+
+**THE REVIEW IS DONE (R110). Both named watch items dissolved under
+measurement; the owner said "it looks great" and nothing was changed for
+either.**
+- **Crown drift was a broken statistic, not drifting art.** The `84 px` floor
+  is the plan's `crowns 4-7 m` at 21 px/m (`84-147 px`), but the classifier is
+  a dark-green colour window feeding components with a `20000 px` cap: in dense
+  or dark cells the stand AND the mossy ground fuse into one component, the cap
+  discards it, and the median falls back on scraps. **Ten of twenty cells
+  compute their median from under half their own mask** (c3-2 `5.7%`, c0-3
+  `5.3%`, c2-0 `15.6%`, c0-0 `18.5%`) and those are exactly the cells flagged
+  under the floor. Do not resurrect that floor as a target.
+- **Tints: no cell-block cast.** Boundary luma steps median `4.9` / max `18`
+  against inside-cell controls at median `9.3` / max `27.4` — the grid steps
+  LESS than the picture does on its own. Row 3 does average luma `98.5` against
+  `81-85` for rows 0-2; there is no designed depth ramp, so it is authoring
+  drift, and the owner left it.
+- **0,0's pool no longer touches its south edge** (26 scattered px, longest run
+  under 8 px). That held item is CLOSED.
+
+**LOCK CHANGES 10 AND 11 LANDED.** The premise the session started from was
+wrong and was corrected before acting: **there was never a crown gate.**
+cell.mjs ran ten gates, none measuring vegetation; it stated the rule to the
+worker, asked for a crown measurement back, and never read `report.json`. Once
+read, **seventeen of twenty cells had stated a median under the plan's 4 m
+floor** (`1.76-5.10 m`, median `3.14`), and c3-2's own report said its median
+was taken **"excluding the giant-tree site"**. Lock 10 (`4e38535a`) added a
+`crown scale` gate requiring a `crown` object with `medianMetres` in band and
+`excludedElements` EMPTY, specified that schema in the packet, and made
+`--from` carry the report; it is deliberately NOT a pixel detector, because the
+oversized crown shares hue and value with the forest behind it and three
+detectors were measured and discarded (`review-crown-not-separable-by-colour.png`).
+Lock 11 (`3aee5c8c`, label fix `97020544`) set the band to **`1.7-5.2 m`, the
+range the accepted cells measured, NOT the plan's written `4-7 m`** — owner
+ruling, because gating the written rule returns replacements at 1.5-2x their
+seventeen accepted neighbours. **The 4-7 m rule is DEFERRED, not resolved:** it
+becomes answerable when a building, rail or person stands next to a tree. The
+constant in cell.mjs says so; do not "fix" it to 4-7 without that comparison
+and the owner's word. Controls `24/24` + `5/5`.
+
+**THREE REPLACEMENTS ARE AUTHORISED AND BRIEFED** ("agree with your read go
+ahead with the replacements"). Briefs are tracked in
+`docs/career-world/session3-tools/`:
+- **3,2 — `brief-c3-2-replacement-r3.md` is the one to dispatch.** The defect
+  is one crown at `~475 px / ~22.6 m`, `3.2x` the plan ceiling, with a trunk
+  and root flare nothing else in the territory has, in a stone ring, in a biome
+  whose `wonders` is `"none"`.
+  - Attempt 1: **the tree went** and the crown gate passed (`2.499 m`, 40
+    crowns, empty exclusions, *"all visibly larger conifers were included"*).
+    Rejected on veg `dBG 0.258` at the c3-1 seam. **Director miss:** the brief
+    said the magical gorge brings "a grey-blue basin haze" — true of its basin,
+    false of its conifers at the shared edge.
+  - Attempt 2: north seam **solved** (`dBG 0.031`), crown gate passed again.
+    Rejected on all-land tone `23.4` at the c3-3 seam (limit `21`).
+  - **Two strikes → reframed.** `edge-envelope.mjs` measures EVERY shared edge
+    at once with cell.mjs's own `vegBand`/`toneBand`, against the ACCEPTED
+    version which passed all four. It showed the candidate was **12-16 luma
+    darker than the accepted version at all four edges** — one global darkening,
+    caused by the briefs' own "near-black" / "darkest green in the territory" /
+    "take the blue out" language. Attempt 3's brief is numbers only: the four
+    accepted edge readings as targets (N `60-68`, S `86-94`, W `64-72`, E
+    `96-104`), the deltas from attempt 2, an explicit ban on any overall level
+    applied to the frame, and a request that the worker report its own four edge
+    medians. **Dispatch failed on the 404 before any worker ran — the brief is
+    untested.**
+- **1,0 — `brief-c1-0-replacement.md`.** The basalt reads as built: a plinth of
+  near-identical cylinders with flush level tops in rows, hexagonal jointing at
+  one size and orientation like laid cobbles, bench terraces of near-constant
+  width. Against the plan's `never a regular palisade of identical cylinders`.
+  Keeps the crater tarn and the flat lighting this cell was once rejected for.
+- **1,3 — `brief-c1-3-replacement.md`.** The inlet runs dry: open water enters
+  the north edge then becomes a pale sandy trench with a cobble kerb and stays
+  dry to the south, reading as a footpath. Two owner rulings land on it — the
+  south edge opens into the SOUND, and the railway's south-west leg runs
+  SUBMERGED through here (*"that coast must open into water the line can dive
+  beneath"*), so the inlet must reach the south edge as open water.
+
+**NEXT STEP:** probe the dispatch path; when it answers, re-dispatch 3,2 on
+`brief-c3-2-replacement-r3.md`, then 1,0, then 1,3, **one bake at a time**,
+running `edge-envelope.mjs` on each candidate before believing a single-seam
+diagnosis. Then the territory tier of the pyramid (L1-L6 are derived and exist;
+the runtime LoD feed `terrain-stream-runtime-l2dev.json` serves each cell at
+256 px from the capital tier with `?landStream=l2dev`, launch config
+`career-world-worktree`) — note the L2 land is `minimumTier: "capital"`, so the
+territory tier does not serve it yet.
+
+**Rules that still bind:** one bake at a time; `tools/world-authoring/`
+solidified (owner words + `check-solidified.mjs --approve` before and after,
+controls first, `npm run check:world-authoring`); only the owner accepts; never
+hand-author a derived tier; never push; the owner sets any API key himself;
+attach the asset being reviewed in the same message as any question; commit on
+a cadence and leave the tree clean. **New this session:** F32 — a number a
+packet asks for but never reads is not a measurement, and a worker will
+disclose the defect into it; F33 — brief a neighbour's MEASURED edge values,
+not its biome prose, and a rejection re-brief must name the direction, not just
+the failing number.
 
 **SESSION 4, NIGHT (2026-09-02) — RESUME HERE, ANY MODEL.** The owner is
 switching from Fable to Opus 5 for the rest of the week's budget; this block
