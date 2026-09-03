@@ -251,3 +251,31 @@ five manifests, five literals and seventeen constants with each one's current
 value and its derived candidate, get the LoD thresholds ruled on, then apply
 the whole set in one commit against the targeted control — rather than editing
 until the app stops throwing.
+
+---
+
+## Step 7 — retire `stream-r3` (owner-authorised 2026-09-03, MUST FOLLOW step 5)
+
+Owner: *"yeah just resolve and remove em then."* Authorised, but **sequenced
+after registration, not before**, and the ordering is not a formality:
+
+| | measured 2026-09-03 |
+|---|---|
+| release feed `terrain-stream-runtime-r4.json` | 214 tiles, **all 428 sources from `stream-r3`** |
+| `stream-r3` tiles on disk | 428 |
+| runtime code referencing `l2-ninjaone-r1` | **none** |
+
+`stream-r3` is the only tileset the runtime serves. Deleting it before the L2
+land is registered leaves the world with **no terrain at all**. So:
+
+1. Do step 5 (register the 20 cells, point the release feed at
+   `l2-ninjaone-r1`).
+2. Confirm the app renders the new land — the LoD test that has never been run.
+3. **Then** delete `public/career-world/layers/terrain/authority/tiles/stream-r3/`
+   (428 files), `terrain-stream-tiles-r3.json`, and the `stream-r3` prefix in
+   `features/career-world/layers/terrain/model/streamTiles.ts`.
+4. Six of the nine suite failures die with it — 8, 19, 23 outright, and 9/21
+   once the land mask is re-derived from the new source.
+
+Until then the `stream-r3` drift stays as a **known-deliberate red**, recorded
+in R113, not an unexplained one.
