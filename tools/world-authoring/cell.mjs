@@ -64,6 +64,11 @@ const GEN_PX = CELL_PX + BLEED * 2;      // 2560
 const ART = 9.45;                         // art px per world px
 const M_PER_WORLDPX = 0.4503;
 const CM_PER_PX = (M_PER_WORLDPX / ART) * 100;
+// The plan's own vegetation rule (art-source/.../plan.json rules.vegetation:
+// "crowns 4-7 m"). The packet states it to the worker and the crown gate
+// enforces it against the worker's own measurement; both read these.
+const CROWN_MIN_M = 4;
+const CROWN_MAX_M = 7;
 
 const TILE = 256;
 const LEVELS = 7;                         // 0 (finest) .. 6, exact 2:1 each
@@ -965,10 +970,30 @@ ${editMode ? `3. **ONE edit call, whole canvas.** Deliver the raw output of that
 
 ## Report
 
-Write \`${id}-report.json\`: lighting isotropy (peak vs uniform over land),
-median conifer crown in px and metres **stated at final ${GEN_PX} px canvas
-scale**, buildable vs steep fraction, water footprint fraction, and the exact
-generation size you produced.
+Write \`${id}-report.json\`. **It is read and gated, not filed.** Include
+lighting isotropy (peak vs uniform over land), buildable vs steep fraction,
+water footprint fraction, the exact generation size you produced, and this
+object exactly, with these key names:
+
+    "crown": {
+      "medianMetres": <number>,
+      "medianPx": <number>,
+      "sampleCount": <number>,
+      "method": "<one line: how you measured>",
+      "excludedElements": []
+    }
+
+\`medianMetres\` is the median conifer crown WIDTH in metres, and \`medianPx\`
+the same measured at the final ${GEN_PX} px canvas scale. It must fall within
+**${CROWN_MIN_M}-${CROWN_MAX_M} m** — the plan's vegetation rule, which is the
+size the ground scale above is built around.
+
+**Do not exclude anything from the measurement to bring it inside the band.**
+If this cell contains a crown that does not belong to that band, put it in
+\`excludedElements\` with a one-line description. The cell will then be
+refused, which is the correct outcome — an out-of-scale element is a defect to
+report, not to measure around. A missing, unparseable or incomplete
+\`crown\` object fails the cell.
 `;
 
 fs.writeFileSync(path.join(cellDir, `packet-${id}.md`), packet);
@@ -996,6 +1021,14 @@ try {
       if (!fs.existsSync(src)) die(`--from ${from} is missing ${f}`);
       fs.copyFileSync(src, path.join(cellDir, f));
     }
+    // The report is part of a delivery and the crown gate reads it, so a stale
+    // one from an earlier attempt must not survive into this run - the same
+    // hazard the dispatch branch clears below. It is copied when supplied and
+    // NOT required here: the gate is the single authority on whether a report
+    // is present and valid, so there is one place that says so.
+    fs.rmSync(path.join(cellDir, `${id}-report.json`), { force: true });
+    const fromReport = path.join(from, `${id}-report.json`);
+    if (fs.existsSync(fromReport)) fs.copyFileSync(fromReport, path.join(cellDir, `${id}-report.json`));
     console.log(`\n  artefacts supplied via --from ${from} — generation skipped.`);
   } else if (redo) {
     if (!fs.existsSync(path.join(cellDir, `${id}-source.png`))) {
@@ -1592,6 +1625,38 @@ exit 1
   }
   for (const v of palViolations) console.log(`      palette: ${v}`);
 
+  // ---- the worker's own crown measurement, read at last -------------------
+  // Every worker has measured its crowns and written the number down. Until
+  // 2026-09-03 cell.mjs copied that report into the sources dir and never
+  // opened it, so both scale defects in the built territory were disclosed in
+  // writing and passed anyway: seventeen of twenty cells stated a median under
+  // the plan's 4 m floor, and c3-2 stated "excluding the giant-tree site" for
+  // a crown that measures ~22 m. A stated measurement nothing reads is not a
+  // measurement. This gate is deliberately NOT a pixel detector: the crown and
+  // the forest behind it share a hue and a value, so no colour threshold
+  // separates them (three attempts, 2026-09-03) - but the worker can see it,
+  // and did.
+  const crownReport = (() => {
+    const rp = path.join(cellDir, `${id}-report.json`);
+    if (!fs.existsSync(rp)) return { value: `${id}-report.json not delivered`, pass: false };
+    let rep;
+    try { rep = JSON.parse(fs.readFileSync(rp, "utf8")); }
+    catch (e) { return { value: `${id}-report.json unparseable: ${e.message}`, pass: false }; }
+    const c = rep.crown;
+    if (!c || typeof c !== "object") return { value: "report has no `crown` object", pass: false };
+    if (typeof c.medianMetres !== "number" || !isFinite(c.medianMetres)) {
+      return { value: "report has no numeric crown.medianMetres", pass: false };
+    }
+    if (!Array.isArray(c.excludedElements)) {
+      return { value: "report has no crown.excludedElements array (use [] if none)", pass: false };
+    }
+    if (c.excludedElements.length) {
+      return { value: `${c.medianMetres} m, but ${c.excludedElements.length} element(s) excluded from the measurement: ${c.excludedElements.map(String).join("; ").slice(0, 200)}`, pass: false };
+    }
+    const inBand = c.medianMetres >= CROWN_MIN_M && c.medianMetres <= CROWN_MAX_M;
+    return { value: `${c.medianMetres} m over ${c.sampleCount ?? "?"} crowns (plan ${CROWN_MIN_M}-${CROWN_MAX_M} m)`, pass: inBand };
+  })();
+
   const gates = [
     { name: "key-light asymmetry", value: +keyLight.toFixed(4), pass: keyLight < 0.011,
       note: "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004" },
@@ -1618,6 +1683,8 @@ exit 1
         ? `${palSeams ? `veg worst dBG ${palWorst.bg.toFixed(3)} dLuma ${palWorst.luma.toFixed(1)} over ${palSeams} seam(s); ` : "no vegetated seams; "}tone worst dLuma ${toneWorst.toFixed(1)} on all land over ${toneSeams} seam(s)`
         : "no authored seams", pass: palViolations.length === 0,
       note: "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13" },
+    { name: "crown scale", value: crownReport.value, pass: crownReport.pass,
+      note: `the worker's own median crown from ${id}-report.json, against the plan's ${CROWN_MIN_M}-${CROWN_MAX_M} m vegetation rule; crown.excludedElements must be empty, so an out-of-scale element cannot be measured around` },
   ];
   for (const v of contViolations) console.log(`      continuity: ${v}`);
   console.log(`\n  gates:`);

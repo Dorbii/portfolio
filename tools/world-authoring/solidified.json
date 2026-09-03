@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-02T23:56:00.718Z",
+ "solidifiedAt": "2026-09-03T06:13:32.921Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "cd0524f82d95d6a0",
+  "cell.mjs": "cb3da7670fffcddd",
   "plan-territory.mjs": "270aec1cef622a35",
   "AGENTS.md": "a1ab4eaec1d4c6ac"
  },
@@ -273,6 +273,15 @@
    "reason": "owner approved 2026-09-02 ('if you think its needed go ahead', replying to 'both changes together, then the redo'): lock change 8, AFTER the change - rock lighting limit 0.16 and all-land seam tone limit 21 in cell.mjs; the tone control lifts +34 and still fails (suite 20/20). Next: --redo 2,0 candidate 4.",
    "hashes": {
     "cell.mjs": "cd0524f82d95d6a0",
+    "plan-territory.mjs": "270aec1cef622a35",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-03T06:13:32.922Z",
+   "reason": "owner approved 2026-09-03 ('i agreed fully so replace the faulty gate/lock as well'): lock change 10 - cell.mjs now READS the worker's report.json instead of filing it. Every worker has always measured its own crowns and written the number down; the pipeline copied the report to the sources dir and never opened it, so both scale defects in the built territory were disclosed in writing and passed anyway - seventeen of twenty cells stated a median crown under the plan's 4 m floor, and c3-2 stated 'excluding the giant-tree site' for a crown that measures ~22 m against a 7 m ceiling. Adds: (a) a 'crown scale' gate requiring a crown object in report.json with medianMetres inside the plan's 4-7 m vegetation rule and an EMPTY excludedElements, so an out-of-scale element cannot be measured around; (b) the packet now specifies that exact schema and says the report is gated, not filed; (c) --from carries report.json and clears a stale one first. Deliberately NOT a pixel detector: the oversized crown and the forest behind it share a hue and a value, so no colour threshold separates them (three attempts measured and discarded) - the worker can see it, and did. Controls: world-authoring-stitch 24/24 including four new crown-gate controls (exclusion, under-band, no crown object, no report) and a PASS assertion on a compliant one; stitch-content-aware-seam 5/5.",
+   "hashes": {
+    "cell.mjs": "cb3da7670fffcddd",
     "plan-territory.mjs": "270aec1cef622a35",
     "AGENTS.md": "a1ab4eaec1d4c6ac"
    }

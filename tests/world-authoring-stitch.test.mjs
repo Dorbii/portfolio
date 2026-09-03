@@ -111,7 +111,20 @@ function genImage(col, row, paint, { waterDisc, keepWaterPaint, paintedRing, haz
   return { l2, concept, mask };
 }
 
-async function writeArtefacts(dir, id, img) {
+// A real delivery carries the worker's crown report, and cell.mjs reads it
+// (crown gate, 2026-09-03). Every control that stands in for a delivery writes
+// one through here, so a new control cannot forget it and fail for the wrong
+// reason. Pass a report to craft a bad one, or null to deliver none.
+function writeControlReport(dir, id, report) {
+  if (report === null) return;
+  fs.writeFileSync(path.join(dir, `${id}-report.json`), JSON.stringify(report ?? {
+    cell: id,
+    crown: { medianMetres: 5.5, medianPx: 115, sampleCount: 24,
+      method: "synthetic control", excludedElements: [] },
+  }, null, 1));
+}
+
+async function writeArtefacts(dir, id, img, report) {
   fs.mkdirSync(dir, { recursive: true });
   const save = (buf, name) =>
     sharp(buf, { raw: { width: GEN, height: GEN, channels: 4 } }).png()
@@ -121,6 +134,7 @@ async function writeArtefacts(dir, id, img) {
   await save(img.mask, "water");
   fs.writeFileSync(path.join(dir, `${id}-water.json`),
     JSON.stringify([{ class: "lake", note: "synthetic control" }]));
+  writeControlReport(dir, id, report);
 }
 
 function runCell(cellArg, fromDir, extra = []) {
@@ -170,6 +184,7 @@ await writeArtefacts(path.join(SYN, "b-ring"), "c2-1",
 test("frontier cell stitches aligned, bleeds one ring, and removes water", async () => {
   const log = runCell("1,1", path.join(SYN, "a"));
   assert.match(log, /accepted, stitched/);
+  assert.match(log, /PASS\s+crown scale\s+5\.5 m/, "a compliant crown report must pass");
   assert.match(log, /PASS\s+rock lighting/, "isotropic synthetic paint must pass the rock-lighting gate");
 
   // alignment: a tile deep inside the kept area equals F exactly
@@ -319,6 +334,35 @@ test("a consistent lit side on rock fails the rock-lighting gate", async () => {
   assert.equal(treeHash(), before, "world untouched");
 });
 
+// The crown gate exists because both scale defects in the built NinjaOne
+// territory were disclosed in the workers' own reports and passed anyway: the
+// pipeline copied report.json to the sources dir and never opened it. These
+// four are the ways that disclosure can arrive.
+for (const [label, report, expect] of [
+  ["an element excluded from the measurement",
+    { crown: { medianMetres: 5.5, sampleCount: 20, excludedElements: ["the giant tree at the ring"] } },
+    /FAIL\s+crown scale\s+5\.5 m, but 1 element\(s\) excluded/],
+  ["a median under the plan's band",
+    { crown: { medianMetres: 3.43, sampleCount: 20, excludedElements: [] } },
+    /FAIL\s+crown scale\s+3\.43 m over 20 crowns/],
+  ["a report with no crown object",
+    { cell: "c4-3", lighting_isotropy: 1.4 },
+    /FAIL\s+crown scale\s+report has no `crown` object/],
+  ["no report at all", null, /FAIL\s+crown scale\s+c4-3-report\.json not delivered/],
+]) {
+  test(`crown gate: ${label} fails the cell`, async () => {
+    const dir = path.join(SYN, `crown-${label.replace(/[^a-z]+/gi, "-")}`);
+    await writeArtefacts(dir, "c4-3", genImage(4, 3, F), report);
+    const before = treeHash();
+    let out = "";
+    try { runCell("4,3", dir); assert.fail(`must be rejected: ${label}`); }
+    catch (e) { out = String(e.stdout || "") + String(e.stderr || ""); }
+    assert.match(out, expect, `the crown gate must fire for ${label}:
+` + out.slice(-700));
+    assert.equal(treeHash(), before, "world untouched");
+  });
+}
+
 test("a failing gate blocks the stitch entirely", async () => {
   const before = treeHash();
   assert.throws(() => runCell("2,1", path.join(SYN, "b-bad")), /NOT accepted|Command failed/);
@@ -435,6 +479,7 @@ test("a 100px stream offset at a shared edge is bridged in the footprint", async
     await save(wat, "water-source");
     fs.writeFileSync(path.join(dir, `${id}-water.json`),
       JSON.stringify([{ class: "stream", note: "bridge control" }]));
+    writeControlReport(dir, id);
   }
   const toSrc = (genPx) => Math.round(genPx * SRC / GEN);
   // D at (3,1): stream row gen y=1280 (terr 3072), from gen x 1160 to the east edge
@@ -601,12 +646,13 @@ test("manifest records the contract and both cells", () => {
 // ---- mask completion (owner 2026-09-02, lock change 5b): through the derivation path ----
 // A --redo run derives concept/l2/water from <id>-source.png and <id>-water-source.png
 // in the working dir, exactly as a real bake does after the worker delivers.
-async function supplyGeneration(id, col, row, sourceImg, maskImg) {
+async function supplyGeneration(id, col, row, sourceImg, maskImg, report) {
   const dir = path.join(WORKT, id); fs.mkdirSync(dir, { recursive: true });
   const save = (buf, name) => sharp(buf, { raw: { width: GEN, height: GEN, channels: 4 } }).png().toFile(path.join(dir, `${id}-${name}.png`));
   await save(sourceImg.concept, "source");
   await save(maskImg.mask, "water-source");
   fs.writeFileSync(path.join(dir, `${id}-water.json`), JSON.stringify([{ class: "lake", note: "synthetic control" }]));
+  writeControlReport(dir, id, report);
 }
 function redoCell(cellArg, extra = []) {
   return execFileSync(process.execPath, [SCRIPT, "--cell", cellArg, "--redo", "--describe", "mask completion control", ...extra],
