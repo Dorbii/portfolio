@@ -1,18 +1,18 @@
 [
   {
     "class": "coast",
-    "note": "The deep-teal sound, turquoise shallows, surf, wash, and wet shore margin across the full south edge and along the west shore. The generated source leaves the intended drowned inlet below the fall visually dry, so this class does not fabricate water through that sandy gap."
+    "note": "The continuously painted drowned inlet, its shoreline wash and wet rock gaps, the turquoise shallows, and the deeper sound water continuing through the south and west edges."
   },
   {
     "class": "stream",
-    "note": "The single narrow beck continuing from the painted north edge into the shelf pool."
+    "note": "The narrow dark-water reach continuing from the north edge through the settlement shelf and into the pool."
   },
   {
     "class": "lake",
-    "note": "The one small natural pool on the bright settlement shelf."
+    "note": "The distinct natural pool on the settlement shelf, continuously connected to the stream and drowned inlet."
   },
   {
     "class": "fall",
-    "note": "The one short painted fall and its spray immediately below the shelf pool."
+    "note": "The short low fall and spray between the northern stream reach and the shelf pool."
   }
 ]

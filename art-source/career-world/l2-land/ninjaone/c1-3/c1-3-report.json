@@ -1,117 +1,95 @@
 {
   "cell": "c1-3",
-  "status": "quarantine_candidate_requires_director_and_owner_review",
+  "status": "quarantine_refusal_settled_composition_drifted",
   "generation": {
     "filename": "c1-3-source.png",
-    "exact_size_px": [1254, 1254],
+    "exactSizePx": [1254, 1254],
     "format": "PNG RGB",
-    "sha256": "2892FED35AC70D71CC62A0CE34544932EFDDA80D3131F2EA1A7D497CAA5B4499",
-    "mode": "built-in imagegen edit with the edit target first and the canon second as reference only",
-    "edit_calls_used": 1,
-    "retry_used": false,
-    "both_images_attached_to_same_call": true,
-    "whole_canvas_single_pass": true,
-    "raw_output_preserved": true,
-    "resized_cropped_or_tiled": false,
-    "prompt_record": "c1-3-imagegen-prompt.txt"
+    "sha256": "270DFF0BB38E58EE9426B140CEA97ED28450CCCF0E48E6CC51CCFE0AF868C8E1",
+    "mode": "single built-in imagegen edit with edit-target.png first and the canon second as reference only",
+    "editCallsUsed": 1,
+    "retryUsed": false,
+    "bothImagesAccepted": true,
+    "rawOutputPreserved": true,
+    "resizedCroppedRetouchedOrTiled": false
   },
-  "shipped_canvas_px": [2560, 2560],
-  "ground_extent_m": [97.6, 97.6],
-  "stated_final_resolution_cm_per_px": 4.8,
-  "lighting_isotropy": {
-    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean after a local separable Lanczos3 reproduction at the 2560 px shipped canvas; water-mask pixels and gradients below 12 luminance units excluded",
-    "peak_vs_uniform_over_land": 1.489420,
-    "uniform_reference": 1.0,
-    "key_light_asymmetry": 0.005271,
-    "gradient_samples": 3172999,
-    "rock_lighting_first_moment": 0.073812,
-    "rock_lighting_direction_degrees": 53.957,
-    "rock_strong_edge_samples": 7926,
-    "rock_lighting_limit": 0.15,
-    "rock_lighting_numeric_pass": true,
-    "strict_equal_face_value_visual_check": false,
-    "visual_check": "The aggregate and rock-direction proxies clear the measured threshold, but some generated rounded boulders still show visible top-to-side value separation; the strict no-lit-side rule is therefore not claimed."
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "method": "Repository-equivalent 36-bin luminance-gradient measurement on the 2560 px derived land canvas after the delivered water mask; magnitude floor 12.",
+    "peakVsUniformOverLand": 1.380396,
+    "keyLightFirstMoment": 0.004451,
+    "gradientSamples": 3325916
   },
-  "median_conifer_crown_final_scale": {
-    "px_on_2560_canvas": 60.223,
-    "metres_at_stated_4_8_cm_per_px": 2.891,
-    "source_px_equivalent": 29.5,
-    "source_to_final_scale": 2.041467,
-    "sample_count": 24,
-    "measurement": "Median connected dark-green crown width across 24 isolated candidate components in the source raster, scaled by 2560/1254; diagnostic overlay is diagnostics/c1-3-conifer-components.png.",
-    "required_final_px_range": [84, 147],
-    "required_metres_range": [4.0, 7.0],
-    "pass": false
+  "rockLighting": {
+    "firstMoment": 0.156262,
+    "strongEdgeSamples": 12403,
+    "directionDegrees": 46.352,
+    "limitExclusive": 0.16,
+    "pass": true,
+    "method": "Repository-equivalent first circular moment of strong (>=80) luminance gradients whose center and four orthogonal neighbours classify as rock on the 2560 px derived land canvas."
   },
-  "buildable_vs_steep_fraction": {
-    "basis": "manual estimated fraction of non-water land area",
-    "buildable": 0.50,
-    "steep": 0.05,
-    "other_moor_shore_or_vegetated": 0.45,
-    "method": "The broad luminous central meadow and open glades count as buildable; only the short fall banks, sandy gully banks, and immediate shore slope count as steep; the surrounding moor, shingle, boulders, and tree stands make up the remainder."
+  "edgeBands": {
+    "N": 76.4,
+    "W": 81.5,
+    "E": 75.7
   },
-  "water_footprint_fraction": 0.25899260,
-  "water_mask": {
+  "edgeBandsMethod": "Median all-land luma in the repository's 16-176 px inward bands at final 2560 px scale, excluding cut water.",
+  "crown": {
+    "medianMetres": 3.1,
+    "medianPx": 64.6,
+    "sampleCount": 27,
+    "method": "Manual full-silhouette width census of 27 fully visible ordinary conifers across the source, including the visibly largest and smallest complete crowns, scaled by 2560/1254 and converted at 4.8 cm/px.",
+    "excludedElements": []
+  },
+  "buildableVsSteepFraction": {
+    "basis": "Manual visual estimate as fractions of non-water land.",
+    "buildable": 0.5,
+    "steep": 0.03,
+    "otherMoorShoreOrVegetated": 0.47,
+    "method": "The broad open central and eastern meadow shelf counts as buildable; only the short fall banks and immediate incised channel margins count as steep."
+  },
+  "waterFootprintFraction": 0.21416634,
+  "finalDerivedLandCoverageFraction": 0.77951004,
+  "waterMask": {
     "filename": "c1-3-water-source.png",
-    "exact_size_px": [1254, 1254],
-    "format": "PNG RGBA",
-    "sha256": "FB4E8079735DA886A9C08F4FCEEDA1AB9474DA6EA849039DBA20C668E0BF2BAD",
-    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
-    "derivation": "Source-raster colour and luminance classification constrained only by broad coast and hydrology search envelopes, followed by connectivity growth, local closure, and enclosed-hole filling. The final boundary follows painted wet pixels; no polyline supplies it.",
-    "opaque_water_pixels": 407270,
-    "intermediate_alpha_pixels": 0,
-    "non_white_water_pixels": 0,
-    "connected_pixel_components": 2,
-    "component_note": "One coast/sound component and one north-beck/pool/fall component; the generated sandy gully between fall and coast is visibly dry and is not mislabeled as water.",
-    "interior_hole_pixels": 0,
-    "edge_water_pixels": {
-      "north": 9,
-      "east": 1,
-      "south": 1254,
-      "west": 751
-    },
-    "edge_note": "The east count is only the shared south-east corner pixel required by full south-edge coverage.",
-    "final_canvas_gate_reproduction": {
-      "output_size_px": 2560,
-      "ring_6_pixels": 17253,
-      "ring_6_fringe_pixels": 0,
-      "ring_6_fringe_percent": 0.0,
-      "ring_48_pixels": 234936,
-      "ring_48_fringe_pixels": 0,
-      "ring_48_fringe_percent": 0.0,
-      "maximum_percent": 1.0,
-      "ring_6_pass": true,
-      "ring_48_pass": true,
-      "official_node_gate_run": false,
-      "note": "The installed Node executable is unavailable in this managed PowerShell environment, so the repository formula was reproduced locally at the actual 2560 px final scale."
-    }
+    "exactSizePx": [1254, 1254],
+    "sha256": "ECC3FE781D549B9D51BBC5A87D516744513F1DAAD774610AFEB5452A122E2BA1",
+    "opaqueWaterPixels": 336780,
+    "intermediateAlphaPixels": 0,
+    "connectedComponents4": 1,
+    "touchesEdges": ["north", "east", "south", "west"],
+    "finalCanvasMaskCompletionGrowthPixels": 0,
+    "finalCanvasFilledHolePixels": 0,
+    "note": "Opaque white water on transparent non-water. The trace includes the very dark north reach, pool, fall, inlet, shoreline wash, reflections, wet rock gaps, shallows and open sound."
   },
-  "constraint_checks": {
-    "square_at_least_1254_px": true,
-    "single_edit_call": true,
-    "second_reference_attached": true,
-    "terrain_only": true,
-    "south_edge_water_full_width": true,
-    "north_beck_mask_reaches_edge": true,
-    "east_edge_water_only_at_shared_south_east_corner": true,
-    "one_visible_pool": true,
-    "one_visible_fall": true,
-    "continuous_beck_from_north_to_pool": true,
-    "continuous_wet_inlet_from_fall_to_sound": false,
-    "coherent_occupiable_shelf_present": true,
-    "new_column_stacks_or_terraces_absent": true,
-    "water_mask_same_dimensions_binary_and_hole_free": true,
-    "water_mask_6_px_gate_local_reproduction": true,
-    "water_mask_48_px_gate_local_reproduction": true,
-    "rock_lighting_numeric_gate": true,
-    "strict_equal_value_on_all_rock_faces_visual_check": false,
-    "conifer_scale": false
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleEditCall": true,
+    "secondReferenceAccepted": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "northToSouthWaterContinuityVisible": true,
+    "streamLakeCoastAllPresent": true,
+    "rockLightingUnder0_16": true,
+    "crownMedianWithin1_7To5_2Metres": true,
+    "crownExcludedElementsEmpty": true,
+    "settled64PercentLandCoverageHeld": false,
+    "settledEdgeBandsHeld": false,
+    "onlyRockLightingChanged": false
   },
-  "open_risks": [
-    "The generated source does not paint a continuous drowned inlet below the fall: the lower gully is dry pale sand before it reaches the sound. The mask follows the source and does not conceal this content failure.",
-    "The measured median conifer crown is about 60.223 px / 2.891 m at the final 2560 px scale, below the required 84-147 px / 4-7 m range; multiple crowns are visibly below the required floor.",
-    "Some rounded boulders retain lighter upper areas and darker lower sides. The numeric rock-lighting proxy is 0.073812 against the 0.15 limit, but the stricter equal-face-value visual rule is not established.",
-    "The official Node authoring gate was unavailable; the 6 px and 48 px checks were reproduced with the same classifier and scaling procedure at 2560 px.",
-    "Seam continuity, water-mask judgment, and overall visual quality remain director and owner decisions; this report does not claim visual acceptance."
-  ]
+  "refusalReasons": [
+    "The generated land/water balance drifted materially: the repository-equivalent final land coverage is 77.95%, not the settled 64%.",
+    "The settled edge tones were not held: N/W/E measured 76.4/81.5/75.7 rather than 87.1/98.2/83.1.",
+    "The key-light and gradient-ratio metrics also changed from the settled values, so this is not a rock-lighting-only correction.",
+    "Although the numeric rock gate passes at 0.156262, several large inherited and generated rocks still read with pale upper facets by eye; visual flat-face conformity is not claimed."
+  ],
+  "verification": {
+    "sourceDimensions": "pass",
+    "maskDimensionsBinaryAndConnected": "pass",
+    "rockLightingNumericGate": "pass",
+    "settledCompositionAndTone": "fail",
+    "promotion": "refused; quarantine only"
+  }
 }
