@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-03T14:15:44.405Z",
+ "solidifiedAt": "2026-09-03T14:38:46.630Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "6b98e716450ee9bf",
+  "cell.mjs": "14ecb952fdc91d8b",
   "plan-territory.mjs": "270aec1cef622a35",
   "AGENTS.md": "a1ab4eaec1d4c6ac"
  },
@@ -291,6 +291,15 @@
    "reason": "owner approved 2026-09-03 ('yeah this is fine i dont wanna spend more cycles on this part it looks great', answering the band question): lock change 11 - the crown gate's band is 1.7-5.2 m, the range the twenty accepted cells measured on their own workers' reports, NOT the plan's written 4-7 m. Reason: all twenty were accepted by the owner's eye and read consistent at 1:1, so a replacement gated at 4-7 would come back 1.5-2x its neighbours. The 4-7 m rule is left as an open canon question for when something at known scale stands beside a tree. The gate's substantive work - refusing a report whose crown.excludedElements is non-empty, which is how the ~22 m crown in c3-2 passed - is unchanged by the band. Controls recalibrated to the new band and green: world-authoring-stitch 24/24, stitch-content-aware-seam 5/5.",
    "hashes": {
     "cell.mjs": "6b98e716450ee9bf",
+    "plan-territory.mjs": "270aec1cef622a35",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-03T14:38:46.631Z",
+   "reason": "owner approved 2026-09-03 (band ruling, same conversation): label fix within lock change 11 - the crown gate's reported value said '(plan 1.7-5.2 m)' when 1.7-5.2 is the ACCEPTED range and the plan's written rule is 4-7 m. Left alone it would have written that wrong attribution into every future cell's ledger entry. Value now reads '(accepted range ...)'. No behaviour change; suite 24/24.",
+   "hashes": {
+    "cell.mjs": "14ecb952fdc91d8b",
     "plan-territory.mjs": "270aec1cef622a35",
     "AGENTS.md": "a1ab4eaec1d4c6ac"
    }

@@ -1662,7 +1662,7 @@ exit 1
       return { value: `${c.medianMetres} m, but ${c.excludedElements.length} element(s) excluded from the measurement: ${c.excludedElements.map(String).join("; ").slice(0, 200)}`, pass: false };
     }
     const inBand = c.medianMetres >= CROWN_MIN_M && c.medianMetres <= CROWN_MAX_M;
-    return { value: `${c.medianMetres} m over ${c.sampleCount ?? "?"} crowns (plan ${CROWN_MIN_M}-${CROWN_MAX_M} m)`, pass: inBand };
+    return { value: `${c.medianMetres} m over ${c.sampleCount ?? "?"} crowns (accepted range ${CROWN_MIN_M}-${CROWN_MAX_M} m)`, pass: inBand };
   })();
 
   const gates = [
