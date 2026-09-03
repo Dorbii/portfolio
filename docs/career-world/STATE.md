@@ -4,7 +4,13 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-03, LATEST (current):** **STEP 5 IS DONE.** The world is a 16 x 9
+**2026-09-03, LATEST (current):** **STEP 5 AND THE REMOVAL ARE DONE.** The world
+is a 16 x 9 lattice; NinjaOne's 20 cells are registered and served; the capital
+derives from `plan.json`; **the old land art, L4 and the capital environment are
+deleted** - ~1,000 files. Suite **95 pass / 4 fail**. Resume from `SESSION 8`
+below.
+
+**2026-09-03, superseded:** **STEP 5 IS DONE.** The world is a 16 x 9
 lattice of 97.7 m cells (`WORLD_PLANE 3472 x 1953`, cell 217 px); NinjaOne's
 20 authored cells are registered at cell `[3,1]` and the runtime serves them;
 the capital derives from `plan.json`'s capital shelf; and **the old land art is
@@ -611,6 +617,69 @@ Five cells stand. Briefs ready for the next cells in
 adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 `brief-c3-1-r2.md` (magical gorge, rail gorge span), `brief-c2-2-r2.md`
 (bench country, waystation bench, hot spring).
+
+**SESSION 8 (2026-09-03) — RESUME HERE, ANY MODEL.** Step 5 landed and the old
+art is gone. SESSION 7 below covers the lattice and the registration.
+
+## WHAT IS TRUE NOW
+
+`WORLD_PLANE 3472 x 1953` = **16 x 9 cells of 217 px**. Cell (c,r) is at
+`[c/16, r/9]`. NinjaOne's authored block is at cell `[3,1]`, 5 x 4, registered
+and served by the release feed at **capital 1024 / site 2048 px per cell**
+(4.72 and 9.44 image px per world px, better than `stream-r3` managed).
+
+The capital envelope is exactly **2 x 1.5 cells**, origin `[0.278125, 0.2]`,
+derived from `plan.json`'s capital shelf at cell `[2,1]`. Envelope land
+coverage **0.983**.
+
+**Deleted:** `stream-r3`, `terrain-relief-r6` + 4x, `world-land-mask` r1-r4,
+the authored surface sources, the l2dev placement, the whole
+`capitals/ninjaone` tree (L4 city AND the capital environment), `layers/city`,
+`layers/terrain/detail` and `/foliage`, the environment proof/geology
+components, `terrain-relief-r6.json`, `terrain-dem-r4.json`, and 19 tests.
+
+**New:** `textures/world-land-r1.png` (1664 x 936, 104 px per cell) and
+`world-land-detail-4x-r1.png` (6656 x 3744), composited from the L2 pyramid
+and transparent where nothing is authored; `masks/world-land-mask-r5.png`,
+**derived from the plate's own alpha** so the two cannot drift.
+
+## FOUR DEFECTS WORTH REMEMBERING
+
+- **sharp writes PNG as RGB by default.** Every consumer indexes a mask as
+  `pixels[y * width + x]`; three channels reads the wrong bytes SILENTLY.
+  `{ colours: 2 }` is worse (palette). Use `toColourspace("b-w")` and **verify
+  colour type 0 on disk** - sharp's metadata says 3 channels either way.
+- **The land stream was being suppressed.** `TerritoryLandform` took
+  `suppressDetailedStreaming={ninjaOneEnvironmentOwnsCamera}`, so the capital's
+  old art did not merely draw on top - it TURNED OFF the authored stream.
+- **Tile sizes must come from the art.** The dev feed's 256/1024 was a
+  quarter-scale placement; copying it shipped tiles 3.3x coarser than the
+  tileset they replaced. The ledger states `artPxPerWorldPx: 9.45`.
+- **Deleting a data attribute breaks CSS invisibly.** `data-city-proof-view`
+  was gone, so `:not([data-city-proof-view="interactive"])` matched everything
+  and applied the proof view's chrome-less styling to the normal page. The
+  header and controls vanished; **typecheck stayed clean through both.**
+
+## SUITE: 95 pass / 4 fail / 1 skipped
+
+- `coast field is derived across the complete authored shoreline`, `ocean
+  realism profile` - **ocean, owner-excluded and being reworked.** The old
+  continents still show as black silhouettes for the same reason: the ocean's
+  baked phase and flow fields encode the old coastline.
+- `NinjaOne town-plan paving stays on accepted terrain`, `Kaizen route and
+  structure semantics stay on buildable topography` - **real content.**
+  Kaizen's foundry district has 13 of 170 points standing on the authored
+  coastline at its cell edge. Wants an eye, not arithmetic.
+
+Black shapes inside the authored land are **water cuts** - the layer-separation
+contract working. The masks exist per cell (`c3-1-water.png`, `waterZones` in
+the ledger); nothing consumes them yet, and that consumer is the water rework.
+
+## NEXT
+
+Kaizen's district against the coastline. Then Tanium's L2 land, planned against
+NinjaOne's block - the grid expands from here, and the world is scoped for ~88
+land cells against the 18.2 now authored.
 
 **SESSION 7 (2026-09-03) — RESUME HERE, ANY MODEL.** Step 5 landed. Read
 `SCALE-RESET-APPLY.md` for the arc; SESSION 6 below is the scale reset that
