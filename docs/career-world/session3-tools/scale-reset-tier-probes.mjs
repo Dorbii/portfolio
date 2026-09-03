@@ -99,24 +99,21 @@ sub(ST, `  assert.equal(
     ) < NINJAONE_CAPITAL_D05_CANON_ONE_TO_ONE_MAXIMUM_SPAN * 6e-4,
   );`, "canon floor tolerance");
 
-// ------------------------------------------ the misclassified capital tile
-{
-  const p = "public/career-world/layers/terrain/authority/manifests/terrain-site-tiles-r2.json";
-  const raw = fs.readFileSync(p, "utf8");
-  const crlf = raw.includes("\r\n");
-  const text = raw.replace(/\r\n/g, "\n");
-  const doc = JSON.parse(text);
-  const tile = doc.tiles.find((t) => t.id.startsWith("project-kaizen"));
-  if (Math.abs(tile.worldBounds.span[0] - 0.03289473684210526) < 1e-12) {
-    tile.worldBounds.origin = pt(tile.worldBounds.origin);
-    tile.worldBounds.span = tile.worldBounds.span.map((v) => v * 0.5);
-    const out = JSON.stringify(doc, null, 2) + "\n";
-    changes.push(`${p}  kaizen site tile worldBounds`);
-    if (!DRY) fs.writeFileSync(p, crlf ? out.replace(/\n/g, "\r\n") : out);
-  } else {
-    changes.push(`${p}  kaizen site tile worldBounds  (already applied)`);
-  }
-}
+// ---------------------------------- terrain-site-tiles-r2.json: NOT touched
+//
+// An earlier version of this pass re-derived the Kaizen site tile, on the
+// reasoning that assets.test.mjs asserts a project's anchor sits inside its
+// own tile and the anchor had moved. That was wrong, and the suite said so:
+// "capital site tiles stay bounded to land and add local density" derives the
+// expected worldBounds from the crop's position IN THE TERRITORY PLATE
+// (1428 / 6688 = 0.2135...). The tile's world position is a statement about
+// where its art was cut from the terrain, so it is terrain, and phase 1's
+// classification was right.
+//
+// Both cannot hold against the current plate: the anchor is capital content
+// and moves, the tile is terrain and does not. That is not a third problem --
+// it is the same one the land-coverage gate reports, which step 5 resolves by
+// re-registering the terrain under the capital.
 
 console.log(`${DRY ? "WOULD APPLY" : "APPLIED"} ${changes.length} edits:\n`);
 for (const c of changes) console.log(`  ${c}`);
