@@ -48,10 +48,13 @@ editJson("layers/infrastructure/manifests/ninjaone-project-towns-r1.json", (d) =
   }
 }, "the foundry district moves with Kaizen");
 
-const c = by(CAPITAL_D);
+// The rural fringe belongs to KAIZEN, not to the capital: ruralOutskirts.ts
+// requires every anchor to sit inside an accepted NinjaOne allocation, and the
+// only allocation is Kaizen's. Moving the fringe with the capital while the
+// allocation moved with Kaizen tore the two apart and the guard said so.
 editJson("layers/terrain/detail/manifests/ninjaone-rural-outskirts-r1.json", (d) => {
-  for (const s of [...d.scenery, ...(d.easterEggSlots ?? [])]) s.anchor = c(s.anchor);
-}, "the rural fringe moves with the capital");
+  for (const s of [...d.scenery, ...(d.easterEggSlots ?? [])]) s.anchor = k(s.anchor);
+}, "the rural fringe moves with Kaizen, whose allocation contains it");
 editJson("layers/structures/manifests/ninjaone-city-allocations-r1.json", (d) => {
   for (const a of d.allocations) a.bounds.origin = k(a.bounds.origin);
 }, "the Kaizen allocation moves with Kaizen");
