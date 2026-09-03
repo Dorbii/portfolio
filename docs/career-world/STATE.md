@@ -4,11 +4,18 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-03, LATEST (current):** **STEP 5 AND THE REMOVAL ARE DONE.** The world
+**2026-09-03, LATEST (current):** **KAIZEN IS CENTRED ON KAIZEN.** The district
+was 32 m north of its shelf because step 5E aligned it by a point on its south
+edge; **13 of 163 points over water is now 1**, and that one is a drainage
+seam's head sitting in the river it drains into - an owner call, drawn in
+`session3-tools/kaizen-on-land.png`. **The other three failures are all the
+ocean's**, including the one SESSION 8 called a Kaizen problem. Resume from
+`SESSION 9` below.
+
+**2026-09-03, superseded:** **STEP 5 AND THE REMOVAL ARE DONE.** The world
 is a 16 x 9 lattice; NinjaOne's 20 cells are registered and served; the capital
 derives from `plan.json`; **the old land art, L4 and the capital environment are
-deleted** - ~1,000 files. Suite **95 pass / 4 fail**. Resume from `SESSION 8`
-below.
+deleted** - ~1,000 files. Suite **95 pass / 4 fail**. See `SESSION 8`.
 
 **2026-09-03, superseded:** **STEP 5 IS DONE.** The world is a 16 x 9
 lattice of 97.7 m cells (`WORLD_PLANE 3472 x 1953`, cell 217 px); NinjaOne's
@@ -33,7 +40,7 @@ The old D06 district was **deleted outright by owner ruling** ("nuke and boot") 
 
 ## SCALE CONTRACT (S1/S2, in force)
 
-`H ~= 0.13 m per master unit` — corroborated independently by D05 masonry coursing (median `3.30 MU` = `0.43 m`) and a `2.1 m` doorway. A director declaration of `H=0.492` is RETRACTED. **World/territory tiers are SYMBOLIC, not metric** (far-tier carrier measured `3.99-20.66x` too large; the runtime routes those tiers marker-only). Registration **as of the applied scale reset**: `world = ([0.125,0] + master/[1448,1086] * [0.125,1/6]) * [3344,1882]`; territory plate = world x4 (`13376 x 7528`). **The envelope fraction is DERIVED, not immutable.** The invariant is D05's ground footprint and `0.13 m` per master unit; `[0.25,1/3]` expressed that against a `1672x941` plane, so it halved to `[0.125,1/6]` when the plane's pixels doubled — precisely so D05 keeps its footprint. The **origin** `[0.125,0]` does not move. Calling the fraction immutable is a wording trap that cost a session; the old comment saying so in `ninjaOneCapitalD05Concept.ts` has been retired. `WORLD_PLATE_DIMENSIONS` stays `1672x941` — it is the true pixel size of `terrain-relief-r6.png`, a different thing from the coordinate space.
+`H ~= 0.13 m per master unit` — corroborated independently by D05 masonry coursing (median `3.30 MU` = `0.43 m`) and a `2.1 m` doorway. A director declaration of `H=0.492` is RETRACTED. **World/territory tiers are SYMBOLIC, not metric** (far-tier carrier measured `3.99-20.66x` too large; the runtime routes those tiers marker-only). Registration **as it now stands**: `WORLD_PLANE` is `3472 x 1953` = **16 x 9 cells of 217 px**, and the capital envelope is origin `[0.278125, 0.2]` span `[0.125, 1/6]` — exactly **2 x 1.5 cells**, derived from `plan.json`'s capital shelf at cell `[2,1]`. **Nothing about the envelope is immutable — not the fraction and NOT THE ORIGIN.** The only invariants are D05's ground footprint and `0.13 m` per master unit; where that footprint sits is whatever `plan.json` says. Two separate sessions were lost to the opposite belief: first "the fraction is immutable", then "the origin does not move" — the second is the same trap wearing the other half of the sentence, and it put the capital in the sea (coverage `0.552`; it is `0.983` since the envelope started deriving from the plan). **World/territory tiers are SYMBOLIC, not metric** (far-tier carrier measured `3.99-20.66x` too large; the runtime routes those tiers marker-only). `WORLD_PLATE_DIMENSIONS` is now `[1664, 936]` in `layers/terrain/model/assets.ts` — the pixel size of `world-land-r1.png`, 104 px per cell, still a different thing from the coordinate space.
 
 ## LANDED THIS ARC
 
@@ -618,8 +625,65 @@ adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 `brief-c3-1-r2.md` (magical gorge, rail gorge span), `brief-c2-2-r2.md`
 (bench country, waystation bench, hot spring).
 
-**SESSION 8 (2026-09-03) — RESUME HERE, ANY MODEL.** Step 5 landed and the old
-art is gone. SESSION 7 below covers the lattice and the registration.
+**SESSION 9 (2026-09-03) — RESUME HERE, ANY MODEL.** Kaizen is placed. SESSION
+8 below covers step 5 and the removal; SESSION 7 the lattice.
+
+## KAIZEN: 13 POINTS OVER WATER WAS ONE BUG OF MINE
+
+Step 5E translated the district by aligning **one anchor**, `[0.1805, 0.154]`,
+onto the plan's kaizen shelf. That anchor sat near the district's **south
+edge**, and `plan-territory.mjs` draws a shelf as a circle **CENTRED** on
+`cell + off` — so aligning the wrong reference point carried the whole
+district **32 m north**, off the top of cell `[7,1]` into unauthored sea.
+
+Two things already sat on the shelf centre and were never wrong: the Kaizen
+node's `territoryAnchor` and the Kaizen plate's `anchor`, both
+`[0.4625, 0.17777777777777778]`. The district belongs centred on them.
+`step5f-kaizen-recentre.mjs` applies the residual — 0.4 m east, 32.1 m south,
+one rigid move, nothing deformed — and **refuses to run twice** (a translation
+is not idempotent, and step 5E had no guard).
+
+**Corroboration, not assertion:** the rural fringe was not in the objective and
+goes **5 of 7 anchors over water → 0 of 7** at the same delta. A sweep finds
+**1707 of 2401** neighbouring positions fully dry, so it is not a knife-edge fit.
+
+## SUITE: 95 pass / 4 fail / 1 skipped — and three of the four are the ocean
+
+- `NinjaOne town-plan paving stays on accepted terrain` — **one point**, the
+  head of `kaizen-agent-east-contour-drainage-seam`, standing in the river the
+  seam drains into. Alpha 0 at 4x too, so it is real water, not quantisation.
+  A 0.1 m nudge west clears it; that is fitting geometry to a test, so it is
+  **not applied pending an owner ruling**. See `kaizen-on-land.png`.
+- `Kaizen route and structure semantics stay on buildable topography` —
+  **SESSION 8 called this a Kaizen coastline problem. It is not.** It throws in
+  `readScalarField`: `terrain-slope-r4.png does not match the world plane`. The
+  height and slope fields are **1672 x 941**, the old plate's size, and they
+  describe the deleted terrain — **IoU 29.6%** against the authored land mask,
+  claiming land over 34.2% of the plane where the authored land covers 12.7%.
+  Resampling them to `3472 x 1953` would make the test green off a landscape
+  that no longer exists. **They cannot be deleted either:** they are build
+  inputs to `coast-material-field-r6.json` and the inland-water layer, so
+  re-deriving them is inside the ocean rework. Owner's.
+- `coast field is derived across the complete authored shoreline`, `ocean
+  realism profile` — ocean, owner-excluded. Same root cause as the black
+  continent silhouettes: the baked fields encode the old coastline.
+
+## A CONTROL WORTH KEEPING
+
+`read_console_messages` returns a **retained buffer** — it survives a full dev
+server restart and a navigate, so a stale error list reads exactly like a live
+one. SESSION 8 called those errors stale and was right, but for no reason it
+had tested. The control is per-document:
+`performance.getEntriesByType("resource").filter(e => e.responseStatus >= 400)`
+— currently **0 of 163**.
+
+## NEXT
+
+The drainage-seam vertex needs a ruling. Then Tanium's L2 land, planned against
+NinjaOne's block — the grid expands from here, and the world is scoped for ~88
+land cells against the 18.2 now authored.
+
+**SESSION 8 (2026-09-03).** Step 5 landed and the old art is gone.
 
 ## WHAT IS TRUE NOW
 
