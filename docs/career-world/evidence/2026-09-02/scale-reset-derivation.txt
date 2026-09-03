@@ -1,0 +1,45 @@
+WORLD SCALE RESET - derivation (owner-approved 2026-08-31, never applied)
+
+Checks against figures STATE already states:
+  OK   current plane width m: derived 752.90 vs STATE 753
+  OK   current plane height m: derived 423.73 vs STATE 424
+  OK   region ground m: derived 98.17 vs STATE 98
+  OK   m per master unit (D05): derived 0.13 vs STATE 0.13
+  OK   cell ground m: derived 97.59 vs STATE 97.6
+  OK   territory width m: derived 487.94 vs STATE 488
+  OK   territory height m: derived 390.36 vs STATE 390
+  OK   regions to author at x2, land 2/3: derived 88.28 vs STATE 88
+  OK   NinjaOne budget side m (sqrt of 21 regions): derived 449.85 vs STATE 450
+
+SETTLED - what 'world plane x2' must mean:
+  A region is defined as BOTH 218 world px AND ~98 m of ground, so
+  metres-per-world-pixel CANNOT change. It stays 0.4503.
+  Therefore the plane's PIXELS double: 1672 x 941 -> 3344 x 1882
+  Ground: 753 x 424 m -> 1506 x 847 m
+  Land at 67% of the plane = 88.3 regions to author (STATE says ~88).
+  Territory plate stays world x4: 13376 x 7528
+
+KEY FINDING - the authored land already fits the POST-reset budget:
+  One cell  = 2048 art px / 9.45 = 216.7 world px = 97.6 m
+  Territory = 5 x 4 cells = 1084 x 867 world px = 488 x 390 m
+  That is 19.8 regions against NinjaOne's budget of 21 (~450 m).
+  So the 20 authored cells DO NOT need rescaling. They were authored to the
+  post-reset budget. What has to change is the world plane around them.
+
+BLOCKING CHOICE - two STATE rules collide and only the owner can pick:
+  STATE says the capitalEnvelope origin [0.125,0] span [0.25,1/3] is IMMUTABLE.
+  STATE also says D05 remains the scale anchor and does not move.
+  With m/px fixed and the plane's pixels doubled, those cannot both hold:
+
+  Option A - keep the envelope FRACTION [0.25, 1/3]:
+    envelope becomes 376 x 282 m (was 188 x 141 m)
+    D05's 125 m capital then fills 50% of the envelope width instead of 100%.
+    D05 keeps 0.13 m per master unit only if its master->world mapping is re-derived.
+
+  Option B - keep D05's footprint exactly, halve the fraction to [0.125, 1/6]:
+    envelope stays 188 x 141 m and 0.130 m per master unit
+    D05 does not move by a single world pixel; the ENVELOPE NUMBER changes.
+    New registration: world = ([0.125,0] + master/[1448,1086] * [0.125, 1/6]) * [3344,1882]
+
+  Option B is the one that honours 'D05 does not move'; Option A honours the
+  literal envelope numbers. Everything downstream depends on which.
