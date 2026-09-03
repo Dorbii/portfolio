@@ -49,11 +49,21 @@ function writeText(path, before, after, crlf, label) {
 function sub(path, find, replace, label, count = 1) {
   const { text, crlf } = readLf(path);
   const hits = text.split(find).length - 1;
+  // Text edits are exact, so one already present is a no-op rather than an
+  // error. That keeps this file a re-runnable record when a later pass adds
+  // an edit to it, as the capitalAnchor one below was.
+  if (hits === 0 && text.includes(replace)) { changes.push(`${path}  ${label}  (already applied)`); return; }
   if (hits !== count) throw new Error(`${path}: expected ${count} of ${JSON.stringify(find)}, found ${hits}`);
   writeText(path, text, text.replace(find, replace), crlf, label);
 }
+// Unlike the text edits, the JSON mutations below are arithmetic (`* 0.5`,
+// re-derive), so re-running them would halve twice. Detect a completed phase 1
+// from the one value that cannot be anything else and skip them.
+const PHASE1_APPLIED = fs.readFileSync(S + "shared/world.ts", "utf8").includes("3344");
+
 // Round-trip, for files that are already exactly JSON.stringify(_, null, 2).
 function editJson(path, mutate, label) {
+  if (PHASE1_APPLIED) { changes.push(`${path}  ${label}  (already applied)`); return; }
   const { text, crlf } = readLf(path);
   const doc = JSON.parse(text);
   if (JSON.stringify(doc, null, 2) + "\n" !== text) {
@@ -77,6 +87,14 @@ sub(R + "layers/terrain/authority/manifests/world-territories-r4.json",
   "ninjaone capitalEnvelope.span");
 sub(R + "capitals/ninjaone/manifests/city-package-authority-r4.json",
   `"worldSpan": ${SPAN_OLD}`, `"worldSpan": ${SPAN_NEW}`, "registration.worldSpan");
+// capitalAnchor sits beside the envelope in the same manifest and is capital
+// content in world coordinates, so it re-derives. Missed on the first pass
+// because the inventory's scanner skipped points in any file that already
+// held an envelope-span copy - a self-inflicted blind spot. Left alone it
+// lands outside its own halved envelope and assets.test.mjs catches it.
+sub(R + "layers/terrain/authority/manifests/world-territories-r4.json",
+  `"capitalAnchor": [0.295, 0.23827],`,
+  `"capitalAnchor": [${pt([0.295, 0.23827])}],`, "ninjaone capitalAnchor");
 for (const [file, label] of [
   ["capitals/ninjaone/environment/manifests/environment-proof-r1.json", "registration.boundingWorldView.span"],
   ["capitals/ninjaone/environment/manifests/foliage-native-r4.json", "registration.boundingWorldView.span"],
