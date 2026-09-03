@@ -623,7 +623,7 @@ rather than a 401, on the ChatGPT-account endpoint, points at that endpoint or
 the account's Codex access rather than a plain token expiry. Two bakes ran fine
 earlier the same morning (09:31, 09:51) and the third failed at 09:54, so it
 may be transient. **Probe before assuming it is still broken; do not spend
-bakes against a dead endpoint.**
+bakes against a dead endpoint.** Re-probed after a codex update later that day: still 404, and PATH codex is still `0.149.0`. The owner attributes it to provider-side server issues, so this is a WAIT, not a fix. Probe once; if it still 404s, leave it alone.
 
 **THE REVIEW IS DONE (R110). Both named watch items dissolved under
 measurement; the owner said "it looks great" and nothing was changed for
