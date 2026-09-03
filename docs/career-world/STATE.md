@@ -70,6 +70,15 @@ Only Steve accepts (F10); two strikes → reframe; F17 discard-don't-repair; F21
 
 ## Dispatch discipline
 
+**Commit at every landing (owner instruction, 2026-09-02).** Nothing generated
+or edited sits uncommitted across a session boundary. This worktree carried
+`405` modified files for two days before anyone noticed, and every dispatched
+worker swallowed those lines through `git status`. A landing is a commit; an
+experiment that does not land is reverted the same day, its evidence kept
+under `.codex-tmp`. Owner's words: *"can you make sure we are committing
+regularly then so that doesnt happen"*.
+
+
 `codex exec --sandbox workspace-write -c model=gpt-5.6-{sol|terra} -c model_reasoning_effort=high "$(cat <packet>)" < /dev/null > <log> 2>&1` from REPO ROOT (a stray `cd` once silently killed a dispatch); verify the log grew past the banner; watch for the `tokens used` completion marker (never poll the process list). Bundled Node (F5): `~/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node.exe`. Quarantine-only until director review + owner acceptance. HEAD advances concurrently (ocean program) — re-establish red baselines per lane; known pre-existing red: D05 hash mismatch at `tests/ninjaone-capital-city-lod-routing.test.mjs:847`.
 
 ---
@@ -285,9 +294,9 @@ archaeology: nobody later can tell whether a file is dead or load-bearing.
 
 **Already known to be obsolete or obsolescent** (verify before removing):
 
-- The shoreline-erosion change in `build-career-world-land-stream-tiles.py` and
-  the v3 coast fill — both superseded by the L2 rebuild, since regenerated art
-  will not derive from the relief plate at all.
+- ~~The shoreline-erosion change in `build-career-world-land-stream-tiles.py`
+  and the v3 coast fill~~ — DONE 2026-09-02: measured, both discarded, worktree
+  reverted to HEAD (see the resolution below).
 - The `d05-canon-ocean-removal-*` and `residual-blue` artefact families, once
   the new per-cell water contract replaces them.
 - D06-era scripts, manifests and proof assets left behind by the district
@@ -1040,11 +1049,28 @@ hand travels through the neighbour chain, so the canon only conditions the
 first cell of an empty territory; director proceeds with candidate **g**
 unless the owner objects.
 
-**Unresolved, owner call:** the `407` uncommitted stream-r3 modifications in
-this worktree (shoreline-erosion re-bake + v3 coast fill, obsolescent) —
-commit as an interim fix for the old-world serving, or discard. Untouched
-this session; NOT in this session's commits. Side cost: every worker runs
-`git status` and swallows those 400 lines into its context.
+**RESOLVED 2026-09-02 — both discarded, worktree clean at HEAD.** The `405`
+uncommitted stream-r3 modifications were two coupled changes and neither
+survives measurement. (a) `SHORE_ALPHA_EROSION_PX = 2` in
+`build-career-world-land-stream-tiles.py` assumed the shoreline ends in a
+partial-alpha ramp it could shift inland. It does not: in the west-coast
+window the plate's alpha is effectively binary — `134` partial pixels in
+`62,980`, `0.21%` — so the min filter shifts no ramp, it deletes a 2 px rind
+of land, which at the site tier's `5x` magnification reads as a blocky,
+stair-stepped, holed coast. Proof, HEAD beside the eroded build composited
+over a flat sea: `review/shore-halo-0.1-0.16.png`. (b) The v3 coast fill
+edited the relief plate itself — `12,258 px` of land removed, `1,003` added,
+in one west-shore region — and the coast is the OCEAN program's authority
+now, so it is not the land lane's to commit; the plate is kept at
+`.codex-tmp/session3/discarded/relief-r6-detail-4x-coastfill-v3.png` if it is
+ever wanted. Control that separated the two: rebuilt from the committed plate
+with erosion OFF, the two sampled tiles reproduce HEAD to within re-encode
+noise (alpha byte-identical, mean RGB delta `0.11 / 0.22`), so the 402-tile
+diff was those two changes and not build drift. **The dark shore rim is real
+and still open:** over the real coast the shore band measures luma `56`
+against an interior `66.1`. It is the plate's own painted water margin, not
+an alpha ramp — the fix repaints that band's colour, and it belongs to
+whoever owns the coast.
 
 **OWNER INTERJECTION CHECKLIST — session 3 (every item closes or is handed
 back explicitly; owner asked for this discipline 2026-09-01):**
