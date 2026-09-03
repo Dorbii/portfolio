@@ -678,8 +678,11 @@ in the territory plate, so it is terrain.
 ## SUITE
 
 **168 pass / 12 fail / 2 skipped**, against a re-measured baseline of
-**172 / 8 / 2**. The 8 are unchanged and still real. The 4 new ones are the
-single land-coverage cause above. Targeted control
+**172 / 8 / 2** (STATE previously said 9; one was pruned in `5820cdf4`).
+The baseline 8 are `8, 9, 19, 21, 23, 49, 134, 140` — unchanged and still
+real. The 4 new ones are `14` (envelope land coverage), `16` (town-plan
+paving), `109` (the Kaizen anchor outside its terrain-fixed site tile) and
+`164` (Kaizen route/structure topography): **one cause, four gates.** Targeted control
 (`world-territory-resegmentation` + `ninjaone-environment-proof`) is
 **16 pass / 1 fail — the baseline exactly**, same known red. `typecheck` clean.
 
