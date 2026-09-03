@@ -11,6 +11,8 @@ const useL2DevStream = (typeof process !== "undefined" && process.env?.NEXT_PUBL
     && new URLSearchParams(window.location.search).get("landStream") === "l2dev");
 const manifest = useL2DevStream ? l2DevManifest : releaseManifest;
 const STREAM_PATH_PREFIXES = [
+  // The registered authored land. `stream-r3` stays only until its removal.
+  "/career-world/layers/terrain/authority/tiles/l2-ninjaone/",
   "/career-world/layers/terrain/authority/tiles/stream-r3/",
   "/career-world/layers/terrain/authority/tiles/l2-ninjaone-dev/",
 ];
