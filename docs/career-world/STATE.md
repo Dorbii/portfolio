@@ -4,7 +4,7 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-03 (current):** the NinjaOne L2 land territory is **20 of 20 cells** on `codex/land-lod-completion`, tree clean, nothing pushed. **One cell changed this session: 1,3, whose dry inlet is water again.** Two of the three suspected defects turned out to be BRIEFED content declared in `plan.sites`. The scale reset is derived and ruled but not applied. **Resume from the block titled `SESSION 5 (2026-09-03) - RESUME HERE, ANY MODEL`** further down; everything below it is older history.
+**2026-09-03, later (current):** the NinjaOne L2 land territory is **20 of 20 cells** on `codex/land-lod-completion`, tree clean, nothing pushed. **The scale reset is DERIVED AND APPLIED.** The world plane is `3344 x 1882`, NinjaOne's capital envelope fraction is halved, and every camera/LoD span halved with it. One consequence is open and needs an owner ruling. **Resume from `SESSION 6 (2026-09-03) - RESUME HERE, ANY MODEL`** immediately below; everything under `SESSION 5` is older history.
 
 The old D06 district was **deleted outright by owner ruling** ("nuke and boot") — all 67 asset paths and every code path; the app is green without it (typecheck PASS, focused suites green, production build PASS). The rebuild is in its survey/concept phase and is governed by a new **scale contract** and a **settled territory map**. One blocker stands between here and re-authoring D06: the site re-survey at correct resolution.
 
@@ -20,7 +20,7 @@ The old D06 district was **deleted outright by owner ruling** ("nuke and boot") 
 
 ## SCALE CONTRACT (S1/S2, in force)
 
-`H ~= 0.13 m per master unit` — corroborated independently by D05 masonry coursing (median `3.30 MU` = `0.43 m`) and a `2.1 m` doorway. A director declaration of `H=0.492` is RETRACTED. **World/territory tiers are SYMBOLIC, not metric** (far-tier carrier measured `3.99-20.66x` too large; the runtime routes those tiers marker-only). Registration: `world = ([0.125,0] + master/[1448,1086] * [0.25,1/3]) * [1672,941]`; territory plate = world x4. **NinjaOne's `capitalEnvelope` `origin [0.125,0] span [0.25,1/3]` is IMMUTABLE** — D05 and the whole chain derive from it; W1b added a test asserting it.
+`H ~= 0.13 m per master unit` — corroborated independently by D05 masonry coursing (median `3.30 MU` = `0.43 m`) and a `2.1 m` doorway. A director declaration of `H=0.492` is RETRACTED. **World/territory tiers are SYMBOLIC, not metric** (far-tier carrier measured `3.99-20.66x` too large; the runtime routes those tiers marker-only). Registration **as of the applied scale reset**: `world = ([0.125,0] + master/[1448,1086] * [0.125,1/6]) * [3344,1882]`; territory plate = world x4 (`13376 x 7528`). **The envelope fraction is DERIVED, not immutable.** The invariant is D05's ground footprint and `0.13 m` per master unit; `[0.25,1/3]` expressed that against a `1672x941` plane, so it halved to `[0.125,1/6]` when the plane's pixels doubled — precisely so D05 keeps its footprint. The **origin** `[0.125,0]` does not move. Calling the fraction immutable is a wording trap that cost a session; the old comment saying so in `ninjaOneCapitalD05Concept.ts` has been retired. `WORLD_PLATE_DIMENSIONS` stays `1672x941` — it is the true pixel size of `terrain-relief-r6.png`, a different thing from the coordinate space.
 
 ## LANDED THIS ARC
 
@@ -604,6 +604,92 @@ Five cells stand. Briefs ready for the next cells in
 adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 `brief-c3-1-r2.md` (magical gorge, rail gorge span), `brief-c2-2-r2.md`
 (bench country, waystation bench, hot spring).
+
+**SESSION 6 (2026-09-03) — RESUME HERE, ANY MODEL.** The scale reset is
+**applied**: `docs/career-world/SCALE-RESET-APPLY.md` carries the full record,
+including the derivation pass that preceded it. Tree clean, nothing pushed.
+Everything below `SESSION 5` is history; read it only for background.
+
+## THE RESET, AS APPLIED
+
+`WORLD_PLANE 1672x941 -> 3344x1882` (m/px pinned at `0.4503`). NinjaOne's
+`capitalEnvelope.span` halved to `[0.125, 1/6]` with its **origin unchanged**,
+so D05 keeps its ground footprint. Capital content re-derived about that origin
+(`p' = o + (p - o)/2`); every normalized camera/LoD span halved. That halving
+**cancels**: screen position is `(n - origin)/span`, so a capital feature lands
+on exactly the same pixel and every tier decision is unchanged — measured worst
+delta `0.0`. **SCALE-RESET-APPLY called the LoD thresholds an owner-facing taste
+question; they are arithmetic, and that question is closed.**
+
+Six passes, all script-driven under `docs/career-world/session3-tools/` so the
+change is reproducible rather than hand-typed: `scale-reset-inventory.mjs`
+(enumerate), then `-apply` (51), `-fixtures` (19), `-generators` (9),
+`-sweeps` (11), `-tier-probes` (15).
+
+## WHAT THE ENUMERATION MISSED, AND HOW EACH SURFACED
+
+Every one came from a guard failing closed or a sweep run *before* an edit —
+none from editing until the app stopped throwing, which is how step 2 failed.
+
+- **Two manifests are BUILD OUTPUTS.** `foliage-native-r4.json` and
+  `seam-integration-native-r2.json` are generated, and the suite runs their
+  builders, so `npm test` silently reverted edits to them. Nothing in either
+  file says it is generated. **Change the source and re-export** — the rule
+  already written for the ocean shaders. Coherence check: `cameraArtboardView`'s
+  divisor *is* the envelope span, so with both halved the artboardView is
+  invariant (moved `1e-13`).
+- **A third copy of the selector checkpoints** in
+  `scripts/lib/ninjaone-environment-mvp-verification.mjs`.
+- **Two demand-mode spans** (`0.075`/`0.0875`). Unhalved they put every halved
+  sweep span in `fresh-or-retained`, emptying the `retained-only` bucket — the
+  band existed but nothing could land in it.
+- **`capitalAnchor`**, hidden by the inventory's own filter, which skipped
+  points in files that already held an envelope-span copy.
+- **A tolerance that shrinks with its input.** The D05 canon floor used
+  `toFixed(4)`; `0.0824845` rounded to `0.0825` but `0.0412422` rounds to
+  `0.04125` at no number of places. Now relative (`6e-4`).
+
+## THE ONE OPEN CONSEQUENCE — NEEDS AN OWNER RULING
+
+Measured by `session3-tools/capital-on-land-check.mjs` (reads live manifests
+untransformed; reproduces the gates):
+
+```
+envelope land coverage   0.552   need >= 0.700   FAIL   (was 0.715)
+buildable / land         0.896   need >= 0.580   PASS
+anchor on land / slope   true / 0                PASS
+7 of 170 capital points over water (2 were over water BEFORE the reset)
+```
+
+The capital re-derives toward the envelope's **north-west corner** while the
+land mask, addressed by fraction, does not move; that corner is 45% sea.
+**Four suite failures share this one cause** — envelope coverage, town-plan
+paving, the Kaizen anchor sitting outside its terrain-fixed site tile, and
+Kaizen route/structure topography. Not fixable by arithmetic: the origin is
+pinned by the Option B ruling. Three ways out — accept as a known-deliberate
+red until **step 5** re-registers the L2 land under the capital (recommended;
+this mask is the terrain step 7 retires), re-place the envelope (moves D05,
+defeating Option B), or lower `minimumLandCoverage` (weakening a gate to fit
+its own input, which F27 rules out). **Do not resolve it by moving terrain:**
+a pass that re-derived the Kaizen site tile to chase this was reverted —
+`terrain-site-tiles-r2.json` derives its world bounds from the crop's position
+in the territory plate, so it is terrain.
+
+## SUITE
+
+**168 pass / 12 fail / 2 skipped**, against a re-measured baseline of
+**172 / 8 / 2**. The 8 are unchanged and still real. The 4 new ones are the
+single land-coverage cause above. Targeted control
+(`world-territory-resegmentation` + `ninjaone-environment-proof`) is
+**16 pass / 1 fail — the baseline exactly**, same known red. `typecheck` clean.
+
+## NEXT
+
+Step 5: register the 20 L2 cells at their world bounds, which both unblocks the
+LoD test that has never run and resolves the four land failures. Then step 7,
+retire `stream-r3` — in that order, it is still the only tileset the runtime
+serves. Also still open from SESSION 5: the lock-10 `excludedElements` flaw
+that would block c3-2 for containing its own briefed `giant-tree`.
 
 **SESSION 5 (2026-09-03) — RESUME HERE, ANY MODEL.** The NinjaOne territory is
 **20 of 20** on `codex/land-lod-completion` (worktree
