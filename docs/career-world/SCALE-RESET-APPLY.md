@@ -392,3 +392,101 @@ Targeted control `world-territory-resegmentation` + `ninjaone-environment-proof`
 **16 pass / 1 fail**, re-measured this session, matching the recorded baseline.
 `tests/assets.test.mjs` is **13 pass / 5 fail** on a pristine tree — already red,
 part of the nine; do not read it as a clean gate.
+
+---
+
+## APPLIED — 2026-09-03. Steps 2, 3 and 4 are done.
+
+Owner: *"go for it."* Driven by five scripts under `session3-tools/` rather
+than hand-typed, so the change is reproducible and each pass is a record:
+
+| pass | script | edits |
+|---|---|---|
+| 1 | `scale-reset-apply.mjs` | 51 — plane, envelope, capital content, LoD spans, ruling assertions |
+| 2 | `scale-reset-fixtures.mjs` | 19 — environment test cameras |
+| 3 | `scale-reset-generators.mjs` | 9 — the builders behind two generated manifests |
+| 4 | `scale-reset-sweeps.mjs` | 11 — MVP checkpoints, sweep lattice, threshold probes |
+
+**Targeted control: 16 pass / 1 fail — the baseline exactly**, same known red
+(the `INTERIM-owner-guard-treatment` hash pin). `typecheck` clean.
+
+### Four things the enumeration missed, and how each surfaced
+
+None came from reading the app's errors; each came from a guard failing closed
+or from a sweep run before the edit.
+
+1. **Two manifests are BUILD OUTPUTS.** `foliage-native-r4.json` and
+   `seam-integration-native-r2.json` are written by
+   `build-ninjaone-environment-foliage-r4.mjs` and
+   `...-seam-integration-r2.mjs`, and the suite runs both builders — so
+   `npm test` silently reverted the phase-1 edits to them. Nothing in either
+   file marks it as generated. This doc already states the rule for the ocean
+   shaders; it applies here too.
+   *Coherence check:* `cameraArtboardView`'s divisor **is** the envelope span,
+   so with both halved the artboardView is invariant — it moved by `1e-13`.
+
+2. **A third copy of the selector checkpoints** lives in
+   `scripts/lib/ninjaone-environment-mvp-verification.mjs`, with a sweep
+   lattice over the capital and the budget sweep spans.
+
+3. **`NINJAONE_MVP_CLOSE_ASSET_PRELOAD_MAXIMUM_CAMERA_SPAN` (0.075) and
+   `..._NATIVE_RELEASE_...` (0.0875)** classify a sweep camera's demand mode.
+   Left unhalved they put every halved sweep span in `fresh-or-retained`, so
+   the `retained-only` bucket emptied and the 32 MiB union test failed on a
+   count of zero — the hysteresis band still existed, but no sample could land
+   in it. Halved, the correspondence is exact.
+
+4. **`capitalAnchor`**, sitting beside `capitalEnvelope` in the same manifest.
+   The miss was self-inflicted: `scale-reset-inventory.mjs` skipped points in
+   any file that already held an envelope-span copy, and that filter hid it.
+
+### The one consequence that did not resolve — needs an owner ruling
+
+Measured by `session3-tools/capital-on-land-check.mjs`, which reads the live
+manifests untransformed and reproduces the two `assets.test.mjs` gates:
+
+```
+envelope land coverage   0.552   need >= 0.700   FAIL
+buildable / land         0.896   need >= 0.580   PASS
+anchor on land / slope   true / 0                PASS
+7 of 170 world-registered capital points over water
+  (2 of them rural-outskirts anchors that were over water BEFORE the reset)
+```
+
+The capital re-derives toward the envelope's **north-west corner**, and the
+world land mask — a plane-wide raster addressed by fraction — does not move.
+Against `world-land-mask-r3`, that corner is 45% sea. Before the reset the
+same envelope measured `0.715`.
+
+This is not fixable by arithmetic. The envelope's origin is pinned by the
+owner ruling (it does not move, so D05 does not move), and the terrain under
+it is what it is. Three ways out:
+
+- **Accept it as a known-deliberate red until step 5** — the L2 land is
+  registered over NinjaOne's territory and its coastline is new art, so the
+  mask this gate reads is the terrain being superseded exactly there. This is
+  the ordering the plan already assumes.
+- **Re-place the envelope** so it covers land — but that moves D05, which
+  Option B exists to prevent.
+- **Lower `minimumLandCoverage` for ninjaone** — weakening a gate to fit its
+  own input, which F27 rules out.
+
+The first is recommended. It is recorded here rather than resolved because it
+is an owner ruling, not a derivation.
+
+### A wording trap retired
+
+`ninjaOneCapitalD05Concept.ts` carried `CAPITAL_ENVELOPE_WORLD_SPAN_X = 0.25`
+under a comment calling it *"immutable at 0.25 (world-territories-r4, asserted
+by test)"* — the same trap STATE already names. The comment now says the span
+is derived and why. Its dependent, the D05 1:1 canon floor, is self-consistent
+after the halving: still 1:1 at a 1303 px viewport, and the floor at 1948 px
+halves from `0.12332` to `0.06166`.
+
+### Deliberately not touched
+
+Terrain. `terrain-dem-r4` (shelves, mountain ranges), `terrain-site-tiles-r2`
+and the stream tilesets are addressed by fraction and do not move; re-cropping
+terrain is step 5's work. `viewportOverscanRatio` is dimensionless.
+`tierMaximumSpan.world` stays `1`. `camera.test.mjs` keeps its `[0.25, 1/3]`
+bounds rectangle and its `[1672, 941]` literal — neither is a registration.
