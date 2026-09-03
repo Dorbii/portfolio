@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-03T06:13:32.921Z",
+ "solidifiedAt": "2026-09-03T14:15:44.405Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "cb3da7670fffcddd",
+  "cell.mjs": "6b98e716450ee9bf",
   "plan-territory.mjs": "270aec1cef622a35",
   "AGENTS.md": "a1ab4eaec1d4c6ac"
  },
@@ -282,6 +282,15 @@
    "reason": "owner approved 2026-09-03 ('i agreed fully so replace the faulty gate/lock as well'): lock change 10 - cell.mjs now READS the worker's report.json instead of filing it. Every worker has always measured its own crowns and written the number down; the pipeline copied the report to the sources dir and never opened it, so both scale defects in the built territory were disclosed in writing and passed anyway - seventeen of twenty cells stated a median crown under the plan's 4 m floor, and c3-2 stated 'excluding the giant-tree site' for a crown that measures ~22 m against a 7 m ceiling. Adds: (a) a 'crown scale' gate requiring a crown object in report.json with medianMetres inside the plan's 4-7 m vegetation rule and an EMPTY excludedElements, so an out-of-scale element cannot be measured around; (b) the packet now specifies that exact schema and says the report is gated, not filed; (c) --from carries report.json and clears a stale one first. Deliberately NOT a pixel detector: the oversized crown and the forest behind it share a hue and a value, so no colour threshold separates them (three attempts measured and discarded) - the worker can see it, and did. Controls: world-authoring-stitch 24/24 including four new crown-gate controls (exclusion, under-band, no crown object, no report) and a PASS assertion on a compliant one; stitch-content-aware-seam 5/5.",
    "hashes": {
     "cell.mjs": "cb3da7670fffcddd",
+    "plan-territory.mjs": "270aec1cef622a35",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-03T14:15:44.406Z",
+   "reason": "owner approved 2026-09-03 ('yeah this is fine i dont wanna spend more cycles on this part it looks great', answering the band question): lock change 11 - the crown gate's band is 1.7-5.2 m, the range the twenty accepted cells measured on their own workers' reports, NOT the plan's written 4-7 m. Reason: all twenty were accepted by the owner's eye and read consistent at 1:1, so a replacement gated at 4-7 would come back 1.5-2x its neighbours. The 4-7 m rule is left as an open canon question for when something at known scale stands beside a tree. The gate's substantive work - refusing a report whose crown.excludedElements is non-empty, which is how the ~22 m crown in c3-2 passed - is unchanged by the band. Controls recalibrated to the new band and green: world-authoring-stitch 24/24, stitch-content-aware-seam 5/5.",
+   "hashes": {
+    "cell.mjs": "6b98e716450ee9bf",
     "plan-territory.mjs": "270aec1cef622a35",
     "AGENTS.md": "a1ab4eaec1d4c6ac"
    }

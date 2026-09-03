@@ -64,11 +64,18 @@ const GEN_PX = CELL_PX + BLEED * 2;      // 2560
 const ART = 9.45;                         // art px per world px
 const M_PER_WORLDPX = 0.4503;
 const CM_PER_PX = (M_PER_WORLDPX / ART) * 100;
-// The plan's own vegetation rule (art-source/.../plan.json rules.vegetation:
-// "crowns 4-7 m"). The packet states it to the worker and the crown gate
-// enforces it against the worker's own measurement; both read these.
-const CROWN_MIN_M = 4;
-const CROWN_MAX_M = 7;
+// The crown band the gate enforces, and the band the packet states.
+//
+// NOT the plan's written rule. plan.json rules.vegetation says "crowns 4-7 m",
+// but the twenty accepted cells measured 1.76-5.10 m (median 3.14) on their own
+// workers' reports, and the owner accepted all twenty by eye. Owner ruling
+// 2026-09-03: gate the range that was accepted, so a replacement matches its
+// neighbours, and leave the 4-7 m rule as an OPEN CANON QUESTION to settle when
+// something at known scale - a building, rail, a person - stands next to a tree
+// and can be judged against it. Nothing at known scale is on this land yet.
+// Do not "fix" this to 4-7 without that comparison and the owner's word.
+const CROWN_MIN_M = 1.7;
+const CROWN_MAX_M = 5.2;
 
 const TILE = 256;
 const LEVELS = 7;                         // 0 (finest) .. 6, exact 2:1 each
@@ -985,8 +992,9 @@ object exactly, with these key names:
 
 \`medianMetres\` is the median conifer crown WIDTH in metres, and \`medianPx\`
 the same measured at the final ${GEN_PX} px canvas scale. It must fall within
-**${CROWN_MIN_M}-${CROWN_MAX_M} m** — the plan's vegetation rule, which is the
-size the ground scale above is built around.
+**${CROWN_MIN_M}-${CROWN_MAX_M} m** — the range the already-authored cells of
+this territory were measured and accepted at, so this cell matches its
+neighbours. Aim for the middle of it, not an end.
 
 **Do not exclude anything from the measurement to bring it inside the band.**
 If this cell contains a crown that does not belong to that band, put it in
@@ -1684,7 +1692,7 @@ exit 1
         : "no authored seams", pass: palViolations.length === 0,
       note: "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13" },
     { name: "crown scale", value: crownReport.value, pass: crownReport.pass,
-      note: `the worker's own median crown from ${id}-report.json, against the plan's ${CROWN_MIN_M}-${CROWN_MAX_M} m vegetation rule; crown.excludedElements must be empty, so an out-of-scale element cannot be measured around` },
+      note: `the worker's own median crown from ${id}-report.json, against the ${CROWN_MIN_M}-${CROWN_MAX_M} m range the accepted cells measured (NOT the plan's written 4-7 m — see CROWN_MIN_M); crown.excludedElements must be empty, so an out-of-scale element cannot be measured around` },
   ];
   for (const v of contViolations) console.log(`      continuity: ${v}`);
   console.log(`\n  gates:`);

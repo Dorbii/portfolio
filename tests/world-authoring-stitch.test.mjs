@@ -119,7 +119,7 @@ function writeControlReport(dir, id, report) {
   if (report === null) return;
   fs.writeFileSync(path.join(dir, `${id}-report.json`), JSON.stringify(report ?? {
     cell: id,
-    crown: { medianMetres: 5.5, medianPx: 115, sampleCount: 24,
+    crown: { medianMetres: 3.5, medianPx: 73, sampleCount: 24,
       method: "synthetic control", excludedElements: [] },
   }, null, 1));
 }
@@ -184,7 +184,7 @@ await writeArtefacts(path.join(SYN, "b-ring"), "c2-1",
 test("frontier cell stitches aligned, bleeds one ring, and removes water", async () => {
   const log = runCell("1,1", path.join(SYN, "a"));
   assert.match(log, /accepted, stitched/);
-  assert.match(log, /PASS\s+crown scale\s+5\.5 m/, "a compliant crown report must pass");
+  assert.match(log, /PASS\s+crown scale\s+3\.5 m/, "a compliant crown report must pass");
   assert.match(log, /PASS\s+rock lighting/, "isotropic synthetic paint must pass the rock-lighting gate");
 
   // alignment: a tile deep inside the kept area equals F exactly
@@ -340,11 +340,11 @@ test("a consistent lit side on rock fails the rock-lighting gate", async () => {
 // four are the ways that disclosure can arrive.
 for (const [label, report, expect] of [
   ["an element excluded from the measurement",
-    { crown: { medianMetres: 5.5, sampleCount: 20, excludedElements: ["the giant tree at the ring"] } },
-    /FAIL\s+crown scale\s+5\.5 m, but 1 element\(s\) excluded/],
+    { crown: { medianMetres: 3.5, sampleCount: 20, excludedElements: ["the giant tree at the ring"] } },
+    /FAIL\s+crown scale\s+3\.5 m, but 1 element\(s\) excluded/],
   ["a median under the plan's band",
-    { crown: { medianMetres: 3.43, sampleCount: 20, excludedElements: [] } },
-    /FAIL\s+crown scale\s+3\.43 m over 20 crowns/],
+    { crown: { medianMetres: 1.2, sampleCount: 20, excludedElements: [] } },
+    /FAIL\s+crown scale\s+1\.2 m over 20 crowns/],
   ["a report with no crown object",
     { cell: "c4-3", lighting_isotropy: 1.4 },
     /FAIL\s+crown scale\s+report has no `crown` object/],
