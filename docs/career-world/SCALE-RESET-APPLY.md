@@ -279,3 +279,116 @@ land is registered leaves the world with **no terrain at all**. So:
 
 Until then the `stream-r3` drift stays as a **known-deliberate red**, recorded
 in R113, not an unexplained one.
+
+---
+
+## The derivation pass — 2026-09-03. Enumerated, not applied.
+
+Tools: `session3-tools/scale-reset-inventory.mjs` (70 values, five classes,
+current → derived) and `session3-tools/scale-reset-landmask-check.mjs`.
+Control re-measured before and after: **16 pass / 1 fail**, unchanged.
+
+### The scope was wrong in two directions
+
+**Bigger than "5 manifests".** Five manifests hold a *copy of the envelope
+span*, exactly as recorded. But eight more hold **world-registered content that
+sits inside the envelope**, in world coordinates, independent of it. Those do
+not halve — they are re-derived about the envelope origin, which does not move:
+
+```
+p' = [0.125, 0] + (p - [0.125, 0]) * 0.5      span' = span * 0.5
+```
+
+| manifest | what | values |
+|---|---|---|
+| `cities/kaizen-agent/.../base-runtime-r1.json` | Kaizen's plate — a capital district by owner acceptance | anchor + span |
+| `structures/.../project-structures-r1.json` | `project-kaizen-agent` (Metrics-Service and Vendy are outside and keep their fractions) | 1 |
+| `structures/.../skill-structures-r1.json` | three `project-kaizen-agent-*` instances | 3 |
+| `terrain/.../terrain-site-tiles-r2.json` | Kaizen's site tile; the other four capitals keep theirs | origin + span |
+| `terrain/.../terrain-dem-r4.json` | shelves 5–8 (`ninjaone-development-basin` is *territory*, keeps its fraction) | 4 centres + 4 radii |
+| `infrastructure/.../ninjaone-project-towns-r1.json` | `kaizen-agent-foundry-district` entrances | 10 |
+| `terrain/detail/.../ninjaone-rural-outskirts-r1.json` | the capital's rural fringe | 5 |
+| `capitals/ninjaone/.../seam-integration-native-r2.json` | checkpoint cameras onto the capital | 2 origins + 2 spans |
+
+**Left alone, Kaizen ends up outside the halved capital entirely** — its plate
+spans `x 0.183–0.289`, and the halved envelope ends at `x 0.25`.
+
+Also: **eight** TS span literals, not five. The two missed are
+`CAPITAL_ENVELOPE_WORLD_SPAN_X = 0.25` in `ninjaOneCapitalD05Concept.ts` —
+whose comment calls it "immutable at 0.25", the wording trap again, and which
+feeds the 1:1 canon floor — and `NINJAONE_ENVIRONMENT_CAMERA`.
+
+**Smaller than "~17 constants" in one respect.** `viewportOverscanRatio = 0.25`
+is named in STATE's list but is **dimensionless**: it multiplies `view.span` by
+`(1 + ratio * 2)`. It is a ratio *of* a span, not a span. It must not halve.
+Same for `renderScale.*`, `DESTINATION_MARKER_HANDOFF.*`, and
+`MIN/MAX_FOOTPRINT_SPAN` (artboard-relative). `tierMaximumSpan.world = 1` is a
+sentinel; halving it is behaviourally identical (the tier search falls back to
+`world`), so keep it at 1 for clarity.
+
+### The LoD thresholds are arithmetic, not taste — the question can be closed
+
+This doc asked whether `maxDetailEnterSpan: 0.12` should become `0.06` (same
+ground) or stay `0.12` (same camera feel), and called it "an owner-facing
+question per constant". **It is not.** Screen position of a feature is
+`(n - camera.origin) / camera.span`. For capital content, `n' = o + (n-o)/2`,
+and a camera framing it has `origin' = o + (origin-o)/2`, `span' = span/2`:
+
+```
+(n' - origin') / span' = [(n-o)/2 - (origin-o)/2] / (span/2) = (n - origin) / span
+```
+
+The halving cancels. Measured across three features at two tier boundaries,
+**worst screen delta `0.0`** — not approximately, exactly. Every tier test
+compares `max(camera.span)` against a constant, so halving both sides leaves
+every tier decision unchanged. Halving is the choice that changes nothing;
+*not* halving is the one that would move things.
+
+There is one real behaviour change, and it is the intended repair. The four
+placeholder capitals do not halve, so their tiers engage further in. Measured
+on-screen capital width at the moment its tier engages:
+
+| | before | after |
+|---|---|---|
+| ninjaone | 74% | 74% |
+| tanium | 37% | **74%** |
+| column-technologies | 30% | 60% |
+| independent / ace-hardware | 26% | 53% |
+
+NinjaOne stops being the outlier and lands exactly on Tanium, the other
+4-project capital. This doc's "makes all five consistent" is too strong —
+they become consistent *with project count*, which is the anomaly worth
+repairing.
+
+### The one consequence that is not inert — needs a ruling
+
+The capital re-derives toward the envelope's **north-west corner**, while the
+world land mask is a plane-wide raster addressed by fraction and does not move.
+So the capital lands on different mask pixels. Measured against
+`world-land-mask-r3/r4` with the same polarity `assets.test.mjs` uses
+(`>= 128` is land), over 32 re-derived points:
+
+- **All 10 town entrances — the only set an existing test land-guards — survive.**
+- 4 (r4) / 5 (r3) go **land → water**: Kaizen's plate NW corner, DEM shelves
+  `ninjaone-northwest-approach` (and `ninjaone-upper-capital-plateau` on r3),
+  and outskirts `northwest-grove` and `upper-meadow-wall`.
+- 2 outskirts anchors are **already over water today**, so "on land" was never
+  an invariant for that layer.
+
+**Two DEM shelves in the sea is a real defect** — a development shelf is
+buildable ground. But every regression sits inside the footprint **step 5
+replaces**: the L2 land is registered over NinjaOne's territory, and its
+coastline is new art. So this cannot be resolved against `world-land-mask-r3/r4`
+— that is the terrain being superseded exactly there.
+
+**Recommendation:** apply the whole set now, and resolve the two shelves at
+step 5 against the L2 art rather than against a mask on its way out. The
+alternative — moving the shelves now to fit the old mask — tunes to terrain
+that is about to be deleted.
+
+### Baseline for the apply
+
+Targeted control `world-territory-resegmentation` + `ninjaone-environment-proof`:
+**16 pass / 1 fail**, re-measured this session, matching the recorded baseline.
+`tests/assets.test.mjs` is **13 pass / 5 fail** on a pristine tree — already red,
+part of the nine; do not read it as a clean gate.
