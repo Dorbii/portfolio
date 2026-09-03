@@ -122,3 +122,78 @@ change; that is what Option B buys.
 `layers/ocean/model/generated/oceanStates.ts` is a **false positive** in any
 grep for these numbers — its colour floats contain the digit runs (`0.49411765`
 holds "941"). It is not a touch point.
+
+---
+
+## Step 1 result — 2026-09-03, the audit found no conflation, and two corrections
+
+**The audit's own answer: there is nothing to split.** All ~40 `WORLD_PLANE`
+usages are coordinate-space — `normalized x plane` for positions, and
+`cameraViewBox` derives the viewBox from the *same* dimensions.
+`WORLD_PLATE_DIMENSIONS` appears only in `assets.ts`, for decoded-byte budgets
+and the asset's declared `dimensions`. The two constants already carry distinct
+correct meanings. **Step 1 requires no code change.**
+
+### Correction 1 — doubling the plane is inert for rendering, and still required
+
+Because element positions and the viewBox both scale with `WORLD_PLANE`, and
+the land canvas does not read it at all, doubling it changes **nothing** that
+is currently rendered. That is the change's control, not an assumption.
+
+It is nevertheless **required**, for a reason not previously established:
+
+| | NinjaOne's 20 authored cells (1084 x 867 world px) | share of all land | budget |
+|---|---|---|---|
+| current plane `1672 x 941` | `64.8% x 92.1%` | **`89.6%`** — impossible | `23.9%` |
+| doubled plane `3344 x 1882` | `32.4% x 46.1%` | **`22.4%`** | `23.9%` |
+
+The authored land cannot be registered into the current plane at all. This is
+independent arithmetic confirming the reset, and it is why the tile tree has
+been parked as "territory-local, registration pending".
+
+### Correction 2 — the registration is DUPLICATED, and the copy that matters is not the envelope
+
+`capitalEnvelope` is **not** what positions the capital. The city and
+environment art derive from a second manifest:
+
+```
+NINJAONE_CAPITAL_CITY_R3_WORLD_SPAN    = NINJAONE_ENVIRONMENT_WORLD_SPAN
+NINJAONE_CAPITAL_CITY_LAYER_WORLD_SPAN = NINJAONE_ENVIRONMENT_WORLD_SPAN
+NINJAONE_ENVIRONMENT_WORLD_SPAN        = environment-proof-r1.json
+                                          .registration.boundingWorldView.span
+```
+
+Both manifests hold the identical `origin [0.125,0] span [0.25,1/3]`:
+
+| copy | file | role |
+|---|---|---|
+| `capitalEnvelope` | `manifests/world-territories-r4.json` | declarative, drives segmentation |
+| `registration.boundingWorldView` | `capitals/ninjaone/environment/manifests/environment-proof-r1.json` | **actually positions the city and environment art** |
+
+**Halving only `capitalEnvelope` would have passed its test and moved nothing.**
+Both must change together. Each is pinned by a test, so a divergence is caught:
+`world-territory-resegmentation.test.mjs:144` and
+`ninjaone-environment-proof.test.mjs:71`.
+
+That duplication is a latent hazard independent of this change and worth
+collapsing to one source later.
+
+### The corrected edit list — five edits
+
+1. `features/career-world/shared/world.ts` — plane `1672 x 941` -> `3344 x 1882`.
+2. `public/career-world/layers/terrain/authority/manifests/world-territories-r4.json`
+   — **ninjaone only** `capitalEnvelope.span` -> `[0.125, 1/6]`.
+3. `public/career-world/capitals/ninjaone/environment/manifests/environment-proof-r1.json`
+   — `registration.boundingWorldView.span` -> `[0.125, 1/6]`. **The one that moves the art.**
+4. `tests/world-territory-resegmentation.test.mjs:144` — expected span.
+5. `tests/ninjaone-environment-proof.test.mjs:71` — expected span.
+
+Edits 4 and 5 change assertions that encode an owner ruling; they are recorded
+in the ledger, not quietly edited.
+
+### Baseline before any edit
+
+`npm run typecheck` clean. `npm test`: **182 tests, 168 pass, 12 fail, 2
+skipped** — twelve pre-existing failures, where STATE records only one known
+red (the D05 hash mismatch). The failing set is captured so the post-change run
+can be compared against it rather than against an assumption of green.
