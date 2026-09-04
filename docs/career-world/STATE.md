@@ -4,7 +4,17 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-04, LATEST (current):** **TANIUM 14 OF 21; THE RUNE CHAIN IS IN TWO
+**2026-09-04 evening, LATEST (current):** **c1-1 IS BAKING ALONE, ON A BRIEF
+THAT SAYS WHAT THE GATES MEASURED.** Its five refusals were all key-light
+asymmetry, and the cause is measured, not guessed: a dense conifer canopy
+reads as a sun from above (each crown a pale top over a dark skirt), and the
+water cut has nothing to do with it. Seam tone failed because the candidate
+painted forest over the sound coast's arriving ground on seven eighths of the
+north edge. The briefs were also stale against c0-1's rebake. **If c1-1 fails
+key-light again with the flat-crown instruction in place, STOP: that is the
+owner's ruling, not a brief.** Resume from `SESSION 11` below.
+
+**2026-09-04 afternoon, superseded:** **TANIUM 14 OF 21; THE RUNE CHAIN IS IN TWO
 CELLS.** Tanium's wonder is no longer the colonnade — it is a chain of runes
 carved across the whole territory, owner's idea, with the travelling light
 belonging to a later EFFECT layer. `c0-1` and `c4-1` carry it. The three cells
@@ -631,7 +641,91 @@ adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 `brief-c3-1-r2.md` (magical gorge, rail gorge span), `brief-c2-2-r2.md`
 (bench country, waystation bench, hot spring).
 
-**SESSION 10 (2026-09-04) — RESUME HERE, ANY MODEL.** **A BAKE IS IN FLIGHT.**
+**SESSION 11 (2026-09-04, evening) — RESUME HERE, ANY MODEL.** **c1-1 IS BAKING ALONE.**
+
+## c1-1: WHY IT FAILED FIVE TIMES, MEASURED
+
+Five refusals, every one on **key-light asymmetry** — 0.012, 0.0277, 0.0122,
+0.0162, 0.0133 against 0.011 — and it is the only cell in the territory that
+fails that gate consistently (c2-0 and c4-0 each failed it early and then
+passed). `session3-tools/keylight-where.mjs` replicates the gate's sum and
+attributes the moment to 8x8 blocks and to pixel-luma bands:
+
+- as-is 0.0133, alpha-safe 0.0133: **the water cut is not it** — the
+  keylight-probe hypothesis is dead for this cell;
+- net direction **86 deg, straight down the image**; the two darkest bands
+  (L<40, L40-70) carry 13.7 of the 13.3 x10^-3 and the bright bands cancel;
+- every one of the 64 blocks contributes, the pure-forest blocks most (local
+  moments 45-54 x10^-3 against 2-20 on the accepted neighbours);
+- the c2-1 candidate shows the same signature where its forest is (west
+  column 58-76, whole cell 0.0085 — a pass only because two thirds of it is
+  open); c1-2 0.0047; NinjaOne's own dark-forest c2-0 sat at 0.0086.
+
+**Mechanism: a dense conifer canopy reads as a sun from above.** Each crown
+is drawn as a pale top over a dark skirt. The sharp edge where one crown's
+skirt meets the next crown's top points the same way for every tree, while
+the gradual darkening inside a crown sits under the gate's 12-unit floor.
+That is ambient occlusion on a field of cones — the top of every cone sees
+sky, the base sees its neighbours — and the gate cannot tell it from a key
+light. It was calibrated at 0.0012-0.0036 on ground with no canopy. A whole
+cell of forest fails; a third of a cell passes. The worker's own report said
+the same in words: *"tree crowns ... repeatedly use lighter upper planes
+over darker vertical or lower faces"*.
+
+**Seam tone 27.3 against c1-0**, located with `tone-where.mjs` (the gate's
+band, per eighth of the edge, W to E): candidate `85/64/56/44/41/50/52/64`
+against the coast's `82-85`. The candidate kept the arriving ground only in
+the north-west corner and painted forest over it everywhere else — over
+paint that was already in its edit target. The west seam against c0-1 was
+fine at 9.7.
+
+**The groove** stopped at the gorge and read as a pale kerb with rune panels
+beside it; c0-1 and c4-1 both drew it as a dark slot with pale rims. Nothing
+in the brief said what the chain does at a gorge.
+
+**The briefs were stale.** Written 15:40 against the 14:44 c0-1; c0-1 was
+then rebaked (16:05) and its mask grown (16:37). c1-1's water crossing was
+stated at 32%; the art has it at 22%, and the candidate's stream missed by
+52 px against a 48 px gate. **Re-run `write-briefs.mjs` before every
+dispatch** — nothing does it automatically, and c0-2's crossing had moved too.
+
+## WHAT CHANGED (commit `a29bccf8`)
+
+c1-1's cell text only — the shared rune and lighting paragraphs are proven on
+c0-1 and c4-1 and untouched: every crown one flat value tip to skirt, with
+the haze visible; the north edge is the sound coast's ground corner to corner
+for the first 10 m, no stand touching it; the groove a dark slot cut into
+both lips of the gorge and continuing to the east edge, no panels. Briefs
+regenerated: c1-1 22%, c0-2 7%. 874 words, the added ones all about this cell.
+
+**Dispatched:** `node docs/career-world/session3-tools/bake-tanium.mjs --only c1-1`
+— log `.codex-tmp/bake-tanium.log`, results `.codex-tmp/bake-tanium-results.json`,
+an accepted cell commits itself. If this session died mid-run: `git log`
+says whether it landed; the lock at `.codex-tmp/authoring/cell.lock` is stale
+only if no `node` process is running.
+
+## IF IT FAILS KEY-LIGHT AGAIN — STOP. THIS NEEDS THE OWNER
+
+The flat-crown instruction is the first attempt aimed at the measured cause.
+A refusal with it in place is the second strike on the mechanism, and no
+brief can remove ambient occlusion from a forest. The ruling is the owner's:
+(a) a canopy-aware measure — the gate is solidified, so a lock change; (b) a
+dark-forest limit set from his eye on the refused candidates, which are kept
+at `session3-tools/tanium-rejects/c1-1.webp` and on the mosaic; or (c) accept
+the cell on his eye against the number. **Do not roll a seventh candidate.**
+
+## NEXT, in order
+
+1. c1-1 (in flight). 2. `c3-1`, the capital node — every refusal was water
+continuity (1-2 unmet crossings); it has never failed key-light. 3. `c2-1`
+and `c1-2` once c1-1 stands — each gains a forest neighbour and the tone
+problem largely goes. 4. `c4-0`, `c4-2`, `c6-2`. 5. Force-rebake `c5-1` and
+`c6-1` for the chain. Before each: re-run `write-briefs.mjs`, then
+`--only <cell>`. Two unverified notes stand from SESSION 10: `c2-1` drawing
+983 crowns at 1.176 m, and `c5-1`'s `veg dLuma 68.0` against a bare plateau.
+
+**SESSION 10 (2026-09-04).** Superseded by SESSION 11 above. The bake it
+announced finished 1 of 6 (c4-1); the rest of it is still the record.
 
 ## TANIUM: 14 OF 21
 
