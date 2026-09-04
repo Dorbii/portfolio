@@ -919,7 +919,7 @@
    }
   },
   "c3-2": {
-   "authoredAt": "2026-09-04T12:53:38.221Z",
+   "authoredAt": "2026-09-04T23:47:15.158Z",
    "describe": "Bench country running down to the world's southern coast. The SOUTH edge is\nopen sea.\n\nStepped benches and terraces descending from north to south, four of them, each\n10–18 m above the last, separated by column walls with talus at their feet.\nMoor grass on the flats, scree on the faces. Becks step down the benches, two\nof them, each dropping over every wall in a small fall.\n\nThe TERRACE-STEPS site",
    "sourcePx": 1254,
    "gates": [
@@ -931,7 +931,7 @@
     },
     {
      "name": "gradient ratio",
-     "value": "1.38 (reported)",
+     "value": "1.379 (reported)",
      "pass": true,
      "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
     },
@@ -954,19 +954,19 @@
     },
     {
      "name": "mask completion",
-     "value": "+82 px grown, 6 px holes filled (reported)",
+     "value": "+128 px grown, 6 px holes filled (reported)",
      "pass": true,
      "note": "the delivered mask grown into contiguous painted water within 48 px and speckle holes <=64 px filled before the cut (owner 2026-09-02); dry paint stops the growth, so a polyline mask still fails the rings"
     },
     {
      "name": "water fringe",
-     "value": "0.14%",
+     "value": "0.1%",
      "pass": true,
      "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
     },
     {
      "name": "water fringe (48px)",
-     "value": "0.05%",
+     "value": "0.03%",
      "pass": true,
      "note": "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)"
     },
@@ -999,7 +999,7 @@
     "fall"
    ],
    "maskCompletion": {
-    "grownPx": 82,
+    "grownPx": 128,
     "holePx": 6
    },
    "biome": "mixed-bench",
