@@ -492,11 +492,32 @@ for (const s of def.sites) {
   if (!flat(B[k]).includes(flat(s.id))) throw new Error(`brief ${k} never mentions the ${s.id} site`);
 }
 
+// Appended to every brief. The lighting rule reaches a generate-mode packet
+// once, in a list of territory rules; the emphatic wording is attached to the
+// canon reference, which only edit mode gets. Four of the first five Tanium
+// generations were refused on key-light asymmetry (0.0116-0.0140 against a
+// 0.011 limit) and a re-roll came back worse, so the instruction is repeated
+// here, in the part of the packet that describes what to draw.
+//
+// This is not gaming the gate: it restates the world's own lighting canon at
+// the point of description. If it does not move the number, the cause is not
+// the prompt and the numbers go to the owner unchanged.
+const LIGHTING = `
+
+**Lighting — this world has no sun.** Flat, ambient light only. Every rock face,
+column, bank, tussock and boulder is the SAME VALUE on every side, whichever way
+it faces. No lit side and no shaded side. No bright upper edge, no dark lower
+edge. No cast shadows and no contact shadows of any kind. Nothing anywhere in
+the frame should let a viewer say which direction light comes from. Depth reads
+from ambient occlusion in crevices and from the drawing itself, never from a key
+light. This matters more than any other instruction above: an image with a
+consistent lit side is refused whatever else it gets right.`;
+
 fs.mkdirSync(DIR, { recursive: true });
 let n = 0;
 for (const k of cells) {
   const [c, r] = k.split(",");
-  fs.writeFileSync(path.join(DIR, `c${c}-${r}.md`), `${B[k].trim()}\n`);
+  fs.writeFileSync(path.join(DIR, `c${c}-${r}.md`), `${B[k].trim()}${LIGHTING}\n`);
   n += 1;
 }
 console.log(`wrote ${n} briefs to ${DIR}`);
