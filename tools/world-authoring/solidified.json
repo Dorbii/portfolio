@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-04T23:37:57.793Z",
+ "solidifiedAt": "2026-09-04T23:55:07.682Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "c06b8503f56cb16e",
+  "cell.mjs": "020d8521c343055b",
   "plan-territory.mjs": "e8d86a90b2e32796",
   "AGENTS.md": "a1ab4eaec1d4c6ac"
  },
@@ -435,6 +435,15 @@
    "reason": "owner approved 2026-09-04 (in chat: 'you are free to spawn codex threads of varying efforts so if 5.6 was the better image gen go for it and let astra be the rubber ducky'): the dispatch model and reasoning effort in cell.mjs come from CELL_MODEL and CELL_EFFORT (defaults gpt-6-astra, high); nothing else changes",
    "hashes": {
     "cell.mjs": "c06b8503f56cb16e",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-04T23:55:07.683Z",
+   "reason": "owner approved 2026-09-04 (blanket, in chat: 'w.e. you feel is unblocking you best', after 'change the codex agent you use to astra 6'): the worker's edit target is written as JPEG q95 4:4:4 (~3 MB) instead of a 7-10 MB PNG, because Codex 0.153's image loader base64-encodes large files in chunks and fails on most of them; the stitch never reads this file; nothing else changes",
+   "hashes": {
+    "cell.mjs": "020d8521c343055b",
     "plan-territory.mjs": "e8d86a90b2e32796",
     "AGENTS.md": "a1ab4eaec1d4c6ac"
    }

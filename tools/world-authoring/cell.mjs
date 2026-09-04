@@ -824,9 +824,15 @@ if (authoredNeighbours.length) {
         }
       }
     }
-    await sharp(target, { raw: { width: GEN_PX, height: GEN_PX, channels: 4 } }).png()
-      .toFile(path.join(ctxDir, "edit-target.png"));
-    console.log(`  edit target   ${ctxDir}/edit-target.png (neighbour concept paint, grey to paint)`);
+    await sharp(target, { raw: { width: GEN_PX, height: GEN_PX, channels: 4 } })
+      // JPEG, not PNG (lock 18d, 2026-09-04): Codex 0.153 base64-encodes a big
+      // input in chunks with padding left in the middle, so a 7-10 MB PNG fails
+      // to load on most dispatches ("invalid symbol 61", "invalid input length")
+      // while a 6 MB one loads. At q95 / 4:4:4 this is ~3 MB and visually the
+      // same reference; the stitch never reads it, only the worker does.
+      .jpeg({ quality: 95, chromaSubsampling: "4:4:4" })
+      .toFile(path.join(ctxDir, "edit-target.jpg"));
+    console.log(`  edit target   ${ctxDir}/edit-target.jpg (neighbour concept paint, grey to paint)`);
   }
 }
 
@@ -958,7 +964,7 @@ ${sites.map((s) => `- **${s.id}.** ${s.terrain}`).join("\n")}
 ` : ""}
 ${editMode ? `## Neighbour context — you EDIT this cell into existence, you do not generate it
 
-\`${cellDir}/context/edit-target.png\` is your canvas: the authored
+\`${cellDir}/context/edit-target.jpg\` is your canvas: the authored
 neighbours' real paint wherever it reaches into this cell's window, and flat
 grey wherever this cell is still unpainted. \`${canonPath}\` is the
 style canon of this world. Load both with the built-in \`view_image\` tool,
