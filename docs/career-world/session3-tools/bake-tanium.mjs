@@ -39,7 +39,7 @@ function newestCodex() {
   let best = "codex", bestV = "";
   for (const c of cands) {
     const r = spawnSync(c, ["--version"], { encoding: "utf8" });
-    const m = (r.stdout || "").match(/(d+).(d+).(d+)/);
+    const m = (r.stdout || "").match(/(\d+)\.(\d+)\.(\d+)/);
     if (!m) continue;
     const v = m.slice(1).map((n) => n.padStart(4, "0")).join(".");
     if (v > bestV) { bestV = v; best = c; }
