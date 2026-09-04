@@ -1048,6 +1048,18 @@ If this cell contains a crown that does not belong to that band, put it in
 refused, which is the correct outcome — an out-of-scale element is a defect to
 report, not to measure around. A missing, unparseable or incomplete
 \`crown\` object fails the cell.
+
+\`excludedElements\` means EXACTLY ONE THING: elements you LEFT OUT of the
+median. It is not a notes field. If every crown you found is in the census —
+including any you thought small or atypical — the array must be \`[]\`, and
+anything you want to say about them goes in your prose, not in there. A worker
+listed two saplings there while writing that they "remain included in the
+median sample"; that is a report of an empty exclusion set, and it cost the
+cell a bake.
+
+If this cell has NO crowns at all because its biome says trees do not belong
+here, report \`"sampleCount": 0\`, \`"medianMetres": 0\` and \`"excludedElements": []\`.
+That is accepted: there is nothing to be out of scale.
 `;
 
 fs.writeFileSync(path.join(cellDir, `packet-${id}.md`), packet);
@@ -1706,6 +1718,21 @@ exit 1
     }
     if (c.excludedElements.length) {
       return { value: `${c.medianMetres} m, but ${c.excludedElements.length} element(s) excluded from the measurement: ${c.excludedElements.map(String).join("; ").slice(0, 200)}`, pass: false };
+    }
+    // A cell with NO crowns cannot have an out-of-scale one, and five of
+    // Tanium's cells sit in biomes whose own trees vocabulary begins "none" —
+    // sound-coast "none near the shore", bare-plateau "none on the open
+    // plateau", linked-colonnade "none on the bench". The plan, the brief and
+    // this gate contradicted each other there, and the gate was the odd one
+    // out. It never showed on NinjaOne: the gate landed 2026-09-03, after 19
+    // of its 20 cells were already baked.
+    //
+    // The BIOME decides, not the report — so a worker cannot dodge the census
+    // by reporting zero crowns over a forest. A biome that says conifers belong
+    // (coast-cliff, "dark conifers only in gullies") still fails on zero.
+    const treeless = /^none\b/i.test((biome.trees ?? "").trim());
+    if ((c.sampleCount === 0 || c.medianMetres === 0) && treeless) {
+      return { value: `no crowns, and ${biomeId} declares none ("${(biome.trees ?? "").slice(0, 40)}") — nothing to scale (reported)`, pass: true };
     }
     const inBand = c.medianMetres >= CROWN_MIN_M && c.medianMetres <= CROWN_MAX_M;
     return { value: `${c.medianMetres} m over ${c.sampleCount ?? "?"} crowns (accepted range ${CROWN_MIN_M}-${CROWN_MAX_M} m)`, pass: inBand };

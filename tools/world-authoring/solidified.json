@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-04T06:45:06.060Z",
+ "solidifiedAt": "2026-09-04T08:08:12.889Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "83cbf9ad4215c92e",
+  "cell.mjs": "e379e43f1e67358a",
   "plan-territory.mjs": "e8d86a90b2e32796",
   "AGENTS.md": "a1ab4eaec1d4c6ac"
  },
@@ -372,6 +372,24 @@
    "reason": "owner 2026-09-04 ('go for it now... please render it all'), lock change 15, AFTER, controls 29/29. cell.mjs falls back to the WORLD style canon (art-source/career-world/l2-land/ninjaone/seed/L2-seed-region-r2-source.png) when the territory being authored has no seed of its own; a territory that does have one still wins, so the L2_OUT_ROOT test world with its synthetic canon is on exactly its previous path and the suite is unchanged. Not a per-territory copy: the ledger calls that file 'the accepted look of THIS WORLD's terrain', and copying it would let the one thing that must never drift drift silently, one territory at a time. Verified on the real cell that failed - tanium c4-0 dry-run now reaches edit target and packet. The failure it fixes: c3-0 was a frontier cell in generate mode, so the whole 21-cell run got past cell one and then refused every remaining cell in under a second each, because they all have an authored neighbour and therefore run in edit mode.",
    "hashes": {
     "cell.mjs": "83cbf9ad4215c92e",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-04T08:00:49.278Z",
+   "reason": "owner 2026-09-04 ('go for it now... please render it all'), lock change 16, BEFORE. Two crown-scale defects that only a second territory could expose. EVIDENCE: the crown gate landed 2026-09-03, after 19 of NinjaOne's 20 cells were already baked, so it has run against exactly ONE real cell in its life. (a) A cell with NO crowns fails with '0 m over 0 crowns', but five of Tanium's twenty-one cells have a biome whose own trees vocabulary begins with the word none - sound-coast 'none near the shore', bare-plateau 'none on the open plateau', linked-colonnade 'none on the bench' - and the briefs say the same. The plan, the brief and the gate contradict each other and the gate is the odd one out. Fix: zero crowns PASSES, reported not silent, only when the cell's own biome vocabulary declares no trees; a biome that says conifers belong (coast-cliff 'dark conifers only in gullies') still fails on zero, which is right. The biome is already the authority on what is painted, so it is the authority here too - and this cannot be gamed by a worker reporting zero crowns over a forest, because the biome decides, not the report. (b) A worker reported two 1.47 m saplings under excludedElements while stating they 'remain included in the median sample' - a disclosure, not an exclusion - and the gate refused it, because a non-empty list is how a 22 m crown once got measured around. The gate is right to refuse exclusions; the packet is wrong to invite the field's use as a notes field. Fix is wording only: the schema line says excludedElements means REMOVED FROM THE MEASUREMENT and must be empty when everything stays in the census. Controls must stay 29/29.",
+   "hashes": {
+    "cell.mjs": "83cbf9ad4215c92e",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-04T08:08:12.889Z",
+   "reason": "owner 2026-09-04 ('go for it now... please render it all'), lock change 16, AFTER, controls 29/29. (a) Zero crowns now PASSES, reported, when the cell's own biome vocabulary begins with the word none - and only then. The biome decides, not the worker's report, so a forest cannot be waved through by claiming no crowns; coast-cliff, whose vocabulary says conifers belong in its gullies, still fails on zero. Five of Tanium's twenty-one cells needed this, including the wonder cell. (b) The packet now says excludedElements means EXACTLY ONE THING - elements left OUT of the median - is not a notes field, must be [] when everything stayed in the census, and that a treeless cell reports sampleCount 0 / medianMetres 0 / excludedElements []. Verified live in the same run: a genuinely out-of-scale cell (c1-0, median 5.487 m with five crowns above the 5.2 m limit) is still refused, so the gate distinguishes 'nothing to measure' from 'measured around something' rather than being loosened.",
+   "hashes": {
+    "cell.mjs": "e379e43f1e67358a",
     "plan-territory.mjs": "e8d86a90b2e32796",
     "AGENTS.md": "a1ab4eaec1d4c6ac"
    }

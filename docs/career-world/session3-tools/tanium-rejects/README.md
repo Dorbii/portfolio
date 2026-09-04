@@ -10,3 +10,6 @@ They are kept because a rejected cell nobody sees cannot be ruled on.
 - `c2-0` sound-coast — rejected on **a gate **
 - `c1-0` sound-coast — rejected on **a gate **
 - `c4-0` moor — rejected on **key-light asymmetry 0.014**
+- `c4-0` moor — rejected on **crown scale 2.842**
+- `c2-0` sound-coast — rejected on **key-light asymmetry 0.0115**
+- `c1-0` sound-coast — rejected on **crown scale 5.487**
