@@ -1,0 +1,101 @@
+{
+  "cell": "c0-0",
+  "territory": "tanium",
+  "status": "refused",
+  "generation": {
+    "filename": "c0-0-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "B6B364D9178AA7175BD7A2A8BEE33107B6E82C2927D1326486050C576238363C",
+    "mode": "built-in ImageGen whole-canvas generation",
+    "imageGenCallsUsed": 2,
+    "selectedCandidate": 1,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "promptFile": "c0-0-imagegen-prompt.txt"
+  },
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean on the delivered source; final water-mask pixels excluded and gradients below 12 luminance units excluded",
+    "peakVsUniformOverLand": 1.546196,
+    "uniformReference": 1.0,
+    "directionalKeyFirstMoment": 0.003849,
+    "rockStrongEdgeFirstMoment": 0.013732,
+    "gradientSamples": 881272,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No cast-shadow field or whole-cell sun gradient is visible, but upper basalt planes remain consistently brighter than vertical cliff faces; the numeric aggregate cannot override the literal equal-value rule."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "manual estimated fraction of non-water land area at native source resolution",
+    "buildable": 0.62,
+    "steep": 0.18,
+    "otherBrokenRockTalusOrVegetation": 0.20,
+    "method": "Broad coherent cliff-top bench counts as buildable; exposed sea-cliff faces count as steep; the gully, talus, broken margins, stacks, and dense rock fields make up the remainder."
+  },
+  "waterFootprintFraction": 0.343111,
+  "crown": {
+    "medianMetres": 4.851,
+    "medianPx": 101.053,
+    "sampleCount": 4,
+    "method": "Median native-pixel outer-foliage width across all four visible gully conifers, measured on the 1254 px source and scaled by 2560/1254; source widths 48, 49, 50 and 53 px.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c0-0-water-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "B8CB0EC20B92792624F625B39183FE7AB3D2F476BED6BE5AAC718B9B37099C55",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "opaqueWaterPixels": 539548,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "waterComponents4Connected": 22,
+    "waterComponents8Connected": 1,
+    "smallSpeckleHolePixelsFilled": 2235,
+    "accidentalInteriorHoles": 0,
+    "intentionalDrySeaStackIslands": 3,
+    "edgeWaterPixels": {
+      "north": 954,
+      "east": 0,
+      "south": 0,
+      "west": 1128
+    },
+    "sourceScaleFringeProxy": {
+      "final6PxEquivalentSourceRadiusPx": 3,
+      "ring3Pixels": 14137,
+      "ring3UnmaskedStrongWaterColourPixels": 12,
+      "ring3FringePercent": 0.084884,
+      "final48PxEquivalentSourceRadiusPx": 24,
+      "ring24Pixels": 73036,
+      "ring24UnmaskedStrongWaterColourPixels": 90,
+      "ring24FringePercent": 0.123227
+    },
+    "method": "Flooded the source-raster blue/teal sea from the north and west edges, grew a narrow pale-foam collar, closed pixel-scale gaps, and filled small enclosed wet speckles; the three large dry sea stacks remain unmasked as terrain."
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasSelectedGeneration": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "seaOnlyExitsNorthAndWest": true,
+    "landContinuesThroughSouthAndEastEdges": true,
+    "waterMaskSameDimensions": true,
+    "waterMaskBinaryWhiteOnTransparent": true,
+    "waterMaskNoAccidentalInteriorHoles": true,
+    "crownMedianInsideAcceptedTerritoryBand": true,
+    "allMeasuredCrownsIncluded": true,
+    "strictEqualValueOnAllFormSides": false,
+    "weatheredIrregularColumnsWithoutPalisadeRhythm": false
+  },
+  "refusalReasons": [
+    "The source violates the highest-priority lighting rule: broad upper basalt planes are consistently brighter than vertical cliff faces, so the drawing still reveals an upper-light direction despite no cast-shadow field.",
+    "Several long cliff sections retain a repeated upright column rhythm and read closer to a palisade than the required strongly irregular weathered masses. The second whole-canvas candidate reduced that rhythm but was rejected because open water reached the east edge instead of continuous land."
+  ],
+  "openRisks": [
+    "The water mask overlay and source-scale fringe proxies show close coverage of surf and wash, but no shipped-canvas bake was run because this task is quarantine-only.",
+    "The crown census uses manual outer-foliage boxes because the overlapping dark crowns merge under color-component segmentation; the diagnostic overlay records every measured crown."
+  ]
+}
