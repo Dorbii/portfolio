@@ -1,0 +1,110 @@
+{
+  "cell": "c2-0",
+  "territory": "tanium",
+  "status": "refused",
+  "generation": {
+    "filename": "c2-0-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "5DD4D31D98E1CDFB2D0105B606883D1C07C416C567FE3EE6E1C666AE602D58B1",
+    "mode": "built-in ImageGen whole-canvas edit with the local edit target first and the NinjaOne seed canon second as reference only",
+    "imageGenCallsUsed": 1,
+    "retryUsed": false,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "promptFile": "c2-0-imagegen-prompt.txt"
+  },
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean on the delivered source; water-mask pixels and gradients below 12 luminance units excluded",
+    "peakVsUniformOverLand": 1.496872,
+    "uniformReference": 1.0,
+    "directionalKeyFirstMoment": 0.004364,
+    "gradientSamples": 994626,
+    "aggregateDirectionalityNumericPass": true,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No coherent cast-shadow field is visible, but basalt top planes are consistently lighter than their exposed vertical faces and many rocks retain bright upper rims plus dark lower edges. The low aggregate first moment does not override that literal form-side value failure."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "manual estimated fraction of non-water land area at native source resolution",
+    "buildable": 0.69,
+    "steep": 0.09,
+    "otherShingleTalusBrokenRockOrVegetation": 0.22,
+    "method": "The broad gently rising grass-and-slab interior and level ground above the ferry slip count as buildable; exposed basalt faces count as steep; the shingle ramp, talus, broken ledge margins, boulder scatter, scrub, and heather make up the remainder."
+  },
+  "waterFootprintFraction": 0.155359,
+  "finalDerivedLandCoverageFraction": 0.844641,
+  "crown": {
+    "medianMetres": 0,
+    "medianPx": 0,
+    "sampleCount": 0,
+    "method": "Complete visual census at native source resolution found no conifers or tree crowns; the Sound-coast cell is intentionally treeless.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c2-0-water-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "7DC163BC8AF71F3159B25478D40C1D8358B3F061FE8DC89E34C7C5EB98BBAFFD",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "opaqueWaterPixels": 244304,
+    "transparentNonWaterPixels": 1328212,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedComponents": 1,
+    "interiorHolePixels": 0,
+    "boundsSourcePx": [0, 0, 570, 575],
+    "edgeWaterPixels": {
+      "north": 477,
+      "east": 0,
+      "south": 0,
+      "west": 576
+    },
+    "northEdgeWaterFraction": 0.380383,
+    "method": "Native-resolution color-assisted trace retained only the Sound component connected to the north and west edges, included turquoise and pale wet shallows, submerged-slab water, wash, ripples, and reflections, then filled each occupied row continuously to a smoothed landward boundary so the binary mask has no interior holes; the full overlay was visually inspected."
+  },
+  "northBorderCheck": {
+    "singleSoundToLandHandover": true,
+    "northEdgeWaterPixels": 477,
+    "northEdgeLandPixels": 777,
+    "northEdgeWaterFraction": 0.380383,
+    "soundOccupiesWesternNorthEdge": true,
+    "landOccupiesEasternNorthEdge": true,
+    "landContinuousToEastAndSouthEdges": true
+  },
+  "siteCheck": {
+    "ferrySlipGroundPresent": true,
+    "naturalShingleRampIntoSound": true,
+    "lowRockSpurOnNorthSide": true,
+    "levelGroundAtTop": true,
+    "structuresPathsMarkersOrBoatsPresent": false
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasEditCall": true,
+    "rawGenerationUntouched": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "northBorderHingeMatchesMeasuredHandover": true,
+    "landTouchesSouthEastAndEasternNorthEdges": true,
+    "treeFreeSoundCoast": true,
+    "waterMaskBinarySameDimensionsConnectedAndHoleFree": true,
+    "crownObjectComplete": true,
+    "strictEqualValueOnAllFormSides": false,
+    "buildableFractionApproximatelyOneThird": false
+  },
+  "refusalReasons": [
+    "The highest-priority lighting rule fails visually: basalt top planes and upper rock rims are consistently lighter than exposed vertical and lower faces, despite the absence of an obvious cast-shadow field.",
+    "The estimated buildable share is about 0.69 of non-water land, materially above the territory-wide target of roughly one third.",
+    "Several generated basalt ledges read as repeated column rows rather than only a few short, strongly weathered sound-coast outcrops."
+  ],
+  "openRisks": [
+    "The generated transition into the authored east-side paint is visually close, but exact neighbor-pixel preservation is delegated to the stitch and is not claimed for the raw ImageGen output.",
+    "The water mask is binary, same-size, connected, hole-free, and overlay-checked, but exact shoreline judgment remains a human visual gate.",
+    "No shipped-canvas bake was run and no artifact was promoted outside quarantine."
+  ],
+  "recommendedReframe": "Use an authoring path with explicit unlit or flat-albedo material control; this single permitted prompt-driven edit reproduced the forbidden light-top/dark-side value hierarchy, and the task allows no quality retry after a square result."
+}
