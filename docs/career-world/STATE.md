@@ -4,15 +4,17 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-04 evening, LATEST (current):** **c1-1 IS BAKING ALONE, ON A BRIEF
-THAT SAYS WHAT THE GATES MEASURED.** Its five refusals were all key-light
-asymmetry, and the cause is measured, not guessed: a dense conifer canopy
-reads as a sun from above (each crown a pale top over a dark skirt), and the
-water cut has nothing to do with it. Seam tone failed because the candidate
-painted forest over the sound coast's arriving ground on seven eighths of the
-north edge. The briefs were also stale against c0-1's rebake. **If c1-1 fails
-key-light again with the flat-crown instruction in place, STOP: that is the
-owner's ruling, not a brief.** Resume from `SESSION 11` below.
+**2026-09-04 night, LATEST (current):** **c1-1 IS STOPPED AT SIX REFUSALS
+AND NEEDS AN OWNER RULING; THE OTHER SIX CELLS ARE BAKING IN ONE RUN.** The
+sixth candidate, briefed to draw every crown one flat value, failed key-light
+WORSE (0.016) with the same signature, and the worker wrote that the model
+kept shading the crowns. A dense conifer canopy reads as a sun to this gate
+and no brief removes that; it is the owner's call (four options under
+`SESSION 11`). The same candidate also painted forest over the coast's
+arriving ground a second time despite being told not to — the model repaints
+the edit target's pixels. Meanwhile c3-1, c4-0, c6-2, c4-2, c1-2 and c2-1 run
+on briefs that state what each gate measured, and the brief writer now reads
+water exactly as the gate does. Resume from `SESSION 11` below.
 
 **2026-09-04 afternoon, superseded:** **TANIUM 14 OF 21; THE RUNE CHAIN IS IN TWO
 CELLS.** Tanium's wonder is no longer the colonnade — it is a chain of runes
@@ -641,7 +643,58 @@ adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 `brief-c3-1-r2.md` (magical gorge, rail gorge span), `brief-c2-2-r2.md`
 (bench country, waystation bench, hot spring).
 
-**SESSION 11 (2026-09-04, evening) — RESUME HERE, ANY MODEL.** **c1-1 IS BAKING ALONE.**
+**SESSION 11 (2026-09-04, evening) — RESUME HERE, ANY MODEL.** **c1-1 STOPPED; SIX CELLS BAKING.**
+
+## c1-1: THE SIXTH REFUSAL, AND WHY THERE IS NO SEVENTH
+
+Dispatched 17:33 on the brief below (flat crowns, the coast's ground along
+the north edge, the groove past the gorge). Refused at 17:57 after 23.5 min:
+
+- **key-light 0.016** — worse than any of the five (0.012-0.028 → 0.0133 → 0.016);
+  as-is and alpha-safe identical, direction 87 deg, the darkest band alone
+  carrying 11.3 of the 16.1 x10^-3. Same mechanism, stronger.
+- **The worker's own report:** *"conifer crowns and basalt retain visibly
+  brighter upper detail and darker lower detail; the literal one-flat-value
+  rule is not met."* The instruction was in the packet; the image model did
+  not do it. Its own first-moment (water excluded) read 0.0057.
+- **Seam tone vs c1-0: 34.9** (was 27.3) — the north band matches the coast
+  in its first eighth (85 vs 85) and is forest for the other seven (36-55 vs
+  80-85). The brief said the whole edge is the coast's ground; the candidate
+  painted over the arriving pixels that were already in its edit target.
+- Water continuity: it sent a stream NORTH into c1-0, where nothing arrives,
+  and met c0-1's beck at 34% instead of 22%.
+- What the brief DID fix: the groove now crosses the gorge and reaches the
+  east edge, dark. One of the three things asked for landed.
+
+That is the second strike on the mechanism with the fix in place, so under
+the standing rule this stops here. Candidate kept at
+`session3-tools/tanium-rejects/c1-1.webp` (768 px) and in full at
+`.codex-tmp/authoring/cells/tanium/c1-1/` until the next dispatch clears it.
+
+## THE WRITER READ THE WRONG THING (fixed, commit after `d4093e26`)
+
+`write-briefs.mjs` read each neighbour's WATER MASK at the exact edge column.
+The continuity gate reads the neighbour's LAND LAYER alpha, the most
+water-like value within 8 px either side of the shared line, wet below 128.
+c5-2's beck reaches the line a few px short of the column: the gate saw a
+crossing at 24%, the brief never named it, and c6-2 was refused for not
+meeting it (`nearest 1449px`). The writer now reads the same layer through
+the same band with the same thresholds (`edge-water.mjs` shows both
+readings side by side). Widths grew to what the gate sees; positions moved
+by at most 1%; c6-2 gained its fourth arrival.
+
+## DISPATCHED — six cells, one run, in this order
+
+`node docs/career-world/session3-tools/bake-tanium.mjs --only c3-1,c4-0,c6-2,c4-2,c1-2,c2-1`
+
+Each brief now names the defect its last candidate was refused for, with
+the number the gate measured — see the commit message. c3-1 first (the
+capital node of the chain); the two forest cells last. Every accepted cell
+commits itself. Results go under `RESULTS` below as they land.
+
+## RESULTS
+
+(pending)
 
 ## c1-1: WHY IT FAILED FIVE TIMES, MEASURED
 
@@ -698,31 +751,46 @@ for the first 10 m, no stand touching it; the groove a dark slot cut into
 both lips of the gorge and continuing to the east edge, no panels. Briefs
 regenerated: c1-1 22%, c0-2 7%. 874 words, the added ones all about this cell.
 
-**Dispatched:** `node docs/career-world/session3-tools/bake-tanium.mjs --only c1-1`
-— log `.codex-tmp/bake-tanium.log`, results `.codex-tmp/bake-tanium-results.json`,
-an accepted cell commits itself. If this session died mid-run: `git log`
-says whether it landed; the lock at `.codex-tmp/authoring/cell.lock` is stale
-only if no `node` process is running.
+**Dispatched 17:33, refused 17:57** — see the top of this session. Log
+`.codex-tmp/bake-tanium.log`, results `.codex-tmp/bake-tanium-results.json`.
+If a session died mid-run: `git log` says what landed; the lock at
+`.codex-tmp/authoring/cell.lock` is stale only if no `node` process is running.
 
-## IF IT FAILS KEY-LIGHT AGAIN — STOP. THIS NEEDS THE OWNER
+## c1-1 NEEDS THE OWNER — four options, none of them a brief
 
-The flat-crown instruction is the first attempt aimed at the measured cause.
-A refusal with it in place is the second strike on the mechanism, and no
-brief can remove ambient occlusion from a forest. The ruling is the owner's:
-(a) a canopy-aware measure — the gate is solidified, so a lock change; (b) a
-dark-forest limit set from his eye on the refused candidates, which are kept
-at `session3-tools/tanium-rejects/c1-1.webp` and on the mosaic; or (c) accept
-the cell on his eye against the number. **Do not roll a seventh candidate.**
+The flat-crown instruction was the one attempt aimed at the measured cause,
+and it did not move the number. No brief removes ambient occlusion from a
+forest, and the model does not draw flat crowns when asked. The ruling is
+the owner's:
+
+- **(a)** a canopy-aware key-light measure (exclude the darkest luma band,
+  or measure rock only, as the rock-lighting gate already does) — the gate is
+  solidified, so a lock change;
+- **(b)** a dark-forest limit set from his eye on the six refused candidates
+  (0.012-0.028) — the accepted NinjaOne forest c2-0 sat at 0.0086;
+- **(c)** accept a candidate on his eye against the number;
+- **(d)** anchor-and-cover: composite each authored neighbour's pixels back
+  over the candidate's outer band before the gates run. Twice now the model
+  has repainted arriving pixels it was told to keep, and every dark cell
+  beside a bright one will fail seam tone the same way. Also a lock change.
+
+**Do not roll a seventh candidate.** Whatever he rules, re-run
+`write-briefs.mjs` first: c1-1's neighbours may have changed by then.
 
 ## NEXT, in order
 
-1. c1-1 (in flight). 2. `c3-1`, the capital node — every refusal was water
-continuity (1-2 unmet crossings); it has never failed key-light. 3. `c2-1`
-and `c1-2` once c1-1 stands — each gains a forest neighbour and the tone
-problem largely goes. 4. `c4-0`, `c4-2`, `c6-2`. 5. Force-rebake `c5-1` and
-`c6-1` for the chain. Before each: re-run `write-briefs.mjs`, then
-`--only <cell>`. Two unverified notes stand from SESSION 10: `c2-1` drawing
-983 crowns at 1.176 m, and `c5-1`'s `veg dLuma 68.0` against a bare plateau.
+1. The six-cell run (in flight; RESULTS above). 2. The owner's ruling on
+c1-1. 3. Any cell the run refuses: read its gate block, then the picture on
+the grid (`world-mosaic.mjs tanium --highlight <cell>`), before touching its
+brief — and stop at two strikes on one mechanism. 4. Force-rebake `c5-1` and
+`c6-1` for the chain. Before every dispatch: re-run `write-briefs.mjs`.
+
+**One more gate finding for the owner, measured tonight:** the palette gate's
+vegetation arm decided c3-1's refusal against c3-0 on **532 vs 599 green
+pixels out of 82,944** in the band (0.6% / 0.7%) — the 500-pixel floor lets it
+compare noise. SESSION 10's unverified note on c5-1's `veg dLuma 68.0` is the
+same shape. Candidate lock change: the vegetation arm needs a share of the
+band (say 2%) on both sides, else the tone arm alone governs.
 
 **SESSION 10 (2026-09-04).** Superseded by SESSION 11 above. The bake it
 announced finished 1 of 6 (c4-1); the rest of it is still the record.
