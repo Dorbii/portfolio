@@ -1,0 +1,18 @@
+[
+  {
+    "class": "coast",
+    "note": "The complete south-edge sea, including the full teal surface, cove shallows, surf, foam, reflections, ripple highlights, cliff-base wash, and water between offshore and shoreline rocks."
+  },
+  {
+    "class": "stream",
+    "note": "The continuous narrow north-east stream from its north-edge entry, through the shelf and both lower benches, to its southern coastal outlet, including shallow margins and ripple highlights."
+  },
+  {
+    "class": "lake",
+    "note": "The single approximately 12 m shelf pool, including its complete painted surface, edge wash, ripples, and reflections."
+  },
+  {
+    "class": "fall",
+    "note": "The clear drop from the shelf pool over the first bench plus the smaller connected cascades on the lower descent, including white water, spray, and plunge wash."
+  }
+]

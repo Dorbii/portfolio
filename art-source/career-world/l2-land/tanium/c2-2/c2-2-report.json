@@ -1,0 +1,105 @@
+{
+  "cell": "c2-2",
+  "territory": "tanium",
+  "status": "refused",
+  "generation": {
+    "filename": "c2-2-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "07380C2A87910D3412AAB75C120B0BD141C7ACA8C4658891FDC739A331F8B975",
+    "mode": "built-in ImageGen whole-canvas generation conditioned on a measured composition guide",
+    "imageGenCallsUsed": 2,
+    "selectedCandidate": 2,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "promptRecord": "c2-2-imagegen-prompt.txt",
+    "rejectedCandidate": "rejected-candidate-1-regular-cliffs-directional-faces.png"
+  },
+  "generationSizePx": [1254, 1254],
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean on the delivered source; final water-mask pixels and gradients below 12 luminance units excluded",
+    "peakVsUniformOverLand": 1.360482,
+    "uniformReference": 1.0,
+    "directionalKeyFirstMoment": 0.004919,
+    "gradientSamples": 942870,
+    "aggregateDirectionalityNumericPass": true,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No whole-cell cast-shadow field or obvious sun direction is present, but repeated rock upper planes and some conifer upper foliage remain brighter than adjacent vertical or lower faces. The aggregate orientation metric cannot override the literal equal-value requirement."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "manual estimated fraction of non-water land area at native source resolution",
+    "buildable": 0.63,
+    "steep": 0.11,
+    "otherTalusBrokenRockShingleOrVegetation": 0.26,
+    "method": "The broad northern rail run, coherent main shelf, and two wide bench tops count as buildable; exposed bench and coastal faces count as steep; talus, shingle, broken outcrops, stream margins, and conifer groups make up the remainder."
+  },
+  "waterFootprintFraction": 0.207181,
+  "finalDerivedLandCoverageFraction": 0.792819,
+  "crown": {
+    "medianMetres": 3.332,
+    "medianPx": 69.41,
+    "sampleCount": 61,
+    "method": "Manual native-resolution outer-foliage census of all 61 visually distinguishable conifer crowns, including saplings, edge crowns, and readable individuals in loose overlaps; median source width 34 px, scaled by 2560/1254 and converted at 0.048 m per final pixel.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c2-2-water-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "3B26E79D2E81F64BBA9AD42CA6E5CC0DA95243820A1E1E09EE5763ED28C77FE4",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "opaqueWaterPixels": 325795,
+    "transparentNonWaterPixels": 1246721,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedComponents8": 63,
+    "componentNote": "The main stream-pool-coast envelope plus source-painted detached spray and ripple flecks; all retained components are painted water evidence.",
+    "interiorHolePixelsFilled": 2588,
+    "interiorTransparentPixelsAfterFill": 0,
+    "boundsSourcePx": [0, 0, 1253, 1253],
+    "edgeWaterPixels": {
+      "north": 14,
+      "east": 260,
+      "south": 1254,
+      "west": 405
+    },
+    "method": "Native-resolution teal classification constrained to the north-east stream corridor and south coast, expanded through adjacent pool shallows, all three painted drops, cove surf, foam, reflections, ripple highlights, and wash between shore rocks; enclosed holes were filled and the complete result inspected as an overlay."
+  },
+  "siteChecks": {
+    "coherentOccupiableShelf": "A broad level gold-green shelf with an unobstructed central glade occupies the north-centre.",
+    "levelNorthernRailRun": "Even natural ground crosses the full north edge with no rail infrastructure or constructed path.",
+    "twoBroadBenches": "Two grass-covered bench tops separate the main shelf from the low coastal cliff.",
+    "southWestShingleCove": "A pale shingle cove occupies the south-west shoreline and opens directly to the south-edge sea.",
+    "streamPoolAndFall": "One north-east stream, one shelf pool, a clear first-bench drop, and a continued coastal outflow are present.",
+    "terrainOnly": "No building, road, bridge, dock, boat, fence, figure, rail, track, text, or marker is visible."
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasSelectedGeneration": true,
+    "rawGenerationUntouched": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "terrainContinuesNorthEastAndWest": true,
+    "southEdgeEntirelySea": true,
+    "coherentBuildableShelfPresent": true,
+    "twoBroadBenchesPresent": true,
+    "waterMaskSameDimensionsBinaryAndHoleFree": true,
+    "allPaintedWaterIncluded": true,
+    "crownMedianInsideAcceptedTerritoryBand": true,
+    "strictEqualValueOnAllFormSides": false
+  },
+  "refusalReasons": [
+    "The highest-priority lighting rule still fails by eye: despite no cast-shadow field, multiple rocks and exposed basalt fragments retain a brighter upper plane and darker side-plane convention, and some conifers retain upper-foliage highlights.",
+    "Two whole-canvas candidates failed the same neutral-face-value defect class. Under the two-strikes rule, a third ImageGen attempt with the same text-and-guide pipeline is blocked."
+  ],
+  "pipelineReframe": "A future retry needs a genuinely value-flat accepted terrain reference or an albedo-only generation/rendering path that can enforce equal plane luminance before another generation spend; stronger repetitions of the same negative prompt are not supported by the two observed results.",
+  "openRisks": [
+    "Several short bench exposures still approach a repeated upright-column rhythm, although candidate 2 removed candidate 1's long palisades; owner visual judgment is required.",
+    "The water mask was checked at native resolution and by overlay, but exact shoreline placement remains a human visual gate.",
+    "No artifact was promoted outside quarantine."
+  ]
+}
