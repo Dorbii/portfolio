@@ -1,0 +1,121 @@
+{
+  "cell": "c6-0",
+  "territory": "tanium",
+  "status": "refused",
+  "generation": {
+    "filename": "c6-0-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "498D718CADF3948E076A5850EFB26AF94A27F5ADAE3FDDD17F071FA8EF4598B4",
+    "mode": "built-in ImageGen edit with edit-target as Image 1 and style canon as reference-only Image 2",
+    "imageGenCallsUsed": 1,
+    "selectedCandidate": 1,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "secondReferenceAccepted": true,
+    "promptFile": "c6-0-imagegen-prompt-used.txt"
+  },
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean on the delivered source; final water-mask pixels and gradients below 12 luminance units excluded",
+    "peakVsUniformOverLand": 1.560942,
+    "uniformReference": 1.0,
+    "directionalKeyFirstMoment": 0.004914,
+    "gradientSamples": 714969,
+    "aggregateDirectionalityNumericPass": true,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No whole-cell sun gradient or cast-shadow field is visible, but repeated light column caps above darker vertical faces violate the literal equal-value-on-all-sides rule. The aggregate isotropy metric cannot override that visual defect."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "manual estimated fraction of non-water land area at native source resolution",
+    "buildable": 0.46,
+    "steep": 0.30,
+    "otherBrokenRockTalusOrVegetation": 0.24,
+    "method": "Only coherent upper bench areas count as buildable; sea-cliff and gully faces count as steep; talus, broken margins, stack rock, and the conifer gully make up the remainder."
+  },
+  "waterFootprintFraction": 0.417387,
+  "finalDerivedLandCoverageFraction": 0.582613,
+  "edgeTopology": {
+    "north": {
+      "required": "open sea across the edge",
+      "waterPixels": 1254,
+      "landPixels": 0,
+      "pass": true
+    },
+    "east": {
+      "required": "open sea across the edge; terrain ends mid-ground",
+      "waterPixels": 850,
+      "landPixels": 404,
+      "pass": false
+    },
+    "south": {
+      "required": "land continues through the edge",
+      "waterPixels": 0,
+      "landPixels": 1254,
+      "pass": true
+    },
+    "west": {
+      "required": "preserve the authored Wild coast handoff",
+      "waterPixels": 812,
+      "landPixels": 442,
+      "pass": true
+    }
+  },
+  "crown": {
+    "medianMetres": 3.087,
+    "medianPx": 64.306,
+    "sampleCount": 62,
+    "method": "Manual outer-foliage width census of every visible crown at native source scale, including all small and south-edge-clipped crowns; native median 31.5 px scaled by 2560/1254.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c6-0-water-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "B679D35B76D7C767FD43BF731E22C6C2192B769481FF26D41A515C90BA1EF99C",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "opaqueWaterPixels": 656348,
+    "transparentLandPixels": 916168,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedWaterComponents8Connected": 1,
+    "smallSpeckleHolePixelsFilled": 522,
+    "accidentalInteriorHoles": 0,
+    "intentionalDryStackOrIsletComponents": 5,
+    "edgeWaterPixels": {
+      "north": 1254,
+      "east": 850,
+      "south": 0,
+      "west": 812
+    },
+    "method": "Flooded the source-raster blue and teal sea from the canvas edges, grew a narrow pale surf-and-wash collar, closed pixel-scale gaps, and filled small enclosed wet speckles; five full dry stack/islet components remain unmasked as terrain."
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasEdit": true,
+    "rawGenerationUntouched": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "landContinuesThroughSouthAndWestEdges": true,
+    "northEdgeOpenSea": true,
+    "eastEdgeOpenSea": false,
+    "waterMaskSameDimensions": true,
+    "waterMaskBinaryWhiteOnTransparent": true,
+    "waterMaskNoAccidentalInteriorHoles": true,
+    "allMeasuredCrownsIncluded": true,
+    "crownMedianInsideAcceptedTerritoryBand": true,
+    "strictEqualValueOnAllFormSides": false
+  },
+  "refusalReasons": [
+    "The eastern edge contains 404 land pixels; the brief requires open sea on the east and terrain ending mid-ground.",
+    "The candidate violates the highest-priority lighting wording: repeated pale column caps above darker vertical faces expose an upper-face lighting convention."
+  ],
+  "openRisks": [
+    "Several cliff runs retain a repeated vertical-column rhythm; owner visual review is required against the ordinary-coast ban on accidental regular palisades.",
+    "The small north-side shingle cove is not clearly distinguishable from talus at native resolution.",
+    "The water mask overlay follows surf and inlet wash at native resolution, but no pipeline bake was run because the task is quarantine-only."
+  ]
+}

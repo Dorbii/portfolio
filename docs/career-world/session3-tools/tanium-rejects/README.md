@@ -25,3 +25,5 @@ They are kept because a rejected cell nobody sees cannot be ruled on.
 - `c4-2` dark-forest — rejected on **a gate **
 - `c6-2` quarry — rejected on **rock lighting 0.317**
 - `c4-0` moor — rejected on **water continuity 1**
+- `c2-0` sound-coast — rejected on **key-light asymmetry 0.0178**
+- `c1-0` sound-coast — rejected on **water continuity 1**
