@@ -44,7 +44,7 @@ function newestCodex() {
     const v = m.slice(1).map((n) => n.padStart(4, "0")).join(".");
     if (v > bestV) { bestV = v; best = c; }
   }
-  return { bin: best, version: bestV.replace(/0+(d)/g, "$1") };
+  return { bin: best, version: bestV.split(".").map((s) => String(Number(s))).join(".") };
 }
 const CODEX = newestCodex();
 process.env.CODEX_BIN = CODEX.bin;
@@ -61,6 +61,17 @@ const listArg = (flag) => {
 };
 const ONLY = listArg("--only");
 const FORCE = new Set(listArg("--force"));
+// --review        a refused candidate is reviewed by a second Codex job and the
+//                 worker gets ONE more attempt with the reviewer's addendum
+//                 (owner 2026-09-04: review before the director, cut the cycles)
+// --model M       the generation model (cell.mjs reads CELL_MODEL; default astra)
+// --effort E      its reasoning effort (CELL_EFFORT; default high)
+// REVIEW_MODEL    env, the reviewer's model (default gpt-6-astra)
+const REVIEW = process.argv.includes("--review");
+const modelArg = listArg("--model")[0], effortArg = listArg("--effort")[0];
+if (modelArg) process.env.CELL_MODEL = modelArg;
+if (effortArg) process.env.CELL_EFFORT = effortArg;
+const REVIEW_MODEL = process.env.REVIEW_MODEL || "gpt-6-astra";
 const TERRITORY = "tanium";
 const BRIEFS = `art-source/career-world/l2-land/${TERRITORY}/briefs`;
 const LOG = `.codex-tmp/bake-${TERRITORY}.log`;
@@ -117,7 +128,144 @@ function keepReject(id, biome, out) {
   say(`    candidate kept at ${REJECTS}/${id}.webp`);
 }
 
+function bakeOnce(cell, describeFile, forced, t0) {
+  const run = spawnSync(process.execPath, [
+    "tools/world-authoring/cell.mjs",
+    "--territory", TERRITORY,
+    "--cell", cell,
+    "--describe-file", describeFile,
+    ...(forced ? ["--force"] : []),
+  ], { encoding: "utf8", maxBuffer: 1 << 28 });
+  const mins = ((Date.now() - t0) / 60000).toFixed(1);
+  const out = `${run.stdout ?? ""}${run.stderr ?? ""}`;
+  fs.appendFileSync(LOG, out + "\n");
+  // Re-running this script after an interruption must not report finished work
+  // as failure: cell.mjs refuses an already-authored cell, which is the correct
+  // behaviour and the reason re-running is safe.
+  const already = /already authored/.test(out);
+  const ok = already || (run.status === 0 && /accepted, stitched/.test(out));
+  return { run, out, already, ok, mins };
+}
+
+// The reviewer sees what the director would see: the candidate small enough
+// for its viewer, a strip of every authored neighbour along the shared edge,
+// the gate block, the worker's report and the brief — and never a conclusion.
+// It answers under fixed headings; section 3 is the addendum the second
+// attempt is dispatched with. Everything lands in .codex-tmp/review/<id>-aN/
+// where the dialog page picks it up.
+function reviewCandidate(id, cell, biome, out) {
+  const [c, r] = cell.split(",").map(Number);
+  const cellDir = `.codex-tmp/authoring/cells/${TERRITORY}/${id}`;
+  let n = 1;
+  while (fs.existsSync(`.codex-tmp/review/${id}-a${n}`)) n += 1;
+  const dir = `.codex-tmp/review/${id}-a${n}`;
+  fs.mkdirSync(dir, { recursive: true });
+  const node = (args) => spawnSync(process.execPath, args, { encoding: "utf8", maxBuffer: 1 << 26 });
+  // the candidate at 1024 px (astra's viewer refuses the 2560 px originals)
+  node(["-e", `import("sharp").then(s=>s.default(${JSON.stringify(`${cellDir}/${id}-l2.png`)}).resize(1024,1024).png().toFile(${JSON.stringify(`${dir}/candidate-l2-1024.png`)}))`]);
+  const webp = `${REJECTS}/${id}.webp`;
+  if (fs.existsSync(webp)) fs.copyFileSync(webp, `${dir}/candidate-attempt${n}.webp`);
+  // seam strips against every authored orthogonal neighbour
+  const strips = [];
+  for (const [edge, nc, nr, where] of [["N", c, r - 1, "the neighbour above the line, the candidate below"], ["S", c, r + 1, "the candidate above the line, the neighbour below"], ["W", c - 1, r, "the neighbour left of the line, the candidate right"], ["E", c + 1, r, "the candidate left of the line, the neighbour right"]]) {
+    const nb = `c${nc}-${nr}`;
+    const nbConcept = `art-source/career-world/l2-land/${TERRITORY}/${nb}/${nb}-concept.png`;
+    if (!fs.existsSync(nbConcept)) continue;
+    const outPng = `${dir}/seam-${edge}-${nb}.png`;
+    const s = node(["docs/career-world/session3-tools/seam-strips.mjs", `${cellDir}/${id}-concept.png`, edge, nbConcept, outPng]);
+    if (s.status === 0) strips.push(`  - ${edge === "N" ? "north" : edge === "S" ? "south" : edge === "W" ? "west" : "east"} seam, ${where}: \`${outPng}\``);
+  }
+  // the gate block, from the first derived/mask line to the verdict
+  const lines = out.split("\n");
+  const a = lines.findIndex((l) => /^\s{2}(mask|derived|bridge)|^\s{6}(palette|continuity)/.test(l));
+  const b = lines.findIndex((l) => /cell NOT accepted/.test(l));
+  const gateBlock = a >= 0 && b > a ? lines.slice(a, b + 1).join("\n") : lines.filter((l) => /PASS|FAIL/.test(l)).join("\n");
+  const x0 = c * 2048, y0 = r * 2048;
+  const packet = `# REVIEW — refused L2 land cell ${id} (${TERRITORY}, ${biome}), attempt ${n}
+
+You are the reviewer in a two-model loop. A worker generated this cell, the
+pipeline's gates refused it, and you review the candidate BEFORE the director
+sees it, so the second attempt can be dispatched with your notes. Work
+quarantine-only: the ONLY file you may write is \`${dir}/codex-review.md\`.
+Do not generate images, do not run the pipeline, do not modify any other file.
+
+## The evidence — look at every image with \`view_image\`
+
+- **The brief** the worker was given, verbatim: \`${BRIEFS}/${id}.md\`
+- **The candidate**, 1024 px, water already cut out (transparent): \`${dir}/candidate-l2-1024.png\`
+- **The candidate as painted**, 768 px: \`${dir}/candidate-attempt${n}.webp\`
+- **Seam strips** — the 18 m band either side of a shared edge, the neighbour's real art beside the candidate's, magenta line on the seam:
+${strips.join("\n") || "  (no authored neighbour)"}
+- **The worker's own report** (its self-checks are honest and worth reading): \`${cellDir}/${id}-report.json\`
+- The full-resolution files are in \`${cellDir}/\` if you need a native-pixel crop; read them in memory, write nothing.
+
+## The gate block, verbatim
+
+\`\`\`
+${gateBlock}
+\`\`\`
+
+How to read a continuity line: positions are territory pixels along the shared
+edge; this cell's kept area spans ${x0}-${x0 + 2048} along x (west to east) and
+${y0}-${y0 + 2048} along y (north to south), 2048 px = 97.6 m, 4.8 cm per px.
+"nearest none" means the neighbour has no water run of 30 px or more within
+8 px of that line anywhere. Crossings match by centre within 48 px (2.3 m).
+A palette line compares the 16-176 px band inside each side of the seam: all-land
+tone median (limit 21) and vegetation median (limits dBG 0.20, dLuma 13).
+
+## What to write — \`${dir}/codex-review.md\`, under EXACTLY these headings
+
+## 1. Why it was refused
+The defect(s) in the picture, with positions in percent along the edge or
+metres from a corner. Say what you looked at.
+
+## 2. What else is wrong against the brief
+Semantic misses no gate measures: a feature drawn as the wrong thing, a rule
+ignored, a site missing. Cite the image.
+
+## 3. Addendum for the second attempt
+The exact paragraph(s) to append to the brief, at most 140 words, numbers and
+instructions only, no reasoning. The worker reads it as part of the same
+brief. Where the gate and the neighbour's paint disagree, tell the worker what
+the GATE will accept — the gate is the arbiter until the director changes it.
+
+## 4. Problems in the brief itself
+Anything contradictory or misleading.
+
+## 5. Confidence
+One line, and the one measurement that would confirm or refute your read.
+
+Keep the whole file under 700 words.
+`;
+  fs.writeFileSync(`${dir}/review-packet.md`, packet);
+  const rv = spawnSync(CODEX.bin, ["exec", "--sandbox", "workspace-write", "-c", `model=${REVIEW_MODEL}`, "-c", "model_reasoning_effort=high", packet],
+    { encoding: "utf8", maxBuffer: 1 << 26, input: "" });
+  fs.writeFileSync(`${dir}/codex.log`, `${rv.stdout ?? ""}${rv.stderr ?? ""}`);
+  const reviewFile = `${dir}/codex-review.md`;
+  if (!fs.existsSync(reviewFile)) { say(`    reviewer wrote nothing (exit ${rv.status}) — see ${dir}/codex.log`); return null; }
+  const review = fs.readFileSync(reviewFile, "utf8").replace(/\r\n/g, "\n");
+  const m = review.match(/^##\s*3\.[^\n]*\n([\s\S]*?)(?=^##\s*\d\.|\s*$)/m);
+  const addendum = m ? m[1].trim() : "";
+  if (!addendum) { say(`    reviewer gave no addendum — see ${reviewFile}`); return null; }
+  const why = (review.match(/^##\s*1\.[^\n]*\n([\s\S]*?)(?=^##)/m) || [])[1] || "";
+  const summary = why.trim().split("\n").find((l) => l.trim()) || "(no summary)";
+  const brief = fs.readFileSync(`${BRIEFS}/${id}.md`, "utf8").replace(/\r\n/g, "\n");
+  const brief2 = `${dir}/brief-attempt2.md`;
+  fs.writeFileSync(brief2, `${brief.trimEnd()}
+
+---
+
+**SECOND ATTEMPT.** The first candidate was refused by the gates, and a
+reviewer compared it with this brief and with the neighbours' art. Everything
+above still holds. In addition, do exactly this:
+
+${addendum}
+`);
+  return { addendum, summary: summary.slice(0, 200), brief2 };
+}
+
 say(`bake ${TERRITORY}: ${ORDER.length} cells, sequential, failures do not stop the run`);
+if (REVIEW) say(`review-and-retry ON: reviewer ${REVIEW_MODEL}, generation ${process.env.CELL_MODEL || "(cell.mjs default)"} at ${process.env.CELL_EFFORT || "high"}`);
 say(`codex ${CODEX.version} at ${CODEX.bin}`);
 if (DRY) { say("--dry: order and briefs check out, nothing dispatched"); process.exit(0); }
 
@@ -132,23 +280,25 @@ for (const [i, cell] of ORDER.entries()) {
   say(`--- ${i + 1}/${ORDER.length}  ${id}  ${biome}`);
 
   const forced = FORCE.has(id);
-  const run = spawnSync(process.execPath, [
-    "tools/world-authoring/cell.mjs",
-    "--territory", TERRITORY,
-    "--cell", cell,
-    "--describe-file", `${BRIEFS}/${id}.md`,
-    ...(forced ? ["--force"] : []),
-  ], { encoding: "utf8", maxBuffer: 1 << 28 });
-
-  const mins = ((Date.now() - t0) / 60000).toFixed(1);
-  const out = `${run.stdout ?? ""}${run.stderr ?? ""}`;
-  fs.appendFileSync(LOG, out + "\n");
-  // Re-running this script after an interruption must not report finished work
-  // as failure: cell.mjs refuses an already-authored cell, which is the correct
-  // behaviour and the reason re-running is safe.
-  const already = /already authored/.test(out);
-  const ok = already || (run.status === 0 && /accepted, stitched/.test(out));
-  results.push({ cell, id, biome, ok, already, mins });
+  let { out, already, ok, mins } = bakeOnce(cell, `${BRIEFS}/${id}.md`, forced, t0);
+  let attempts = 1;
+  // Review-and-retry: a refused candidate goes to a reviewer before anyone
+  // else sees it, and the worker gets ONE more attempt with the reviewer's
+  // addendum appended to the same brief. A dispatch failure (no candidate)
+  // is not reviewed — there is nothing to look at.
+  if (REVIEW && !ok && !already && fs.existsSync(`.codex-tmp/authoring/cells/${TERRITORY}/${id}/${id}-l2.png`)) {
+    say(`    refused after ${mins} min — sending the candidate to the reviewer (${REVIEW_MODEL})`);
+    keepReject(id, biome, out);
+    const rv = reviewCandidate(id, cell, biome, out);
+    if (rv) {
+      say(`    reviewer: ${rv.summary}`);
+      say(`    second attempt with the addendum (${rv.addendum.split(/\s+/).length} words) -> ${rv.brief2}`);
+      const t1 = Date.now();
+      ({ out, already, ok, mins } = bakeOnce(cell, rv.brief2, forced, t1));
+      attempts = 2;
+    }
+  }
+  results.push({ cell, id, biome, ok, already, mins, attempts });
 
   if (already) {
     say(`    already authored — skipped`);
@@ -193,7 +343,7 @@ for (const [i, cell] of ORDER.entries()) {
 
 const ok = results.filter((r) => r.ok);
 say(`\n=== done in ${((Date.now() - started) / 3600000).toFixed(1)} h — ${ok.length} of ${results.length} accepted`);
-for (const r of results) say(`  ${r.already ? "skip" : r.ok ? "ok  " : "FAIL"} ${r.id.padEnd(6)} ${r.biome.padEnd(17)} ${r.mins} min`);
+for (const r of results) say(`  ${r.already ? "skip" : r.ok ? "ok  " : "FAIL"} ${r.id.padEnd(6)} ${r.biome.padEnd(17)} ${r.mins} min${r.attempts === 2 ? " (2nd attempt, after review)" : ""}`);
 if (ok.length < results.length) {
   say(`\nthe failures left the world untouched; re-run one with:`);
   say(`  node tools/world-authoring/cell.mjs --territory ${TERRITORY} --cell C,R --describe-file ${BRIEFS}/cC-R.md`);

@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-04T23:15:53.006Z",
+ "solidifiedAt": "2026-09-04T23:37:57.793Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "f59b5148337672a8",
+  "cell.mjs": "c06b8503f56cb16e",
   "plan-territory.mjs": "e8d86a90b2e32796",
   "AGENTS.md": "a1ab4eaec1d4c6ac"
  },
@@ -426,6 +426,15 @@
    "reason": "owner approved 2026-09-04 (same instruction, 'change the codex agent you use to astra 6'): gpt-6-astra needs Codex 0.153+ and the CLI on PATH is 0.149, so cell.mjs now runs the binary named by CODEX_BIN (default: codex on PATH) and the runner sets it to the newest codex.exe on the machine; nothing else changes",
    "hashes": {
     "cell.mjs": "f59b5148337672a8",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-04T23:37:57.793Z",
+   "reason": "owner approved 2026-09-04 (in chat: 'you are free to spawn codex threads of varying efforts so if 5.6 was the better image gen go for it and let astra be the rubber ducky'): the dispatch model and reasoning effort in cell.mjs come from CELL_MODEL and CELL_EFFORT (defaults gpt-6-astra, high); nothing else changes",
+   "hashes": {
+    "cell.mjs": "c06b8503f56cb16e",
     "plan-territory.mjs": "e8d86a90b2e32796",
     "AGENTS.md": "a1ab4eaec1d4c6ac"
    }
