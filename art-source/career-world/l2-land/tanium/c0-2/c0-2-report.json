@@ -1,0 +1,102 @@
+{
+  "cell": "c0-2",
+  "territory": "tanium",
+  "status": "refused",
+  "generation": {
+    "filename": "c0-2-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "91273B5755DE4BF1CD09C78D4460522F3D042484262D889E0232E7FC53BD42AF",
+    "mode": "built-in ImageGen whole-canvas generation",
+    "candidateNumber": 2,
+    "totalCandidatesGenerated": 2,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "promptRecord": "c0-2-imagegen-prompt-candidate-2.txt"
+  },
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean on the delivered source; water-mask pixels and gradients below 12 luminance units excluded",
+    "peakVsUniformOverLand": 1.357249,
+    "uniformReference": 1.0,
+    "directionalKeyFirstMoment": 0.002189,
+    "gradientSamples": 530209,
+    "aggregateDirectionalityNumericPass": true,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No cast-shadow field or coherent sun direction is visible, but basalt top planes remain consistently lighter than exposed vertical faces. The aggregate orientation metric does not override this literal equal-value failure."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "manual estimated fraction of non-water land area at native source resolution",
+    "buildable": 0.56,
+    "steep": 0.12,
+    "otherShoreBrokenRockShingleOrVegetation": 0.32,
+    "method": "The broad inland grass and level slab shelf counts as buildable; sea-stack faces and exposed ledge faces count as steep; the shingle cove, broken shore slabs, boulders, and vegetation make up the remainder."
+  },
+  "waterFootprintFraction": 0.547112,
+  "finalDerivedLandCoverageFraction": 0.452888,
+  "crown": {
+    "medianMetres": 0,
+    "medianPx": 0,
+    "sampleCount": 0,
+    "method": "Complete visual census at native source resolution found no conifers or tree crowns; the Sound-coast cell is intentionally treeless.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c0-2-water-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "98CEB814F03AFD92A242FBE366DAEBCBB73E7342C90E595A5C6650B1676B0458",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "opaqueWaterPixels": 860343,
+    "transparentNonWaterPixels": 712173,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedComponents": 1,
+    "interiorHolePixels": 0,
+    "boundsSourcePx": [0, 0, 1253, 1253],
+    "edgeWaterPixels": {
+      "north": 187,
+      "east": 51,
+      "south": 1254,
+      "west": 1254
+    },
+    "method": "South-and-west-connected teal and turquoise evidence was traced through the complete sea, shallows, wash, surf, reflections, and submerged-slab water; the wet fringe was included, enclosed interruptions were filled, and the binary hole-free result was checked against a full-canvas overlay."
+  },
+  "siteCheck": {
+    "stackCovePresent": true,
+    "qualifyingSeaStacks12To20Metres": 4,
+    "additionalLowOffshoreOutcrop": 1,
+    "shingleBeachPresent": true,
+    "submergedSlabsPresent": true,
+    "structuresPresent": false
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "wholeCanvasSinglePass": true,
+    "rawGenerationUntouched": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "seaTouchesSouthAndWestEdges": true,
+    "landTouchesNorthAndEastEdges": true,
+    "stackCoveSitePresent": true,
+    "treeFreeSoundCoast": true,
+    "waterMaskBinarySameDimensionsConnectedAndHoleFree": true,
+    "crownObjectComplete": true,
+    "strictEqualValueOnAllFormSides": false,
+    "buildableFractionApproximatelyOneThird": false
+  },
+  "refusalReasons": [
+    "The highest-priority lighting rule still fails visually: broad basalt top planes are consistently lighter than vertical faces.",
+    "The estimated buildable fraction is about 0.56 of non-water land rather than the territory target of roughly one third."
+  ],
+  "openRisks": [
+    "Two whole-canvas candidates reproduced the same top-plane-versus-face value hierarchy, so the two-strikes rule blocks a third generation using the same prompting approach.",
+    "The low central offshore outcrop is below the specified 12-20 m stack class and is not counted among the four qualifying stacks, but a reviewer may read it as a fifth small stack.",
+    "The water mask passes dimension, binary-alpha, connectivity, edge, and no-hole checks and was visually inspected as an overlay; exact coastline judgment remains a human visual gate.",
+    "No artifact was promoted outside quarantine."
+  ],
+  "recommendedReframe": "Use a generation path with an explicit flat albedo or unlit-material control, or author the terrain in a renderer whose material values are deterministic; prompt-only ImageGen has now failed the literal equal-value rock-face rule twice."
+}
