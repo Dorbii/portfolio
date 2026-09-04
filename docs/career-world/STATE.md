@@ -706,8 +706,22 @@ only `geology`, `coast-cliff` and the new biome differ; `shelves`, `loop`,
 `railFeatures`, `sites` and **`cellBiomes` are byte-identical**, so the 20 baked
 cells stay valid and nothing is rebaked.
 
-**Owner's eye still wanted on:** the shelf layout, and the two territories
-carrying **separate closed rail loops** with no link between them.
+## TANIUM IS FULLY RULED — NOTHING OPEN ON THE PLAN
+
+Owner 2026-09-03, *"sure fine with me on both"*, closing the last two:
+
+- **The shelf layout is accepted as proposed.** capital `[3,1]` centre, cablecar
+  `[0,1]` west, risk-assessment `[5,1]` east, automated-uat `[2,2]` south,
+  construction `[6,2]` the SE corner. It was a chosen arrangement rather than a
+  derived one; it is the owner's now.
+- **Two separate closed rail loops stand.** NinjaOne's circuit and Tanium's each
+  leave their capital, call at every project city and return; nothing crosses
+  the land border between them. Not an oversight — ruled.
+
+So Tanium's definition is settled end to end: block, biomes, shelves, loop, rail
+features, sites, the measured north border and the wonder. **The next action on
+Tanium is the bake itself** — 21 cells at ~13 min each, one cell per invocation
+in the background. Nothing about the plan is waiting on anyone.
 
 **`step5-register.mjs` still hardcodes `BLOCK = [3,1]`.** The def is the
 authority now; that tool should read it before it registers Tanium.
@@ -763,9 +777,15 @@ had tested. The control is per-document:
 
 ## NEXT
 
-The drainage-seam vertex needs a ruling. Then Tanium's L2 land, planned against
-NinjaOne's block — the grid expands from here, and the world is scoped for ~88
-land cells against the 18.2 now authored.
+**Bake Tanium's 21 cells.** The plan is fully ruled and nothing waits on the
+owner. `cell.mjs`, one cell per invocation, background, ~13 min each. Start on
+the north row so the measured handover against NinjaOne is tested first — local
+`3,0` and `4,0` are the connecting ground, and `land-border-check.mjs` is the
+check that says whether the two halves actually met.
+
+Still genuinely open, and neither is Tanium's: the drainage-seam vertex in
+Kaizen (one point, standing in the river it drains into), and the ocean rework,
+which owns three of the four suite failures and the stale height/slope fields.
 
 **SESSION 8 (2026-09-03).** Step 5 landed and the old art is gone.
 
