@@ -64,3 +64,4 @@ They are kept because a rejected cell nobody sees cannot be ruled on.
 - `c3-1` lush-shelf — rejected on **water continuity 1**
 - `c5-1` lush-shelf — rejected on **a gate **
 - `c6-1` linked-colonnade — rejected on **water continuity 2**
+- `c1-1` dark-forest — rejected on **key-light asymmetry 0.016**

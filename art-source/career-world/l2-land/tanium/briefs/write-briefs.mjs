@@ -154,9 +154,18 @@ with dull violet accents, grey rock.
 
 A BECK about 4 m wide — wider than the one to the west — crosses the NORTH edge
 55% of the way across from the west. That position is measured: it arrives from
-NinjaOne's authored ground and must meet it there. It runs south through a
-shallow gully, widening a little, and leaves at the south edge. Dark conifers
-only in that gully and in one hollow to the south-west.
+NinjaOne's authored ground and must meet it there. It stays a beck — 4 m
+wide, a stride across, never a river — and runs south through a shallow gully
+into a peat-dark tarn about 20 m across in a hollow in the south-west. The
+tarn has no outlet: nothing wet reaches the south, east or west edge, because
+the cells there carry no water to meet. Dark conifers only in that gully and
+around the tarn.
+
+**The south edge is the plateau's ground arriving from the south**, corner to
+corner, at its own brightness for the first 10 m inside the seam: pale bare
+rock across the eastern half of that edge, darker moor-grass in the western
+half, exactly as it arrives. The moor gives way to bare rock across the south
+third.
 
 The ground falls away gently to the east toward the bay, so the eastern quarter
 of the cell sits lower, but it does NOT reach water inside this cell — the bay
@@ -292,6 +301,21 @@ fall on its south side — the one place hereabouts the forest opens to a view,
 and the whole south coast lies that way. Approachable from the north by a ramp
 of broken ground.
 
+**Every crown one flat value, tip to skirt.** No pale top and no dark
+underside on any tree: a crown is told from the next by its outline and by the
+darker gap between them, never by shading on the crown itself. The grey-blue
+haze is VISIBLE over the stands and softens every crown edge. Crowns 3-4 m across even in the dense western stands — a
+stand is a few hundred proper trees, never a carpet of saplings.
+
+**The south edge is as bright as the shelf ground arriving from the south**,
+corner to corner, for the first 10 m inside the seam — the western stands stop
+short of it, and the forest closes only north of that band.
+
+**The groove is a dark slot, never a pale path** — its floor in shade, its rims
+rounded and paler, darker than the ground either side. It runs between the
+trunks over the forest floor in the west and across the open ground in the
+east, one true line from edge to edge.
+
 Land to all four edges.`;
 
 B["3,1"] = `THE CAPITAL SHELF. The most important ground in the territory, and the richest
@@ -305,9 +329,22 @@ terraces of warm rock — two or three steps, each broad enough to build on, so
 the settlement has levels to occupy. To the south and east it runs out more
 gently.
 
-A stream enters from the north-east, crosses the eastern part of the shelf in a
-shallow channel with one pool about 15 m across, and leaves to the south-west
-over the terrace edge in a modest fall.
+A stream enters from the north-east and runs, 2-3 m wide the whole way, in a
+shallow channel down to ONE pool about 15 m across in the north-east quarter of
+the shelf. The pool has no outlet: the shelf drains through the jointed basalt
+beneath it, and nothing wet reaches the south, east or west edge — the cells
+there carry no water to meet. The pool lies well north of the groove, and the
+stream never touches the line.
+
+**The south edge is as bright as the ground arriving from the south**, corner
+to corner: that gold-green meadow with its pale column outcrops continues at
+its own brightness for the first 10 m inside the seam, and the shelf's own
+meadow is the same bright gold-green — not olive, not khaki. The north edge
+continues the darker olive bench ground arriving from the north, and the
+change from olive to gold happens across the north third.
+
+The rune panels stand within 15 m of the groove, on both sides of it, as one
+cluster near the middle of the shelf — not scattered over the cell.
 
 This is where the rail loop begins and ends, so the shelf needs a level
 approach from the east and from the west: two clear runs of even ground at the
@@ -458,6 +495,17 @@ bridge and no track — only the ground.
 A stream comes down through the forest from the north and falls into the head of
 the inlet.
 
+**Every crown one flat value, tip to skirt.** No pale top and no dark
+underside on any tree: a crown is told from the next by its outline and by the
+darker gap between them, never by shading on the crown itself. The grey-blue
+haze is VISIBLE over the stands and softens every crown edge.
+
+**Both side edges are as bright as the ground arriving**, corner to corner:
+the shelf's gold meadow from the east and the sound coast's pale grey-green
+grass from the west continue at their own brightness and colour for the first
+10 m inside each seam. The dark stands begin beyond those bands and close to
+the full forest through the middle of the cell.
+
 Carry land to the NORTH, EAST and WEST edges; the south is sea.`;
 
 B["2,2"] = `The AUTOMATED-UAT shelf — a settlement shelf on the south coast, the richest
@@ -522,6 +570,11 @@ The FERN-HOLLOW site: a damp hollow on the middle bench about 30 m across, a
 spring at its head, a level mossy floor, ferns thick around the spring, and the
 bench walls sheltering it on every side.
 
+**The east edge is the moor's ground arriving from the east**, corner to
+corner, for the first 10 m inside the seam — its cooler blue-green grass at its
+own colour and brightness, not the benches' warmer gold; the benches take over
+across the east third.
+
 Carry land to the NORTH, EAST and WEST edges.`;
 
 B["5,2"] = `Open moor on the southern coast. Wind-scoured heather and grass, rolling,
@@ -563,7 +616,19 @@ quarry's edge where the ground was not taken. A few dark conifers on the north
 rim and in the drainage gully.
 
 The coast below the lowest bench is low cliff, 8–15 m, part natural and part
-cut away. Carry land to the NORTH and WEST edges.`;
+cut away.
+
+**The NORTH edge is land only along its western third.** From about a third
+of the way along it the bay arriving from the north fills the rest of that
+edge, corner included: the quarry's north-east rim is that bay's south shore,
+low cut cliff dropping straight into the water at the brightness and colour
+the sea arrives in. Do not carry the quarry floor east along the north edge.
+
+A beck arrives across the WEST edge a quarter of the way down it and runs
+east along the quarry's north rim into the flooded pit. The sea also arrives
+at the south-west corner of the west edge.
+
+Carry land to the WEST edge and to the western third of the NORTH edge.`;
 
 // ---------------------------------------------------- check, then write ----
 const cells = Object.keys(def.cellBiomes).sort();
@@ -688,25 +753,35 @@ function waterCrossingsFor(col, row) {
   const out = [];
   for (const [dir, c, r, edge] of sides) {
     const id = `c${c}-${r}`;
-    const mask = `art-source/career-world/l2-land/tanium/${id}/${id}-water.png`;
-    if (!fs.existsSync(mask)) continue;                 // not authored, or no water
+    // Read what the GATE reads: the land layer's alpha (water is cut from it),
+    // the most water-like value within 8 px either side of the shared line,
+    // wet below 128, runs of 30 px or more. The mask's exact edge column
+    // missed a beck that reaches c5-2's east edge a few px short of the line;
+    // the gate's band did not, and c6-2 was refused for not meeting it.
+    const l2 = `art-source/career-world/l2-land/tanium/${id}/${id}-l2.png`;
+    if (!fs.existsSync(l2)) continue;                   // not authored
     let px;
-    try { px = readGrey(mask); } catch { continue; }
+    try { px = readGrey(l2); } catch { continue; }      // last channel = alpha
     const bleed = Math.round((px.width - KEPT) / 2);
+    const BAND = 8;
+    const line = edge === "bottom" || edge === "right" ? bleed + KEPT : bleed;
+    const along = edge === "bottom" || edge === "top";
     const runs = [];
     let start = null;
     for (let i = 0; i < KEPT; i += 1) {
-      const [x, y] = edge === "bottom" ? [bleed + i, bleed + KEPT - 1]
-        : edge === "top" ? [bleed + i, bleed]
-          : edge === "right" ? [bleed + KEPT - 1, bleed + i]
-            : [bleed, bleed + i];
-      const wet = px.data[y * px.width + x] >= 128;
+      let mn = 255;
+      for (let d = -BAND; d <= BAND; d += 1) {
+        const [x, y] = along ? [bleed + i, line + d] : [line + d, bleed + i];
+        if (x < 0 || y < 0 || x >= px.width || y >= px.height) continue;
+        mn = Math.min(mn, px.data[y * px.width + x]);
+      }
+      const wet = mn < 128;
       if (wet && start === null) start = i;
       if (!wet && start !== null) { runs.push([start, i - 1]); start = null; }
     }
     if (start !== null) runs.push([start, KEPT - 1]);
     // 30 px is the gate's own minimum run; anything shorter is not a crossing
-    for (const [a, b] of runs.filter(([a2, b2]) => b2 - a2 >= 30)) {
+    for (const [a, b] of runs.filter(([a2, b2]) => b2 - a2 + 1 >= 30)) {
       const mid = Math.round(((a + b) / 2 / KEPT) * 100);
       const wide = Math.round(((b - a) / KEPT) * 97.6);
       out.push(`- water arrives on your **${dir}** edge at **${mid}% along it**, about ${wide} m wide — meet it there`);
