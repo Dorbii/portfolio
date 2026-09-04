@@ -73,6 +73,7 @@ say(`bake ${TERRITORY}: ${ORDER.length} cells, sequential, failures do not stop 
 if (DRY) { say("--dry: order and briefs check out, nothing dispatched"); process.exit(0); }
 
 const results = [];
+let instant = 0;                      // consecutive sub-30s failures
 const started = Date.now();
 for (const [i, cell] of ORDER.entries()) {
   const [c, r] = cell.split(",");
@@ -113,8 +114,24 @@ for (const [i, cell] of ORDER.entries()) {
     const commit = spawnSync("git", ["commit", "-q", "-m", msg], { encoding: "utf8" });
     if (commit.status !== 0) say(`    (commit said: ${(commit.stdout || commit.stderr || "").trim().slice(0, 120)})`);
   } else {
-    const why = out.split("\n").filter((l) => /FAIL|refus|Error|die|gate/i.test(l)).slice(-4).join(" | ");
+    // Fall back to the tail of the output when nothing matches: a run once
+    // failed all 21 cells in nine seconds against a stale lockfile and reported
+    // an EMPTY reason every time, because "another run holds the lock" matches
+    // none of these words. A failure with no stated reason is a failure you
+    // cannot act on.
+    const why = out.split("\n").filter((l) => /FAIL|refus|Error|die|gate|lock/i.test(l)).slice(-4).join(" | ")
+      || out.trim().split("\n").slice(-3).join(" | ")
+      || "(no output at all)";
     say(`    FAILED after ${mins} min — world untouched. ${why.slice(0, 300)}`);
+    // Nine seconds is not a bake. If several cells fail that fast, something is
+    // wrong with the run itself rather than with the art, and grinding through
+    // the rest wastes the night.
+    if (Number(mins) < 0.5) instant += 1; else instant = 0;
+    if (instant >= 3) {
+      say(`\n!! three cells failed in under 30 s each — this is the run, not the art.`);
+      say(`   Check for a stale lock at .codex-tmp/authoring/cell.lock and re-run.`);
+      break;
+    }
     // Keep the rejected art. The gates leaving the world untouched is right,
     // but .codex-tmp is gitignored, and the candidate is the only evidence for
     // whether the gate was correct to refuse it. A rejected cell nobody ever
