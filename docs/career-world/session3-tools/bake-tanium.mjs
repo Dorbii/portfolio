@@ -52,6 +52,23 @@ const say = (line) => {
   fs.appendFileSync(LOG, stamped + "\n");
 };
 
+const REJECTS = `docs/career-world/session3-tools/${TERRITORY}-rejects`;
+function keepReject(id, biome, out) {
+  const src = `.codex-tmp/authoring/cells/${TERRITORY}/${id}/${id}-l2.png`;
+  if (!fs.existsSync(src)) return;
+  fs.mkdirSync(REJECTS, { recursive: true });
+  const m = out.match(/FAIL\s+(\S+(?: \S+)*?)\s{2,}([0-9.]+)/);
+  const r = spawnSync(process.execPath, ["-e",
+    `import("sharp").then(s=>s.default(${JSON.stringify(src)})`
+    + `.resize(768,768,{fit:"cover"}).webp({quality:82})`
+    + `.toFile(${JSON.stringify(`${REJECTS}/${id}.webp`)}))`,
+  ], { encoding: "utf8" });
+  if (r.status !== 0) { say(`    (could not keep the candidate: ${(r.stderr || "").trim().slice(0, 120)})`); return; }
+  fs.appendFileSync(`${REJECTS}/README.md`,
+    `- \`${id}\` ${biome} — rejected on **${m ? m[1] : "a gate"} ${m ? m[2] : ""}**\n`);
+  say(`    candidate kept at ${REJECTS}/${id}.webp`);
+}
+
 say(`bake ${TERRITORY}: ${ORDER.length} cells, sequential, failures do not stop the run`);
 if (DRY) { say("--dry: order and briefs check out, nothing dispatched"); process.exit(0); }
 
@@ -98,6 +115,11 @@ for (const [i, cell] of ORDER.entries()) {
   } else {
     const why = out.split("\n").filter((l) => /FAIL|refus|Error|die|gate/i.test(l)).slice(-4).join(" | ");
     say(`    FAILED after ${mins} min — world untouched. ${why.slice(0, 300)}`);
+    // Keep the rejected art. The gates leaving the world untouched is right,
+    // but .codex-tmp is gitignored, and the candidate is the only evidence for
+    // whether the gate was correct to refuse it. A rejected cell nobody ever
+    // sees cannot be ruled on.
+    keepReject(id, biome, out);
   }
 }
 
