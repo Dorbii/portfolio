@@ -4,7 +4,26 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-04 night, LATEST (current):** **c1-1 IS STOPPED AT SIX REFUSALS
+**2026-09-04 late, LATEST (current):** **THE LOOP HAS A SECOND MODEL IN IT
+NOW.** Owner rulings tonight, all in his own words in chat: the dispatch model
+is `gpt-6-astra` (lock 18); Codex reviews every refused candidate BEFORE the
+director and the worker gets one more attempt with its notes (the runner's
+`--review`); the generation model and effort are switchable per run (lock
+18c); c3-2's water cut may be widened at its north seam, mask only, no
+regeneration; and he is driving the water layers himself in another thread —
+leave those files alone. The review loop's trial on c3-1 corrected the
+director (Codex saw c3-2's stream reaching the seam; the gate's 30 px minimum
+run hides it), and the second opinion on c1-1 produced the measurement that
+settles the key-light mechanism (the gate's 12-unit floor keeps +16.0 of sharp
+crown edges and drops −17.4 of soft ones). The brief writer now reads water
+the way the gate does. Astra reasons better than sol; its generation is
+undecided, and Codex 0.153's image loader flakes on big edit targets (the
+runner re-dispatches once). A dialog page showing the two models' exchanges
+was built (`session3-tools/dialog-page.mjs`, published once) and then paused
+by the owner — "not needed atm" — so it is not maintained. Resume from
+`SESSION 11` below.
+
+**2026-09-04 night, superseded:** **c1-1 IS STOPPED AT SIX REFUSALS
 AND NEEDS AN OWNER RULING; THE OTHER SIX CELLS ARE BAKING IN ONE RUN.** The
 sixth candidate, briefed to draw every crown one flat value, failed key-light
 WORSE (0.016) with the same signature, and the worker wrote that the model
@@ -692,9 +711,116 @@ the number the gate measured — see the commit message. c3-1 first (the
 capital node of the chain); the two forest cells last. Every accepted cell
 commits itself. Results go under `RESULTS` below as they land.
 
-## RESULTS
+## RESULTS — the six-cell run (c3-1 on gpt-5.6-sol; the rest on gpt-6-astra)
 
-(pending)
+- **c3-1** (gpt-5.6-sol, 12.6 min) — REFUSED on one gate: a stream out the
+  south edge at 62%. The blind review found c3-2's own stream reaching that
+  seam at 20 px, under the gate's 30 px minimum run; the worker had continued
+  what it saw. Everything else passed, including the two gates that refused
+  the previous candidate (seam tone 17.2 against 38.0; crowns 3.0 m).
+- **c4-0** (gpt-6-astra) — dispatch died at 1.7 min, nothing generated: Codex
+  0.153's image loader rejected the 9.3 MB edit target ("IDAT checksum
+  invalid"); the file checks clean. The runner now re-dispatches such a death.
+- **c6-2** (gpt-6-astra, 9.4 min) — REFUSED on one gate: c5-2's beck a quarter
+  of the way down the west edge unmet (nearest water 1446 px away). The north
+  edge — 65 m of bay from c6-1 — was met this time; land coverage 69%.
+- **c4-2** (gpt-6-astra, 6.3 min) — REFUSED on three: rock lighting 0.331 (a
+  lit side on the bench walls), the east-seam vegetation colour against c5-2
+  (dBG 0.259), one crossing 220 px off.
+- **c1-2** (gpt-6-astra) — dispatch died at 1.5 min: the same loader flake
+  ("invalid base64 ... input length 8266189" on a 7.2 MB file).
+- **c2-1** (gpt-6-astra, 8.5 min) — REFUSED on palette: tone 52.5 and veg
+  39.0 against c2-2 at the south seam. Dark forest painted to the seam again,
+  with the brief saying the opposite — the "model repaints the arriving
+  ground" class, third sighting tonight.
+- **c3-2** (redo, no regeneration, owner-approved) — the source mask widened
+  by radius 5 in a 60 px window at the seam crossing; the cut at the seam row
+  16 → 38 canvas px (63% along, 1.8 m); every gate passes; 14 tiles rewritten,
+  131 byte-identical. c3-1's brief now states the arrival.
+
+## THE REVIEW LOOP (owner 2026-09-04: "have codex review the image gen before your review")
+
+`bake-tanium.mjs --review`: a refused candidate goes to a second Codex job
+(`REVIEW_MODEL`, default gpt-6-astra) with the candidate at 1024 px, its
+768 px preview, a strip of every authored neighbour along the shared edge,
+the gate block, the worker's report and the brief — never a conclusion. It
+answers under five fixed headings; section 3 is appended to the brief as a
+SECOND ATTEMPT block and the worker is dispatched once more. Everything lands
+in `.codex-tmp/review/<id>-aN/`, which the dialog page reads. Dispatch
+failures (no candidate) are not reviewed. `--model` / `--effort` set the
+generation model (cell.mjs honours `CELL_MODEL` / `CELL_EFFORT`).
+
+**The trial, done by hand on c3-1 before the loop existed.** The director's
+read was sealed first (`.codex-tmp/review/c3-1/claude-read.md`), then the
+same evidence went to astra blind. Codex (46k tokens, 6 min) saw blue water
+continuing across the south seam into c3-2 at the refused position and said
+the gate's "nearest none" conflicted with the neighbour's paint. Measured:
+c3-2's cut water reaches the seam at 62% (alpha 0 on the first row inside the
+cell) but only ~20 px wide, under the gate's 30 px minimum run, so the gate
+sees no crossing and refuses any continuation of a stream that visibly
+exists. The director's read had accepted the gate's word. Codex also found
+the pool undersized (9.7 m against 15), the inlet disconnected from it, the
+groove drawn as a kerb, the panels crown-sized, and a contradiction in the
+brief ("2-3 m wide the whole way" against a measured 5 m arrival). Its viewer
+could not decode the 2560 px PNGs — packets carry 1024 px versions now.
+
+**The second opinion on c1-1** (`.codex-tmp/review/c1-1-duck/`) challenged
+the "pale top over dark skirt" reading on the sign of the gradient and asked
+for one measurement: split the gate's sums at its 12-unit floor.
+`session3-tools/keylight-threshold.mjs`, alpha-safe, on the retained mass:
+
+    cell                          retained gy   dropped gy   together
+    c1-1 candidate 6 (refused)       +16.04       -17.44      -1.40
+    ninjaone c2-0 forest (accepted)   +6.79        -7.43      -0.64
+    ninjaone c3-2 forest (accepted)   -0.33        -0.60      -0.93
+    c1-2 candidate (forest + coast)   +4.29        -1.96      +2.33
+    c0-1 meadow (accepted)            +0.59        -1.04      -0.46
+
+The gate keeps the sharp half of every crown (dark skirt against brighter
+ground below) and drops the soft half (bright top fading into the skirt), and
+reads the difference as a sun. Codex's caveat stands: any image's
+unthresholded sum telescopes to its edges, so cancellation alone does not
+prove the shading is permitted, and the worker still admits shaded crowns.
+What is settled: 0.011 cannot separate a shaded canopy from a sun, and the
+accepted NinjaOne forest carries the same signature. **Codex's proposal, now
+option (e) for the owner:** before another full cell, generate one small
+flat-light forest study, rule on its look, and calibrate from it.
+
+## ASTRA, SO FAR
+
+Reasoning: clearly stronger than sol in both reviews. Generation: c6-2 passed
+ten of eleven gates (the west beck unmet); c4-2 failed three (rock lighting
+0.331, the east-seam vegetation colour, a crossing); two dispatches died
+before any image existed because Codex 0.153's image loader returned a
+truncated read of the edit target (`invalid base64 ... input length
+8266189` on a 7.2 MB file; `IDAT checksum invalid` on a 9.3 MB one) while
+the same or larger files loaded fine next time. The files check clean (every
+PNG chunk CRC verified). The runner now re-dispatches such a death once.
+Model per role is the owner's ruling: astra reviews; generation stays on
+astra until the loop's own data says otherwise.
+
+## THE WRITER READ THE WRONG THING (fixed)
+
+`write-briefs.mjs` read each neighbour's water mask at the exact edge
+column; the gate reads the land layer's alpha within 8 px of the line, wet
+below 128, runs of 30 px or more. c5-2's beck reaches the line a few px short
+of the column, so the gate demanded a crossing the brief never named and c6-2
+was refused for not meeting it. The writer now reads the same layer through
+the same band (`edge-water.mjs` shows both readings). Widths grew to what
+the gate sees; c6-2 gained its fourth arrival.
+
+## FOR THE OWNER'S MORNING
+
+- **c1-1:** options (a)-(e) above; no seventh candidate without a ruling.
+- **The palette gate's vegetation arm** decided c3-1's earlier refusal on
+  532 vs 599 green pixels out of 82,944 (0.6% / 0.7%): a lock-change candidate
+  (a share-of-band floor, else the tone arm alone governs).
+- **The continuity gate's 30 px minimum on the NEIGHBOUR's side** hides a
+  real 20 px stream at c3-2's seam. The approved fix (widen c3-2's cut at the
+  seam, mask only) handles this instance; the rule is the owner's.
+- **Anchor-and-cover** (composite the neighbours' pixels back over the outer
+  band before gating) would remove the whole "model repaints arriving
+  pixels" class — seen on c1-1 twice and c3-1 once.
 
 ## c1-1: WHY IT FAILED FIVE TIMES, MEASURED
 
@@ -779,18 +905,17 @@ the owner's:
 
 ## NEXT, in order
 
-1. The six-cell run (in flight; RESULTS above). 2. The owner's ruling on
-c1-1. 3. Any cell the run refuses: read its gate block, then the picture on
-the grid (`world-mosaic.mjs tanium --highlight <cell>`), before touching its
-brief — and stop at two strikes on one mechanism. 4. Force-rebake `c5-1` and
-`c6-1` for the chain. Before every dispatch: re-run `write-briefs.mjs`.
-
-**One more gate finding for the owner, measured tonight:** the palette gate's
-vegetation arm decided c3-1's refusal against c3-0 on **532 vs 599 green
-pixels out of 82,944** in the band (0.6% / 0.7%) — the 500-pixel floor lets it
-compare noise. SESSION 10's unverified note on c5-1's `veg dLuma 68.0` is the
-same shape. Candidate lock change: the vegetation arm needs a share of the
-band (say 2%) on both sides, else the tone arm alone governs.
+1. **c3-2's seam** (approved): `grow-water-along-stream.mjs tanium c3-2 --write`
+   with `GROW_REGIONS` around canvas x 1521 / y 256, then
+   `cell.mjs --territory tanium --cell 3,2 --redo --force` (no regeneration),
+   then `edge-water.mjs tanium c3-2 top` must show a run of 30 px or more at
+   ~62%; commit. 2. Re-run `write-briefs.mjs` (c3-1 gains its south
+   arrival). 3. `bake-tanium.mjs --review --only c3-1,c6-2,c4-0,c4-2,c1-2`
+   (+ `c2-1` if refused) — one reviewer pass and one retry each, then the
+   director. 4. c1-1 waits for the owner. 5. Force-rebake c5-1 and c6-1 for
+   the chain.
+   Before every dispatch: re-run `write-briefs.mjs`; never touch the water
+   layers — the owner is driving those in his own thread.
 
 **SESSION 10 (2026-09-04).** Superseded by SESSION 11 above. The bake it
 announced finished 1 of 6 (c4-1); the rest of it is still the record.
