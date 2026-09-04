@@ -617,13 +617,44 @@ middle. Set them back from the cell edges so only the groove crosses a boundary.
 
 }
 
+// Per-seam transition, derived from the biome map.
+//
+// The packet lists each neighbour's biome and says a change lives in the
+// later-authored cell's outer third — but it never says the change includes
+// BRIGHTNESS, and brightness is what the palette gate measures. c0-1 came back
+// 21.6 luma darker than the sound coast below it: two biomes meeting with no
+// transition drawn, not a lit cell. "Match your neighbour's brightness" is the
+// wrong instruction for a cell between two different biomes; this is the right
+// one.
+function transitionsFor(col, row) {
+  const mine = def.cellBiomes[`${col},${row}`];
+  const sides = [["NORTH", col, row - 1], ["SOUTH", col, row + 1], ["WEST", col - 1, row], ["EAST", col + 1, row]];
+  const lines = sides
+    .map(([dir, c, r]) => [dir, def.cellBiomes[`${c},${r}`]])
+    .filter(([, nb]) => nb && nb !== mine)
+    .map(([dir, nb]) => `- your **${dir} third** carries the change from ${mine} to **${nb}**`);
+  if (!lines.length) return "";
+  return `
+
+**Where the biome changes, the transition is yours to draw.** These neighbours
+are a different biome, and the change belongs INSIDE this cell, across the outer
+third on that side — including how light or dark the ground is, not only what
+grows on it:
+
+${lines.join("\n")}
+
+At the seam itself your ground should already look like theirs. A cell that
+paints its own biome flat to its edge reads as two worlds meeting.`;
+}
+
 fs.mkdirSync(DIR, { recursive: true });
 let n = 0, chained = 0;
 for (const k of cells) {
   const [c, r] = k.split(",");
   const rune = runeChainFor(Number(c), Number(r));
   if (rune) chained += 1;
-  fs.writeFileSync(path.join(DIR, `c${c}-${r}.md`), `${B[k].trim()}${rune}${LIGHTING}\n`);
+  const trans = transitionsFor(Number(c), Number(r));
+  fs.writeFileSync(path.join(DIR, `c${c}-${r}.md`), `${B[k].trim()}${trans}${rune}${LIGHTING}\n`);
   n += 1;
 }
 console.log(`  the rune chain crosses ${chained} cells`);
