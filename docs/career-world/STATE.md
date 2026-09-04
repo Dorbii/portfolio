@@ -4,12 +4,12 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-04, LATEST (current):** **TANIUM IS 7 OF 21; PASS 2 RUNNING.** Five
-pipeline defects surfaced and were fixed, all of them assumptions that only held
-while there was one territory. No threshold moved. The refused cells do not look
-worse than the accepted ones — see
-`session3-tools/tanium-review-sheet.png`, which is the owner ruling that is
-open. Resume from `SESSION 10` below.
+**2026-09-04, LATEST (current):** **TANIUM IS 12 OF 21, PASSES CONTINUING.**
+Six pipeline defects found and fixed, all of them assumptions that only held
+while there was one territory. **No threshold has been moved.** Two findings of
+mine were retracted after measurement, one after the owner's eye. Review is now
+a house rule in `CLAUDE.md`: cells go on the grid, from the stitched pyramid,
+with the cell in question boxed. Resume from `SESSION 10` below.
 
 **2026-09-03, superseded:** **KAIZEN IS CENTRED ON KAIZEN.** The district
 was 32 m north of its shelf because step 5E aligned it by a point on its south
@@ -633,21 +633,62 @@ adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 
 **SESSION 10 (2026-09-04) — RESUME HERE, ANY MODEL.** **A BAKE IS IN FLIGHT.**
 
-## TANIUM: 7 OF 21 ON PASS 1, PASS 2 RUNNING
+## TANIUM: 12 OF 21
 
-`docs/career-world/session3-tools/tanium-review-sheet.png` — every cell in its
-lattice position, accepted and refused at the same size, each with the number
-that decided it. **The refused cells do not look worse than the accepted ones**;
-that is the finding, and it is the owner's to rule on.
-
-Accepted: `c3-0 c0-0 c5-0 c4-1 c0-2 c2-2 c5-2`. The colonnade (`c6-1`) came
-through visually but was refused on water fringe.
+    in   c0-0 c0-2 c1-0 c2-0 c2-2 c3-0 c3-2 c4-1 c5-0 c5-1 c5-2 c6-0
+    out  c0-1 c1-1 c1-2 c2-1 c3-1 c4-0 c4-2 c6-1 c6-2
 
 Re-running `bake-tanium.mjs` retries exactly the failures — it skips
-already-authored cells — so a pass is cheap and the gates leave the world
-untouched on refusal.
+already-authored cells — and it works: 7 → 10 → 11 → 12 across the passes. The
+refusals are outliers, not decay. **The generation has NOT drifted**: comparing
+accepted cells, Tanium is flatter than NinjaOne on the global lighting measure
+(key-light median 0.0022 vs 0.0033, max 0.0090 vs 0.0108, limit 0.011).
 
-## FIVE PIPELINE DEFECTS, ALL FOUND BY THE SECOND TERRITORY
+**Seam gates get harder as the territory fills.** The remaining nine are the
+cells now surrounded on two or three sides, so `palette conformance` and
+`water continuity` dominate their refusals. That is structural, not bad luck.
+
+## THE FOREST IS ONE REGION NOW
+
+Owner on c1-1: *"I feel like this doesnt blend well or maybe we need dark forest
+above it and up and left of it"*. He was right and it was worse than the cell he
+saw — **both** dark-forest cells were isolated. His exact suggestion was blocked
+by his own rulings (c1-0's north edge must open into the sound; c0-0 is baked
+and a corner), so the forest grew east and south instead:
+
+    c2-1  moor        -> dark-forest      c4-2  dark-forest -> mixed-bench
+    c1-2  coast-cliff -> dark-forest
+
+An L from the capital's edge to the south coast. None were baked, so it cost
+nothing. The blending lives in the two edge briefs: c2-1 thins its canopy
+gradually eastward across the whole cell rather than stopping at a line.
+
+## TWO RETRACTIONS, BOTH MINE
+
+- **"Vegetation colour is drifting cell to cell."** Wrong. Splitting every
+  reading into hue and brightness: six failures read `dBG 0.011-0.049` (hue
+  essentially identical) with `dLuma 14-56`. Those are **lighting** faults
+  wearing a palette gate's name. I had also called `dLuma 56.2` "a genuinely bad
+  cell whose tone is nothing like its neighbour's" — its tone matched to 0.041.
+  The brief instruction now targets brightness, and the proposal to widen the
+  palette gate is **withdrawn**: it would have masked exactly the baked light the
+  owner is protecting, because light and shadow become their own layer.
+- **The rock-lighting "blind spot".** Six accepted cells scored over the 0.16
+  limit and passed on the report-only exemption below 5000 strong rock edges.
+  All six are low-rock terrain (n 874-2991), and the owner's eye agreed they are
+  flat: *"those 3 for ninja look fine to my eyes tbh"*. The outlier, tanium c3-2
+  at 0.522, is terraced bench country whose risers all face the same way — the
+  rock gradients align by **landform**. **No change; retracted rather than left
+  in STATE as a phantom defect.**
+
+## REVIEW IS A HOUSE RULE NOW
+
+Owner: *"I much prefer this type of review where I see the cell in question on
+the grid like this."* In `CLAUDE.md`, not here, because STATE is rewritten at
+every promotion. `world-mosaic.mjs <territory> [--level N] [--highlight ...]`
+assembles a territory from its stitched pyramid with cells boxed.
+
+## SIX PIPELINE DEFECTS, ALL FOUND BY THE SECOND TERRITORY
 
 The pipeline was calibrated on NinjaOne, and every assumption that only held
 because there was ONE territory surfaced tonight. Lock changes 14-17:
@@ -667,6 +708,10 @@ because there was ONE territory surfaced tonight. Lock changes 14-17:
   floor.** Cost four cells and ten exclusion reports, every worker doing exactly
   what the packet asked — reporting a 1.5 m sapling and losing the bake. The
   next cell after the fix passed.
+
+- **The crown band is a range of MEDIANS and the packet used it as a per-crown
+  floor.** Cost four cells and ten exclusion reports, every worker doing exactly
+  what the packet asked — reporting a 1.5 m sapling and losing the bake.
 
 **No threshold moved.** 1.7/5.2, 0.011, 0.16, 13, 21 are all as the owner set
 them.
