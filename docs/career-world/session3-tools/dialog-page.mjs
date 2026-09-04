@@ -247,15 +247,16 @@ const page = `<title>Career World Dialog</title>
   --ok:#7FC07F; --bad:#E07A66; --warn:#E0B05A; --pending:#5E6963; }
 *{box-sizing:border-box}
 body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55}
-main{max-width:76ch;margin:0 auto;padding:28px 20px 80px}
+main{max-width:76ch;margin:0 auto;padding:28px 20px 80px;overflow-wrap:anywhere}
+.body code,.body p{overflow-wrap:anywhere}
 h1,h2,h3{font-family:var(--disp);text-wrap:balance;letter-spacing:-0.01em}
 h1{font-size:2rem;font-weight:700;margin:0 0 6px}
 .lede{color:var(--ink-2);margin:0 0 22px;max-width:60ch}
 .lede strong{color:var(--ink)}
 .status{display:flex;flex-wrap:wrap;gap:8px 18px;font-family:var(--mono);font-size:.8rem;color:var(--ink-2);margin:0 0 18px;font-variant-numeric:tabular-nums}
 .status b{color:var(--ink);font-weight:600}
-.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:0 0 6px}
-.cell{display:flex;flex-direction:column;justify-content:space-between;min-height:58px;padding:6px 7px;border-radius:4px;text-decoration:none;color:var(--ink);background:var(--surface);border:1px solid var(--rule);font-family:var(--mono);font-size:.72rem;line-height:1.2}
+.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin:0 0 6px;max-width:100%}
+.cell{display:flex;flex-direction:column;justify-content:space-between;min-height:58px;min-width:0;overflow:hidden;padding:6px 7px;border-radius:4px;text-decoration:none;color:var(--ink);background:var(--surface);border:1px solid var(--rule);font-family:var(--mono);font-size:.72rem;line-height:1.2}
 .cell .id{font-weight:600}
 .cell .biome{color:var(--ink-2);font-size:.62rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cell.st-authored{border-color:var(--ok);box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--ok) 35%,transparent)}

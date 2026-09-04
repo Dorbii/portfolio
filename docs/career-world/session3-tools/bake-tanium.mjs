@@ -282,6 +282,17 @@ for (const [i, cell] of ORDER.entries()) {
   const forced = FORCE.has(id);
   let { out, already, ok, mins } = bakeOnce(cell, `${BRIEFS}/${id}.md`, forced, t0);
   let attempts = 1;
+  // Codex 0.153's image loader sometimes returns a truncated read of the edit
+  // target ("invalid base64 data ... input length 8266189" on a 7.2 MB file;
+  // "IDAT checksum invalid" on a 9.3 MB one) while the same or larger files
+  // load fine on the next dispatch. The worker gets one call and cannot
+  // retry; the runner can. A dispatch that died before any image existed is
+  // re-dispatched once — nothing was generated, so nothing is wasted.
+  if (!ok && !already && !fs.existsSync(`.codex-tmp/authoring/cells/${TERRITORY}/${id}/${id}-source.png`)
+      && /unable to read referenced image|invalid base64|checksum|no generation at/i.test(out)) {
+    say(`    the image tool failed to load an input before generating — re-dispatching once`);
+    ({ out, already, ok, mins } = bakeOnce(cell, `${BRIEFS}/${id}.md`, forced, Date.now()));
+  }
   // Review-and-retry: a refused candidate goes to a reviewer before anyone
   // else sees it, and the worker gets ONE more attempt with the reviewer's
   // addendum appended to the same brief. A dispatch failure (no candidate)
