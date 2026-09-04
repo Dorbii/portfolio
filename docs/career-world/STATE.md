@@ -4,12 +4,12 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-04, LATEST (current):** **TANIUM IS 12 OF 21, PASSES CONTINUING.**
-Six pipeline defects found and fixed, all of them assumptions that only held
-while there was one territory. **No threshold has been moved.** Two findings of
-mine were retracted after measurement, one after the owner's eye. Review is now
-a house rule in `CLAUDE.md`: cells go on the grid, from the stitched pyramid,
-with the cell in question boxed. Resume from `SESSION 10` below.
+**2026-09-04, LATEST (current):** **TANIUM 14 OF 21; THE RUNE CHAIN IS IN TWO
+CELLS.** Tanium's wonder is no longer the colonnade — it is a chain of runes
+carved across the whole territory, owner's idea, with the travelling light
+belonging to a later EFFECT layer. `c0-1` and `c4-1` carry it. The three cells
+between them are the blocker and `c1-1` is the keystone. Resume from
+`SESSION 10` below.
 
 **2026-09-03, superseded:** **KAIZEN IS CENTRED ON KAIZEN.** The district
 was 32 m north of its shelf because step 5E aligned it by a point on its south
@@ -633,20 +633,90 @@ adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 
 **SESSION 10 (2026-09-04) — RESUME HERE, ANY MODEL.** **A BAKE IS IN FLIGHT.**
 
-## TANIUM: 12 OF 21
+## TANIUM: 14 OF 21
 
-    in   c0-0 c0-2 c1-0 c2-0 c2-2 c3-0 c3-2 c4-1 c5-0 c5-1 c5-2 c6-0
-    out  c0-1 c1-1 c1-2 c2-1 c3-1 c4-0 c4-2 c6-1 c6-2
+    missing  c1-1 c1-2 c2-1 c3-1 c4-0 c4-2 c6-2
 
-Re-running `bake-tanium.mjs` retries exactly the failures — it skips
-already-authored cells — and it works: 7 → 10 → 11 → 12 across the passes. The
-refusals are outliers, not decay. **The generation has NOT drifted**: comparing
-accepted cells, Tanium is flatter than NinjaOne on the global lighting measure
-(key-light median 0.0022 vs 0.0033, max 0.0090 vs 0.0108, limit 0.011).
+## THE WONDER IS A RUNE CHAIN, NOT THE COLONNADE
 
-**Seam gates get harder as the territory fills.** The remaining nine are the
-cells now surrounded on two or three sides, so `palette conformance` and
-`water continuity` dominate their refusals. That is structural, not bad luck.
+The colonnade was tried twice and failed both times to be what it was for: the
+first pass drew separate upright columns, the second got them leaning but never
+touching, so the LINK — the whole point of a linear chain — was never drawn. No
+gate can catch that; every one is a physical measurement and none can ask
+whether this is the thing that was specified.
+
+Owner: *"maybe we rethink how to portray the chain"*, then *"Could also do runes
+carved into the environment itself"*, then *"what if we expand it over the
+entire territory?"* and *"maybe not every cell but span the territory"*.
+
+**`runeChain` is a ROUTE in the def**, like the rail loop — not a biome, not one
+cell's feature. It crosses row 1 sea to sea, and the RUNES cluster only at the
+settlements, so each project city is a node on the line, which is what Tanium's
+linear chain actually is. Cells between nodes carry the groove alone.
+
+**The layer split is the owner's and it shapes everything:** *"that would be on
+an effect layer"*. L2 carries the CARVING — permanent, static, pure albedo. The
+travelling pulse belongs to an effect layer later. Every brief says so: carving
+only, paint no light.
+
+No lock change: the route lives in the def and is consumed by `write-briefs.mjs`.
+
+**In the world:** `c0-1` and `c4-1`. `c5-1` and `c6-1` kept their older art
+because their forced rebakes failed and a failure leaves the world untouched.
+
+## THE BRIEF WAS 80% RULES — AND THAT WAS THE BUG
+
+`c0-1` failed five times, each on a different gate, and measuring the brief
+explained it better than any gate did: **1027 words, of which 200 described the
+cell.** Every failure had been answered by appending another paragraph, and the
+packet already carries the lighting rule, the crown schema, the biome vocabulary
+and the transitions on its own. Trimmed to 541 words — rules keep their NUMBERS
+and lose their arguments — and it began passing.
+
+**Four gates, four fixes, all the same shape: the pipeline knew a number, the
+brief never said it, and the worker guessed.**
+
+| gate | what the brief now states |
+|---|---|
+| crown scale | crowns 3-4 m, the middle of what has been accepted |
+| palette | which of your thirds carries which biome change |
+| water continuity | where each neighbour's water touches your edge, measured |
+| the chain | the exact crossing percentage on each edge |
+
+That is how to write briefs for Column, ACE and Independent from the start.
+
+## THE KEYSTONE: c1-1
+
+Every dark-forest cell fails on seam TONE — `c1-1` 27.3, `c2-1` 57.7, `c1-2`
+39.3, against a 21 limit — and there is a chicken-and-egg in it. `c1-1`'s
+authored neighbours are a meadow shelf and a sound coast, both bright; its two
+FOREST neighbours are unbaked. So the first forest cell must transition to
+bright on every authored side at once, the hardest possible case.
+
+**Once `c1-1` lands, `c2-1` and `c1-2` each gain a same-biome neighbour and the
+tone problem largely goes.** Grind `c1-1` alone rather than cycling all three.
+
+Also seen: `c2-1` drew **983 crowns at 1.176 m** — hundreds of tiny trees rather
+than a forest of proper ones — and `c5-1` failed `veg dLuma 68.0` against
+`c4-1`, a bare plateau whose vocabulary says *"none on the open plateau"*. That
+smells like a small-sample artefact in the palette gate's vegetation arm, the
+same shape as the rock-lighting exemption. Unverified.
+
+## A WATER FIX WITHOUT A REBAKE
+
+Owner: *"the river needs to cut out this tiny part. No regen please cause it
+looks good."* `grow-water-along-stream.mjs` edits the mask and `cell.mjs --redo`
+re-derives and re-cuts from the existing generation — art byte-identical, only
+the cut changes, original mask kept beside it.
+
+Three approaches failed first: no enclosed islands existed, growth from the
+existing cut could not start because the channels do not touch it, and
+saturation could not separate stream from grass (0.29-0.32 vs 0.5-0.68).
+**Blue-leaning does: the channel runs `b-r` −25..+28 where grass sits at −107.**
+
+**The preview caught a near-disaster** — the first bounded fill was eating the
+RUNE GROOVE, because grey stone reads blue-leaning exactly as the stream does.
+Nothing would have failed; the chain would just have been cut away.
 
 ## THE FOREST IS ONE REGION NOW
 
