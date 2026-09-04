@@ -48,3 +48,4 @@ They are kept because a rejected cell nobody sees cannot be ruled on.
 - `c4-2` mixed-bench — rejected on **a gate **
 - `c6-2` quarry — rejected on **water continuity 1**
 - `c4-0` moor — rejected on **water continuity 1**
+- `c0-1` lush-shelf — rejected on **rock lighting 0.25**
