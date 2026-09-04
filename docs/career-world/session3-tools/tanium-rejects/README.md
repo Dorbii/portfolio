@@ -36,3 +36,4 @@ They are kept because a rejected cell nobody sees cannot be ruled on.
 - `c4-2` dark-forest — rejected on **rock lighting 0.215**
 - `c6-2` quarry — rejected on **rock lighting 0.204**
 - `c4-0` moor — rejected on **water continuity 1**
+- `c1-0` sound-coast — rejected on **water continuity 1**

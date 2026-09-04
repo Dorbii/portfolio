@@ -277,16 +277,16 @@
   "6,0": "coast-cliff",
   "0,1": "lush-shelf",
   "1,1": "dark-forest",
-  "2,1": "moor",
+  "2,1": "dark-forest",
   "3,1": "lush-shelf",
   "4,1": "bare-plateau",
   "5,1": "lush-shelf",
   "6,1": "linked-colonnade",
   "0,2": "sound-coast",
-  "1,2": "coast-cliff",
+  "1,2": "dark-forest",
   "2,2": "lush-shelf",
   "3,2": "mixed-bench",
-  "4,2": "dark-forest",
+  "4,2": "mixed-bench",
   "5,2": "moor",
   "6,2": "quarry"
  },
@@ -345,7 +345,7 @@
     1
    ],
    "id": "beacon-crag",
-   "terrain": "a crag with a flat top standing clear of the moor, a view over the whole south coast"
+   "terrain": "a bare crag standing clear of the canopy, flat-topped, the one place the forest opens to a view over the whole south coast"
   },
   {
    "cell": [
@@ -361,7 +361,7 @@
     2
    ],
    "id": "fern-hollow",
-   "terrain": "a damp hollow under the canopy, a spring and a level floor"
+   "terrain": "a damp hollow on the middle bench, about 30 m across, a spring at its head, a level mossy floor and ferns thick around it, sheltered on every side by the bench walls"
   },
   {
    "cell": [

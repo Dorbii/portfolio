@@ -212,22 +212,27 @@ darkest stand in the territory surrounds it.
 
 Land to all four edges.`;
 
-B["2,1"] = `Open heather-and-grass moor, wind-scoured, rolling. Boulders and scrub, low
-basalt outcrops, one longer column wall running east–west across the north of
-the cell about 6 m high with talus at its foot. Heather sparse and subdued,
-never a carpet: olive and gold-green ground, dull violet accents, grey rock.
+B["2,1"] = `THE EASTERN EDGE OF THE FOREST, and the cell that has to make the forest read
+as a forest rather than as one dark square. The cell WEST of this one (1,1) is
+dense dark forest; the cell EAST (3,1) is the capital's meadow shelf.
 
-Becks in two shallow gullies running south, small pools where they slacken.
-Dark conifers only in those gullies and in one hollow.
+So the canopy is unbroken along the WEST edge and THINS EASTWARD across this
+cell: dense stands for the western third, then stands breaking into glades and
+scattered groups through the middle, then open ground with only a few isolated
+conifers by the eastern third. **The change happens gradually across the whole
+cell, not at a line.** Mossy ground and deep shade under the western stands;
+grass and low scrub in the open east.
 
-The BEACON-CRAG site: a crag standing clear of the moor toward the south-east,
-rising 18–25 m above the surrounding ground with a flat top about 20 m across
-and a clear fall on its south side. It should read as the one place in this
-part of the territory you would climb to see from — the whole south coast lies
-that way. Approachable from the north by a natural ramp of broken ground.
+Ground gently rolling and falling to the south. Low basalt outcrops break
+through in the open eastern part; one column wall about 6 m high runs east-west
+across the north with talus at its foot. A beck runs south through the trees in
+a shallow gully and out into the open ground.
 
-The ground falls gently south toward the coast beyond this cell and rises
-slightly to the east toward the capital's shelf.
+The BEACON-CRAG site: a bare crag toward the south-east where the trees have
+already thinned, rising 18-25 m with a flat top about 20 m across and a clear
+fall on its south side — the one place hereabouts the forest opens to a view,
+and the whole south coast lies that way. Approachable from the north by a ramp
+of broken ground.
 
 Land to all four edges.`;
 
@@ -348,25 +353,31 @@ grass and low outcrop, so the cell reads as a shore that continues inland.
 
 Carry land to the NORTH and EAST edges; the south and west are water.`;
 
-B["1,2"] = `Wild coast on the world's southern edge. The SOUTH edge is open sea.
+B["1,2"] = `THE FOREST COMING DOWN TO THE SEA. The cell NORTH of this one (1,1) is dense
+dark forest and its canopy continues into this cell unbroken; the SOUTH edge is
+open sea, the world's southern coast.
 
-Cliffs 20–35 m tall of weathered columnar basalt: uneven column heights and
-widths, tops broken at different levels, split and leaning columns, collapsed
-drums lying in talus at the foot, lichen in the joints. The cliff line wanders
-with two bays and a buttress between them; never a straight run, never a square
-corner.
+So: forest over most of the cell, thinning only in the last 30-40 m before the
+cliff edge where the wind gets at it — the outermost conifers low, wind-shaped
+and leaning inland, with bare rock and thin grass between them. Dense dark
+stands everywhere north of that. Mossy ground, wet talus, flat haze between the
+trunks.
 
-An INLET cuts north into the land from the sea, about 30 m wide at its mouth
-and running 60 m inland, its walls the same broken columns, its water deep and
-dark. The rail loop crosses it. Give the crossing what it needs: two facing
-shoulders of firm level rock at about the same height on either side of the
-inlet, roughly 30 m apart, clear of talus and trees. Draw no bridge and no
-track — only the ground.
+The coast below is cliff, 20-35 m, weathered columnar basalt: uneven column
+heights, tops broken at different levels, split and leaning columns, collapsed
+drums in talus at the foot. The cliff line wanders with two bays and a buttress.
 
-Above the cliffs, bare basalt benches and talus with thin grass and shingle in
-the hollows; no meadow. Dark conifers only in the gully running north-east.
+An INLET cuts north into the land from the sea, about 30 m wide at its mouth and
+running 60 m inland, its walls the same broken columns, its water deep and dark,
+with the forest standing right to the lip on both sides. The rail loop crosses
+it: give the crossing two facing shoulders of firm level rock at about the same
+height on either side, roughly 30 m apart, clear of talus and of trees. Draw no
+bridge and no track — only the ground.
 
-Carry land to the NORTH, EAST and WEST edges.`;
+A stream comes down through the forest from the north and falls into the head of
+the inlet.
+
+Carry land to the NORTH, EAST and WEST edges; the south is sea.`;
 
 B["2,2"] = `The AUTOMATED-UAT shelf — a settlement shelf on the south coast, the richest
 ground in its neighbourhood.
@@ -410,22 +421,25 @@ stair.
 Conifer stands on the sheltered benches, thicker toward the east where the
 forest begins. Carry land to the NORTH, EAST and WEST edges.`;
 
-B["4,2"] = `Dark forest on the southern coast. Dense dark conifer stands on mossy ground,
-little open ground, flat haze between the trunks — the darkest green in the
-territory after the stand in the north-west.
+B["4,2"] = `Bench country on the world's southern coast, continuing the benches of the cell
+to the WEST (3,2) without a break — the two are one landform and the benches
+should run straight across the shared edge.
 
-A gorge runs north to south through the centre of the cell, 25–35 m deep, walls
-of mossy basalt with wet talus, a stream in the bottom with two falls and pools
-lying in shade. The canopy nearly closes over it in places. The gorge opens at
-the SOUTH edge directly into the sea, so its mouth is a narrow steep-sided
-notch in the coast with the stream running out over shingle.
+Stepped benches and terraces descending north to south, three or four of them,
+each 10-18 m above the last, separated by column walls with talus at their feet.
+Moor grass on the flats, scree on the faces, conifer stands on the sheltered
+benches and thicker in the hollows — trees present but not a forest, the canopy
+open enough to see the ground through.
 
-The FERN-HOLLOW site: a damp hollow under the canopy on the east side of the
-gorge, about 30 m across, with a spring at its head, a level mossy floor and
-ferns thick around the spring. Sheltered on every side.
+The SOUTH edge is open sea: at the foot of the lowest bench, low cliffs 10-20 m
+and a shingle strand in one small cove.
 
-The SOUTH edge either side of the gorge mouth is low cliff, 10–20 m, weathered
-and broken, with conifers standing right to the cliff top.
+Becks step down the benches, two of them, each dropping over every wall in a
+small fall and running out over the shingle.
+
+The FERN-HOLLOW site: a damp hollow on the middle bench about 30 m across, a
+spring at its head, a level mossy floor, ferns thick around the spring, and the
+bench walls sheltering it on every side.
 
 Carry land to the NORTH, EAST and WEST edges.`;
 
