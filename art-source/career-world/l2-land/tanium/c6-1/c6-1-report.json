@@ -1,0 +1,140 @@
+{
+  "cell": "c6-1",
+  "territory": "tanium",
+  "status": "refused",
+  "generation": {
+    "filename": "c6-1-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "827B8CF12A8881E538D340E723C81E12699454198D0E63E9FB8739FED55BD075",
+    "mode": "built-in ImageGen edit with the edit target first and the canon second as reference only",
+    "imageGenCallsUsed": 1,
+    "retryUsed": false,
+    "bothImagesAttachedToSameCall": true,
+    "secondReferenceAccepted": true,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "promptRecord": "c6-1-imagegen-prompt-used.txt"
+  },
+  "generationSizePx": [1254, 1254],
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean on the delivered source; final water-mask pixels and gradients below 12 luminance units excluded",
+    "peakVsUniformOverLand": 1.592956,
+    "uniformReference": 1.0,
+    "directionalKeyFirstMoment": 0.001743,
+    "gradientSamples": 1035873,
+    "rockStrongEdgeFirstMoment": 0.05273,
+    "rockStrongEdgeSamples": 51139,
+    "aggregateDirectionalityNumericPass": true,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No whole-cell sun gradient or long cast-shadow field is visible, but repeated pale column caps above darker vertical faces create a consistent upper-face value bias. The aggregate metric cannot override the literal no-lit-side requirement."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "manual estimated fraction of non-water land area at native source resolution",
+    "buildable": 0.74,
+    "steep": 0.15,
+    "otherBrokenRockTalusOrVegetation": 0.11,
+    "method": "The broad level grass-and-bare-rock plateau counts as buildable; the east cliff faces and taller west outcrop faces count as steep; conifer gullies, talus, and broken rock make up the remainder."
+  },
+  "waterFootprintFraction": 0.223001,
+  "finalDerivedLandCoverageFraction": 0.776999,
+  "edgeTopology": {
+    "north": {
+      "waterPixels": 0,
+      "landPixels": 1254,
+      "required": "land continues through the north edge",
+      "pass": true
+    },
+    "east": {
+      "waterPixels": 1114,
+      "landPixels": 140,
+      "required": "sea across the east edge with terrain ending before it",
+      "pass": false
+    },
+    "south": {
+      "waterPixels": 604,
+      "landPixels": 650,
+      "required": "the coastal landform and its east sea continue through the south edge",
+      "pass": true
+    },
+    "west": {
+      "waterPixels": 0,
+      "landPixels": 1254,
+      "required": "settlement-shelf land continues through the west edge",
+      "pass": true
+    }
+  },
+  "crown": {
+    "medianMetres": 3.136,
+    "medianPx": 65.327,
+    "sampleCount": 31,
+    "method": "Manual apex-by-apex outer-foliage census of all 31 visible crowns at native 1254 px, including clipped crowns and saplings; median source width 32 px scaled by 2560/1254 and 0.048 m per final pixel.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c6-1-water-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "C7867EB9F3785D86000F9264BE50E53FB1E7F5EBBECDC119E687BF2CADF2901A",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "opaqueWaterPixels": 350672,
+    "transparentLandPixels": 1221844,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedWaterComponents8Connected": 1,
+    "smallSpeckleHolePixelsFilled": 3266,
+    "accidentalInteriorHoles": 0,
+    "edgeWaterPixels": {
+      "north": 0,
+      "east": 1114,
+      "south": 604,
+      "west": 0
+    },
+    "method": "Flooded the edge-connected teal sea from the east edge, grew through qualified cool surf and foam pixels, and filled enclosed wet speckles; the resulting binary boundary includes the full painted surf, wash, ripples, and reflections while retaining dry rocks and column bases."
+  },
+  "siteChecks": {
+    "plainCliffTopBench": "present, but much broader than the requested narrow bench",
+    "colonnadeHead": "absent: there is no last land column followed by a first linked sea stack with adjacent level viewing ground",
+    "railCliffRunLandform": "partial: level ground reaches the cliff top, but a distinct narrow ledge above the sea is not clearly drawn"
+  },
+  "wonderChecks": {
+    "singleUnbrokenArcade": false,
+    "allColumnsLeanSouthEast": false,
+    "neighborTopsTouch": false,
+    "walkableOpenGapsUnderArcade": false,
+    "equalColumnHeightAndGirth": false,
+    "noCentralMonument": true,
+    "continuesAsLinkedSeaStacksPastEastEdge": false
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasEdit": true,
+    "secondReferenceAttached": true,
+    "rawGenerationUntouched": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "landContinuesNorthSouthAndWest": true,
+    "eastEdgeSea": false,
+    "waterMaskBinarySameDimensionsAndHoleFree": true,
+    "allPaintedWaterIncluded": true,
+    "allMeasuredCrownsIncluded": true,
+    "crownMedianInsideAcceptedTerritoryBand": true,
+    "strictEqualValueOnAllFormSides": false,
+    "linkedColonnadeAsSpecified": false
+  },
+  "refusalReasons": [
+    "The generated columns are upright repeated cliff buttresses, not equal columns all leaning south-east and touching their immediate neighbors at the top to form a walkable arcade.",
+    "The chain does not leave land as linked sea stacks and continue past the east edge; consequently the required colonnade-head site is absent.",
+    "The east edge contains 140 land pixels, while the brief requires the east edge to be sea.",
+    "Repeated pale column caps above darker vertical faces violate the highest-priority equal-value-on-all-sides lighting rule. The packet permits a retry only for a non-square result, so no corrective ImageGen call was made."
+  ],
+  "openRisks": [
+    "The broad level plateau does not match the requested narrow, quiet cliff-top bench and visually competes with the intended linear wonder.",
+    "The water mask was inspected against a native-resolution overlay and passes its mechanical checks, but coastline judgment remains a director and owner visual decision.",
+    "Exact seam quality, ground scale, and overall visual quality remain director and owner judgments; quarantine evidence does not establish visual acceptance."
+  ]
+}
