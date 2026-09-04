@@ -1,0 +1,161 @@
+{
+ "format": "l2-cell-pyramid",
+ "territory": "tanium",
+ "contract": {
+  "keptPx": 2048,
+  "bleedPx": 256,
+  "generatedPx": 2560,
+  "artPxPerWorldPx": 9.45,
+  "mPerWorldPx": 0.4503,
+  "tilePx": 256,
+  "levels": 7,
+  "reduction": "lanczos3, premultiplied, chained exact 2:1",
+  "seam": {
+   "cornerJitterPx": 64,
+   "wigglePx": 64,
+   "featherPx": 8,
+   "contentAware": {
+    "bandPx": 128,
+    "stepPenalty": 2,
+    "cost": "l2 RGB rms per pixel; a water-cut mismatch costs 255",
+    "between": "authored cells only; edges to unauthored ground keep the wiggle"
+   }
+  }
+ },
+ "gridPx": [
+  14336,
+  6144
+ ],
+ "levelTiles": [
+  [
+   56,
+   24
+  ],
+  [
+   28,
+   12
+  ],
+  [
+   14,
+   6
+  ],
+  [
+   7,
+   3
+  ],
+  [
+   4,
+   2
+  ],
+  [
+   2,
+   1
+  ],
+  [
+   1,
+   1
+  ]
+ ],
+ "tilePath": "L{level}/{x}-{y}.webp",
+ "registration": {
+  "status": "territory-local; world placement pending the world-scale-reset re-derivation"
+ },
+ "cells": {
+  "c3-0": {
+   "authoredAt": "2026-09-04T06:36:43.218Z",
+   "describe": "CONNECTING GROUND. The entire NORTH edge of this cell is land continuing into\nNinjaOne — no coast, no shingle, no water on that edge at all. Terrain must run\nright off the top as solid ground.\n\nBench country: three or four broad terraces 15–25 m deep, stepping down from\nthe north edge toward the south-west, separated by low column walls 4–8 m high\nwith talus at their feet. Moor grass and sparse he",
+   "sourcePx": 1254,
+   "gates": [
+    {
+     "name": "key-light asymmetry",
+     "value": 0.0027,
+     "pass": true,
+     "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004"
+    },
+    {
+     "name": "gradient ratio",
+     "value": "1.476 (reported)",
+     "pass": true,
+     "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
+    },
+    {
+     "name": "rock lighting",
+     "value": 0.051,
+     "pass": true,
+     "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.14; limit 0.16 on the owner's eye (2026-09-02, the dark-forest gorge at 0.153)"
+    },
+    {
+     "name": "land coverage",
+     "value": "97.4%",
+     "pass": true
+    },
+    {
+     "name": "water cut clear",
+     "value": "0 px",
+     "pass": true,
+     "note": "paint surviving where the mask is fully water; exact zero by construction for pipeline-derived cells"
+    },
+    {
+     "name": "mask completion",
+     "value": "+1 px grown, 0 px holes filled (reported)",
+     "pass": true,
+     "note": "the delivered mask grown into contiguous painted water within 48 px and speckle holes <=64 px filled before the cut (owner 2026-09-02); dry paint stops the growth, so a polyline mask still fails the rings"
+    },
+    {
+     "name": "water fringe",
+     "value": "0.01%",
+     "pass": true,
+     "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
+    },
+    {
+     "name": "water fringe (48px)",
+     "value": "0%",
+     "pass": true,
+     "note": "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)"
+    },
+    {
+     "name": "water continuity",
+     "value": "ok (0 crossings checked)",
+     "pass": true,
+     "note": "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint"
+    },
+    {
+     "name": "palette conformance",
+     "value": "no authored seams",
+     "pass": true,
+     "note": "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13"
+    },
+    {
+     "name": "crown scale",
+     "value": "4.312 m over 11 crowns (accepted range 1.7-5.2 m)",
+     "pass": true,
+     "note": "the worker's own median crown from c3-0-report.json, against the 1.7-5.2 m range the accepted cells measured (NOT the plan's written 4-7 m — see CROWN_MIN_M); crown.excludedElements must be empty, so an out-of-scale element cannot be measured around"
+    }
+   ],
+   "shelf": null,
+   "features": [],
+   "waterZones": [
+    "stream",
+    "fall"
+   ],
+   "maskCompletion": {
+    "grownPx": 1,
+    "holePx": 0
+   },
+   "biome": "mixed-bench",
+   "source": "art-source/career-world/l2-land/tanium/c3-0",
+   "stitch": {
+    "order": 1,
+    "tiles": [
+     90,
+     30,
+     12,
+     6,
+     2,
+     2,
+     1
+    ]
+   }
+  }
+ }
+}

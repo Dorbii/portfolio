@@ -1,0 +1,95 @@
+{
+  "cell": "c3-0",
+  "territory": "tanium",
+  "status": "refused",
+  "generation": {
+    "filename": "c3-0-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "991C156BCA93D1F93E007B50BB17D07866248195D6C966C80F46CEDD31632B5E",
+    "mode": "built-in ImageGen whole-canvas generation conditioned on a measured layout guide and a canon style crop",
+    "imageGenCallsUsed": 2,
+    "selectedCandidate": 2,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "resizedCroppedOrTiled": false,
+    "promptFile": "c3-0-imagegen-prompt.txt"
+  },
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean on the delivered source; final water-mask pixels excluded and gradients below 12 luminance units excluded",
+    "peakVsUniformOverLand": 1.336,
+    "uniformReference": 1.0,
+    "peakBinDegrees": [250, 260],
+    "directionalKeyFirstMoment": 0.0029,
+    "directionalKeyLimit": 0.011,
+    "directionalKeyPass": true,
+    "visualCheck": "No cast-shadow field, sun, or time-of-day gradient was observed. Local form shading and ambient occlusion remain; visual flat-value judgment is not claimed as owner acceptance."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "manual estimated fraction of non-water land area at native source resolution",
+    "buildable": 0.55,
+    "steep": 0.16,
+    "otherBrokenTalusOrVegetated": 0.29,
+    "method": "Broad coherent bench tops and the level knoll count as buildable; exposed terrace faces count as steep; talus, dense gully vegetation, broken margins, and scattered boulders make up the remainder."
+  },
+  "waterFootprintFraction": 0.017836,
+  "crown": {
+    "medianMetres": 4.312,
+    "medianPx": 89.824,
+    "sampleCount": 11,
+    "method": "Median native-pixel outer-foliage width across 11 visible mature gully conifers, measured on the 1254 px source and scaled by 2560/1254; median source width 44 px.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c3-0-water-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "57585D083006C1011999EC6A45F11220E25F0471DDA5C5ECDEBBAEFE510E510D",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "opaqueWaterPixels": 28048,
+    "components8Connected": 27,
+    "componentNote": "One continuous channel plus small source-painted detached ripple, wash, and spray flecks retained to cover the full painted water extent.",
+    "interiorHolePixels": 0,
+    "edgeWaterPixels": 55,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "northEdgeSpanPx": [308, 327],
+    "northEdgeCenterPx": 317.5,
+    "northEdgeCenterFraction": 0.25319,
+    "southEdgeSpanPx": [1024, 1058],
+    "sourceScaleFringeProxy": {
+      "final6PxEquivalentSourceRadiusPx": 3,
+      "ring6UnmaskedStrongWaterColourPixels": 31,
+      "ring6Pixels": 14085,
+      "ring6FringePercent": 0.220092,
+      "final48PxEquivalentSourceRadiusPx": 24,
+      "ring48UnmaskedStrongWaterColourPixels": 106,
+      "ring48Pixels": 74456,
+      "ring48FringePercent": 0.142366
+    }
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasSelectedGeneration": true,
+    "terrainOnly": true,
+    "landToAllFourEdgesExceptRequiredBeckCrossings": true,
+    "northEdgeOtherwiseSolidLand": true,
+    "waterMaskSameDimensions": true,
+    "waterMaskBinaryWhiteOnTransparent": true,
+    "waterMaskNoInteriorHoles": true,
+    "crownWithinAcceptedTerritoryBand": true,
+    "beckNorthEntryAtExactly30Percent": false
+  },
+  "refusalReasons": [
+    "The selected source paints the beck at x=317.5 px / 25.319% of the north edge; the required handover is x=376.2 px / 30%. The centerline is 58.7 px, about 4.57 m, too far west.",
+    "Two whole-canvas ImageGen candidates were used. Candidate 1 met the handover more closely but was rejected for regular palisade-like columns and excessive small conifers. A third candidate would violate the two-candidate spend cap, and patching or shifting the source would violate the raw-generation rule."
+  ],
+  "openRisks": [
+    "Long terrace faces still contain visible vertical joint rhythms; whether they remain sufficiently weathered and irregular is a visual judgment for the owner.",
+    "The water mask was checked by full-canvas overlay and source-scale fringe proxies, but no shipped-canvas pipeline gate was run in this quarantine-only task.",
+    "The crown measurement is a manual outer-foliage census; the automated dark-core component check found a conservative 70.431 px / 3.381 m median from two isolated cores."
+  ]
+}
