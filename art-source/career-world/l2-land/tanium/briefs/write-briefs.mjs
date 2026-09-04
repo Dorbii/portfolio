@@ -11,6 +11,44 @@
 //   node art-source/career-world/l2-land/tanium/briefs/write-briefs.mjs
 import fs from "node:fs";
 import path from "node:path";
+import zlib from "node:zlib";
+function readGrey(p) {
+  const b = fs.readFileSync(p);
+  const w = b.readUInt32BE(16), h = b.readUInt32BE(20), ct = b[25];
+  const ch = ct === 6 ? 4 : ct === 2 ? 3 : ct === 4 ? 2 : 1;
+  const cs = []; let o = 8;
+  while (o < b.length) {
+    const l = b.readUInt32BE(o);
+    if (b.subarray(o + 4, o + 8).toString("ascii") === "IDAT") cs.push(b.subarray(o + 8, o + 8 + l));
+    o += 12 + l;
+  }
+  const raw = zlib.inflateSync(Buffer.concat(cs));
+  const st = w * ch, out = Buffer.alloc(h * w);
+  const line = Buffer.alloc(st);
+  let prev = Buffer.alloc(st);
+  for (let y = 0; y < h; y += 1) {
+    const f = raw[y * (st + 1)];
+    raw.copy(line, 0, y * (st + 1) + 1, y * (st + 1) + 1 + st);
+    for (let x = 0; x < st; x += 1) {
+      const a = x >= ch ? line[x - ch] : 0, bb = prev[x], c = x >= ch ? prev[x - ch] : 0;
+      if (f === 1) line[x] = (line[x] + a) & 255;
+      else if (f === 2) line[x] = (line[x] + bb) & 255;
+      else if (f === 3) line[x] = (line[x] + ((a + bb) >> 1)) & 255;
+      else if (f === 4) {
+        const pp = a + bb - c, pa = Math.abs(pp - a), pb = Math.abs(pp - bb), pc = Math.abs(pp - c);
+        line[x] = (line[x] + (pa <= pb && pa <= pc ? a : pb <= pc ? bb : c)) & 255;
+      }
+    }
+    // The water mask is white RGB with the shape in ALPHA, so take the last
+    // channel, not the first. Reading channel 0 gives a solid 255 and reports
+    // the whole edge as water — the same silent wrong-channel read that cost a
+    // day on the land mask earlier in this project.
+    for (let x = 0; x < w; x += 1) out[y * w + x] = line[x * ch + (ch >= 2 ? ch - 1 : 0)];
+    line.copy(prev);
+  }
+  return { width: w, height: h, data: out };
+}
+
 
 const DIR = "art-source/career-world/l2-land/tanium/briefs";
 const def = JSON.parse(fs.readFileSync("art-source/career-world/l2-land/tanium/territory.def.json", "utf8"));
@@ -617,6 +655,53 @@ middle. Set them back from the cell edges so only the groove crosses a boundary.
 
 }
 
+// Where an authored neighbour's water actually reaches the shared edge.
+//
+// Reads the neighbour's own water mask and reports each run as a percentage
+// along the edge, so the brief can state what has to be met instead of leaving
+// the worker to guess. Same mechanism as the northBorder becks, which c3-0 met
+// first time, and the rune chain crossings, which c0-1 hit exactly.
+function waterCrossingsFor(col, row) {
+  const KEPT = 2048;
+  const sides = [["NORTH", col, row - 1, "bottom"], ["SOUTH", col, row + 1, "top"],
+    ["WEST", col - 1, row, "right"], ["EAST", col + 1, row, "left"]];
+  const out = [];
+  for (const [dir, c, r, edge] of sides) {
+    const id = `c${c}-${r}`;
+    const mask = `art-source/career-world/l2-land/tanium/${id}/${id}-water.png`;
+    if (!fs.existsSync(mask)) continue;                 // not authored, or no water
+    let px;
+    try { px = readGrey(mask); } catch { continue; }
+    const bleed = Math.round((px.width - KEPT) / 2);
+    const runs = [];
+    let start = null;
+    for (let i = 0; i < KEPT; i += 1) {
+      const [x, y] = edge === "bottom" ? [bleed + i, bleed + KEPT - 1]
+        : edge === "top" ? [bleed + i, bleed]
+          : edge === "right" ? [bleed + KEPT - 1, bleed + i]
+            : [bleed, bleed + i];
+      const wet = px.data[y * px.width + x] >= 128;
+      if (wet && start === null) start = i;
+      if (!wet && start !== null) { runs.push([start, i - 1]); start = null; }
+    }
+    if (start !== null) runs.push([start, KEPT - 1]);
+    // 30 px is the gate's own minimum run; anything shorter is not a crossing
+    for (const [a, b] of runs.filter(([a2, b2]) => b2 - a2 >= 30)) {
+      const mid = Math.round(((a + b) / 2 / KEPT) * 100);
+      const wide = Math.round(((b - a) / KEPT) * 97.6);
+      out.push(`- water arrives on your **${dir}** edge at **${mid}% along it**, about ${wide} m wide — meet it there`);
+    }
+  }
+  if (!out.length) return "";
+  return `
+
+**Water arriving from the neighbours.** These are measured off the authored art
+next door, not estimates. A watercourse that does not meet them is a broken
+stream at the seam:
+
+${out.join("\n")}`;
+}
+
 // Per-seam transition, derived from the biome map.
 //
 // The packet lists each neighbour's biome and says a change lives in the
@@ -654,7 +739,8 @@ for (const k of cells) {
   const rune = runeChainFor(Number(c), Number(r));
   if (rune) chained += 1;
   const trans = transitionsFor(Number(c), Number(r));
-  fs.writeFileSync(path.join(DIR, `c${c}-${r}.md`), `${B[k].trim()}${trans}${rune}${LIGHTING}\n`);
+  const water = waterCrossingsFor(Number(c), Number(r));
+  fs.writeFileSync(path.join(DIR, `c${c}-${r}.md`), `${B[k].trim()}${trans}${water}${rune}${LIGHTING}\n`);
   n += 1;
 }
 console.log(`  the rune chain crosses ${chained} cells`);
