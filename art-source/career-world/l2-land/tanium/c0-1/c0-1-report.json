@@ -1,0 +1,109 @@
+{
+  "cell": "c0-1",
+  "territory": "tanium",
+  "status": "refused",
+  "generation": {
+    "filename": "c0-1-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "2D7A76822984C8EB13EAD855935B93E9C89EC67AF04FC4C0A091B977E00A77C9",
+    "mode": "built-in ImageGen edit with the edit target first and the canon second as reference only",
+    "imageGenCallsUsed": 1,
+    "retryUsed": false,
+    "bothImagesAttachedToSameCall": true,
+    "secondReferenceAcceptedByTool": true,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "promptRecord": "c0-1-imagegen-prompt-used.txt"
+  },
+  "generationSizePx": [1254, 1254],
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean on the delivered source; final water-mask pixels and gradients below 12 luminance units excluded",
+    "peakVsUniformOverLand": 1.506813,
+    "uniformReference": 1.0,
+    "directionalKeyFirstMoment": 0.000655,
+    "gradientSamples": 1061274,
+    "aggregateDirectionalityNumericPass": true,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No whole-cell cast-shadow field or exposure gradient is visible, but column faces, boulders, conifer crowns, and bank edges repeatedly use brighter upper planes or rims over darker vertical and lower faces. The literal same-value-all-round lighting rule is not met."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "manual estimated fraction of non-water land area at native source resolution",
+    "buildable": 0.61,
+    "steep": 0.14,
+    "otherBrokenRockTalusOrVegetation": 0.25,
+    "method": "The broad central and eastern level meadow shelf and its open glades count as buildable; the western gorge wall, waterfall face, and immediate incised banks count as steep; orchard stands, talus, outcrops, and biome-transition ground make up the remainder."
+  },
+  "waterFootprintFraction": 0.06821934,
+  "finalDerivedLandCoverageFraction": 0.93178066,
+  "crown": {
+    "medianMetres": 3.038,
+    "medianPx": 63.285,
+    "sampleCount": 41,
+    "method": "Full-frame native-resolution connected-component census of all 41 separable dark conifer crown silhouettes found by the documented detector, including saplings and edge crowns; native median width 31 px was scaled by 2560/1254 and converted at 0.048 m per final pixel.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c0-1-water-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "F5D3E0DCBE7F4DBDB731CC7C535EA95BBED476EB537580CFBC6367F36C5E0FE5",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "opaqueWaterPixels": 107276,
+    "transparentLandPixels": 1465240,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedComponents": 2,
+    "interiorHolePixels": 0,
+    "edgeWaterPixels": {
+      "north": 0,
+      "east": 26,
+      "south": 195,
+      "west": 411
+    },
+    "method": "Native-raster hole-free bank-to-bank envelopes trace both complete painted water systems: western sea, wash, plunge foam, fall and top pool; eastern stream and pool. The mask includes surf, ripple highlights, reflections, and water between shoreline stones."
+  },
+  "siteChecks": {
+    "coherentOccupiableShelf": "present as one broad level gold-green central and eastern shelf with open glades",
+    "orchardLikeConiferStands": "present",
+    "weatheredColumnarGorgeAndTalus": "present at the western drop",
+    "terrainOnly": true,
+    "runeNodePresent": true,
+    "runeCarvingHasNoGlowOrEnergy": true,
+    "singleEastToWestStreamAndFall": false,
+    "westEdgeEntirelySea": false,
+    "runeChainBoundaryHandoffsExact": false
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleEditCall": true,
+    "secondReferenceAttached": true,
+    "rawGenerationUntouched": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "waterMaskBinarySameDimensionsAndHoleFree": true,
+    "allPaintedWaterIncluded": true,
+    "allDetectedCrownsIncluded": true,
+    "crownMedianInsideAcceptedTerritoryBand": true,
+    "strictEqualValueOnAllFormSides": false,
+    "continuousStreamFromEastPoolToWesternFall": false,
+    "runeChainEntersFromSeaAtWestMidpoint": false,
+    "runeChainExitsAtRequiredEastHandoff": false
+  },
+  "refusalReasons": [
+    "The highest-priority lighting rule fails visually: pale rock tops and column caps, dark vertical cliff faces, and lighter upper foliage over darker lower foliage reveal baked form-side lighting. The permitted retry condition was non-square output only, so no second ImageGen call was made.",
+    "The eastern stream ends in a separate central pool and does not continue across the shelf to the western pool and waterfall; the required single coherent stream-to-fall watercourse is broken.",
+    "The rune groove reaches the west boundary through dry cliff-top land rather than coming out of the sea, and the generated west sea occupies only the lower portion of that edge.",
+    "The groove centerline reaches both side boundaries at roughly the same height, approximately 48.7 percent down the frame; it therefore misses the exact east handoff at 47 percent and does not satisfy the asymmetric boundary registration."
+  ],
+  "openRisks": [
+    "The water mask is a manually reviewed binary bank-to-bank trace; exact shoreline judgment remains director or owner visual review.",
+    "Buildable and steep fractions are manual raster estimates rather than height-field measurements.",
+    "Dense overlapping conifer groups are less separable than isolated crowns in the automated census; no detected element was excluded to move the median.",
+    "Seam quality, landform credibility, and visual quality remain director or owner decisions; mechanical checks do not establish visual acceptance."
+  ]
+}
