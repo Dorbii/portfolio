@@ -4,11 +4,12 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-04, LATEST (current):** **TANIUM IS BAKING — 21 CELLS, UNATTENDED.**
-Owner said render it all overnight. Sequential, ~4.5 h, each accepted cell
-committed on its own. If the session died mid-run, `.codex-tmp/bake-tanium.log`
-and `git log --oneline` say how far it got; re-running the script continues
-rather than redoing finished cells. Resume from `SESSION 10` below.
+**2026-09-04, LATEST (current):** **TANIUM IS 7 OF 21; PASS 2 RUNNING.** Five
+pipeline defects surfaced and were fixed, all of them assumptions that only held
+while there was one territory. No threshold moved. The refused cells do not look
+worse than the accepted ones — see
+`session3-tools/tanium-review-sheet.png`, which is the owner ruling that is
+open. Resume from `SESSION 10` below.
 
 **2026-09-03, superseded:** **KAIZEN IS CENTRED ON KAIZEN.** The district
 was 32 m north of its shelf because step 5E aligned it by a point on its south
@@ -632,7 +633,61 @@ adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 
 **SESSION 10 (2026-09-04) — RESUME HERE, ANY MODEL.** **A BAKE IS IN FLIGHT.**
 
-## TANIUM'S 21 CELLS ARE BAKING, UNATTENDED
+## TANIUM: 7 OF 21 ON PASS 1, PASS 2 RUNNING
+
+`docs/career-world/session3-tools/tanium-review-sheet.png` — every cell in its
+lattice position, accepted and refused at the same size, each with the number
+that decided it. **The refused cells do not look worse than the accepted ones**;
+that is the finding, and it is the owner's to rule on.
+
+Accepted: `c3-0 c0-0 c5-0 c4-1 c0-2 c2-2 c5-2`. The colonnade (`c6-1`) came
+through visually but was refused on water fringe.
+
+Re-running `bake-tanium.mjs` retries exactly the failures — it skips
+already-authored cells — so a pass is cheap and the gates leave the world
+untouched on refusal.
+
+## FIVE PIPELINE DEFECTS, ALL FOUND BY THE SECOND TERRITORY
+
+The pipeline was calibrated on NinjaOne, and every assumption that only held
+because there was ONE territory surfaced tonight. Lock changes 14-17:
+
+- **`cell.mjs` hardcoded ninjaone's plan path.** Now `--territory`, required,
+  no default — a default would bake into the wrong tree unnoticed.
+- **Grid edges said "nothing arrives; end your terrain mid-ground"** while
+  `northBorder` demanded solid connecting ground — *in the same packet*. An
+  edge with a `<dir>Border` rule now defers to it.
+- **The style canon lived under `ninjaone/`**, so every edit-mode cell refused.
+  Now a world-canon fallback, not a per-territory copy: a copy is how the one
+  thing that must never drift would drift, one territory at a time.
+- **The crown gate had run against ONE cell in its life** (it landed 2026-09-03,
+  after 19 of NinjaOne's 20 were baked) and could not pass a treeless biome.
+  Zero crowns now passes *only* when the biome's own vocabulary says none.
+- **The crown band is a range of MEDIANS and the packet used it as a per-crown
+  floor.** Cost four cells and ten exclusion reports, every worker doing exactly
+  what the packet asked — reporting a 1.5 m sapling and losing the bake. The
+  next cell after the fix passed.
+
+**No threshold moved.** 1.7/5.2, 0.011, 0.16, 13, 21 are all as the owner set
+them.
+
+## WHAT NEEDS THE OWNER
+
+**Are the bands tighter than his eye?** Each was derived from what NinjaOne's
+twenty cells *happened to measure*, not from a tolerance, and Tanium brushed
+every edge: `0.0115` vs `0.011`, `0.164` vs `0.16`, `13.7` vs `13`,
+`1.666` vs `1.7`. But some refusals were emphatically right — `palette 56.2`
+against 13, `rock lighting 0.258` inside his measured lit range — so this is a
+judgement, not an arithmetic fix.
+
+**Corrected twice on the key-light gate.** I built a case that it was measuring
+something other than lighting; a second sample after the brief change scored
+`0.0087`, a clear pass, and the case collapsed. It needs no ruling.
+
+## THE BAKE ITSELF
+
+Owner 2026-09-04: *"go for it now. You have codex cli as needed please render it
+all and ill review in the morning and then we can handle any rebakes"*.
 
 Owner 2026-09-04: *"go for it now. You have codex cli as needed please render it
 all and ill review in the morning and then we can handle any rebakes"*.
