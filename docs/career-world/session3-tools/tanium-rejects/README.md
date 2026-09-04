@@ -47,3 +47,4 @@ They are kept because a rejected cell nobody sees cannot be ruled on.
 - `c1-2` dark-forest — rejected on **a gate **
 - `c4-2` mixed-bench — rejected on **a gate **
 - `c6-2` quarry — rejected on **water continuity 1**
+- `c4-0` moor — rejected on **water continuity 1**

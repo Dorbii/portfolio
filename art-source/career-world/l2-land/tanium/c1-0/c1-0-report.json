@@ -1,0 +1,109 @@
+{
+  "cell": "c1-0",
+  "territory": "tanium",
+  "status": "refused",
+  "generation": {
+    "filename": "c1-0-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "8D89ED6F16F4F806078A9C8109CE7AF446638D273D57056A4371118411F8ADCD",
+    "mode": "built-in ImageGen whole-canvas edit with edit-target as Image 1 and canon as reference-only Image 2",
+    "imageGenCallsUsed": 1,
+    "retryUsed": false,
+    "secondReferenceAccepted": true,
+    "bothImagesAttachedToSameCall": true,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "promptFile": "c1-0-imagegen-prompt-call.txt"
+  },
+  "generationSizePx": [1254, 1254],
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean on the delivered source; final water-mask pixels and immediate neighbours excluded and gradients below 12 luminance units excluded",
+    "peakVsUniformOverLand": 1.776798,
+    "uniformReference": 1.0,
+    "directionalKeyFirstMoment": 0.002742,
+    "strongEdgeFirstMoment": 0.00768,
+    "gradientSamples": 929109,
+    "strongGradientSamples": 574899,
+    "aggregateDirectionalityNumericPass": true,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No long cast-shadow field or whole-cell sun gradient is visible, but repeated pale rock caps and upper facets sit above darker vertical faces. The literal same-value-on-every-side rule is not met; the aggregate orientation metric cannot override that visible defect."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "manual estimated fraction of non-water land area at native source resolution",
+    "buildable": 0.66,
+    "steep": 0.05,
+    "otherBrokenRockShingleOrVegetation": 0.29,
+    "method": "The broad gently rising grass-and-bare-rock inland shelf counts as buildable; the short west-edge face fragments and isolated column stacks count as steep; shoreline slabs, shingle, broken outcrops, scrub and heather make up the remainder."
+  },
+  "waterFootprintFraction": 0.23758041,
+  "finalDerivedLandCoverageFraction": 0.76241959,
+  "crown": {
+    "medianMetres": 0,
+    "medianPx": 0,
+    "sampleCount": 0,
+    "method": "Full-frame visual census at native 1254 px found no conifer crowns, consistent with the sound-coast biome.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c1-0-water-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "082395D5DC8687EB76496DD3CB5276957086B8C5DD3A192890A5CECF6A96ADB9",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "opaqueWaterPixels": 373599,
+    "transparentNonWaterPixels": 1198917,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedComponents": 1,
+    "interiorHolePixels": 0,
+    "bounds": [231, 0, 1253, 486],
+    "edgeWaterPixels": {
+      "north": 1023,
+      "east": 381,
+      "south": 0,
+      "west": 0
+    },
+    "method": "Native-resolution cool-water classification followed by a smoothed north-connected shoreline trace and fill. The mask includes the complete visible Sound surface from the north edge through deep water, turquoise shallows, submerged slabs, shoreline wash, ripples and reflections; the full-canvas overlay was visually inspected."
+  },
+  "siteChecks": {
+    "soundNarrowsDeepChannelPresent": true,
+    "soundNarrowsApproximatelyTwelveMetresAcross": false,
+    "levelBareRockStandingBanksOnBothSides": false,
+    "lowShallowShoreWithoutCliff": true,
+    "submergedBasaltVisibleThroughShallows": true,
+    "landContinuesSouthEastAndWest": true,
+    "entireNorthEdgeIsWater": false,
+    "treesAbsent": true,
+    "terrainOnly": true
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasEdit": true,
+    "secondReferenceAttached": true,
+    "rawGenerationUntouched": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "waterMaskSameDimensionsBinaryWhiteTransparent": true,
+    "waterMaskCoversCompletePaintedWater": true,
+    "waterMaskNoInteriorHoles": true,
+    "noConiferCrownsToMeasure": true,
+    "strictEqualValueOnAllFormSides": false,
+    "entireNorthEdgeWater": false,
+    "soundNarrowsGroundOfferComplete": false
+  },
+  "refusalReasons": [
+    "The highest-priority lighting rule fails visually: repeated pale upper rock facets and caps contrast with darker vertical and lower faces, revealing baked form-side value separation.",
+    "The north edge is not entirely water: the western 231 of 1254 north-edge pixels are land, so approximately 18.4 percent of the required water edge is blocked.",
+    "A dark channel is present toward the north-east, but it is not a clear approximately 12 m pinch between two broad level bare-rock standing banks; the required Sound-Narrows ground offer is incomplete."
+  ],
+  "openRisks": [
+    "The water mask follows the water actually painted in the candidate and therefore correctly leaves the erroneous north-west land transparent; it does not invent water absent from the raw source.",
+    "Exact neighbour stitch quality and terrain quality remain director and owner visual decisions; mechanical checks do not establish visual acceptance.",
+    "No shipped-canvas bake or runtime validation was run because the task is quarantine-only; nothing was promoted to public or art-source."
+  ]
+}
