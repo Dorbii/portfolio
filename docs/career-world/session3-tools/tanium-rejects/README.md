@@ -33,3 +33,5 @@ They are kept because a rejected cell nobody sees cannot be ruled on.
 - `c3-1` lush-shelf — rejected on **a gate **
 - `c6-1` linked-colonnade — rejected on **a gate **
 - `c1-2` coast-cliff — rejected on **rock lighting 0.202**
+- `c4-2` dark-forest — rejected on **rock lighting 0.215**
+- `c6-2` quarry — rejected on **rock lighting 0.204**
