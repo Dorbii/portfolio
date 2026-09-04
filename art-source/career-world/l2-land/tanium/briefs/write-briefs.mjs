@@ -563,12 +563,75 @@ than its neighbour because something in it is being lit — a sun angle, an
 exposure, a haze — and this world has none of that. Paint it flat and it matches
 by itself.`;
 
+// ---------------------------------------------------------- the rune chain --
+// A route, like the rail loop, not a biome and not one cell's feature. It spans
+// the territory; the RUNES appear only at the settlements, so a cell the chain
+// merely passes through gets a groove and nothing else.
+//
+// Each crossing is derived from the route and stated as a percentage down the
+// shared edge, exactly as the becks crossing NinjaOne's border are — that is
+// the one continuity mechanism this pipeline has already proved (c3-0 met its
+// beck first time).
+function runeChainFor(col, row) {
+  const rc = def.runeChain;
+  if (!rc) return "";
+  const W = rc.waypoints;
+  const at = (x) => {
+    for (let i = 1; i < W.length; i += 1) {
+      const a = W[i - 1], b = W[i];
+      if (a[0] === b[0] || (a[0] - x) * (b[0] - x) > 0) continue;
+      const t = (x - a[0]) / (b[0] - a[0]);
+      if (t < 0 || t > 1) continue;
+      return a[1] + t * (b[1] - a[1]);
+    }
+    return null;
+  };
+  const yIn = at(col), yOut = at(col + 1);
+  if (yIn == null || yOut == null) return "";
+  if (Math.floor(yIn) !== row && Math.floor(yOut) !== row) return "";
+  const pct = (y) => `${Math.round((y - Math.floor(y)) * 100)}%`;
+  const node = rc.nodes.find((x) => x.cell[0] === col && x.cell[1] === row);
+
+  const west = col === 0
+    ? `It comes **out of the sea** at the WEST edge, ${pct(yIn)} down that edge`
+    : `It enters at the WEST edge, **${pct(yIn)} down that edge**`;
+  const east = col === def.grid.cols - 1
+    ? `and leaves the EAST edge ${pct(yOut)} down, running on **into the sea and out of the world**`
+    : `and leaves at the EAST edge, **${pct(yOut)} down that edge**`;
+
+  return `
+
+**THE RUNE CHAIN crosses this cell.** One line of carved rock spans the whole
+territory, entering from the sea in the west and leaving into the sea in the
+east, linking every settlement in Tanium as a node on the way. ${west}, ${east}.
+Those two positions are not suggestions: the neighbouring cells are authored to
+meet the chain at exactly those points, and a groove that arrives anywhere else
+is a broken chain.
+
+The groove is ${rc.groove} — cut into the bare rock, not built on top of it, and
+it holds its line across the whole cell rather than wandering like a stream.
+${node
+    ? `**This cell is a NODE** — ${node.of}. Here the groove opens into a cluster of
+RUNES on the level rock: ${rc.rune} Set them back from the cell edges so only the
+groove itself ever crosses a boundary.`
+    : `**This cell is not a node** — no runes here, only the groove passing through.
+Keep it plain: the chain crosses, and the ground is otherwise exactly what its
+biome says it is.`}
+
+Carving only. **Do not paint any light, glow or energy in or along the groove** —
+that belongs to an effect layer and painting it here would bake it into the
+albedo permanently.`;
+}
+
 fs.mkdirSync(DIR, { recursive: true });
-let n = 0;
+let n = 0, chained = 0;
 for (const k of cells) {
   const [c, r] = k.split(",");
-  fs.writeFileSync(path.join(DIR, `c${c}-${r}.md`), `${B[k].trim()}${LIGHTING}\n`);
+  const rune = runeChainFor(Number(c), Number(r));
+  if (rune) chained += 1;
+  fs.writeFileSync(path.join(DIR, `c${c}-${r}.md`), `${B[k].trim()}${rune}${LIGHTING}\n`);
   n += 1;
 }
+console.log(`  the rune chain crosses ${chained} cells`);
 console.log(`wrote ${n} briefs to ${DIR}`);
 console.log(`  every shelf and site in the plan is named in its own cell's brief`);
