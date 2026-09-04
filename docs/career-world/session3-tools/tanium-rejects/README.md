@@ -52,3 +52,6 @@ They are kept because a rejected cell nobody sees cannot be ruled on.
 - `c1-1` dark-forest — rejected on **key-light asymmetry 0.0162**
 - `c2-1` dark-forest — rejected on **a gate **
 - `c3-1` lush-shelf — rejected on **water continuity 1**
+- `c1-2` dark-forest — rejected on **a gate **
+- `c4-2` mixed-bench — rejected on **crown scale 1.372**
+- `c6-2` quarry — rejected on **water continuity 4**
