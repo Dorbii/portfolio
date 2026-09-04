@@ -922,6 +922,105 @@
      1
     ]
    }
+  },
+  "c3-2": {
+   "authoredAt": "2026-09-04T12:53:38.221Z",
+   "describe": "Bench country running down to the world's southern coast. The SOUTH edge is\nopen sea.\n\nStepped benches and terraces descending from north to south, four of them, each\n10–18 m above the last, separated by column walls with talus at their feet.\nMoor grass on the flats, scree on the faces. Becks step down the benches, two\nof them, each dropping over every wall in a small fall.\n\nThe TERRACE-STEPS site",
+   "sourcePx": 1254,
+   "gates": [
+    {
+     "name": "key-light asymmetry",
+     "value": 0.0038,
+     "pass": true,
+     "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004"
+    },
+    {
+     "name": "gradient ratio",
+     "value": "1.38 (reported)",
+     "pass": true,
+     "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
+    },
+    {
+     "name": "rock lighting",
+     "value": "0.522 (n 1930, report-only)",
+     "pass": true,
+     "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.14; limit 0.16 on the owner's eye (2026-09-02, the dark-forest gorge at 0.153)"
+    },
+    {
+     "name": "land coverage",
+     "value": "87.7%",
+     "pass": true
+    },
+    {
+     "name": "water cut clear",
+     "value": "0 px",
+     "pass": true,
+     "note": "paint surviving where the mask is fully water; exact zero by construction for pipeline-derived cells"
+    },
+    {
+     "name": "mask completion",
+     "value": "+82 px grown, 6 px holes filled (reported)",
+     "pass": true,
+     "note": "the delivered mask grown into contiguous painted water within 48 px and speckle holes <=64 px filled before the cut (owner 2026-09-02); dry paint stops the growth, so a polyline mask still fails the rings"
+    },
+    {
+     "name": "water fringe",
+     "value": "0.14%",
+     "pass": true,
+     "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
+    },
+    {
+     "name": "water fringe (48px)",
+     "value": "0.05%",
+     "pass": true,
+     "note": "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)"
+    },
+    {
+     "name": "water continuity",
+     "value": "ok (2 crossings checked)",
+     "pass": true,
+     "note": "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint"
+    },
+    {
+     "name": "palette conformance",
+     "value": "veg worst dBG 0.049 dLuma 11.9 over 1 seam(s); tone worst dLuma 3.2 on all land over 1 seam(s)",
+     "pass": true,
+     "note": "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13"
+    },
+    {
+     "name": "crown scale",
+     "value": "2.156 m over 118 crowns (accepted range 1.7-5.2 m)",
+     "pass": true,
+     "note": "the worker's own median crown from c3-2-report.json, against the 1.7-5.2 m range the accepted cells measured (NOT the plan's written 4-7 m — see CROWN_MIN_M); crown.excludedElements must be empty, so an out-of-scale element cannot be measured around"
+    }
+   ],
+   "shelf": null,
+   "features": [],
+   "waterZones": [
+    "coast",
+    "stream",
+    "stream",
+    "stream",
+    "fall"
+   ],
+   "maskCompletion": {
+    "grownPx": 82,
+    "holePx": 6
+   },
+   "biome": "mixed-bench",
+   "source": "art-source/career-world/l2-land/tanium/c3-2",
+   "stitch": {
+    "order": 10,
+    "tiles": [
+     90,
+     30,
+     12,
+     6,
+     4,
+     2,
+     1
+    ]
+   }
   }
  }
 }

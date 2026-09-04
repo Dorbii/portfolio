@@ -31,3 +31,5 @@ They are kept because a rejected cell nobody sees cannot be ruled on.
 - `c1-1` dark-forest — rejected on **key-light asymmetry 0.0277**
 - `c2-1` moor — rejected on **a gate **
 - `c3-1` lush-shelf — rejected on **a gate **
+- `c6-1` linked-colonnade — rejected on **a gate **
+- `c1-2` coast-cliff — rejected on **rock lighting 0.202**

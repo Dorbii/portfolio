@@ -1,0 +1,106 @@
+{
+  "cell": "c3-2",
+  "territory": "tanium",
+  "status": "refused",
+  "generation": {
+    "filename": "c3-2-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "0F6F13D21E11716DF10432D72E3F73E6AEF51B669729A391E886BE61026B490D",
+    "mode": "built-in ImageGen edit with the edit target first and the NinjaOne seed canon second as reference only",
+    "imageGenCallsUsed": 1,
+    "retryUsed": false,
+    "bothImagesAttachedToSameCall": true,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "rawCopyHashIdentical": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "promptRecord": "c3-2-imagegen-prompt-used.txt"
+  },
+  "generationSizePx": [1254, 1254],
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean on the delivered source; final water-mask pixels and gradients below 12 luminance units excluded",
+    "peakVsUniformOverLand": 1.413228,
+    "uniformReference": 1.0,
+    "directionalKeyFirstMoment": 0.007428,
+    "gradientSamples": 1045784,
+    "aggregateDirectionalityNumericPass": true,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No whole-cell sun gradient is obvious, but the basalt bench tops repeatedly read lighter than their vertical faces and multiple conifers retain directional light-dark separation. The aggregate metric cannot override the literal equal-value requirement."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "manual estimated fraction of non-water land area at native source resolution",
+    "buildable": 0.58,
+    "steep": 0.15,
+    "otherTalusScreeShingleOrVegetation": 0.27,
+    "method": "The four broad moor bench tops and walkable terrace treads count as buildable; exposed basalt risers and the coastal cliff count as steep; talus, scree, shingle, stream margins, boulders, and conifer stands make up the remainder."
+  },
+  "waterFootprintFraction": 0.11245927,
+  "finalDerivedLandCoverageFraction": 0.88754073,
+  "crown": {
+    "medianMetres": 2.156,
+    "medianPx": 44.912,
+    "sampleCount": 118,
+    "method": "Full-image native-resolution dark-green connected-component census of all 118 conifer-shaped crown components, including saplings and edge crowns; median source width 22 px, scaled by 2560/1254 and converted at 0.048 m per final pixel.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c3-2-water-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "CAB69B439BEE6D356FD47951ED851281DDACE8559A62EFB9491F56409B0B33ED",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "opaqueWaterPixels": 176844,
+    "transparentNonWaterPixels": 1395672,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedComponents8": 16,
+    "componentNote": "The sea, two descending beck systems, west-edge incoming stream, and small source-painted foam or fall fragments separated by intervening rocks.",
+    "interiorHolePixelsFilled": 940,
+    "boundsSourcePx": [0, 0, 1123, 1253],
+    "edgeWaterPixels": {
+      "north": 10,
+      "east": 0,
+      "south": 1108,
+      "west": 292
+    },
+    "method": "Native-resolution teal-water classification constrained to the three visible stream corridors and the sloped southern coast, expanded through adjacent whitewater, foam, shallow wash, reflections, and ripple highlights; enclosed holes were filled and the full result inspected as a magenta overlay."
+  },
+  "siteChecks": {
+    "fourDescendingBenches": true,
+    "centralTerraceStepsReadAsGiantsStair": true,
+    "broadLevelTerraceSurfacesRemainEmpty": true,
+    "twoBecksCrossEachRiserBySmallFalls": true,
+    "lowCliffsAndShingleAtFoot": true,
+    "terrainOnly": true
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasEditCall": true,
+    "secondReferenceAttached": true,
+    "rawGenerationUntouched": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "landContinuesNorthEastAndWest": true,
+    "southernEdgeOpenSea": false,
+    "waterMaskSameDimensionsBinaryAndHoleFree": true,
+    "allPaintedWaterIncluded": true,
+    "crownObjectComplete": true,
+    "crownMedianInsideAcceptedTerritoryBand": true,
+    "strictEqualValueOnAllFormSides": false,
+    "ordinaryColumnsWeatheredAndIrregularThroughout": false
+  },
+  "refusalReasons": [
+    "The highest-priority lighting rule fails visually: repeated pale upper planes and darker vertical basalt faces reveal a baked form-light convention, and some conifers retain directional value separation.",
+    "Outside the intentionally regular centre-south terrace-steps run, several long bench risers still read as repeated upright column palisades rather than sufficiently broken, leaning, collapsed, and irregular geology.",
+    "The southern edge is not entirely open sea: the verified water mask reaches 1108 of 1254 south-edge pixels, leaving a dry south-east corner."
+  ],
+  "openRisks": [
+    "The measured crown median is inside the territory band but close to its lower end rather than the requested middle.",
+    "The south edge is mostly sea but retains dry shoreline at the extreme south-east corner, so the literal entire-edge sea reading is imperfect.",
+    "Exact neighbour-pixel stitch quality and exact water-edge placement remain human visual gates; no artifact was promoted outside quarantine."
+  ]
+}

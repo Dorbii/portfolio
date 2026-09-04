@@ -1,0 +1,22 @@
+[
+  {
+    "class": "coast",
+    "note": "Open southern sea, including the complete surf band, foam, ripple highlights, reflections, shallow wash, and water between shoreline rocks."
+  },
+  {
+    "class": "stream",
+    "note": "The west-edge neighbour stream where it remains visible before leaving the cell."
+  },
+  {
+    "class": "stream",
+    "note": "The central beck from the northern edge through each bench to its coastal outlet."
+  },
+  {
+    "class": "stream",
+    "note": "The eastern beck from the upper sheltered ground through the bench sequence to the sea."
+  },
+  {
+    "class": "fall",
+    "note": "All painted small drops and whitewater where the two descending becks cross the basalt risers."
+  }
+]
