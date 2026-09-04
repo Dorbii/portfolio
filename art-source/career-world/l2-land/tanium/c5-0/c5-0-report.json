@@ -1,0 +1,101 @@
+{
+  "cell": "c5-0",
+  "territory": "tanium",
+  "status": "refused",
+  "generation": {
+    "filename": "c5-0-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "679381D5A8DEAF29C6F1AA02F94C1D3691FBBE3164941CD30D25E9E1855E9511",
+    "mode": "built-in ImageGen whole-canvas generation with same-territory coast canon as reference only",
+    "imageGenCallsUsed": 2,
+    "selectedCandidate": 2,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "promptFile": "c5-0-imagegen-prompt.txt"
+  },
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean on the delivered source; final water-mask pixels and gradients below 12 luminance units excluded",
+    "peakVsUniformOverLand": 1.515018,
+    "uniformReference": 1.0,
+    "directionalKeyFirstMoment": 0.002795,
+    "gradientSamples": 873699,
+    "aggregateDirectionalityNumericPass": true,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No whole-cell sun gradient or cast-shadow field is visible, but cliff-top planes are consistently lighter than vertical basalt faces. The aggregate metric cannot override the literal no-lit-side requirement."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "manual estimated fraction of non-water land area at native source resolution",
+    "buildable": 0.66,
+    "steep": 0.18,
+    "otherBrokenRockTalusOrVegetation": 0.16,
+    "method": "Broad coherent cliff-top benches count as buildable; exposed sea-cliff and gully faces count as steep; talus, broken margins, sea stacks, and the conifer gully make up the remainder."
+  },
+  "waterFootprintFraction": 0.344480,
+  "finalDerivedLandCoverageFraction": 0.655520,
+  "northEdgeHandover": {
+    "requiredLandFraction": 0.34,
+    "measuredLandPixels": 533,
+    "measuredLandFraction": 0.425040,
+    "measuredWaterPixels": 721,
+    "landFractionError": 0.085040,
+    "pass": false
+  },
+  "crown": {
+    "medianMetres": 5.096,
+    "medianPx": 106.156,
+    "sampleCount": 8,
+    "method": "Median native-pixel outer-foliage width across all eight visible gully conifers, measured on the 1254 px source and scaled by 2560/1254; source widths 48, 50, 51, 52, 52, 53, 53 and 53 px.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c5-0-water-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "3020FDBB3AD4C33E50F2A325F30DEDBDF279582E8427BE05203797E043085FB5",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "opaqueWaterPixels": 541701,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedWaterComponents8Connected": 1,
+    "smallSpeckleHolePixelsFilled": 3376,
+    "accidentalInteriorHoles": 0,
+    "intentionalDryRockIslands": 3,
+    "edgeWaterPixels": {
+      "north": 721,
+      "east": 941,
+      "south": 0,
+      "west": 0
+    },
+    "method": "Flooded the source-raster blue and teal sea from the north and east edges, grew a narrow pale-foam collar, closed pixel-scale gaps, and filled small enclosed wet speckles; the two sea stacks and one detached cove boulder group remain unmasked as terrain."
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasSelectedGeneration": true,
+    "rawGenerationUntouched": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "landContinuesThroughSouthAndWestEdges": true,
+    "bayExitsNorthAndEast": true,
+    "waterMaskSameDimensions": true,
+    "waterMaskBinaryWhiteOnTransparent": true,
+    "waterMaskNoAccidentalInteriorHoles": true,
+    "allMeasuredCrownsIncluded": true,
+    "crownMedianInsideAcceptedTerritoryBand": true,
+    "northEdgeWesternLandExactly34Percent": false,
+    "strictEqualValueOnAllFormSides": false
+  },
+  "refusalReasons": [
+    "The candidate violates the highest-priority lighting rule: repeated lighter cliff-top planes and darker vertical basalt faces reveal an upper-light convention.",
+    "The north edge contains 42.50% land rather than the required western 34%, an 8.50 percentage-point overshoot."
+  ],
+  "openRisks": [
+    "Several cliff runs still retain a repeated vertical-column rhythm; their weathering is improved over candidate 1 but owner visual judgment is required against the no-regular-palisade rule.",
+    "The measured median crown is within the accepted territory band but close to its 5.2 m upper limit.",
+    "The water mask overlay follows the surf and cove wash at native resolution, but no pipeline bake was run because the task is quarantine-only."
+  ]
+}
