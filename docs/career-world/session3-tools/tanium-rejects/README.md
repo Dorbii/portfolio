@@ -37,3 +37,13 @@ They are kept because a rejected cell nobody sees cannot be ruled on.
 - `c6-2` quarry — rejected on **rock lighting 0.204**
 - `c4-0` moor — rejected on **water continuity 1**
 - `c1-0` sound-coast — rejected on **water continuity 1**
+- `c4-0` moor — rejected on **water continuity 1**
+- `c1-0` sound-coast — rejected on **water continuity 3**
+- `c0-1` lush-shelf — rejected on **a gate **
+- `c1-1` dark-forest — rejected on **key-light asymmetry 0.0122**
+- `c2-1` dark-forest — rejected on **a gate **
+- `c3-1` lush-shelf — rejected on **water continuity 2**
+- `c6-1` linked-colonnade — rejected on **a gate **
+- `c1-2` dark-forest — rejected on **a gate **
+- `c4-2` mixed-bench — rejected on **a gate **
+- `c6-2` quarry — rejected on **water continuity 1**

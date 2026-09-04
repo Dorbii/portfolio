@@ -525,7 +525,16 @@ edge. No cast shadows and no contact shadows of any kind. Nothing anywhere in
 the frame should let a viewer say which direction light comes from. Depth reads
 from ambient occlusion in crevices and from the drawing itself, never from a key
 light. This matters more than any other instruction above: an image with a
-consistent lit side is refused whatever else it gets right.`;
+consistent lit side is refused whatever else it gets right.
+
+**Colour — match the neighbours you are given, do not choose your own.** Where
+authored paint reaches into this cell, sample the greens of its grass, scrub and
+conifers and use THOSE, not a green of your own choosing. The single commonest
+reason a cell is refused here is vegetation colour drifting from the cell beside
+it: the shapes match and the hue does not, and the seam reads as two different
+worlds meeting. Same for the rock — the same warm pale basalt, the same value.
+If a neighbour's ground looks more olive, or more gold, or duller than you would
+paint it, the neighbour is right and you are wrong. Copy it.`;
 
 fs.mkdirSync(DIR, { recursive: true });
 let n = 0;
