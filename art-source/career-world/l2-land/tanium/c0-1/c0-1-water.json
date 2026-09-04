@@ -1,22 +1,18 @@
 [
   {
     "class": "coast",
-    "note": "Western sea and connected gorge-mouth water, including the complete painted surf, foam, reflections, coastal wash, and water between shoreline stones."
-  },
-  {
-    "class": "lake",
-    "note": "Western shelf-top plunge pool feeding the waterfall, including its full painted edge zone and rippled shallows."
-  },
-  {
-    "class": "fall",
-    "note": "Single western waterfall from the shelf pool to the gorge mouth, including all whitewater from lip through plunge foam."
+    "note": "Open west sea, gorge-mouth basin, surf, and visible wash between shoreline rocks."
   },
   {
     "class": "stream",
-    "note": "Eastern shelf stream from the east boundary into the separate central pool, including the entire painted channel, ripples, reflections, and bank-to-bank wash."
+    "note": "Shelf stream entering from the east and feeding the pool at the gorge lip."
   },
   {
     "class": "lake",
-    "note": "Separate central pool at the end of the eastern stream, including the complete painted water surface and shoreline wash."
+    "note": "Small top pool immediately before the stream drops into the gorge."
+  },
+  {
+    "class": "fall",
+    "note": "Single falling sheet plus its visible spray and impact water in the gorge basin."
   }
 ]
