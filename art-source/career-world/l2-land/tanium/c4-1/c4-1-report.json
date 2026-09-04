@@ -1,61 +1,37 @@
 {
   "cell": "c4-1",
   "territory": "tanium",
-  "status": "refused",
+  "layer": "L2 land terrain",
   "generation": {
-    "filename": "c4-1-source.png",
-    "exactSizePx": [1254, 1254],
-    "format": "PNG RGB",
-    "sha256": "7358DC3551A944E38175690C3733E8ACDE8E5E875814568732FAE1FD42CE771B",
-    "mode": "built-in ImageGen edit with the edit target first and the canon second as reference only",
-    "imageGenCallsUsed": 1,
-    "retryUsed": false,
-    "bothImagesAttachedToSameCall": true,
-    "wholeCanvasSinglePass": true,
-    "rawOutputPreserved": true,
-    "resizedCroppedRetouchedOrTiled": false,
-    "promptRecord": "c4-1-imagegen-prompt-used.txt"
+    "mode": "single whole-canvas edit",
+    "callCount": 1,
+    "widthPx": 1254,
+    "heightPx": 1254,
+    "square": true,
+    "resized": false,
+    "cropped": false,
+    "sourceSha256": "F54E834031F66A4A65C3E585C186240B9612D9F4F2C87ACA16E8DF54DF716C4A"
   },
-  "generationSizePx": [1254, 1254],
-  "shippedCanvasPx": [2560, 2560],
-  "groundExtentMetres": [97.6, 97.6],
-  "finalResolutionCmPerPx": 4.8,
   "lightingIsotropy": {
-    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean on the delivered source; final water-mask pixels and gradients below 12 luminance units excluded",
-    "peakVsUniformOverLand": 1.612672,
-    "uniformReference": 1.0,
-    "directionalKeyFirstMoment": 0.000344,
-    "gradientSamples": 1363973,
-    "aggregateDirectionalityNumericPass": true,
-    "strictEqualValueOnAllFormSidesVisualCheck": false,
-    "visualCheck": "No whole-cell sun gradient or cast-shadow field is visible, but basalt tops are repeatedly brighter than vertical faces and column sides have consistent value separation. The aggregate metric cannot override the literal no-lit-side requirement."
+    "peakVsUniformOverLand": 1.644645,
+    "firstMomentOverLand": 0.000240,
+    "sampleCount": 1321300,
+    "method": "36-bin luminance-gradient orientation census over non-water pixels; this is a mechanical isotropy measure, not visual acceptance."
   },
-  "buildableVsSteepFraction": {
-    "basis": "manual estimated fraction of non-water land area at native source resolution",
-    "buildable": 0.62,
-    "steep": 0.18,
-    "otherTalusBrokenRockOrSparseVegetation": 0.20,
-    "method": "The broad level bench tops and approach shelves count as buildable; exposed vertical bench faces and the arch face count as steep; talus, scree, gullies, and sparse conifer pockets make up the remainder."
+  "surfaceFractions": {
+    "basis": "whole source canvas",
+    "buildable": 0.538000,
+    "steep": 0.440019,
+    "water": 0.021981,
+    "buildableWithinLand": 0.550092,
+    "steepWithinLand": 0.449908,
+    "method": "Water is the traced alpha-mask footprint; coherent level bench tops and approach shelves count as buildable, while exposed bench faces, arch faces, talus, scree fans, and broken transition slopes count as steep."
   },
-  "waterFootprintFraction": 0.024772,
-  "finalDerivedLandCoverageFraction": 0.975228,
-  "crown": {
-    "medianMetres": 3.724,
-    "medianPx": 77.576,
-    "sampleCount": 8,
-    "method": "Median of all eight detected conifer crowns, including every small crown: source widths 18, 19, 26, 37, 39, 43, 46 and 52 px, scaled by 2560/1254; median source width 38 px.",
-    "excludedElements": []
-  },
+  "waterFootprintFraction": 0.021981,
   "waterMask": {
-    "filename": "c4-1-water-source.png",
-    "exactSizePx": [1254, 1254],
-    "format": "PNG RGBA",
-    "sha256": "936318215DD225E30F293EFC42F91A544C08A3A8EA747998BC4F54B393D35774",
-    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
-    "opaqueWaterPixels": 38954,
-    "transparentLandPixels": 1533562,
-    "intermediateAlphaPixels": 0,
-    "nonWhiteOpaquePixels": 0,
+    "widthPx": 1254,
+    "heightPx": 1254,
+    "opaqueWaterPixels": 34565,
     "connectedComponents": 2,
     "interiorHolePixels": 0,
     "edgeWaterPixels": {
@@ -64,33 +40,37 @@
       "south": 0,
       "west": 0
     },
-    "method": "The tarn and west fall-runoff system were traced bank-to-bank from the native source; filled row envelopes include the complete painted surfaces, ripple highlights, reflections, spray, whitewater, and wash between stones, with smooth binary boundaries and no interior holes."
+    "sha256": "76276399758994C51504438535DEBCD971E4B5F6AF460F9C3E4A92B73F3F01B7"
   },
-  "siteChecks": {
-    "plateauTarn": "present as a round lake on bare middle-bench rock with a continuous vegetation-free shingle rim",
-    "windArch": "present as a natural basalt arch beside a level bare-rock shelf",
-    "tunnelledRidgeTerrain": "present as a tall solid north-bench rise with level approach ground and no portal or track",
-    "westBenchFall": "present as a thin tall fall with connected rock-channel runoff"
+  "crown": {
+    "medianMetres": 2.352,
+    "medianPx": 49.0,
+    "sampleCount": 22,
+    "method": "Full-frame grid census of every discernible outer-foliage conifer crown, including saplings and clipped edge crowns; source widths were scaled by 2560/1254 and converted at 0.048 m per final pixel.",
+    "excludedElements": []
   },
-  "constraintChecks": {
-    "squareAtLeast1254Px": true,
-    "singleEditCall": true,
-    "secondReferenceAttached": true,
-    "rawGenerationUntouched": true,
+  "content": {
     "terrainOnly": true,
-    "highOblique2_5D": true,
-    "landToAllFourEdges": true,
-    "noMeadow": true,
-    "waterMaskBinarySameDimensionsAndHoleFree": true,
-    "allPaintedWaterIncluded": true,
-    "crownMedianInsideAcceptedTerritoryBand": true,
-    "strictEqualValueOnAllFormSides": false
+    "plateauTarnPresent": true,
+    "windArchAndLevelShelfPresent": true,
+    "northRockFaceAndApproachPresent": true,
+    "westernFallPresent": true,
+    "builtStructuresPresent": false
   },
-  "refusalReasons": [
-    "The candidate violates the highest-priority lighting rule: repeated bright basalt top planes and darker vertical faces reveal consistent form-side value separation. The task allows a retry only for a non-square result, so no second ImageGen call was made."
-  ],
-  "openRisks": [
-    "Exact shoreline judgment, neighbour-pixel stitch quality, site readability, and overall terrain quality remain director and owner visual decisions; mechanical checks do not establish visual acceptance.",
-    "The wind arch and north tunnel approach are present, but their usable clearances were estimated from the single raster rather than validated against a 3D height field."
-  ]
+  "visualReview": {
+    "status": "quarantine candidate; hard-constraint failure observed; pending director and owner inspection",
+    "claims": [
+      "Three pale basalt benches, their exposed column faces, and talus feet dominate the cell while the outer ground grades into the painted neighbour families.",
+      "The round middle-bench tarn has a complete shingle rim with no vegetation touching its masked water surface.",
+      "The eastern upper bench provides a natural arch and adjacent level rock shelf; the northern bench provides an unbuilt rock face and approach ground."
+    ],
+    "hardConstraintFindings": [
+      "The visible groove reaches the west edge near source y=260 and the east edge near source y=390, not the required approximately y=602 and y=564 seam handoffs.",
+      "The western fall visibly begins at the same cut line at the bench lip, so the image does not establish the required dry rune slot."
+    ],
+    "openRisks": [
+      "The carved slot appears shallower and more kerbed than the specified two-metre-deep bedrock excavation in parts of the image.",
+      "Mechanical isotropy does not prove the strict no-key-light visual rule; exposed column faces still need human inspection for orientation-dependent value."
+    ]
+  }
 }
