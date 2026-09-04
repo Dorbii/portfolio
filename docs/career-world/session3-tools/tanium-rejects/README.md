@@ -17,3 +17,4 @@ They are kept because a rejected cell nobody sees cannot be ruled on.
 - `c0-1` lush-shelf — rejected on **rock lighting 0.164**
 - `c1-1` dark-forest — rejected on **key-light asymmetry 0.012**
 - `c2-1` moor — rejected on **crown scale 3.332**
+- `c3-1` lush-shelf — rejected on **crown scale 3.234**
