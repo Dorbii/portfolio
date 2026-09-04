@@ -676,10 +676,38 @@ cablecar west `[0,1]`, risk-assessment east `[5,1]`, automated-uat south
 the other side and mapped column by column** (local col L is world col 2+L):
 sound at L1/L2, connecting LAND at L3/L4, bay at L5, open sea at L0 and L6.
 
-**Owner's eye still wanted on:** the shelf layout; Tanium having **no wonder**
-(NinjaOne got magical-gorge and purple-field, both unique — a third would be a
-canon addition); and the two territories carrying **separate closed rail loops**
-with no link between them.
+## TANIUM HAS A WONDER: THE LINKED COLONNADE (lock change 13)
+
+Owner: *"what about something highlighting their linear chain tech"*. Tanium is
+known for the linear chain — endpoints talking to their neighbours rather than
+to a hub — and it turns out to be drawable in the world's own rock.
+
+`linked-colonnade`, the **eleventh biome**, at Tanium local `[6,1]` = world
+`[8,6]`, where the rail's `cliff run` at `6.5,1.8` already passes. Basalt
+columns **all leaning one way**, each touching the next, one unbroken arcade
+that leaves the land at the shore and continues as linked sea stacks past the
+edge of the authored world. Every column equal, **nothing standing at the
+middle** — the chain has no hub and that must be visible.
+
+It is **pure landform, no crystal and no glow**, which is what separates it from
+NinjaOne's two: the magical gorge and the purple field are *both* crystal,
+*both* self-luminous, *both* static, *both* inland. A third of the same kind
+would have read as "this world has crystals in it".
+
+**The rule it needed.** The geology canon said *never a regular palisade of
+identical cylinders* — the owner's own 2026-09-01 defect report. Owner
+2026-09-03: **"thats only true if unintentional"**. The ban now governs
+regularity that ARRIVES BY DEFAULT; where a biome or site explicitly calls for
+ordered columns, that order is the point and must be drawn exactly, not
+weathered back. Without that line a worker would helpfully sand the wonder off.
+
+**NinjaOne's plan.json changed** — geology is world canon. Verified key by key:
+only `geology`, `coast-cliff` and the new biome differ; `shelves`, `loop`,
+`railFeatures`, `sites` and **`cellBiomes` are byte-identical**, so the 20 baked
+cells stay valid and nothing is rebaked.
+
+**Owner's eye still wanted on:** the shelf layout, and the two territories
+carrying **separate closed rail loops** with no link between them.
 
 **`step5-register.mjs` still hardcodes `BLOCK = [3,1]`.** The def is the
 authority now; that tool should read it before it registers Tanium.

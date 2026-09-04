@@ -1,9 +1,9 @@
 {
- "solidifiedAt": "2026-09-04T01:28:42.318Z",
+ "solidifiedAt": "2026-09-04T03:57:05.712Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
   "cell.mjs": "14ecb952fdc91d8b",
-  "plan-territory.mjs": "7ea249c3de097ba8",
+  "plan-territory.mjs": "e8d86a90b2e32796",
   "AGENTS.md": "a1ab4eaec1d4c6ac"
  },
  "history": [
@@ -319,6 +319,24 @@
    "hashes": {
     "cell.mjs": "14ecb952fdc91d8b",
     "plan-territory.mjs": "7ea249c3de097ba8",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-04T03:51:04.021Z",
+   "reason": "owner 2026-09-03, BEFORE the change, his words: 'thats only true if unintentional' - answering the tension raised about Tanium's wonder, that an authored colonnade collides with the geology rule's 'never a regular palisade of identical cylinders'. Ruling: that ban governs regularity that ARRIVES BY DEFAULT, not order that is deliberately specified. Lock change 13: (a) the geology canon rule and the coast-cliff biome rock rule are scoped accordingly - ordinary cliff stays weathered and irregular, and where a biome or site explicitly calls for regular ordered columns that order is the point and must be drawn exactly, not weathered back; (b) an eleventh biome, the linked colonnade, is added to the vocabulary - Tanium's wonder, proposed by the owner as 'something highlighting their linear chain tech': basalt columns all leaning one way, each touching the next, one unbroken arcade running past the shore as linked sea stacks and out of the authored world; no column larger than any other and nothing at the middle, so the chain has no hub. It is pure landform, no crystal and no glow, which is what separates it from NinjaOne's two wonders. NOTE: the geology rule is world canon, so NinjaOne's plan.json changes too. The scoping only PERMITS something new - nothing in NinjaOne is a deliberate colonnade - so the 20 baked cells stay valid and are not being rebaked.",
+   "hashes": {
+    "cell.mjs": "14ecb952fdc91d8b",
+    "plan-territory.mjs": "7ea249c3de097ba8",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-04T03:57:05.713Z",
+   "reason": "owner 2026-09-03 ('thats only true if unintentional') - lock change 13, AFTER the change, controls 34/34. (a) The geology canon rule now states that the ban on a regular palisade governs regularity that ARRIVES BY DEFAULT, and that where a biome or site explicitly calls for regular ordered columns that order is the point and must be drawn exactly, not weathered back; the coast-cliff rock rule cross-references the exception by name. (b) Eleventh biome linked-colonnade added: Tanium's wonder, from the owner's 'something highlighting their linear chain tech' - basalt columns all leaning one way, each touching the next, one unbroken arcade leaving the land at the shore and continuing as linked sea stacks past the edge of the authored world; every column equal, nothing at the middle, so the chain has no hub. Pure landform, no crystal and no glow, which is what separates it from NinjaOne's two wonders. Placed at Tanium local cell 6,1 (world 8,6), where the rail's cliff run at 6.5,1.8 already passes, and its ledge-walk site is replaced by colonnade-head. VERIFIED on NinjaOne's plan: only geology, coast-cliff and the new biome differ - shelves, loop, railFeatures, sites and cellBiomes are byte-identical, so the 20 baked cells stay valid and nothing is rebaked.",
+   "hashes": {
+    "cell.mjs": "14ecb952fdc91d8b",
+    "plan-territory.mjs": "e8d86a90b2e32796",
     "AGENTS.md": "a1ab4eaec1d4c6ac"
    }
   }

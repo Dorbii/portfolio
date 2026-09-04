@@ -28,7 +28,7 @@ const W = COLS * S, H = ROWS * S + TOP + 96;
 const BIOME_COLOUR = {
   "bare-plateau": "#5a5650", moor: "#4d5a2e", "dark-forest": "#1f3a2a", "coast-cliff": "#3d4f5c",
   "sound-coast": "#2e5566", quarry: "#6b6250", "mixed-bench": "#4f5a3c", "lush-shelf": "#5f7a2a",
-  "magical-gorge": "#4a3566", "purple-field": "#7a2f7a",
+  "magical-gorge": "#4a3566", "purple-field": "#7a2f7a", "linked-colonnade": "#8d8b80",
 };
 const s = [];
 s.push(`<rect width="${W}" height="${H}" fill="#101720"/>`);
