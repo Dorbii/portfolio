@@ -1,71 +1,96 @@
 import sharp from "sharp";
 import fs from "node:fs";
 
-// NinjaOne territory plan.
+// Territory plan — generic over territories.
 //
-// Fine-first means we do NOT draw the island's shape. We allocate a block of
-// authoring cells, designate the five settlement shelves and the rail loop that
-// serves them, and let the coastline emerge from what the art actually draws
-// inside that block.
+//   node tools/world-authoring/plan-territory.mjs <territory-id>
+//
+// Fine-first means we do NOT draw an island's shape. We allocate a block of
+// authoring cells on the world lattice, designate the settlement shelves and
+// the rail loop that serves them, and let the coastline emerge from what the
+// art actually draws inside that block.
 //
 // A cell is an authoring unit: 2048px of kept area, generated at 2560px so a
 // 256px bleed overlaps its neighbours. Boundaries interlock with tabs so the
 // seam network has no straight lines and no four-way junctions.
+//
+// WHAT LIVES WHERE (owner 2026-09-03: "we gotta make this workflow re-usable
+// since it worked for the ninja territory"). This script holds the WORLD
+// CANON — the constants, the biome vocabulary, the geology/vegetation/water/
+// buildable/rail/lighting/register rules, and the checks. It is the part the
+// lock exists to protect, and it is identical for every territory.
+//
+// A territory's CONTENT — how many cells, where the block sits on the lattice,
+// the shelves, the loop, the rail features, the per-cell biomes, the interior
+// sites, and any territory-specific rule — lives in a data file beside the
+// plan it produces:
+//
+//   art-source/career-world/l2-land/<id>/territory.def.json
+//
+// That is the one input only a human can supply, so there is deliberately no
+// default and no way to run without it.
 
-// The plan is what every cell derives from, so it lives beside the cell
-// sources and is committed (it was gitignored scratch until 2026-09-01).
-const OUT = "art-source/career-world/l2-land/ninjaone/";
+const TERRITORY = process.argv[2];
+if (!TERRITORY || TERRITORY.startsWith("-")) {
+  console.error(`
+  usage: node tools/world-authoring/plan-territory.mjs <territory-id>
+
+  Reads art-source/career-world/l2-land/<territory-id>/territory.def.json
+  and writes plan.json and plan-review.png beside it.
+`);
+  process.exit(1);
+}
+
+const OUT = `art-source/career-world/l2-land/${TERRITORY}/`;
+const DEF = OUT + "territory.def.json";
+if (!fs.existsSync(DEF)) {
+  console.error(`\n  no territory definition at ${DEF}\n`
+    + `  A territory's cells, shelves, loop and biomes are content. Write that file first.\n`);
+  process.exit(1);
+}
+const def = JSON.parse(fs.readFileSync(DEF, "utf8"));
+if (def.territory !== TERRITORY) {
+  throw new Error(`${DEF} says territory "${def.territory}" but was asked for "${TERRITORY}"`);
+}
 fs.mkdirSync(OUT, { recursive: true });
 
 const CELL = 2048;              // kept area, px
 const BLEED = 256;              // overlap into each neighbour
 const ART = 9.45;               // art px per world px
 const M = 0.4503;               // metres per world px
-const COLS = 5, ROWS = 4;       // 20 cells; budget was ~21
+const COLS = def.grid.cols, ROWS = def.grid.rows;
+
+// The world plane is 16 x 9 lattice cells of 217 world px. A territory block is
+// placed on that lattice, and must fit inside it.
+const PLANE_COLS = 16, PLANE_ROWS = 9;
+const BLOCK = def.lattice.block;
 
 const cellMetres = CELL / ART * M;
+console.log(`territory ${TERRITORY}`);
 console.log(`cell ${CELL}px = ${cellMetres.toFixed(1)} m of ground`);
 console.log(`territory ${COLS}x${ROWS} = ${COLS * ROWS} cells = `
-  + `${(COLS * cellMetres).toFixed(0)} x ${(ROWS * cellMetres).toFixed(0)} m\n`);
+  + `${(COLS * cellMetres).toFixed(0)} x ${(ROWS * cellMetres).toFixed(0)} m`);
+console.log(`block at lattice cell [${BLOCK}] .. [${BLOCK[0] + COLS - 1}, ${BLOCK[1] + ROWS - 1}]\n`);
 
 // Settlement shelves, in cell coordinates (col,row) with a sub-cell offset.
-// Placed so the loop has to travel and the settlements do not crowd.
-const SHELVES = [
-  { id: "capital", cell: [2, 1], off: [0.45, 0.55], role: "capital + main station" },
-  { id: "kaizen", cell: [4, 0], off: [0.40, 0.60], role: "project city (largest)" },
-  { id: "metrics-service", cell: [0, 1], off: [0.55, 0.35], role: "project city" },
-  { id: "vendy", cell: [1, 3], off: [0.50, 0.40], role: "project city" },
-  { id: "construction", cell: [4, 3], off: [0.45, 0.45],
-    role: "construction zone — project not yet named",
-    terrain: "cut benches, quarried faces, exposed rock; works-in-progress read from LANDFORM only, no structures" },
-];
+// An `off` is the shelf's CENTRE — this script draws it as a circle centred
+// there, and anything registering content onto a shelf must centre it the same
+// way. (A session was lost to aligning a district by a point on its south edge
+// instead, which carried it 32 m off the shelf.)
+const SHELVES = def.shelves;
 
-// The Circle CI loop: a closed double-track circuit leaving the capital,
-// calling at each project city, and returning. Waypoints in cell space.
-// Terrain must offer theatre along it, not gentle gradients -- it is a fantasy
-// railway and may tunnel, span improbably, or run submerged.
-const LOOP = [
-  [2.45, 1.55], [3.5, 1.2], [4.4, 0.6],       // capital -> kaizen
-  [4.7, 1.8], [4.45, 3.45],                    // kaizen -> fourth (east cliff run)
-  [3.0, 3.7], [1.5, 3.4],                      // fourth -> vendy (south)
-  [0.4, 2.6], [0.55, 1.35],                    // vendy -> metrics (west)
-  [1.4, 1.1], [2.45, 1.55],                    // metrics -> capital, closing
-];
-
-const FEATURES = [
-  { at: [3.5, 1.2], kind: "gorge span", note: "viaduct between capital and kaizen" },
-  { at: [4.7, 1.8], kind: "tunnelled headland", note: "line enters the rock" },
-  { at: [4.45, 3.45], kind: "cliff run", note: "track on a ledge above the sea" },
-  { at: [1.5, 3.4], kind: "water crossing", note: "loop crosses an inlet" },
-  { at: [0.4, 2.6], kind: "submerged run", note: "line dives and runs beneath the water on the south-west" },
-];
+// The rail loop: a closed circuit leaving the capital, calling at each project
+// city, and returning. Waypoints in cell space. Terrain must offer theatre
+// along it, not gentle gradients.
+const LOOP = def.loop;
+const FEATURES = def.railFeatures;
 
 // Biomes (owner-directed 2026-09-01: "set biome areas on the grid so even if
 // its a biome transition it can handle it correctly and with appropriate
 // assets"). One vocabulary per biome, quoted verbatim into every packet, and
-// one biome per cell from the owner-reviewed scenery variance map. The hand
-// (brush, projection, flat lighting) is territory-wide and comes from the
-// neighbours' paint; the biome sets what is painted and the palette shift.
+// one biome per cell. The hand (brush, projection, flat lighting) is
+// world-wide and comes from the neighbours' paint; the biome sets what is
+// painted and the palette shift.
 const BIOMES = {
   "bare-plateau": { name: "Bare plateau",
     ground: "bare pale basalt benches with hexagonal-jointed tops, scree fans, thin wind-scoured grass only in cracks; no meadow",
@@ -138,59 +163,91 @@ const BIOMES = {
     palette: "saturated magenta-violet ground, high-key and bright, purple as the base and the other hues as accents",
     wonders: "the crystal knoll; nothing floating" },
 };
-// col,row -> biome (owner-reviewed scenery variance map, 2026-09-01)
-const CELL_BIOMES = {
-  "0,0": "moor", "1,0": "bare-plateau", "2,0": "dark-forest", "3,0": "bare-plateau", "4,0": "lush-shelf",
-  "0,1": "lush-shelf", "1,1": "purple-field", "2,1": "lush-shelf", "3,1": "magical-gorge", "4,1": "coast-cliff",
-  "0,2": "sound-coast", "1,2": "moor", "2,2": "mixed-bench", "3,2": "dark-forest", "4,2": "coast-cliff",
-  "0,3": "sound-coast", "1,3": "lush-shelf", "2,3": "moor", "3,3": "moor", "4,3": "quarry",
-};
-for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
-  const b = CELL_BIOMES[`${c},${r}`];
-  if (!b || !BIOMES[b]) throw new Error(`cell ${c},${r} has no valid biome`);
-}
+
+// col,row -> biome, from the territory definition
+const CELL_BIOMES = def.cellBiomes;
 
 // Interior sites (owner, 2026-09-01: "populate with small settlements or misc
 // attractions/areas just to make it feel alive and not like a barren/
 // uninhabited area"). L2 offers the GROUND for each; the structures layer
 // builds on it later — the same split as the settlement shelves, at village
 // scale. Terrain descriptions only; nothing is drawn on them.
-const SITES = [
-  { cell: [1, 2], id: "hamlet-by-the-beck", terrain: "a level clearing about 30 m across beside the beck, sheltered by a low outcrop, dry ground" },
-  { cell: [1, 2], id: "lookout-crag", terrain: "a crag on the rail side with a flat top and a clear view over the moor" },
-  { cell: [2, 2], id: "waystation-bench", terrain: "a level bench on the middle terrace beside the loop, about 40 m long" },
-  { cell: [2, 2], id: "hot-spring", terrain: "a steaming pool on a lower bench with pale mineral rims (classify: lake)" },
-  { cell: [3, 2], id: "hermits-crag", terrain: "a crag rising above the canopy with a view into the gorge and a ledge to stand on" },
-  { cell: [3, 2], id: "giant-tree", terrain: "one conifer three times the size of any other, in a clearing of its own" },
-  { cell: [1, 0], id: "crater-tarn", terrain: "a round tarn in bare rock with a shingle rim (classify: lake)" },
-  { cell: [1, 0], id: "column-altar", terrain: "a natural altar: a level cluster of column tops standing above the plateau" },
-  { cell: [3, 0], id: "walk-under-arch", terrain: "a natural basalt arch big enough to walk under, with a level shelf beside it" },
-  { cell: [2, 0], id: "mill-ledge", terrain: "a fall with a level ledge beside its plunge pool" },
-  { cell: [0, 0], id: "shepherds-fold", terrain: "a grassy hollow among boulders" },
-  { cell: [2, 3], id: "border-knoll", terrain: "a level knoll on the land border into Tanium" },
-];
+const SITES = def.sites;
+
+// ---- checks. A territory that fails any of these is not authorable.
+if (!(COLS > 0 && ROWS > 0)) throw new Error("grid must have positive cols and rows");
+if (BLOCK[0] < 0 || BLOCK[1] < 0
+  || BLOCK[0] + COLS > PLANE_COLS || BLOCK[1] + ROWS > PLANE_ROWS) {
+  throw new Error(`block [${BLOCK}] + ${COLS}x${ROWS} does not fit the `
+    + `${PLANE_COLS}x${PLANE_ROWS} plane`);
+}
+for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+  const b = CELL_BIOMES[`${c},${r}`];
+  if (!b || !BIOMES[b]) throw new Error(`cell ${c},${r} has no valid biome`);
+}
+if (Object.keys(CELL_BIOMES).length !== COLS * ROWS) {
+  throw new Error(`cellBiomes has ${Object.keys(CELL_BIOMES).length} entries for ${COLS * ROWS} cells`);
+}
+const inGrid = ([c, r]) => c >= 0 && r >= 0 && c <= COLS && r <= ROWS;
 for (const s of SITES) {
   if (!CELL_BIOMES[`${s.cell[0]},${s.cell[1]}`]) throw new Error(`site ${s.id} is outside the grid`);
 }
+for (const s of SHELVES) {
+  if (!CELL_BIOMES[`${s.cell[0]},${s.cell[1]}`]) throw new Error(`shelf ${s.id} is outside the grid`);
+  if (!(s.off[0] >= 0 && s.off[0] <= 1 && s.off[1] >= 0 && s.off[1] <= 1)) {
+    throw new Error(`shelf ${s.id} has an off outside the cell`);
+  }
+}
+for (const [i, p] of LOOP.entries()) {
+  if (!inGrid(p)) throw new Error(`loop waypoint ${i} [${p}] is outside the grid`);
+}
+for (const f of FEATURES) {
+  if (!inGrid(f.at)) throw new Error(`rail feature "${f.kind}" is outside the grid`);
+}
+if (LOOP.length > 1) {
+  const a = LOOP[0], z = LOOP[LOOP.length - 1];
+  if (a[0] !== z[0] || a[1] !== z[1]) throw new Error("the rail loop must close on its first waypoint");
+}
+if (!SHELVES.some((s) => s.id === "capital")) throw new Error("a territory needs a capital shelf");
+
+// World canon. Identical for every territory; a territory may add to `rail`
+// through railAddendum and may supply its own border rules.
+const RULES_CANON = {
+    geology: "columnar basalt, bedded and jointed, talus at cliff bases; plateau-and-gorge — columns are a feature where the biome says so, not the ground everywhere. Columns are WEATHERED and irregular wherever they appear: uneven heights and widths, broken tops, split and leaning columns, collapsed drums in talus, lichen in the joints; never a regular palisade of identical cylinders, never a square corner (owner, 2026-09-01: 'the cliff side is unnatural')",
+    vegetation: "conifer in gullies and shelter, thinning on exposed rock; scrub and heather on open ground; crowns 4-7 m; the biome sets the mix",
+    water: "coastal cliff and shingle seaward; inland tarns on shelves draining by falls into gorges",
+    buildable: "~1/3 occupiable shelf, separated by gorges and broken ground so settlements read distinct",
+    rail: "fantasy railway: tunnels, improbable spans and submerged runs permitted; land supplies the drama, not the gradient.",
+    lighting: "flat: every rock face the same value whichever way it faces; ambient occlusion only; no directional key, no lit side, no cast shadows",
+    register: "OWNER RULING 2026-09-01: epic, fantastical, light-toned fantasy register — luminous and hopeful, never grim; scenery varies by biome so wonders read as wonders",
+};
+
+// Fixed order so a rule always appears in the same place in every plan.
+const RULE_ORDER = ["geology", "vegetation", "water", "buildable", "rail",
+  "lighting", "northBorder", "southBorder", "eastBorder", "westBorder", "register"];
+const rules = {};
+{
+  const merged = { ...RULES_CANON };
+  if (def.rules?.railAddendum) merged.rail = `${RULES_CANON.rail} ${def.rules.railAddendum}`;
+  for (const [k, v] of Object.entries(def.rules ?? {})) {
+    if (k === "railAddendum") continue;
+    merged[k] = v;
+  }
+  for (const k of RULE_ORDER) if (merged[k] !== undefined) rules[k] = merged[k];
+  for (const k of Object.keys(merged)) {
+    if (!(k in rules)) throw new Error(`rule "${k}" is not in RULE_ORDER; add it in the right place`);
+  }
+}
 
 const plan = {
-  territory: "ninjaone",
+  territory: TERRITORY,
   grid: { cols: COLS, rows: ROWS, cells: COLS * ROWS },
   cell: { keptPx: CELL, generatedPx: CELL + BLEED * 2, bleedPx: BLEED,
     groundMetres: +cellMetres.toFixed(1) },
   territoryMetres: [+(COLS * cellMetres).toFixed(0), +(ROWS * cellMetres).toFixed(0)],
   shelves: SHELVES, loop: LOOP, railFeatures: FEATURES,
   biomes: BIOMES, cellBiomes: CELL_BIOMES, sites: SITES,
-  rules: {
-    geology: "columnar basalt, bedded and jointed, talus at cliff bases; plateau-and-gorge — columns are a feature where the biome says so, not the ground everywhere. Columns are WEATHERED and irregular wherever they appear: uneven heights and widths, broken tops, split and leaning columns, collapsed drums in talus, lichen in the joints; never a regular palisade of identical cylinders, never a square corner (owner, 2026-09-01: 'the cliff side is unnatural')",
-    vegetation: "conifer in gullies and shelter, thinning on exposed rock; scrub and heather on open ground; crowns 4-7 m; the biome sets the mix",
-    water: "coastal cliff and shingle seaward; inland tarns on shelves draining by falls into gorges",
-    buildable: "~1/3 occupiable shelf, separated by gorges and broken ground so settlements read distinct",
-    rail: "fantasy railway: tunnels, improbable spans and submerged runs permitted; land supplies the drama, not the gradient. The south-west leg runs SUBMERGED, so that coast must open into water the line can dive beneath.",
-    lighting: "flat: every rock face the same value whichever way it faces; ambient occlusion only; no directional key, no lit side, no cast shadows",
-    southBorder: "OWNER RULING 2026-09-01: NinjaOne and Tanium share BOTH a land and an ocean border. Cells 0,3 and 1,3: the south edge opens into a SOUND (ocean border - the inlet crossing and submerged run live here). Cells 2,3 and 3,3: the south edge is LAND that continues into Tanium territory (land border) - terrain must run to the south edge as solid connecting ground, no coast. Cell 4,3: south-east bay, sea as authored.",
-    register: "OWNER RULING 2026-09-01: epic, fantastical, light-toned fantasy register — luminous and hopeful, never grim; scenery varies by biome so wonders read as wonders",
-  },
+  rules,
 };
 fs.writeFileSync(OUT + "plan.json", JSON.stringify(plan, null, 1));
 

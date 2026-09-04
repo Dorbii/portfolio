@@ -1,9 +1,9 @@
 {
- "solidifiedAt": "2026-09-03T14:38:46.630Z",
+ "solidifiedAt": "2026-09-04T01:28:42.318Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
   "cell.mjs": "14ecb952fdc91d8b",
-  "plan-territory.mjs": "270aec1cef622a35",
+  "plan-territory.mjs": "7ea249c3de097ba8",
   "AGENTS.md": "a1ab4eaec1d4c6ac"
  },
  "history": [
@@ -301,6 +301,24 @@
    "hashes": {
     "cell.mjs": "14ecb952fdc91d8b",
     "plan-territory.mjs": "270aec1cef622a35",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-04T01:17:49.949Z",
+   "reason": "owner approved 2026-09-03 IN CHAT, before the change, his words: 'yeah we gotta make this workflow re-usable since it worked for the ninja territory' (answering the recommendation to generalise rather than write a sibling plan-territory-tanium.mjs, since Column, ACE and Independent all need the same thing). Lock change 12, BEFORE: plan-territory.mjs becomes territory-generic. It keeps the WORLD CANON that the lock exists to protect -- the biome vocabulary and the geology/vegetation/water/buildable/rail/lighting rules -- and takes the per-territory CONTENT (grid, lattice block, shelves, loop, railFeatures, cellBiomes, sites, territory-specific rules) from a data file beside the plan it emits, art-source/career-world/l2-land/<id>/territory.def.json. Control first and it is exact: NinjaOne's committed plan.json must come back BYTE-IDENTICAL from the generalised script, so the refactor cannot silently alter the territory that is already authored and accepted.",
+   "hashes": {
+    "cell.mjs": "14ecb952fdc91d8b",
+    "plan-territory.mjs": "270aec1cef622a35",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-04T01:28:42.318Z",
+   "reason": "owner approved 2026-09-03 ('yeah we gotta make this workflow re-usable since it worked for the ninja territory') - lock change 12, AFTER the change, suite green. plan-territory.mjs now takes a territory id and reads art-source/career-world/l2-land/<id>/territory.def.json. It KEEPS the world canon: the 2048/256/9.45/0.4503 constants, the 10-biome vocabulary, and the geology/vegetation/water/buildable/rail/lighting/register rules, with a territory able to extend rail through railAddendum and add its own border rules in a fixed RULE_ORDER. The biome vocabulary and canon rules were LIFTED VERBATIM from the old source by brace matching, never retyped. NinjaOne's plan.json is unchanged and no lattice field was added to it - placement lives in the def, so the emitted plan shape is untouched. New guards, each with a negative control: block fits the plane, cellBiomes covers exactly cols x rows, shelves and sites inside the grid, shelf off inside its cell, loop waypoints and rail features inside the grid, loop closes on its first waypoint, a capital exists, a rule name has a place in RULE_ORDER, the def names the territory it was asked for, and no argument prints usage. Controls: tests/world-authoring-plan-territory.test.mjs 5/5, including byte-identity for NinjaOne (the plan is DELETED before regenerating, because the first run of that control passed while the script was crashing before it wrote) and non-overlap of every territory block. world-authoring-stitch and stitch-content-aware-seam 29/29 unchanged. Tanium's definition is written but nothing is baked.",
+   "hashes": {
+    "cell.mjs": "14ecb952fdc91d8b",
+    "plan-territory.mjs": "7ea249c3de097ba8",
     "AGENTS.md": "a1ab4eaec1d4c6ac"
    }
   }

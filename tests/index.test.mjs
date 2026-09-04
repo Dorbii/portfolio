@@ -14,3 +14,4 @@ import "./town-surface.test.mjs";
 import "./water-state.test.mjs";
 import "./water-uniform-contract.test.mjs";
 import "./stitch-content-aware-seam.test.mjs";
+import "./world-authoring-plan-territory.test.mjs";

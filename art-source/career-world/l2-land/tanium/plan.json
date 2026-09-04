@@ -1,0 +1,392 @@
+{
+ "territory": "tanium",
+ "grid": {
+  "cols": 7,
+  "rows": 3,
+  "cells": 21
+ },
+ "cell": {
+  "keptPx": 2048,
+  "generatedPx": 2560,
+  "bleedPx": 256,
+  "groundMetres": 97.6
+ },
+ "territoryMetres": [
+  683,
+  293
+ ],
+ "shelves": [
+  {
+   "id": "capital",
+   "cell": [
+    3,
+    1
+   ],
+   "off": [
+    0.5,
+    0.5
+   ],
+   "role": "capital + main station"
+  },
+  {
+   "id": "cablecar",
+   "cell": [
+    0,
+    1
+   ],
+   "off": [
+    0.45,
+    0.5
+   ],
+   "role": "project city — document migration tooling (React/Electron), conversion workflows"
+  },
+  {
+   "id": "risk-assessment",
+   "cell": [
+    5,
+    1
+   ],
+   "off": [
+    0.5,
+    0.45
+   ],
+   "role": "project city — customer-facing endpoint risk reporting at scale"
+  },
+  {
+   "id": "automated-uat",
+   "cell": [
+    2,
+    2
+   ],
+   "off": [
+    0.5,
+    0.5
+   ],
+   "role": "project city — automated UAT workflows, a week of manual work down to an hour"
+  },
+  {
+   "id": "construction",
+   "cell": [
+    6,
+    2
+   ],
+   "off": [
+    0.45,
+    0.5
+   ],
+   "role": "construction zone — project not yet named",
+   "terrain": "cut benches, quarried faces, exposed rock; works-in-progress read from LANDFORM only, no structures"
+  }
+ ],
+ "loop": [
+  [
+   3.5,
+   1.5
+  ],
+  [
+   4.5,
+   1.1
+  ],
+  [
+   5.5,
+   1.45
+  ],
+  [
+   6.5,
+   1.8
+  ],
+  [
+   6.45,
+   2.5
+  ],
+  [
+   5,
+   2.75
+  ],
+  [
+   2.5,
+   2.5
+  ],
+  [
+   1.2,
+   2.6
+  ],
+  [
+   0.45,
+   1.5
+  ],
+  [
+   1.3,
+   1.15
+  ],
+  [
+   3.5,
+   1.5
+  ]
+ ],
+ "railFeatures": [
+  {
+   "at": [
+    1.3,
+    1.15
+   ],
+   "kind": "gorge span",
+   "note": "viaduct between the cable-car shelf and the capital"
+  },
+  {
+   "at": [
+    4.5,
+    1.1
+   ],
+   "kind": "tunnelled ridge",
+   "note": "line enters the rock under the north bench"
+  },
+  {
+   "at": [
+    6.5,
+    1.8
+   ],
+   "kind": "cliff run",
+   "note": "track on a ledge above the east sea"
+  },
+  {
+   "at": [
+    5,
+    2.75
+   ],
+   "kind": "sea-stack span",
+   "note": "the line leaps stack to stack along the south coast"
+  },
+  {
+   "at": [
+    1.2,
+    2.6
+   ],
+   "kind": "water crossing",
+   "note": "loop crosses the south-west inlet"
+  }
+ ],
+ "biomes": {
+  "bare-plateau": {
+   "name": "Bare plateau",
+   "ground": "bare pale basalt benches with hexagonal-jointed tops, scree fans, thin wind-scoured grass only in cracks; no meadow",
+   "rock": "pale warm basalt, stepped benches and low column walls, talus at every foot",
+   "trees": "none on the open plateau; a few dark conifers in gullies",
+   "water": "tarns lying in bare rock; thin tall falls off the bench edges",
+   "palette": "pale warm greys and creams, cool teal water, sparse grey-green",
+   "wonders": "none"
+  },
+  "moor": {
+   "name": "Heather moor",
+   "ground": "open heather-and-grass moor, wind-scoured, boulders and scrub; heather sparse and subdued, never a carpet",
+   "rock": "low basalt outcrops and boulder fields, an occasional column wall",
+   "trees": "dark conifers only in gullies and hollows",
+   "water": "becks in shallow gullies, small pools",
+   "palette": "olive and gold-green, dull violet accents, grey rock",
+   "wonders": "none"
+  },
+  "dark-forest": {
+   "name": "Dark forest gorge",
+   "ground": "dense dark conifer stands on mossy ground, little open ground, flat haze in the gorge",
+   "rock": "mossy basalt gorge walls, wet talus",
+   "trees": "dense dark conifers, the darkest green in the territory",
+   "water": "a gorge stream with falls, pools in shade",
+   "palette": "deep greens, near-black under the stands, grey-blue haze",
+   "wonders": "none"
+  },
+  "coast-cliff": {
+   "name": "Wild coast",
+   "ground": "bare basalt benches and talus above sea-cliffs, thin grass, shingle coves; no meadow",
+   "rock": "tall columnar sea-cliffs, WEATHERED and irregular: columns of uneven height and width, tops broken at different levels, split and leaning columns, collapsed drums lying in talus at the foot, lichen in the joints; the cliff line wanders in plan with bays and buttresses, never a straight run or a square corner, never a regular palisade of identical cylinders; a natural ledge partway up the face; sea stacks offshore",
+   "trees": "dark conifers only in gullies",
+   "water": "the sea on the seaward edge with surf and wash; an occasional tarn on a shelf",
+   "palette": "pale grey rock, teal to deep-blue sea, sparse green",
+   "wonders": "none"
+  },
+  "sound-coast": {
+   "name": "Sound coast",
+   "ground": "bare rock diving into the sound, shingle, thin grass",
+   "rock": "low basalt slabs and ledges running on under the water",
+   "trees": "none near the shore",
+   "water": "the sound (sea) on the seaward edge, clear shallows over slabs",
+   "palette": "grey slabs, turquoise shallows to deep teal",
+   "wonders": "none"
+  },
+  "quarry": {
+   "name": "Construction quarry",
+   "ground": "cut benches, quarried faces, spoil fans, a levelled floor; works read from landform only",
+   "rock": "fresh pale cut rock and column walls",
+   "trees": "a few dark conifers on the rim and in the drainage gully",
+   "water": "a flooded pit, the drainage stream, the sea where coastal",
+   "palette": "pale cut rock, dust, a thin green rim",
+   "wonders": "none"
+  },
+  "mixed-bench": {
+   "name": "Bench country",
+   "ground": "stepped benches and terraces, scree, moor on the flats",
+   "rock": "column walls between benches, talus",
+   "trees": "conifer stands on the sheltered benches",
+   "water": "becks stepping down the benches",
+   "palette": "moor palette with pale rock",
+   "wonders": "none"
+  },
+  "lush-shelf": {
+   "name": "Settlement shelf",
+   "ground": "the richest ground in its neighbourhood: meadow green warmed with gold, glades, flowers allowed here",
+   "rock": "low outcrops and natural terraces that a settlement could sit on",
+   "trees": "orchard-like conifer stands with open glades",
+   "water": "a stream through the shelf, a pool",
+   "palette": "luminous gold-green, warm rock",
+   "wonders": "none"
+  },
+  "magical-gorge": {
+   "name": "Magical gorge (moment)",
+   "ground": "a deep gorge with flat mist; the ground around it is moor",
+   "rock": "column walls; rock fragments floating above the gorge trailing roots and moss",
+   "trees": "dark conifers",
+   "water": "a great fall into faintly glowing water",
+   "palette": "moor palette plus violet crystal glow and luminous teal",
+   "wonders": "floating rock fragments with crystals; self-luminous crystal outcrops that cast no light; faintly glowing water at the fall"
+  },
+  "purple-field": {
+   "name": "The purple field (unique)",
+   "ground": "a saturated magenta-violet carpet of grass and low bloom on magenta soil filling the whole cell; tufts of pale lavender-blue grass; clumps of gold, orange, red and pale-blue flowering shrubs",
+   "rock": "a crystal-crowned knoll rising from the field; low outcrops",
+   "trees": "pink-blossom broadleaf trees standing in the field; dark conifers only at the edges",
+   "water": "a beck through the field",
+   "palette": "saturated magenta-violet ground, high-key and bright, purple as the base and the other hues as accents",
+   "wonders": "the crystal knoll; nothing floating"
+  }
+ },
+ "cellBiomes": {
+  "0,0": "coast-cliff",
+  "1,0": "sound-coast",
+  "2,0": "sound-coast",
+  "3,0": "mixed-bench",
+  "4,0": "moor",
+  "5,0": "coast-cliff",
+  "6,0": "coast-cliff",
+  "0,1": "lush-shelf",
+  "1,1": "dark-forest",
+  "2,1": "moor",
+  "3,1": "lush-shelf",
+  "4,1": "bare-plateau",
+  "5,1": "lush-shelf",
+  "6,1": "coast-cliff",
+  "0,2": "sound-coast",
+  "1,2": "coast-cliff",
+  "2,2": "lush-shelf",
+  "3,2": "mixed-bench",
+  "4,2": "dark-forest",
+  "5,2": "moor",
+  "6,2": "quarry"
+ },
+ "sites": [
+  {
+   "cell": [
+    1,
+    0
+   ],
+   "id": "sound-narrows",
+   "terrain": "the sound pinches between two basalt slabs, a narrow deep channel with level rock on both banks"
+  },
+  {
+   "cell": [
+    2,
+    0
+   ],
+   "id": "ferry-slip",
+   "terrain": "a natural shingle ramp running into the sound, sheltered by a low spur"
+  },
+  {
+   "cell": [
+    3,
+    0
+   ],
+   "id": "border-cairn-knoll",
+   "terrain": "a level knoll on the land border out of NinjaOne, open ground on both sides of the line"
+  },
+  {
+   "cell": [
+    4,
+    1
+   ],
+   "id": "plateau-tarn",
+   "terrain": "a round tarn lying in bare rock on the plateau, shingle rim (classify: lake)"
+  },
+  {
+   "cell": [
+    4,
+    1
+   ],
+   "id": "wind-arch",
+   "terrain": "a wind-cut arch at the plateau edge with a level shelf beside it"
+  },
+  {
+   "cell": [
+    1,
+    1
+   ],
+   "id": "deep-stand",
+   "terrain": "the darkest stand in the territory, a small clearing around one fallen giant"
+  },
+  {
+   "cell": [
+    2,
+    1
+   ],
+   "id": "beacon-crag",
+   "terrain": "a crag with a flat top standing clear of the moor, a view over the whole south coast"
+  },
+  {
+   "cell": [
+    3,
+    2
+   ],
+   "id": "terrace-steps",
+   "terrain": "a run of natural terraces stepping down to the sea, each about 40 m long"
+  },
+  {
+   "cell": [
+    4,
+    2
+   ],
+   "id": "fern-hollow",
+   "terrain": "a damp hollow under the canopy, a spring and a level floor"
+  },
+  {
+   "cell": [
+    5,
+    2
+   ],
+   "id": "boulder-maze",
+   "terrain": "a field of house-sized boulders on the moor with grass lanes between them"
+  },
+  {
+   "cell": [
+    0,
+    2
+   ],
+   "id": "stack-cove",
+   "terrain": "a cove with sea stacks offshore and a shingle beach at the back"
+  },
+  {
+   "cell": [
+    6,
+    1
+   ],
+   "id": "ledge-walk",
+   "terrain": "a natural ledge running partway up the sea-cliff, wide enough to walk"
+  }
+ ],
+ "rules": {
+  "geology": "columnar basalt, bedded and jointed, talus at cliff bases; plateau-and-gorge — columns are a feature where the biome says so, not the ground everywhere. Columns are WEATHERED and irregular wherever they appear: uneven heights and widths, broken tops, split and leaning columns, collapsed drums in talus, lichen in the joints; never a regular palisade of identical cylinders, never a square corner (owner, 2026-09-01: 'the cliff side is unnatural')",
+  "vegetation": "conifer in gullies and shelter, thinning on exposed rock; scrub and heather on open ground; crowns 4-7 m; the biome sets the mix",
+  "water": "coastal cliff and shingle seaward; inland tarns on shelves draining by falls into gorges",
+  "buildable": "~1/3 occupiable shelf, separated by gorges and broken ground so settlements read distinct",
+  "rail": "fantasy railway: tunnels, improbable spans and submerged runs permitted; land supplies the drama, not the gradient. The north-east leg spans the bay NinjaOne's ruling puts at that corner, so that coast must open into water wide enough for the line to leap it.",
+  "lighting": "flat: every rock face the same value whichever way it faces; ambient occlusion only; no directional key, no lit side, no cast shadows",
+  "northBorder": "OWNER RULING 2026-09-01, read from NinjaOne's side and mapped onto this block (NinjaOne is at lattice [3,1], this block at [2,5], so local col L is world col 2+L): NinjaOne and Tanium share BOTH a land and an ocean border. Local cells 1,0 and 2,0 (world cols 3 and 4): the north edge opens into the SOUND — the same water NinjaOne's 0,3 and 1,3 open into, and the inlet crossing and submerged run live on the far side of it. Local cells 3,0 and 4,0 (world cols 5 and 6): the north edge is LAND that continues into NinjaOne territory — terrain must run to the north edge as solid connecting ground, no coast. Local cell 5,0 (world col 7): the north-east bay, sea as authored. Local cells 0,0 and 6,0 (world cols 2 and 8) have no NinjaOne above them: open sea to the north.",
+  "register": "OWNER RULING 2026-09-01: epic, fantastical, light-toned fantasy register — luminous and hopeful, never grim; scenery varies by biome so wonders read as wonders"
+ }
+}
