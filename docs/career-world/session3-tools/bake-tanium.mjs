@@ -23,6 +23,31 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 
 const DRY = process.argv.includes("--dry");
+
+// The owner's model (gpt-6-astra, 2026-09-04) needs Codex 0.153+. The CLI on
+// PATH was 0.149 while the Codex app carried 0.153 in its own bin dir, and the
+// first three astra dispatches died in 0.1 min on "requires a newer version".
+// So: find every codex on the machine, take the newest, hand it to cell.mjs.
+import path from "node:path";
+function newestCodex() {
+  const cands = ["codex"];
+  const bin = path.join(process.env.LOCALAPPDATA || "", "OpenAI", "Codex", "bin");
+  if (fs.existsSync(bin)) for (const d of fs.readdirSync(bin)) {
+    const f = path.join(bin, d, "codex.exe");
+    if (fs.existsSync(f)) cands.push(f);
+  }
+  let best = "codex", bestV = "";
+  for (const c of cands) {
+    const r = spawnSync(c, ["--version"], { encoding: "utf8" });
+    const m = (r.stdout || "").match(/(d+).(d+).(d+)/);
+    if (!m) continue;
+    const v = m.slice(1).map((n) => n.padStart(4, "0")).join(".");
+    if (v > bestV) { bestV = v; best = c; }
+  }
+  return { bin: best, version: bestV.replace(/0+(d)/g, "$1") };
+}
+const CODEX = newestCodex();
+process.env.CODEX_BIN = CODEX.bin;
 // --only c0-1,c1-1   bake just these, in the order given
 // --force c4-1,c5-1  replace these even though they are already authored
 //
@@ -93,6 +118,7 @@ function keepReject(id, biome, out) {
 }
 
 say(`bake ${TERRITORY}: ${ORDER.length} cells, sequential, failures do not stop the run`);
+say(`codex ${CODEX.version} at ${CODEX.bin}`);
 if (DRY) { say("--dry: order and briefs check out, nothing dispatched"); process.exit(0); }
 
 const results = [];

@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-04T23:02:08.818Z",
+ "solidifiedAt": "2026-09-04T23:15:53.006Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "01a4d8848605a57e",
+  "cell.mjs": "f59b5148337672a8",
   "plan-territory.mjs": "e8d86a90b2e32796",
   "AGENTS.md": "a1ab4eaec1d4c6ac"
  },
@@ -417,6 +417,15 @@
    "reason": "owner approved 2026-09-04 (in chat: 'can you change the codex agent you use to astra 6'): the dispatch model in cell.mjs changes from gpt-5.6-sol to gpt-6-astra, the model this machine's Codex config already defaults to; reasoning effort stays high; nothing else in the file changes",
    "hashes": {
     "cell.mjs": "01a4d8848605a57e",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-04T23:15:53.006Z",
+   "reason": "owner approved 2026-09-04 (same instruction, 'change the codex agent you use to astra 6'): gpt-6-astra needs Codex 0.153+ and the CLI on PATH is 0.149, so cell.mjs now runs the binary named by CODEX_BIN (default: codex on PATH) and the runner sets it to the newest codex.exe on the machine; nothing else changes",
+   "hashes": {
+    "cell.mjs": "f59b5148337672a8",
     "plan-territory.mjs": "e8d86a90b2e32796",
     "AGENTS.md": "a1ab4eaec1d4c6ac"
    }

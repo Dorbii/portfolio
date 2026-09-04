@@ -1125,6 +1125,7 @@ try {
     fs.writeFileSync(runner, `#!/usr/bin/env bash
 set -uo pipefail
 cd "${P(ROOT)}"
+CODEX="${P(process.env.CODEX_BIN || "codex")}"
 LOG="${P(path.join(cellDir, `${id}.log`))}"
 SRC="${P(path.join(cellDir, `${id}-source.png`))}"
 WAIT="\${CELL_RETRY_WAIT_S:-120}"
@@ -1132,7 +1133,7 @@ WAIT="\${CELL_RETRY_WAIT_S:-120}"
 for attempt in 1 2 3 4; do
   A="$LOG.attempt$attempt"
   echo "=== attempt $attempt $(date -Iseconds) ===" >> "$LOG"
-  codex exec \\
+  "$CODEX" exec \\
     --sandbox workspace-write \\
     -c sandbox_workspace_write.network_access=true \\
     -c model=gpt-6-astra \\
