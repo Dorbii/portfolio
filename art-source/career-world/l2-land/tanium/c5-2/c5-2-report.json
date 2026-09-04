@@ -1,0 +1,83 @@
+{
+  "cell": "c5-2",
+  "territory": "tanium",
+  "status": "quarantine_candidate_with_visual_failures_disclosed",
+  "generation": {
+    "filename": "c5-2-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "98C146F5C732DDE1429E924FA5F251725E786D85727FAB107CC8ED417DD8FDF1",
+    "mode": "built-in imagegen edit with edit target first and canon second as reference only",
+    "editCallsUsed": 1,
+    "retryUsed": false,
+    "bothImagesAttachedToSameCall": true,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "resizedCroppedOrTiled": false
+  },
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean; water-mask pixels and gradients below 12 luminance units excluded",
+    "peakVsUniformOverLand": 1.562731,
+    "uniformReference": 1.0,
+    "keyLightAsymmetry": 0.002481,
+    "gradientSamples": 1077182,
+    "aggregateDirectionalKeyPass": true,
+    "strictEqualFaceValueVisualCheck": false,
+    "visualCheck": "No long cast-shadow field or time-of-day gradient is visible, but many boulders and stacks retain brighter upper facets and darker side faces. The literal same-value-on-every-side requirement is not met."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "manual estimate of non-water land area",
+    "buildable": 0.34,
+    "steep": 0.12,
+    "otherBrokenBoulderScrubOrShore": 0.54,
+    "method": "Open grass lanes and coherent moor shelf count as buildable; cliff and stack faces count as steep; the boulder maze, scrub, shingle, talus, and broken rock make up the remainder."
+  },
+  "waterFootprintFraction": 0.19305813,
+  "waterMask": {
+    "filename": "c5-2-water-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "96A2A12DB5D11C487542C2BF1A766A8587FCB04D5D1AD879C048741C1FEB959A",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "opaqueWaterPixels": 303587,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedPixelComponents": 1,
+    "edgeWaterPixels": {
+      "north": 0,
+      "east": 70,
+      "south": 1254,
+      "west": 167
+    },
+    "derivation": "Source-raster colour classification connected to the sea, with the two visible narrow beck courses traced at source resolution; emergent stack and shore rock remain transparent.",
+    "visualCheck": "The mask covers open water, surf, wash, ripple highlights, reflections, and both becks. Transparent interiors inside the connected sea component are the five sea-stack bodies and emergent rocks, not unclassified water."
+  },
+  "crown": {
+    "medianMetres": 2.989,
+    "medianPx": 62.265,
+    "sampleCount": 34,
+    "method": "Measured all identified full conifer crown components on the 1254 px source, including saplings, then scaled widths by 2560/1254; median source width 30.5 px.",
+    "excludedElements": []
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleEditCall": true,
+    "secondReferenceAttached": true,
+    "terrainOnly": true,
+    "fiveSeparateSeaStacks": true,
+    "twoBecksReachSea": true,
+    "waterMaskSameDimensionsBinary": true,
+    "crownMedianInRequiredBand": true,
+    "strictNeutralLighting": false,
+    "houseSizedBoulderMaze": false
+  },
+  "openRisks": [
+    "Hard lighting failure: repeated bright upper facets and darker side faces remain on rocks and stacks despite the low aggregate whole-cell key-light asymmetry.",
+    "The central field is dense and maze-like, but most boulders read smaller and more uniform than the required 4-7 m house-sized erratics.",
+    "Several stacks read as similarly proportioned basalt towers; owner review should judge whether the requested ordinary weathered irregularity is sufficient.",
+    "Visual seam continuity, exact water-edge judgment, scale, and terrain quality remain director and owner decisions; this report does not claim visual acceptance."
+  ]
+}
