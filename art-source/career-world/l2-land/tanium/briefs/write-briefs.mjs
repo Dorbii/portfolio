@@ -541,35 +541,19 @@ for (const s of def.sites) {
 // the prompt and the numbers go to the owner unchanged.
 const LIGHTING = `
 
-**Lighting — this world has no sun.** Flat, ambient light only. Every rock face,
-column, bank, tussock and boulder is the SAME VALUE on every side, whichever way
-it faces. No lit side and no shaded side. No bright upper edge, no dark lower
-edge. No cast shadows and no contact shadows of any kind. Nothing anywhere in
-the frame should let a viewer say which direction light comes from. Depth reads
-from ambient occlusion in crevices and from the drawing itself, never from a key
-light. This matters more than any other instruction above: an image with a
-consistent lit side is refused whatever else it gets right.
+---
 
-**Tree size.** Conifer crowns about **3-4 m across**, measured at the final
-canvas scale — that is the middle of what every accepted cell in this world has
-measured (2.16-5.10 m, median 3.33). Draw them at that size deliberately rather
-than leaving it to chance: a cell whose median crown lands outside 1.7-5.2 m is
-refused, and one attempt at this territory came back at 1.47 m, below every cell
-already in the world. Saplings and small ones are fine and belong in the census;
-it is the MEDIAN that has to sit in the band.
+**This world has no sun.** Flat ambient light only: every rock face, column,
+bank and tussock the SAME VALUE on every side. No lit side, no shaded side, no
+cast or contact shadows, nothing that says which way light comes from. Depth
+comes from ambient occlusion in crevices, never from a key light.
 
-**Brightness — match the neighbour's, exactly.** Measured across this whole
-territory, the hue of the vegetation matches its neighbours almost perfectly
-(dBG 0.01-0.05 against a 0.20 limit) and the BRIGHTNESS does not (dLuma 14-56
-against 13). Every one of those was a cell lit differently from the cell beside
-it. So: where authored paint reaches into this cell, match how light or dark it
-is, not just its colour. If the neighbour's grass is darker or paler overall
-than you would paint it, the neighbour is right.
+**Match the neighbour brightness**, not only its colour. Where authored paint
+reaches into this cell, if its ground is darker or paler than you would paint
+it, the neighbour is right.
 
-The two things are the same instruction. A cell comes out brighter or darker
-than its neighbour because something in it is being lit — a sun angle, an
-exposure, a haze — and this world has none of that. Paint it flat and it matches
-by itself.`;
+**Conifer crowns about 3-4 m across** at final scale. Saplings are fine and stay
+in the census; it is the MEDIAN that must land in 1.7-5.2 m.`;
 
 // ---------------------------------------------------------- the rune chain --
 // A route, like the rail loop, not a biome and not one cell's feature. It spans
@@ -609,27 +593,28 @@ function runeChainFor(col, row) {
 
   return `
 
-**THE RUNE CHAIN crosses this cell.** One line of carved rock spans the whole
-territory, entering from the sea in the west and leaving into the sea in the
-east, linking every settlement in Tanium as a node on the way. ${west}, ${east}.
-Those two positions are not suggestions: the neighbouring cells are authored to
-meet the chain at exactly those points, and a groove that arrives anywhere else
-is a broken chain.
+**THE RUNE CHAIN crosses this cell.** One weathered line of carved rock spans
+the whole territory, sea to sea, linking every settlement as a node. ${west},
+${east}. Those positions are exact: the neighbouring cells are authored to meet
+them, and a groove arriving anywhere else is a broken chain.
 
-The groove is ${rc.groove}
+**A slot cut DOWN into the bedrock**, 2-3 m wide and about 2 m deep, two cut
+walls and a floor, dark inside because depth shades it. Ancient: edges rounded,
+lichen in the joints, scrub over the lip, rubble on the floor. It never wanders
+— the line holds true from edge to edge. **Not** a path, road, kerb, wall or
+ridge: the ground is REMOVED along it.
 
-${rc.water}
+**No water on the line.** A beck may pass beneath or stop short, but nothing wet
+sits on the groove — water there is cut from this layer and leaves a hole.
+
 ${node
-    ? `**This cell is a NODE** — ${node.of}. Here the groove opens into a cluster of
-RUNES on the level rock: ${rc.rune} Set them back from the cell edges so only the
-groove itself ever crosses a boundary.`
-    : `**This cell is not a node** — no runes here, only the groove passing through.
-Keep it plain: the chain crosses, and the ground is otherwise exactly what its
-biome says it is.`}
+    ? `**A NODE — ${node.of}.** Six to ten cut panels flank the groove, each 6-8 m,
+each a different mark, weathered and some part-lost. None larger, nothing at the
+middle. Set them back from the cell edges so only the groove crosses a boundary.`
+    : `**Not a node** — the groove passes through and nothing else changes.`}
 
-Carving only. **Do not paint any light, glow or energy in or along the groove** —
-that belongs to an effect layer and painting it here would bake it into the
-albedo permanently.`;
+**Carving only. Paint no light or glow along it** — that is an effect layer.`;
+
 }
 
 fs.mkdirSync(DIR, { recursive: true });
