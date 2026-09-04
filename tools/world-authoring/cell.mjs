@@ -45,13 +45,19 @@ import sharp from "sharp";
 sharp.cache(false);
 
 const ROOT = process.cwd();
-const TERRITORY = "art-source/career-world/l2-land/ninjaone/plan.json";   // committed, beside the sources
+// The plan path follows --territory; it is resolved in main, after args().
+// It used to be a constant pointing at ninjaone, which is why this pipeline
+// could author exactly one territory.
+const planPathFor = (id) => `art-source/career-world/l2-land/${id}/plan.json`;
 // the working dir follows the output tree: a relocated test world must never
 // write into the real cells' working dirs — a control's stub water.json
 // reached cell 4,3's ledger record that way (R073, 2026-09-02)
-const WORK = process.env.L2_OUT_ROOT
+// Per territory: two territories authoring the same cell coordinate would
+// otherwise share one scratch dir, and a stale delivery from the other one
+// could be picked up as this cell's.
+const workRoot = (id) => (process.env.L2_OUT_ROOT
   ? path.join(process.env.L2_OUT_ROOT, "work")
-  : ".codex-tmp/authoring/cells";
+  : path.join(".codex-tmp/authoring/cells", id));
 // one lock per OUTPUT TREE: the invariant is one writer per world, and a
 // relocated test world (L2_OUT_ROOT) is its own world with its own lock
 const LOCKDIR = process.env.L2_OUT_ROOT
@@ -120,11 +126,19 @@ function args() {
   const cell = get("--cell");
   if (!cell) die("--cell COL,ROW is required");
   const [col, row] = cell.split(",").map(Number);
+  // REQUIRED, and deliberately without a default. A default would let a
+  // mistyped or forgotten flag bake a cell into the wrong territory's tree,
+  // and nothing downstream would notice until a whole territory was wrong.
+  const territory = get("--territory");
+  if (!territory) {
+    die("--territory ID is required (e.g. --territory ninjaone).\n"
+      + "  There is no default: a silent one would bake into the wrong tree.");
+  }
   let describe = get("--describe");
   const df = get("--describe-file");
   if (df) describe = fs.readFileSync(df, "utf8");
   return {
-    col, row, describe,
+    col, row, describe, territory,
     from: get("--from"),
     dryRun: a.includes("--dry-run"),
     force: a.includes("--force"),
@@ -569,9 +583,18 @@ async function stitchAndPropagate(plan, seam, paths, ledger, id) {
 }
 
 // --------------------------------------------------------------- main -----
-const { col, row, describe, from, dryRun, force, redo, restitch } = args();
-if (!fs.existsSync(TERRITORY)) die(`territory plan missing: ${TERRITORY}`);
+const { col, row, describe, territory, from, dryRun, force, redo, restitch } = args();
+const TERRITORY = planPathFor(territory);
+const WORK = workRoot(territory);
+if (!fs.existsSync(TERRITORY)) {
+  die(`territory plan missing: ${TERRITORY}\n`
+    + `  Write art-source/career-world/l2-land/${territory}/territory.def.json, then\n`
+    + `  node tools/world-authoring/plan-territory.mjs ${territory}`);
+}
 const plan = JSON.parse(fs.readFileSync(TERRITORY, "utf8"));
+if (plan.territory !== territory) {
+  die(`${TERRITORY} says territory "${plan.territory}" but was asked for "${territory}"`);
+}
 if (col < 0 || row < 0 || col >= plan.grid.cols || row >= plan.grid.rows) {
   die(`cell ${col},${row} is outside the ${plan.grid.cols}x${plan.grid.rows} territory`);
 }
@@ -826,6 +849,16 @@ if (editMode && !fs.existsSync(canonPath)) die(`edit mode needs the style canon 
 const transitionLines = [["north", col, row - 1], ["east", col + 1, row], ["south", col, row + 1], ["west", col - 1, row]]
   .map(([dir, c, r]) => {
     if (c < 0 || r < 0 || c >= plan.grid.cols || r >= plan.grid.rows) {
+      // A grid edge is not automatically the end of the world. Where the plan
+      // carries a rule for this side — a shared border with the next territory
+      // — that rule governs, and saying "nothing arrives" here would flatly
+      // contradict it in the same packet.
+      const borderRule = plan.rules?.[`${dir}Border`];
+      if (borderRule) {
+        return `- **${dir}:** territory edge, but **${dir}Border applies** — read it in `
+          + `Territory rules below and obey it exactly. Do NOT end your terrain `
+          + `mid-ground on this side unless that rule says this side is sea.`;
+      }
       return `- **${dir}:** territory edge — nothing arrives; end your terrain mid-ground.`;
     }
     const nid = plan.cellBiomes?.[`${c},${r}`], nb = nid ? plan.biomes?.[nid] : null;

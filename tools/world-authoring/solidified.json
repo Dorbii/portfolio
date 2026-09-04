@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-04T03:57:05.712Z",
+ "solidifiedAt": "2026-09-04T06:20:51.427Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "14ecb952fdc91d8b",
+  "cell.mjs": "951096906eb84477",
   "plan-territory.mjs": "e8d86a90b2e32796",
   "AGENTS.md": "a1ab4eaec1d4c6ac"
  },
@@ -336,6 +336,24 @@
    "reason": "owner 2026-09-03 ('thats only true if unintentional') - lock change 13, AFTER the change, controls 34/34. (a) The geology canon rule now states that the ban on a regular palisade governs regularity that ARRIVES BY DEFAULT, and that where a biome or site explicitly calls for regular ordered columns that order is the point and must be drawn exactly, not weathered back; the coast-cliff rock rule cross-references the exception by name. (b) Eleventh biome linked-colonnade added: Tanium's wonder, from the owner's 'something highlighting their linear chain tech' - basalt columns all leaning one way, each touching the next, one unbroken arcade leaving the land at the shore and continuing as linked sea stacks past the edge of the authored world; every column equal, nothing at the middle, so the chain has no hub. Pure landform, no crystal and no glow, which is what separates it from NinjaOne's two wonders. Placed at Tanium local cell 6,1 (world 8,6), where the rail's cliff run at 6.5,1.8 already passes, and its ledge-walk site is replaced by colonnade-head. VERIFIED on NinjaOne's plan: only geology, coast-cliff and the new biome differ - shelves, loop, railFeatures, sites and cellBiomes are byte-identical, so the 20 baked cells stay valid and nothing is rebaked.",
    "hashes": {
     "cell.mjs": "14ecb952fdc91d8b",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-04T06:13:03.245Z",
+   "reason": "owner 2026-09-03/04, BEFORE the change: 'go for it now. You have codex cli as needed please render it all and ill review in the morning and then we can handle any rebakes' - an instruction to bake Tanium's 21 cells, which cell.mjs cannot do, plus his standing reusability ruling 'we gotta make this workflow re-usable since it worked for the ninja territory' (lock change 12 covered plan-territory.mjs; cell.mjs is the other half of the same workflow). Lock change 14, BEFORE: (a) cell.mjs takes --territory <id> and derives its plan path from it; REQUIRED, no default, because a silent default would bake into the wrong tree and the mistake would not be visible until a whole territory was wrong. (b) The working dir becomes per-territory so a stale scratch dir from another territory cannot be picked up. (c) A DEFECT this exposed: the transitions section tells any grid-edge cell 'territory edge - nothing arrives; end your terrain mid-ground', which flatly contradicts Tanium's northBorder rule requiring solid connecting ground into NinjaOne. An edge direction that a plan rule describes now defers to that rule instead of asserting nothing arrives. Controls first: world-authoring-stitch and stitch-content-aware-seam must stay green, with both updated to pass --territory ninjaone explicitly. KNOWN LIMIT being accepted rather than fixed tonight: neighbour context is per-territory, so Tanium's north row gets NinjaOne's coast as TEXT (the measured crossings in northBorder), not as pixels. Cross-territory pixel context is a larger change than is safe to make unvalidated before an unattended overnight run; the north row is therefore the most likely rebake and the owner is told so.",
+   "hashes": {
+    "cell.mjs": "14ecb952fdc91d8b",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-04T06:20:51.428Z",
+   "reason": "owner 2026-09-03/04 ('go for it now... please render it all'), lock change 14 AFTER, controls 29/29. cell.mjs takes --territory ID (required, no default), derives its plan path and a per-territory working dir from it, and refuses a plan whose territory field disagrees. The defect it exposed is fixed: a grid-edge direction that the plan carries a <dir>Border rule for now defers to that rule instead of telling the worker 'nothing arrives; end your terrain mid-ground' - which in Tanium's north row would have contradicted northBorder's requirement of solid connecting ground into NinjaOne, in the same packet. Verified on the real dry-run of tanium c3-0: the transitions section reads 'territory edge, but northBorder applies' and the measured handover text is in the packet. world-authoring-stitch updated to pass --territory ninjaone at all ten call sites; 29/29 green.",
+   "hashes": {
+    "cell.mjs": "951096906eb84477",
     "plan-territory.mjs": "e8d86a90b2e32796",
     "AGENTS.md": "a1ab4eaec1d4c6ac"
    }

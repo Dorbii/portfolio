@@ -139,7 +139,7 @@ async function writeArtefacts(dir, id, img, report) {
 
 function runCell(cellArg, fromDir, extra = []) {
   return execFileSync(process.execPath,
-    [SCRIPT, "--cell", cellArg, "--from", fromDir, "--describe", "synthetic control", ...extra],
+    [SCRIPT, "--territory", "ninjaone", "--cell", cellArg, "--from", fromDir, "--describe", "synthetic control", ...extra],
     { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" });
 }
 
@@ -227,7 +227,7 @@ test("frontier cell stitches aligned, bleeds one ring, and removes water", async
 
 test("edit target carries the neighbour's concept paint byte-exact and grey elsewhere", async () => {
   // c1-1 is authored; a dry run for its east neighbour must build the target
-  const log = execFileSync(process.execPath, [SCRIPT, "--cell", "2,1", "--dry-run"],
+  const log = execFileSync(process.execPath, [SCRIPT, "--territory", "ninjaone", "--cell", "2,1", "--dry-run"],
     { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" });
   assert.match(log, /edit target/);
   const f = path.join(WORKT, "c2-1", "context", "edit-target.png");
@@ -275,20 +275,20 @@ test("edit target carries the neighbour's concept paint byte-exact and grey else
   assert.match(packet, /\*\*west \(1,1\):\*\* .*authored/, "the authored west neighbour's biome must be named");
   assert.match(packet, /\*\*east \(3,1\):\*\* .*not yet authored/, "an unauthored neighbour must be marked so");
   // a frontier cell gets no edit target and stays in generate mode
-  const log3 = execFileSync(process.execPath, [SCRIPT, "--cell", "3,1", "--dry-run"],
+  const log3 = execFileSync(process.execPath, [SCRIPT, "--territory", "ninjaone", "--cell", "3,1", "--dry-run"],
     { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" });
   assert.doesNotMatch(log3, /edit target/);
   assert.ok(!fs.existsSync(path.join(WORKT, "c3-1", "context", "edit-target.png")),
     "frontier cell must not get an edit target");
   assert.match(fs.readFileSync(path.join(WORKT, "c3-1", "packet-c3-1.md"), "utf8"), /ONE generation, whole canvas/);
   // interior sites (owner-directed): a cell with sites carries them as terrain to offer
-  execFileSync(process.execPath, [SCRIPT, "--cell", "2,2", "--dry-run"],
+  execFileSync(process.execPath, [SCRIPT, "--territory", "ninjaone", "--cell", "2,2", "--dry-run"],
     { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" });
   const p22 = fs.readFileSync(path.join(WORKT, "c2-2", "packet-c2-2.md"), "utf8");
   assert.match(p22, /## Sites this cell must offer/);
   assert.match(p22, /waystation-bench/);
   // loop presence by segment: 4,2 holds no waypoint but the line crosses it
-  const log42 = execFileSync(process.execPath, [SCRIPT, "--cell", "4,2", "--dry-run"],
+  const log42 = execFileSync(process.execPath, [SCRIPT, "--territory", "ninjaone", "--cell", "4,2", "--dry-run"],
     { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" });
   assert.match(log42, /rail\s+loop passes through/, "a segment crossing the cell counts as the loop passing through");
 });
@@ -311,7 +311,7 @@ echo "fake worker: delivering nothing"; exit 0
   const before = treeHash();
   let out = "";
   try {
-    execFileSync(process.execPath, [SCRIPT, "--cell", "3,2", "--describe", "stale-deliverable control"],
+    execFileSync(process.execPath, [SCRIPT, "--territory", "ninjaone", "--cell", "3,2", "--describe", "stale-deliverable control"],
       { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT, CELL_RETRY_WAIT_S: "0", PATH: fakeDir + path.delimiter + process.env.PATH }, encoding: "utf8" });
     assert.fail("a dispatch that delivered nothing must not be accepted");
   } catch (e) { out = String(e.stdout || "") + String(e.stderr || ""); }
@@ -416,7 +416,7 @@ test("re-stitching a cell from the same source is byte-idempotent", async () => 
 });
 
 test("edit target for a replacement never carries the cell's own previous paint", async () => {
-  execFileSync(process.execPath, [SCRIPT, "--cell", "2,1", "--dry-run", "--force"],
+  execFileSync(process.execPath, [SCRIPT, "--territory", "ninjaone", "--cell", "2,1", "--dry-run", "--force"],
     { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" });
   const f = path.join(WORKT, "c2-1", "context", "edit-target.png");
   const { data } = await sharp(f).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
@@ -488,14 +488,14 @@ test("a 100px stream offset at a shared edge is bridged in the footprint", async
   await writeSources("c4-1", 4, 1, [toSrc(1380), 0, toSrc(1380)]);
 
   const logD = execFileSync(process.execPath,
-    [SCRIPT, "--cell", "3,1", "--redo", "--describe", "bridge control D"],
+    [SCRIPT, "--territory", "ninjaone", "--cell", "3,1", "--redo", "--describe", "bridge control D"],
     { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" });
   assert.match(logD, /accepted, stitched/);
 
   let logE;
   try {
     logE = execFileSync(process.execPath,
-      [SCRIPT, "--cell", "4,1", "--redo", "--describe", "bridge control E"],
+      [SCRIPT, "--territory", "ninjaone", "--cell", "4,1", "--redo", "--describe", "bridge control E"],
       { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" });
   } catch (e) {
     console.error("E rejected. Child output:\n", e.stdout, e.stderr);
@@ -571,7 +571,7 @@ test("a crown straddling the shared line on one paint only comes through whole o
   const logA = runCell("1,3", path.join(SYN, "row3-a"));
   assert.match(logA, /accepted, stitched/, "the plain cell must actually stitch");
   // the pipeline's own boundary against c1-3, from the dry run's binding map
-  execFileSync(process.execPath, [SCRIPT, "--cell", "2,3", "--dry-run"], ENV);
+  execFileSync(process.execPath, [SCRIPT, "--territory", "ninjaone", "--cell", "2,3", "--dry-run"], ENV);
   const bind = await sharp(path.join(WORKT, "c2-3", "context", "binding.png")).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const wx0 = 2 * CELL - BLEED, wy0 = 3 * CELL - BLEED, W = bind.info.width;
   const yMid = 3 * CELL + 1024, v = yMid - wy0;
@@ -617,12 +617,12 @@ test("a crown straddling the shared line on one paint only comes through whole o
 
 test("--restitch rebuilds an accepted cell's tiles from its sources with no dispatch and no gates, byte-identically, and refuses an unauthored cell", () => {
   const before = treeHash();
-  const log = execFileSync(process.execPath, [SCRIPT, "--cell", "2,3", "--restitch"], ENV);
+  const log = execFileSync(process.execPath, [SCRIPT, "--territory", "ninjaone", "--cell", "2,3", "--restitch"], ENV);
   assert.equal(treeHash(), before, "the same sources and the same seams reproduce the same tiles");
   assert.match(log, /total 0 written/);
   assert.doesNotMatch(log, /gates:/, "no gate runs on a restitch: the acceptance stands");
   let refused = "";
-  try { execFileSync(process.execPath, [SCRIPT, "--cell", "3,3", "--restitch"], { ...ENV, stdio: "pipe" }); }
+  try { execFileSync(process.execPath, [SCRIPT, "--territory", "ninjaone", "--cell", "3,3", "--restitch"], { ...ENV, stdio: "pipe" }); }
   catch (e) { refused = String(e.stderr || e.message); }
   assert.match(refused, /not authored/, "an unauthored cell has nothing to restitch");
 });
@@ -655,7 +655,7 @@ async function supplyGeneration(id, col, row, sourceImg, maskImg, report) {
   writeControlReport(dir, id, report);
 }
 function redoCell(cellArg, extra = []) {
-  return execFileSync(process.execPath, [SCRIPT, "--cell", cellArg, "--redo", "--describe", "mask completion control", ...extra],
+  return execFileSync(process.execPath, [SCRIPT, "--territory", "ninjaone", "--cell", cellArg, "--redo", "--describe", "mask completion control", ...extra],
     { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" });
 }
 const C41 = [4 * CELL + 1024, 1 * CELL + 1024];   // cell 4,1's centre in territory px
