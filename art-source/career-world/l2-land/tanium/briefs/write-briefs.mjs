@@ -608,8 +608,9 @@ Those two positions are not suggestions: the neighbouring cells are authored to
 meet the chain at exactly those points, and a groove that arrives anywhere else
 is a broken chain.
 
-The groove is ${rc.groove} — cut into the bare rock, not built on top of it, and
-it holds its line across the whole cell rather than wandering like a stream.
+The groove is ${rc.groove}
+
+${rc.water}
 ${node
     ? `**This cell is a NODE** — ${node.of}. Here the groove opens into a cluster of
 RUNES on the level rock: ${rc.rune} Set them back from the cell edges so only the
