@@ -23,3 +23,4 @@ They are kept because a rejected cell nobody sees cannot be ruled on.
 - `c1-2` coast-cliff — rejected on **rock lighting 0.258**
 - `c3-2` mixed-bench — rejected on **a gate **
 - `c4-2` dark-forest — rejected on **a gate **
+- `c6-2` quarry — rejected on **rock lighting 0.317**

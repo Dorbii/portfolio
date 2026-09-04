@@ -32,7 +32,10 @@ const TILE = 420, PAD = 10, HEAD = 52, LABEL = 40;
 const W = COLS * (TILE + PAD) - PAD, H = HEAD + ROWS * (TILE + LABEL + PAD) - PAD;
 const comps = [];
 const svg = [];
-svg.push(`<rect width="${W}" height="${H}" fill="#0d1620"/>`);
+// NO full-size background rect. This overlay composites ON TOP of the art, so
+// an opaque rect here paints out every tile and leaves a sheet of empty frames.
+// The canvas below already provides the ground. (Written twice in one night:
+// draw-kaizen-on-land.mjs had the identical bug and its own warning comment.)
 svg.push(`<text x="12" y="32" fill="#f0f5fa" font-family="Georgia,serif" font-size="26">`
   + `Tanium — every cell, accepted and refused, with the number that decided it</text>`);
 
