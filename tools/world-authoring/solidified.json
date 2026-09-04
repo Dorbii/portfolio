@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-04T09:11:25.080Z",
+ "solidifiedAt": "2026-09-04T23:02:08.818Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "0a7bc79204dfe097",
+  "cell.mjs": "01a4d8848605a57e",
   "plan-territory.mjs": "e8d86a90b2e32796",
   "AGENTS.md": "a1ab4eaec1d4c6ac"
  },
@@ -408,6 +408,15 @@
    "reason": "owner 2026-09-04, lock change 17, AFTER, controls 29/29. Packet wording only; CROWN_MIN_M stays 1.7 and CROWN_MAX_M stays 5.2, and the comment forbidding a move to 4-7 without the owner's word is untouched. The packet now states that the band governs the MEDIAN of the census and not every individual crown, that every crown found goes into the census whatever its own size (leaving small ones out is itself a way of shifting the median), and that excludedElements is only for an element so grossly out of scale that including it would distort the median - naming the case it exists for, the ~22 m crown against a 5.2 m band. The old wording asked the worker to police every crown against a band of medians, so any cell containing a sapling was refused; four cells and ten exclusion reports went that way tonight, each worker doing exactly what the packet asked.",
    "hashes": {
     "cell.mjs": "0a7bc79204dfe097",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-04T23:02:08.818Z",
+   "reason": "owner approved 2026-09-04 (in chat: 'can you change the codex agent you use to astra 6'): the dispatch model in cell.mjs changes from gpt-5.6-sol to gpt-6-astra, the model this machine's Codex config already defaults to; reasoning effort stays high; nothing else in the file changes",
+   "hashes": {
+    "cell.mjs": "01a4d8848605a57e",
     "plan-territory.mjs": "e8d86a90b2e32796",
     "AGENTS.md": "a1ab4eaec1d4c6ac"
    }

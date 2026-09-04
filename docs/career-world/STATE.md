@@ -119,7 +119,7 @@ under `.codex-tmp`. Owner's words: *"can you make sure we are committing
 regularly then so that doesnt happen"*.
 
 
-`codex exec --sandbox workspace-write -c model=gpt-5.6-{sol|terra} -c model_reasoning_effort=high "$(cat <packet>)" < /dev/null > <log> 2>&1` from REPO ROOT (a stray `cd` once silently killed a dispatch); verify the log grew past the banner; watch for the `tokens used` completion marker (never poll the process list). Bundled Node (F5): `~/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node.exe`. Quarantine-only until director review + owner acceptance. HEAD advances concurrently (ocean program) — re-establish red baselines per lane; known pre-existing red: D05 hash mismatch at `tests/ninjaone-capital-city-lod-routing.test.mjs:847`.
+`codex exec --sandbox workspace-write -c model=gpt-6-astra (owner 2026-09-04, was gpt-5.6-sol/terra) -c model_reasoning_effort=high "$(cat <packet>)" < /dev/null > <log> 2>&1` from REPO ROOT (a stray `cd` once silently killed a dispatch); verify the log grew past the banner; watch for the `tokens used` completion marker (never poll the process list). Bundled Node (F5): `~/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node.exe`. Quarantine-only until director review + owner acceptance. HEAD advances concurrently (ocean program) — re-establish red baselines per lane; known pre-existing red: D05 hash mismatch at `tests/ninjaone-capital-city-lod-routing.test.mjs:847`.
 
 ---
 

@@ -1135,7 +1135,7 @@ for attempt in 1 2 3 4; do
   codex exec \\
     --sandbox workspace-write \\
     -c sandbox_workspace_write.network_access=true \\
-    -c model=gpt-5.6-sol \\
+    -c model=gpt-6-astra \\
     -c model_reasoning_effort=high \\
     "$(cat ${P(path.join(cellDir, `packet-${id}.md`))})" \\
     < /dev/null > "$A" 2>&1
