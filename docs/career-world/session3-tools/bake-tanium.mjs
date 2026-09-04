@@ -23,6 +23,19 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 
 const DRY = process.argv.includes("--dry");
+// --only c0-1,c1-1   bake just these, in the order given
+// --force c4-1,c5-1  replace these even though they are already authored
+//
+// Order matters for the rune chain: a cell authored after its western neighbour
+// gets the groove arriving as PIXELS in its edit target, not just as a
+// percentage in prose. West to east is the whole point.
+const listArg = (flag) => {
+  const i = process.argv.indexOf(flag);
+  return i >= 0 && process.argv[i + 1] && !process.argv[i + 1].startsWith("--")
+    ? process.argv[i + 1].split(",").map((s) => s.trim()).filter(Boolean) : [];
+};
+const ONLY = listArg("--only");
+const FORCE = new Set(listArg("--force"));
 const TERRITORY = "tanium";
 const BRIEFS = `art-source/career-world/l2-land/${TERRITORY}/briefs`;
 const LOG = `.codex-tmp/bake-${TERRITORY}.log`;
@@ -36,9 +49,19 @@ const ORDER = [
 
 const def = JSON.parse(fs.readFileSync(`art-source/career-world/l2-land/${TERRITORY}/territory.def.json`, "utf8"));
 const planned = Object.keys(def.cellBiomes).sort();
-const missing = planned.filter((k) => !ORDER.includes(k));
-if (missing.length) throw new Error(`the run order skips ${missing.join(", ")}`);
-if (ORDER.length !== planned.length) throw new Error(`order has ${ORDER.length} cells, plan has ${planned.length}`);
+if (ONLY.length) {
+  // --only takes ids like c0-1; the order given is the order baked
+  ORDER.length = 0;
+  for (const id of ONLY) {
+    const k = id.replace(/^c/, "").replace("-", ",");
+    if (!(k in def.cellBiomes)) throw new Error(`--only names ${id}, which is not in the plan`);
+    ORDER.push(k);
+  }
+} else {
+  const missing = planned.filter((k) => !ORDER.includes(k));
+  if (missing.length) throw new Error(`the run order skips ${missing.join(", ")}`);
+  if (ORDER.length !== planned.length) throw new Error(`order has ${ORDER.length} cells, plan has ${planned.length}`);
+}
 for (const k of ORDER) {
   const [c, r] = k.split(",");
   const f = `${BRIEFS}/c${c}-${r}.md`;
@@ -82,11 +105,13 @@ for (const [i, cell] of ORDER.entries()) {
   const t0 = Date.now();
   say(`--- ${i + 1}/${ORDER.length}  ${id}  ${biome}`);
 
+  const forced = FORCE.has(id);
   const run = spawnSync(process.execPath, [
     "tools/world-authoring/cell.mjs",
     "--territory", TERRITORY,
     "--cell", cell,
     "--describe-file", `${BRIEFS}/${id}.md`,
+    ...(forced ? ["--force"] : []),
   ], { encoding: "utf8", maxBuffer: 1 << 28 });
 
   const mins = ((Date.now() - t0) / 60000).toFixed(1);
