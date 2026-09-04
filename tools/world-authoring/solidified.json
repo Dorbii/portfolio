@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-04T06:20:51.427Z",
+ "solidifiedAt": "2026-09-04T06:45:06.060Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "951096906eb84477",
+  "cell.mjs": "83cbf9ad4215c92e",
   "plan-territory.mjs": "e8d86a90b2e32796",
   "AGENTS.md": "a1ab4eaec1d4c6ac"
  },
@@ -354,6 +354,24 @@
    "reason": "owner 2026-09-03/04 ('go for it now... please render it all'), lock change 14 AFTER, controls 29/29. cell.mjs takes --territory ID (required, no default), derives its plan path and a per-territory working dir from it, and refuses a plan whose territory field disagrees. The defect it exposed is fixed: a grid-edge direction that the plan carries a <dir>Border rule for now defers to that rule instead of telling the worker 'nothing arrives; end your terrain mid-ground' - which in Tanium's north row would have contradicted northBorder's requirement of solid connecting ground into NinjaOne, in the same packet. Verified on the real dry-run of tanium c3-0: the transitions section reads 'territory edge, but northBorder applies' and the measured handover text is in the packet. world-authoring-stitch updated to pass --territory ninjaone at all ten call sites; 29/29 green.",
    "hashes": {
     "cell.mjs": "951096906eb84477",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-04T06:37:50.274Z",
+   "reason": "owner 2026-09-04 ('go for it now... please render it all'), lock change 15, BEFORE. The Tanium bake stopped after one cell: c3-0 was a frontier cell and ran in generate mode, but every cell after it has an authored neighbour and so runs in EDIT mode, which refuses without the style canon at paths.sources/seed/L2-seed-region-r2-source.png. That file exists only under ninjaone/. The ledger calls it 'the accepted look of THIS WORLD's terrain' - it is world canon that happens to live in ninjaone/ for historical reasons, not NinjaOne's property. Copying it per territory would let the one thing that must never drift drift silently, so instead cell.mjs falls back to the world canon when a territory has no seed of its own; a territory that does have one still wins, which keeps the L2_OUT_ROOT test world (which carries a synthetic canon) on exactly its current path. Controls must stay 29/29.",
+   "hashes": {
+    "cell.mjs": "951096906eb84477",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-04T06:45:06.060Z",
+   "reason": "owner 2026-09-04 ('go for it now... please render it all'), lock change 15, AFTER, controls 29/29. cell.mjs falls back to the WORLD style canon (art-source/career-world/l2-land/ninjaone/seed/L2-seed-region-r2-source.png) when the territory being authored has no seed of its own; a territory that does have one still wins, so the L2_OUT_ROOT test world with its synthetic canon is on exactly its previous path and the suite is unchanged. Not a per-territory copy: the ledger calls that file 'the accepted look of THIS WORLD's terrain', and copying it would let the one thing that must never drift drift silently, one territory at a time. Verified on the real cell that failed - tanium c4-0 dry-run now reaches edit target and packet. The failure it fixes: c3-0 was a frontier cell in generate mode, so the whole 21-cell run got past cell one and then refused every remaining cell in under a second each, because they all have an authored neighbour and therefore run in edit mode.",
+   "hashes": {
+    "cell.mjs": "83cbf9ad4215c92e",
     "plan-territory.mjs": "e8d86a90b2e32796",
     "AGENTS.md": "a1ab4eaec1d4c6ac"
    }

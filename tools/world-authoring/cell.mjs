@@ -840,8 +840,21 @@ const editMode = authoredNeighbours.length > 0;
 const REFERENCE_PARAGRAPH = "The second image is a reference only and must not appear in the output: take from it the brush, the palette family, the ground scale and above all the FLAT LIGHTING — every tussock, boulder, column and bank the same value on every side, no bright upper edge, no dark lower edge, no lit side anywhere, ambient occlusion only.";
 const CANON_SOURCE = "seed/L2-seed-region-r2-source.png";   // under paths.sources
 const FRAMING_PREAMBLE = "Edit the first image in place. The output must be a SQUARE image with exactly the same framing and extent as the first image: the painted terrain stays exactly where it is, at the same scale, and the flat grey area is painted in. Do not change the aspect ratio, do not crop, do not zoom, do not extend the canvas beyond the input. Paint the grey area as a seamless continuation of the painted ground so the join is invisible. Keep exactly the same view as the first image.";
-const canonPath = path.join(paths.sources, CANON_SOURCE);
-if (editMode && !fs.existsSync(canonPath)) die(`edit mode needs the style canon at ${canonPath}`);
+// The canon is THE WORLD'S, not a territory's: the ledger calls it "the
+// accepted look of this world's terrain". It lives under ninjaone/ because that
+// is where the world was first authored. A territory with its own seed wins
+// (the L2_OUT_ROOT test world carries a synthetic one), and every other
+// territory falls back to the world canon rather than getting a COPY — copying
+// it per territory would let the single thing that must never drift drift
+// silently, one territory at a time.
+const WORLD_CANON = path.join("art-source/career-world/l2-land/ninjaone", CANON_SOURCE);
+const localCanon = path.join(paths.sources, CANON_SOURCE);
+const canonPath = fs.existsSync(localCanon) ? localCanon : WORLD_CANON;
+if (editMode && !fs.existsSync(canonPath)) {
+  die(`edit mode needs the style canon, and neither exists:\n`
+    + `  this territory:  ${localCanon}\n`
+    + `  the world canon: ${WORLD_CANON}`);
+}
 
 // transitions: a biome change lives INSIDE the later-authored cell, across its
 // outer third on that side, so the biome boundary never lies on a cell seam

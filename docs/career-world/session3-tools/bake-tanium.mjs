@@ -74,10 +74,16 @@ for (const [i, cell] of ORDER.entries()) {
   const mins = ((Date.now() - t0) / 60000).toFixed(1);
   const out = `${run.stdout ?? ""}${run.stderr ?? ""}`;
   fs.appendFileSync(LOG, out + "\n");
-  const ok = run.status === 0 && /accepted, stitched/.test(out);
-  results.push({ cell, id, biome, ok, mins });
+  // Re-running this script after an interruption must not report finished work
+  // as failure: cell.mjs refuses an already-authored cell, which is the correct
+  // behaviour and the reason re-running is safe.
+  const already = /already authored/.test(out);
+  const ok = already || (run.status === 0 && /accepted, stitched/.test(out));
+  results.push({ cell, id, biome, ok, already, mins });
 
-  if (ok) {
+  if (already) {
+    say(`    already authored — skipped`);
+  } else if (ok) {
     say(`    ACCEPTED in ${mins} min`);
     // Commit each accepted cell on its own: the tiles and sources are large,
     // and an interrupted night should leave every finished cell landed rather
@@ -97,7 +103,7 @@ for (const [i, cell] of ORDER.entries()) {
 
 const ok = results.filter((r) => r.ok);
 say(`\n=== done in ${((Date.now() - started) / 3600000).toFixed(1)} h — ${ok.length} of ${results.length} accepted`);
-for (const r of results) say(`  ${r.ok ? "ok  " : "FAIL"} ${r.id.padEnd(6)} ${r.biome.padEnd(17)} ${r.mins} min`);
+for (const r of results) say(`  ${r.already ? "skip" : r.ok ? "ok  " : "FAIL"} ${r.id.padEnd(6)} ${r.biome.padEnd(17)} ${r.mins} min`);
 if (ok.length < results.length) {
   say(`\nthe failures left the world untouched; re-run one with:`);
   say(`  node tools/world-authoring/cell.mjs --territory ${TERRITORY} --cell C,R --describe-file ${BRIEFS}/cC-R.md`);
