@@ -4,13 +4,18 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-03, LATEST (current):** **KAIZEN IS CENTRED ON KAIZEN.** The district
+**2026-09-04, LATEST (current):** **TANIUM IS BAKING — 21 CELLS, UNATTENDED.**
+Owner said render it all overnight. Sequential, ~4.5 h, each accepted cell
+committed on its own. If the session died mid-run, `.codex-tmp/bake-tanium.log`
+and `git log --oneline` say how far it got; re-running the script continues
+rather than redoing finished cells. Resume from `SESSION 10` below.
+
+**2026-09-03, superseded:** **KAIZEN IS CENTRED ON KAIZEN.** The district
 was 32 m north of its shelf because step 5E aligned it by a point on its south
 edge; **13 of 163 points over water is now 1**, and that one is a drainage
 seam's head sitting in the river it drains into - an owner call, drawn in
 `session3-tools/kaizen-on-land.png`. **The other three failures are all the
-ocean's**, including the one SESSION 8 called a Kaizen problem. Resume from
-`SESSION 9` below.
+ocean's**, including the one SESSION 8 called a Kaizen problem. See `SESSION 9`.
 
 **2026-09-03, superseded:** **STEP 5 AND THE REMOVAL ARE DONE.** The world
 is a 16 x 9 lattice; NinjaOne's 20 cells are registered and served; the capital
@@ -625,7 +630,61 @@ adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 `brief-c3-1-r2.md` (magical gorge, rail gorge span), `brief-c2-2-r2.md`
 (bench country, waystation bench, hot spring).
 
-**SESSION 9 (2026-09-03) — RESUME HERE, ANY MODEL.** Kaizen is placed and the
+**SESSION 10 (2026-09-04) — RESUME HERE, ANY MODEL.** **A BAKE IS IN FLIGHT.**
+
+## TANIUM'S 21 CELLS ARE BAKING, UNATTENDED
+
+Owner 2026-09-04: *"go for it now. You have codex cli as needed please render it
+all and ill review in the morning and then we can handle any rebakes"*.
+
+    node docs/career-world/session3-tools/bake-tanium.mjs
+
+Sequential, ~13 min a cell, ~4.5 h. **If this session died mid-run, check
+`.codex-tmp/bake-tanium.log` and `.codex-tmp/bake-tanium-results.json` first** —
+every accepted cell is committed on its own, so `git log --oneline` shows
+exactly how far it got. Re-run the whole script to continue: cell.mjs refuses a
+cell that is already authored unless `--force`, so finished work is not redone.
+
+**Order:** `3,0` and `4,0` first — the only cells that must meet a coastline
+that already exists — then an order where every later cell has an authored
+neighbour, so the pipeline stays in edit mode. A failed cell does not stop the
+run; the gates leave the world untouched.
+
+**Briefs** are committed at `art-source/career-world/l2-land/tanium/briefs/`,
+written and validated by `write-briefs.mjs` (every shelf and site in the def
+must be named in its own cell's brief — that check caught a drift immediately).
+
+## LOCK CHANGE 14 — cell.mjs TAKES A TERRITORY
+
+It hardcoded ninjaone's plan path, so this pipeline could author exactly one
+territory. Now `--territory ID`, **required, no default** — a default would bake
+into the wrong tree and nothing downstream would notice until a whole territory
+was wrong. Per-territory working dir too.
+
+**The defect that exposed:** every grid-edge cell was told *"territory edge —
+nothing arrives; end your terrain mid-ground"*, which flatly contradicts
+Tanium's `northBorder` requirement of solid connecting ground into NinjaOne —
+**both sentences in the same packet**. An edge with a `<dir>Border` rule now
+defers to it. Verified on the real c3-0 dry-run packet, not just the diff.
+
+## TWO THINGS CAUGHT BEFORE THEY REACHED A WORKER
+
+- **An inverted fraction in my own border text.** World col 4 spans 4.00–5.00
+  and land begins at 4.38, so the sound holds its western **38%** and land the
+  eastern 62%. The def said the opposite — it would have told the cell authoring
+  the isthmus to paint sea across it.
+- **The brief/plan drift check**, which failed on its first run.
+
+## THE KNOWN LIMIT — READ BEFORE REVIEWING
+
+Neighbour context is **per-territory**, so Tanium's north row gets NinjaOne's
+coast as **text** (the measured crossings in `northBorder`), **not as pixels**.
+Everything this pipeline has learned says pixels beat prose for a handover;
+cross-territory pixel context was too large a change to make unvalidated before
+an unattended run. **`3,0`, `4,0` and `2,0` are the likeliest rebakes**, and
+`land-border-check.mjs` is the check that says whether the two halves met.
+
+**SESSION 9 (2026-09-03).** Kaizen is placed and the
 authoring workflow is reusable. SESSION 8 below covers step 5 and the removal;
 SESSION 7 the lattice.
 
