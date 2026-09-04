@@ -1,0 +1,417 @@
+<title>Career World Lattice</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    /* Ground and ink. The palette is the world's own: the sea the lattice
+       floats on, and the pale warm basalt the style canon paints ground with. */
+    --sea:      #0d1620;
+    --shelf:    #16202b;
+    --shelf-2:  #1c2733;
+    --rule:     #2c3844;
+    --rule-soft:#212c38;
+    --ink:      #e9eff5;
+    --ink-mid:  #a9b8c6;
+    --ink-dim:  #7d8d9c;
+    --gold:     #e0b64a;
+    --sprout:   #8fe06a;
+    --sky:      #6ec8ff;
+    --swatch-edge: rgba(255,255,255,.22);
+
+    /* The ten biomes, verbatim from plan-territory.mjs. These are data, not
+       decoration, so they do not change between themes. */
+    --bare-plateau:  #5a5650;
+    --moor:          #4d5a2e;
+    --dark-forest:   #1f3a2a;
+    --coast-cliff:   #3d4f5c;
+    --sound-coast:   #2e5566;
+    --quarry:        #6b6250;
+    --mixed-bench:   #4f5a3c;
+    --lush-shelf:    #5f7a2a;
+    --magical-gorge: #4a3566;
+    --purple-field:  #7a2f7a;
+
+    --measure: 66ch;
+    --step-0: .875rem;
+    --step-1: 1rem;
+    --step-2: 1.32rem;
+    --step-3: 1.85rem;
+    --step-4: 2.6rem;
+  }
+  :root:not([data-theme="dark"]) {
+    /* Light is the pale warm basalt of the canon, greyed and slightly green,
+       not a cream. The biome hexes stay put and gain a darker hairline. */
+    --sea:      #e6e3d9;
+    --shelf:    #efece3;
+    --shelf-2:  #f5f3ec;
+    --rule:     #c3c0b3;
+    --rule-soft:#d6d3c8;
+    --ink:      #1a2028;
+    --ink-mid:  #4c5763;
+    --ink-dim:  #6d7885;
+    --gold:     #8a6410;
+    --sprout:   #3d6b22;
+    --sky:      #1c5f8c;
+    --swatch-edge: rgba(0,0,0,.3);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --sea: #0d1620; --shelf: #16202b; --shelf-2: #1c2733;
+      --rule: #2c3844; --rule-soft: #212c38;
+      --ink: #e9eff5; --ink-mid: #a9b8c6; --ink-dim: #7d8d9c;
+      --gold: #e0b64a; --sprout: #8fe06a; --sky: #6ec8ff;
+      --swatch-edge: rgba(255,255,255,.22);
+    }
+  }
+  :root[data-theme="dark"] {
+    --sea: #0d1620; --shelf: #16202b; --shelf-2: #1c2733;
+    --rule: #2c3844; --rule-soft: #212c38;
+    --ink: #e9eff5; --ink-mid: #a9b8c6; --ink-dim: #7d8d9c;
+    --gold: #e0b64a; --sprout: #8fe06a; --sky: #6ec8ff;
+    --swatch-edge: rgba(255,255,255,.22);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--sea);
+    color: var(--ink);
+    font-family: Spectral, Georgia, "Times New Roman", serif;
+    font-size: var(--step-1);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+  .mono { font-family: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace; }
+
+  h1, h2, h3 { text-wrap: balance; margin: 0; font-weight: 600; letter-spacing: -.012em; }
+  h1 { font-size: var(--step-4); line-height: 1.12; }
+  h2 { font-size: var(--step-3); line-height: 1.2; }
+  h3 { font-size: var(--step-2); line-height: 1.3; }
+  p  { margin: 0; max-width: var(--measure); }
+  a  { color: var(--gold); }
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .72rem; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+
+  header { display: flex; flex-direction: column; gap: .8rem; margin-bottom: 2.2rem; }
+  header p { color: var(--ink-mid); font-size: 1.06rem; }
+
+  section { margin-top: 3.4rem; display: flex; flex-direction: column; gap: 1.15rem; }
+  .section-head { display: flex; flex-direction: column; gap: .35rem; }
+
+  /* ---------- the lattice ---------- */
+  .board-scroll { overflow-x: auto; padding-bottom: .4rem; }
+  .board {
+    min-width: 1000px;
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+    aspect-ratio: 16 / 9;
+    gap: 1px;
+    background: var(--rule-soft);
+    border: 1px solid var(--rule);
+  }
+  .cell {
+    background: var(--shelf);
+    position: relative;
+    padding: 3px 4px;
+    min-width: 0;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .cell.sea { background: var(--sea); }
+  .cell .coord {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .58rem; line-height: 1;
+    color: var(--ink-dim);
+    font-variant-numeric: tabular-nums;
+  }
+  .cell.claimed .coord { color: rgba(255,255,255,.62); }
+  .cell .biome {
+    font-size: .58rem; line-height: 1.12;
+    color: rgba(255,255,255,.92);
+    /* break-word, not anywhere: anywhere split "construction" mid-word in a
+       54px cell. Wider cells plus hyphenation keep the labels readable. */
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+  .cell .shelf-dot {
+    position: absolute; inset: auto;
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--sprout); border: 1.5px solid rgba(0,0,0,.45);
+    transform: translate(-50%, -50%);
+  }
+  .cell.capital .shelf-dot { width: 13px; height: 13px; }
+  .cell.planned { outline: 1px dashed var(--gold); outline-offset: -2px; }
+
+  .board-key {
+    display: flex; flex-wrap: wrap; gap: .35rem 1.4rem;
+    font-size: .82rem; color: var(--ink-mid);
+    font-family: "IBM Plex Mono", monospace;
+  }
+  .board-key span { display: inline-flex; align-items: center; gap: .45rem; }
+  .chip { width: 13px; height: 13px; border: 1px solid var(--swatch-edge); flex: none; }
+  .chip.dashed { border: 1.5px dashed var(--gold); background: transparent; }
+  .chip.solid-green { border: 1.5px solid var(--sprout); background: transparent; }
+  .chip.dot { border-radius: 50%; background: var(--sprout); border-color: var(--swatch-edge); }
+
+  /* ---------- territory panels ---------- */
+  .territory {
+    border: 1px solid var(--rule);
+    background: var(--shelf);
+    display: flex; flex-direction: column;
+  }
+  .territory > header {
+    margin: 0; padding: 1rem 1.15rem;
+    border-bottom: 1px solid var(--rule);
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem 1rem;
+  }
+  .territory h3 { flex: 1 1 auto; }
+  .status {
+    font-family: "IBM Plex Mono", monospace; font-size: .7rem;
+    letter-spacing: .11em; text-transform: uppercase;
+    padding: .18rem .5rem; border: 1px solid currentColor;
+  }
+  .status.authored { color: var(--sprout); }
+  .status.planned  { color: var(--gold); }
+  .facts {
+    display: flex; flex-wrap: wrap; gap: .1rem 1.6rem;
+    font-family: "IBM Plex Mono", monospace; font-size: .8rem;
+    color: var(--ink-mid); font-variant-numeric: tabular-nums;
+    flex-basis: 100%;
+  }
+
+  table { border-collapse: collapse; width: 100%; font-size: .85rem; }
+  .table-scroll { overflow-x: auto; }
+  th, td { text-align: left; padding: .42rem .7rem; border-bottom: 1px solid var(--rule-soft); }
+  thead th {
+    font-family: "IBM Plex Mono", monospace; font-weight: 500;
+    font-size: .68rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink-dim); border-bottom: 1px solid var(--rule);
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.co { font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--ink-mid); }
+  td.world { color: var(--ink); }
+  td.bio { white-space: nowrap; }
+  .sw { display: inline-flex; align-items: center; gap: .5rem; }
+  td.what { color: var(--ink-mid); }
+  td.what b { color: var(--sprout); font-weight: 600; }
+
+  /* ---------- vocabulary ---------- */
+  .vocab { display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 1px; background: var(--rule-soft); border: 1px solid var(--rule); }
+  .biome-card { background: var(--shelf); padding: .9rem 1.05rem; display: flex; flex-direction: column; gap: .4rem; }
+  .biome-card .top { display: flex; align-items: center; gap: .6rem; }
+  .biome-card .name { font-weight: 600; }
+  .biome-card .id { font-family: "IBM Plex Mono", monospace; font-size: .72rem; color: var(--ink-dim); margin-left: auto; }
+  .biome-card .ground { font-size: .85rem; color: var(--ink-mid); }
+  .biome-card .tally { font-family: "IBM Plex Mono", monospace; font-size: .74rem; color: var(--ink-dim); font-variant-numeric: tabular-nums; }
+
+  /* ---------- border strip ---------- */
+  .join { border: 1px solid var(--rule); background: var(--shelf); padding: 1.15rem; display: flex; flex-direction: column; gap: .9rem; }
+  .strip { display: flex; height: 30px; min-width: 620px; border: 1px solid var(--rule); font-family: "IBM Plex Mono", monospace; font-size: .68rem; }
+  .strip div { display: flex; align-items: center; justify-content: center; color: #eef4f8; white-space: nowrap; overflow: hidden; }
+  .join-nums { display: flex; flex-wrap: wrap; gap: .3rem 2rem; font-family: "IBM Plex Mono", monospace; font-size: .82rem; color: var(--ink-mid); font-variant-numeric: tabular-nums; }
+  .note { font-size: .9rem; color: var(--ink-mid); }
+  .open { border-left: 2px solid var(--gold); padding-left: .9rem; }
+
+  footer { margin-top: 3.6rem; padding-top: 1.2rem; border-top: 1px solid var(--rule); font-size: .82rem; color: var(--ink-dim); font-family: "IBM Plex Mono", monospace; }
+</style>
+
+<div class="wrap" lang="en">
+  <header>
+    <div class="eyebrow">Career World · world-authoring</div>
+    <h1>The lattice, cell by cell</h1>
+    <p>The world plane is <span class="mono">3472 × 1953</span> px — exactly <b>16 × 9 cells of 217 world px</b>, so cell <span class="mono">(c,r)</span> sits at <span class="mono">[c/16, r/9]</span> and every registration is an exact fraction. A cell is 97.7 m of ground, authored at 2048 px kept (2560 generated, 256 bleed). Two territories are placed on it.</p>
+  </header>
+
+  <div class="board-scroll"><div class="board" id="board"></div></div>
+  <div class="board-key">
+    <span><i class="chip solid-green"></i> authored — cells baked</span>
+    <span><i class="chip dashed"></i> planned — nothing baked</span>
+    <span><i class="chip dot"></i> settlement shelf, drawn at its <span class="mono">off</span></span>
+    <span><i class="chip" style="background:var(--sea)"></i> sea — unclaimed lattice</span>
+  </div>
+
+  <section>
+    <div class="section-head">
+      <div class="eyebrow">Grid layout</div>
+      <h2>Two blocks on one island</h2>
+    </div>
+    <p>Each territory is a rectangular block of authoring cells placed on the lattice. Cells are addressed <b>both ways</b>: local <span class="mono">c,r</span> is what a cell's authoring packet uses, world <span class="mono">c,r</span> is where it lands on the plane. Confusing the two is what put a district 32 m off its shelf, so both are given everywhere.</p>
+    <div id="territories" style="display:flex;flex-direction:column;gap:1.6rem"></div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <div class="eyebrow">Biome mapping</div>
+      <h2>Ten biomes, one vocabulary</h2>
+    </div>
+    <p>The hand — brush, projection, flat lighting — is world-wide and carries across every cell. The biome sets what is <em>painted</em> and how the palette shifts. Each is quoted verbatim into the authoring packet, with a transition rule that puts a biome change inside the later-authored cell's outer third, never on the seam.</p>
+    <div class="vocab" id="vocab"></div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <div class="eyebrow">The shared edge</div>
+      <h2>Where the two halves meet</h2>
+    </div>
+    <div class="join">
+      <div class="table-scroll"><div class="strip" id="strip"></div></div>
+      <div class="join-nums">
+        <span>283 m connecting ground</span>
+        <span>world cols 4.38 → 7.34</span>
+        <span>widest unbroken run 120 m</span>
+        <span>a cell is 98 m</span>
+      </div>
+      <p class="note">Measured on the authored NinjaOne art along world row 5, not read off the plan. The ruling names two cells as land; the sound's shore stops short at col 4.38 and the bay's begins at 7.34, so the isthmus is broader than the ruling's cell granularity implies. Two becks cross it — <span class="mono">1.9 m</span> at col 5.30 and <span class="mono">3.8 m</span> at col 6.55 — streams rather than channels. Tanium's <span class="mono">northBorder</span> carries these crossings so its top row is authored to meet them.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <div class="eyebrow">Open</div>
+      <h2>Still wanting a ruling</h2>
+    </div>
+    <div class="open">
+      <p><b>Tanium has no wonder.</b> NinjaOne carries the magical gorge and the purple field, both unique to it and both flagged as “moments”. Tanium reads flatter with neither, and an eleventh biome would be an addition to canon rather than a placement decision.</p>
+    </div>
+    <div class="open">
+      <p><b>Two closed rail loops.</b> Each territory's circuit leaves its capital, calls at every project city and returns. Nothing crosses the land border between them.</p>
+    </div>
+    <div class="open">
+      <p><b>The shelf layout is a proposal.</b> Spread so each loop has to travel, and shelf cells are lush ground, but the arrangement is chosen rather than derived.</p>
+    </div>
+  </section>
+
+  <footer>
+    Generated from art-source/career-world/l2-land/&lt;id&gt;/territory.def.json · 41 of ~88 scoped cells planned · budget 4 projects / 21 regions each
+  </footer>
+</div>
+
+<script>
+const DATA = {"biomes":{"bare-plateau":{"name":"Bare plateau","ground":"bare pale basalt benches with hexagonal-jointed tops, scree fans, thin wind-scoured grass only in cracks; no meadow","rock":"pale warm basalt, stepped benches and low column walls, talus at every foot","trees":"none on the open plateau; a few dark conifers in gullies","water":"tarns lying in bare rock; thin tall falls off the bench edges","palette":"pale warm greys and creams, cool teal water, sparse grey-green","wonders":"none"},"moor":{"name":"Heather moor","ground":"open heather-and-grass moor, wind-scoured, boulders and scrub; heather sparse and subdued, never a carpet","rock":"low basalt outcrops and boulder fields, an occasional column wall","trees":"dark conifers only in gullies and hollows","water":"becks in shallow gullies, small pools","palette":"olive and gold-green, dull violet accents, grey rock","wonders":"none"},"dark-forest":{"name":"Dark forest gorge","ground":"dense dark conifer stands on mossy ground, little open ground, flat haze in the gorge","rock":"mossy basalt gorge walls, wet talus","trees":"dense dark conifers, the darkest green in the territory","water":"a gorge stream with falls, pools in shade","palette":"deep greens, near-black under the stands, grey-blue haze","wonders":"none"},"coast-cliff":{"name":"Wild coast","ground":"bare basalt benches and talus above sea-cliffs, thin grass, shingle coves; no meadow","rock":"tall columnar sea-cliffs, WEATHERED and irregular: columns of uneven height and width, tops broken at different levels, split and leaning columns, collapsed drums lying in talus at the foot, lichen in the joints; the cliff line wanders in plan with bays and buttresses, never a straight run or a square corner, never a regular palisade of identical cylinders; a natural ledge partway up the face; sea stacks offshore","trees":"dark conifers only in gullies","water":"the sea on the seaward edge with surf and wash; an occasional tarn on a shelf","palette":"pale grey rock, teal to deep-blue sea, sparse green","wonders":"none"},"sound-coast":{"name":"Sound coast","ground":"bare rock diving into the sound, shingle, thin grass","rock":"low basalt slabs and ledges running on under the water","trees":"none near the shore","water":"the sound (sea) on the seaward edge, clear shallows over slabs","palette":"grey slabs, turquoise shallows to deep teal","wonders":"none"},"quarry":{"name":"Construction quarry","ground":"cut benches, quarried faces, spoil fans, a levelled floor; works read from landform only","rock":"fresh pale cut rock and column walls","trees":"a few dark conifers on the rim and in the drainage gully","water":"a flooded pit, the drainage stream, the sea where coastal","palette":"pale cut rock, dust, a thin green rim","wonders":"none"},"mixed-bench":{"name":"Bench country","ground":"stepped benches and terraces, scree, moor on the flats","rock":"column walls between benches, talus","trees":"conifer stands on the sheltered benches","water":"becks stepping down the benches","palette":"moor palette with pale rock","wonders":"none"},"lush-shelf":{"name":"Settlement shelf","ground":"the richest ground in its neighbourhood: meadow green warmed with gold, glades, flowers allowed here","rock":"low outcrops and natural terraces that a settlement could sit on","trees":"orchard-like conifer stands with open glades","water":"a stream through the shelf, a pool","palette":"luminous gold-green, warm rock","wonders":"none"},"magical-gorge":{"name":"Magical gorge (moment)","ground":"a deep gorge with flat mist; the ground around it is moor","rock":"column walls; rock fragments floating above the gorge trailing roots and moss","trees":"dark conifers","water":"a great fall into faintly glowing water","palette":"moor palette plus violet crystal glow and luminous teal","wonders":"floating rock fragments with crystals; self-luminous crystal outcrops that cast no light; faintly glowing water at the fall"},"purple-field":{"name":"The purple field (unique)","ground":"a saturated magenta-violet carpet of grass and low bloom on magenta soil filling the whole cell; tufts of pale lavender-blue grass; clumps of gold, orange, red and pale-blue flowering shrubs","rock":"a crystal-crowned knoll rising from the field; low outcrops","trees":"pink-blossom broadleaf trees standing in the field; dark conifers only at the edges","water":"a beck through the field","palette":"saturated magenta-violet ground, high-key and bright, purple as the base and the other hues as accents","wonders":"the crystal knoll; nothing floating"}},"territories":{"ninjaone":{"grid":{"cols":5,"rows":4},"block":[3,1],"cellBiomes":{"0,0":"moor","1,0":"bare-plateau","2,0":"dark-forest","3,0":"bare-plateau","4,0":"lush-shelf","0,1":"lush-shelf","1,1":"purple-field","2,1":"lush-shelf","3,1":"magical-gorge","4,1":"coast-cliff","0,2":"sound-coast","1,2":"moor","2,2":"mixed-bench","3,2":"dark-forest","4,2":"coast-cliff","0,3":"sound-coast","1,3":"lush-shelf","2,3":"moor","3,3":"moor","4,3":"quarry"},"shelves":[{"id":"capital","cell":[2,1],"off":[0.45,0.55],"role":"capital + main station"},{"id":"kaizen","cell":[4,0],"off":[0.4,0.6],"role":"project city (largest)"},{"id":"metrics-service","cell":[0,1],"off":[0.55,0.35],"role":"project city"},{"id":"vendy","cell":[1,3],"off":[0.5,0.4],"role":"project city"},{"id":"construction","cell":[4,3],"off":[0.45,0.45],"role":"construction zone — project not yet named"}],"sites":[{"cell":[1,2],"id":"hamlet-by-the-beck","terrain":"a level clearing about 30 m across beside the beck, sheltered by a low outcrop, dry ground"},{"cell":[1,2],"id":"lookout-crag","terrain":"a crag on the rail side with a flat top and a clear view over the moor"},{"cell":[2,2],"id":"waystation-bench","terrain":"a level bench on the middle terrace beside the loop, about 40 m long"},{"cell":[2,2],"id":"hot-spring","terrain":"a steaming pool on a lower bench with pale mineral rims (classify: lake)"},{"cell":[3,2],"id":"hermits-crag","terrain":"a crag rising above the canopy with a view into the gorge and a ledge to stand on"},{"cell":[3,2],"id":"giant-tree","terrain":"one conifer three times the size of any other, in a clearing of its own"},{"cell":[1,0],"id":"crater-tarn","terrain":"a round tarn in bare rock with a shingle rim (classify: lake)"},{"cell":[1,0],"id":"column-altar","terrain":"a natural altar: a level cluster of column tops standing above the plateau"},{"cell":[3,0],"id":"walk-under-arch","terrain":"a natural basalt arch big enough to walk under, with a level shelf beside it"},{"cell":[2,0],"id":"mill-ledge","terrain":"a fall with a level ledge beside its plunge pool"},{"cell":[0,0],"id":"shepherds-fold","terrain":"a grassy hollow among boulders"},{"cell":[2,3],"id":"border-knoll","terrain":"a level knoll on the land border into Tanium"}],"baked":true},"tanium":{"grid":{"cols":7,"rows":3},"block":[2,5],"cellBiomes":{"0,0":"coast-cliff","1,0":"sound-coast","2,0":"sound-coast","3,0":"mixed-bench","4,0":"moor","5,0":"coast-cliff","6,0":"coast-cliff","0,1":"lush-shelf","1,1":"dark-forest","2,1":"moor","3,1":"lush-shelf","4,1":"bare-plateau","5,1":"lush-shelf","6,1":"coast-cliff","0,2":"sound-coast","1,2":"coast-cliff","2,2":"lush-shelf","3,2":"mixed-bench","4,2":"dark-forest","5,2":"moor","6,2":"quarry"},"shelves":[{"id":"capital","cell":[3,1],"off":[0.5,0.5],"role":"capital + main station"},{"id":"cablecar","cell":[0,1],"off":[0.45,0.5],"role":"project city — document migration tooling (React/Electron), conversion workflows"},{"id":"risk-assessment","cell":[5,1],"off":[0.5,0.45],"role":"project city — customer-facing endpoint risk reporting at scale"},{"id":"automated-uat","cell":[2,2],"off":[0.5,0.5],"role":"project city — automated UAT workflows, a week of manual work down to an hour"},{"id":"construction","cell":[6,2],"off":[0.45,0.5],"role":"construction zone — project not yet named"}],"sites":[{"cell":[1,0],"id":"sound-narrows","terrain":"the sound pinches between two basalt slabs, a narrow deep channel with level rock on both banks"},{"cell":[2,0],"id":"ferry-slip","terrain":"a natural shingle ramp running into the sound, sheltered by a low spur"},{"cell":[3,0],"id":"border-cairn-knoll","terrain":"a level knoll on the land border out of NinjaOne, open ground on both sides of the line"},{"cell":[4,1],"id":"plateau-tarn","terrain":"a round tarn lying in bare rock on the plateau, shingle rim (classify: lake)"},{"cell":[4,1],"id":"wind-arch","terrain":"a wind-cut arch at the plateau edge with a level shelf beside it"},{"cell":[1,1],"id":"deep-stand","terrain":"the darkest stand in the territory, a small clearing around one fallen giant"},{"cell":[2,1],"id":"beacon-crag","terrain":"a crag with a flat top standing clear of the moor, a view over the whole south coast"},{"cell":[3,2],"id":"terrace-steps","terrain":"a run of natural terraces stepping down to the sea, each about 40 m long"},{"cell":[4,2],"id":"fern-hollow","terrain":"a damp hollow under the canopy, a spring and a level floor"},{"cell":[5,2],"id":"boulder-maze","terrain":"a field of house-sized boulders on the moor with grass lanes between them"},{"cell":[0,2],"id":"stack-cove","terrain":"a cove with sea stacks offshore and a shingle beach at the back"},{"cell":[6,1],"id":"ledge-walk","terrain":"a natural ledge running partway up the sea-cliff, wide enough to walk"}],"baked":false}}};
+
+const LABEL = { "bare-plateau":"Bare plateau", "moor":"Heather moor", "dark-forest":"Dark forest gorge",
+  "coast-cliff":"Wild coast", "sound-coast":"Sound coast", "quarry":"Construction quarry",
+  "mixed-bench":"Bench country", "lush-shelf":"Settlement shelf", "magical-gorge":"Magical gorge",
+  "purple-field":"The purple field" };
+const COLS = 16, ROWS = 9;
+const el = (t, cls, txt) => { const n = document.createElement(t); if (cls) n.className = cls; if (txt != null) n.textContent = txt; return n; };
+const swatch = (b) => { const i = el("i", "chip"); i.style.background = "var(--" + b + ")"; return i; };
+
+// ---- lattice
+const owner = {};      // "c,r" -> { territory, biome, local, shelf }
+for (const [id, t] of Object.entries(DATA.territories)) {
+  for (const [k, biome] of Object.entries(t.cellBiomes)) {
+    const [c, r] = k.split(",").map(Number);
+    owner[(t.block[0] + c) + "," + (t.block[1] + r)] = { id, biome, local: k, baked: t.baked };
+  }
+  for (const s of t.shelves) {
+    const key = (t.block[0] + s.cell[0]) + "," + (t.block[1] + s.cell[1]);
+    if (owner[key]) owner[key].shelf = s;
+  }
+}
+const board = document.getElementById("board");
+for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+  const o = owner[c + "," + r];
+  const cell = el("div", "cell" + (o ? " claimed" : " sea") + (o && !o.baked ? " planned" : "") + (o && o.shelf && o.shelf.id === "capital" ? " capital" : ""));
+  if (o) cell.style.background = "var(--" + o.biome + ")";
+  cell.appendChild(el("span", "coord", c + "," + r));
+  if (o) {
+    cell.appendChild(el("span", "biome", o.shelf ? o.shelf.id : LABEL[o.biome]));
+    if (o.shelf) {
+      const d = el("span", "shelf-dot");
+      d.style.left = (o.shelf.off[0] * 100) + "%";
+      d.style.top = (o.shelf.off[1] * 100) + "%";
+      cell.appendChild(d);
+    }
+  }
+  board.appendChild(cell);
+}
+
+// ---- territory panels
+const host = document.getElementById("territories");
+for (const [id, t] of Object.entries(DATA.territories)) {
+  const cells = t.grid.cols * t.grid.rows;
+  const panel = el("div", "territory");
+  const head = el("header");
+  head.appendChild(el("h3", null, id === "ninjaone" ? "NinjaOne — north" : "Tanium — south"));
+  head.appendChild(el("span", "status " + (t.baked ? "authored" : "planned"), t.baked ? "authored" : "planned · nothing baked"));
+  const facts = el("div", "facts");
+  for (const f of [
+    "block [" + t.block.join(",") + "]",
+    t.grid.cols + " × " + t.grid.rows + " = " + cells + " cells",
+    "world cols " + t.block[0] + "–" + (t.block[0] + t.grid.cols - 1),
+    "rows " + t.block[1] + "–" + (t.block[1] + t.grid.rows - 1),
+    Math.round(t.grid.cols * 97.6) + " × " + Math.round(t.grid.rows * 97.6) + " m",
+  ]) facts.appendChild(el("span", null, f));
+  head.appendChild(facts);
+  panel.appendChild(head);
+
+  const shelfBy = {}, siteBy = {};
+  for (const s of t.shelves) (shelfBy[s.cell.join(",")] ||= []).push(s);
+  for (const s of t.sites) (siteBy[s.cell.join(",")] ||= []).push(s);
+
+  const wrap2 = el("div", "table-scroll");
+  const table = el("table");
+  const thead = el("thead"), hr = el("tr");
+  for (const h of ["local", "world", "biome", "what stands on it"]) hr.appendChild(el("th", null, h));
+  thead.appendChild(hr); table.appendChild(thead);
+  const tb = el("tbody");
+  for (let r = 0; r < t.grid.rows; r++) for (let c = 0; c < t.grid.cols; c++) {
+    const key = c + "," + r, biome = t.cellBiomes[key];
+    const tr = el("tr");
+    tr.appendChild(el("td", "co", key));
+    tr.appendChild(el("td", "co world", (t.block[0] + c) + "," + (t.block[1] + r)));
+    const bt = el("td", "bio");
+    const sp = el("span", "sw"); sp.appendChild(swatch(biome)); sp.appendChild(el("span", null, LABEL[biome]));
+    bt.appendChild(sp); tr.appendChild(bt);
+    const what = el("td", "what");
+    const bits = [];
+    for (const s of shelfBy[key] || []) { const b = el("b", null, s.id); what.appendChild(b); what.appendChild(document.createTextNode(" — " + s.role)); bits.push(1); }
+    for (const s of siteBy[key] || []) {
+      if (bits.length) what.appendChild(el("br"));
+      what.appendChild(document.createTextNode(s.id.replace(/-/g, " ")));
+      bits.push(1);
+    }
+    if (!bits.length) what.appendChild(document.createTextNode("—"));
+    tr.appendChild(what);
+    tb.appendChild(tr);
+  }
+  table.appendChild(tb); wrap2.appendChild(table); panel.appendChild(wrap2);
+  host.appendChild(panel);
+}
+
+// ---- vocabulary
+const counts = {};
+for (const t of Object.values(DATA.territories)) for (const b of Object.values(t.cellBiomes)) {
+  (counts[b] ||= { ninjaone: 0, tanium: 0 });
+}
+for (const [id, t] of Object.entries(DATA.territories)) for (const b of Object.values(t.cellBiomes)) counts[b][id]++;
+const vocab = document.getElementById("vocab");
+for (const [bid, b] of Object.entries(DATA.biomes)) {
+  const card = el("div", "biome-card");
+  const top = el("div", "top");
+  top.appendChild(swatch(bid));
+  top.appendChild(el("span", "name", b.name));
+  top.appendChild(el("span", "id", bid));
+  card.appendChild(top);
+  card.appendChild(el("p", "ground", b.ground));
+  const n = counts[bid] || { ninjaone: 0, tanium: 0 };
+  card.appendChild(el("div", "tally", "NinjaOne " + n.ninjaone + "  ·  Tanium " + n.tanium
+    + (b.wonders !== "none" ? "  ·  carries a wonder" : "")));
+  vocab.appendChild(card);
+}
+
+// ---- the shared edge strip, west to east across world cols 2–9
+const strip = document.getElementById("strip");
+const SEGS = [
+  { w: 2.38, c: "var(--sound-coast)", t: "the sound — opens west" },
+  { w: 2.96, c: "var(--lush-shelf)",  t: "283 m connecting land" },
+  { w: 1.66, c: "var(--coast-cliff)", t: "the bay — opens east" },
+];
+for (const s of SEGS) { const d = el("div", null, s.t); d.style.flex = s.w; d.style.background = s.c; strip.appendChild(d); }
+</script>
