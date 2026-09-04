@@ -625,8 +625,64 @@ adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 `brief-c3-1-r2.md` (magical gorge, rail gorge span), `brief-c2-2-r2.md`
 (bench country, waystation bench, hot spring).
 
-**SESSION 9 (2026-09-03) — RESUME HERE, ANY MODEL.** Kaizen is placed. SESSION
-8 below covers step 5 and the removal; SESSION 7 the lattice.
+**SESSION 9 (2026-09-03) — RESUME HERE, ANY MODEL.** Kaizen is placed and the
+authoring workflow is reusable. SESSION 8 below covers step 5 and the removal;
+SESSION 7 the lattice.
+
+## THE PIPELINE TAKES A TERRITORY NOW (lock change 12)
+
+Owner approved before and after: *"yeah we gotta make this workflow re-usable
+since it worked for the ninja territory"*.
+
+`node tools/world-authoring/plan-territory.mjs <id>` reads
+`art-source/career-world/l2-land/<id>/territory.def.json`. The split:
+
+- **The script keeps the world canon** — the `2048/256/9.45/0.4503` constants,
+  the 10-biome vocabulary, and the geology/vegetation/water/buildable/rail/
+  lighting/register rules. Lifted verbatim by brace matching, never retyped.
+- **The def carries the territory** — grid, lattice block, shelves, loop, rail
+  features, per-cell biomes, sites, border rules. A territory extends `rail`
+  through `railAddendum` and slots border rules into a fixed `RULE_ORDER`.
+
+`plan.json` gained **no** new field — placement lives in the def — so the plan
+shape the 20 baked cells were authored against is untouched, byte for byte.
+
+**Controls: `tests/world-authoring-plan-territory.test.mjs` 5/5**, registered in
+the index. Thirteen negative cases plus NinjaOne byte-identity plus non-overlap
+of every territory block. `world-authoring-stitch` + `stitch-content-aware-seam`
+29/29 unchanged.
+
+**Two bugs the controls caught that reading did not:** the lifted rules block is
+`{ ... }` whose own first line IS the brace, so a pattern-based drop emitted
+`const RULES_CANON = {\n{`; and the byte-identity control **passed while the
+script was crashing before it wrote anything**. It deletes the plan first now.
+
+## TANIUM IS PLANNED, NOTHING BAKED
+
+`7 x 3 = 21 cells` at lattice `[2,5]` — world cols 2-8, rows 5-7. Exactly its
+budget (4 projects, capital weighted double). **Row 8 stays sea below it** per
+the owner: *"there should be padding below it so it reads as an island"*; cols
+0-1 and 9-15 stay sea either side; the block centres on col 5, the same centre
+as NinjaOne's, so the island is narrow north and broad south.
+
+Projects, from the owner and his resume: **cablecar** (document migration
+tooling, React/Electron), **risk-assessment** (customer-facing endpoint risk
+reports), **automated-uat** (a week of manual work to an hour), plus a
+**construction** zone like NinjaOne's. Shelves: capital centre `[3,1]`,
+cablecar west `[0,1]`, risk-assessment east `[5,1]`, automated-uat south
+`[2,2]`, construction the SE corner `[6,2]`.
+
+`rules.northBorder` is the owner's 2026-09-01 south-border ruling **read from
+the other side and mapped column by column** (local col L is world col 2+L):
+sound at L1/L2, connecting LAND at L3/L4, bay at L5, open sea at L0 and L6.
+
+**Owner's eye still wanted on:** the shelf layout; Tanium having **no wonder**
+(NinjaOne got magical-gorge and purple-field, both unique — a third would be a
+canon addition); and the two territories carrying **separate closed rail loops**
+with no link between them.
+
+**`step5-register.mjs` still hardcodes `BLOCK = [3,1]`.** The def is the
+authority now; that tool should read it before it registers Tanium.
 
 ## KAIZEN: 13 POINTS OVER WATER WAS ONE BUG OF MINE
 
@@ -647,7 +703,7 @@ is not idempotent, and step 5E had no guard).
 goes **5 of 7 anchors over water → 0 of 7** at the same delta. A sweep finds
 **1707 of 2401** neighbouring positions fully dry, so it is not a knife-edge fit.
 
-## SUITE: 95 pass / 4 fail / 1 skipped — and three of the four are the ocean
+## SUITE: 100 pass / 4 fail / 1 skipped — three of the four are the ocean
 
 - `NinjaOne town-plan paving stays on accepted terrain` — **one point**, the
   head of `kaizen-agent-east-contour-drainage-seam`, standing in the river the
