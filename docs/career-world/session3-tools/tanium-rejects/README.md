@@ -27,3 +27,7 @@ They are kept because a rejected cell nobody sees cannot be ruled on.
 - `c4-0` moor — rejected on **water continuity 1**
 - `c2-0` sound-coast — rejected on **key-light asymmetry 0.0178**
 - `c1-0` sound-coast — rejected on **water continuity 1**
+- `c0-1` lush-shelf — rejected on **rock lighting 0.283**
+- `c1-1` dark-forest — rejected on **key-light asymmetry 0.0277**
+- `c2-1` moor — rejected on **a gate **
+- `c3-1` lush-shelf — rejected on **a gate **

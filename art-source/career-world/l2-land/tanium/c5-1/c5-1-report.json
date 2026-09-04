@@ -1,0 +1,101 @@
+{
+  "cell": "c5-1",
+  "territory": "tanium",
+  "status": "refused",
+  "generation": {
+    "filename": "c5-1-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "09D3B7F3952F4F638022DC61E74DB8D76A1F07E7BEA9DD1A3E81F6B1707303C5",
+    "mode": "built-in ImageGen edit with the edit target first and the canon second as reference only",
+    "imageGenCallsUsed": 1,
+    "retryUsed": false,
+    "bothImagesAttachedToSameCall": true,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "promptRecord": "c5-1-imagegen-prompt-used.txt"
+  },
+  "generationSizePx": [1254, 1254],
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean on the delivered source; final water-mask pixels and gradients below 12 luminance units excluded",
+    "peakVsUniformOverLand": 1.629147,
+    "uniformReference": 1.0,
+    "directionalKeyFirstMoment": 0.001708,
+    "gradientSamples": 1307601,
+    "aggregateDirectionalityNumericPass": true,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No whole-cell sun gradient or long cast-shadow field is visible, but basalt tops and many boulder upper facets are repeatedly brighter than vertical faces. The aggregate metric cannot override the literal no-lit-side requirement."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "manual estimated fraction of non-water land area at native source resolution",
+    "buildable": 0.47,
+    "steep": 0.11,
+    "otherBrokenRockTalusOrVegetation": 0.42,
+    "method": "The coherent central gold-green shelf and broad northern level run count as buildable; exposed west bench faces and the taller eastern ridge faces count as steep; orchard stands, talus, low outcrops, gullies, and broken moor make up the remainder."
+  },
+  "waterFootprintFraction": 0.017094,
+  "finalDerivedLandCoverageFraction": 0.982906,
+  "crown": {
+    "medianMetres": 3.332,
+    "medianPx": 69.41,
+    "sampleCount": 58,
+    "method": "Manual apex-by-apex outer-foliage census of all 58 visible crowns at native 1254 px, including saplings; median source width 34 px, scaled by 2560/1254 and 0.048 m per final pixel.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c5-1-water-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "62B7E4BDDAE40F191603EA38540481050FE42D763E637F8109CCB2CE060345DB",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "opaqueWaterPixels": 26881,
+    "transparentLandPixels": 1545635,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedComponents": 1,
+    "interiorHolePixels": 0,
+    "edgeWaterPixels": {
+      "north": 0,
+      "east": 0,
+      "south": 0,
+      "west": 0
+    },
+    "method": "The connected pool and shallow stream were traced bank-to-bank on the native source. The filled row envelope includes the complete painted water surface, shallow stony wash, ripple highlights, reflections, and water between stones, with a smooth binary boundary and no interior holes."
+  },
+  "siteChecks": {
+    "coherentOccupiableShelf": "present as one broad, level gold-green terrace at centre-west with open glades and low natural rock edges",
+    "pool": "present at the shelf's north edge; the main painted pool body is approximately 12 m across at source scale",
+    "ridge": "present east of the shelf as a north-south band of moor, jointed outcrop, irregular broken columns, and talus",
+    "stream": "present as one shallow connected channel from the eastern ridge through the pool and westward into the plateau",
+    "railRunLandform": "present as a broad, level-looking natural band north of the main shelf; no track or constructed edge is painted"
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleEditCall": true,
+    "secondReferenceAttached": true,
+    "rawGenerationUntouched": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "landToAllFourEdges": true,
+    "wholeCanvasTextureCharacterContinuous": true,
+    "coherentSettlementShelf": true,
+    "waterMaskBinarySameDimensionsAndHoleFree": true,
+    "allPaintedWaterIncluded": true,
+    "allMeasuredCrownsIncluded": true,
+    "crownMedianInsideAcceptedTerritoryBand": true,
+    "accidentalBasaltOrderAvoided": true,
+    "strictEqualValueOnAllFormSides": false
+  },
+  "refusalReasons": [
+    "The candidate violates the highest-priority lighting rule: repeated bright basalt top planes and darker vertical faces reveal consistent form-side value separation. The task allows a retry only for a non-square result, so no second ImageGen call was made."
+  ],
+  "openRisks": [
+    "Several eastern ridge stacks remain vertically columnar; they vary in height and spacing, but director and owner review should judge whether the weathering is irregular enough against the no-default-palisade rule.",
+    "Exact neighbour-pixel stitch quality, shoreline judgment, shelf usability, and overall terrain quality remain director and owner visual decisions; mechanical checks do not establish visual acceptance.",
+    "The northern level run is readable as a broad natural bench, but its usable 25 m width is estimated from the single raster rather than validated against a height field."
+  ]
+}
