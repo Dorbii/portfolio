@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-04T08:08:12.889Z",
+ "solidifiedAt": "2026-09-04T09:11:25.080Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "e379e43f1e67358a",
+  "cell.mjs": "0a7bc79204dfe097",
   "plan-territory.mjs": "e8d86a90b2e32796",
   "AGENTS.md": "a1ab4eaec1d4c6ac"
  },
@@ -390,6 +390,24 @@
    "reason": "owner 2026-09-04 ('go for it now... please render it all'), lock change 16, AFTER, controls 29/29. (a) Zero crowns now PASSES, reported, when the cell's own biome vocabulary begins with the word none - and only then. The biome decides, not the worker's report, so a forest cannot be waved through by claiming no crowns; coast-cliff, whose vocabulary says conifers belong in its gullies, still fails on zero. Five of Tanium's twenty-one cells needed this, including the wonder cell. (b) The packet now says excludedElements means EXACTLY ONE THING - elements left OUT of the median - is not a notes field, must be [] when everything stayed in the census, and that a treeless cell reports sampleCount 0 / medianMetres 0 / excludedElements []. Verified live in the same run: a genuinely out-of-scale cell (c1-0, median 5.487 m with five crowns above the 5.2 m limit) is still refused, so the gate distinguishes 'nothing to measure' from 'measured around something' rather than being loosened.",
    "hashes": {
     "cell.mjs": "e379e43f1e67358a",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-04T09:04:19.964Z",
+   "reason": "owner 2026-09-04 ('go for it now... please render it all'), lock change 17, BEFORE. A CATEGORY ERROR in the crown packet, costing four cells tonight and ten exclusion reports. CROWN_MIN_M/MAX_M are documented in cell.mjs as 'the range that was accepted' - the range of MEDIANS across NinjaOne's twenty cells - but the packet then tells the worker 'If this cell contains a crown that does not belong to that band, put it in excludedElements', which polices EVERY INDIVIDUAL crown against a band of medians. Real ground has saplings, so any cell containing a young tree is refused: workers reported 1.47 m, 1.666 m, 1.27-1.67 m and 'eight isolated crown components' and lost the cell each time, doing exactly what the packet asked. The gate's actual purpose is intact and untouched - it exists because a ~22 m crown, three times the ceiling, was measured AROUND in c3-2. THRESHOLDS ARE NOT CHANGING: CROWN_MIN_M stays 1.7 and CROWN_MAX_M stays 5.2, and the comment forbidding a move to 4-7 without the owner's word stands. Only the packet's instruction changes: the band governs the MEDIAN of the census, every crown found goes into the census whatever its own size, and excludedElements is only for an element so grossly out of scale that including it would distort the median. Controls must stay 29/29.",
+   "hashes": {
+    "cell.mjs": "e379e43f1e67358a",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-04T09:11:25.080Z",
+   "reason": "owner 2026-09-04, lock change 17, AFTER, controls 29/29. Packet wording only; CROWN_MIN_M stays 1.7 and CROWN_MAX_M stays 5.2, and the comment forbidding a move to 4-7 without the owner's word is untouched. The packet now states that the band governs the MEDIAN of the census and not every individual crown, that every crown found goes into the census whatever its own size (leaving small ones out is itself a way of shifting the median), and that excludedElements is only for an element so grossly out of scale that including it would distort the median - naming the case it exists for, the ~22 m crown against a 5.2 m band. The old wording asked the worker to police every crown against a band of medians, so any cell containing a sapling was refused; four cells and ten exclusion reports went that way tonight, each worker doing exactly what the packet asked.",
+   "hashes": {
+    "cell.mjs": "0a7bc79204dfe097",
     "plan-territory.mjs": "e8d86a90b2e32796",
     "AGENTS.md": "a1ab4eaec1d4c6ac"
    }

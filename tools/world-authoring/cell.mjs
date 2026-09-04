@@ -1042,20 +1042,28 @@ the same measured at the final ${GEN_PX} px canvas scale. It must fall within
 this territory were measured and accepted at, so this cell matches its
 neighbours. Aim for the middle of it, not an end.
 
-**Do not exclude anything from the measurement to bring it inside the band.**
-If this cell contains a crown that does not belong to that band, put it in
-\`excludedElements\` with a one-line description. The cell will then be
-refused, which is the correct outcome — an out-of-scale element is a defect to
-report, not to measure around. A missing, unparseable or incomplete
-\`crown\` object fails the cell.
+**That band governs the MEDIAN, not every individual crown.** Real ground has
+young trees and small ones; a sapling narrower than ${CROWN_MIN_M} m is a
+sapling, not a defect. **Every crown you find goes into the census whatever its
+own size** — that is what a median is for, and leaving the small ones out is
+itself a way of shifting it.
+
+**Do not exclude anything from the measurement to bring the median inside the
+band.** \`excludedElements\` is only for an element so grossly out of scale that
+including it would distort the median — the case this exists for is a crown that
+measured about 22 m against a ${CROWN_MAX_M} m band, four times over. Put such an
+element there with a one-line description. The cell will then be refused, which
+is the correct outcome: an out-of-scale element is a defect to report, not to
+measure around. A missing, unparseable or incomplete \`crown\` object fails the
+cell.
 
 \`excludedElements\` means EXACTLY ONE THING: elements you LEFT OUT of the
-median. It is not a notes field. If every crown you found is in the census —
-including any you thought small or atypical — the array must be \`[]\`, and
-anything you want to say about them goes in your prose, not in there. A worker
-listed two saplings there while writing that they "remain included in the
-median sample"; that is a report of an empty exclusion set, and it cost the
-cell a bake.
+median. It is not a notes field, and it is NOT where small crowns go. If every
+crown you found is in the census — including every sapling, and every one you
+thought small or atypical — the array must be \`[]\`, and anything you want to
+say about them belongs in your prose. Four cells were refused in a single night
+by workers listing saplings of 1.3-1.7 m there; each was doing what an earlier
+wording asked, and each lost a bake for it.
 
 If this cell has NO crowns at all because its biome says trees do not belong
 here, report \`"sampleCount": 0\`, \`"medianMetres": 0\` and \`"excludedElements": []\`.
