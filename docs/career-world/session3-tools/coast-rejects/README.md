@@ -30,3 +30,5 @@
 - `c6-8` shore — rejected on **rock lighting 0.259**
 - `c7-0` shore — rejected on **water continuity 5**
 - `c7-4` shore — rejected on **water continuity 7**
+- `c6-8` shore — rejected on **rock lighting 0.243**
+- `c4-8` shore — rejected on **rock lighting 0.282**
