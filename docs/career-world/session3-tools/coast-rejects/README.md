@@ -33,3 +33,8 @@
 - `c6-8` shore — rejected on **rock lighting 0.243**
 - `c4-8` shore — rejected on **rock lighting 0.282**
 - `c1-2` shore — rejected on **rock lighting 0.42**
+- `c7-3` shore — rejected on **water continuity 3**
+- `c8-7` shore — rejected on **water continuity 3**
+- `c7-8` shore — rejected on **rock lighting 0.482**
+- `c1-3` shore — rejected on **a gate **
+- `c2-8` shore — rejected on **rock lighting 0.29**

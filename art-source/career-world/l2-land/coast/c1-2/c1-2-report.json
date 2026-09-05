@@ -1,0 +1,163 @@
+{
+  "cell": "c1-2",
+  "territory": "coast",
+  "biome": "shore",
+  "status": "quarantine_candidate_failed_hard_constraints",
+  "generationSizePx": [1254, 1254],
+  "generation": {
+    "filename": "c1-2-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "BFC9FA15E1FD001E4DF634C3365604C00E4B3F65CEE3491359C2DE246A1E2618",
+    "mode": "single built-in ImageGen edit with the edit target as Image 1 and the style canon as reference-only Image 2",
+    "imageGenCallsUsed": 1,
+    "retryUsed": false,
+    "secondReferenceAccepted": true,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "byteIdenticalToGeneratedOutput": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "promptFile": "c1-2-imagegen-prompt-used.txt"
+  },
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "Magnitude-weighted 36-bin land-luminance-gradient orientation histogram at native source resolution; water and its four immediate neighbours are excluded, as are gradients below 12 luminance units. Peak is divided by the uniform-bin mean.",
+    "peakVsUniformOverLand": 1.60926,
+    "uniformReference": 1.0,
+    "peakBinDegrees": [230, 240],
+    "directionalKeyFirstMoment": 0.004152,
+    "gradientSamples": 613656,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No whole-cell sun gradient or long cast-shadow field is visible, but basalt repeatedly has pale top caps over darker vertical faces. The literal same-value-on-every-side rule is not met."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "Manual estimated fractions of non-water terrain at native source resolution.",
+    "buildable": 0.55,
+    "steep": 0.28,
+    "otherTalusShingleScrubOrConifers": 0.17,
+    "canvasFractions": {
+      "buildable": 0.250257073,
+      "steep": 0.127403601,
+      "otherTerrain": 0.077352186
+    },
+    "method": "Broad cliff-top benches and open shelf ground count as buildable; exposed column faces and abrupt banks count as steep; talus, shingle, broken rim rock, scrub, and conifers make up the remainder. Approximate uncertainty is plus or minus 0.08 per land-relative fraction."
+  },
+  "waterFootprintFraction": 0.54498714,
+  "finalDerivedLandCoverageFraction": 0.45501286,
+  "crown": {
+    "medianMetres": 2.989,
+    "medianPx": 62.265,
+    "sampleCount": 12,
+    "method": "Complete census of all 12 dark-green crown-core components found by the reproducible detector, including every small component and edge-intersecting component; source widths were 11, 12, 15, 16, 18, 26, 35, 35, 39, 40, 59, and 65 px, with the 30.5 px median scaled by 2560/1254 and converted at 4.8 cm/px. The threshold is conservative because it can omit pale branch tips.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c1-2-water-source.png",
+    "classification": "c1-2-water.json",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "DCB480E5AAEDF04D7A1B11597CA521E692A934D23B76C4172902103ED38FE576",
+    "encoding": "Opaque white water pixels on fully transparent non-water pixels; binary alpha.",
+    "opaqueWaterPixels": 857001,
+    "transparentTerrainPixels": 715515,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedWaterComponents8Connected": 1,
+    "enclosedDryTerrainComponents": 1,
+    "enclosedDryTerrainPixels": 209,
+    "edgeWaterPixels": {
+      "north": 495,
+      "east": 0,
+      "south": 729,
+      "west": 1254
+    },
+    "method": "Flooded edge-connected teal and blue source pixels, expanded through adjacent pale surf, foam, wash, reflections, ripple highlights, and water gaps between shore rocks, filled only small interior water holes, and retained the single coastal component. Dry cliff, talus, shingle, vegetation, and the isolated rock body remain transparent terrain.",
+    "visualInspection": "Native overlay inspection found the open sea and complete shoreline wash included without interior holes; dry column solids, talus, and the isolated rock remain outside the mask."
+  },
+  "edgeTopology": {
+    "north": {
+      "required": "sea only",
+      "observedWaterPixels": 495,
+      "observedTerrainPixels": 759,
+      "observedRuns": [
+        "water 0-486",
+        "terrain 487",
+        "water 488",
+        "terrain 489-490",
+        "water 491-497",
+        "terrain 498-1253"
+      ],
+      "pass": false
+    },
+    "east": {
+      "required": "ground from the north end through 47 percent, then open sea through the south end",
+      "expectedWaterPixelsApprox": 665,
+      "observedWaterPixels": 0,
+      "observedTerrainPixels": 1254,
+      "observedRun": "terrain 0-1253",
+      "pass": false
+    },
+    "south": {
+      "required": "sea only",
+      "observedWaterPixels": 729,
+      "observedTerrainPixels": 525,
+      "observedRuns": [
+        "water 0-728",
+        "terrain 729-1253"
+      ],
+      "pass": false
+    },
+    "west": {
+      "required": "sea only",
+      "observedWaterPixels": 1254,
+      "observedTerrainPixels": 0,
+      "observedRun": "water 0-1253",
+      "pass": true
+    }
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasEdit": true,
+    "secondReferenceAttached": true,
+    "rawGenerationUntouched": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "westEdgeSeaOnly": true,
+    "northEdgeSeaOnly": false,
+    "southEdgeSeaOnly": false,
+    "eastEdgeExactGroundThenSeaMap": false,
+    "bayMouthOpenAtEastSeam": false,
+    "noLandAcrossBayMouth": false,
+    "weatheredIrregularColumnsWithoutDefaultRegularity": false,
+    "strictEqualValueOnAllRockFaces": false,
+    "waterMaskSameDimensions": true,
+    "waterMaskBinaryWhiteOnTransparent": true,
+    "waterMaskCoversSourceVisibleWaterByOverlayInspection": true,
+    "crownObjectComplete": true,
+    "crownCensusIncludesAllDetectedCrowns": true,
+    "crownMedianInsideAcceptedTerritoryBand": true
+  },
+  "refusalReasons": [
+    "The entire east edge is terrain: zero of 1254 east-edge pixels are water, but the lower 53 percent must be open water. This repeats the explicitly identified edge-map defect and closes the bay mouth at the seam.",
+    "The north edge has 759 terrain pixels and the south edge has 525 terrain pixels although both edges must be sea only.",
+    "Repeated pale basalt caps over darker vertical faces violate the literal neutral-lighting rule despite the absence of a whole-cell sun gradient or cast-shadow field.",
+    "Several cliff runs remain repeated upright capped columns with regular spacing rather than consistently broken, split, leaning, irregular coastal basalt."
+  ],
+  "openRisks": [
+    "The square result did not qualify for the framing-only retry, so no second ImageGen call was made.",
+    "The water mask follows the refused raw source and deliberately does not relabel incorrect dry land as water.",
+    "The built-in edit repainted the supplied context outside the flat-grey shapes despite the preservation prompt; the downstream stitch was not run or verified in this task.",
+    "Buildable and steep fractions and crown widths are screen-space estimates rather than surveyed terrain geometry.",
+    "No artifact was promoted outside quarantine; visual quality remains owner and director judgment."
+  ],
+  "evidence": [
+    "diagnostics/c1-2-measurements.json",
+    "diagnostics/c1-2-water-overlay.png",
+    "diagnostics/c1-2-crown-components.json",
+    "diagnostics/c1-2-crown-components.png",
+    "diagnostics/current-east-top-3x.png",
+    "diagnostics/current-east-bottom-3x.png"
+  ]
+}
