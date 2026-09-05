@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-05T16:59:08.598Z",
+ "solidifiedAt": "2026-09-05T19:30:43.530Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "f8307db6fe8241d6",
+  "cell.mjs": "9fa45296c5e99d43",
   "plan-territory.mjs": "e8d86a90b2e32796",
   "AGENTS.md": "a1ab4eaec1d4c6ac"
  },
@@ -480,6 +480,15 @@
    "reason": "owner 2026-09-05 17:10, after the plain description of both: 'sure go for it' — lock 18h (a cell sees the authored cell across a territory border: its paint in the edit target, its seam judged by the gates, the stitch untouched) and lock 18i (a shore cell's edit target carries the island's sea on into the cell from its own sea pixels, grey only within 40 m of arriving ground; the packet calls the painted sea final; stitch, gates and mask untouched)",
    "hashes": {
     "cell.mjs": "f8307db6fe8241d6",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-05T19:30:43.530Z",
+   "reason": "owner 2026-09-05 19:20 UTC: 'sorry proceed' — in reply to the ask 'Say yes to all three or name the ones you want' on proposals 18i-b (sea texture: the pre-fill tiles a real sea patch), 18j (key-light report-only under 5% land), 18k (wet runs split by a gap under 30 px are one run); all three applied",
+   "hashes": {
+    "cell.mjs": "9fa45296c5e99d43",
     "plan-territory.mjs": "e8d86a90b2e32796",
     "AGENTS.md": "a1ab4eaec1d4c6ac"
    }
