@@ -33,8 +33,36 @@ const listArg = (flag) => {
   return i >= 0 && process.argv[i + 1] && !process.argv[i + 1].startsWith("--")
     ? process.argv[i + 1].split(",").map((s) => s.trim()).filter(Boolean) : [];
 };
+const arg1 = (flag) => listArg(flag)[0] || null;
 const WANTED = listArg("--territory");
 const ALL = ["ninjaone", "tanium", "coast"];      // feed order: NinjaOne first (its ids are the old ones)
+// --tone <gains.json>: exposure equalisation at SERVE time (tone-harmonise.mjs
+// writes the table; owner 2026-09-05: "lets fix all the patchy non-uniformed
+// look"). Each cell's luma gain is applied as a smooth field — bilinear between
+// cell centres, missing neighbours take the cell's own gain — to the sliced
+// tiles only; the authored pyramids are untouched. With --tone, every cell is
+// re-sliced (a gain change is not visible to the mtime check).
+const TONE = arg1("--tone");
+const gains = new Map();
+if (TONE) {
+  const table = JSON.parse(fs.readFileSync(TONE, "utf8"));
+  for (const c of table.cells) gains.set(c.world.join(","), c.gain);
+  console.log(`tone: ${gains.size} cell gains from ${TONE} (strength ${table.strength}, cap ±${table.cap})`);
+}
+function applyTone(raw, size, wx, wy) {
+  const own = gains.get(`${wx},${wy}`) ?? 1;
+  const at = (x, y) => gains.get(`${x},${y}`) ?? own;
+  for (let y = 0; y < size; y += 1) {
+    const fy = (y + 0.5) / size - 0.5, sy = fy < 0 ? -1 : 1, ty = Math.abs(fy);
+    for (let x = 0; x < size; x += 1) {
+      const fx = (x + 0.5) / size - 0.5, sx = fx < 0 ? -1 : 1, tx = Math.abs(fx);
+      const g = own * (1 - tx) * (1 - ty) + at(wx + sx, wy) * tx * (1 - ty) + at(wx, wy + sy) * (1 - tx) * ty + at(wx + sx, wy + sy) * tx * ty;
+      const o = (y * size + x) * 4;
+      for (let k = 0; k < 3; k += 1) raw[o + k] = Math.min(255, Math.round(raw[o + k] * g));
+    }
+  }
+  return raw;
+}
 
 const A = "public/career-world/layers/terrain/authority/";
 const ART = "art-source/career-world/l2-land/";
@@ -92,12 +120,19 @@ for (const t of ALL) {
     const cap = `${id}-capital.webp`, site = `${id}-site.webp`;
     const capFile = path.join(outDir, cap), siteFile = path.join(outDir, site);
     const l1 = await cellImage(pyr, 1, col, row), l0 = await cellImage(pyr, 0, col, row);
-    const stale = FORCE || !fs.existsSync(capFile) || !fs.existsSync(siteFile)
+    const stale = FORCE || TONE || !fs.existsSync(capFile) || !fs.existsSync(siteFile)
       || fs.statSync(capFile).mtimeMs < l1.newest || fs.statSync(siteFile).mtimeMs < l0.newest;
     if (stale) {
       if (!DRY) {
-        await l1.image.webp({ quality: 90, alphaQuality: 100 }).toFile(capFile);
-        await l0.image.webp({ quality: 90, alphaQuality: 100 }).toFile(siteFile);
+        for (const [lvl, file, size] of [[l1, capFile, 1024], [l0, siteFile, 2048]]) {
+          if (TONE) {
+            const raw = await lvl.image.raw().toBuffer();
+            await sharp(applyTone(raw, size, world[0], world[1]), { raw: { width: size, height: size, channels: 4 } })
+              .webp({ quality: 90, alphaQuality: 100 }).toFile(file);
+          } else {
+            await lvl.image.webp({ quality: 90, alphaQuality: 100 }).toFile(file);
+          }
+        }
       }
       sliced += 1;
     } else kept += 1;

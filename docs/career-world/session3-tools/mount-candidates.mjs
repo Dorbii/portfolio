@@ -17,6 +17,28 @@ import crypto from "node:crypto";
 import sharp from "sharp";
 sharp.cache(false);
 const DRY = process.argv.includes("--dry");
+// --tone <gains.json>: a candidate takes the MEAN of its authored neighbours'
+// serve-time gains (it has none of its own), applied as the same bilinear field
+// world-register.mjs uses, so a preview does not stand out from equalised land.
+const toneArg = process.argv.indexOf("--tone");
+const TONE = toneArg >= 0 ? process.argv[toneArg + 1] : null;
+const gains = new Map();
+if (TONE && fs.existsSync(TONE)) for (const c of JSON.parse(fs.readFileSync(TONE, "utf8")).cells) gains.set(c.world.join(","), c.gain);
+function applyTone(raw, size, wx, wy) {
+  const nb = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([dx, dy]) => gains.get(`${wx + dx},${wy + dy}`)).filter((g) => g !== undefined);
+  const own = nb.length ? nb.reduce((s, g) => s + g, 0) / nb.length : 1;
+  const at = (x, y) => gains.get(`${x},${y}`) ?? own;
+  for (let y = 0; y < size; y += 1) {
+    const fy = (y + 0.5) / size - 0.5, sy = fy < 0 ? -1 : 1, ty = Math.abs(fy);
+    for (let x = 0; x < size; x += 1) {
+      const fx = (x + 0.5) / size - 0.5, sx = fx < 0 ? -1 : 1, tx = Math.abs(fx);
+      const g = own * (1 - tx) * (1 - ty) + at(wx + sx, wy) * tx * (1 - ty) + at(wx, wy + sy) * (1 - tx) * ty + at(wx + sx, wy + sy) * tx * ty;
+      const o = (y * size + x) * 4;
+      for (let k = 0; k < 3; k += 1) raw[o + k] = Math.min(255, Math.round(raw[o + k] * g));
+    }
+  }
+  return own;
+}
 const ART = "art-source/career-world/l2-land", A = "public/career-world/layers/terrain/authority";
 const REVIEW = `${A}/tiles/l2-review`, CONFIG = "art-source/career-world/land-mount-r1.json";
 const KEPT = 2048, BLEED = 256;
@@ -36,11 +58,13 @@ for (const t of ["tanium", "ninjaone", "coast"]) {
   const ids = def.coastCells
     ? def.coastCells.map((x) => `c${x.at[0]}-${x.at[1]}`)
     : Array.from({ length: def.grid.cols * def.grid.rows }, (_, i) => `c${i % def.grid.cols}-${Math.floor(i / def.grid.cols)}`);
+  const [bx, by] = def.lattice.block;
   for (const id of ids) {
     if (ledger.cells[id]) continue;                                   // authored — served by the release feed
     const l2 = `.codex-tmp/authoring/cells/${t}/${id}/${id}-l2.png`;
     if (!fs.existsSync(l2)) continue;                                 // no candidate in hand
-    cells.push({ territory: t, id, l2 });
+    const [c, r] = id.slice(1).split("-").map(Number);
+    cells.push({ territory: t, id, l2, wx: bx + c, wy: by + r });
   }
 }
 
@@ -49,8 +73,15 @@ const entries = [];
 for (const c of cells) {
   const source = fs.readFileSync(c.l2);
   const name = `${c.territory}-${c.id}-site.webp`;
-  const canonical = await sharp(source).extract({ left: BLEED, top: BLEED, width: KEPT, height: KEPT })
-    .webp({ quality: 95, alphaQuality: 100 }).toBuffer();
+  let kept = sharp(source).extract({ left: BLEED, top: BLEED, width: KEPT, height: KEPT });
+  let gain = 1;
+  if (gains.size) {
+    const raw = await kept.raw().toBuffer();
+    gain = applyTone(raw, KEPT, c.wx, c.wy);
+    kept = sharp(raw, { raw: { width: KEPT, height: KEPT, channels: 4 } });
+  }
+  const canonical = await kept.webp({ quality: 95, alphaQuality: 100 }).toBuffer();
+  c.gain = gain;
   if (!DRY) fs.writeFileSync(path.join(REVIEW, name), canonical);
   entries.push({
     territory: c.territory, id: c.id, status: "review-candidate",
