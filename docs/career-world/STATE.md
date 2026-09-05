@@ -4,7 +4,33 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-05 17:00 UTC, LATEST (current):** **THE LIVE SERVER IS THE REVIEW
+**2026-09-05 18:45 UTC, LATEST (current):** **LOCKS 18h AND 18i ARE IN AND
+BOTH WORK; THREE SMALL REFINEMENTS WAIT ON THE OWNER; THE COAST RUN IS HELD
+FOR THEM.** Owner 17:10: *"sure go for it"* → cell.mjs locks **18h** (the
+cell across a territory border in the edit target and the seam gates) and
+**18i** (a shore cell's target carries the island's sea; grey only within
+40 m of arriving ground), recorded with his words. First results: **c4-0 met
+the border river** (N c3-3's beck at 57%, within 10 px; refused only on the
+two territories' vegetation colour across that border — 18l, not proposed
+yet: no vegetation arm across a border); **c7-2 met two of three sea runs**
+within 24 px; c1-8 matched its seam (refused on key-light noise on 2% land);
+c6-8 matched its seam (a sliver split the run for the gate) but painted a
+land mass into the pre-filled sea; **c7-3 painted a coast over the flat
+pre-filled sea along the whole seam** — the worker's prompt had said the
+sea was locked; the flat averaged fill reads as a placeholder. Proposals,
+checked, not applied (`session3-tools/proposals/`): **18i-b** real sea
+texture tiled into the fill; **18j** key-light report-only under 5% land;
+**18k** the continuity gate merges wet runs across dry gaps under 30 px.
+**Stitched on his words today:** Tanium c3-1, c4-1's rebake, c6-2's rebake
+(the bay meets the new c6-1); coast c1-1, c5-8, c8-5. Coast 7 of 27, Tanium
+18 of 21. **His eye:** Tanium c1-1 (eighth), c4-0, c2-1's rebake (chain as a
+groove? crowns 1.2 m again), c7-2, c1-8, c6-8; c7-3 a send-back. The held
+run (`.codex-tmp/session4/misses.sh`, its prelude done, marker
+`misses-prelude.done`; the waiter starts the coast part when
+`misses.go` exists): c1-0, c7-4, c8-7, c1-2, c4-8, c7-0, c1-3, c7-8, c8-6,
+then the conform pass, then serve. Resume from `SESSION 11`.
+
+**2026-09-05 17:00 UTC, superseded:** **THE LIVE SERVER IS THE REVIEW
 SURFACE; THE WORLD IS EQUALISED; THE OLD ART IS GONE; THE CHAIN WAITS ON
 ONE ACCEPT AND TWO APPROVALS.** The owner, on the live server: *"seeing it
 in full like this helps my eyes spot defects more and we gotta do something
