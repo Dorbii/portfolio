@@ -134,17 +134,26 @@ for (const [edge, dx, dy] of EDGES) {
     // 10 m and a third of the stretch, only where the neighbour's ground
     // turns to SEA — beside an inlet the land runs on past the cove, and at
     // a cell corner the limit runs to the edge in full
-    const taper = Math.min(TAPER, Math.round((b - a + 1) / 3));
     const taperA = a > 0 && seaAt(a - 1), taperB = b < KEPT - 1 && seaAt(b + 1);
+    // the limit before rounding: the candidate's own coast is kept whole when
+    // it lies within 46 m of the seam (a coast drawn at 40 m must not lose
+    // its cliff faces to the limit); only land carried further than that — a
+    // plateau across the cell — is trimmed at the wandering limit
+    const base = [];
     for (let i = a; i <= b; i += 1) {
-      // the candidate's own coast is kept whole when it lies within 46 m of
-      // the seam (a coast drawn at 40 m must not lose its cliff faces to the
-      // limit); only land carried further than that — a plateau across the
-      // cell — is trimmed at the wandering limit
       const last = extent(i);
-      let d = last <= SLACK ? last + 1 : D_MIN + (D_MAX - D_MIN) * Math.max(0, Math.min(1, wav[i]));
-      const t = Math.min(taperA ? i - a : Infinity, taperB ? b - i : Infinity);
-      if (taper > 0 && t < taper) { const u = (taper - t - 1) / taper; d *= Math.sqrt(Math.max(0, 1 - u * u)); }
+      base.push(last <= SLACK ? last + 1 : D_MIN + (D_MAX - D_MIN) * Math.max(0, Math.min(1, wav[i])));
+    }
+    // the rounding at an end against the sea is a quarter-ellipse whose
+    // length along the edge is four fifths of the limit's depth there (a
+    // headland as round as it is deep, not a flat wedge), never more than a
+    // third of the stretch and never less than 10 m
+    const rA = taperA ? Math.min(Math.max(TAPER, Math.round(0.8 * base[0])), Math.round((b - a + 1) / 3)) : 0;
+    const rB = taperB ? Math.min(Math.max(TAPER, Math.round(0.8 * base[base.length - 1])), Math.round((b - a + 1) / 3)) : 0;
+    for (let i = a; i <= b; i += 1) {
+      let d = base[i - a];
+      if (rA > 0 && i - a < rA) { const u = (rA - (i - a) - 1) / rA; d *= Math.sqrt(Math.max(0, 1 - u * u)); }
+      if (rB > 0 && b - i < rB) { const u = (rB - (b - i) - 1) / rB; d *= Math.sqrt(Math.max(0, 1 - u * u)); }
       depth[i] = Math.max(0, Math.round(d));
     }
   }
