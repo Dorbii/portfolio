@@ -115,6 +115,12 @@ brief is committed; needs the lock.
   the becks fill their beds).
 - Pictures are outline-only from now on (*"when they have a red mask I cant
   judge color correctness"*).
+- *"yeah accept c3-1 thats fine"* (01:53) — but the accepted candidate's
+  source had been cleared by the astra dispatch that died at the loader; only
+  its 768 px preview survived, which cannot be stitched. **c3-1 regenerates
+  once**, then c2-1 once against it. The runner now keeps every refused
+  candidate's full artefacts under `.codex-tmp/rejected/<territory>/` so an
+  accept-on-eye can always be stitched (`cell.mjs --from`).
 
 ## Order (as of 00:35)
 
