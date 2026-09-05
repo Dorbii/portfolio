@@ -398,7 +398,23 @@ the same slot it is everywhere else, and it never turns into a watercourse.
 The previous candidate ran the groove down into the fall, so the chain ended
 in a waterfall; the line must cross the whole cell edge to edge on its own.
 
-Land to all four edges.`;
+Land to all four edges.
+
+**The owner's ruling on the first version (2026-09-05, on the live world:
+"this spot could be cool as a natural stone overpass type concept but as it
+is a its a nogo").** Two things were wrong and both change here. FIRST, the
+cell read as one pale square set into its neighbours' heath: the pale bare
+stone is the TOP bench only; the lower benches carry talus fans, scree and
+the same wind-scoured heath as the cells around them, and every edge of this
+cell begins as the neighbour's ground at the neighbour's own brightness for
+the first 10-15 m before the first bench wall rises. No bench wall stands on
+a cell edge and no wall meets an edge head-on. SECOND, the rune chain
+stepped at both side edges. Its floor is already drawn on the canvas as a
+thin dark line from edge to edge: it is exact; cut the slot's walls and rims
+along it and nothing else about it changes. Where the groove meets a bench
+wall it passes UNDER the wall through a natural arch — a stone overpass, the
+concept the owner liked — and the WIND-ARCH is one of those crossings: the
+groove runs beneath it.`;
 
 B["5,1"] = `The RISK-ASSESSMENT shelf — a settlement shelf, the richest ground in its
 neighbourhood, and the last one before the coast to the east.

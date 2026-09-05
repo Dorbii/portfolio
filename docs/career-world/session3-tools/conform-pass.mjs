@@ -44,15 +44,22 @@ for (const x of def.coastCells) {
   const depths = [...dry.matchAll(/depth ([\d.]+)-([\d.]+) m/g)].map((m) => Number(m[2]));
   const deepest = depths.length ? Math.max(...depths) : 0;
   if (!depths.length) { results.push(`${id}: nothing to cut`); continue; }
-  if (deepest > MAX) { results.push(`${id}: deepest cut ${deepest.toFixed(1)} m > ${MAX} — to the owner's eye, not conformed`); continue; }
-  if (DRY) { results.push(`${id}: WOULD conform (deepest ${deepest.toFixed(1)} m) and redo`); continue; }
-  execSync(`${cmd} --write`, { encoding: "utf8" });
+  // a drift within --max: the seam cut alone. Deeper — the model painted its
+  // coast over the island's sea or its inlets (c7-0, 2026-09-05 20:04) — the
+  // whole-shore conform: every run opened, land beyond the limit trimmed
+  // (conform-band.mjs); its preview is kept for the owner's eye either way.
+  const band = deepest > MAX;
+  const preview = `docs/career-world/session3-tools/coast-rejects/${id}-conform.jpg`;
+  if (DRY) { results.push(`${id}: WOULD ${band ? `band-conform (seam drift ${deepest.toFixed(1)} m > ${MAX})` : `seam-conform (deepest ${deepest.toFixed(1)} m)`} and redo`); continue; }
+  if (band) execSync(`node docs/career-world/session3-tools/conform-band.mjs coast ${id} --preview ${preview} --write`, { encoding: "utf8" });
+  else execSync(`${cmd} --preview ${preview} --write`, { encoding: "utf8" });
   const redo = execSync(`node tools/world-authoring/cell.mjs --territory coast --cell ${x.at[0]},${x.at[1]} --redo --force --describe-file ${ART}/coast/briefs/${id}.md 2>&1 || true`, { encoding: "utf8", shell: "bash" });
   const accepted = /accepted, stitched/.test(redo);
   const gates = (redo.match(/FAIL\s+[a-z][a-z -]+?\s{2,}[^\n]*/g) || []).map((s) => s.trim()).join(" | ");
-  results.push(`${id}: conformed (deepest ${deepest.toFixed(1)} m) — ${accepted ? "ACCEPTED and stitched" : `still refused: ${gates}`}`);
+  const how = band ? `band-conformed (seam drift ${deepest.toFixed(1)} m)` : `seam-conformed (deepest ${deepest.toFixed(1)} m)`;
+  results.push(`${id}: ${how} — ${accepted ? "ACCEPTED and stitched" : `still refused: ${gates}`}; preview ${preview}`);
   if (accepted) {
-    execSync(`git add -A -- ${ART}/coast ${A} docs/career-world/session3-tools/coast-rejects && git commit -q -m "Coast ${id}: seam conformed to the island's water (mask only, deepest cut ${deepest.toFixed(1)} m) and stitched" -m "Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"`, { encoding: "utf8", shell: "bash" });
+    execSync(`git add -A -- ${ART}/coast ${A} docs/career-world/session3-tools/coast-rejects && git commit -q -m "Coast ${id}: ${band ? "shore conformed to the plan (every run opened, land beyond the limit trimmed; mask only)" : `seam conformed to the island's water (mask only, deepest cut ${deepest.toFixed(1)} m)`} and stitched" -m "Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"`, { encoding: "utf8", shell: "bash" });
   }
 }
 for (const r of results) console.log(r);

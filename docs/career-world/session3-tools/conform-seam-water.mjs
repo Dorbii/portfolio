@@ -90,6 +90,19 @@ for (const [a, b] of runs) {
     depth[i] = found >= 0 ? found : cap;
   }
 }
+// the cut's ends along the seam round off (a quarter-circle over the shorter
+// of 6 m and half the run) where the run ends inside the edge, so a notch is
+// a cove and a bay has a curved corner, not a box (2026-09-05 20:20, c7-0:
+// per-row cuts left a comb of rectangular slots)
+for (const [a, b] of runs) {
+  const r = Math.min(Math.round(6 / M_PER_PX), Math.floor((b - a + 1) / 2));
+  if (r <= 0) continue;
+  for (let i = a; i <= b; i += 1) {
+    const fromA = a > 0 ? i - a : Infinity, fromB = b < KEPT - 1 ? b - i : Infinity;
+    const t = Math.min(fromA, fromB);
+    if (t < r) { const u = (r - t - 1) / r; depth[i] = Math.round(depth[i] * Math.sqrt(Math.max(0, 1 - u * u))); }
+  }
+}
 // a median over ±15 positions keeps single-row spikes out of the cut
 const smooth = depth.map((_, i) => {
   if (!wet[i]) return 0;
