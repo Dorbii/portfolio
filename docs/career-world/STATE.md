@@ -4,7 +4,52 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-05 19:55 UTC, LATEST (current):** **THE OWNER'S ELEVEN CROPS OF
+**2026-09-05 20:35 UTC, LATEST (current):** **c7-2 LANDED ON THE NEW LOCKS
+(20:18Z); c7-0 REFUSED AND THE FIX IS A MASK; THE REVIEWER'S 55 ROWS ARE IN;
+THE CHAIN RUN IS WRITTEN AND WAITS ON 18m.** The coast run (misses.sh) is in
+wave 1: c7-0 refused at 20:04Z on water continuity alone (5 unmet crossings —
+its target-vs-result picture `.codex-tmp/session4/island/c7-0-target-vs-result.jpg`
+shows the model kept its land inside the 40 m strip but painted over the sea
+at the strip's ends and closed c6-0's crossings, which the pre-fill never
+painted: c6-0's east coast weaves across the seam, so its "inlets" are
+crossings narrower than 15 m); **c7-2 ACCEPTED at 20:18Z** (13.4 min; N
+c4-1's peninsula continued). **New tool, mask only (the class the owner
+approved 2026-09-04): `docs/career-world/session3-tools/conform-band.mjs coast <id>
+[--preview x.jpg] [--write]`** — opens every wet run on every authored
+neighbour's edge (conform-seam-water.mjs, whose cuts now round their ends: a
+narrow run is a 12 m cove, a sea run is cut to the candidate's own water),
+keeps the candidate's coast whole where it lies within 46 m of the seam, and
+trims land carried further (a plateau across the cell) at a limit wandering
+24-40 m that rounds off against sea; over an inlet the limit runs on so the
+cove ENDS. conform-pass.mjs now band-conforms any continuity refusal whose
+seam drift exceeds --max and keeps a preview at
+`session3-tools/coast-rejects/<id>-conform.jpg` for the owner's eye; the run's
+end-of-run pass will apply it to c7-0 (preview of the result:
+`.codex-tmp/session4/island/c7-0-band.jpg` — the coast with four coves).
+**The reviewer's report** `.codex-tmp/session4/review/drifts.md` (55 rows,
+crops under `review/drifts/`, numbers in `seams.txt`, tools `seams.mjs`,
+`chain.mjs`, `colour.mjs`, `cuts.mjs`): rows 1-4, 8, 13-17, 22-30 are the
+coast candidates already in the run or its conform pass; **authored cells it
+faults, for the owner's eye:** T c6-1 has NO rune chain (row 9: the groove
+stops dead at T c5-1's edge — the new c6-1 is in chain.sh, forced); T c1-0's
+plateau ends flush on the N/T border under N c0-3's open sea (row 11); T
+c5-0's cliff top flush under N c4-3's sea (row 20); T c5-2's beck dead-ends at
+T c6-2 (row 18, known — c6-2 stitched on his crop); the T c3-2|T c4-2 and T
+c2-1|T c2-2 tone lines (21, 31); the N/T palette borders read as colour, not
+luma (32, 33); T c4-1's stone block face on the T c5-1 seam (24 — the chain
+run); a ruler-straight lake shore in T c5-1; a rectangle of painted water at
+C c1-4's south-east corner. Its rows 5-6 ("bleed slabs" in empty c1-0 and
+c8-6) are the PYRAMID, not the runtime: the runtime serves per-cell webps
+(l2-coast has 14 files for 7 cells), so those cells' cuts are the authored
+neighbours' land ending at their own edges, fixed by baking c1-0 and c8-6
+(wave 1). Cells never attempted: **c0-5** (T c0-0's cliffs into the sea — in
+chain.sh), c8-4 (nothing arrives; leave). **chain.sh** (`.codex-tmp/session4/chain.sh`,
+tracked under session4-chain/): refuses to start without 18m applied or with
+the lock held; bakes c4-1 (forced), c2-1, c1-1, c6-1 (forced), c1-2 (forced),
+then coast c0-5, then conform-pass and serve. Asked of the owner (19:55
+picture): 18m yes/no; accepts for T c4-0, C c3-0, C c0-6, C c1-4.
+
+**2026-09-05 19:55 UTC:** **THE OWNER'S ELEVEN CROPS OF
 THE LIVE WORLD; LOCKS 18i-b, 18j, 18k IN; THE COAST RUN IS BAKING; THE CHAIN
 WAITS ON 18m.** Owner 19:20, eleven crops of the live server with five notes,
 then *"sorry proceed"* (in reply to "yes to all three releases the held coast
