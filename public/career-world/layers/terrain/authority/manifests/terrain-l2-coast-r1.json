@@ -569,6 +569,109 @@
      2
     ]
    }
+  },
+  "c1-1": {
+   "authoredAt": "2026-09-05T18:08:15.742Z",
+   "ownerOverride": {
+    "at": "2026-09-05T18:08:15.743Z",
+    "reason": "owner 2026-09-05 17:35, on the candidate's view with its neighbours: 'c1-1 is fine but the cell above it needs to complete the shore (rock lighting 0.247 was its only gate)'",
+    "failedGates": [
+     "rock lighting 0.247"
+    ]
+   },
+   "describe": "THE WEST SHORE beside NinjaOne's c0-0 (Heather moor).\n\nThe island lies to the EAST. Along your EAST edge its art arrives as real\npaint — its ground (open heather-and-grass moor, wind-scoured, boulders and scrub; heather sparse and subdued, never a carpet) in some\nstretches and its SEA in others; the edge map below says which is which.\n**Where its ground arrives, continue it exactly as it arrives**",
+   "sourcePx": 1254,
+   "gates": [
+    {
+     "name": "key-light asymmetry",
+     "value": 0.002,
+     "pass": true,
+     "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004"
+    },
+    {
+     "name": "gradient ratio",
+     "value": "1.569 (reported)",
+     "pass": true,
+     "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
+    },
+    {
+     "name": "rock lighting",
+     "value": 0.247,
+     "pass": false,
+     "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.14; limit 0.16 on the owner's eye (2026-09-02, the dark-forest gorge at 0.153)"
+    },
+    {
+     "name": "land coverage",
+     "value": "65.4%",
+     "pass": true
+    },
+    {
+     "name": "water cut clear",
+     "value": "0 px",
+     "pass": true,
+     "note": "paint surviving where the mask is fully water; exact zero by construction for pipeline-derived cells"
+    },
+    {
+     "name": "mask completion",
+     "value": "+12 px grown, 903 px holes filled (reported)",
+     "pass": true,
+     "note": "the delivered mask grown into contiguous painted water within 48 px and speckle holes <=64 px filled before the cut (owner 2026-09-02); dry paint stops the growth, so a polyline mask still fails the rings"
+    },
+    {
+     "name": "water fringe",
+     "value": "0.04%",
+     "pass": true,
+     "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
+    },
+    {
+     "name": "water fringe (48px)",
+     "value": "0.03%",
+     "pass": true,
+     "note": "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)"
+    },
+    {
+     "name": "water continuity",
+     "value": "ok (0 crossings checked)",
+     "pass": true,
+     "note": "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint"
+    },
+    {
+     "name": "palette conformance",
+     "value": "veg worst dBG 0.042 dLuma 0.0 over 1 seam(s); tone worst dLuma 9.5 on all land over 1 seam(s)",
+     "pass": true,
+     "note": "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13"
+    },
+    {
+     "name": "crown scale",
+     "value": "3.479 m over 20 crowns (accepted range 1.7-5.2 m)",
+     "pass": true,
+     "note": "the worker's own median crown from c1-1-report.json, against the 1.7-5.2 m range the accepted cells measured (NOT the plan's written 4-7 m — see CROWN_MIN_M); crown.excludedElements must be empty, so an out-of-scale element cannot be measured around"
+    }
+   ],
+   "shelf": null,
+   "features": [],
+   "waterZones": [
+    "coast",
+    "lake"
+   ],
+   "maskCompletion": {
+    "grownPx": 12,
+    "holePx": 903
+   },
+   "biome": "shore",
+   "source": "art-source/career-world/l2-land/coast/c1-1",
+   "stitch": {
+    "order": 6,
+    "tiles": [
+     100,
+     36,
+     16,
+     9,
+     4,
+     1,
+     1
+    ]
+   }
   }
  }
 }

@@ -1,0 +1,135 @@
+{
+  "cell": "c1-1",
+  "territory": "ninjaone",
+  "biome": "shore",
+  "status": "refused",
+  "generation": {
+    "filename": "c1-1-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "82ED148C31DEEEA8074DBC251B13F12350780F59166B73A640F492754EDA068C",
+    "mode": "built-in ImageGen edit with edit-target as Image 1 and style canon as reference-only Image 2",
+    "imageGenCallsUsed": 1,
+    "selectedCandidate": 1,
+    "retryUsed": false,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "secondReferenceAccepted": true,
+    "promptFile": "c1-1-imagegen-prompt-used.txt"
+  },
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by the uniform-bin mean on the delivered source; water and its four immediate neighbours are excluded, as are gradients below 12 luminance units.",
+    "peakVsUniformOverLand": 1.630774,
+    "uniformReference": 1.0,
+    "peakBinDegrees": [230, 240],
+    "directionalKeyFirstMoment": 0.004039,
+    "gradientSamples": 894972,
+    "aggregateDirectionalityNumericPass": true,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No whole-cell sun gradient or cast-shadow field is visible, but basalt columns repeatedly have pale caps over darker side faces and conifer crowns retain directional light-dark modelling. The aggregate statistic does not establish the literal equal-value rule."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "Manual estimated fraction of non-water land area at native source resolution.",
+    "buildable": 0.72,
+    "steep": 0.14,
+    "otherBrokenRockTalusOrVegetation": 0.14,
+    "method": "Broad coherent moor benches count as buildable; exposed column faces and stacks count as steep; talus, shingle, boulders, scrub, and conifers make up the remainder. Approximate uncertainty is plus or minus 0.08 per fraction."
+  },
+  "waterFootprintFraction": 0.339509,
+  "finalDerivedLandCoverageFraction": 0.660491,
+  "edgeTopology": {
+    "north": {
+      "required": "open sea across the edge",
+      "waterPixels": 413,
+      "landPixels": 841,
+      "pass": false
+    },
+    "east": {
+      "required": "island ground across the edge, with the inherited tarn retained",
+      "waterPixels": 15,
+      "landPixels": 1239,
+      "pass": true
+    },
+    "south": {
+      "required": "open sea across the edge",
+      "waterPixels": 427,
+      "landPixels": 827,
+      "pass": false
+    },
+    "west": {
+      "required": "open sea across the edge",
+      "waterPixels": 1254,
+      "landPixels": 0,
+      "pass": true
+    }
+  },
+  "crown": {
+    "medianMetres": 3.479,
+    "medianPx": 72.472,
+    "sampleCount": 20,
+    "method": "Manual width census of every visually distinguishable conifer crown, including saplings, dense-group crowns, and edge-clipped crowns; native median 35.5 px scaled by 2560/1254 and converted at 4.8 cm per final pixel.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c1-1-water-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "E8FABD188AE821FF2BF03D9F93945819302CC4C150E153AB70557E2B32B2551E",
+    "encoding": "Opaque white water pixels on fully transparent non-water pixels; binary alpha.",
+    "opaqueWaterPixels": 533884,
+    "transparentLandPixels": 1038632,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedWaterComponents8Connected": 2,
+    "connectedWaterComponentSizesPx": [533383, 501],
+    "componentNote": "The large component is the open sea with the complete source-visible surf and wash zone; the second is the retained east-edge tarn.",
+    "edgeWaterPixels": {
+      "north": 413,
+      "east": 15,
+      "south": 427,
+      "west": 1254
+    },
+    "method": "Flooded source-raster teal and blue from the image edges, grew through adjacent source-painted pale surf and wash, retained the separate east-edge tarn, and removed sub-16-pixel water specks. Dry cliffs, talus, stacks, and skerries remain transparent terrain."
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasEdit": true,
+    "secondReferenceAttached": true,
+    "rawGenerationUntouched": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "northEdgeOpenSea": false,
+    "eastEdgeIslandGround": true,
+    "southEdgeOpenSea": false,
+    "westEdgeOpenSea": true,
+    "landContinuationWithin15To40Metres": false,
+    "noMeadowFlowersOrStructures": true,
+    "weatheredIrregularColumnarBasalt": false,
+    "oneOrTwoCloseInStacksOnly": false,
+    "treesOnlyWhereNeighbourPaintArrives": false,
+    "strictEqualValueOnAllFormSides": false,
+    "waterMaskSameDimensions": true,
+    "waterMaskBinaryWhiteOnTransparent": true,
+    "waterMaskCoversAllSourceVisibleWater": true,
+    "allMeasuredCrownsIncluded": true,
+    "crownMedianInsideAcceptedTerritoryBand": true
+  },
+  "refusalReasons": [
+    "Land occupies 841 north-edge pixels and 827 south-edge pixels; both edges are required to be open sea.",
+    "The moor continues roughly 55-70 m from the east edge in much of the source instead of ending at the required 15-40 m shore band.",
+    "Repeated pale basalt caps over darker column faces and directionally modelled conifers violate the literal neutral-lighting rule.",
+    "Three distinct offshore stacks are present instead of the permitted one or two.",
+    "Several cliff runs read as repeated upright columns with clean level caps rather than consistently broken, split, leaning, weathered coast geology.",
+    "Conifers were introduced well west of the authored neighbour arrival instead of being limited to vegetation that continues from that paint."
+  ],
+  "openRisks": [
+    "The water mask is mechanically complete against the delivered source, but it faithfully preserves the source candidate's noncompliant north and south edge topology.",
+    "Buildable and steep fractions and the crown census are manual image measurements rather than surveyed geometry.",
+    "No second ImageGen call was made because the returned source was square and the task authorizes a retry only for non-square framing.",
+    "Seam continuity and overall visual quality remain director and owner judgments; this report does not claim visual acceptance."
+  ]
+}
