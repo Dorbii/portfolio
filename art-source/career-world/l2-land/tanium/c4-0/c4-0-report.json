@@ -1,0 +1,126 @@
+{
+  "cell": "c4-0",
+  "territory": "tanium",
+  "status": "refused_quarantine_only",
+  "generation": {
+    "filename": "c4-0-source.png",
+    "exactGenerationSizeProduced": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "37A02EE131B70456C445231CC84A548708F67F70A58496B3B740418DB7BBE73D",
+    "mode": "single built-in image_gen whole-canvas edit with edit-target.jpg first and the NinjaOne seed canon second as reference only",
+    "imageGenCallsUsedThisWorkBlock": 1,
+    "retryUsed": false,
+    "secondReferenceAccepted": true,
+    "bothImagesAttachedToSameCall": true,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "rawCopyHashIdentical": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "promptFile": "c4-0-imagegen-prompt-20260905.txt"
+  },
+  "generationSizePx": [1254, 1254],
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin full-angle land-luminance-gradient magnitude peak divided by the uniform-bin mean on the delivered source; final water-mask pixels and immediate neighbours excluded and gradients below 12 luminance units excluded",
+    "peakVsUniformOverLand": 1.601070,
+    "uniformReference": 1.0,
+    "directionalKeyFirstMoment": 0.000741,
+    "gradientSamples": 1222086,
+    "aggregateDirectionalityNumericPass": true,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No whole-cell cast-shadow field is visible, but repeated basalt caps and exposed upper rock planes are materially paler than their vertical faces. The aggregate statistic does not override this visible violation of the literal equal-value rule."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "manual full-frame screen-space estimate as fractions of non-water land at native source resolution",
+    "buildable": 0.64,
+    "steep": 0.08,
+    "otherBrokenRockBouldersVegetationOrTransitionGround": 0.28,
+    "method": "Broad rolling moor and plateau approaches count as buildable; exposed short column faces and the sharpest gully banks count as steep; boulder fields, broken outcrops, conifers and biome-transition ground make up the remainder.",
+    "limitation": "Screen-space visual estimate with approximate uncertainty of plus or minus 0.08 per fraction, not an elevation-derived slope measurement."
+  },
+  "waterFootprintFraction": 0.033932,
+  "finalDerivedLandCoverageFraction": 0.966068,
+  "crown": {
+    "medianMetres": 2.940,
+    "medianPx": 61.244,
+    "sampleCount": 31,
+    "method": "Full-frame native-resolution census of all 31 discernible conifer crowns, including saplings and separately readable overlapping crowns; median outer foliage-envelope width 30 source pixels scaled by 2560/1254 and converted at 0.048 m per final pixel.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c4-0-water-source.png",
+    "classificationFile": "c4-0-water.json",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "DF27006A334A9FAD507DB751AE696555166F082B82A3BAE35CDB17A1B86F2B49",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "opaqueWaterPixels": 53358,
+    "transparentNonWaterPixels": 1519158,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedComponents8": 1,
+    "accidentalInteriorHoles": 0,
+    "edgeWaterPixels": {
+      "north": 26,
+      "east": 0,
+      "south": 0,
+      "west": 0
+    },
+    "method": "Native-resolution bank-to-bank trace of the complete connected beck and tarn surface, including pale ripple highlights, cascade wash and reflections; the binary outline and overlay were inspected over the raw source."
+  },
+  "northBeckHandover": {
+    "measurementLine": "north bleed seam at source row 125",
+    "spanPx": [679, 707],
+    "centerPx": 693.0,
+    "centerFractionFromWest": 0.552632,
+    "requiredFractionFromWest": 0.55,
+    "pass": true
+  },
+  "siteChecks": {
+    "connectingLandAcrossFullNorthEdge": true,
+    "landContinuesToAllFourEdges": true,
+    "beckContinuesFromNorthHandover": true,
+    "beckRemainsNarrowAndTerminatesInTarn": true,
+    "waterAbsentFromSouthEastAndWestEdges": true,
+    "moorToBarePlateauSouthTransition": true,
+    "moorToMixedBenchWestTransition": true,
+    "moorToCoastCliffEastTransition": true,
+    "darkConifersConfinedToGullyAndTarnHollow": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasEditCall": true,
+    "secondReferenceAttached": true,
+    "rawGenerationUntouched": true,
+    "terrainOnly": true,
+    "waterMaskSameDimensionsBinaryWhiteTransparent": true,
+    "waterMaskCoversCompletePaintedWater": true,
+    "waterMaskNoAccidentalInteriorHoles": true,
+    "allMeasuredCrownsIncluded": true,
+    "crownMedianInsideAcceptedTerritoryBand": true,
+    "northBeckMeasuredHandover": true,
+    "strictNeutralLighting": false
+  },
+  "refusalReasons": [
+    "The automatic lighting failure applies: repeated pale basalt caps and upper rock planes over darker vertical faces violate the required equal value on every side."
+  ],
+  "openRisks": [
+    "The tarn open-water span is approximately 15.5 metres and its rock-rim span approximately 17 metres; owner review must decide whether that reads close enough to the requested roughly 20 metres.",
+    "The water mask is same-size, binary, one-component and overlay-inspected; exact water-to-stone boundary placement remains a human visual gate.",
+    "The manual crown census includes every discernible crown and excludes nothing, but separation of overlapping painted foliage remains a visual measurement judgment.",
+    "No shipped-canvas bake, runtime mount, public asset write, art-source write or owner visual acceptance was attempted because the result remains quarantine-only and fails the binding lighting constraint."
+  ],
+  "inspection": {
+    "sourceInspected": true,
+    "waterOutlineInspected": true,
+    "waterOverlayInspected": true,
+    "crownOverlayInspected": true,
+    "visualAcceptance": "not claimed; owner review required",
+    "writesConfinedToCellFolder": true,
+    "publicAndArtSourceModified": false
+  }
+}
