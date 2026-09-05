@@ -11,64 +11,7 @@
     "pitchDegreesFromHorizontal": 72,
     "lightSource": "career-world/world-light@r1"
   },
-  "nodes": [
-    {
-      "id": "capital-tanium",
-      "territoryId": "tanium",
-      "archetype": "ridge-forum",
-      "assetPath": "/career-world/layers/structures/textures/tanium-capital-r1.png",
-      "groundAnchor": [
-        0.5,
-        0.77
-      ],
-      "footprintSpan": [
-        0.0185,
-        0.0329
-      ]
-    },
-    {
-      "id": "capital-independent",
-      "territoryId": "independent",
-      "archetype": "maker-court",
-      "assetPath": "/career-world/layers/structures/textures/independent-capital-r1.png",
-      "groundAnchor": [
-        0.5,
-        0.79
-      ],
-      "footprintSpan": [
-        0.019,
-        0.0338
-      ]
-    },
-    {
-      "id": "capital-column-technologies",
-      "territoryId": "column-technologies",
-      "archetype": "column-archive",
-      "assetPath": "/career-world/layers/structures/textures/column-capital-r1.png",
-      "groundAnchor": [
-        0.5,
-        0.81
-      ],
-      "footprintSpan": [
-        0.017,
-        0.0302
-      ]
-    },
-    {
-      "id": "capital-ace-hardware",
-      "territoryId": "ace-hardware",
-      "archetype": "hardware-guildhall",
-      "assetPath": "/career-world/layers/structures/textures/ace-hardware-capital-r1.png",
-      "groundAnchor": [
-        0.5,
-        0.81
-      ],
-      "footprintSpan": [
-        0.0155,
-        0.0276
-      ]
-    }
-  ],
+  "nodes": [],
   "policy": [
     "Capital anchors are consumed from the Phase 3 territory manifest and are never duplicated here.",
     "Every capital is a fixed-world structure whose footprint remains inside its registered capital envelope.",
@@ -79,5 +22,6 @@
     "Every authored raster shares one projection bearing and the root world-light direction; finished assets are never rotated at runtime.",
     "World view remains terrain-only; capitals use the shared territory reveal weight.",
     "Project buildings, skill buildings, roads, vegetation, labels, interaction, and effects remain deferred."
-  ]
+  ],
+  "note": "Legacy capital structures retired 2026-09-05 (owner: old art gone). The city layer rebuilds each capital on its territory's L2 land."
 }

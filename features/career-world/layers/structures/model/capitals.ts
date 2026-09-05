@@ -62,8 +62,23 @@ if (manifest.minimumTier !== CAPITAL_NODE_POLICY.minimumTier) {
   throw new TypeError("Capital manifest must use the shared territory tier.");
 }
 
+// The manifest's node shape, stated here because the registry is EMPTY now
+// (owner 2026-09-05: "can you make sure old art is all gone?" — the pre-L2
+// capitals of Tanium, Independent, Column Technologies and ACE Hardware sat on
+// old world positions, now the new land or open water) and an empty JSON
+// array types as never[]. Capitals return with the city layer, on L2 land.
+interface CapitalNodeManifest {
+  readonly id: string;
+  readonly territoryId: string;
+  readonly archetype: string;
+  readonly assetPath: string;
+  readonly groundAnchor: number[];
+  readonly footprintSpan: number[];
+}
+const capitalNodes = manifest.nodes as readonly CapitalNodeManifest[];
+
 export const CAPITAL_STRUCTURES: readonly CapitalStructure[] = Object.freeze(
-  manifest.nodes.map((node) => {
+  capitalNodes.map((node) => {
     const territory = TERRITORIES.find(({ id }) => id === node.territoryId);
     if (!territory) {
       throw new TypeError(
