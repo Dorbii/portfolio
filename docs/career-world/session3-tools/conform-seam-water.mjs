@@ -76,7 +76,10 @@ for (const [a, b] of runs) {
   // caps as an ellipse. Use this tool for drifts of a few metres; a 16 m
   // overrun cut this way carves an arc through a headland (c8-7, 08:45).
   const narrow = (b - a + 1) * M_PER_PX < 15;
-  const reach = narrow ? Math.round(MAX / 4) : MAX;
+  // a narrow run's gully is three times as long as the run is wide, between
+  // 3 m and a quarter of MAX (2026-09-05: a 1.7 m beck was cut as a 12 m slot)
+  const gully = Math.min(Math.round(MAX / 4), Math.max(Math.round(3 / M_PER_PX), 3 * (b - a + 1)));
+  const reach = narrow ? gully : MAX;
   for (let i = a; i <= b; i += 1) {
     const along = BLEED + i;
     let found = -1;
@@ -85,7 +88,7 @@ for (const [a, b] of runs) {
       if (isWet(Math.round(cx * sc), Math.round(cy * sc))) { found = d; break; }
     }
     const cap = narrow
-      ? Math.round(MAX / 4)
+      ? gully
       : Math.max(32, Math.round(MAX * Math.sqrt(Math.max(0, 1 - ((i - c) / half) ** 2))));
     depth[i] = found >= 0 ? found : cap;
   }
