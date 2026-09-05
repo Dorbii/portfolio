@@ -49,9 +49,11 @@ async function arrivals(x) {
 async function edgeMap(x) {
   const f = `${root}/${x.extends.territory}/${x.extends.id}/${x.extends.id}-l2.png`;
   if (!fs.existsSync(f)) return null;
+  return segmentsOf(f, { S: "top", N: "bottom", E: "left", W: "right" }[x.island]);
+}
+async function segmentsOf(f, edge) {
   const { data, info } = await sharp(f).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const W = info.width, bleed = Math.round((W - KEPT) / 2);
-  const edge = { S: "top", N: "bottom", E: "left", W: "right" }[x.island];
   const along = edge === "top" || edge === "bottom";
   const line = edge === "bottom" || edge === "right" ? bleed + KEPT : bleed;
   const wet = new Array(KEPT);
@@ -73,6 +75,34 @@ async function edgeMap(x) {
     segs.push({ ...r });
   }
   return segs.map((g) => ({ wet: g.wet, from: Math.round(g.a / KEPT * 100), to: Math.round((g.b + 1) / KEPT * 100), m: (g.b - g.a + 1) / KEPT * 97.6 }));
+}
+
+// What the cell's LAST candidate did at that seam, measured: where it put
+// land over the island's sea or water over the island's ground, in % along
+// the edge. The candidate's land layer survives in its working folder until
+// the next dispatch, which is when this runs. A retry then carries the exact
+// correction instead of the same words again (c8-7's land began at 37% where
+// the island's begins at 54%; prose without a number drifted 10-20 m).
+async function lastAttemptNote(x, id) {
+  const f = `.codex-tmp/authoring/cells/coast/${id}/${id}-l2.png`;
+  const island = `${root}/${x.extends.territory}/${x.extends.id}/${x.extends.id}-l2.png`;
+  if (!fs.existsSync(f) || !fs.existsSync(island)) return "";
+  const mine = await segmentsOf(f, { E: "right", W: "left", N: "top", S: "bottom" }[x.island]);
+  const theirs = await segmentsOf(island, { S: "top", N: "bottom", E: "left", W: "right" }[x.island]);
+  const stateAt = (segs, p) => segs.find((g) => p >= g.from && p < g.to)?.wet;
+  const faults = [];
+  let cur = null;
+  for (let p = 0; p <= 100; p += 1) {
+    const kind = p === 100 ? null : (stateAt(theirs, p) === true && stateAt(mine, p) === false ? "land-over-sea" : stateAt(theirs, p) === false && stateAt(mine, p) === true ? "water-over-ground" : null);
+    if (cur && kind !== cur.kind) { if (cur.to - cur.from >= 2) faults.push(cur); cur = null; }
+    if (kind && !cur) cur = { kind, from: p, to: p };
+    if (cur) cur.to = p;
+  }
+  if (!faults.length) return "";
+  const sideName = { S: "SOUTH", N: "NORTH", E: "EAST", W: "WEST" }[x.island];
+  return `\n\n**Your previous candidate missed this edge — measured, not an opinion:**\n${faults.map((v) => v.kind === "land-over-sea"
+    ? `- from ${v.from}% to ${v.to}% of the ${sideName} edge it painted LAND where the island's SEA arrives — that stretch must be open water at the seam.`
+    : `- from ${v.from}% to ${v.to}% of the ${sideName} edge it painted WATER where the island's GROUND arrives — that stretch must be land at the seam, continuing the island's.`).join("\n")}\nThe edge map above is exact; match it to the percent this time.`;
 }
 
 const PERSPECTIVE = {
@@ -226,7 +256,8 @@ ${PERSPECTIVE[x.shore]}
 
 No meadow, no flowers, no structures. Dark conifers only where they arrive
 from the island. Carry land only across the ${sideName} edge; the ${seaSides.join(", ")} edges are sea.${mapText}`;
-  fs.writeFileSync(`${root}/coast/briefs/${id}.md`, brief + (NOTES[id] ? `\n\n${NOTES[id]}` : "") + LIGHTING + "\n");
+  const lastNote = await lastAttemptNote(x, id);
+  fs.writeFileSync(`${root}/coast/briefs/${id}.md`, brief + (NOTES[id] ? `\n\n${NOTES[id]}` : "") + lastNote + LIGHTING + "\n");
   n += 1;
   console.log(`  ${id}: ${x.shore} shore beside ${x.extends.territory} ${x.extends.id} (${islandBiomeId}), ${water.length} water arrival(s)`);
 }
