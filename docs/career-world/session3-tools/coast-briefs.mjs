@@ -203,6 +203,16 @@ which arrives across the top 19% of your WEST edge. Below that, T c6-1's
 cliff face runs down the seam: continue it as a sea cliff with talus at its
 foot and, 20-40 m out, the stack the rune chain's last line cuts across —
 c6-1 is the chain's seaward end. Open sea east and south.`,
+  // owner 2026-09-05 17:20, on c7-8's candidate: "this kinda looks like an
+  // unnatural transition to the ocean" — the seam matched; the shore read as
+  // a wall dropping into deep water
+  "c7-8": `**The transition to the sea must read natural — hard.** No wall of columns
+dropping straight into deep water. The plateau steps DOWN to the sea: broken
+column tops at different heights, then collapsed drums and talus at the foot,
+then a shingle beach or a shallow shelf, then skerries and half-drowned rock
+just offshore, and only then open sea. The shoreline wanders in and out; a
+cove or two where the ground comes low. The previous candidate was a cliff
+wall on the sea; that is wrong.`,
   "c8-4": `**The corner north-east of T c6-0.** The shore cell c7-4 lies to your WEST
 and c8-5 to your SOUTH; T c6-0's north-east corner touches your south-west
 corner. Carry their shorelines round this corner as one line — a low rim of
