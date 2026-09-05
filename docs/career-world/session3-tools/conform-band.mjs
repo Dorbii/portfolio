@@ -4,12 +4,12 @@
 // inlets, becks — is cut open from the seam inward with conform-seam-water.mjs
 // (a narrow run becomes a 12 m gully, a sea run is cut to the candidate's own
 // water), so every crossing the continuity gate checks is met; (2) land
-// beyond a LIMIT is trimmed: beside each ground stretch of the neighbour's
-// edge the limit wanders between 24 and 40 m from the seam and rounds off to
-// nothing where the neighbour's ground turns to water (a headland, not a
-// wedge); away from every authored edge the limit is zero, so a plateau
-// carried across the cell to the world's edge (c6-8, 2026-09-05) ends at a
-// wandering shore instead. The art is untouched; cell.mjs --redo --force
+// beyond a LIMIT is trimmed: a coast the candidate drew within 46 m of the
+// seam is kept whole; land carried further — a plateau across the cell to
+// the world's edge (c6-8, 2026-09-05) — ends at a limit that wanders between
+// 24 and 40 m from the seam and rounds off to nothing where the neighbour's
+// ground turns to water (a headland, not a wedge); away from every authored
+// edge the limit is zero. The art is untouched; cell.mjs --redo --force
 // re-derives and re-gates. Same class of fix the owner approved for water on
 // 2026-09-04, applied to the whole shore.
 //
@@ -30,7 +30,7 @@ const WRITE = process.argv.includes("--write"), PREVIEW = arg("--preview");
 if (T !== "coast" || !ID) throw new Error("usage: conform-band.mjs coast <cell-id> [--preview out.jpg] [--write]");
 const CANVAS = 2560, BLEED = 256, KEPT = 2048, M = 97.6 / KEPT;                 // metres per canvas px
 const px = (m) => Math.round(m / M);
-const D_MIN = px(24), D_MAX = px(40), TAPER = px(10);
+const D_MIN = px(24), D_MAX = px(40), TAPER = px(10), SLACK = px(46);
 const ART = "art-source/career-world/l2-land", A = "public/career-world/layers/terrain/authority";
 const cellDir = `.codex-tmp/authoring/cells/${T}/${ID}`;
 const maskFile = `${cellDir}/${ID}-water-source.png`;
@@ -106,27 +106,54 @@ for (const [edge, dx, dy] of EDGES) {
   const edgeCanvas = edge === "left" || edge === "top" ? BLEED : BLEED + KEPT - 1, dir = edge === "left" || edge === "top" ? 1 : -1;
   const pt = (along, across) => (alongIsY ? [across, along] : [along, across]);
   const depth = new Array(KEPT).fill(0), wav = wander(KEPT);
-  // ground stretches between wet runs
-  const stretches = []; let s = null;
+  // ground stretches and wet runs along the edge; a wet run 15 m or wider is
+  // the sea (no land beside it at all), a narrower one an inlet or a beck,
+  // which the seam cut opens as a cove that ENDS — the land beyond it stays
+  const stretches = [], seaRuns = [], narrowRuns = []; let s = null, w0 = null;
   for (let i = 0; i <= KEPT; i += 1) {
-    const g = i < KEPT && !wet[i];
+    const g = i < KEPT && !wet[i], ww = i < KEPT && wet[i];
     if (g && s === null) s = i;
     if (!g && s !== null) { stretches.push([s, i - 1]); s = null; }
+    if (ww && w0 === null) w0 = i;
+    if (!ww && w0 !== null) { (i - w0 >= px(15) ? seaRuns : narrowRuns).push([w0, i - 1]); w0 = null; }
   }
+  const seaAt = (i) => seaRuns.some(([a, b]) => i >= a && i <= b);
+  // the candidate's own land extent inward from the seam, per position
+  const extent = (i) => {
+    let last = -1;
+    for (let k = 0; k < KEPT + BLEED; k += 1) {
+      const [cx, cy] = pt(BLEED + i, edgeCanvas + dir * k);
+      const mx = Math.round(cx * sc), my = Math.round(cy * sc);
+      if (mx < 0 || my < 0 || mx >= W || my >= H) break;
+      if (!isWet(mx, my)) last = k;
+    }
+    return last;
+  };
   for (const [a, b] of stretches) {
     // the rounding at a stretch end is a quarter-circle over the shorter of
-    // 10 m and a third of the stretch, and only where the neighbour's ground
-    // turns to water — at a cell corner the limit runs to the edge in full
+    // 10 m and a third of the stretch, only where the neighbour's ground
+    // turns to SEA — beside an inlet the land runs on past the cove, and at
+    // a cell corner the limit runs to the edge in full
     const taper = Math.min(TAPER, Math.round((b - a + 1) / 3));
+    const taperA = a > 0 && seaAt(a - 1), taperB = b < KEPT - 1 && seaAt(b + 1);
     for (let i = a; i <= b; i += 1) {
-      let d = D_MIN + (D_MAX - D_MIN) * Math.max(0, Math.min(1, wav[i]));
-      const fromA = a > 0 ? i - a : Infinity, fromB = b < KEPT - 1 ? b - i : Infinity;
-      const t = Math.min(fromA, fromB);
+      // the candidate's own coast is kept whole when it lies within 46 m of
+      // the seam (a coast drawn at 40 m must not lose its cliff faces to the
+      // limit); only land carried further than that — a plateau across the
+      // cell — is trimmed at the wandering limit
+      const last = extent(i);
+      let d = last <= SLACK ? last + 1 : D_MIN + (D_MAX - D_MIN) * Math.max(0, Math.min(1, wav[i]));
+      const t = Math.min(taperA ? i - a : Infinity, taperB ? b - i : Infinity);
       if (taper > 0 && t < taper) { const u = (taper - t - 1) / taper; d *= Math.sqrt(Math.max(0, 1 - u * u)); }
-      depth[i] = Math.round(d);
+      depth[i] = Math.max(0, Math.round(d));
     }
   }
-  void pt; void isWet;
+  // over an inlet the limit runs on from one bank to the other (the cove ends
+  // and the coast continues); over the sea it is zero
+  for (const [a, b] of narrowRuns) {
+    const dA = a > 0 ? depth[a - 1] : (b < KEPT - 1 ? depth[b + 1] : 0), dB = b < KEPT - 1 ? depth[b + 1] : dA;
+    for (let i = a; i <= b; i += 1) depth[i] = Math.round(dA + (dB - dA) * (i - a) / Math.max(1, b - a));
+  }
   bands[edge] = { depth, stretches, wet, nb, edgeCanvas, dir, alongIsY };
   report.push(`  ${edge}: ${nb.t} ${nb.id} — ${stretches.length} ground stretch(es) ${stretches.map(([a, b]) => `${Math.round(a / KEPT * 100)}-${Math.round((b + 1) / KEPT * 100)}%`).join(", ") || "none"}; ${wet.filter(Boolean).length} px of its edge is water`);
 }
