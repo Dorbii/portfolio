@@ -134,7 +134,12 @@ for (const [edge, dx, dy] of EDGES) {
     // 10 m and a third of the stretch, only where the neighbour's ground
     // turns to SEA — beside an inlet the land runs on past the cove, and at
     // a cell corner the limit runs to the edge in full
-    const taperA = a > 0 && seaAt(a - 1), taperB = b < KEPT - 1 && seaAt(b + 1);
+    // an end faces the sea when the run beside it is the sea, or when the
+    // next ground along the edge is more than 15 m away (a cove and then
+    // open sea: the land beyond the cove is a headland too)
+    const nextGround = stretches.find(([p]) => p > b), prevGround = [...stretches].reverse().find(([, q]) => q < a);
+    const taperA = a > 0 && (seaAt(a - 1) || !prevGround || a - prevGround[1] > px(15));
+    const taperB = b < KEPT - 1 && (seaAt(b + 1) || !nextGround || nextGround[0] - b > px(15));
     // the limit before rounding: the candidate's own coast is kept whole when
     // it lies within 46 m of the seam (a coast drawn at 40 m must not lose
     // its cliff faces to the limit); only land carried further than that — a
