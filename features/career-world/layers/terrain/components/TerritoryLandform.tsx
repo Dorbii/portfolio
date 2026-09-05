@@ -729,13 +729,14 @@ export function TerritoryLandform({
         drawRegisteredTile(tile, image, tierOpacity * sourceOpacity);
       }
     };
-    const movingCapitalOpacity = cameraSettled
-      ? capitalOpacity
-      : Math.max(capitalOpacity, Math.min(1, siteOpacity));
-    drawStreamTier("capital", movingCapitalOpacity);
-    if (cameraSettled) {
-      drawStreamTier("site", siteOpacity);
-    }
+    // The site tier is drawn while the camera moves as well (owner
+    // 2026-09-04: "artificial blur when panning or zooming ... remove that").
+    // Suppressing it during motion and fading it back 180 ms after the camera
+    // settled read as a blur on every pan and zoom. Only tiles already decoded
+    // are drawn, as before, so a pan into unloaded ground still shows the
+    // capital tier until the site tiles arrive.
+    drawStreamTier("capital", capitalOpacity);
+    drawStreamTier("site", siteOpacity);
     canvas.dataset.streamResolutionTier = siteOpacity > 0.5
       ? "site"
       : "capital";
@@ -755,7 +756,7 @@ export function TerritoryLandform({
     );
     publishStreamMetrics();
 
-    for (const tile of cameraSettled ? visibleSiteTiles : []) {
+    for (const tile of visibleSiteTiles) {
       if (siteOpacity <= LOD_PRESENTATION_EPSILON) {
         continue;
       }
