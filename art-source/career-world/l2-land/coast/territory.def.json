@@ -120,6 +120,18 @@
     "id": "c0-1"
    },
    "shore": "west"
+  },
+  {
+   "at": [
+    1,
+    4
+   ],
+   "island": "E",
+   "extends": {
+    "territory": "ninjaone",
+    "id": "c0-3"
+   },
+   "shore": "west"
   }
  ],
  "shelves": [],
@@ -176,7 +188,8 @@
   "1,1": "coast-cliff",
   "1,2": "coast-cliff",
   "7,1": "coast-cliff",
-  "0,6": "coast-cliff"
+  "0,6": "coast-cliff",
+  "1,4": "coast-cliff"
  },
  "runeChain": null,
  "rules": {
