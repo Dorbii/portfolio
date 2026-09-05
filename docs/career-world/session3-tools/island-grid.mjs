@@ -52,8 +52,8 @@ for (const m of MARKS) {
   const t = terr.find((x) => x.tag === m.tag); if (!t) continue;
   const [c, r] = m.id.slice(1).split("-").map(Number);
   const x = (t.lattice.block[0] - X0 + c) * CELL, y = (t.lattice.block[1] - Y0 + r) * CELL;
-  svg.push(`<rect x="${x + 4}" y="${y + 4}" width="${CELL - 8}" height="${CELL - 8}" fill="rgba(255,60,40,0.10)" stroke="#ff3c28" stroke-width="7"/>`);
-  svg.push(`<rect x="${x + 10}" y="${y + CELL - 62}" width="${CELL - 20}" height="50" rx="4" fill="rgba(0,0,0,0.75)"/>`);
+  svg.push(`<rect x="${x + 4}" y="${y + 4}" width="${CELL - 8}" height="${CELL - 8}" fill="none" stroke="#ff3c28" stroke-width="6"/>`);
+  svg.push(`<rect x="${x + 10}" y="${y + CELL - 62}" width="${CELL - 20}" height="50" rx="4" fill="rgba(0,0,0,0.45)"/>`);
   svg.push(`<text x="${x + CELL / 2}" y="${y + CELL - 40}" fill="#ff6a5a" font-family="monospace" font-size="20" font-weight="bold" text-anchor="middle">${esc(`${m.tag} ${m.id}`)} · needs you</text>`);
   svg.push(`<text x="${x + CELL / 2}" y="${y + CELL - 18}" fill="#ffffff" font-family="monospace" font-size="16" text-anchor="middle">${esc(m.why)}</text>`);
 }
