@@ -1,0 +1,127 @@
+{
+  "cell": "c3-1",
+  "territory": "tanium",
+  "status": "refused_quarantine_only",
+  "generation": {
+    "filename": "c3-1-source.png",
+    "exactGenerationSizeProduced": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "AC81731B09E01F5C817FE6BEF508DA1415723B0E21874DAECCF1FE965D0E483F",
+    "mode": "single built-in ImageGen whole-canvas edit with edit-target.jpg first and the NinjaOne seed canon second as reference only",
+    "imageGenCallsUsed": 1,
+    "retryUsed": false,
+    "secondReferenceAccepted": true,
+    "bothImagesAttachedToSameCall": true,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "rawCopyHashIdentical": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "promptFile": "c3-1-imagegen-prompt-used-root.txt"
+  },
+  "generationSizePx": [1254, 1254],
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by the uniform-bin mean on the delivered source; final water-mask pixels and immediate neighbours excluded and gradients below 12 luminance units excluded",
+    "peakVsUniformOverLand": 1.505194,
+    "uniformReference": 1.0,
+    "directionalKeyFirstMoment": 0.000096,
+    "gradientSamples": 1181298,
+    "aggregateDirectionalityNumericPass": true,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No whole-cell cast-shadow field is visible, but pale terrace and column caps sit above materially darker vertical faces, violating the literal equal-value-on-all-sides rule. The aggregate statistic cannot override that visible form-lighting defect."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "manual full-frame screen-space estimate as fractions of non-water land at native source resolution",
+    "buildable": 0.70,
+    "steep": 0.12,
+    "otherVegetationTalusCarvingsOrBrokenMargin": 0.18,
+    "method": "The coherent central shelf, its broad terrace treads, and the clear east-west approaches count as buildable; exposed terrace faces count as steep; conifer stands, talus, rune carving, channels, and broken transition ground make up the remainder.",
+    "limitation": "This is a screen-space visual estimate with approximate uncertainty of plus or minus 0.08 per fraction, not an elevation-derived slope measurement."
+  },
+  "waterFootprintFraction": 0.02439466,
+  "finalDerivedLandCoverageFraction": 0.97560534,
+  "crown": {
+    "medianMetres": 2.45,
+    "medianPx": 51.037,
+    "sampleCount": 68,
+    "method": "Full-frame native-resolution census of all 68 discernible outer-foliage crown components, including saplings and clipped edge crowns; median source width 25 px scaled by 2560/1254 and converted at 0.048 m per final pixel.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c3-1-water-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "2C8603EB61976B8D94AE2D6150E23FAA73AA55B1FA17BF84AA2EAFA72716FAF9",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "opaqueWaterPixels": 38361,
+    "transparentNonWaterPixels": 1534155,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedComponents8": 3,
+    "accidentalInteriorHolePixels": 0,
+    "edgeWaterPixels": {
+      "north": 29,
+      "east": 0,
+      "south": 18,
+      "west": 34
+    },
+    "method": "Native-resolution bank-to-bank polygon trace of every visible blue or turquoise surface, ripple, reflection, pale wash, and short fall; the full overlay was inspected at native resolution and the rune-slot crossing remains intentionally dry."
+  },
+  "runeChain": {
+    "requiredWestEdgeFractionDown": 0.52,
+    "requiredEastEdgeFractionDown": 0.48,
+    "requiredWestCentreYSourcePx": 652.08,
+    "requiredEastCentreYSourcePx": 601.92,
+    "measuredWestCentreYSourcePxApprox": 590,
+    "measuredEastCentreYSourcePxApprox": 663,
+    "exactEdgeHandoffsPass": false,
+    "fullWidthContinuous": true,
+    "dryAtBeckCrossing": true,
+    "excavatedSlotRead": false,
+    "panelCount": 9,
+    "panelClusterPass": true,
+    "visualRead": "The line has a dark centre but regular stone lips read as a lined kerb or low wall more strongly than a two-metre-deep slot removed from bedrock."
+  },
+  "siteChecks": {
+    "broadCoherentCapitalShelfPresent": true,
+    "levelEastWestApproachesPresent": true,
+    "singleNorthEastPoolPresent": true,
+    "northSouthWaterContinuityPresent": true,
+    "noPaintedWaterOnRuneFloor": true,
+    "southBrightGoldGreenContinuationPresent": true,
+    "northOliveToGoldTransitionPresent": true,
+    "eastBarePlateauTransitionPresent": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "landContinuesAllEdges": true
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasEditCall": true,
+    "secondReferenceAccepted": true,
+    "rawGenerationUntouched": true,
+    "waterMaskSameDimensionsBinaryWhiteTransparent": true,
+    "waterMaskCoversCompletePaintedWater": true,
+    "waterMaskNoAccidentalInteriorHoles": true,
+    "crownObjectComplete": true,
+    "allMeasuredCrownsIncluded": true,
+    "crownMedianInsideAcceptedTerritoryBand": true,
+    "strictNeutralLighting": false,
+    "runeChainExactEdgeHandoffs": false,
+    "runeChainUnambiguouslyExcavatedSlot": false
+  },
+  "refusalReasons": [
+    "The rune chain misses both required full-canvas edge handoffs: it reaches the west edge near source y=590 instead of 652.08 and the east edge near y=663 instead of 601.92, with the slope opposite the required west-below/east-above relation.",
+    "The rune feature reads as a regular stone-lined kerb or low wall rather than bedrock removed into a two-metre-deep slot.",
+    "The strict lighting rule fails visually because terrace and column caps are materially lighter than vertical faces, even though aggregate image gradients are directionally balanced."
+  ],
+  "openRisks": [
+    "The 68-crown census includes every visually distinguishable foliage component and no exclusions, but dense touching stands make separation of individual overlapping crowns a manual judgment.",
+    "The truthful mask reaches the west source edge only where the edit target already contained a south-west neighbour-bleed stream; no new west-edge water was generated in the cell interior.",
+    "Exact water/stone boundary placement remains a human visual gate even though the binary overlay was inspected and contains no interior holes.",
+    "No shipped-canvas bake, runtime mount, or owner visual acceptance was attempted because the package is quarantine-only."
+  ],
+  "recommendedReframe": "Do not spend another call on this candidate. A future attempt needs a deterministic groove guide or authored base that can enforce the two exact edge handoffs, a truly excavated dry slot rather than regular stone lips, and literal flat-value rock faces."
+}

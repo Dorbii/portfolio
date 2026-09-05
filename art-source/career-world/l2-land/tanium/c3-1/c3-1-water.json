@@ -1,0 +1,22 @@
+[
+  {
+    "class": "stream",
+    "note": "North-edge feeder, pool inlet, and southbound beck; every visible channel surface is traced bank-to-bank, including pale wash, ripples, and reflections."
+  },
+  {
+    "class": "lake",
+    "note": "The single north-east shelf pool, including its full shallow painted edge zone."
+  },
+  {
+    "class": "fall",
+    "note": "The short exposed drop where the southbound beck descends the lower natural terrace."
+  },
+  {
+    "class": "submerged",
+    "note": "The beck passes beneath the rune slot through natural bedrock; the slot floor is dry and therefore the mask has an intentional surface-water gap at the crossing."
+  },
+  {
+    "class": "stream",
+    "note": "The separate south-west neighbour-bleed stream is preserved from the edit target and masked because every painted water surface in the raw source must be classified."
+  }
+]
