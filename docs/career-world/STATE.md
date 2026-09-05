@@ -4,7 +4,36 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-05 11:40 UTC, LATEST (current):** **THE BLUR WAS THE LOD POLICY;
+**2026-09-05 17:00 UTC, LATEST (current):** **THE LIVE SERVER IS THE REVIEW
+SURFACE; THE WORLD IS EQUALISED; THE OLD ART IS GONE; THE CHAIN WAITS ON
+ONE ACCEPT AND TWO APPROVALS.** The owner, on the live server: *"seeing it
+in full like this helps my eyes spot defects more and we gotta do something
+about it"*, *"for the chain now we say this cell is good and then do it in
+proper order"* (c3-1 → Tanium 18), *"lets fix all the patchy non-uniformed
+look"* → **exposure equalisation at serve time** (`tone-harmonise.mjs` solves
+one luma gain per cell across every seam; `world-register.mjs --tone` slices
+the served tiles through the smooth gain field; the pyramids untouched;
+strength 0.6, cap ±30% — his choice of "Both. Equalise now, then rebake only
+what still reads wrong": T c1-2 and c2-2 still read >15 off, and c1-2 is a
+dark forest), *"if the mount has stale land please update it as you are land
+authority"* → `mount-candidates.mjs` previews EVERY current candidate in the
+mount (18: Tanium c1-1, c2-1, c4-0 + 15 coast), previews taking their
+neighbours' gain; `serve.sh` is the sequence after any landing (tone →
+register --tone → candidates → build:land-mount → build:water → commit).
+*"can you make sure old art is all gone?"* → the pre-L2 capitals of Tanium,
+Independent, Column Technologies and ACE Hardware retired (structures +
+ground tiles + textures; the Kaizen site stays; the capital registry is
+empty until the city layer). **The chain in order:** c3-1 in; c4-1 rebaked
+against it (refused on vegetation colour 0.230 only); c2-1 against c3-1 —
+the dark-forest signature again (1.2 m crowns, tone 31.7); **c1-1's eighth,
+with every neighbour real, passes everything but the forest-edge tone (26.3
+vs c0-1)** — an accept. His six crops (*"these area needs to be fixed"*) →
+`fix-areas.sh` running: c4-1's rebake stitched on his crop, c6-2 forced
+against the new c6-1, coast c7-2, c7-3, c1-8, c6-8 baked, then serve. The
+rest of his crops are coast misses and the border: **18h and 18i wait on his
+word; c1-1's accept; the coast candidates' accepts.** Resume from `SESSION 11`.
+
+**2026-09-05 11:40 UTC, superseded:** **THE BLUR WAS THE LOD POLICY;
 THE PATCHES ARE THE PREVIEWS AND THE UNSERVED COAST.** The owner walked the
 live server (five screenshots: rough coast, chain not lined up, patchy
 colour, blur). Measured: the regenerated overview plates match the served

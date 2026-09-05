@@ -186,3 +186,15 @@ brief is committed; needs the lock.
 - Open owner calls: the accepts (c1-1, c1-4, c7-1, c0-6, c3-0, c2-8, c5-8,
   c8-5, c7-8), the shore rock-lighting limit, 18h, 18i, c3-1; row 8 stays
   planned unless he says otherwise.
+
+## 17:00 UTC (2026-09-05) — the live server is the review surface
+
+- Blur: fixed (LOD crossfades complete before the coarser tier passes 1:1).
+- Patchy: equalised at serve time (strength 0.6); residual >15: T c1-2 (dark
+  forest), T c2-2 → his eye on the server.
+- Old art: the four pre-L2 capitals and their ground tiles retired.
+- Chain: c3-1 in; c4-1's rebake in (his crop); c1-1's eighth passes all but
+  the forest-edge tone → his accept; c2-1 dark-forest signature → 18i-class
+  lever needed for that biome's canopy.
+- Coast: 4 in; 15 candidates previewed; c7-2, c7-3, c1-8, c6-8 baking; the
+  misses (c1-2, c1-3, c4-8, c7-0, c7-4, c8-7) wait on 18i; c4-0 on 18h.
