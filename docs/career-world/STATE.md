@@ -768,6 +768,33 @@ Not yet served: registration of the coast pyramid is a later step (the
 owner reviews on the mosaic; `island-grid.mjs --margin 1` draws the island
 with its sea margin).
 
+## THE OWNER'S ACCEPTANCE POLICY (owner 2026-09-05, 01:20)
+
+*"if any of these are close can you let me do a review on them I dont think
+we need to burn that many cycles for the changes, what you have is pretty
+great as is and these were more finishing touches"* and *"if they truely
+need another pass by all means but there have been several that I ruled good
+enough."*
+
+So: **one attempt per cell.** A refusal goes into his picture
+(`island-grid.mjs --mark`, refused candidates drawn in place) for an
+accept-on-eye or a targeted send-back; the automatic reviewer-plus-retry
+(`--review`) is for cells he sends back, not the default. Accepted cells
+with finishing-touch defects are asked, not rebaked (c4-1, c5-2 taken out of
+the forced list). **c4-2 was the first accept-on-eye:** stitched at 01:24
+past four gates (rock lighting 0.215, water fringe 1.17%, one crossing,
+veg dBG 0.362) with his words in the manifest (`ownerOverride`, lock 18g).
+Tanium 15 of 21. The 00:16 run was stopped after c1-2's second attempt
+(refused only on vegetation colour, 0.289; tone fell from 47.9 to 17.9)
+before c2-1 spent a cycle; c1-2, c2-1, c3-1, c6-2, c4-0 (refused
+candidates) and c4-1, c5-2 (accepted, finishing touches) went to his picture
+at 01:24 (`.codex-tmp/session4/island/tanium-review-7.jpg`).
+
+The chain running now (`.codex-tmp/session4/after-run.sh`, one attempt
+each): the four mask re-derives (c0-1, c2-2, c3-2, c5-1), c6-1 forced (the
+chain's seaward end), the eleven coast cells, c1-1. Its log for the coast is
+`.codex-tmp/bake-coast.log`.
+
 ## THE OWNER'S STAGE ORDER (owner 2026-09-04, in his words)
 
 *"after we get this tanium territory landed I think we should put any
