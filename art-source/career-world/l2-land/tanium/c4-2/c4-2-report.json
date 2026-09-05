@@ -1,0 +1,120 @@
+{
+  "cell": "c4-2",
+  "territory": "tanium",
+  "status": "quarantine-gate-failed",
+  "generationSize": [
+    1254,
+    1254
+  ],
+  "generation": {
+    "mode": "edit",
+    "tool": "built-in image_gen",
+    "callCount": 1,
+    "referenceImageCount": 2,
+    "secondImageAccepted": true,
+    "preferred2048Achieved": false,
+    "minimum1254Achieved": true,
+    "sourceUnresized": true,
+    "sourceUncropped": true,
+    "sourceUntouched": true,
+    "originalFile": "C:/Users/Steve/.codex/generated_images/01a06efa-5b7b-7ce2-8f97-eca18237006b/exec-3e1bfe52-f498-4692-ace6-bf7e2c662cb5.png",
+    "sha256": "E2D2864FC36DDA230896C0395238584623F01A28B2EE78BAA1A515EAD09F24BB",
+    "byteIdenticalToToolOutput": true,
+    "promptFile": "c4-2-prompt-used-second.txt"
+  },
+  "lightingIsotropy": {
+    "peakVsUniform": 1.548003,
+    "firstMoment": 0.000726,
+    "landGradientSampleCount": 1168191,
+    "method": "Magnitude-weighted 36-bin signed luminance-gradient orientation histogram using central differences at gradient magnitude 12 or greater, excluding classified water and immediate water neighbours.",
+    "interpretation": "This is a texture and edge-direction proxy, not calibrated illumination ground truth. The low signed first moment does not cancel the visible cap-versus-face value split.",
+    "visualGate": "failed: pale rock caps and upper rims remain brighter than darker column faces, so the required equal cap and face value is not demonstrated."
+  },
+  "buildableFraction": 0.43,
+  "steepFraction": 0.24,
+  "otherLandFraction": 0.33,
+  "terrainFractionDenominator": "land excluding classified water",
+  "terrainFractionMethod": "Manual source-image area estimate: broad level grass shelves and the hollow floor are buildable; column faces and steep talus are steep; rough, wooded, or uncertain land is other. Approximate uncertainty is plus or minus 0.08 per fraction.",
+  "waterFootprintFraction": 0.11782456,
+  "water": {
+    "maskFile": "c4-2-water-source.png",
+    "classificationFile": "c4-2-water.json",
+    "method": "Source-resolution manual trace of the complete coastal surf and wash boundary plus every visible stream, spring, fall, splash, and ripple run; binary polygons and rounded channel traces were inspected over the raw source.",
+    "maskSha256": "B0FEEF0ADA0A97C21804D4742422A3395EB64FE48E9904CE6C6A05C1E88FCA33",
+    "opaqueWhitePixels": 185281,
+    "transparentPixels": 1387235,
+    "invalidPixels": 0,
+    "interiorHoles": 0,
+    "interiorHolePixels": 0,
+    "overlayFile": "c4-2-water-review-second.png"
+  },
+  "crown": {
+    "medianMetres": 2.352,
+    "medianPx": 48.995,
+    "sampleCount": 72,
+    "method": "Full-frame hue/value component census expanded to visible foliage envelopes, then source-image review removed fern and grass false positives; every identified conifer including saplings and clipped edge crowns remains in the median.",
+    "excludedElements": []
+  },
+  "crownEvidence": {
+    "censusFile": "c4-2-crown-census-second.csv",
+    "overlayFile": "c4-2-crown-review-second.jpg",
+    "medianSourcePx": 24,
+    "scaleWithinBand": true,
+    "limitations": "Dense overlapping stands are not segmentation ground truth; connected visible envelopes can merge close crowns. No element was removed because of size."
+  },
+  "eastWaterHandover": {
+    "targetSourceY": 777.48,
+    "toleranceSourcePx": 23.51,
+    "minimumRunSourcePx": 14.7,
+    "nearestClassifiedRun": {
+      "startSourcePx": 685,
+      "endSourcePx": 703,
+      "lengthSourcePx": 19,
+      "centerSourcePx": 694,
+      "centerOffsetFinalPx": 170.46,
+      "lengthFinalPx": 38.79
+    },
+    "gate": "failed: the nearest classified east-edge stream run is wide enough but its center is about 170 final pixels from the required center, outside the 48-pixel tolerance."
+  },
+  "site": {
+    "name": "fern-hollow",
+    "observation": "A sheltered mossy spring hollow with dense ferns and a continuous outlet beck is visible on the middle bench.",
+    "scaleGate": "failed: the visible sheltered envelope is roughly 23 to 25 metres across and the mossy spring floor is roughly 15 metres across, not the requested 30-metre hollow."
+  },
+  "reviewFindings": [
+    {
+      "severity": "blocker",
+      "finding": "The required eastern water handover is not centered at the registered lower-edge position; the measured nearest classified crossing is outside tolerance."
+    },
+    {
+      "severity": "blocker",
+      "finding": "Rock caps and upper rims remain visibly lighter than column faces, contradicting the binding equal-value flat-lighting requirement."
+    },
+    {
+      "severity": "material",
+      "finding": "Fern-Hollow is visibly smaller than 30 metres across even when measured to its sheltering walls."
+    },
+    {
+      "severity": "material",
+      "finding": "The first ten metres inside much of the eastern seam remain olive and stony rather than a continuous cooler blue-green moor strip."
+    },
+    {
+      "severity": "material",
+      "finding": "Several central scarps still read as fairly regular upright column palisades rather than consistently weathered irregular walls."
+    }
+  ],
+  "positiveObservations": [
+    "The source is one square whole-canvas edit with no remaining grey block or interior texture ring.",
+    "The southern coast includes open sea, a shingle cove, surf, low cliffs, and two distinct interior becks that continue through visible falls to the sea.",
+    "Terrain reaches the north, east, and west edges and no structures, roads, paths, rails, figures, or markers are present.",
+    "The measured conifer crown median is inside the required 1.7-to-5.2-metre band."
+  ],
+  "inspection": {
+    "sourceInspected": true,
+    "waterOverlayInspected": true,
+    "crownOverlayInspected": true,
+    "visualAcceptance": "not claimed; owner review required",
+    "writesConfinedToCellFolder": true,
+    "publicAndArtSourceModified": false
+  }
+}
