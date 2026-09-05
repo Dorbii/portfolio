@@ -877,6 +877,101 @@
      2
     ]
    }
+  },
+  "c8-6": {
+   "authoredAt": "2026-09-05T20:44:32.239Z",
+   "describe": "THE EAST SHORE beside Tanium's c6-1 (Wild coast).\n\nThe island lies to the WEST. Along your WEST edge its art arrives as real\npaint — its ground (bare basalt benches and talus above sea-cliffs, thin grass, shingle coves; no meadow) in some\nstretches and its SEA in others; the edge map below says which is which.\n**Where its ground arrives, continue it exactly as it arrives** for 15-40 m\ninto this ce",
+   "sourcePx": 1254,
+   "gates": [
+    {
+     "name": "key-light asymmetry",
+     "value": 0.002,
+     "pass": true,
+     "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004; report-only under 5% land (18j, 2026-09-05: a 98%-sea shore cell read 0.0116 on noise)"
+    },
+    {
+     "name": "gradient ratio",
+     "value": "1.336 (reported)",
+     "pass": true,
+     "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
+    },
+    {
+     "name": "rock lighting",
+     "value": 0.121,
+     "pass": true,
+     "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.14; limit 0.16 on the owner's eye (2026-09-02, the dark-forest gorge at 0.153)"
+    },
+    {
+     "name": "land coverage",
+     "value": "20.8%",
+     "pass": true
+    },
+    {
+     "name": "water cut clear",
+     "value": "0 px",
+     "pass": true,
+     "note": "paint surviving where the mask is fully water; exact zero by construction for pipeline-derived cells"
+    },
+    {
+     "name": "mask completion",
+     "value": "+198 px grown, 3527 px holes filled (reported)",
+     "pass": true,
+     "note": "the delivered mask grown into contiguous painted water within 48 px and speckle holes <=64 px filled before the cut (owner 2026-09-02); dry paint stops the growth, so a polyline mask still fails the rings"
+    },
+    {
+     "name": "water fringe",
+     "value": "0%",
+     "pass": true,
+     "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
+    },
+    {
+     "name": "water fringe (48px)",
+     "value": "0%",
+     "pass": true,
+     "note": "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)"
+    },
+    {
+     "name": "water continuity",
+     "value": "ok (4 crossings checked)",
+     "pass": true,
+     "note": "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint"
+    },
+    {
+     "name": "palette conformance",
+     "value": "veg worst dBG 0.135 dLuma 0.9 over 1 seam(s); tone worst dLuma 10.2 on all land over 2 seam(s)",
+     "pass": true,
+     "note": "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13"
+    },
+    {
+     "name": "crown scale",
+     "value": "4.606 m over 3 crowns (accepted range 1.7-5.2 m)",
+     "pass": true,
+     "note": "the worker's own median crown from c8-6-report.json, against the 1.7-5.2 m range the accepted cells measured (NOT the plan's written 4-7 m — see CROWN_MIN_M); crown.excludedElements must be empty, so an out-of-scale element cannot be measured around"
+    }
+   ],
+   "shelf": null,
+   "features": [],
+   "waterZones": [
+    "coast"
+   ],
+   "maskCompletion": {
+    "grownPx": 198,
+    "holePx": 3527
+   },
+   "biome": "shore",
+   "source": "art-source/career-world/l2-land/coast/c8-6",
+   "stitch": {
+    "order": 9,
+    "tiles": [
+     90,
+     30,
+     12,
+     6,
+     4,
+     2,
+     2
+    ]
+   }
   }
  }
 }

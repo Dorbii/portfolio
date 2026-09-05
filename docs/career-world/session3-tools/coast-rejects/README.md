@@ -29,3 +29,4 @@
 - `c1-8` shore — rejected on **key-light asymmetry 0.0116**
 - `c6-8` shore — rejected on **rock lighting 0.259**
 - `c7-0` shore — rejected on **water continuity 5**
+- `c7-4` shore — rejected on **water continuity 7**
