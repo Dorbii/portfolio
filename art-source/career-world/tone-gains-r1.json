@@ -2,7 +2,7 @@
  "strength": 0.6,
  "cap": 0.3,
  "lambda": 0.35,
- "meanLuma": 91.1,
+ "meanLuma": 90.9,
  "cells": [
   {
    "territory": "ninjaone",
@@ -22,7 +22,7 @@
     4
    ],
    "luma": 123.7,
-   "gain": 0.8446
+   "gain": 0.8442
   },
   {
    "territory": "tanium",
@@ -32,7 +32,7 @@
     7
    ],
    "luma": 128.7,
-   "gain": 0.8455
+   "gain": 0.8448
   },
   {
    "territory": "tanium",
@@ -42,7 +42,7 @@
     7
    ],
    "luma": 71.5,
-   "gain": 1.153
+   "gain": 1.1525
   },
   {
    "territory": "tanium",
@@ -52,7 +52,7 @@
     7
    ],
    "luma": 119,
-   "gain": 0.8748
+   "gain": 0.8745
   },
   {
    "territory": "ninjaone",
@@ -62,17 +62,7 @@
     3
    ],
    "luma": 68.2,
-   "gain": 1.1251
-  },
-  {
-   "territory": "tanium",
-   "id": "c4-1",
-   "world": [
-    6,
-    6
-   ],
-   "luma": 116.6,
-   "gain": 0.8898
+   "gain": 1.1249
   },
   {
    "territory": "ninjaone",
@@ -82,27 +72,7 @@
     3
    ],
    "luma": 107.1,
-   "gain": 0.8958
-  },
-  {
-   "territory": "ninjaone",
-   "id": "c3-1",
-   "world": [
-    6,
-    2
-   ],
-   "luma": 69.9,
-   "gain": 1.0999
-  },
-  {
-   "territory": "ninjaone",
-   "id": "c3-0",
-   "world": [
-    6,
-    1
-   ],
-   "luma": 100.5,
-   "gain": 0.9006
+   "gain": 0.8956
   },
   {
    "territory": "tanium",
@@ -112,7 +82,27 @@
     7
    ],
    "luma": 114.6,
-   "gain": 0.9007
+   "gain": 0.8996
+  },
+  {
+   "territory": "ninjaone",
+   "id": "c3-1",
+   "world": [
+    6,
+    2
+   ],
+   "luma": 69.9,
+   "gain": 1.0998
+  },
+  {
+   "territory": "ninjaone",
+   "id": "c3-0",
+   "world": [
+    6,
+    1
+   ],
+   "luma": 100.5,
+   "gain": 0.9005
   },
   {
    "territory": "coast",
@@ -122,7 +112,17 @@
     0
    ],
    "luma": 100.5,
-   "gain": 0.9081
+   "gain": 0.908
+  },
+  {
+   "territory": "tanium",
+   "id": "c4-1",
+   "world": [
+    6,
+    6
+   ],
+   "luma": 110.8,
+   "gain": 0.9125
   },
   {
    "territory": "ninjaone",
@@ -132,7 +132,7 @@
     1
    ],
    "luma": 100,
-   "gain": 0.9229
+   "gain": 0.9228
   },
   {
    "territory": "ninjaone",
@@ -142,7 +142,7 @@
     3
    ],
    "luma": 71.7,
-   "gain": 1.0759
+   "gain": 1.0758
   },
   {
    "territory": "ninjaone",
@@ -152,7 +152,7 @@
     2
    ],
    "luma": 70.9,
-   "gain": 1.0724
+   "gain": 1.0723
   },
   {
    "territory": "tanium",
@@ -161,8 +161,8 @@
     6,
     7
    ],
-   "luma": 83.9,
-   "gain": 1.0708
+   "luma": 83.7,
+   "gain": 1.0699
   },
   {
    "territory": "ninjaone",
@@ -182,7 +182,7 @@
     5
    ],
    "luma": 77.9,
-   "gain": 1.0657
+   "gain": 1.0649
   },
   {
    "territory": "ninjaone",
@@ -192,17 +192,7 @@
     4
    ],
    "luma": 96.2,
-   "gain": 0.9355
-  },
-  {
-   "territory": "ninjaone",
-   "id": "c4-1",
-   "world": [
-    7,
-    2
-   ],
-   "luma": 96.7,
-   "gain": 0.9381
+   "gain": 0.9354
   },
   {
    "territory": "tanium",
@@ -212,7 +202,17 @@
     6
    ],
    "luma": 103.9,
-   "gain": 0.9392
+   "gain": 0.9376
+  },
+  {
+   "territory": "ninjaone",
+   "id": "c4-1",
+   "world": [
+    7,
+    2
+   ],
+   "luma": 96.7,
+   "gain": 0.938
   },
   {
    "territory": "tanium",
@@ -222,7 +222,7 @@
     6
    ],
    "luma": 103.5,
-   "gain": 0.9424
+   "gain": 0.9421
   },
   {
    "territory": "ninjaone",
@@ -242,17 +242,7 @@
     4
    ],
    "luma": 95.6,
-   "gain": 0.947
-  },
-  {
-   "territory": "ninjaone",
-   "id": "c0-2",
-   "world": [
-    3,
-    3
-   ],
-   "luma": 89.8,
-   "gain": 0.9586
+   "gain": 0.9468
   },
   {
    "territory": "tanium",
@@ -262,7 +252,17 @@
     7
    ],
    "luma": 102,
-   "gain": 0.9592
+   "gain": 0.9583
+  },
+  {
+   "territory": "ninjaone",
+   "id": "c0-2",
+   "world": [
+    3,
+    3
+   ],
+   "luma": 89.8,
+   "gain": 0.9585
   },
   {
    "territory": "coast",
@@ -272,7 +272,7 @@
     0
    ],
    "luma": 93.1,
-   "gain": 0.9614
+   "gain": 0.9613
   },
   {
    "territory": "tanium",
@@ -282,7 +282,7 @@
     6
    ],
    "luma": 88.1,
-   "gain": 1.0379
+   "gain": 1.0368
   },
   {
    "territory": "coast",
@@ -302,7 +302,7 @@
     3
    ],
    "luma": 77.1,
-   "gain": 1.0329
+   "gain": 1.0328
   },
   {
    "territory": "ninjaone",
@@ -315,16 +315,6 @@
    "gain": 1.0275
   },
   {
-   "territory": "ninjaone",
-   "id": "c1-3",
-   "world": [
-    4,
-    4
-   ],
-   "luma": 80.3,
-   "gain": 1.0256
-  },
-  {
    "territory": "tanium",
    "id": "c6-0",
    "world": [
@@ -332,7 +322,17 @@
     5
    ],
    "luma": 98.2,
-   "gain": 0.9752
+   "gain": 0.9745
+  },
+  {
+   "territory": "ninjaone",
+   "id": "c1-3",
+   "world": [
+    4,
+    4
+   ],
+   "luma": 80.3,
+   "gain": 1.0254
   },
   {
    "territory": "tanium",
@@ -341,8 +341,8 @@
     7,
     6
    ],
-   "luma": 90.4,
-   "gain": 1.0234
+   "luma": 90.3,
+   "gain": 1.022
   },
   {
    "territory": "tanium",
@@ -352,7 +352,7 @@
     7
    ],
    "luma": 97.7,
-   "gain": 0.9808
+   "gain": 0.9795
   },
   {
    "territory": "tanium",
@@ -362,7 +362,7 @@
     5
    ],
    "luma": 83.3,
-   "gain": 1.0151
+   "gain": 1.0149
   },
   {
    "territory": "tanium",
@@ -372,7 +372,7 @@
     5
    ],
    "luma": 85,
-   "gain": 1.0133
+   "gain": 1.0132
   },
   {
    "territory": "tanium",
@@ -382,7 +382,7 @@
     5
    ],
    "luma": 94.5,
-   "gain": 0.9927
+   "gain": 0.9919
   },
   {
    "territory": "ninjaone",
@@ -392,7 +392,7 @@
     4
    ],
    "luma": 83.6,
-   "gain": 1.0072
+   "gain": 1.0069
   },
   {
    "territory": "coast",
@@ -412,7 +412,7 @@
     5
    ],
    "luma": 90.4,
-   "gain": 0.9992
+   "gain": 0.999
   },
   {
    "territory": "ninjaone",
@@ -422,7 +422,7 @@
     2
    ],
    "luma": 79.7,
-   "gain": 1.0006
+   "gain": 1.0005
   }
  ]
 }

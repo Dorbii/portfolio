@@ -1756,6 +1756,72 @@
       }
     },
     {
+      "id": "l2-review-coast-c7-2",
+      "minimumTier": "capital",
+      "status": "review-candidate",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c7-2-capital.webp",
+          "dimensions": [
+            1024,
+            1024
+          ],
+          "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c7-2-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
+        }
+      },
+      "worldBounds": {
+        "origin": [
+          0.5,
+          0.2222222222222222
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-review-coast-c7-3",
+      "minimumTier": "capital",
+      "status": "review-candidate",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c7-3-capital.webp",
+          "dimensions": [
+            1024,
+            1024
+          ],
+          "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c7-3-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
+        }
+      },
+      "worldBounds": {
+        "origin": [
+          0.5,
+          0.3333333333333333
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
       "id": "l2-review-coast-c7-4",
       "minimumTier": "capital",
       "status": "review-candidate",
@@ -1855,6 +1921,39 @@
       }
     },
     {
+      "id": "l2-review-coast-c1-8",
+      "minimumTier": "capital",
+      "status": "review-candidate",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c1-8-capital.webp",
+          "dimensions": [
+            1024,
+            1024
+          ],
+          "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c1-8-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
+        }
+      },
+      "worldBounds": {
+        "origin": [
+          0.125,
+          0.8888888888888888
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
       "id": "l2-review-coast-c2-8",
       "minimumTier": "capital",
       "status": "review-candidate",
@@ -1921,6 +2020,39 @@
       }
     },
     {
+      "id": "l2-review-coast-c6-8",
+      "minimumTier": "capital",
+      "status": "review-candidate",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c6-8-capital.webp",
+          "dimensions": [
+            1024,
+            1024
+          ],
+          "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c6-8-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
+        }
+      },
+      "worldBounds": {
+        "origin": [
+          0.4375,
+          0.8888888888888888
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
       "id": "l2-review-coast-c7-8",
       "minimumTier": "capital",
       "status": "review-candidate",
@@ -1955,22 +2087,22 @@
     }
   ],
   "baseReleaseHash": "45594197d854b4697adbd814a4b252f1ea34f624f3c95c1129626f94a74d2cb1",
-  "inputHash": "ee14abc60bb08eada62ad380fcec349df645f7d91b580d5e2a950f92a7e37d4d",
+  "inputHash": "6dbe5cf9b6cb8272184b5b0a68431d9de253d4c913c47937fea0451ec44754e8",
   "candidates": [
     {
       "id": "l2-review-tanium-c4-0",
       "sourceSha256": "5fa2e7fc6cbbf8565ff32b4f5f1bdacdb16971b3557bdb872bba65de49da104e",
-      "canonicalSha256": "718610430a86ef45c3987490d54b191b0224c0ddd31f5b0cda3a8ba6568fb0bd"
+      "canonicalSha256": "bac29172f3206c8b4f1f1612df6f333a463aa5d7269622d41d78ec2c79f34d8b"
     },
     {
       "id": "l2-review-tanium-c1-1",
       "sourceSha256": "89751b1109faea794eb362479733fe0a8035e039a887171b08c0de573058700d",
-      "canonicalSha256": "517a358a1a04d88ad895ba8d73503c22c62f6b054579991988e9da0f799d9c18"
+      "canonicalSha256": "f55a13e792e4975f597d232380f28f02ed8db2f33c6814cdec4576bef14eeaaf"
     },
     {
       "id": "l2-review-tanium-c2-1",
       "sourceSha256": "1f42cc77130638181720db17b6478a22429b6850e49fe41e860d281c2e9fcba4",
-      "canonicalSha256": "c1a0f80dd7a8e3da05748447f972e074ee05fd9da5a6416a5dfb47042b299b1b"
+      "canonicalSha256": "e7710d723d607a75a36ac31741cbd58bdf316af804f98ff66d39509441bc812c"
     },
     {
       "id": "l2-review-coast-c3-0",
@@ -1985,67 +2117,87 @@
     {
       "id": "l2-review-coast-c1-2",
       "sourceSha256": "c06fb7062adf46341ce7a2fcb1136671f51a4f58a956a59ddda3bf95a566656f",
-      "canonicalSha256": "7f9139a739199fbd3b475ff30e1e98218aac3ed054a5190583d6de490a47d3bf"
+      "canonicalSha256": "ac3184a5f8b4e7e15ddd1f40afd3bb9ed01e5caeb147d126c12797adfaf9b67c"
     },
     {
       "id": "l2-review-coast-c7-1",
       "sourceSha256": "31eeb09860f3db9a2a8053711fb870a0289b0971dfa5839d9249510476b4f1a3",
-      "canonicalSha256": "7ca470f130764a40436fc3f96682ef4c36cdeb3ded3620a114c24624f50bd2b7"
+      "canonicalSha256": "353d49246fae920c89d863851ce5d775992ac9790792ff4c3d38ef616a7d00ed"
     },
     {
       "id": "l2-review-coast-c0-6",
       "sourceSha256": "544baeb4f0f2c4bfa96da9335ee6f06058c3d7289cde85adb5b22e7c95bfaed9",
-      "canonicalSha256": "14f275d80f5ba53ca7bb0bd10af85729c57caf9120e6bc1fefecfa12731c60d7"
+      "canonicalSha256": "51f8d75a235c985be6bd3c9eb23e2f2566ff0ae0b369610ceabdfd6851e36ee8"
     },
     {
       "id": "l2-review-coast-c1-4",
       "sourceSha256": "8c74c383254c6471467cb35d9b32ad594f500fa5e8fb6cec6061200b6c3f7dd8",
-      "canonicalSha256": "e5c31888248d74cea56105682bf26fe5e1d353bf0b3a1b4e28582453425a838b"
+      "canonicalSha256": "183cec946bcf833bd83fab1231f07633107a42ad1be51e2e0e30dc1caf6c4323"
     },
     {
       "id": "l2-review-coast-c1-3",
       "sourceSha256": "9e7dc4b7d94c0ee8f57a7c45483d4f5a7faab306428b88503c5aebead1a37b47",
-      "canonicalSha256": "6841e252cf1b95f8f1b93d03b4e962565090053d6dae9bf8bba1dd5801b8a636"
+      "canonicalSha256": "5e50ed647516d3a14118c5b5b07c6afbd3a86e852314893944dca620dc8e9f05"
     },
     {
       "id": "l2-review-coast-c4-8",
       "sourceSha256": "0a297658110f23cd36516a31af97d2fea0ef1bcda00e17a5d7f23e246f15e9fa",
-      "canonicalSha256": "7dc82caf07afc388009fee9743fb0d22be24716c71c94b3c1f5d8fc8ec1dd253"
+      "canonicalSha256": "0fd1410e8e8e893b9e1981d1972c0be4dea02ae46579af0138112bd17207d562"
     },
     {
       "id": "l2-review-coast-c7-0",
       "sourceSha256": "53bb59d59e791edef0c6f47ebeb5254ea4ca8b4f4da6cd81ead3630ac59b407a",
-      "canonicalSha256": "379d424a3ae42efcda7ab35d40d1e354eba482a21cec35ea17aa01a69416c8bd"
+      "canonicalSha256": "f626ebae94edb8c2dd297b4a558b5880691cc985264d91c28f5bc13346ade3b9"
+    },
+    {
+      "id": "l2-review-coast-c7-2",
+      "sourceSha256": "531f0f904158802a79f42885c7ada9c1310556da68c4f2c8ef79a251ac276511",
+      "canonicalSha256": "04f16d7e3dde8665a553789177d0f23a4745331b4cf7335502a186293fb8bbb3"
+    },
+    {
+      "id": "l2-review-coast-c7-3",
+      "sourceSha256": "1d295fd3b9d0673bbfb273a6c488e63a6e721778453e74a8cae3fd562f27d865",
+      "canonicalSha256": "d3168a8c89fc4f6ea9570a4802de5a47286b9cd4542f6564fc220e91e053fb1f"
     },
     {
       "id": "l2-review-coast-c7-4",
       "sourceSha256": "b1b1e1ea50b773495ee8c8ba88914b2bd082f98437e80e83871b92ce3c29473f",
-      "canonicalSha256": "4b5da618f56833666bca31db365f62cbac73a016395d2172baf3ad2331494d35"
+      "canonicalSha256": "e2fe369b190664f4f87164fd50b7366d4ce8f5d93d1065d19f4e95acf8d7d24c"
     },
     {
       "id": "l2-review-coast-c8-5",
       "sourceSha256": "4da6ad8712869ff2611f5c6aa451d55e734f33a3df4e5c811366fc612d62f467",
-      "canonicalSha256": "56f861431699445e49647458fd70fa63dd838d188b65998b7869341ee612c7c8"
+      "canonicalSha256": "b699c2808e76502baff2b84ccef155b004b75648857828118321ca9f624497e2"
     },
     {
       "id": "l2-review-coast-c8-7",
       "sourceSha256": "30b4cb09a9855d51c653da6a71a7b04dca0abe0aa7c8915da605f5651f9fb21d",
-      "canonicalSha256": "f06d6358ec48c00c5b5ded667c699d17d43e67dd77e93fb828ca66254df38898"
+      "canonicalSha256": "1135eff3173058594c05624173018d29e643d9bd9c355849da081cf4ec8e644f"
+    },
+    {
+      "id": "l2-review-coast-c1-8",
+      "sourceSha256": "31a4db7ad14def3285f3b2bb1f1e5b4b0d8098acb06611aa4e8a5c45a893acc4",
+      "canonicalSha256": "f427577adfe4cf8cedf3ec16733a1fabff0d34c31659fe22864c2cbd0faf7cb2"
     },
     {
       "id": "l2-review-coast-c2-8",
       "sourceSha256": "d6986c7e2091c5b48eb5226a7fe130d3a3e0b60cbddee4b3cebd1895bce874b1",
-      "canonicalSha256": "f291ee79f67b8ee9d78bdc1b9614a8c874171aee3413c67aba3bac3e51b0d4ce"
+      "canonicalSha256": "63943ea569aefd1befc1cc9973ce316e8e104dfdb6dc4f5b0419015343542f17"
     },
     {
       "id": "l2-review-coast-c5-8",
       "sourceSha256": "abdca1eb13de835c4a5191c58c95df7e50042a402b1e8105edbe36e445741637",
-      "canonicalSha256": "2690201444a549855d658b766eda26b9ddfc3cbef6a8401c8cac35e40b333a4c"
+      "canonicalSha256": "befeb97aefe9f9dad758b4d0f34ca1cd658de0619c11942f5e5c37ff4aa1c0c6"
+    },
+    {
+      "id": "l2-review-coast-c6-8",
+      "sourceSha256": "d315df705e16e03825d2b9c0478a7a0b8b5628efa3d77d6f56547f219884423f",
+      "canonicalSha256": "6c33a934e433446eb9a4ca5561fcb283fdade1bd3dd5de67fc00a7dc60d4582c"
     },
     {
       "id": "l2-review-coast-c7-8",
       "sourceSha256": "e9774f3be0937568d2e13cbd0073ff6895155eb7dc1d454f2407e2931ca89658",
-      "canonicalSha256": "0d50d4fa8242aa1d2907cf81f47505b03b6d37f32b12d6ac6ae64536a5ff1a54"
+      "canonicalSha256": "c8f922df5dd03d76b20ff64db88c616d6be0b95088db749d29e304b5ea057626"
     }
   ]
 }
