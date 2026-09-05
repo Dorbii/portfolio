@@ -10,11 +10,20 @@ export type DetailTierId =
 const POLICY_CAMERA_MINIMUM_SPAN:
   typeof import("../camera.ts").CAMERA_MINIMUM_SPAN = 0.02;
 
+// Each crossfade completes BEFORE the coarser tier passes 1:1 on a ~2100 px
+// wide screen (owner 2026-09-05: "still see a blur"). Screen px per cell is
+// width / (16 * span); the world plate has 104 px per cell, the territory
+// plate 416, a capital tile 1024, a site tile 2048. The old fades ran where
+// the coarser tier was already magnified 1.7-2.6x (capital -> site at span
+// 0.075-0.05, the capital tile at 1:1 only at 0.13), so every cell-sized
+// view was a magnified capital tile with the site tier a few percent in.
+// Preloads sit one step further out so a cohort is decoded when its fade
+// starts. Tier ids (tierMaximumSpan) are unchanged: only presentation moves.
 export const DETAIL_POLICY = Object.freeze({
   cameraMinimumSpan: POLICY_CAMERA_MINIMUM_SPAN,
-  territoryAssetPreloadSpan: 0.45,
-  capitalAssetPreloadSpan: 0.2,
-  siteAssetPreloadSpan: 0.08,
+  territoryAssetPreloadSpan: 1,
+  capitalAssetPreloadSpan: 0.36,
+  siteAssetPreloadSpan: 0.17,
   closeAssetPreloadSpan: 0.05,
   tierMaximumSpan: Object.freeze({
     world: 1,
@@ -24,16 +33,16 @@ export const DETAIL_POLICY = Object.freeze({
     close: 0.0375,
   }),
   worldToTerritory: Object.freeze({
-    startSpan: 0.43,
-    endSpan: 0.32,
+    startSpan: 0.8,
+    endSpan: 0.55,
   }),
   territoryToCapital: Object.freeze({
-    startSpan: 0.19,
-    endSpan: 0.135,
+    startSpan: 0.3,
+    endSpan: 0.22,
   }),
   capitalToSite: Object.freeze({
-    startSpan: 0.075,
-    endSpan: 0.05,
+    startSpan: 0.135,
+    endSpan: 0.1,
   }),
   siteToClose: Object.freeze({
     startSpan: 0.045,
