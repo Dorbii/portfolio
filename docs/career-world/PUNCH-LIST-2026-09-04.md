@@ -97,6 +97,25 @@ brief is committed; needs the lock.
 - Policy (owner 01:20): one attempt per cell; refusals go to his picture;
   retries only for cells he sends back.
 
+## The owner on the seven-cell picture (01:40-01:50)
+
+- *"the chain between these doesnt line up"* (c2-1 / c3-1 candidates, and
+  c3-1 / c4-1 where c4-1's groove dives into the fall): **c4-1 rebakes**
+  (one attempt; brief pins the groove to the west edge); c2-1 regenerates
+  once against c3-1's real pixels after c3-1 is in the world. **c3-1's
+  acceptance is the one open call.**
+- *"the bottom row looks fine I think"*: **c1-2's second candidate and c6-2's
+  candidate accepted on his eye** (override queued in `after-chain.sh`).
+- c1-2: *"this is fine ... idk why its failed 2 times"* — the palette gate's
+  colour arm (0.289 against 0.20) read the forest's cool understory against
+  the coast's pale grass as a clash; the tone arm had passed.
+- c5-2: *"the water doesnt seem to line up with the banks"* — the cut is a
+  thread beside the painted bed; three mask classifiers (blue-leaning, pale,
+  bed-colour) all picked stones, so **c5-2 regenerates once** (brief 5,2:
+  the becks fill their beds).
+- Pictures are outline-only from now on (*"when they have a red mask I cant
+  judge color correctness"*).
+
 ## Order (as of 00:35)
 
 1. The run of 00:16 finishes (c4-2, c1-2, c2-1, c3-1, c6-2, c4-0), on
