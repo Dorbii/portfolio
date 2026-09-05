@@ -262,6 +262,111 @@
      1
     ]
    }
+  },
+  "c4-0": {
+   "authoredAt": "2026-09-05T06:03:23.582Z",
+   "ownerOverride": {
+    "at": "2026-09-05T06:03:23.583Z",
+    "reason": "owner 2026-09-05, on the picture of the four north-shore candidates in place: 'yeah its fine' (rock lighting on a cliff rim, the reading he accepted on c4-2)",
+    "failedGates": [
+     "rock lighting 0.188"
+    ]
+   },
+   "describe": "THE NORTH SHORE beside NinjaOne's c2-0 (Dark forest gorge).\n\nThe island lies to the SOUTH. Its ground — dense dark conifer stands on mossy ground, little open ground, flat haze in the gorge —\narrives across your SOUTH edge as real paint. **Continue it exactly as it\narrives** for 15-40 m into this cell, the distance varying along the edge so\nthe shoreline wanders, and end it at the shore: weathered",
+   "sourcePx": 1254,
+   "gates": [
+    {
+     "name": "key-light asymmetry",
+     "value": 0.0019,
+     "pass": true,
+     "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004"
+    },
+    {
+     "name": "gradient ratio",
+     "value": "1.483 (reported)",
+     "pass": true,
+     "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
+    },
+    {
+     "name": "rock lighting",
+     "value": 0.188,
+     "pass": false,
+     "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.14; limit 0.16 on the owner's eye (2026-09-02, the dark-forest gorge at 0.153)"
+    },
+    {
+     "name": "land coverage",
+     "value": "60.6%",
+     "pass": true
+    },
+    {
+     "name": "water cut clear",
+     "value": "0 px",
+     "pass": true,
+     "note": "paint surviving where the mask is fully water; exact zero by construction for pipeline-derived cells"
+    },
+    {
+     "name": "mask completion",
+     "value": "+0 px grown, 1361 px holes filled (reported)",
+     "pass": true,
+     "note": "the delivered mask grown into contiguous painted water within 48 px and speckle holes <=64 px filled before the cut (owner 2026-09-02); dry paint stops the growth, so a polyline mask still fails the rings"
+    },
+    {
+     "name": "water fringe",
+     "value": "0%",
+     "pass": true,
+     "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
+    },
+    {
+     "name": "water fringe (48px)",
+     "value": "0.01%",
+     "pass": true,
+     "note": "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)"
+    },
+    {
+     "name": "water continuity",
+     "value": "ok (2 crossings checked)",
+     "pass": true,
+     "note": "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint"
+    },
+    {
+     "name": "palette conformance",
+     "value": "veg worst dBG 0.045 dLuma 0.0 over 1 seam(s); tone worst dLuma 3.8 on all land over 1 seam(s)",
+     "pass": true,
+     "note": "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13"
+    },
+    {
+     "name": "crown scale",
+     "value": "2.5 m over 82 crowns (accepted range 1.7-5.2 m)",
+     "pass": true,
+     "note": "the worker's own median crown from c4-0-report.json, against the 1.7-5.2 m range the accepted cells measured (NOT the plan's written 4-7 m — see CROWN_MIN_M); crown.excludedElements must be empty, so an out-of-scale element cannot be measured around"
+    }
+   ],
+   "shelf": null,
+   "features": [],
+   "waterZones": [
+    "coast",
+    "stream",
+    "lake",
+    "fall"
+   ],
+   "maskCompletion": {
+    "grownPx": 0,
+    "holePx": 1361
+   },
+   "biome": "shore",
+   "source": "art-source/career-world/l2-land/coast/c4-0",
+   "stitch": {
+    "order": 3,
+    "tiles": [
+     90,
+     30,
+     12,
+     6,
+     2,
+     2,
+     1
+    ]
+   }
   }
  }
 }

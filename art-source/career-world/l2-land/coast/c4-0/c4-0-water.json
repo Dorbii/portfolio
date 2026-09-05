@@ -1,0 +1,18 @@
+[
+  {
+    "class": "coast",
+    "note": "Open north sea including all painted surf, foam, wash between shoreline rocks, ripple highlights, and reflections; offshore stacks and skerries remain terrain."
+  },
+  {
+    "class": "stream",
+    "note": "All source-visible stream water: the northern reach that meets the sea and the separate southern-edge outflow; the generated image leaves an unintended dry break between them."
+  },
+  {
+    "class": "lake",
+    "note": "Small source-visible southern tarn or widened stream pool, fully masked through its wet edge."
+  },
+  {
+    "class": "fall",
+    "note": "Short source-visible cascade and spray where the northern stream reach drops through the broken shore rim into the sea."
+  }
+]
