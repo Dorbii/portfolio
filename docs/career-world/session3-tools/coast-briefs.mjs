@@ -39,6 +39,42 @@ async function arrivals(x) {
   return runs.filter(([a, b]) => b - a + 1 >= 30).map(([a, b]) => ({ pct: Math.round((a + b) / 2 / KEPT * 100), m: Math.round((b - a) / KEPT * 97.6) }));
 }
 
+// The shared edge as the island's art delivers it, in order along the edge:
+// segments of GROUND and SEA (runs under 30 px merged into their neighbour).
+// Five shores tonight laid land along a whole edge that was mostly the
+// island's sea (c1-2, c1-3, c4-8, c7-0, c7-4): "its ground arrives across your
+// edge" read as "the edge is land", with the water listed after as streams to
+// meet. So the brief now says, stretch by stretch, what is sea and what is
+// ground — the sea stays open sea, the ground is continued.
+async function edgeMap(x) {
+  const f = `${root}/${x.extends.territory}/${x.extends.id}/${x.extends.id}-l2.png`;
+  if (!fs.existsSync(f)) return null;
+  const { data, info } = await sharp(f).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const W = info.width, bleed = Math.round((W - KEPT) / 2);
+  const edge = { S: "top", N: "bottom", E: "left", W: "right" }[x.island];
+  const along = edge === "top" || edge === "bottom";
+  const line = edge === "bottom" || edge === "right" ? bleed + KEPT : bleed;
+  const wet = new Array(KEPT);
+  for (let i = 0; i < KEPT; i += 1) {
+    let mn = 255;
+    for (let d = -8; d <= 8; d += 1) {
+      const [px, py] = along ? [bleed + i, line + d] : [line + d, bleed + i];
+      if (px < 0 || py < 0 || px >= W || py >= W) continue;
+      mn = Math.min(mn, data[(py * W + px) * 4 + 3]);
+    }
+    wet[i] = mn < 128;
+  }
+  const raw = []; let s = 0;
+  for (let i = 1; i <= KEPT; i += 1) if (i === KEPT || wet[i] !== wet[s]) { raw.push({ wet: wet[s], a: s, b: i - 1 }); s = i; }
+  const segs = [];
+  for (const r of raw) {
+    const last = segs[segs.length - 1];
+    if (last && (r.b - r.a + 1 < 30 || last.wet === r.wet)) { last.b = r.b; continue; }
+    segs.push({ ...r });
+  }
+  return segs.map((g) => ({ wet: g.wet, from: Math.round(g.a / KEPT * 100), to: Math.round((g.b + 1) / KEPT * 100), m: (g.b - g.a + 1) / KEPT * 97.6 }));
+}
+
 const PERSPECTIVE = {
   north: `**Perspective.** This is the island's NORTH shore, and the world is seen from
 the south-south-east, so this shore is seen from BEHIND: no cliff face shows.
@@ -158,25 +194,38 @@ for (const x of def.coastCells) {
   const sideName = { S: "SOUTH", N: "NORTH", E: "EAST", W: "WEST" }[x.island];
   const seaSides = ["NORTH", "SOUTH", "EAST", "WEST"].filter((s) => s !== sideName);
   const water = await arrivals(x);
-  const waterText = water.length
-    ? `\n\n**Water arriving across the ${sideName} edge**, measured off the island's art:\n${water.map((w) => `- at **${w.pct}% along that edge**, about ${w.m} m wide — meet it and let it reach the sea`).join("\n")}`
-    : "";
+  const map = await edgeMap(x);
+  const fromEnd = x.island === "N" || x.island === "S" ? "west" : "north";
+  const seaShare = map ? Math.round(map.filter((g) => g.wet).reduce((a, g) => a + g.to - g.from, 0)) : 0;
+  const mapText = map
+    ? `\n\n**Your ${sideName} edge, from its ${fromEnd} end, exactly as the island's art delivers it** (${seaShare}% of it is the island's sea):\n${map.map((g) => g.wet
+      ? (g.m >= 15
+        ? `- **${g.from}-${g.to}%: the island's SEA** — ${g.m.toFixed(0)} m of open water at the seam. It stays OPEN SEA in this cell: no rock, no beach, no stack across it.`
+        : `- **${g.from}-${g.to}%: a watercourse** about ${g.m.toFixed(0)} m wide — meet it at the seam and let it reach the sea.`)
+      : `- **${g.from}-${g.to}%: the island's GROUND** — continue it exactly as it arrives for 15-40 m and end it at the shore.`).join("\n")}`
+    : (water.length
+      ? `\n\n**Water arriving across the ${sideName} edge**, measured off the island's art:\n${water.map((w) => `- at **${w.pct}% along that edge**, about ${w.m} m wide — meet it and let it reach the sea`).join("\n")}`
+      : "");
   const owner = x.extends.territory === "ninjaone" ? "NinjaOne's" : x.extends.territory === "tanium" ? "Tanium's" : "the coast's own";
   const brief = `THE ${x.shore.toUpperCase()} SHORE beside ${owner} ${x.extends.id} (${islandBiome}).
 
-The island lies to the ${sideName}. Its ground — ${canon[islandBiomeId]?.ground || islandBiomeId} —
-arrives across your ${sideName} edge as real paint. **Continue it exactly as it
-arrives** for 15-40 m into this cell, the distance varying along the edge so
-the shoreline wanders, and end it at the shore: weathered columnar basalt,
-columns of uneven height, tops broken at different levels, collapsed drums in
-talus at the foot, a shingle cove or two where the ground comes down low. Beyond
-the shore, the rest of this cell is OPEN SEA: surf and wash at the rock, one or
-two small stacks or skerries close in, nothing else.
+The island lies to the ${sideName}. Along your ${sideName} edge its art arrives as real
+paint — its ground (${canon[islandBiomeId]?.ground || islandBiomeId}) in some
+stretches and its SEA in others; the edge map below says which is which.
+**Where its ground arrives, continue it exactly as it arrives** for 15-40 m
+into this cell, the distance varying along the edge so the shoreline wanders,
+and end it at the shore: weathered columnar basalt, columns of uneven height,
+tops broken at different levels, collapsed drums in talus at the foot, a
+shingle cove or two where the ground comes down low. **Where its sea arrives,
+the sea continues**: open water at the seam and on into this cell, with no
+land across it. Beyond the shore, the rest of this cell is OPEN SEA: surf and
+wash at the rock, one or two small stacks or skerries close in, nothing else.
+Do not put land along the whole ${sideName} edge; only where the map says ground.
 
 ${PERSPECTIVE[x.shore]}
 
 No meadow, no flowers, no structures. Dark conifers only where they arrive
-from the island. Carry land only across the ${sideName} edge; the ${seaSides.join(", ")} edges are sea.${waterText}`;
+from the island. Carry land only across the ${sideName} edge; the ${seaSides.join(", ")} edges are sea.${mapText}`;
   fs.writeFileSync(`${root}/coast/briefs/${id}.md`, brief + (NOTES[id] ? `\n\n${NOTES[id]}` : "") + LIGHTING + "\n");
   n += 1;
   console.log(`  ${id}: ${x.shore} shore beside ${x.extends.territory} ${x.extends.id} (${islandBiomeId}), ${water.length} water arrival(s)`);
