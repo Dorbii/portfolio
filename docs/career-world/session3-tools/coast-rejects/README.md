@@ -2,3 +2,9 @@
 - `c3-0` coast-cliff — rejected on **rock lighting 0.209**
 - `c4-0` coast-cliff — rejected on **rock lighting 0.188**
 - `c5-0` coast-cliff — rejected on **rock lighting 0.183**
+- `c1-1` coast-cliff — rejected on **rock lighting 0.247**
+- `c1-2` coast-cliff — rejected on **rock lighting 0.185**
+- `c1-4` coast-cliff — rejected on **rock lighting 0.255**
+- `c7-1` coast-cliff — rejected on **key-light asymmetry 0.0118**
+- `c0-6` coast-cliff — rejected on **rock lighting 0.293**
+- `c4-8` coast-cliff — rejected on **water continuity 5**
