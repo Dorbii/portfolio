@@ -72,7 +72,9 @@ const modelArg = listArg("--model")[0], effortArg = listArg("--effort")[0];
 if (modelArg) process.env.CELL_MODEL = modelArg;
 if (effortArg) process.env.CELL_EFFORT = effortArg;
 const REVIEW_MODEL = process.env.REVIEW_MODEL || "gpt-5.6-sol";
-const TERRITORY = "tanium";
+// --territory ID   which territory's cells to bake (default tanium); the coast
+//                  territory holds the island's shore cells (coast-plan.mjs)
+const TERRITORY = listArg("--territory")[0] || "tanium";
 const BRIEFS = `art-source/career-world/l2-land/${TERRITORY}/briefs`;
 const LOG = `.codex-tmp/bake-${TERRITORY}.log`;
 

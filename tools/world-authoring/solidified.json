@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-05T00:16:17.180Z",
+ "solidifiedAt": "2026-09-05T00:33:01.082Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "0ef73ed845f5d070",
+  "cell.mjs": "2db4c48cfa3593d2",
   "plan-territory.mjs": "e8d86a90b2e32796",
   "AGENTS.md": "a1ab4eaec1d4c6ac"
  },
@@ -453,6 +453,15 @@
    "reason": "owner approved 2026-09-04 (in chat: 'change the subagents you spawn back to 5.6 we just chewed through 40% usage with astra'): the default dispatch model returns to gpt-5.6-sol (CELL_MODEL still overrides); nothing else changes",
    "hashes": {
     "cell.mjs": "0ef73ed845f5d070",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-05T00:33:01.082Z",
+   "reason": "owner approved 2026-09-04 (in chat: 'for the coastal fixes you can generate those in the tiles next to the placed art' / 'not replacing those tiles just extending them into the neighbor to transition better'): cell.mjs looks authored neighbours up by world lattice position across every territory (FOREIGN map, srcFileFor), so a coast cell outside the island's blocks receives the island's real pixels in its edit target, its seams are cut against them, its gates are judged against them, and its packet calls them authored; nothing else changes",
+   "hashes": {
+    "cell.mjs": "2db4c48cfa3593d2",
     "plan-territory.mjs": "e8d86a90b2e32796",
     "AGENTS.md": "a1ab4eaec1d4c6ac"
    }

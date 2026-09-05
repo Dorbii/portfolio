@@ -57,7 +57,12 @@ const streamLike = (i) => {
   const bleedY = ((i / W) | 0) - Math.round((H - 2048) / 2);
   if (!inRegion(bleedX, bleedY)) return false;
   const r = a.data[i * 4], g = a.data[i * 4 + 1], bl = a.data[i * 4 + 2];
-  const [h, s] = hsv(r, g, bl);
+  const [h, s, v] = hsv(r, g, bl);
+  // GROW_CLASS=pale: a pale, unsaturated gravel bed painted beside a thread of
+  // cut water (c5-2, owner's markup 2026-09-04) — grey/tan, not blue. Bounded
+  // by GROW_REGIONS as always; the stony ground is the same colour, so the
+  // regions must hug the channel.
+  if (process.env.GROW_CLASS === "pale") return v >= 0.42 && s <= 0.34 && Math.abs(bl - r) < 40;
   if (bl - r > -25) return true;                             // the channel
   return h >= 150 && h <= 250 && s >= 0.15;                  // any frank blue
 };

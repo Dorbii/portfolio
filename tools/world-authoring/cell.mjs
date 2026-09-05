@@ -427,12 +427,22 @@ async function composeTile(seam, authored, contributors, sourceOf, tx, ty, kind)
   return out;
 }
 
+// Neighbours that belong to ANOTHER territory (lock change 18f, owner
+// 2026-09-04: coasts are authored in the sea cells beside the placed art,
+// extending it, never replacing it). Keyed by this territory's LOCAL cell id
+// (the position the foreign cell occupies on this grid); the value says where
+// its sources live. Populated once the cell's position is known.
+const FOREIGN = new Map();
+function srcFileFor(paths, cid, kind) {
+  const f = FOREIGN.get(cid);
+  return f ? path.join(f.dir, `${f.id}-${kind}.png`) : path.join(paths.sources, cid, `${cid}-${kind}.png`);
+}
 function makeSourceOf(paths) {
   const sources = new Map();
   return async (cid, kind) => {
     const key = `${cid}:${kind}`;
     if (!sources.has(key)) {
-      sources.set(key, await rawOf(path.join(paths.sources, cid, `${cid}-${kind}.png`)));
+      sources.set(key, await rawOf(srcFileFor(paths, cid, kind)));
     }
     return sources.get(key);
   };
@@ -533,7 +543,11 @@ async function contentSeams(seam, authored, sourceOf, win, gridW, gridH) {
 
 async function stitchAndPropagate(plan, seam, paths, ledger, id) {
   const gridW = plan.grid.cols * CELL_PX, gridH = plan.grid.rows * CELL_PX;
-  const authored = new Set([...Object.keys(ledger.cells), id]);
+  // foreign neighbours contribute to this pyramid's tiles in the overlap band
+  // exactly as authored neighbours do, so the seam between a coast cell and
+  // the island cell it extends is content-cut and feathered here; the island's
+  // own pyramid is untouched and its pixels win on its side of the cut
+  const authored = new Set([...Object.keys(ledger.cells), id, ...FOREIGN.keys()]);
   const [col, row] = parseCid(id);
   const win = windowOf(col, row, gridW, gridH);
   const dirty = dirtyTiles(win, gridW, gridH);
@@ -686,6 +700,41 @@ const authoredNeighbours = NEIGHBOURS
   .map(([dx, dy]) => [col + dx, row + dy])
   .filter(([c, r]) => ledger.cells[`c${c}-${r}`])
   .map(([c, r]) => ({ cell: [c, r], id: `c${c}-${r}` }));
+// ... and the same positions in every OTHER territory, by world lattice cell.
+// Each territory's block comes from its definition; a foreign cell is only
+// usable when its position falls inside THIS grid, because the window and the
+// seam network are this grid's.
+{
+  const defOf = (tid) => {
+    const f = `art-source/career-world/l2-land/${tid}/territory.def.json`;
+    return fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, "utf8")) : null;
+  };
+  const mine = defOf(plan.territory);
+  const block = mine?.lattice?.block;
+  if (block) {
+    const root = "art-source/career-world/l2-land";
+    for (const tid of fs.readdirSync(root)) {
+      if (tid === plan.territory) continue;
+      const d = defOf(tid), b = d?.lattice?.block;
+      const manFile = `public/career-world/layers/terrain/authority/manifests/terrain-l2-${tid}-r1.json`;
+      if (!b || !d?.grid || !fs.existsSync(manFile)) continue;
+      const cells = JSON.parse(fs.readFileSync(manFile, "utf8")).cells || {};
+      for (const [dx, dy] of NEIGHBOURS) {
+        const c = col + dx, r = row + dy;
+        if (c < 0 || r < 0 || c >= plan.grid.cols || r >= plan.grid.rows) continue;
+        const local = `c${c}-${r}`;
+        if (ledger.cells[local] || FOREIGN.has(local)) continue;
+        const wc = block[0] + c, wr = block[1] + r;              // world lattice cell
+        const fc = wc - b[0], fr = wr - b[1];                    // that cell in the foreign grid
+        if (fc < 0 || fr < 0 || fc >= d.grid.cols || fr >= d.grid.rows) continue;
+        const fid = `c${fc}-${fr}`;
+        if (!cells[fid]) continue;
+        FOREIGN.set(local, { territory: tid, id: fid, dir: `${root}/${tid}/${fid}` });
+        authoredNeighbours.push({ cell: [c, r], id: local, foreign: { territory: tid, id: fid } });
+      }
+    }
+  }
+}
 
 console.log(`\n  cell ${id}  (${plan.territory})`);
 console.log(`  ground        ${(CELL_PX / ART * M_PER_WORLDPX).toFixed(1)} m square at ${CM_PER_PX.toFixed(1)} cm/px`);
@@ -695,7 +744,7 @@ console.log(`  shelf         ${shelf ? `${shelf.id} — ${shelf.role}` : "none"}
 console.log(`  rail          ${loopHere ? "loop passes through" : "no loop"}`
   + `${features.length ? ` — ${features.map((f) => f.kind).join(", ")}` : ""}`);
 console.log(`  context       ${authoredNeighbours.length} authored neighbour(s)`
-  + `${authoredNeighbours.length ? `: ${authoredNeighbours.map((n) => n.id).join(", ")}` : " — this is a frontier cell"}`);
+  + `${authoredNeighbours.length ? `: ${authoredNeighbours.map((n) => n.foreign ? `${n.id} (=${n.foreign.territory} ${n.foreign.id})` : n.id).join(", ")}` : " — this is a frontier cell"}`);
 
 // ------------------------------------------------------------- packet -----
 const cellDir = path.join(WORK, id);
@@ -710,7 +759,7 @@ if (authoredNeighbours.length) {
   const ctxDir = path.join(cellDir, "context");
   fs.mkdirSync(ctxDir, { recursive: true });
   const W = win.x1 - win.x0, H = win.y1 - win.y0;
-  const authoredSet = new Set(Object.keys(ledger.cells));
+  const authoredSet = new Set([...Object.keys(ledger.cells), ...FOREIGN.keys()]);
   const ctxContrib = contributorsFor(authoredSet, win, gridW, gridH);
   const ctxSourceOf = makeSourceOf(paths);
   await contentSeams(seam, authoredSet, ctxSourceOf, win, gridW, gridH);
@@ -882,7 +931,7 @@ const transitionLines = [["north", col, row - 1], ["east", col + 1, row], ["sout
     }
     const nid = plan.cellBiomes?.[`${c},${r}`], nb = nid ? plan.biomes?.[nid] : null;
     const nName = nb ? nb.name : "unassigned";
-    const authored = !!ledger.cells[`c${c}-${r}`];
+    const authored = !!ledger.cells[`c${c}-${r}`] || FOREIGN.has(`c${c}-${r}`);   // a foreign neighbour is authored too (18f)
     if (!authored) return `- **${dir} (${c},${r}):** ${nName} — not yet authored: paint ${biome.name} to the edge.`;
     if (nid === biomeId) return `- **${dir} (${c},${r}):** ${nName} — authored, same biome: continue without change.`;
     return `- **${dir} (${c},${r}):** ${nName} — authored: its paint arrives as ${nName}; continue it at the edge and change to ${biome.name} across your ${dir} third.`;
@@ -1234,7 +1283,7 @@ exit 1
         const edge = nc > col ? "E" : nc < col ? "W" : nr > row ? "S" : "N";
         const f = frames[edge];
         // the neighbour's crossings on the shared line, in MY gen-u coords
-        const nRaw = await rawOf(path.join(paths.sources, nb.id, `${nb.id}-l2.png`));
+        const nRaw = await rawOf(srcFileFor(paths, nb.id, "l2"));
         const theirs = [];
         {
           let s = -1;
@@ -1583,7 +1632,7 @@ exit 1
       const [nc, nr] = nb.cell;
       if (Math.abs(nc - col) + Math.abs(nr - row) !== 1) continue;
       const nRaw = nSources.get(nb.id)
-        ?? (await rawOf(path.join(paths.sources, nb.id, `${nb.id}-l2.png`)));
+        ?? (await rawOf(srcFileFor(paths, nb.id, "l2")));
       nSources.set(nb.id, nRaw);
       const vertical = nr === row;   // shared edge is a vertical line when the neighbour is E/W
       const lineT = vertical
@@ -1684,7 +1733,7 @@ exit 1
       if (Math.abs(nc - col) + Math.abs(nr - row) !== 1) continue;
       const edge = nc > col ? "E" : nc < col ? "W" : nr > row ? "S" : "N";
       const opp = { E: "W", W: "E", N: "S", S: "N" }[edge];
-      const nRaw = await rawOf(path.join(paths.sources, nb.id, `${nb.id}-l2.png`));
+      const nRaw = await rawOf(srcFileFor(paths, nb.id, "l2"));
       const mine = vegBand(data, edge);
       const theirs = vegBand(nRaw.data, opp);
       const tMine = toneBand(data, edge), tTheirs = toneBand(nRaw.data, opp);

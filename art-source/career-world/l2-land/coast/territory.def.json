@@ -1,0 +1,185 @@
+{
+ "territory": "coast",
+ "note": "The sea cells beside the big island where its coasts are authored, extending NinjaOne's and Tanium's placed art into the water (owner 2026-09-04). Sparse: only the coast cells are planned; the island's cells are mirrored here from their own definitions so transitions read the right biome, and are never baked under this territory.",
+ "grid": {
+  "cols": 9,
+  "rows": 9
+ },
+ "lattice": {
+  "block": [
+   1,
+   0
+  ],
+  "note": "9 x 9 on the 16 x 9 world lattice: the island (NinjaOne 5x4 at [3,1], Tanium 7x3 at [2,5]) plus a one-cell margin. Row 8 stays sea (owner 2026-09-03)."
+ },
+ "coastCells": [
+  {
+   "at": [
+    2,
+    0
+   ],
+   "island": "S",
+   "extends": {
+    "territory": "ninjaone",
+    "id": "c0-0"
+   },
+   "shore": "north"
+  },
+  {
+   "at": [
+    3,
+    0
+   ],
+   "island": "S",
+   "extends": {
+    "territory": "ninjaone",
+    "id": "c1-0"
+   },
+   "shore": "north"
+  },
+  {
+   "at": [
+    4,
+    0
+   ],
+   "island": "S",
+   "extends": {
+    "territory": "ninjaone",
+    "id": "c2-0"
+   },
+   "shore": "north"
+  },
+  {
+   "at": [
+    5,
+    0
+   ],
+   "island": "S",
+   "extends": {
+    "territory": "ninjaone",
+    "id": "c3-0"
+   },
+   "shore": "north"
+  },
+  {
+   "at": [
+    6,
+    0
+   ],
+   "island": "S",
+   "extends": {
+    "territory": "ninjaone",
+    "id": "c4-0"
+   },
+   "shore": "north"
+  },
+  {
+   "at": [
+    1,
+    1
+   ],
+   "island": "E",
+   "extends": {
+    "territory": "ninjaone",
+    "id": "c0-0"
+   },
+   "shore": "west"
+  },
+  {
+   "at": [
+    1,
+    2
+   ],
+   "island": "E",
+   "extends": {
+    "territory": "ninjaone",
+    "id": "c0-1"
+   },
+   "shore": "west"
+  },
+  {
+   "at": [
+    7,
+    1
+   ],
+   "island": "W",
+   "extends": {
+    "territory": "ninjaone",
+    "id": "c4-0"
+   },
+   "shore": "east"
+  },
+  {
+   "at": [
+    0,
+    6
+   ],
+   "island": "E",
+   "extends": {
+    "territory": "tanium",
+    "id": "c0-1"
+   },
+   "shore": "west"
+  }
+ ],
+ "shelves": [],
+ "loop": [],
+ "railFeatures": [],
+ "sites": [],
+ "cellBiomes": {
+  "2,1": "moor",
+  "3,1": "bare-plateau",
+  "4,1": "dark-forest",
+  "5,1": "bare-plateau",
+  "6,1": "lush-shelf",
+  "2,2": "lush-shelf",
+  "3,2": "purple-field",
+  "4,2": "lush-shelf",
+  "5,2": "magical-gorge",
+  "6,2": "coast-cliff",
+  "2,3": "sound-coast",
+  "3,3": "moor",
+  "4,3": "mixed-bench",
+  "5,3": "dark-forest",
+  "6,3": "coast-cliff",
+  "2,4": "sound-coast",
+  "3,4": "lush-shelf",
+  "4,4": "moor",
+  "5,4": "moor",
+  "6,4": "quarry",
+  "1,5": "coast-cliff",
+  "2,5": "sound-coast",
+  "3,5": "sound-coast",
+  "4,5": "mixed-bench",
+  "5,5": "moor",
+  "6,5": "coast-cliff",
+  "7,5": "coast-cliff",
+  "1,6": "lush-shelf",
+  "2,6": "dark-forest",
+  "3,6": "dark-forest",
+  "4,6": "lush-shelf",
+  "5,6": "bare-plateau",
+  "6,6": "lush-shelf",
+  "7,6": "coast-cliff",
+  "1,7": "sound-coast",
+  "2,7": "dark-forest",
+  "3,7": "lush-shelf",
+  "4,7": "mixed-bench",
+  "5,7": "mixed-bench",
+  "6,7": "moor",
+  "7,7": "quarry",
+  "2,0": "coast-cliff",
+  "3,0": "coast-cliff",
+  "4,0": "coast-cliff",
+  "5,0": "coast-cliff",
+  "6,0": "coast-cliff",
+  "1,1": "coast-cliff",
+  "1,2": "coast-cliff",
+  "7,1": "coast-cliff",
+  "0,6": "coast-cliff"
+ },
+ "runeChain": null,
+ "rules": {
+  "outerEdge": "OWNER RULING 2026-09-04: coasts are authored HERE, in the sea cell beside the island's placed art, never by replacing that art. The island's ground arrives across the shared edge as real pixels and is continued for 15-40 m, then ends at the shore the biome describes; the rest of the cell is open sea. Perspective (owner: 'perspective is important'): this world is a high-oblique 2.5D view from the south-south-east, so a NORTH shore is seen from behind — its cliff face is hidden under its own rim and what shows is the ground ending in a rim of broken column tops with the sea beyond; a SOUTH shore shows its full cliff face; EAST and WEST shores show the faces of their south-facing bays and hide their north-facing ones."
+ }
+}
