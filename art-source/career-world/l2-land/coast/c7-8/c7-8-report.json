@@ -1,0 +1,114 @@
+{
+  "cell": "c7-8",
+  "territory": "coast",
+  "biome": "shore",
+  "status": "quarantine_candidate_failed_hard_constraints",
+  "generation": {
+    "filename": "c7-8-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "F183E2C8F7411B6AAA40DFD938B01DD9335320E14C491541D614ACB0F7D4301B",
+    "mode": "built-in ImageGen edit with edit-target as Image 1 and canon as reference-only Image 2",
+    "imageGenCallsUsed": 1,
+    "retryUsed": false,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "secondReferenceAccepted": true,
+    "promptRecord": "c7-8-imagegen-prompt-used.txt"
+  },
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by the uniform-bin mean on the delivered source; water-mask pixels and adjacent pixels excluded, and gradients below 12 luminance units excluded",
+    "peakVsUniformOverLand": 1.785018,
+    "uniformReference": 1.0,
+    "peakBinDegrees": [230, 240],
+    "directionalKeyFirstMoment": 0.004728,
+    "gradientSamples": 597188,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No cast-shadow field or explicit sun is visible, but basalt caps are repeatedly paler than vertical faces. The literal same-value-on-every-side constraint is not met."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "Manual screen-space estimate over non-water land at native source resolution.",
+    "buildable": 0.57,
+    "steep": 0.22,
+    "otherBrokenRockTalusShingleScrubOrStacks": 0.21,
+    "wholeCellBuildableEstimate": 0.250918,
+    "wholeCellSteepEstimate": 0.096845,
+    "method": "Broad coherent quarry-floor and plateau benches count as buildable; exposed column faces count as steep; talus, shingle, broken rims, scrub, and detached stacks make up the remainder.",
+    "limitation": "Visual estimate rather than elevation-derived slope or world-space surface area."
+  },
+  "waterFootprintFraction": 0.55979335,
+  "crown": {
+    "medianMetres": 0,
+    "medianPx": 0,
+    "sampleCount": 0,
+    "method": "Complete native-resolution visual census found no conifer crowns; low scrub and heather were not classified as trees.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c7-8-water-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "E3387AA715ADF883CADC6699F0B08658A21214A7781FF70E5974A07F385EDD06",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "opaqueWaterPixels": 880284,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "transparentNonzeroRgbPixels": 0,
+    "connectedWaterComponents8Connected": 5,
+    "smallClassifierHolePixelsFilled": 6418,
+    "edgeWaterPixels": {
+      "north": 259,
+      "east": 1242,
+      "south": 1253,
+      "west": 1243
+    },
+    "derivation": "The edge-connected teal and deep-blue source surface was traced through adjacent cool surf, wash, ripple, reflection, stream, and fall pixels; tiny enclosed cool classifier gaps were filled. The result was reviewed as a source overlay so dry cliff, talus, and stack silhouettes remain transparent.",
+    "interiorTransparentTerrainNote": "Transparent islands enclosed by sea are visibly dry stacks, columns, talus, or shore rocks, not omitted water texture."
+  },
+  "northEdgeAudit": {
+    "method": "Direct census of opaque water-mask pixels on the delivered source canvas north edge.",
+    "waterPixels": 259,
+    "totalPixels": 1254,
+    "waterFraction": 0.206539,
+    "requiredWaterFraction": 0.31,
+    "dominantRunsSourcePixels": [
+      {"class": "water", "start": 0, "end": 81},
+      {"class": "terrain", "start": 82, "end": 1062},
+      {"class": "waterSurfFragmentation", "start": 1063, "end": 1093},
+      {"class": "water", "start": 1094, "end": 1253}
+    ],
+    "passes": false,
+    "note": "The previously missing middle ground stretch is now land, but water appears at the west end and terrain continues to about 84.8% of the edge before the eastern surf transition; the required contiguous ground-then-open-sea split is not reproduced."
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasEdit": true,
+    "secondReferenceAttached": true,
+    "rawGenerationUntouched": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "noStructuresFiguresOrTrack": true,
+    "waterMaskSameDimensionsBinaryWhiteTransparent": true,
+    "waterMaskCoversSurfWashRippleHighlightsReflectionsStreamAndFall": true,
+    "crownCensusComplete": true,
+    "treelessShoreReportUsesZeroCrownContract": true,
+    "exactNorthEdgeGroundSeaSplit": false,
+    "strictEqualValueOnAllFormSides": false,
+    "weatheredIrregularColumnsThroughout": false
+  },
+  "refusalReasons": [
+    "The previously missing middle north-edge ground is now present, but the delivered edge still fails the exact map: it adds west-end water and carries terrain to about 84.8% before the eastern surf, rather than ending ground at 69%; total north-edge water is 259/1254 pixels (20.6539%), not 31%.",
+    "Repeated pale column caps over darker vertical faces violate the literal neutral-lighting requirement despite the absence of a cast-shadow field or explicit sun.",
+    "Several long cliff sections remain too regular, with repeated upright columns and clean cap bands rather than consistently broken, split, leaning, uneven ordinary coast."
+  ],
+  "openRisks": [
+    "The source cannot be corrected without violating the one-edit-call limit; its square 1254 px result does not authorize a framing retry.",
+    "Buildable and steep fractions are manual image estimates rather than surveyed geometry.",
+    "The water mask is color-and-connectivity traced and visually reviewed, but exact coastline judgment remains a human visual gate.",
+    "Seam continuity, landform naturalism, and visual quality remain director and owner judgments; this report does not claim visual acceptance."
+  ]
+}
