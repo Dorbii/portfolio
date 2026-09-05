@@ -827,31 +827,38 @@
    }
   },
   "c5-1": {
-   "authoredAt": "2026-09-04T12:28:10.448Z",
+   "authoredAt": "2026-09-05T06:49:31.228Z",
+   "ownerOverride": {
+    "at": "2026-09-05T06:49:31.228Z",
+    "reason": "owner 2026-09-04 marked the wet patch below c5-1's tarn spillway as painted water the mask missed (punch list A, his crop); this re-derive changes only that water cut; the one failing gate is the vegetation arm on the c5-0 seam, untouched by the change and already in the world as accepted at 12:28",
+    "failedGates": [
+     "palette conformance veg worst dBG 0.048 dLuma 68.0 over 3 seam(s); tone worst dLuma 18.4 on all land over 4 seam(s)"
+    ]
+   },
    "describe": "The RISK-ASSESSMENT shelf — a settlement shelf, the richest ground in its\nneighbourhood, and the last one before the coast to the east.\n\nThe shelf: a level terrace about 45 m across in the centre-west of the cell,\nmeadow green warmed with gold, glades among orchard-like conifer stands,\nflowers permitted here. Low outcrops and natural rock terraces around its\nedge that a settlement could sit on. No",
    "sourcePx": 1254,
    "gates": [
     {
      "name": "key-light asymmetry",
-     "value": 0.0015,
+     "value": 0.0004,
      "pass": true,
      "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004"
     },
     {
      "name": "gradient ratio",
-     "value": "1.571 (reported)",
+     "value": "1.469 (reported)",
      "pass": true,
      "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
     },
     {
      "name": "rock lighting",
-     "value": 0.13,
+     "value": 0.065,
      "pass": true,
      "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.14; limit 0.16 on the owner's eye (2026-09-02, the dark-forest gorge at 0.153)"
     },
     {
      "name": "land coverage",
-     "value": "98%",
+     "value": "96.9%",
      "pass": true
     },
     {
@@ -862,19 +869,19 @@
     },
     {
      "name": "mask completion",
-     "value": "+444 px grown, 1 px holes filled (reported)",
+     "value": "+6 px grown, 0 px holes filled (reported)",
      "pass": true,
      "note": "the delivered mask grown into contiguous painted water within 48 px and speckle holes <=64 px filled before the cut (owner 2026-09-02); dry paint stops the growth, so a polyline mask still fails the rings"
     },
     {
      "name": "water fringe",
-     "value": "0.06%",
+     "value": "0.11%",
      "pass": true,
      "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
     },
     {
      "name": "water fringe (48px)",
-     "value": "0.14%",
+     "value": "0.06%",
      "pass": true,
      "note": "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)"
     },
@@ -886,13 +893,13 @@
     },
     {
      "name": "palette conformance",
-     "value": "veg worst dBG 0.059 dLuma 11.4 over 1 seam(s); tone worst dLuma 9.6 on all land over 3 seam(s)",
-     "pass": true,
+     "value": "veg worst dBG 0.048 dLuma 68.0 over 3 seam(s); tone worst dLuma 18.4 on all land over 4 seam(s)",
+     "pass": false,
      "note": "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13"
     },
     {
      "name": "crown scale",
-     "value": "3.332 m over 58 crowns (accepted range 1.7-5.2 m)",
+     "value": "2.009 m over 42 crowns (accepted range 1.7-5.2 m)",
      "pass": true,
      "note": "the worker's own median crown from c5-1-report.json, against the 1.7-5.2 m range the accepted cells measured (NOT the plan's written 4-7 m — see CROWN_MIN_M); crown.excludedElements must be empty, so an out-of-scale element cannot be measured around"
     }
@@ -900,12 +907,12 @@
    "shelf": "risk-assessment",
    "features": [],
    "waterZones": [
-    "lake",
-    "stream"
+    "stream",
+    "lake"
    ],
    "maskCompletion": {
-    "grownPx": 444,
-    "holePx": 1
+    "grownPx": 6,
+    "holePx": 0
    },
    "biome": "lush-shelf",
    "source": "art-source/career-world/l2-land/tanium/c5-1",
