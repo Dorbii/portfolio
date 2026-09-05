@@ -84,3 +84,6 @@ They are kept because a rejected cell nobody sees cannot be ruled on.
 - `c5-2` moor — rejected on **a gate **
 - `c4-0` moor — rejected on **a gate **
 - `c5-2` moor — rejected on **water continuity 1**
+- `c4-1` bare-plateau — rejected on **a gate **
+- `c2-1` dark-forest — rejected on **rock lighting 0.194**
+- `c1-1` dark-forest — rejected on **a gate **
