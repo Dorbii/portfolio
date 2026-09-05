@@ -11,16 +11,25 @@ test("environment registry gives every child one authority parent", () => {
   const ids = new Set(ENVIRONMENT_LAYER_DEFINITIONS.map(({ id }) => id));
   assert.equal(ids.size, ENVIRONMENT_LAYER_DEFINITIONS.length);
   for (const layer of ENVIRONMENT_LAYER_DEFINITIONS) {
-    if (layer.id.includes("_")) {
-      assert.ok(layer.parentId, `${layer.id} must declare its authority parent`);
+    if (layer.parentId) {
       assert.ok(ids.has(layer.parentId));
-    } else {
-      assert.equal(layer.parentId, undefined);
+      const visited = new Set([layer.id]);
+      let parent = layer.parentId;
+      while (parent) {
+        assert.ok(!visited.has(parent), `cycle in ${layer.id}'s authority chain`);
+        visited.add(parent);
+        parent = ENVIRONMENT_LAYER_DEFINITIONS.find((entry) => entry.id === parent)?.parentId;
+      }
     }
   }
 });
 
 test("authority visibility cascades without erasing child selections", () => {
+  const waterDisabled = { ...DEFAULT_ENVIRONMENT_LAYER_VISIBILITY, L1: false };
+  for (const id of ["L1_0", "L1_1", "L1_2", "L3", "L3_1", "L3_2"]) {
+    assert.equal(isEnvironmentLayerEffectivelyVisible(waterDisabled, id), false);
+    assert.equal(waterDisabled[id], true);
+  }
   const inlandDisabled = Object.freeze({
     ...DEFAULT_ENVIRONMENT_LAYER_VISIBILITY,
     L3: false,

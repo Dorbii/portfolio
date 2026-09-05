@@ -90,10 +90,7 @@
 }
 
 .career-world__backdrop,
-.career-world__layer,
-.career-world__water-canvas,
-.career-world__inland-water-canvas,
-.career-world__inland-habitat-canvas {
+.career-world__layer {
   position: absolute;
   inset: 0;
 }
@@ -109,50 +106,82 @@
     #040807;
 }
 
-.career-world__water-canvas {
+.career-world__unified-water {
+  position: absolute;
+  inset: 0;
   z-index: 2;
   display: block;
   width: 100%;
   height: 100%;
-  /* While the solver loads, and if WebGL 2 is unavailable at all, the sea is a
-     depth gradient and nothing else. It used to be a 12 MB painted plate of the
-     whole ocean, which is a strange thing to download in order to cover the
-     first second of a render that replaces it -- and stranger still to keep as
-     the fallback for a layer whose entire point is that the water is solved. */
-  background:
-    radial-gradient(
-      140% 100% at 50% 45%,
-      #123047 0%,
-      #0b2033 55%,
-      #07131f 100%
-    );
+  pointer-events: none;
+  background: var(--water-fallback, #17383f);
 }
 
-.career-world__water-canvas[data-render-state="fallback"] {
-  filter: saturate(0.92) brightness(0.86);
-}
-
-.career-world__water-canvas[data-render-state="ready"] {
-  z-index: 4;
+.career-world__unified-water[data-render-state="ready"] {
   background: none;
 }
 
-.career-world__inland-water-canvas {
-  z-index: 8;
-  display: block;
+.career-world__wave-events {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
   width: 100%;
   height: 100%;
-  background: transparent;
   pointer-events: none;
 }
 
-.career-world__inland-habitat-canvas {
-  z-index: 8;
-  display: block;
+.career-world__ocean-details {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
   width: 100%;
   height: 100%;
-  background: transparent;
   pointer-events: none;
+}
+
+.career-world__land-lighting,
+.career-world__land-lighting-surface {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.career-world__land-lighting {
+  z-index: 3;
+}
+
+.career-world__lighting-controls {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 25;
+  display: grid;
+  gap: 0.6rem;
+  width: 280px;
+  padding: 0.8rem;
+  background: var(--world-panel);
+  border: 1px solid var(--world-border);
+  color: var(--world-ink);
+  font: 0.8rem Consolas, monospace;
+}
+
+.career-world__lighting-controls label {
+  display: block;
+}
+
+.career-world__lighting-controls input[type="range"] {
+  width: 100%;
+}
+
+.career-world__lighting-controls button {
+  padding: 0.3rem 0.4rem;
+  margin-right: 0.3rem;
+  color: var(--world-ink);
+  background: #18292a;
+  border: 1px solid var(--world-border);
+  cursor: pointer;
 }
 
 /* The capital presentation route is an art-review surface. Keep navigation,
@@ -162,11 +191,6 @@
 .career-world__viewport[data-initial-view="ninjaone-capital"]
   .career-world__camera-hint {
   display: none;
-}
-
-.career-world__inland-water-canvas[data-render-state="fallback"],
-.career-world__inland-habitat-canvas[data-render-state="fallback"] {
-  visibility: hidden;
 }
 
 .career-world__layer-inspector {

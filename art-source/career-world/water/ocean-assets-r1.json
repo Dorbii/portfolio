@@ -1,0 +1,39 @@
+{
+  "method": "Built-in imagegen for color art; deterministic source-alpha labels and world-anchored placement. No land art was supplied to or modified by generation.",
+  "assets": [
+    {
+      "path": "public/career-world/layers/water/ocean/seabed/seabed-albedo-r1.png",
+      "sha256": "6b5ef7a17b39d40cfca71c30c38ccc9197fb76b2512516d3545ee01a91d5a63f",
+      "width": 1254,
+      "height": 1254,
+      "channels": 3
+    },
+    {
+      "path": "public/career-world/layers/water/ocean/seabed/seabed-surface-r1.png",
+      "sha256": "37c617890444d0e4d3172c292f873f420e7f6f14c8bf52019509fb296f24aa01",
+      "width": 1,
+      "height": 1,
+      "channels": 3
+    },
+    {
+      "path": "public/career-world/layers/water/ocean/details/ocean-details-r1.png",
+      "sha256": "001de2d218a09250c9b37be02a8e57f46e5667101b465065bab6f0eca50d1ebe",
+      "width": 1254,
+      "height": 1254,
+      "channels": 4
+    },
+    {
+      "path": "public/career-world/layers/water/ocean/details/ocean-details-surface-r1.png",
+      "sha256": "37c617890444d0e4d3172c292f873f420e7f6f14c8bf52019509fb296f24aa01",
+      "width": 1,
+      "height": 1,
+      "channels": 3
+    }
+  ],
+  "normalContract": "Neutral flat local normals; macro shelf depth comes from current registered land alpha. The color art has illustrative ambient relief, not recovered height/occluder data.",
+  "floorSource": "exec-d92677e3-bb1d-43c2-9b7a-2a14f0d87061.png",
+  "detailsSource": "exec-b5a262d7-304c-4c84-bc88-ab711861f9c6.png",
+  "discarded": "exec-0fbb9b22-f676-42a0-8f33-fb05cf0ce77a.png: edit returned an opaque checkerboard. Original atlas has valid transparency (59.75% near-zero alpha); blue-background compositing proof showed clean edges.",
+  "repeatPolicy": "Offline seeded 256 m floor quilt and 288 m detail scatter; 455 placements from 37 source-alpha-labelled colonies with jittered position, size, mirroring and small rotation. Runtime samples the baked world-anchored layouts. Finite source motifs and both full layouts still repeat.",
+  "runtimeLayoutManifest": "public/career-world/layers/water/ocean/layout-textures-r1.json"
+}

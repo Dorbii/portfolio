@@ -1,0 +1,41 @@
+{
+  "purpose": "Owner-requested local mounting of existing land work; does not mark these candidates accepted or modify authoring ledgers.",
+  "cells": [
+    {
+      "territory": "tanium",
+      "id": "c1-1",
+      "status": "review-candidate",
+      "sourceSnapshot": "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/.codex-tmp/authoring/cells/tanium/c1-1/c1-1-l2.png",
+      "sourceSha256": "ea43c2f16bf117dbf3a958a97a3f533c3f15a89f62b9edc26149ea700e76e317",
+      "canonicalPath": "/career-world/layers/terrain/authority/tiles/l2-review/tanium-c1-1-site.webp",
+      "canonicalSha256": "460a71cbd796f9f805a582cda5ea689648023836e575ecbb5ad6203b0f181344"
+    },
+    {
+      "territory": "tanium",
+      "id": "c2-1",
+      "status": "review-candidate",
+      "sourceSnapshot": "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/.codex-tmp/authoring/cells/tanium/c2-1/c2-1-l2.png",
+      "sourceSha256": "952889d088d5d6fb80f4b13d30a581dbf412aa306bcf54050c2c7b9e86cb9735",
+      "canonicalPath": "/career-world/layers/terrain/authority/tiles/l2-review/tanium-c2-1-site.webp",
+      "canonicalSha256": "da91c296809eb8319cdd579331772ed7d343eac9b6e392333488887e59119771"
+    },
+    {
+      "territory": "tanium",
+      "id": "c3-1",
+      "status": "review-candidate",
+      "sourceSnapshot": "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/.codex-tmp/authoring/cells/tanium/c3-1/c3-1-l2.png",
+      "sourceSha256": "f1bb97c6f5cd10fa5684fc987de976cb92de1cdff2c3dbfb05f70320ccec1d78",
+      "canonicalPath": "/career-world/layers/terrain/authority/tiles/l2-review/tanium-c3-1-site.webp",
+      "canonicalSha256": "bf5263e799d01edbdbab3ad9fb2cb425b09f4f2e2908b2467e78b8313d4d6021"
+    },
+    {
+      "territory": "tanium",
+      "id": "c4-0",
+      "status": "review-candidate",
+      "sourceSnapshot": "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/.codex-tmp/authoring/cells/tanium/c4-0/c4-0-l2.png",
+      "sourceSha256": "5fa2e7fc6cbbf8565ff32b4f5f1bdacdb16971b3557bdb872bba65de49da104e",
+      "canonicalPath": "/career-world/layers/terrain/authority/tiles/l2-review/tanium-c4-0-site.webp",
+      "canonicalSha256": "a9ae622b60a3853b6032c4381465d8c0c0840ae82ba00a4dc34c1e4604063071"
+    }
+  ]
+}

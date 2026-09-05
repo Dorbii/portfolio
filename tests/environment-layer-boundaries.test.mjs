@@ -1,51 +1,39 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
+import path from "node:path";
 import test from "node:test";
+import ts from "typescript";
+import { CAREER_WORLD_LAYER_ORDER } from "../features/career-world/shared/layers.ts";
+import { WATER_LAYER, WATER_SUBLAYERS } from "../features/career-world/layers/water/contract.ts";
 
-const read = (path) => readFile(path, "utf8");
+async function imports(file) {
+  const source = ts.createSourceFile(file, await readFile(file, "utf8"), ts.ScriptTarget.Latest, true,
+    file.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
+  return source.statements.filter(ts.isImportDeclaration).map((statement) => statement.moduleSpecifier.text);
+}
 
-// L4 and the L2 detail/foliage children were removed with the capital's art
-// (owner 2026-09-03). What remains is ocean, terrain and inland water, and the
-// rule this test exists for is unchanged: every layer exposes an authority
-// root, its children are explicit modules with declared ids, and an authority
-// root does not reach into a sibling's rendering.
-test("L1 through L3 expose authority roots and explicit child modules", async () => {
-  const [scene, ocean, oceanAuthority, oceanMotion, oceanAmbience,
-    terrain, terrainAuthority, terrainShadows,
-    inland, inlandAuthority, inlandMotion, inlandEffects, inlandHabitat] =
-    await Promise.all([
-      read("features/career-world/composition/WorldScene.tsx"),
-      read("features/career-world/layers/ocean/index.ts"),
-      read("features/career-world/layers/ocean/authority/index.ts"),
-      read("features/career-world/layers/ocean/surface-motion/index.ts"),
-      read("features/career-world/layers/ocean/coastal-ambience/index.ts"),
-      read("features/career-world/layers/terrain/index.ts"),
-      read("features/career-world/layers/terrain/authority/index.ts"),
-      read("features/career-world/layers/terrain/dynamic-shadows/index.ts"),
-      read("features/career-world/layers/inland-water/index.ts"),
-      read("features/career-world/layers/inland-water/authority/index.ts"),
-      read("features/career-world/layers/inland-water/surface-motion/index.ts"),
-      read("features/career-world/layers/inland-water/effects/index.ts"),
-      read("features/career-world/layers/inland-water/habitat-detail/index.ts"),
-    ]);
+test("water is a separate surface owner below land with ocean and inland children", () => {
+  assert.ok(CAREER_WORLD_LAYER_ORDER.indexOf(WATER_LAYER.id) < CAREER_WORLD_LAYER_ORDER.indexOf("terrain"));
+  assert.equal(WATER_LAYER.order, CAREER_WORLD_LAYER_ORDER.indexOf(WATER_LAYER.id));
+  assert.ok(WATER_SUBLAYERS.every((layer) => layer.parent === WATER_LAYER.id));
+  assert.equal(new Set(WATER_SUBLAYERS.map((layer) => layer.id)).size, WATER_SUBLAYERS.length);
+});
 
-  assert.match(scene, /from "\.\.\/layers\/ocean"/);
-  assert.match(scene, /from "\.\.\/layers\/terrain"/);
-  assert.match(scene, /from "\.\.\/layers\/inland-water"/);
-  assert.doesNotMatch(scene, /from "\.\.\/layers\/city"/);
-  assert.match(ocean, /from "\.\/authority"/);
-  assert.match(terrain, /from "\.\/authority"/);
-  assert.match(inland, /from "\.\/authority"/);
-  assert.match(oceanAuthority, /OCEAN_AUTHORITY_LAYER_ID = "L1"/);
-  assert.match(oceanMotion, /OCEAN_SURFACE_MOTION_LAYER_ID = "L1_1"/);
-  assert.match(oceanAmbience, /OCEAN_COASTAL_AMBIENCE_LAYER_ID = "L1_2"/);
-  assert.match(terrainAuthority, /TERRAIN_AUTHORITY_LAYER_ID = "L2"/);
-  assert.match(terrainShadows, /TERRAIN_DYNAMIC_SHADOWS_LAYER_ID = "L2_3"/);
-  assert.match(inlandAuthority, /INLAND_WATER_AUTHORITY_LAYER_ID = "L3"/);
-  assert.match(inlandMotion, /INLAND_WATER_SURFACE_MOTION_LAYER_ID = "L3_1"/);
-  assert.match(inlandEffects, /INLAND_WATER_EFFECTS_LAYER_ID = "L3_2"/);
-  assert.match(inlandHabitat, /INLAND_WATER_HABITAT_DETAIL_LAYER_ID = "L3_4"/);
-  assert.doesNotMatch(oceanAuthority, /water-surface/);
-  assert.doesNotMatch(terrainAuthority, /territory-landform/);
-  assert.doesNotMatch(inlandAuthority, /water-surface/);
+test("water runtime cannot import land rendering and land cannot import water rendering", async () => {
+  const root = path.resolve("features/career-world/layers");
+  const water = path.join(root, "water"), terrain = path.join(root, "terrain");
+  for (const name of await readdir(water, { recursive: true })) {
+    if (!name.endsWith(".ts") && !name.endsWith(".tsx")) continue;
+    const file = path.join(water, name);
+    for (const specifier of await imports(file)) {
+      if (specifier.startsWith(".")) assert.ok(!path.resolve(path.dirname(file), specifier).startsWith(terrain + path.sep), `${name}: ${specifier}`);
+    }
+  }
+  const landFile = path.join(terrain, "components", "TerritoryLandform.tsx");
+  for (const specifier of await imports(landFile)) {
+    if (!specifier.startsWith(".")) continue;
+    const resolved = path.resolve(path.dirname(landFile), specifier);
+    assert.ok(!resolved.startsWith(water + path.sep));
+    assert.ok(!resolved.startsWith(path.join(root, "inland-water") + path.sep));
+  }
 });

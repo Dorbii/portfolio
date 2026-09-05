@@ -1,4 +1,4 @@
-import releaseManifest from "@/public/career-world/layers/terrain/authority/manifests/terrain-stream-runtime-r4.json";
+import releaseManifest from "@/public/career-world/layers/terrain/authority/manifests/terrain-local-mount-r1.json";
 import type { CameraView, Pair } from "../../../shared/camera";
 import type { DetailTierId } from "../../../shared/lod";
 import type { TerrainResidencyPolicy } from "./residency";
@@ -15,6 +15,7 @@ const STREAM_PATH_PREFIXES = [
   "/career-world/layers/terrain/authority/tiles/l2-ninjaone/",
   "/career-world/layers/terrain/authority/tiles/l2-tanium/",
   "/career-world/layers/terrain/authority/tiles/l2-coast/",
+  "/career-world/layers/terrain/authority/tiles/l2-review/",
 ];
 
 export type TerrainStreamSourceTier = Extract<

@@ -1,11 +1,10 @@
 import { defineLayerDetailContract } from "../../../shared/lod";
 import { TERRAIN_SITE_TILES } from "./siteTiles";
 import { TERRAIN_STREAM_TILES } from "./streamTiles";
+import overviews from "@/public/career-world/layers/terrain/authority/manifests/terrain-overviews-r1.json";
 
-const WORLD_PLATE =
-  "/career-world/layers/terrain/authority/textures/world-land-r1.png?v=l2-ninjaone-r1";
-const TERRITORY_PLATE =
-  "/career-world/layers/terrain/authority/textures/world-land-detail-4x-r1.png?v=l2-ninjaone-r1";
+const WORLD_PLATE = overviews.world.path;
+const TERRITORY_PLATE = overviews.territory.path;
 const WORLD_PLATE_DIMENSIONS = [1664, 936] as const;
 const TERRITORY_PLATE_DIMENSIONS = [6656, 3744] as const;
 

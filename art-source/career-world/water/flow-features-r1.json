@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "status": "visual-review-candidate",
+  "coordinates": "source concept pixels, including the recorded bleed; mapped through the served cell registration",
+  "policy": "These annotations choose motion only. They never create, erase or move a water or land pixel. Directions are art interpretation, not a surveyed hydraulic model.",
+  "cells": [
+    {
+      "tileId": "l2-c1-1",
+      "source": "art-source/career-world/l2-land/ninjaone/c1-1/c1-1-concept.png",
+      "sha256": "9a1313820a76872480ace482e2fe18325be1fe8c1c63a2483e6cc582cd62f93a",
+      "features": [
+        {"id": "purple-clearing-brook", "kind": "stream", "radiusArtPx": 110,
+          "path": [[1664,677],[1594,763],[1651,830],[1568,912],[1702,1018],[1632,1104],[1616,1173],[1686,1234],[1562,1301],[1578,1381],[1600,1485],[1491,1515],[1374,1560],[1262,1618],[1160,1666],[1030,1693]]}
+      ]
+    },
+    {
+      "tileId": "l2-c3-1",
+      "source": "art-source/career-world/l2-land/ninjaone/c3-1/c3-1-concept.png",
+      "sha256": "6a50b213c4be17cb307d156fc0444531f3b887e980f67a630f319b51c9227f9d",
+      "features": [
+        {"id": "gorge-feeder", "kind": "stream", "radiusArtPx": 70,
+          "path": [[1840,1000],[1770,1030],[1720,1065],[1685,1120]]},
+        {"id": "great-gorge-fall", "kind": "fall", "radiusArtPx": 65,
+          "path": [[1685,1120],[1672,1300],[1668,1450],[1660,1618]]},
+        {"id": "gorge-lower-cascade", "kind": "fall", "radiusArtPx": 70,
+          "path": [[1748,1810],[1740,1880],[1730,1940]]}
+      ]
+    }
+  ]
+}

@@ -11,11 +11,7 @@ import {
   type WheelEvent,
 } from "react";
 import { WorldBackdrop } from "../layers/world-backdrop";
-import { WaterSurfaceCanvas, type WaterRenderState } from "../layers/ocean";
-import {
-  NinjaOneInlandHabitatCanvas,
-  NinjaOneInlandWaterCanvas,
-} from "../layers/inland-water";
+import { WaterLayer, type WaterRenderState } from "../layers/water";
 import {
   TERRITORIES,
   TerritoryLandform,
@@ -59,6 +55,7 @@ import {
 import { DETAIL_POLICY, resolveDetailState } from "../shared/lod";
 import { WORLD_PLANE } from "../shared/world";
 import { WORLD_LIGHT } from "../shared/lighting";
+import { LandLighting, LightingControls, useLighting } from "../layers/lighting";
 import { resolveTownPresentationAnchor } from "../shared/townPresentation";
 import {
   DEFAULT_ENVIRONMENT_LAYER_VISIBILITY,
@@ -306,7 +303,6 @@ export function WorldScene({
       : "world",
   );
   const [kaizenVisualReady, setKaizenVisualReady] = useState(false);
-  const [ninjaOneGeologyReady, setNinjaOneGeologyReady] = useState(false);
   const [renderState, setRenderState] =
     useState<WaterRenderState>("loading");
   const [waterTuning, setWaterTuning] = useState<WaterTuning>(() => (
@@ -319,6 +315,8 @@ export function WorldScene({
   const [showGrid, setShowGrid] = useState(false);
   const [showLandmarkLabels, setShowLandmarkLabels] = useState(false);
   const [isPageVisible, setIsPageVisible] = useState(true);
+  const lighting = useLighting(WORLD_LIGHT, waterTuning.oceanWeather, isPageVisible);
+  const light = lighting.light;
   const [viewportSize, setViewportSize] = useState<[number, number] | null>(
     null,
   );
@@ -331,22 +329,17 @@ export function WorldScene({
     timeScale: waterTuning.oceanTimeScale,
     weather: waterTuning.oceanWeather,
   }), [waterTuning]);
-  const showNinjaOneInlandWater = (
-    detailState.tier.id !== "world"
-    && detailState.tier.id !== "territory"
-  );
   const environmentLayerVisible = (id: EnvironmentLayerId) => (
     !capitalLayerInspection
     || isEnvironmentLayerEffectivelyVisible(environmentLayerVisibility, id)
   );
-  const oceanAuthorityVisible = environmentLayerVisible("L1");
+  const oceanAuthorityVisible = environmentLayerVisible("L1_0");
   const oceanMotionVisible = environmentLayerVisible("L1_1");
   const coastalAmbienceVisible = environmentLayerVisible("L1_2");
   const terrainAuthorityVisible = environmentLayerVisible("L2");
   const inlandWaterAuthorityVisible = environmentLayerVisible("L3");
   const inlandWaterMotionVisible = environmentLayerVisible("L3_1");
   const inlandWaterEffectsVisible = environmentLayerVisible("L3_2");
-  const inlandHabitatVisible = environmentLayerVisible("L3_4");
   const handleEnvironmentLayerToggle = useCallback((id: EnvironmentLayerId) => {
     setEnvironmentLayerVisibility((current) => Object.freeze({
       ...current,
@@ -647,7 +640,7 @@ export function WorldScene({
       data-capital-layer-inspection={capitalLayerInspection}
       data-city-layer-proof={cityLayerProof}
       data-city-visual-intent={cityVisualIntent}
-      data-layer-l1={oceanAuthorityVisible}
+      data-layer-l1={environmentLayerVisible("L1")}
       data-layer-l1-1={oceanMotionVisible}
       data-layer-l1-2={environmentLayerVisible("L1_2")}
       data-layer-l2={terrainAuthorityVisible}
@@ -670,56 +663,45 @@ export function WorldScene({
       role="application"
       tabIndex={0}
     >
-      <WorldBackdrop light={WORLD_LIGHT} />
+      <WorldBackdrop light={light} />
       {terrainAuthorityVisible ? (
-        <TerritoryLandform
-          camera={camera}
-          detailState={detailState}
-        />
+        <LandLighting camera={camera} light={light} enabled={environmentLayerVisible("L5_1")}>
+          <TerritoryLandform camera={camera} detailState={detailState} />
+        </LandLighting>
       ) : null}
-      {oceanAuthorityVisible ? (
-        <WaterSurfaceCanvas
-          active={isPageVisible && oceanMotionVisible}
+      {oceanAuthorityVisible || inlandWaterAuthorityVisible ? (
+        <WaterLayer
+          active={isPageVisible}
           camera={camera}
-          coastalAmbience={coastalAmbienceVisible}
-          detailState={detailState}
-          light={WORLD_LIGHT}
+          light={environmentLayerVisible("L5_2") ? light : { ...light, enabled: false }}
           onRenderStateChange={setRenderState}
-          tuning={oceanWaterTuning}
+          state={oceanWaterTuning}
+          oceanVisible={oceanAuthorityVisible}
+          inlandVisible={inlandWaterAuthorityVisible}
+          oceanMotion={oceanMotionVisible}
+          inlandMotion={inlandWaterMotionVisible}
+          inlandEffects={inlandWaterEffectsVisible}
+          coastalEffects={coastalAmbienceVisible}
+          seabedVisible={environmentLayerVisible("L1_3")}
+          oceanDetailsVisible={environmentLayerVisible("L1_4")}
+          aquaticLifeVisible={environmentLayerVisible("L1_5")}
         />
       ) : null}
-      {showNinjaOneInlandWater && inlandWaterAuthorityVisible ? (
-        <NinjaOneInlandWaterCanvas
-          active={isPageVisible && inlandWaterMotionVisible}
-          camera={camera}
-          detailState={detailState}
-          effectsEnabled={inlandWaterEffectsVisible}
-          light={WORLD_LIGHT}
-        />
-      ) : null}
-      {showNinjaOneInlandWater
-        && inlandWaterAuthorityVisible
-        && inlandHabitatVisible ? (
-          <NinjaOneInlandHabitatCanvas
-            camera={camera}
-            detailState={detailState}
-          />
-        ) : null}
       <>
           <InfrastructureLayer
             camera={camera}
             detailState={detailState}
-            light={WORLD_LIGHT}
+            light={light}
           />
           <ActorsEffectsLayer
             camera={camera}
             detailState={detailState}
-            light={WORLD_LIGHT}
+            light={light}
           />
           <StructuresLayer
             camera={camera}
             detailState={detailState}
-            light={WORLD_LIGHT}
+            light={light}
             onKaizenVisualReadyChange={setKaizenVisualReady}
           />
       </>
@@ -769,6 +751,8 @@ export function WorldScene({
         tuning={waterTuning}
       />
       <PerformanceProbe enabled={enableDevelopmentTools || enablePerformanceProbe} />
+      <LightingControls enabled={enableDevelopmentTools} hour={lighting.hour} onHour={lighting.setHour}
+        cycling={lighting.cycling} onCycling={lighting.setCycling} />
     </div>
   );
 }

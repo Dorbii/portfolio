@@ -29,7 +29,6 @@ import {
   LAND_ASSETS,
   LAND_PLATE_DECODED_BYTES,
 } from "../model/assets";
-import { NINJAONE_INLAND_TERRAIN_ERASE_MASK } from "../../inland-water";
 import {
   TERRAIN_SITE_TILES,
 } from "../model/siteTiles";
@@ -142,8 +141,6 @@ export function TerritoryLandform({
   const detailPlateRef = useRef<HTMLImageElement | null>(null);
   const detailPlateDecodedRef = useRef(false);
   const detailPlateDecodedAtRef = useRef<number | null>(null);
-  const inlandTerrainEraseMaskRef = useRef<HTMLImageElement | null>(null);
-  const inlandTerrainEraseMaskDecodedRef = useRef(false);
   const streamTileRefs = useRef(new Map<string, HTMLImageElement>());
   const activeStreamKeysRef = useRef(new Set<string>());
   const decodedStreamKeysRef = useRef(new Set<string>());
@@ -236,9 +233,6 @@ export function TerritoryLandform({
         : 0)
       + (detailPlateDecodedRef.current
         ? LAND_PLATE_DECODED_BYTES.territory
-        : 0)
-      + (inlandTerrainEraseMaskDecodedRef.current
-        ? NINJAONE_INLAND_TERRAIN_ERASE_MASK.decodedBytes
         : 0);
     const canvasDecodedBytes = expectedCanvasDecodedBytes(
       canvas,
@@ -779,20 +773,6 @@ export function TerritoryLandform({
       }
       drawRegisteredTile(tile, image, siteOpacity * sourceOpacity);
     }
-    const inlandTerrainEraseMask = inlandTerrainEraseMaskRef.current;
-    if (
-      inlandTerrainEraseMask
-      && inlandTerrainEraseMaskDecodedRef.current
-    ) {
-      context.save();
-      context.globalCompositeOperation = "destination-out";
-      drawRegisteredTile(
-        NINJAONE_INLAND_TERRAIN_ERASE_MASK,
-        inlandTerrainEraseMask,
-        1,
-      );
-      context.restore();
-    }
     context.globalAlpha = 1;
     if (needsPresentationFrame) {
       queueRender();
@@ -918,42 +898,6 @@ export function TerritoryLandform({
         target: 0,
         lastUpdatedAt: 0,
       };
-    };
-  }, [queueRender]);
-
-  useEffect(() => {
-    let cancelled = false;
-    const image = new Image();
-    image.decoding = "async";
-    inlandTerrainEraseMaskRef.current = image;
-    inlandTerrainEraseMaskDecodedRef.current = false;
-    const fail = () => {
-      if (cancelled || inlandTerrainEraseMaskRef.current !== image) {
-        return;
-      }
-      inlandTerrainEraseMaskDecodedRef.current = false;
-      releaseImage(image);
-      inlandTerrainEraseMaskRef.current = null;
-    };
-    image.onload = () => {
-      void image.decode().then(() => {
-        if (cancelled || inlandTerrainEraseMaskRef.current !== image) {
-          return;
-        }
-        inlandTerrainEraseMaskDecodedRef.current = true;
-        setViewportRevision((revision) => revision + 1);
-        queueRender();
-      }, fail);
-    };
-    image.onerror = fail;
-    image.src = NINJAONE_INLAND_TERRAIN_ERASE_MASK.path;
-    return () => {
-      cancelled = true;
-      releaseImage(image);
-      if (inlandTerrainEraseMaskRef.current === image) {
-        inlandTerrainEraseMaskRef.current = null;
-        inlandTerrainEraseMaskDecodedRef.current = false;
-      }
     };
   }, [queueRender]);
 

@@ -25,27 +25,27 @@ export function linkProgram(
   fragmentSource: string,
 ): WebGLProgram {
   const vertex = compileShader(gl, gl.VERTEX_SHADER, vertexSource);
-  const fragment = compileShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
-  const program = gl.createProgram();
+  let fragment: WebGLShader | null = null;
+  let program: WebGLProgram | null = null;
+  try {
+    fragment = compileShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
+    program = gl.createProgram();
+    if (!program) throw new Error("WebGL could not allocate a shader program.");
 
-  if (!program) {
+    gl.attachShader(program, vertex);
+    gl.attachShader(program, fragment);
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      throw new Error(gl.getProgramInfoLog(program) ?? "Unknown shader link error.");
+    }
+    return program;
+  } catch (error) {
+    if (program) gl.deleteProgram(program);
+    throw error;
+  } finally {
     gl.deleteShader(vertex);
-    gl.deleteShader(fragment);
-    throw new Error("WebGL could not allocate a shader program.");
+    if (fragment) gl.deleteShader(fragment);
   }
-
-  gl.attachShader(program, vertex);
-  gl.attachShader(program, fragment);
-  gl.linkProgram(program);
-  gl.deleteShader(vertex);
-  gl.deleteShader(fragment);
-
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    const log = gl.getProgramInfoLog(program) ?? "Unknown shader link error.";
-    gl.deleteProgram(program);
-    throw new Error(log);
-  }
-  return program;
 }
 
 export async function loadImage(path: string): Promise<HTMLImageElement> {
