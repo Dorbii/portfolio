@@ -171,3 +171,18 @@ brief is committed; needs the lock.
 - E: c4-1 → waits for c3-1's ruling, then rebakes against it. c3-1 → refused
   by one pixel → his eye (the accept unblocks c2-1 and c4-1).
 - Served: `world-register.mjs` — 41 cells, three territories (f6f0e2ab).
+
+## Status at 10:00 UTC (2026-09-05) — the coast programme
+
+- Owner 07:30: "we need it so the coast is cohesive not constantly have this
+  edge issue" + five outlined crops → `coast-audit.mjs` found every cut
+  edge; the plan holds 27 shore cells (4 in, 15 candidates, 8 unbaked).
+- D, revised again: the island's coast is planned as a whole. Wave 1 (six
+  new cells) + four retries: none accepted by the gates; seams matched on
+  c2-8, c5-8, c8-5, c7-8 (refused on rock lighting / crowns / a vegetation
+  reading only → his eye); c7-4, c8-7 drift on mostly-sea edges → proposal
+  18i (the sea painted into the edit target). c1-3 (his "this spot needs to
+  be coastal") refused: headlands closed the bay → 18i too.
+- Open owner calls: the accepts (c1-1, c1-4, c7-1, c0-6, c3-0, c2-8, c5-8,
+  c8-5, c7-8), the shore rock-lighting limit, 18h, 18i, c3-1; row 8 stays
+  planned unless he says otherwise.

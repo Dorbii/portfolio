@@ -4,7 +4,32 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-05 07:00 UTC, LATEST (current):** **THE ISLAND IS SERVED END TO
+**2026-09-05 10:00 UTC, LATEST (current):** **THE WHOLE COAST IS PLANNED;
+THE MODEL PLACES SHORELINES BY PIXELS, NOT WORDS; TWO PROPOSALS WAIT.** The
+owner at 07:30: *"we need it so the coast is cohesive not constantly have
+this edge issue"* with five outlined crops. `coast-audit.mjs` (new) then
+found every authored edge and corner where land still runs into unplanned
+sea — 14 cells beyond his five — and the coast plan holds **27 shore cells**:
+4 in the world (c2-0, c4-0, c5-0, c6-0), 15 candidates in their working
+folders for his eye, 8 unbaked. A wave of six new cells and four retries
+(07:51-09:55) accepted none by the gates, but taught the thing that matters:
+**the worker is told to rewrite briefs "never as coordinates or
+percentages"**, so the edge map and the measured-fault notes the brief
+writer now produces reach the image model only as prose — enough for the
+south shores (c2-8, c5-8, c7-8 and the c8-5 retry matched their seams and
+were refused on shore readings alone), not for the east shores whose island
+edge is mostly sea (c7-4, c8-7 drifted 16 m twice). The fix is pixels:
+**proposal 18i** paints the island's sea on into a shore cell's edit target
+and leaves grey only within 40 m of arriving ground
+(`session3-tools/proposals/sea-prefill.apply.mjs`, applies on his word,
+after 18h). A mask-only conform tool exists for drifts of a few metres and
+carves arcs for larger ones — not used. Tanium 17 of 21, served; suite 98/6;
+pipeline intact. The picture (10:00) boxes 22 cells. **His rulings unblock
+everything: the accepts (c1-1, c1-4, c7-1, c0-6, c3-0, and now c2-8, c5-8,
+c8-5, c7-8), the shore rock-lighting limit, 18h, 18i, c3-1.** Resume from
+`SESSION 11` below, its first section.
+
+**2026-09-05 07:00 UTC, superseded:** **THE ISLAND IS SERVED END TO
 END, AND FIFTEEN CELLS WAIT ON THE OWNER'S PICTURE.** Tanium is 17 of 21
 (c1-2, c6-2 and c4-2 by his accept; c6-1 rebaked as the chain's seaward end;
 c0-1, c2-2, c3-2, c5-1 carry his mask fixes; open: c1-1, c2-1, c3-1, c4-0,
@@ -730,7 +755,81 @@ adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 `brief-c3-1-r2.md` (magical gorge, rail gorge span), `brief-c2-2-r2.md`
 (bench country, waystation bench, hot spring).
 
-**SESSION 11 (2026-09-04 evening → 2026-09-05 07:00 UTC) — RESUME HERE, ANY MODEL.** **THE NIGHT'S BAKES ARE DONE; THE LOCK IS FREE; NOTHING DISPATCHES UNTIL THE OWNER RULES ON THE PICTURE.**
+**SESSION 11 (2026-09-04 evening → 2026-09-05 10:00 UTC) — RESUME HERE, ANY MODEL.** **THE LOCK IS FREE; NOTHING DISPATCHES UNTIL THE OWNER RULES (accepts, shore limit, 18h, 18i, c3-1).**
+
+## 10:00 — THE COAST PROGRAMME: 27 CELLS, WHAT THE NIGHT TAUGHT, WHAT WAITS
+
+**The owner, 07:10 and 07:30:** *"this spot needs to be coastal"* (N c0-2's
+west edge → coast c1-3), then five crops with red outlines: *"we need it so
+the coast is cohesive not constantly have this edge issue. Tried to outline
+the fill areas. C7-0 thought needs a regen."* Read as: the coast must be
+continuous round the whole island; his outlines are fill areas (land) and
+open-bay areas (water) — carried into the briefs' NOTES (c0-5, c1-0, c1-2,
+c1-3, c7-0, c8-4, c8-5, c8-6 in `coast-briefs.mjs`).
+
+**`coast-audit.mjs`** reads every authored cell's four kept edges and
+corners (alpha ≥ 128 within 8 px, runs ≥ 30 px) and names each sea cell
+that land runs into and is neither authored nor planned. It found his five
+and nine more: NinjaOne's east (c7-2, c7-3, c7-4), the corner north-east of
+T c6-0 (c8-4), east of T c6-2 (c8-7), and row 8 (c1-8, c2-8, c5-8, c6-8,
+c7-8 — his c4-8 exception generalised by "cohesive"; say so if row 8 must
+stay sea). `coast-plan.mjs` now plans **27 shore cells**; the audit is
+empty against the plan; the sparse-territory tests pass.
+
+**The coast at 10:00:** in the world c2-0, c4-0 (his accepts), c5-0, c6-0.
+Candidates in `.codex-tmp/authoring/cells/coast/<id>/` (copies under
+`.codex-tmp/rejected/coast/`), all in the picture:
+- **seam matched, refused on shore readings only** — c2-8 (rock 0.201, four
+  crowns at 6 m), c5-8 (rock 0.392), c8-5 retry (five crowns at 5.6 m; his
+  bulge), c7-8 retry (veg colour 19.6), c3-0 (a skerry splits its sea for
+  the gate; rock 0.305);
+- **close** — c1-1 (rock 0.247), c1-4 (water 6 m off), c7-1 (key-light
+  0.0118, one thread), c0-6 (one thread 3.6 m off, rock 0.293);
+- **misses, land over the island's sea** — c1-2 (N c0-1's bay), c1-3
+  (headlands close N c0-2's bay), c4-8 (T c3-2's five falls), c7-0 (c6-0's
+  four inlets), c7-4 (N c4-3's sea, twice), c8-7 (16 m drift, twice).
+- **unbaked** — c0-5, c1-0 (his crops; they border c0-6 and c1-1, his
+  call), c7-2 (borders c7-1), c7-3, c8-4, c8-6, c1-8, c6-8 (the between-cells
+  of wave 2, after their neighbours are in).
+
+**What the night taught (the workflow for every island):**
+1. **Pixels place shorelines; prose does not.** cell.mjs tells the worker to
+   rewrite the brief for the image model "never as coordinates or
+   percentages" (packet text, by design: the generator cannot hit spatial
+   pegs). So the brief writer's new edge map ("0-24%: the island's SEA …
+   24-57%: GROUND …") and its measured-fault note ("your previous candidate
+   painted LAND over the island's SEA from 38% to 56%") arrive as prose.
+   That was enough where the island's ground spans most of the seam (south
+   shores, the north row) and not where its sea does (east shores: c7-4 65%
+   sea, c8-7 92% sea — both drifted the same way twice).
+2. **Proposal 18i** (`session3-tools/proposals/sea-prefill.apply.mjs`,
+   `--check` passes): for a shore cell, the island's sea arriving at every
+   authored seam is painted on into the edit target from its own sea pixels,
+   and grey is left only in strips at most 40 m deep beside arriving ground
+   (6 m margin); the packet calls the painted sea FINAL. Stitch, gates and
+   mask untouched. Apply after 18h; then the misses get their real attempt.
+3. **Alternate order** still holds: a cell between two authored shores
+   matches (c5-0, c3-0); a cell beside a candidate bakes blind of it.
+4. **Mask conform** (`conform-seam-water.mjs`, mask only): cuts the
+   candidate's land wet where the island's water arrives, to its own water
+   or a capped cove. Fit for drifts of a few metres only; on c8-7's 16 m it
+   carves an arc through the headland (preview kept). Not applied.
+5. **The rock-lighting gate refuses shores that are otherwise clean** (0.20-
+   0.39 on cells whose seams match) — the shore limit is the ruling that
+   turns five candidates into accepts.
+6. **Ops:** a background bash waiter stopped with TaskStop keeps running on
+   Windows (two follow-ups fired at once at 09:05; the second died on the
+   lock, no harm). Change a waiter by making its trigger impossible.
+
+**When the owner rules — in this order:** (a) stitch his accepts by
+override (coast: `CELL_OWNER_ACCEPT="<his words>" cell.mjs --territory coast
+--cell C,R --redo --force --describe-file art-source/career-world/l2-land/coast/briefs/cC-R.md`,
+briefs from `coast-briefs.mjs` first); (b) apply 18h and 18i on his words
+(`check-solidified.mjs --approve`), dry-run c4-0 and c7-4; (c) the misses,
+one attempt each, in alternate order between accepted neighbours (c1-2
+between c1-1 and c1-3's slot; c1-3 after c1-2 and c1-4; c7-0 after c7-1;
+c7-4 after c7-3's slot… corners last: c1-0, c8-4); (d) wave 2's
+between-cells; (e) `world-register.mjs`, the picture, the walk.
 
 ## 07:00 — THE NIGHT'S END: WHAT LANDED, WHAT NEEDS THE OWNER, WHAT COMES NEXT
 
