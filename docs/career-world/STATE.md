@@ -792,6 +792,34 @@ composites the coast mosaic under the island's, tag C, planned cells boxed
 and labelled, block borders only for the island. Verified at 03:00 on the
 current world (`.codex-tmp/session4/island/island-grid-L2.jpg`).
 
+**05:10 update — the chain was reordered around c3-1.** The handoff won
+its race (the chain's c1-1 dispatch died on the lock at 04:28:54) and
+`after-chain.sh` ran: c3-2 stitched under the c4-2 acceptance; **c1-2 and
+c6-2 stitched by override (Tanium 17 of 21)** — note c6-2 passed five unmet
+crossings against the NEW c6-1, which landed after the picture the owner
+ruled on, so that seam is unreviewed; **c1-1's seventh candidate is the
+first to pass key-light (0.0084) and meets both rivers**, refused on seam
+colour (0.235/0.254), the c0-1 seam tone 29.7, fringe 1.25% and **crowns
+1.18 m median over 1093** (drawn too fine) — his eye; **c3-1 refused by one
+pixel** (its stream meets c3-2's 49 px from the gate's 48) plus rock
+lighting 0.244 on the bench walls, everything else clean — his eye, and
+almost certainly an accept. Because c2-1 and c4-1 border c3-1 and were
+meant to bake AGAINST its real pixels (the seam he flagged), they now wait
+for his c3-1 ruling; c2-1's dispatch of 05:03 went out blind before it could
+be stopped (the process kill was not permitted), so its candidate is a
+bonus, not its attempt. `hold-after-c2-1.sh` takes the lock when c2-1 ends
+so the rest of `after-chain.sh` dies in seconds, then runs
+`after-chain-2.sh`: c4-0, c5-2, the coast accepts (c2-0, c4-0), the coast
+regenerations (c3-0, c5-0, c7-0), and c5-1's mask fix by override (its one
+failing gate is the vegetation arm on the c5-0 seam, which the fix does not
+touch and which passed when the cell was accepted at 12:28). Coast run
+result: 1 of 11 accepted; 7 refused on rock lighting; real misses c1-2
+(N c0-1's bay painted over), c4-8 (all five falls painted over), c3-0; close
+c7-1, c0-6, c1-4. All in `.codex-tmp/session4/results-run3.md`.
+**After after-chain-2: the c5-1 override is in it; then `world-register.mjs`
+(serve Tanium and the coast; add the two prefixes to `streamTiles.ts`; run
+`npm test`), then the picture.**
+
 **Needs the owner in that picture:** the shore limit for rock lighting;
 every refused shore (c1-1 and whatever c1-2, c1-4, c7-1, c0-6, c4-8, c3-0,
 c5-0, c7-0 do); Tanium c1-1 after its attempt (the key-light gate is
