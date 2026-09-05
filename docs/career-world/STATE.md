@@ -4,7 +4,40 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-05 20:35 UTC, LATEST (current):** **c7-2 LANDED ON THE NEW LOCKS
+**2026-09-05 21:50 UTC, LATEST (current):** **LOCK 18m IS IN ON THE OWNER'S
+WORD; HIS RULINGS ARE QUEUED BEHIND THE COAST RUN; c0-7 JOINS THE PLAN.**
+Owner 21:40, on the 18m preview and the four 3x3 views: *"Tc4-0 looks fine,
+c3-0 fine, c0-6 needs work and or needs to finish the coast in the cells
+above and below it, C1-4 almost but needs to finish the coast or expand to
+do so. 18m is fine the line sjust need to connect."* → **cell.mjs lock 18m**
+applied and recorded (commit 2e5f8c7a): a cell the rune chain crosses
+carries the groove's floor in its edit target, 1.2 m wide, FINAL; its ends
+are the AUTHORED neighbours' own grooves read off their layers (the darkest
+0.3-3 m run in the 96 px beside the shared line within 12% of the canon —
+measured c0-1 E 51%, c3-1 W 49% / E 54%, c5-1 W 50% / E 57%, canon 47 / 52 /
+48 / 45 / 50), the canon shape between them shifted linearly; where no
+authored neighbour has a chain, the canon. NOT yet exercised in a real bake
+(the coast run holds the lock; a dry run of cell.mjs takes it too) — the
+first real test is c4-1 at the head of the chain run; if its log lacks
+"chain pre-fill … px" or the run dies, read `.codex-tmp/session4/chain.log`.
+**Queued (`.codex-tmp/session4/chain.sh`, started by `chain-waiter.sh` — a
+background bash — the moment misses.log says "misses done" and the lock is
+free):** 1. his accepts stitched — T c4-0 ("looks fine"), C c3-0 ("fine"),
+C c0-6 (his "needs work and or needs to finish the coast in the cells above
+and below it", taken as keep-and-finish); 2. the chain with the floor drawn:
+c4-1 forced, c2-1, c1-1, c6-1 forced (no chain), c1-2 forced (the dark
+seam); 3. coast c0-5 (above c0-6), **c0-7 (NEW in coast-plan.mjs, 28 shore
+cells, extends c0-6, ends its coast)**, c1-4 again (his "almost but needs to
+finish the coast or expand to do so" → NOTES: one continuous shore from
+c1-3 to T c0-0's cliffs); 4. conform pass, serve. **The coast run so far:**
+c7-2, c8-6, c1-0 landed; c7-0, c7-4, c6-8, c4-8, c1-2 refused on continuity
+(+ rock lighting / tone) → the end-of-run conform pass (conform-band, any
+refusal that includes continuity); c1-8 baking, then wave 2 (c7-1, c7-3,
+c8-7, c7-8, c1-3, c2-8). Every candidate the model made painted its coast
+over the pre-filled sea; 18i-b's tiled patch did not change that — the
+cohesion now comes from the mask cut, not the model.
+
+**2026-09-05 20:35 UTC:** **c7-2 LANDED ON THE NEW LOCKS
 (20:18Z); c7-0 REFUSED AND THE FIX IS A MASK; THE REVIEWER'S 55 ROWS ARE IN;
 THE CHAIN RUN IS WRITTEN AND WAITS ON 18m.** The coast run (misses.sh) is in
 wave 1: c7-0 refused at 20:04Z on water continuity alone (5 unmet crossings —
