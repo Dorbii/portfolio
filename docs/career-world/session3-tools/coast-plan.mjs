@@ -44,6 +44,26 @@ const COAST = [
   // coast c6-0 landed with its land running to its east edge; the sea cell
   // east of it (world 8,0) carries that shoreline round the corner.
   { at: [7, 0], island: "W", extends: { territory: "coast", id: "c6-0" }, shore: "east" },
+  // owner 2026-09-05 07:30, five marked crops: "we need it so the coast is
+  // cohesive not constantly have this edge issue. Tried to outline the fill
+  // areas." coast-audit.mjs then found EVERY edge where authored land still
+  // runs into unplanned sea, and all of them are planned here — row 8 too
+  // (his c4-8 exception, generalised by that instruction). A corner cell
+  // extends the coast cell beside it, which bakes first.
+  { at: local(tan, -1, 0), island: "E", extends: { territory: "tanium", id: "c0-0" }, shore: "west" },      // c0-5 — his crop 1: T c0-0's cliffs into the sea, joining c0-6
+  { at: [1, 0], island: "E", extends: { territory: "coast", id: "c2-0" }, shore: "north" },                  // c1-0 — his crop 3: the north-west corner between c2-0 and c1-1
+  { at: local(ninja, 5, 1), island: "W", extends: { territory: "ninjaone", id: "c4-1" }, shore: "east" },   // c7-2 — N c4-1's east edge, 58% land
+  { at: local(ninja, 5, 2), island: "W", extends: { territory: "ninjaone", id: "c4-2" }, shore: "east" },   // c7-3 — N c4-2's east edge
+  { at: local(ninja, 5, 3), island: "W", extends: { territory: "ninjaone", id: "c4-3" }, shore: "east" },   // c7-4 — N c4-3's east edge, 38% land; T c6-0's corner below
+  { at: [8, 4], island: "W", extends: { territory: "coast", id: "c7-4" }, shore: "east" },                   // c8-4 — the corner north-east of T c6-0
+  { at: local(tan, 7, 0), island: "W", extends: { territory: "tanium", id: "c6-0" }, shore: "east" },       // c8-5 — his crop 4: T c6-0's east edge, 46% land
+  { at: local(tan, 7, 1), island: "W", extends: { territory: "tanium", id: "c6-1" }, shore: "east" },       // c8-6 — his crop 4: T c6-1's cliff, the chain's end beyond
+  { at: local(tan, 7, 2), island: "W", extends: { territory: "tanium", id: "c6-2" }, shore: "east" },       // c8-7 — T c6-2's east edge
+  { at: local(tan, 0, 3), island: "N", extends: { territory: "tanium", id: "c0-2" }, shore: "south" },      // c1-8 — T c0-2's south-east corner
+  { at: local(tan, 1, 3), island: "N", extends: { territory: "tanium", id: "c1-2" }, shore: "south" },      // c2-8 — the forest's south edge, 32% land
+  { at: local(tan, 4, 3), island: "N", extends: { territory: "tanium", id: "c4-2" }, shore: "south" },      // c5-8 — T c4-2's south edge, 71% land
+  { at: local(tan, 5, 3), island: "N", extends: { territory: "tanium", id: "c5-2" }, shore: "south" },      // c6-8 — T c5-2's south edge
+  { at: local(tan, 6, 3), island: "N", extends: { territory: "tanium", id: "c6-2" }, shore: "south" },      // c7-8 — T c6-2's south edge, 49% land
 ];
 
 const cellBiomes = {};

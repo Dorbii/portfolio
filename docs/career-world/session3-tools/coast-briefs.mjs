@@ -75,13 +75,73 @@ const NOTES = {
   "c3-0": `**Distance, hard.** The plateau ends between 15 and 40 m north of the south
 edge — never more. From 40 m on, everything is sea. The previous candidate
 carried the plateau nearly the whole cell as a blank slab; that is wrong.`,
-  // owner 2026-09-05: "this spot needs to be coastal" — N c0-2's west edge
-  "c1-3": `**Two headlands and a bay.** The island's ground reaches your EAST edge in
-two places only — a strip at the top of the edge and the sandy beach at the
-bottom — with the bay's open water between them. Carry EACH strip out into
-this cell as a low headland, 15-40 m long, ending in broken column tops and
-a shingle foot, and let the bay's water run straight out between them into
-the open sea. Nothing closes the bay off; no land bridges the two headlands.`,
+  // owner 2026-09-05: "this spot needs to be coastal" — N c0-2's west edge;
+  // then his outline of the fill area (07:30): the first candidate built
+  // headlands over two thirds of the seam and closed the bay
+  "c1-3": `**Two small headlands and an open bay — hard.** The island's ground reaches
+your EAST edge in two places only: a strip about 2 m long at the very top of
+the edge, and the sandy beach in the bottom 10 m. Everything between — 88 m
+of the edge — is the bay's OPEN WATER, and it stays open water at the seam
+and runs straight out west into the sea. Carry each strip out as a LOW
+headland no wider at the seam than it arrives (2 m at the top, 10 m at the
+bottom), 15-40 m long, tapering to broken column tops and a shingle foot.
+The first candidate put columns across a third of the bay at each end; that
+is wrong. No rock and no beach anywhere across the bay's mouth.`,
+  // owner 2026-09-05 07:30 (the same outline): the bay mouth at N c0-1's west
+  // edge is open water, not the cliff the first candidate painted over it
+  "c1-2": `**The bay's mouth is open water — hard.** N c0-1's bay arrives across your
+EAST edge 53 m wide, centred 73% of the way down: at the seam it is OPEN
+WATER, and it runs out west into the sea with nothing across its mouth — no
+rock, no beach, no stack in the gap. The island's ground arrives only ABOVE
+the bay (the upper 45% of the edge): carry that out as a headland 15-40 m
+long, ending in broken column tops, with the bay's water lapping its south
+foot. The first candidate painted cliff across the mouth; that is wrong.`,
+  // owner 2026-09-05 07:30: "C7-0 thought needs a regen" — the first
+  // candidate met c6-0's sea and ended its four inlets at the seam
+  "c7-0": `**Four inlets, open — hard.** c6-0's coast reaches your WEST edge as sea in
+the top 22% and then FOUR inlets at 33%, 55%, 72% and 91% of the way down.
+Each inlet is OPEN WATER at the seam and continues into this cell as a cove
+that opens to the sea; the land between the inlets continues 15-40 m as low
+headlands and ends. The first candidate met only the sea and walled off the
+inlets; that is wrong. Your south edge meets the shore cell below (c7-1):
+carry the shoreline down to it, not across it.`,
+  // owner 2026-09-05 07:30, crop 1: the fill line from c0-6's corner up to
+  // T c0-0's west edge
+  "c0-5": `**A headland down to c0-6.** T c0-0's cliffs arrive across the bottom 15% of
+your EAST edge (the rest of that edge is T c0-0's own sea). Carry them west
+15-40 m as one headland of columns that turns south and runs down to your
+SOUTH edge, where the shore cell c0-6 continues it — the owner drew this fill
+as one line from c0-6's north-west corner up to T c0-0's edge. Everything
+north and west of that line is open sea.`,
+  // owner 2026-09-05 07:30, crop 3: the diagonal fill from c1-1's corner to
+  // c2-0's corner — the north-west corner of the island
+  "c1-0": `**The corner, on a diagonal.** c2-0's plateau arrives across most of your
+EAST edge (86% of it, from 14% down), and the shore cell c1-1 lies to your
+SOUTH with its land at its north edge. The owner drew the coast here as one
+straight diagonal from your south-west corner to your north-east corner:
+land south-east of that line, continuing c2-0's ground and c1-1's, ending
+in a rim of broken column tops along the diagonal; open sea north-west of
+it. This is the island's north-west corner: the north-facing part of the rim
+is seen from behind (no face), the west-facing part shows its columns.`,
+  // owner 2026-09-05 07:30, crop 4: one convex bulge across c8-5 and c8-6
+  "c8-5": `**A rounded bulge.** T c6-0's ground arrives over the lower 40% of your WEST
+edge (from 63% down) and touches it in two small spots higher up. The owner
+drew the fill as ONE convex bulge of land starting 60% of the way down T
+c6-0's edge, swelling 15-40 m east into this cell, and coming back to T
+c6-1's cliff at the top of the cell below (c8-6). So: a rounded headland,
+widest at your south edge, its rim of broken column tops facing east and
+south; open sea north of it and east of it.`,
+  "c8-6": `**The bulge closes; then the chain's end.** The rounded headland from c8-5
+above comes down across your NORTH edge and closes back onto T c6-1's cliff,
+which arrives across the top 19% of your WEST edge. Below that, T c6-1's
+cliff face runs down the seam: continue it as a sea cliff with talus at its
+foot and, 20-40 m out, the stack the rune chain's last line cuts across —
+c6-1 is the chain's seaward end. Open sea east and south.`,
+  "c8-4": `**The corner north-east of T c6-0.** The shore cell c7-4 lies to your WEST
+and c8-5 to your SOUTH; T c6-0's north-east corner touches your south-west
+corner. Carry their shorelines round this corner as one line — a low rim of
+column tops turning from north-facing to east-facing — and leave the rest
+open sea.`,
 };
 
 let n = 0;
