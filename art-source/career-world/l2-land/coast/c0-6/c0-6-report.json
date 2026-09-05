@@ -1,0 +1,100 @@
+{
+  "cell": "c0-6",
+  "territory": "coast",
+  "status": "refused",
+  "generation": {
+    "filename": "c0-6-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "5C69A371A4A13C34A1D425BDD29B269445DA93BAE99F72813E4B7FCBE6193A6C",
+    "mode": "built-in ImageGen edit with the edit target first and the canon second as reference only",
+    "editCallsUsed": 1,
+    "retryUsed": false,
+    "bothImagesAttachedToSameCall": true,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "promptRecord": "c0-6-imagegen-prompt.txt"
+  },
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean on the delivered source; final water-mask pixels and gradients below 12 luminance units excluded",
+    "peakVsUniformOverLand": 1.636381,
+    "uniformReference": 1.0,
+    "directionalKeyFirstMoment": 0.010558,
+    "gradientSamples": 495800,
+    "aggregateDirectionalityNumericPass": true,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No whole-cell cast-shadow field or sun angle is visible, but repeated basalt top planes are materially lighter than their vertical column faces. The aggregate orientation metric does not override the literal equal-value failure."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "manual estimated fraction of non-water land area at native source resolution",
+    "buildable": 0.58,
+    "steep": 0.23,
+    "otherBrokenRockTalusOrVegetation": 0.19,
+    "method": "Broad coherent cliff-top shelves count as buildable; exposed column faces, fall banks, and steep talus count as steep; broken margins, scattered rock, scrub, and conifers make up the remainder."
+  },
+  "waterFootprintFraction": 0.47145085,
+  "finalDerivedLandCoverageFraction": 0.52854915,
+  "crown": {
+    "medianMetres": 2.548,
+    "medianPx": 53.078,
+    "sampleCount": 24,
+    "method": "Complete visual census of 24 distinct visible crowns, including saplings and edge-visible crowns; horizontal crown-tip widths were measured on the 1254 px source and scaled by 2560/1254, with a 26 px source median.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c0-6-water-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "802E8E881B43B2A7F4894B011D6A0E0BD46A28C9AD02FAE7ED06D4A32A4D40A2",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "opaqueWaterPixels": 741364,
+    "transparentNonWaterPixels": 831152,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedWaterComponents8Connected": 1,
+    "accidentalInteriorHoles": 0,
+    "intentionalDryRockIslands": 1,
+    "edgeWaterPixels": {
+      "north": 635,
+      "east": 34,
+      "south": 857,
+      "west": 1254
+    },
+    "method": "Classified source-raster teal and cyan water from sea-edge connectivity, grew through painted foam and reflections, closed small wet gaps, filled accidental enclosed holes, and retained the single dry column stack; the full-canvas overlay was inspected at source resolution."
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleEditCall": true,
+    "secondReferenceAttached": true,
+    "wholeCanvasRawGenerationUntouched": true,
+    "terrainOnlyNoNewStructuresObserved": true,
+    "highOblique2_5D": true,
+    "westEdgeEntirelySea": true,
+    "northEdgeEntirelySea": false,
+    "southEdgeEntirelySea": false,
+    "landContinuesOnlyFromEastEdge": false,
+    "allFourEastEdgeWaterArrivalsPreservedAtRequiredWidths": false,
+    "waterMaskSameDimensionsBinaryAndVisuallyInspected": true,
+    "allMeasuredCrownsIncluded": true,
+    "crownMedianInsideAcceptedTerritoryBand": true,
+    "strictEqualValueOnAllFormSides": false,
+    "buildableFractionApproximatelyOneThird": false
+  },
+  "refusalReasons": [
+    "The highest-priority lighting rule fails visually: basalt top planes are consistently lighter than vertical faces.",
+    "Generated land reaches both the north and south frame edges, although this cell requires sea on those edges and land only through the east edge.",
+    "Only 34 east-edge pixels classify as water, so the four required incoming water crossings and their stated widths were not preserved.",
+    "The estimated buildable fraction is about 0.58 of non-water land rather than the territory target of roughly one third."
+  ],
+  "openRisks": [
+    "The cliff line contains long stretches of visually regular vertical columns despite weathering and broken talus; owner visual judgment is required against the ordinary-coast regularity ban.",
+    "The supplied neighbour paint contains engraved slabs at the east side. They remain visible in the raw edit result and were not separately removed because the call was required to preserve the edit target.",
+    "The water mask is binary, same-size, connected, and overlay-inspected, but exact coastline judgment remains a human visual gate.",
+    "The square result made the framing-only retry unavailable under the packet, so no second ImageGen call was made.",
+    "No artifact was promoted outside quarantine."
+  ]
+}
