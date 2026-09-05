@@ -1,0 +1,143 @@
+{
+  "cell": "c7-4",
+  "territory": "ninjaone",
+  "biome": "shore",
+  "status": "quarantine_candidate_failed_hard_constraints",
+  "generationSizePx": [1254, 1254],
+  "generation": {
+    "filename": "c7-4-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "C1DDD371E86CF9FC6CB2D10EF209A2651185E7C4A1D3C6BA33675706FD678688",
+    "mode": "single built-in ImageGen edit with edit-target as Image 1 and style canon as reference-only Image 2",
+    "imageGenCallsUsed": 1,
+    "retryUsed": false,
+    "secondReferenceAccepted": true,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "byteIdenticalToGeneratedOutput": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "promptFile": "c7-4-imagegen-prompt-used-r3.txt"
+  },
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "Thirty-six-bin axial land-luminance-gradient magnitude peak divided by the uniform-bin mean; water and its four immediate neighbours are excluded, as are gradients below twelve luminance units.",
+    "peakVsUniformOverLand": 1.533712,
+    "uniformReference": 1.0,
+    "directionalKeyFirstMoment": 0.100586,
+    "gradientSamples": 665518,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No coherent cast-shadow field is obvious, but basalt top caps are consistently lighter than their vertical faces and several recessed faces are darker. The literal equal-value-on-every-side requirement is not met."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "Manual visual estimate as fractions of non-water terrain at native source resolution.",
+    "buildable": 0.57,
+    "steep": 0.29,
+    "otherTalusShingleScrubOrTrees": 0.14,
+    "method": "Broad quarry-floor and plateau tops count as buildable; exposed column faces and fall walls count as steep; talus, shingle, broken rims, scrub, and conifers make up the remainder."
+  },
+  "waterFootprintFraction": 0.521087,
+  "finalDerivedLandCoverageFraction": 0.478913,
+  "crown": {
+    "medianMetres": 3.234,
+    "medianPx": 67.368,
+    "sampleCount": 27,
+    "method": "Manual full-silhouette width census at native 1254 px of all 27 discernible conifer crowns, including saplings, overlaps, and frame-clipped crowns; median native width 33 px was scaled by 2560/1254 and converted at 4.8 cm/px.",
+    "excludedElements": []
+  },
+  "crownEvidence": {
+    "overlay": "qa/c7-4-crown-census.png",
+    "sourceWidthsPx": [20, 20, 25, 28, 29, 29, 30, 30, 31, 31, 32, 32, 33, 33, 34, 35, 35, 35, 36, 36, 38, 38, 39, 39, 40, 42, 47]
+  },
+  "waterMask": {
+    "filename": "c7-4-water-source.png",
+    "classification": "c7-4-water.json",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "CAB699201931ABE23655CF4C18E62C00978095263164FAAEF6B5636CDE6EFC6C",
+    "encoding": "Opaque white water on fully transparent non-water; binary alpha.",
+    "opaqueWaterPixels": 819418,
+    "transparentNonWaterPixels": 753098,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedWaterComponents8": 5,
+    "connectedWaterComponentSizesPx": [804695, 6482, 5698, 2217, 326],
+    "componentInterpretation": "The largest component is the sea and connected lower outlet; the four smaller components are separated reaches of the descending watercourse where dry basalt rims divide painted water surfaces.",
+    "internalDryRegions": [
+      { "pixels": 446, "boundsSourcePx": [694, 1032, 725, 1054], "interpretation": "dry skerry" },
+      { "pixels": 352, "boundsSourcePx": [749, 1071, 773, 1092], "interpretation": "dry skerry" }
+    ],
+    "accidentalInteriorWaterHoles": 0,
+    "edgeWaterPixels": {
+      "north": 752,
+      "east": 1254,
+      "south": 1254,
+      "west": 109
+    },
+    "method": "Trace all cool chromatic water, close pinholes, grow adjacent neutral foam and reflections without crossing warm basalt, fill only small enclosed texture holes, and verify the native-resolution red overlay includes surf, wash, stream reaches, fall, and plunge foam."
+  },
+  "edgeTopology": {
+    "north": {
+      "required": "sea only",
+      "waterPixels": 752,
+      "terrainPixels": 502,
+      "pass": false
+    },
+    "east": {
+      "required": "sea only",
+      "waterPixels": 1254,
+      "terrainPixels": 0,
+      "pass": true
+    },
+    "south": {
+      "required": "sea only",
+      "waterPixels": 1254,
+      "terrainPixels": 0,
+      "pass": true
+    },
+    "west": {
+      "requiredFromNorth": "sea, ground, watercourse, ground, sea in the exact supplied proportions",
+      "actualRunsSourcePxFromNorth": [
+        { "class": "terrain", "start": 0, "end": 1144, "count": 1145 },
+        { "class": "water", "start": 1145, "end": 1253, "count": 109 }
+      ],
+      "actualWaterFraction": 0.086922,
+      "pass": false
+    }
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasEditCall": true,
+    "secondReferenceAccepted": true,
+    "rawSourceUnmodified": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "eastEdgeSeaOnly": true,
+    "southEdgeSeaOnly": true,
+    "northEdgeSeaOnly": false,
+    "westEdgeExactSeaGroundWatercourseGroundSeaPattern": false,
+    "landContinuationWithin15To40Metres": false,
+    "strictNeutralLighting": false,
+    "weatheredIrregularColumnsWithoutDefaultPalisadeRegularity": false,
+    "waterMaskSameDimensionsBinaryAndOverlayInspected": true,
+    "waterMaskCoversSurfWashRipplesReflectionsStreamAndFall": true,
+    "crownObjectComplete": true,
+    "crownCensusIncludesAllFoundCrowns": true,
+    "crownMedianWithin1_7To5_2Metres": true
+  },
+  "refusalReasons": [
+    "The west edge is terrain for its first 1145 of 1254 pixels and water only for the final 109 pixels; it does not match the required sea-ground-watercourse-ground-sea delivery pattern.",
+    "The north edge contains 502 terrain pixels although it must be entirely sea.",
+    "The generated mainland extends across almost half the canvas instead of ending 15-40 metres inside the required short ground arrivals.",
+    "Basalt top caps and vertical faces have different values, violating the literal neutral-lighting rule.",
+    "Several cliff runs repeat upright, similarly capped columns and read as a regular palisade rather than fully weathered irregular coast."
+  ],
+  "openRisks": [
+    "The model repainted outside the flat-grey authoring regions despite the prompt lock. The pipeline binding may preserve neighbour pixels, but no stitched pipeline output was produced or verified in this task.",
+    "The water mask follows the raw generated source and does not hide the failed edge terrain.",
+    "Buildable and steep fractions are manual screen-space estimates rather than surveyed terrain geometry.",
+    "Exact wet-pixel boundary judgment and overall visual quality remain director and owner decisions; this report makes no visual-acceptance claim."
+  ]
+}
