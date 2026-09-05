@@ -1836,8 +1836,19 @@ exit 1
   for (const g of gates) {
     console.log(`    ${g.pass ? "PASS" : "FAIL"}  ${g.name.padEnd(20)} ${g.value}`);
   }
-  if (gates.some((g) => !g.pass)) {
+  const failedGates = gates.filter((g) => !g.pass).map((g) => `${g.name} ${g.value}`);
+  // OWNER OVERRIDE (lock 18g, 2026-09-04): only the owner accepts. When he has
+  // looked at the candidate in place and ruled it fine, CELL_OWNER_ACCEPT
+  // carries his words and the stitch proceeds past the refusal; the failed
+  // gates are printed here and recorded in the manifest so the override is
+  // reviewable, never silent. Never set by the runner on its own.
+  const ownerAccept = process.env.CELL_OWNER_ACCEPT;
+  if (failedGates.length && !ownerAccept) {
     die("cell NOT accepted. Nothing was stitched; the world is unchanged.");
+  }
+  if (failedGates.length && ownerAccept) {
+    console.log(`\n  OWNER OVERRIDE — stitching past ${failedGates.length} failed gate(s): ${failedGates.join(" | ")}`);
+    console.log(`  owner: ${ownerAccept}`);
   }
 
   // ------------------------------------------------- accept and stitch ------
@@ -1859,6 +1870,7 @@ exit 1
 
   ledger.cells[id] = {
     authoredAt: new Date().toISOString(),
+    ownerOverride: (failedGates.length && ownerAccept) ? { at: new Date().toISOString(), reason: ownerAccept, failedGates } : undefined,
     describe: (describe || "").slice(0, 400),
     sourcePx,
     gates, shelf: shelf?.id ?? null,

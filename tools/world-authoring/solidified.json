@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-05T00:33:01.082Z",
+ "solidifiedAt": "2026-09-05T00:53:57.256Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "2db4c48cfa3593d2",
+  "cell.mjs": "b1d67d2f6f4d26b4",
   "plan-territory.mjs": "e8d86a90b2e32796",
   "AGENTS.md": "a1ab4eaec1d4c6ac"
  },
@@ -462,6 +462,15 @@
    "reason": "owner approved 2026-09-04 (in chat: 'for the coastal fixes you can generate those in the tiles next to the placed art' / 'not replacing those tiles just extending them into the neighbor to transition better'): cell.mjs looks authored neighbours up by world lattice position across every territory (FOREIGN map, srcFileFor), so a coast cell outside the island's blocks receives the island's real pixels in its edit target, its seams are cut against them, its gates are judged against them, and its packet calls them authored; nothing else changes",
    "hashes": {
     "cell.mjs": "2db4c48cfa3593d2",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-05T00:53:57.257Z",
+   "reason": "owner approved 2026-09-04 (in chat, on the picture of c4-2's refused candidate in place and its east seam: 'yeah its fine'): CELL_OWNER_ACCEPT carries the owner's words and lets a run stitch past failed gates, printed loudly and recorded in the manifest entry with the gates overridden; never set by the runner; nothing else changes",
+   "hashes": {
+    "cell.mjs": "b1d67d2f6f4d26b4",
     "plan-territory.mjs": "e8d86a90b2e32796",
     "AGENTS.md": "a1ab4eaec1d4c6ac"
    }
