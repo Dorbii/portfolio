@@ -80,6 +80,23 @@ brief is committed; needs the lock.
   T c1-0 / c2-0's water), and T c3-2's south edge (row 8 stays sea by the
   owner's ruling; a shore cell there would put a coast foot in that row).
 
+## Status as of 01:35
+
+- A (mask fixes): **c0-1 done, c2-2 done** (re-derived 01:25); c3-2 refused
+  on the seam with c4-2 the owner accepted (tone 38.3) — re-derives under his
+  acceptance after the chain (`after-chain.sh`); c5-1 did not take — re-run
+  with full output after the chain. c5-2 → to the owner ("rebake, or good
+  enough?").
+- B: c4-2 **accepted by the owner on his eye**, stitched with the override
+  (Tanium 15 of 21). c1-2 refused twice (second close: only veg colour);
+  c1-2, c2-1, c3-1, c6-2, c4-0 are in his picture as refused candidates in
+  place; c1-1 queued for one regeneration.
+- C: c6-1 baking now (the chain's seaward end).
+- D: eleven coast cells queued behind c6-1, one attempt each.
+- E: c4-1 → to the owner ("rebake, or good enough?").
+- Policy (owner 01:20): one attempt per cell; refusals go to his picture;
+  retries only for cells he sends back.
+
 ## Order (as of 00:35)
 
 1. The run of 00:16 finishes (c4-2, c1-2, c2-1, c3-1, c6-2, c4-0), on
