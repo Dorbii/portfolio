@@ -70,10 +70,23 @@ comes from ambient occlusion in crevices, never from a key light.
 reaches into this cell, if its ground is darker or paler than you would paint
 it, the neighbour is right.`;
 
+// per-cell notes from the owner's review of refused candidates
+const NOTES = {
+  "c3-0": `**Distance, hard.** The plateau ends between 15 and 40 m north of the south
+edge — never more. From 40 m on, everything is sea. The previous candidate
+carried the plateau nearly the whole cell as a blank slab; that is wrong.`,
+};
+
 let n = 0;
 for (const x of def.coastCells) {
   const id = `c${x.at[0]}-${x.at[1]}`;
   const islandBiomeId = JSON.parse(fs.readFileSync(`${root}/${x.extends.territory}/territory.def.json`, "utf8")).cellBiomes[x.extends.id.slice(1).replace("-", ",")];
+  // a coast cell can extend another coast cell (the corner beyond c6-0): its
+  // biome lives in the coast plan, not the canon
+  if (!canon[islandBiomeId] && fs.existsSync(`${root}/coast/plan.json`)) {
+    const cb = JSON.parse(fs.readFileSync(`${root}/coast/plan.json`, "utf8")).biomes;
+    if (cb[islandBiomeId]) canon[islandBiomeId] = cb[islandBiomeId];
+  }
   const islandBiome = canon[islandBiomeId]?.name || islandBiomeId;
   const sideName = { S: "SOUTH", N: "NORTH", E: "EAST", W: "WEST" }[x.island];
   const seaSides = ["NORTH", "SOUTH", "EAST", "WEST"].filter((s) => s !== sideName);
@@ -96,7 +109,7 @@ ${PERSPECTIVE[x.shore]}
 
 No meadow, no flowers, no structures. Dark conifers only where they arrive
 from the island. Carry land only across the ${sideName} edge; the ${seaSides.join(", ")} edges are sea.${waterText}`;
-  fs.writeFileSync(`${root}/coast/briefs/${id}.md`, brief + LIGHTING + "\n");
+  fs.writeFileSync(`${root}/coast/briefs/${id}.md`, brief + (NOTES[id] ? `\n\n${NOTES[id]}` : "") + LIGHTING + "\n");
   n += 1;
   console.log(`  ${id}: ${x.shore} shore beside ${x.extends.territory} ${x.extends.id} (${islandBiomeId}), ${water.length} water arrival(s)`);
 }

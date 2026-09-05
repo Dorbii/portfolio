@@ -35,6 +35,10 @@ const COAST = [
   { at: local(ninja, -1, 3), island: "E", extends: { territory: "ninjaone", id: "c0-3" }, shore: "west" },
   // owner 2026-09-04 on T c3-2's south edge: "expand this one" — the row-8 sea cell below it
   { at: local(tan, 3, 3), island: "N", extends: { territory: "tanium", id: "c3-2" }, shore: "south" },
+  // owner 2026-09-05, on the north-shore seams ("these parts are not good"):
+  // coast c6-0 landed with its land running to its east edge; the sea cell
+  // east of it (world 8,0) carries that shoreline round the corner.
+  { at: [7, 0], island: "W", extends: { territory: "coast", id: "c6-0" }, shore: "east" },
 ];
 
 const cellBiomes = {};

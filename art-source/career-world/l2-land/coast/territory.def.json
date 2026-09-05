@@ -144,6 +144,18 @@
     "id": "c3-2"
    },
    "shore": "south"
+  },
+  {
+   "at": [
+    7,
+    0
+   ],
+   "island": "W",
+   "extends": {
+    "territory": "coast",
+    "id": "c6-0"
+   },
+   "shore": "east"
   }
  ],
  "shelves": [],
@@ -202,7 +214,8 @@
   "7,1": "shore",
   "0,6": "shore",
   "1,4": "shore",
-  "4,8": "shore"
+  "4,8": "shore",
+  "7,0": "shore"
  },
  "runeChain": null,
  "rules": {
