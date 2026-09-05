@@ -336,9 +336,12 @@ for (const [i, cell] of ORDER.entries()) {
     // and an interrupted night should leave every finished cell landed rather
     // than one enormous uncommitted pile.
     spawnSync("git", ["add", "-A"], { encoding: "utf8" });
-    const msg = `Tanium ${id}: ${biome}\n\nBaked unattended from `
-      + `art-source/career-world/l2-land/tanium/briefs/${id}.md, gates passed, `
-      + `stitched into the l2-tanium-r1 pyramid.\n\n`
+    // (coast c6-0 at 02:48 was committed as "Tanium c6-0" by the old text —
+    // the territory belongs in the message)
+    const tname = TERRITORY === "tanium" ? "Tanium" : TERRITORY === "coast" ? "Coast" : TERRITORY;
+    const msg = `${tname} ${id}: ${biome}\n\nBaked unattended from `
+      + `art-source/career-world/l2-land/${TERRITORY}/briefs/${id}.md, gates passed, `
+      + `stitched into the l2-${TERRITORY}-r1 pyramid.\n\n`
       + `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`;
     const commit = spawnSync("git", ["commit", "-q", "-m", msg], { encoding: "utf8" });
     if (commit.status !== 0) say(`    (commit said: ${(commit.stdout || commit.stderr || "").trim().slice(0, 120)})`);
