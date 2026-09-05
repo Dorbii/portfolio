@@ -33,6 +33,11 @@ const COAST = [
   // owner 2026-09-04 on the sound edge: N c1-3 "is fine"; N c0-3 "just expand to the side" —
   // the sea cell west of it, which also meets Tanium c0-0 below
   { at: local(ninja, -1, 3), island: "E", extends: { territory: "ninjaone", id: "c0-3" }, shore: "west" },
+  // owner 2026-09-05 07:10, a crop of N c0-2's west edge on the night's picture:
+  // "this spot needs to be coastal" — its beach and the land strip at its
+  // corners run straight into open sea at world (2,3); the bay between them
+  // is the only shoreline. The sea cell west of it, between c1-2 and c1-4.
+  { at: local(ninja, -1, 2), island: "E", extends: { territory: "ninjaone", id: "c0-2" }, shore: "west" },
   // owner 2026-09-04 on T c3-2's south edge: "expand this one" — the row-8 sea cell below it
   { at: local(tan, 3, 3), island: "N", extends: { territory: "tanium", id: "c3-2" }, shore: "south" },
   // owner 2026-09-05, on the north-shore seams ("these parts are not good"):

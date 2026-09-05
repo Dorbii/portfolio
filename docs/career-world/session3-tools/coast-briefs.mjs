@@ -75,6 +75,13 @@ const NOTES = {
   "c3-0": `**Distance, hard.** The plateau ends between 15 and 40 m north of the south
 edge — never more. From 40 m on, everything is sea. The previous candidate
 carried the plateau nearly the whole cell as a blank slab; that is wrong.`,
+  // owner 2026-09-05: "this spot needs to be coastal" — N c0-2's west edge
+  "c1-3": `**Two headlands and a bay.** The island's ground reaches your EAST edge in
+two places only — a strip at the top of the edge and the sandy beach at the
+bottom — with the bay's open water between them. Carry EACH strip out into
+this cell as a low headland, 15-40 m long, ending in broken column tops and
+a shingle foot, and let the bay's water run straight out between them into
+the open sea. Nothing closes the bay off; no land bridges the two headlands.`,
 };
 
 let n = 0;
