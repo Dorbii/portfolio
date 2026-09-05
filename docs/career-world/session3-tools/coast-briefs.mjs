@@ -94,7 +94,8 @@ for (const x of def.coastCells) {
   const waterText = water.length
     ? `\n\n**Water arriving across the ${sideName} edge**, measured off the island's art:\n${water.map((w) => `- at **${w.pct}% along that edge**, about ${w.m} m wide — meet it and let it reach the sea`).join("\n")}`
     : "";
-  const brief = `THE ${x.shore.toUpperCase()} SHORE beside ${x.extends.territory === "ninjaone" ? "NinjaOne" : "Tanium"}'s ${x.extends.id} (${islandBiome}).
+  const owner = x.extends.territory === "ninjaone" ? "NinjaOne's" : x.extends.territory === "tanium" ? "Tanium's" : "the coast's own";
+  const brief = `THE ${x.shore.toUpperCase()} SHORE beside ${owner} ${x.extends.id} (${islandBiome}).
 
 The island lies to the ${sideName}. Its ground — ${canon[islandBiomeId]?.ground || islandBiomeId} —
 arrives across your ${sideName} edge as real paint. **Continue it exactly as it
