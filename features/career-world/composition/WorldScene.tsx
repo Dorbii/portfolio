@@ -12,6 +12,7 @@ import {
 } from "react";
 import { WorldBackdrop } from "../layers/world-backdrop";
 import { WaterLayer, type WaterRenderState } from "../layers/water";
+import {InlandReviewPanel} from "../development/InlandReviewPanel";
 import {
   TERRITORIES,
   TerritoryLandform,
@@ -681,6 +682,7 @@ export function WorldScene({
           oceanMotion={oceanMotionVisible}
           inlandMotion={inlandWaterMotionVisible}
           inlandEffects={inlandWaterEffectsVisible}
+          inlandBedVisible={environmentLayerVisible("L3_4")}
           coastalEffects={coastalAmbienceVisible}
           seabedVisible={environmentLayerVisible("L1_3")}
           oceanDetailsVisible={environmentLayerVisible("L1_4")}
@@ -750,6 +752,9 @@ export function WorldScene({
         onChange={setWaterTuning}
         tuning={waterTuning}
       />
+      <InlandReviewPanel enabled={enableDevelopmentTools} onFrame={(target,id)=>{
+        cancelFocusAnimation();commitCamera(target);setActiveViewId(`inland:${id}`);
+      }} />
       <PerformanceProbe enabled={enableDevelopmentTools || enablePerformanceProbe} />
       <LightingControls enabled={enableDevelopmentTools} hour={lighting.hour} onHour={lighting.setHour}
         cycling={lighting.cycling} onCycling={lighting.setCycling} />

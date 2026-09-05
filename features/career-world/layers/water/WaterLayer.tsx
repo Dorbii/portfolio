@@ -8,6 +8,7 @@ import { normalizeWaterState, type WaterState } from "./model";
 import { WaterRenderer, type WaterScene } from "./WaterRenderer";
 import { waterFallbackColor } from "../lighting/water/WaterLighting";
 import { WaveEventRenderer } from "./ocean/events/WaveEventRenderer";
+import { InlandSprayRenderer } from "./inland/spray";
 
 export type WaterRenderState = "loading" | "ready" | "fallback";
 
@@ -22,6 +23,7 @@ interface WaterLayerProps {
   readonly inlandMotion?: boolean;
   readonly coastalEffects?: boolean;
   readonly inlandEffects?: boolean;
+  readonly inlandBedVisible?: boolean;
   readonly seabedVisible?: boolean;
   readonly oceanDetailsVisible?: boolean;
   readonly aquaticLifeVisible?: boolean;
@@ -46,6 +48,7 @@ export function WaterLayer(props: WaterLayerProps) {
     if (!canvas || !eventCanvas) return;
     let renderer: WaterRenderer | null = null;
     let eventRenderer: WaveEventRenderer | null = null;
+    let inlandSpray: InlandSprayRenderer | null = null;
     const requestedTime = process.env.NODE_ENV !== "production"
       ? Number(new URLSearchParams(window.location.search).get("water.startTime") ?? 3) : 3;
     const initialTime = Number.isFinite(requestedTime) ? Math.max(0, Math.min(3600, requestedTime)) : 3;
@@ -57,6 +60,7 @@ export function WaterLayer(props: WaterLayerProps) {
       return { camera: p.camera, light: p.light, state: normalizeWaterState(p.state),
         oceanVisible: p.oceanVisible ?? true, inlandVisible: p.inlandVisible ?? true,
         coastalEffects: p.coastalEffects ?? true, inlandEffects: p.inlandEffects ?? true,
+        inlandBedVisible:p.inlandBedVisible??true,
         seabedVisible: p.seabedVisible ?? true, oceanDetailsVisible: p.oceanDetailsVisible ?? true,
         aquaticLifeVisible: p.aquaticLifeVisible ?? true,
         debug: new URLSearchParams(window.location.search).has("water.fields"),
@@ -71,6 +75,11 @@ export function WaterLayer(props: WaterLayerProps) {
       const events = eventRenderer?.selectEvents(currentScene, oceanTime) ?? [];
       renderer?.render(oceanTime, inlandTime, events);
       eventRenderer?.render(currentScene, oceanTime, events);
+      const sprayDraws=inlandSpray?.render(currentScene,inlandTime) ?? 0;
+      eventCanvas.dataset.inlandSprayDraws=String(sprayDraws);
+      eventCanvas.dataset.inlandSprayTime=inlandTime.toFixed(3);
+      eventCanvas.dataset.gorgeFallState=inlandSpray?.gorgeState ?? "unavailable";
+      eventCanvas.dataset.mappedFallsState=inlandSpray?.mappedState ?? "unavailable";
     };
     const tick = (now: number) => {
       frame = 0;
@@ -113,11 +122,20 @@ export function WaterLayer(props: WaterLayerProps) {
     const restored = () => { if (!disposed) initialize(); };
     const initializeEvents = () => {
       if (disposed) return;
-      try { eventRenderer = new WaveEventRenderer(eventCanvas, draw); delete eventCanvas.dataset.renderError; draw(); }
+      try {
+        eventRenderer = new WaveEventRenderer(eventCanvas, draw);
+        delete eventCanvas.dataset.renderError;
+        const gl=eventCanvas.getContext("webgl2");
+        if(gl) {
+          try { inlandSpray=new InlandSprayRenderer(gl,draw);delete eventCanvas.dataset.inlandSprayError; }
+          catch(error) { eventCanvas.dataset.inlandSprayError=String(error); }
+        }
+        draw();
+      }
       catch (error) { eventCanvas.dataset.renderState = "unavailable"; eventCanvas.dataset.renderError = String(error); }
     };
     const eventsLost = (event: Event) => {
-      event.preventDefault(); eventRenderer?.destroy(); eventRenderer = null;
+      event.preventDefault(); inlandSpray?.destroy();inlandSpray=null;eventRenderer?.destroy(); eventRenderer = null;
       eventCanvas.dataset.renderState = "unavailable";
     };
     // Defer backing-store changes out of ResizeObserver's layout delivery.
@@ -145,6 +163,7 @@ export function WaterLayer(props: WaterLayerProps) {
       eventCanvas.removeEventListener("webglcontextlost", eventsLost);
       eventCanvas.removeEventListener("webglcontextrestored", initializeEvents);
       renderer?.destroy();
+      inlandSpray?.destroy();
       eventRenderer?.destroy();
       updateRef.current = () => undefined;
     };
@@ -157,6 +176,6 @@ export function WaterLayer(props: WaterLayerProps) {
     <canvas ref={detailCanvasRef} className="career-world__ocean-details" aria-hidden="true"
       data-layer="ocean-details" data-water-sublayers="reef-details aquatic-life coast-contact" data-render-state="loading" />
     <canvas ref={eventCanvasRef} className="career-world__wave-events" aria-hidden="true"
-      data-layer="water-events" data-render-state="loading" />
+      data-layer="water-events" data-water-sublayers="ocean-spray inland-spray" data-render-state="loading" />
   </>;
 }

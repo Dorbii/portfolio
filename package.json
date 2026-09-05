@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "vinext dev",
     "build": "vinext build",
-    "build:water": "node --experimental-strip-types scripts/build-water-fields.mjs",
+    "build:water": "node --experimental-strip-types scripts/build-water-fields.mjs && node scripts/build-inland-fall-atlas.mjs",
+    "build:inland-falls": "node scripts/build-inland-fall-atlas.mjs",
     "build:land-mount": "node scripts/build-land-mount.mjs",
     "build:ocean-layout": "node scripts/build-ocean-layout-textures.mjs",
     "build:lighting": "node scripts/build-lighting-assets.mjs",

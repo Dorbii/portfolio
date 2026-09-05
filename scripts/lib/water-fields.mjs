@@ -110,6 +110,21 @@ export function encodeWaterField(land, width, height, metresPerPixel, rangeMetre
   return { data, stats: { pools, streams, seaPixels: sea.reduce((a, b) => a + b, 0) } };
 }
 
+export function marineFlowMarkers(data){
+  const markers=new Uint16Array(data.length/3);
+  for(let i=0;i<markers.length;i++){
+    const g=data[i*3+1],b=data[i*3+2];
+    if(Math.hypot(g/255*2-1,b/255*2-1)<0.045)markers[i]=(g<<8)|b;
+  }
+  return markers;
+}
+
+export function restoreMarineFlow(data,markers){
+  for(let i=0;i<markers.length;i++)if(markers[i]){
+    data[i*3+1]=markers[i]>>>8;data[i*3+2]=markers[i]&255;
+  }
+}
+
 export function applyFlowFeature(data, land, width, height, points, radius, strength) {
   const distances = new Map();
   for (let s = 1; s < points.length; s++) {

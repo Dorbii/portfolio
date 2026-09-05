@@ -15,7 +15,7 @@ import { SeabedTextures } from "./ocean/seabed/SeabedTextures.ts";
 const LEVELS = fieldManifest.levels as unknown as readonly WaterFieldLevel[];
 const MAX_TEXTURES = 64;
 const MAX_LOADS = 4;
-const UNIFORMS = ["uFields", "uPages", "uFieldSize", "uCamera", "uWorldMetres", "uRange", "uTime", "uWeather", "uWindAngle", "uPixelMetres", "uOpacity", "uCoast", "uInlandEffects", "uVisible", "uDebug"] as const;
+const UNIFORMS = ["uFields", "uPages", "uFieldSize", "uCamera", "uWorldMetres", "uRange", "uTime", "uWeather", "uWindAngle", "uPixelMetres", "uOpacity", "uCoast", "uInlandEffects", "uInlandBed", "uVisible", "uDebug"] as const;
 type Uniform = typeof UNIFORMS[number];
 
 export interface WaterScene {
@@ -26,6 +26,7 @@ export interface WaterScene {
   readonly inlandVisible: boolean;
   readonly coastalEffects: boolean;
   readonly inlandEffects: boolean;
+  readonly inlandBedVisible?: boolean;
   readonly debug: boolean;
   readonly probe?: boolean;
   readonly seabedVisible?: boolean;
@@ -279,6 +280,7 @@ export class WaterRenderer {
     gl.uniform1f(u.uWindAngle, DEFAULT_WORLD_WIND_STATE.directionDegrees * Math.PI / 180);
     gl.uniform1f(u.uCoast, Number(scene.coastalEffects));
     gl.uniform1f(u.uInlandEffects, Number(scene.inlandEffects));
+    gl.uniform1f(u.uInlandBed,Number(scene.inlandBedVisible!==false));
     gl.uniform2f(u.uVisible, Number(scene.oceanVisible), Number(scene.inlandVisible));
     this.lighting.bind(scene.light);
     const seabedState = this.seabed.bind(scene.seabedVisible !== false, scene.oceanDetailsVisible !== false && Boolean(this.detailContext));

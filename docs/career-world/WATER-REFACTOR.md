@@ -142,3 +142,84 @@ Owner requested more noticeable aquatic motion/coast contact and a commit before
 Evidence: `.codex-tmp/qa/water-r4/motion/` has 31 fixed-camera frames across 9.718 simulated seconds with clock records; `life-isolated.png` shows the current ray/school silhouettes. Normal daylight/Coastal settings retained. Source readback reports `ocean-life-readability-r4`, ready and GL error 0. Creatures remain procedural and sparse; they are intended for close views, not constant world-view activity.
 
 Checkpoint gates: focused water/events/lighting 30/30; full suite 105 pass / 5 inherited failures / 1 skipped (plan regeneration is intermittent across these runs); typecheck/build pass; full lint zero errors / 20 warnings. Protected authoring pipeline and current field inputs pass. Full-test plan-file side effects restored. Unreferenced intermediate field generations and the unused procedural seabed draft were preserved under `.codex-tmp/water-refactor/` rather than included as served artifacts. Owner requested local commit; no push authorized.
+
+## Inland work started after checkpoint 30af7d7d
+
+The ocean/lighting/45-cell mount checkpoint was committed as `30af7d7d`; the worktree was clean before this separate inland pass. No push. The first inland change replaces tightly periodic ripple bands with advected irregular flow normals, restrained pooled-water ripples, stationary mineral-bottom depth shading, and broken waterfall aeration. A first muddy palette was revised toward cooler water with stronger channel highlights after browser inspection. Existing water coverage and source-bound flow annotations are unchanged.
+
+Initial browser views: `.codex-tmp/qa/inland-r1/brook.png` and `gorge.png` show the first iteration, not the revised final palette. The gorge shows that landing pools still need purpose-built impact foam, and the island needs a wider flow/fall mapping review. This is started work, not an inland completion claim. Existing flow metadata explicitly identifies the purple brook and two gorge falls; unannotated water still relies on the derived pool/channel heuristic. No new land, ocean or shared-light changes were made in this inland pass.
+
+Inland-only gates: 25 water/lighting tests pass; typecheck, scoped lint and production build pass. The ocean checkpoint's full-suite result remains 105 pass / 5 inherited failures / 1 skip. Inland changes are uncommitted for review.
+
+## Regional inland substrate and waterfall revision
+
+Owner requested fantasy color aligned with each region while retaining transparent water and a bed in rivers/ponds, then explicitly corrected the purple clearing to BLUE water with PURPLE HIGHLIGHTS. That correction is binding: do not return the whole brook to purple.
+
+`inland/palettes.ts` defines water-owned meadow, amethyst-highlight, crystal, limestone and forest palettes, blended over current terrain-cell registrations without changing them. The amethyst region uses blue sand/transmission with violet stones. `inland/bed.ts` supplies stationary, irregularly placed mineral pebbles and sand, refracted through surface normals, attenuated with depth and lit using the shared lighting adapter. This is a procedural visual substrate, not generated texture art or surveyed bathymetry. Palette transitions feather across neighboring cells; no abrupt region swap or land repaint.
+
+`inland/falls.ts` derives its two current impact locations from the field manifest's source-bound fall endpoints. A dedicated advected curtain replaces the long solid strands; the terminal curtain dissolves into churn, with broken outward ripples. Coverage remains existing inland water only. The current flow annotation set is still limited; unannotated falls elsewhere need mapping and the existing authored alpha limits how far spray can extend. No accurate cliff height or occlusion reconstruction is claimed.
+
+Evidence: `.codex-tmp/qa/inland-regional-r1/blue-brook.png` shows the blue clearing water against purple land; `gorge-first.png` records the initial curtain/impact pass before the subsequent terminal-opacity correction. Final motion proof is recorded in the same directory. The initial full-purple palette and terminal opaque bulb were revised following owner feedback and rendered inspection. These are candidates, not owner acceptance.
+
+Gates: 27 focused inland/water/lighting tests pass; typecheck/scoped lint/production build pass. Full suite 107 pass / 5 inherited failures / 1 skipped. Palette registrations and fall-endpoint contracts have build-time tests. Plan-file side effects were restored. Changes remain uncommitted after ocean checkpoint `30af7d7d`; no push.
+
+Waterfall follow-up: opacity-only revisions left the broad terminal footprint. An L3-off browser check exposed the complete pool opening. The final curtain is now constrained to the source-bound path segments (1.4–3.0 m feathered envelope); the landing-pool churn is separate. This is a material envelope, not a change to land/water coverage. Earlier `gorge-first.png` and motion captures precede this correction; `gorge-path-final.png` records the final view.
+
+## Airborne inland spray and continuous fall coordinates
+
+Owner requested more spray and a more realistic fall. Added `inland/spray.ts`, a bounded 256-particle pass per visible mapped fall: rising/outward ballistic droplets, drifting low-opacity mist and finer spray along the curtain. It reuses the existing water-events canvas and WebGL context above land; there is no additional full-screen canvas/context. The program/VAO/lighting adapter remain inland-owned. It consumes shared world lighting/cloud shadows and the inland clock, obeys L3 visibility/effects/reduced-motion lifecycle, culls out-of-view emitters and has disposal coverage. This is approximate ballistic spray, not cliff collision or volumetric scattering.
+
+Close inspection exposed horizontal curtain seams from world-position dot products against changing flow vectors. `inland/falls.ts` now derives continuous arc length from the source-bound path segments; curtain textures use across-path/along-path coordinates independently of quantized field direction. The terminal segment fades to zero at its foot so clamped curtain coordinates cannot stamp vertical streaks into the landing pool. Pool churn/ripples and airborne particles remain separate. New tests check segment continuity, terminal identity, spray visibility/culling and resource disposal.
+
+Final focused checks 29/29; full suite 109 pass / 5 inherited failures / 1 skipped; typecheck/scoped lint/build pass. No land or ocean material edits in this slice. The ocean checkpoint remains 30af7d7d and inland work is uncommitted. Current evidence is under `.codex-tmp/qa/inland-spray-r1/`; earlier regional captures predate this spray/coordinate correction. No owner visual acceptance claimed.
+
+- Close-view follow-up: fall texture coordinates now use accumulated segment length; terminal shading stops at the actual path foot. This removes phase resets at direction changes and constant-coordinate streaks beyond the endpoint. Landing foam receives rotated, warped sampling to break the square noise lattice seen at close scale.
+- Browser lifecycle proof under `.codex-tmp/qa/inland-spray-r1/`: event-context loss/restoration returned to two inland spray draws, reduced motion held the inland clock at 107.004, and normal motion resumed. The pre-final-foam sequence covers 31 frames from 107.004 to 116.805. Final review capture follows the foam adjustment.
+
+## Main gorge waterfall rebuilt as geometry (owner approved)
+
+The fixed-opening material approach was rejected by the owner; this slice replaces only the main gorge fall. `inland/gorge/model.ts` derives the existing feeder/lip/landing anchors and a projected ballistic trajectory. `gorge/shader.ts` renders a curved lip, a continuous sheet with six narrower separating ribbons (64 strips each), and its own impact/plume pass. Texture travel uses flight time, so detail stretches/accelerates down the fall. The lower cascade remains the prior implementation for comparison.
+
+The canonical land tile contains a transparent waterfall opening, so reducing water opacity previously revealed flat blue water rather than cliff depth. A water-owned backing pass samples the adjacent right-hand rock face from that same tile, clipped by the tile's original alpha to the opening. It is a reviewable material reconstruction, not recovered geometry or a change to the land file. This adds one 2048-square sampled texture (approximately 21.3 MiB with mipmaps), one shader program and three bounded draws to the existing effects context. No additional canvas/context is created. Main-fall old curtain/impact shading is disabled; its pool retains inland surface optics. Existing airborne droplets/mist render after the new sheets.
+
+First candidate was too faint; the second exposed overly regular strands. The final review candidate uses a broader translucent body and narrower ribbons whose width, lateral position and coverage vary through flight. The geometry model, anchors and layer boundaries remain the same. Prior source and the owner's rejected screenshot are preserved under `.codex-tmp/qa/gorge-rebuild-r1/before/`.
+
+Gates: 31 focused water/inland/lighting tests pass; typecheck/scoped lint/build pass; full suite 111 pass / 5 inherited failures / 1 skipped. Tests cover source-backed readiness/disposal and increasing sheet travel speed between fixed anchors. Water input hashes and protected authoring pipeline remain current, and the terrain diff is empty for this slice. Inland changes remain uncommitted after ocean checkpoint 30af7d7d; no push or owner visual acceptance is claimed.
+
+## Pool outflow, depth and distant detail
+
+Owner requested leakage/ripples from the pool, a darker lower/deeper portion, and less harsh rendering when zoomed out. `inland/gorge/pool.ts` adds a water-owned basin-depth proxy, expanding surface-normal ripples and restrained foam traces along the existing route to the lower-cascade lip. Both pool/outlet anchors come from the current mapped fall features; no new bank openings are created. The lower terminal basin also receives extra depth. Increased depth changes attenuation instead of multiplying the whole scene by a dark tint. The main waterfall geometry is unchanged.
+
+The first outflow trace was too solid on inspection and was reduced to intermittent finer traces. At distance, narrow ribbons fade as their world width becomes unresolved, and spray opacity accounts for projected particle area rather than making subpixel droplets artificially bright. The broad sheet and low-frequency mist remain; land art is not blurred or altered.
+
+Gates: focused water/inland/lighting 31/31, full 111 pass / 5 inherited failures / 1 skipped, typecheck/scoped lint/build pass. These changes are still part of the uncommitted inland review. Final close/wide motion evidence is under `.codex-tmp/qa/gorge-pool-r1/`.
+
+## Targeted main-sheet material correction
+
+Owner approved reducing the main fall's lined/streaky appearance while retaining its curved lip, placement and pool. Only `inland/gorge/shader.ts` changed for this visual slice: a shared across-sheet material coordinate replaces repeated per-ribbon highlights/normals; the broad sheet remains connected and the narrow contributors fade into localized breakup toward the lower drop. Geometry calculations, basin/outlet treatment and land assets are unchanged. Prior shader preserved at `.codex-tmp/qa/gorge-sheet-r1/before-shader.ts`.
+
+Evidence: `.codex-tmp/qa/gorge-sheet-r1/close.png`, `wide.png`, and `motion/` (22 frames across 6.893 simulated seconds). Focused 31/31; full 111 pass / 5 inherited failures / 1 skipped; typecheck/scoped lint/build pass. Changes remain uncommitted. Visual review remains with owner.
+
+## Owner revision: lighter upper fall, side spills, no lower landing
+
+Owner clarified that the lower cascade falls into the gorge and must not show a foam landing. The lower fall now has `hasLanding: false`: no endpoint foam/rings or rising impact particles; only along-curtain particles remain. Its material darkens progressively into the gorge. This supersedes retaining the lower fall as an untouched comparison. The upper sheet/pool are lighter while retaining the current geometry, depth variation and ripples.
+
+Four small spill strips locate the upper pool's existing side edges using the canonical tile alpha, arc downward over the sides and fade out without inventing new land openings or impacts. They use shared lighting on the same water-owned effects canvas and fade at distance. No land pixels/assets were authored or changed. Mechanical gates: focused 31/31; full 111 pass / 5 inherited failures / 1 skipped; typecheck/scoped lint/build pass.
+
+Evidence: `.codex-tmp/qa/gorge-spill-r1/both-falls.png`, `motion/` (20 frames, 6.234 simulated seconds), and `final-runtime.json` (both GL errors 0; normal motion active). Changes remain uncommitted for owner visual review.
+
+## Island-wide inland pass — current state
+
+The owner's request to cover all inland water is implemented for every currently mounted land cell. The inventory covers 45 cells and 108 reviewable features: 37 stream routes, 30 pool regions and 41 waterfall/cascade segments. This includes 39 newly mapped falls; the reviewed gorge pair and purple-brook paths retain their original field bytes. The detailed current inventory and source limits are in INLAND-WATER-REVIEW.md.
+
+New authoring data: `art-source/career-world/water/inland-island-r1.json`, with canonical-source hashes, normalized paths, pool regions and fall anchors. `build:water` now derives the fields and shared mapped-fall atlas. The generic fall renderer reuses the gorge sheet material with per-location anchors, measured water widths, scaled spray and view/size culling; the bespoke gorge renderer remains intact. One versioned 2048x2560 atlas supports the other falls (about 26.7 MiB with mipmaps). Rivers use bounded two-phase advection rather than global dot-product phase changes at bends. L3_4 now controls the actually implemented inland sand/stone bed independently.
+
+Every feature was framed in the browser and contact sheets were inspected. A c4-1 coastal cove incorrectly inferred from discarded-bleed notes was removed from the pool inventory. A later wide audit exposed circular inland-material patches at sea outlets; the final generator preserves prior open-ocean flow classifications. `geography-proof-delivery.json` records zero shoreline-channel changes across all 341 tiles, zero changes to original ocean pixels, zero inland changes since the full visual audit, and zero field-byte changes in the reviewed purple/gorge cells. Source art seams/occluded gaps, including the author-flagged Tanium quarry edge handoffs, remain unaltered.
+
+Verification: 43 focused tests pass; full suite 116 pass / 5 inherited failures / 1 skipped; typecheck and production build pass; full lint 0 errors / 20 inherited warnings. All 108 final feature captures initialized ready without recorded render errors. Context loss/restoration returned both fall renderers to ready at the same paused clock; bed/effects independence was checked; normal motion and Coastal defaults were restored. Latest native GL readbacks were zero for both contexts. Lower-end performance is unmeasured.
+
+Evidence: `.codex-tmp/qa/inland-island-r1/final/runtime/` (108 feature views), `geography-proof-delivery.json`, `final/recovery.json`, `final/terraces-delivery.png`, `final/delivery-motion/` (45 frames, 6.211 simulated seconds), and `final/delivery-runtime.json`. Intermediate untracked field builds/unversioned atlas were archived under `retired-builds/` after the live final revision was confirmed. No tracked checkpoint assets were deleted. All inland work remains uncommitted after ocean checkpoint 30af7d7d; no push or visual acceptance claim.
+
+## Owner checkpoint request
+
+Owner stopped the proposed cutout/arching correction and requested committing the current inland work and merging it into local main. No cutout or waterfall-path correction was applied in that interrupted follow-up. The current visual candidate, inventory, known source-art limitations and five inherited full-suite failures are preserved for this checkpoint. No push was requested.

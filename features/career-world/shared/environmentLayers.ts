@@ -140,10 +140,10 @@ export const ENVIRONMENT_LAYER_DEFINITIONS: readonly EnvironmentLayerDefinition[
       parentId: "L3",
     }),
     Object.freeze({
-      available: false,
+      available: true,
       id: "L3_4",
-      label: "Inland habitat detail",
-      owns: "deterministic submerged stones, wood, reeds, and aquatic vegetation",
+      label: "Inland bed",
+      owns: "submerged sand and mineral stones; depth and surface optics remain independent",
       parentId: "L3",
     }),
     Object.freeze({

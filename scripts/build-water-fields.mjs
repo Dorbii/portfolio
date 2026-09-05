@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
 import sharp from "sharp";
-import { applyFlowFeature, distanceTransform, encodeWaterField, markProvisionalCoast } from "./lib/water-fields.mjs";
+import { applyFlowFeature, distanceTransform, encodeWaterField, markProvisionalCoast,marineFlowMarkers,restoreMarineFlow } from "./lib/water-fields.mjs";
 import { WORLD_PLANE } from "../features/career-world/shared/world.ts";
 
 sharp.cache(false);
@@ -14,8 +14,12 @@ const RANGE_METRES = 24;
 const sourceBytes = await fs.readFile(SOURCE);
 const terrain = JSON.parse(sourceBytes);
 const ANNOTATIONS = "art-source/career-world/water/flow-features-r1.json";
-const annotationBytes = await fs.readFile(ANNOTATIONS);
-const annotations = JSON.parse(annotationBytes);
+const ISLAND_ANNOTATIONS = "art-source/career-world/water/inland-island-r1.json";
+const legacyAnnotationBytes = await fs.readFile(ANNOTATIONS);
+const islandAnnotationBytes = await fs.readFile(ISLAND_ANNOTATIONS);
+const annotationBytes = Buffer.concat([legacyAnnotationBytes,islandAnnotationBytes]);
+const annotations = JSON.parse(legacyAnnotationBytes);
+const island = JSON.parse(islandAnnotationBytes);
 const hash = (bytes) => crypto.createHash("sha256").update(bytes).digest("hex");
 const sourceAssets = [];
 for (const tile of terrain.tiles) {
@@ -59,7 +63,41 @@ for (let i = 0; i < land.length; i++) land[i] = pixels[i * 4 + 3] >= 128 ? 1 : 0
 console.log(`Deriving water fields from ${terrain.tiles.length} served terrain cells (${WIDTH}x${HEIGHT}).`);
 const { data, stats } = encodeWaterField(land, WIDTH, HEIGHT, metresPerPixel, RANGE_METRES);
 stats.provisionalCoastPixels = markProvisionalCoast(data, land, WIDTH, HEIGHT, rectangles, RANGE_METRES / metresPerPixel);
+const originalMarine=marineFlowMarkers(data);
 const features = [];
+if(island.cells.length!==terrain.tiles.length||new Set(island.cells.map(cell=>cell.tileId)).size!==terrain.tiles.length
+  ||terrain.tiles.some(tile=>!island.cells.some(cell=>cell.tileId===tile.id)))throw new Error("Inland inventory must cover every mounted cell exactly once.");
+for(const cell of island.cells){
+  const tile=terrain.tiles.find(tile=>tile.id===cell.tileId);
+  if(!tile||hash(await fs.readFile(cell.source))!==cell.sha256)throw new Error(`Inland inventory source changed: ${cell.tileId}`);
+  const world=([x,y])=>[tile.worldBounds.origin[0]+x*tile.worldBounds.span[0],tile.worldBounds.origin[1]+y*tile.worldBounds.span[1]];
+  const field=point=>{const p=world(point);return [p[0]*WIDTH,p[1]*HEIGHT];};
+  const radius=r=>r*tile.worldBounds.span[0]*WIDTH;
+  const record=(feature,kind,points,changed,extra={})=>{
+    if(!changed)throw new Error(`Inland feature misses served water: ${feature.id}`);
+    features.push({id:feature.id,kind,tileId:tile.id,waterPixels:changed,points:points.map(world),...extra});
+  };
+  for(const stream of cell.streams){
+    const changed=applyFlowFeature(data,land,WIDTH,HEIGHT,stream.path.map(field),radius(stream.radius),0.6);
+    record(stream,"stream",stream.path,changed);
+  }
+  for(const pool of cell.pools){
+    const center=field(pool.point),r=radius(pool.radius);let changed=0;
+    for(let y=Math.max(0,Math.floor(center[1]-r));y<=Math.min(HEIGHT-1,Math.ceil(center[1]+r));y++)
+      for(let x=Math.max(0,Math.floor(center[0]-r));x<=Math.min(WIDTH-1,Math.ceil(center[0]+r));x++){
+        const i=y*WIDTH+x;if(land[i]||Math.hypot(x-center[0],y-center[1])>r)continue;
+        data[i*3+1]=128;data[i*3+2]=153;changed++;
+      }
+    record(pool,"pool",[pool.point],changed);
+  }
+  for(const fall of cell.falls){
+    const points=[fall.lip,fall.foot];
+    const changed=applyFlowFeature(data,land,WIDTH,HEIGHT,points.map(field),radius(fall.radius),1);
+    record(fall,"fall",points,changed,{upstream:world(fall.upstream),hasLanding:fall.hasLanding,
+      widthMetres:Math.max(0.6,Math.min(4.0,radius(fall.radius)*metresPerPixel)),backingOffset:fall.backingOffset,sourcePath:tile.sources.site.path});
+  }
+}
+// Preserve the already-reviewed gorge and purple-brook interpretation last.
 for (const cell of annotations.cells) {
   const tile = terrain.tiles.find((entry) => entry.id === cell.tileId);
   if (!tile) continue;
@@ -72,10 +110,13 @@ for (const cell of annotations.cells) {
     const points = feature.path.map(toField);
     const radius = feature.radiusArtPx / contract.keptPx * tile.worldBounds.span[0] * WIDTH;
     const changed = applyFlowFeature(data, land, WIDTH, HEIGHT, points, radius, feature.kind === "fall" ? 1 : 0.6);
-    features.push({ id: feature.id, kind: feature.kind, waterPixels: changed,
+    features.push({ id: feature.id, kind: feature.kind, tileId:tile.id,waterPixels: changed,
       points: points.map(([x, y]) => [x / WIDTH, y / HEIGHT]) });
   }
 }
+// Inland annotations may describe a fall reaching the sea, but cannot turn
+// previously open ocean into a circular inland-material patch at its foot.
+restoreMarineFlow(data,originalMarine);
 await fs.mkdir(OUT, { recursive: true });
 // Wider-range ocean geography supplies coastal shelves. It is derived from
 // the same served alpha, so shelves follow the island rather than freehand blobs.
@@ -98,6 +139,7 @@ await fs.mkdir(seabedDirectory, { recursive: true });
 await fs.writeFile(path.join(seabedDirectory, "seabed-geography.png"), seabedPng);
 const manifest = {
   version: 1, source: SOURCE, sourceHash: hash(sourceBytes), inputHash, generatorHash, sourceAssets, features,
+  inlandInventory:island.cells.map(cell=>({tileId:cell.tileId,note:cell.note,streams:cell.streams.length,pools:cell.pools.length,falls:cell.falls.length})),
   worldSize, metresPerWorldUnit: contract.mPerWorldPx, rangeMetres: RANGE_METRES,
   dimensions: [WIDTH, HEIGHT], tileSize: TILE, levels: [],
   seabedGeometry: { path: `/career-world/layers/water/fields-r1/${inputHash.slice(0, 16)}/seabed-geography.png`,

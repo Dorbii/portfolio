@@ -3,16 +3,33 @@ import test from "node:test";
 import fs from "node:fs/promises";
 import crypto from "node:crypto";
 import sharp from "sharp";
-import { distanceTransform, encodeWaterField, applyFlowFeature, markProvisionalCoast } from "../scripts/lib/water-fields.mjs";
+import { distanceTransform, encodeWaterField, applyFlowFeature, markProvisionalCoast,marineFlowMarkers,restoreMarineFlow } from "../scripts/lib/water-fields.mjs";
 import { buildFieldPages } from "../features/career-world/layers/water/fieldPages.ts";
 import { createWaveSpectrum, WAVE_CASCADES, waveHeights } from "../features/career-world/layers/water/ocean/spectrum.ts";
 import { normalizeWaterState, selectWaterFields, waveAngularFrequency } from "../features/career-world/layers/water/model.ts";
 import { WaterRenderer } from "../features/career-world/layers/water/WaterRenderer.ts";
+import { InlandSprayRenderer } from "../features/career-world/layers/water/inland/spray.ts";
+import { GORGE_FALL } from "../features/career-world/layers/water/inland/gorge/model.ts";
+import {MappedFallsRenderer} from "../features/career-world/layers/water/inland/mappedFalls.ts";
+import mappedAtlas from "../public/career-world/layers/water/inland/mapped-falls-r1.json" with {type:"json"};
 import { windVectorFromDegrees } from "../features/career-world/shared/weather.ts";
 import { normalizeWaterTuning, readWaterTuningUrlOverrides, serializeWaterTuning } from "../features/career-world/shared/waterTuning.ts";
 
 const manifest = JSON.parse(await fs.readFile("public/career-world/layers/water/fields-r1/manifest.json", "utf8"));
 const sha = (bytes) => crypto.createHash("sha256").update(bytes).digest("hex");
+
+test("inland flow annotations retain the prior open-ocean material classification",()=>{
+  const width=20,height=20,land=new Uint8Array(width*height);
+  for(let y=5;y<15;y++)for(let x=5;x<15;x++)land[y*width+x]=1;
+  land[10*width+10]=0;
+  const original=encodeWaterField(land,width,height,1,24).data;
+  const markers=marineFlowMarkers(original),changed=Buffer.from(original);
+  applyFlowFeature(changed,land,width,height,[[0,10],[19,10]],4,1);
+  restoreMarineFlow(changed,markers);
+  for(let i=0;i<markers.length;i++)if(markers[i])assert.deepEqual(changed.subarray(i*3+1,i*3+3),original.subarray(i*3+1,i*3+3));
+  const pond=10*width+10;
+  assert.notDeepEqual(changed.subarray(pond*3+1,pond*3+3),original.subarray(pond*3+1,pond*3+3));
+});
 
 test("shared wind stays normalized and water controls round-trip without private lighting controls", () => {
   for (const angle of [-721, -45, 0, 24, 90, 360]) assert.ok(Math.abs(Math.hypot(...windVectorFromDegrees(angle)) - 1) < 1e-12);
@@ -180,6 +197,66 @@ test("fragment compilation failure releases every constructed GPU resource", (t)
   const { construct, allocated } = rendererHarness(t, { deferConstruction: true, failCompile: "fragment" });
   assert.throws(construct);
   assert.equal(allocated.size, 0);
+});
+
+test("inland bed visibility is independent of ocean seabed and inland motion/effects",t=>{
+  const {renderer,scene,uniforms}=rendererHarness(t);
+  renderer.setScene({...scene,inlandBedVisible:false,seabedVisible:true});renderer.render(2,2);
+  assert.deepEqual(uniforms.get("uInlandBed"),[0]);
+  assert.deepEqual(uniforms.get("uInlandEffects"),[1]);
+  renderer.setScene({...scene,inlandBedVisible:true,seabedVisible:false});renderer.render(2,2);
+  assert.deepEqual(uniforms.get("uInlandBed"),[1]);
+});
+
+test("inland spray is independent of ocean visibility, obeys effects/camera, and releases its resources", t=>{
+  const {canvas,scene,allocated,uniforms}=rendererHarness(t);
+  const gl=canvas.getContext("webgl2");
+  gl.drawingBufferWidth=1448;
+  const before=allocated.size;
+  const spray=new InlandSprayRenderer(gl,()=>undefined);
+  t.after(()=>spray.destroy());
+  const fall=manifest.features.find(feature=>feature.kind==="fall");
+  const endpoint=fall.points.at(-1);
+  const visible={...scene,oceanVisible:false,camera:{origin:endpoint.map(n=>n-0.025),span:[0.05,0.05]}};
+  assert.ok(spray.render(visible,7)>0);
+  assert.deepEqual(uniforms.get("uTime"),[7]);
+  assert.equal(spray.render({...visible,inlandEffects:false},9),0);
+  assert.equal(spray.render({...visible,inlandVisible:false},9),0);
+  assert.equal(spray.render({...visible,camera:{origin:[0,0],span:[0.01,0.01]}},9),0);
+  spray.destroy();spray.destroy();
+  assert.equal(allocated.size,before);
+});
+
+test("gorge geometry waits for its backing source and cleans up after that source loads",t=>{
+  const {canvas,scene,allocated,pending}=rendererHarness(t);
+  const gl=canvas.getContext("webgl2");gl.drawingBufferWidth=1448;
+  const before=allocated.size;
+  const spray=new InlandSprayRenderer(gl,()=>undefined);
+  t.after(()=>spray.destroy());
+  const camera={origin:GORGE_FALL.foot.map(n=>n-0.025),span:[0.05,0.05]};
+  const view={...scene,camera};
+  const unloadedDraws=spray.render(view,3);
+  assert.equal(spray.gorgeState,"loading");
+  pending.find(image=>image.path===GORGE_FALL.cliffPath).onload();
+  assert.equal(spray.gorgeState,"ready");
+  assert.ok(spray.render(view,3)>unloadedDraws);
+  spray.destroy();
+  assert.equal(allocated.size,before);
+});
+
+test("island fall renderer loads one shared atlas, culls remote views and releases its allocations",t=>{
+  const {canvas,scene,allocated,pending}=rendererHarness(t);
+  const gl=canvas.getContext("webgl2");gl.drawingBufferWidth=1448;
+  const before=allocated.size,renderer=new MappedFallsRenderer(gl,()=>undefined);
+  t.after(()=>renderer.destroy());
+  const fall=mappedAtlas.falls[0];
+  const view={...scene,camera:{origin:fall.foot.map(n=>n-0.02),span:[0.04,0.04]}};
+  assert.equal(renderer.render(view,3),0);
+  pending.find(image=>image.path===mappedAtlas.texture.path).onload();
+  assert.equal(renderer.state,"ready");assert.ok(renderer.render(view,3)>0);
+  assert.equal(renderer.render({...view,inlandVisible:false},3),0);
+  assert.equal(renderer.render({...view,camera:{origin:[0,0],span:[.01,.01]}},3),0);
+  renderer.destroy();renderer.destroy();assert.equal(allocated.size,before);
 });
 
 test("ocean detail compositing is independent of the seabed toggle and restores the base pass", (t) => {

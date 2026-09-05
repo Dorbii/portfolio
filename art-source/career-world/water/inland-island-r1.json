@@ -1,0 +1,3109 @@
+{
+  "version": 1,
+  "status": "visual-review-candidate",
+  "policy": "Complete mounted-cell inventory. Paths are visual art interpretation, not surveyed hydrology. Original land/water alpha is immutable; occluded gaps and candidate geography remain. Existing gorge and purple-brook annotations have priority.",
+  "cells": [
+    {
+      "tileId": "l2-c0-0",
+      "note": "Closed spring beck and its two pools.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-0-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "northwest-spring-beck",
+          "path": [
+            [
+              0.13,
+              0.15
+            ],
+            [
+              0.15,
+              0.23
+            ],
+            [
+              0.18,
+              0.35
+            ],
+            [
+              0.23,
+              0.46
+            ],
+            [
+              0.28,
+              0.55
+            ]
+          ],
+          "radius": 0.035
+        }
+      ],
+      "pools": [
+        {
+          "id": "northwest-head",
+          "point": [
+            0.11,
+            0.15
+          ],
+          "radius": 0.045
+        },
+        {
+          "id": "northwest-terminal",
+          "point": [
+            0.28,
+            0.55
+          ],
+          "radius": 0.065
+        }
+      ],
+      "falls": [],
+      "sha256": "4d35a7f217d5e90125e9e43376f5b6da078d1a020411b5c69f43cbec391b1fe0"
+    },
+    {
+      "tileId": "l2-c0-1",
+      "note": "Shelf lake drains west over the low shore cliff.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-1-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "western-shelf-outlet",
+          "path": [
+            [
+              0.43,
+              0.12
+            ],
+            [
+              0.38,
+              0.19
+            ],
+            [
+              0.35,
+              0.26
+            ],
+            [
+              0.37,
+              0.3
+            ],
+            [
+              0.32,
+              0.35
+            ],
+            [
+              0.24,
+              0.37
+            ],
+            [
+              0.18,
+              0.41
+            ],
+            [
+              0.12,
+              0.43
+            ],
+            [
+              0.03,
+              0.46
+            ]
+          ],
+          "radius": 0.035
+        }
+      ],
+      "pools": [
+        {
+          "id": "western-shelf-lake",
+          "point": [
+            0.43,
+            0.15
+          ],
+          "radius": 0.08
+        }
+      ],
+      "falls": [
+        {
+          "id": "western-shore-drop",
+          "lip": [
+            0.11040547142159257,
+            0.45236932095749877
+          ],
+          "foot": [
+            0.075,
+            0.51
+          ],
+          "upstream": [
+            0.15046409379579873,
+            0.4235466536394724
+          ],
+          "radius": 0.035,
+          "hasLanding": true,
+          "backingOffset": [
+            0.04,
+            0
+          ]
+        }
+      ],
+      "sha256": "54a51f934a9f909f3f4f330d9061d6a60acde18ebd47d460deb7c2ff6c7f8e41"
+    },
+    {
+      "tileId": "l2-c0-2",
+      "note": "Closed hollow beck; open sound remains ocean.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-2-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "hollow-beck",
+          "path": [
+            [
+              0.85,
+              0.16
+            ],
+            [
+              0.86,
+              0.21
+            ],
+            [
+              0.8,
+              0.27
+            ],
+            [
+              0.78,
+              0.34
+            ]
+          ],
+          "radius": 0.035
+        }
+      ],
+      "pools": [
+        {
+          "id": "hollow-pool",
+          "point": [
+            0.77,
+            0.34
+          ],
+          "radius": 0.07
+        }
+      ],
+      "falls": [],
+      "sha256": "e40f91a525f819d704a9f358c4ce615438b98ec323aae72aca6caac1ae42caba"
+    },
+    {
+      "tileId": "l2-c0-3",
+      "note": "Northern inlet reach; current alpha reaches the tile edge.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-3-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "western-inlet-reach",
+          "path": [
+            [
+              0.64,
+              0
+            ],
+            [
+              0.63,
+              0.07
+            ],
+            [
+              0.67,
+              0.14
+            ],
+            [
+              0.65,
+              0.19
+            ],
+            [
+              0.71,
+              0.26
+            ],
+            [
+              0.78,
+              0.32
+            ]
+          ],
+          "radius": 0.065
+        }
+      ],
+      "pools": [],
+      "falls": [
+        {
+          "id": "western-inlet-low-drop",
+          "lip": [
+            0.6648754274548119,
+            0.12310698583292623
+          ],
+          "foot": [
+            0.655105031753786,
+            0.19589643380556912
+          ],
+          "upstream": [
+            0.64,
+            0.09
+          ],
+          "radius": 0.045,
+          "hasLanding": true,
+          "backingOffset": [
+            0.05,
+            0
+          ]
+        }
+      ],
+      "sha256": "31205f3618dd2320adbfb073354de12cfff6a0aad7cd9c141460f399285c3acc"
+    },
+    {
+      "tileId": "l2-c1-0",
+      "note": "Closed crater tarn; no invented outlet.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c1-0-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [
+        {
+          "id": "crater-tarn",
+          "point": [
+            0.61,
+            0.49
+          ],
+          "radius": 0.14
+        }
+      ],
+      "falls": [],
+      "sha256": "b9861cc6ca675e75df13bbebd5a682b746ab44e3ef03a162bd11e40ef9073f7b"
+    },
+    {
+      "tileId": "l2-c1-1",
+      "note": "Existing source-bound purple brook and pools preserved; palette stays blue with violet highlights.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c1-1-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "d4509fdd27666b2637999d4ee5319a5e5a4d2b7ccba79521c96cb80156ec0d11"
+    },
+    {
+      "tileId": "l2-c1-2",
+      "note": "One logical closed beck with rock-occluded gaps; small eastern pond.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c1-2-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "clearing-beck",
+          "path": [
+            [
+              0.32,
+              0.06
+            ],
+            [
+              0.28,
+              0.13
+            ],
+            [
+              0.22,
+              0.22
+            ],
+            [
+              0.14,
+              0.28
+            ],
+            [
+              0.16,
+              0.35
+            ],
+            [
+              0.14,
+              0.44
+            ],
+            [
+              0.11,
+              0.52
+            ],
+            [
+              0.16,
+              0.57
+            ],
+            [
+              0.21,
+              0.66
+            ],
+            [
+              0.29,
+              0.74
+            ],
+            [
+              0.35,
+              0.86
+            ],
+            [
+              0.45,
+              0.98
+            ]
+          ],
+          "radius": 0.045
+        }
+      ],
+      "pools": [
+        {
+          "id": "clearing-source",
+          "point": [
+            0.31,
+            0.075
+          ],
+          "radius": 0.07
+        },
+        {
+          "id": "clearing-east-pond",
+          "point": [
+            0.4298974108451392,
+            0.12994626282364435
+          ],
+          "radius": 0.035
+        },
+        {
+          "id": "clearing-middle-pool",
+          "point": [
+            0.13,
+            0.5
+          ],
+          "radius": 0.05
+        },
+        {
+          "id": "clearing-lower-pool",
+          "point": [
+            0.28,
+            0.77
+          ],
+          "radius": 0.075
+        }
+      ],
+      "falls": [],
+      "sha256": "eac4d8bf2e9035f75f975f9107a55192558820e3faf0f8d96347d62f3496a3a1"
+    },
+    {
+      "tileId": "l2-c1-3",
+      "note": "North-fed broad reach to the drowned inlet.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c1-3-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "broad-inlet-reach",
+          "path": [
+            [
+              0.46,
+              0
+            ],
+            [
+              0.47,
+              0.12
+            ],
+            [
+              0.44,
+              0.26
+            ],
+            [
+              0.43,
+              0.39
+            ],
+            [
+              0.37,
+              0.48
+            ],
+            [
+              0.29,
+              0.53
+            ],
+            [
+              0.27,
+              0.6
+            ],
+            [
+              0.31,
+              0.67
+            ]
+          ],
+          "radius": 0.075
+        }
+      ],
+      "pools": [],
+      "falls": [
+        {
+          "id": "broad-reach-low-drop",
+          "lip": [
+            0.445,
+            0.26
+          ],
+          "foot": [
+            0.43,
+            0.31
+          ],
+          "upstream": [
+            0.46,
+            0.21
+          ],
+          "radius": 0.07,
+          "hasLanding": true,
+          "backingOffset": [
+            0.07,
+            0
+          ]
+        }
+      ],
+      "sha256": "e9d5a5bdf1cf0d6692bfbf4a7308997510a3d7eb44f5fccaa774c5c73d596c64"
+    },
+    {
+      "tileId": "l2-c2-0",
+      "note": "Closed forest gorge with two stepped drops.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-0-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "forest-headwater",
+          "path": [
+            [
+              0.31,
+              0.02
+            ],
+            [
+              0.36,
+              0.12
+            ],
+            [
+              0.415,
+              0.19
+            ],
+            [
+              0.43,
+              0.27
+            ],
+            [
+              0.43,
+              0.36
+            ],
+            [
+              0.45,
+              0.43
+            ],
+            [
+              0.5,
+              0.49
+            ],
+            [
+              0.48,
+              0.565
+            ],
+            [
+              0.465,
+              0.63
+            ],
+            [
+              0.515,
+              0.68
+            ],
+            [
+              0.515,
+              0.79
+            ],
+            [
+              0.55,
+              0.85
+            ]
+          ],
+          "radius": 0.06
+        }
+      ],
+      "pools": [
+        {
+          "id": "forest-head-pool",
+          "point": [
+            0.32,
+            0.03
+          ],
+          "radius": 0.055
+        },
+        {
+          "id": "forest-terminal-pool",
+          "point": [
+            0.55,
+            0.85
+          ],
+          "radius": 0.055
+        }
+      ],
+      "falls": [
+        {
+          "id": "forest-upper-drop",
+          "lip": [
+            0.425,
+            0.22
+          ],
+          "foot": [
+            0.43,
+            0.325
+          ],
+          "upstream": [
+            0.415,
+            0.19
+          ],
+          "radius": 0.055,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        },
+        {
+          "id": "forest-lower-drop",
+          "lip": [
+            0.515,
+            0.695
+          ],
+          "foot": [
+            0.52,
+            0.8
+          ],
+          "upstream": [
+            0.5,
+            0.665
+          ],
+          "radius": 0.05,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        }
+      ],
+      "sha256": "03f90863322655cc7465f0f330d161f52d07031a39c2716de1d059fbd208ae64"
+    },
+    {
+      "tileId": "l2-c2-1",
+      "note": "Raised spring pool drains to a terminal pool over one edge.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-1-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "raised-shelf-beck",
+          "path": [
+            [
+              0.36,
+              0.105
+            ],
+            [
+              0.37,
+              0.19
+            ],
+            [
+              0.46,
+              0.26
+            ],
+            [
+              0.44,
+              0.33
+            ],
+            [
+              0.53,
+              0.38
+            ],
+            [
+              0.57,
+              0.49
+            ],
+            [
+              0.6,
+              0.54
+            ],
+            [
+              0.67,
+              0.6
+            ],
+            [
+              0.71,
+              0.63
+            ]
+          ],
+          "radius": 0.04
+        }
+      ],
+      "pools": [
+        {
+          "id": "raised-spring",
+          "point": [
+            0.36,
+            0.115
+          ],
+          "radius": 0.075
+        },
+        {
+          "id": "raised-terminal",
+          "point": [
+            0.69,
+            0.61
+          ],
+          "radius": 0.085
+        }
+      ],
+      "falls": [
+        {
+          "id": "raised-shelf-drop",
+          "lip": [
+            0.5603321934538349,
+            0.4499267220322423
+          ],
+          "foot": [
+            0.6223742061553493,
+            0.5466536394723986
+          ],
+          "upstream": [
+            0.54,
+            0.42
+          ],
+          "radius": 0.035,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        }
+      ],
+      "sha256": "9ea59d62fcbac0c27d83c3bb48c99ce078ac3d8c207fa2eddaa3c653ab86babe"
+    },
+    {
+      "tileId": "l2-c2-2",
+      "note": "Hot-spring basin and a separate short stepped beck.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-2-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "hot-spring-beck",
+          "path": [
+            [
+              0.455,
+              0.76
+            ],
+            [
+              0.408,
+              0.78
+            ],
+            [
+              0.375,
+              0.805
+            ],
+            [
+              0.373,
+              0.848
+            ],
+            [
+              0.39,
+              0.87
+            ],
+            [
+              0.445,
+              0.924
+            ]
+          ],
+          "radius": 0.035
+        }
+      ],
+      "pools": [
+        {
+          "id": "hot-spring-main",
+          "point": [
+            0.24,
+            0.605
+          ],
+          "radius": 0.13
+        },
+        {
+          "id": "hot-spring-upper",
+          "point": [
+            0.438,
+            0.764
+          ],
+          "radius": 0.055
+        },
+        {
+          "id": "hot-spring-lower",
+          "point": [
+            0.39,
+            0.877
+          ],
+          "radius": 0.07
+        }
+      ],
+      "falls": [
+        {
+          "id": "hot-spring-step",
+          "lip": [
+            0.38104543234000976,
+            0.8006839276990718
+          ],
+          "foot": [
+            0.379,
+            0.849
+          ],
+          "upstream": [
+            0.405,
+            0.78
+          ],
+          "radius": 0.035,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        }
+      ],
+      "sha256": "14bf6b12c948da501deb0ea6b55a48ba620e41175f5dfc6cc86a2f287f566862"
+    },
+    {
+      "tileId": "l2-c2-3",
+      "note": "Moor beck exits south toward Tanium.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-3-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "moor-south-beck",
+          "path": [
+            [
+              0.28,
+              0.21
+            ],
+            [
+              0.285,
+              0.31
+            ],
+            [
+              0.32,
+              0.38
+            ],
+            [
+              0.4,
+              0.48
+            ],
+            [
+              0.36,
+              0.53
+            ],
+            [
+              0.28,
+              0.59
+            ],
+            [
+              0.24,
+              0.67
+            ],
+            [
+              0.245,
+              0.78
+            ],
+            [
+              0.25,
+              0.9
+            ],
+            [
+              0.3,
+              1
+            ]
+          ],
+          "radius": 0.04
+        }
+      ],
+      "pools": [],
+      "falls": [],
+      "sha256": "b88a20c7228c9cf24dfd812c4c461ccbdc27e9dbc11961c62919094a5846b13c"
+    },
+    {
+      "tileId": "l2-c3-0",
+      "note": "Upper tarn, tall fall, short connector and lower tarn.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-0-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "tarn-connector",
+          "path": [
+            [
+              0.45,
+              0.08
+            ],
+            [
+              0.415,
+              0.15
+            ],
+            [
+              0.4,
+              0.24
+            ],
+            [
+              0.385,
+              0.37
+            ],
+            [
+              0.365,
+              0.41
+            ],
+            [
+              0.3,
+              0.455
+            ],
+            [
+              0.285,
+              0.51
+            ],
+            [
+              0.32,
+              0.55
+            ],
+            [
+              0.325,
+              0.61
+            ]
+          ],
+          "radius": 0.035
+        }
+      ],
+      "pools": [
+        {
+          "id": "upper-rock-tarn",
+          "point": [
+            0.455,
+            0.08
+          ],
+          "radius": 0.085
+        },
+        {
+          "id": "lower-rock-tarn",
+          "point": [
+            0.315,
+            0.61
+          ],
+          "radius": 0.07
+        }
+      ],
+      "falls": [
+        {
+          "id": "rock-tarn-tall-fall",
+          "lip": [
+            0.40302882266731804,
+            0.20127015144113336
+          ],
+          "foot": [
+            0.385,
+            0.365
+          ],
+          "upstream": [
+            0.415,
+            0.17
+          ],
+          "radius": 0.035,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        },
+        {
+          "id": "rock-tarn-short-fall",
+          "lip": [
+            0.295,
+            0.48
+          ],
+          "foot": [
+            0.31753786028334147,
+            0.5407914020517831
+          ],
+          "upstream": [
+            0.3072789447972643,
+            0.4421104054714216
+          ],
+          "radius": 0.035,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        }
+      ],
+      "sha256": "247bce9ecab7751703799fe3bf841cd89a072bb25ceb8387d03c663b93d6a39d"
+    },
+    {
+      "tileId": "l2-c3-1",
+      "note": "Reviewed main gorge and lower void cascade retained without changing their paths or landing policy.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-1-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "854d009d628f8f047c64bf2b9fc5cf90af7dd5985c507818c388a20c366d1df1"
+    },
+    {
+      "tileId": "l2-c3-2",
+      "note": "Closed forest gorge, two drops, dark terminal water.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-2-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "eastern-forest-gorge",
+          "path": [
+            [
+              0.565,
+              0.1
+            ],
+            [
+              0.585,
+              0.15
+            ],
+            [
+              0.585,
+              0.2
+            ],
+            [
+              0.563,
+              0.28
+            ],
+            [
+              0.563,
+              0.34
+            ],
+            [
+              0.59,
+              0.425
+            ],
+            [
+              0.63,
+              0.495
+            ],
+            [
+              0.625,
+              0.555
+            ],
+            [
+              0.585,
+              0.61
+            ],
+            [
+              0.56,
+              0.66
+            ],
+            [
+              0.515,
+              0.715
+            ],
+            [
+              0.48,
+              0.765
+            ],
+            [
+              0.48,
+              0.85
+            ]
+          ],
+          "radius": 0.05
+        }
+      ],
+      "pools": [
+        {
+          "id": "eastern-forest-terminal",
+          "point": [
+            0.48,
+            0.85
+          ],
+          "radius": 0.075
+        }
+      ],
+      "falls": [
+        {
+          "id": "eastern-forest-upper-drop",
+          "lip": [
+            0.567,
+            0.25
+          ],
+          "foot": [
+            0.568,
+            0.345
+          ],
+          "upstream": [
+            0.58,
+            0.215
+          ],
+          "radius": 0.055,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        },
+        {
+          "id": "eastern-forest-lower-drop",
+          "lip": [
+            0.5642403517342452,
+            0.6560820713238886
+          ],
+          "foot": [
+            0.515,
+            0.715
+          ],
+          "upstream": [
+            0.58,
+            0.63
+          ],
+          "radius": 0.05,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        }
+      ],
+      "sha256": "203ed02df813414097e5a06dff87191afbed5a114fa69f21036a37e1fd17d17c"
+    },
+    {
+      "tileId": "l2-c3-3",
+      "note": "Silver beck crosses one upland lip and continues south.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-3-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "silver-south-beck",
+          "path": [
+            [
+              0.8,
+              0.23
+            ],
+            [
+              0.755,
+              0.32
+            ],
+            [
+              0.7,
+              0.39
+            ],
+            [
+              0.665,
+              0.47
+            ],
+            [
+              0.65,
+              0.57
+            ],
+            [
+              0.635,
+              0.68
+            ],
+            [
+              0.625,
+              0.79
+            ],
+            [
+              0.52,
+              1
+            ]
+          ],
+          "radius": 0.06
+        }
+      ],
+      "pools": [],
+      "falls": [
+        {
+          "id": "silver-upland-drop",
+          "lip": [
+            0.6863702979970688,
+            0.41866145578895947
+          ],
+          "foot": [
+            0.66,
+            0.5
+          ],
+          "upstream": [
+            0.705,
+            0.385
+          ],
+          "radius": 0.055,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        }
+      ],
+      "sha256": "8f2aadcb1a0e51cbca2572f63d09d770d9e1be97a1c5afa0d3ea2a252e98725f"
+    },
+    {
+      "tileId": "l2-c4-0",
+      "note": "Shelf stream/pool outfall on the east sea cliff; occluded gaps retained.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-0-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "east-shelf-beck",
+          "path": [
+            [
+              0.11,
+              0.22
+            ],
+            [
+              0.22,
+              0.245
+            ],
+            [
+              0.3,
+              0.27
+            ],
+            [
+              0.4,
+              0.31
+            ],
+            [
+              0.49,
+              0.33
+            ],
+            [
+              0.56,
+              0.37
+            ],
+            [
+              0.67,
+              0.38
+            ],
+            [
+              0.79,
+              0.38
+            ],
+            [
+              0.88,
+              0.405
+            ],
+            [
+              0.9,
+              0.49
+            ],
+            [
+              0.94,
+              0.55
+            ]
+          ],
+          "radius": 0.045
+        }
+      ],
+      "pools": [
+        {
+          "id": "east-shelf-pool",
+          "point": [
+            0.8,
+            0.39
+          ],
+          "radius": 0.1
+        }
+      ],
+      "falls": [
+        {
+          "id": "east-sea-cliff-fall",
+          "lip": [
+            0.885,
+            0.43
+          ],
+          "foot": [
+            0.905,
+            0.55
+          ],
+          "upstream": [
+            0.875,
+            0.4
+          ],
+          "radius": 0.06,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        }
+      ],
+      "sha256": "7cac8560d26b5f39d0ba9df198511ae2468f2a8703a80c8912d88b23b3ba1005"
+    },
+    {
+      "tileId": "l2-c4-1",
+      "note": "Short conifer gully enters the coastal cove. Source-note southwest tarn/fall was in discarded bleed, not the mounted tile; coastal coves remain ocean.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-1-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "conifer-cove-drain",
+          "path": [
+            [
+              0.705,
+              0.24
+            ],
+            [
+              0.72,
+              0.29
+            ],
+            [
+              0.705,
+              0.32
+            ],
+            [
+              0.72,
+              0.36
+            ],
+            [
+              0.715,
+              0.39
+            ]
+          ],
+          "radius": 0.025
+        }
+      ],
+      "pools": [],
+      "falls": [],
+      "sha256": "d50951024a5ecd257dfc5f5650083aebfdf1c22c84f52130bf37205e01cce69a"
+    },
+    {
+      "tileId": "l2-c4-2",
+      "note": "Northern shelf tarn continuation, lip drop and long south drainage.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-2-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "eastern-plateau-drain",
+          "path": [
+            [
+              0.075,
+              0
+            ],
+            [
+              0.09,
+              0.07
+            ],
+            [
+              0.12,
+              0.16
+            ],
+            [
+              0.14,
+              0.28
+            ],
+            [
+              0.145,
+              0.39
+            ],
+            [
+              0.18,
+              0.48
+            ],
+            [
+              0.17,
+              0.56
+            ],
+            [
+              0.19,
+              0.64
+            ],
+            [
+              0.19,
+              0.71
+            ],
+            [
+              0.13,
+              0.8
+            ],
+            [
+              0.13,
+              0.9
+            ],
+            [
+              0.15,
+              1
+            ]
+          ],
+          "radius": 0.035
+        }
+      ],
+      "pools": [],
+      "falls": [
+        {
+          "id": "eastern-plateau-lip",
+          "lip": [
+            0.12017586712261846,
+            0.1529066927210552
+          ],
+          "foot": [
+            0.135,
+            0.25
+          ],
+          "upstream": [
+            0.105,
+            0.12
+          ],
+          "radius": 0.035,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        }
+      ],
+      "sha256": "b805dff99730129de80d184ab986071d992bf51d7f791fd07d1593585374dac0"
+    },
+    {
+      "tileId": "l2-c4-3",
+      "note": "Quarry lake and distinct drainage to the sea.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-3-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "quarry-drain",
+          "path": [
+            [
+              0.145,
+              0
+            ],
+            [
+              0.21,
+              0.14
+            ],
+            [
+              0.325,
+              0.255
+            ],
+            [
+              0.38,
+              0.35
+            ],
+            [
+              0.405,
+              0.43
+            ],
+            [
+              0.425,
+              0.58
+            ],
+            [
+              0.435,
+              0.73
+            ],
+            [
+              0.3,
+              0.88
+            ],
+            [
+              0.29,
+              1
+            ]
+          ],
+          "radius": 0.04
+        }
+      ],
+      "pools": [
+        {
+          "id": "quarry-pit",
+          "point": [
+            0.685,
+            0.48
+          ],
+          "radius": 0.145
+        }
+      ],
+      "falls": [
+        {
+          "id": "quarry-cut-drop",
+          "lip": [
+            0.36541279921836833,
+            0.2979970688812897
+          ],
+          "foot": [
+            0.3991206643869077,
+            0.4035173424523693
+          ],
+          "upstream": [
+            0.33610161211529066,
+            0.25842696629213485
+          ],
+          "radius": 0.035,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        }
+      ],
+      "sha256": "dd1c4a30fcd950f8341b731c992c856367692d64b54b6b9c7798d412d6978975"
+    },
+    {
+      "tileId": "l2-tanium-c0-0",
+      "note": "Coastal coves only; no inland water.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c0-0-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "db0c975952db9bcda779389a0387d2aa4305b432ea07bcbf5b30813f4762613f"
+    },
+    {
+      "tileId": "l2-tanium-c0-1",
+      "note": "East-fed stream and shelf pool discharge over the basalt edge.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c0-1-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "tanium-west-shelf-stream",
+          "path": [
+            [
+              1,
+              0.19
+            ],
+            [
+              0.91,
+              0.28
+            ],
+            [
+              0.8,
+              0.325
+            ],
+            [
+              0.73,
+              0.38
+            ],
+            [
+              0.65,
+              0.42
+            ],
+            [
+              0.54,
+              0.43
+            ],
+            [
+              0.435,
+              0.46
+            ],
+            [
+              0.415,
+              0.56
+            ],
+            [
+              0.41,
+              0.65
+            ],
+            [
+              0.32,
+              0.7
+            ],
+            [
+              0.18,
+              0.74
+            ],
+            [
+              0.02,
+              0.75
+            ]
+          ],
+          "radius": 0.055
+        }
+      ],
+      "pools": [
+        {
+          "id": "tanium-west-lip-pool",
+          "point": [
+            0.4513922813873962,
+            0.47288715192965314
+          ],
+          "radius": 0.055
+        }
+      ],
+      "falls": [
+        {
+          "id": "tanium-west-shelf-fall",
+          "lip": [
+            0.41817293600390815,
+            0.4865657059110894
+          ],
+          "foot": [
+            0.405,
+            0.65
+          ],
+          "upstream": [
+            0.4513922813873962,
+            0.47288715192965314
+          ],
+          "radius": 0.05,
+          "hasLanding": true,
+          "backingOffset": [
+            0.05,
+            0
+          ]
+        }
+      ],
+      "sha256": "d76d9b6eb32a9fd2f0404b60de9f302da069297b01c8ca27f4b2d254f90328e1"
+    },
+    {
+      "tileId": "l2-tanium-c0-2",
+      "note": "Sea cove only.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c0-2-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "72d441a729b66f729d37460e8b9dbd108b400298c98980d382b27b64183c60a6"
+    },
+    {
+      "tileId": "l2-tanium-c1-0",
+      "note": "Dry interior with northern sea context.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c1-0-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "49ad65442fef3318a334607da77da97bd582d487dcdefad7a60c25c25e3c7dd6"
+    },
+    {
+      "tileId": "l2-tanium-c1-2",
+      "note": "Forest channel descends into the inlet; canopy gaps remain occluded.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c1-2-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "tanium-forest-outlet",
+          "path": [
+            [
+              0.6,
+              0.13
+            ],
+            [
+              0.54,
+              0.22
+            ],
+            [
+              0.485,
+              0.34
+            ],
+            [
+              0.44,
+              0.445
+            ],
+            [
+              0.425,
+              0.54
+            ],
+            [
+              0.44,
+              0.63
+            ],
+            [
+              0.47,
+              0.71
+            ],
+            [
+              0.49,
+              0.78
+            ],
+            [
+              0.5,
+              0.87
+            ]
+          ],
+          "radius": 0.045
+        }
+      ],
+      "pools": [],
+      "falls": [
+        {
+          "id": "tanium-forest-inlet-fall",
+          "lip": [
+            0.441133365901319,
+            0.6272594040058622
+          ],
+          "foot": [
+            0.4846116267708842,
+            0.7469467513434294
+          ],
+          "upstream": [
+            0.4333170493404983,
+            0.5930630190522717
+          ],
+          "radius": 0.045,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        }
+      ],
+      "sha256": "02f3bbf60c8ae7af057329e2cac3a56c163a5f6631d28b7bdd443455706761e1"
+    },
+    {
+      "tileId": "l2-tanium-c2-0",
+      "note": "Dry shelf with western sea context.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c2-0-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "22dd7f9c360c98e9636dac588bcc7d63690f3a272844d62a324319efffd1f1a2"
+    },
+    {
+      "tileId": "l2-tanium-c2-2",
+      "note": "Pool-fed descent over successive benches to the southern coast.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c2-2-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "tanium-gold-beck",
+          "path": [
+            [
+              0.88,
+              0
+            ],
+            [
+              0.86,
+              0.12
+            ],
+            [
+              0.85,
+              0.24
+            ],
+            [
+              0.8,
+              0.36
+            ],
+            [
+              0.735,
+              0.46
+            ],
+            [
+              0.7,
+              0.53
+            ],
+            [
+              0.69,
+              0.64
+            ],
+            [
+              0.61,
+              0.72
+            ],
+            [
+              0.53,
+              0.79
+            ],
+            [
+              0.49,
+              0.87
+            ],
+            [
+              0.42,
+              0.965
+            ]
+          ],
+          "radius": 0.045
+        }
+      ],
+      "pools": [
+        {
+          "id": "tanium-gold-shelf-pool",
+          "point": [
+            0.7176355642403517,
+            0.4650708353688324
+          ],
+          "radius": 0.05
+        }
+      ],
+      "falls": [
+        {
+          "id": "tanium-gold-first-fall",
+          "lip": [
+            0.7176355642403517,
+            0.4680019540791402
+          ],
+          "foot": [
+            0.6985832926233513,
+            0.5559355153883733
+          ],
+          "upstream": [
+            0.7489008304836345,
+            0.41719589643380556
+          ],
+          "radius": 0.035,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        },
+        {
+          "id": "tanium-gold-second-fall",
+          "lip": [
+            0.6795310210063508,
+            0.5857352222765022
+          ],
+          "foot": [
+            0.6316560820713238,
+            0.6678065461651197
+          ],
+          "upstream": [
+            0.6985832926233513,
+            0.5652173913043478
+          ],
+          "radius": 0.035,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        },
+        {
+          "id": "tanium-gold-coast-drop",
+          "lip": [
+            0.4953590620420127,
+            0.8597948216902784
+          ],
+          "foot": [
+            0.465,
+            0.925
+          ],
+          "upstream": [
+            0.5192965315095261,
+            0.8255984367366879
+          ],
+          "radius": 0.035,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        }
+      ],
+      "sha256": "7c12ba938f272164eb45e4ce0bf1bbf7fabb058500dc76edff5dfff8e417065d"
+    },
+    {
+      "tileId": "l2-tanium-c3-0",
+      "note": "North-southeast beck drops through three terrace risers.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-0-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "tanium-north-step-beck",
+          "path": [
+            [
+              0.245,
+              0
+            ],
+            [
+              0.24,
+              0.11
+            ],
+            [
+              0.26,
+              0.18
+            ],
+            [
+              0.29,
+              0.27
+            ],
+            [
+              0.335,
+              0.37
+            ],
+            [
+              0.325,
+              0.47
+            ],
+            [
+              0.345,
+              0.545
+            ],
+            [
+              0.43,
+              0.63
+            ],
+            [
+              0.49,
+              0.75
+            ],
+            [
+              0.64,
+              0.86
+            ],
+            [
+              0.74,
+              0.945
+            ],
+            [
+              0.75,
+              1
+            ]
+          ],
+          "radius": 0.04
+        }
+      ],
+      "pools": [],
+      "falls": [
+        {
+          "id": "tanium-north-upper-step",
+          "lip": [
+            0.2799218368343918,
+            0.23009281875915974
+          ],
+          "foot": [
+            0.295,
+            0.295
+          ],
+          "upstream": [
+            0.265,
+            0.2
+          ],
+          "radius": 0.035,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        },
+        {
+          "id": "tanium-north-middle-step",
+          "lip": [
+            0.33,
+            0.415
+          ],
+          "foot": [
+            0.35661944308744503,
+            0.5051294577430386
+          ],
+          "upstream": [
+            0.33,
+            0.375
+          ],
+          "radius": 0.035,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        },
+        {
+          "id": "tanium-north-lower-step",
+          "lip": [
+            0.49,
+            0.725
+          ],
+          "foot": [
+            0.5266243282852956,
+            0.7821201758671226
+          ],
+          "upstream": [
+            0.46458231558378116,
+            0.6897899364924279
+          ],
+          "radius": 0.035,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        }
+      ],
+      "sha256": "7cd0227984246cb5ca4384c34a85bd4b36bd800f0dfa8faee500e5e298dd3440"
+    },
+    {
+      "tileId": "l2-tanium-c3-2",
+      "note": "Three visible becks; central/eastern branches step down toward the sea.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-2-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "tanium-central-bench-beck",
+          "path": [
+            [
+              0.61,
+              0
+            ],
+            [
+              0.59,
+              0.08
+            ],
+            [
+              0.568,
+              0.16
+            ],
+            [
+              0.56,
+              0.22
+            ],
+            [
+              0.51,
+              0.3
+            ],
+            [
+              0.49,
+              0.35
+            ],
+            [
+              0.48,
+              0.42
+            ],
+            [
+              0.45,
+              0.48
+            ],
+            [
+              0.42,
+              0.52
+            ],
+            [
+              0.37,
+              0.565
+            ],
+            [
+              0.365,
+              0.62
+            ],
+            [
+              0.335,
+              0.67
+            ],
+            [
+              0.265,
+              0.74
+            ],
+            [
+              0.241,
+              0.803
+            ],
+            [
+              0.229,
+              0.856
+            ],
+            [
+              0.175,
+              0.915
+            ],
+            [
+              0.05,
+              0.98
+            ]
+          ],
+          "radius": 0.03
+        },
+        {
+          "id": "tanium-eastern-bench-beck",
+          "path": [
+            [
+              0.86,
+              0.335
+            ],
+            [
+              0.83,
+              0.42
+            ],
+            [
+              0.82,
+              0.515
+            ],
+            [
+              0.8,
+              0.61
+            ],
+            [
+              0.74,
+              0.72
+            ],
+            [
+              0.7,
+              0.84
+            ],
+            [
+              0.68,
+              0.92
+            ],
+            [
+              0.7,
+              1
+            ]
+          ],
+          "radius": 0.03
+        },
+        {
+          "id": "tanium-west-edge-beck",
+          "path": [
+            [
+              0.265,
+              0.31
+            ],
+            [
+              0.21,
+              0.43
+            ],
+            [
+              0.12,
+              0.49
+            ],
+            [
+              0.075,
+              0.6
+            ],
+            [
+              0.065,
+              0.68
+            ]
+          ],
+          "radius": 0.025
+        }
+      ],
+      "pools": [],
+      "falls": [
+        {
+          "id": "tanium-central-upper-drop",
+          "lip": [
+            0.568,
+            0.15
+          ],
+          "foot": [
+            0.5559355153883733,
+            0.22325354176844162
+          ],
+          "upstream": [
+            0.58,
+            0.12
+          ],
+          "radius": 0.026,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        },
+        {
+          "id": "tanium-central-middle-drop",
+          "lip": [
+            0.49,
+            0.35
+          ],
+          "foot": [
+            0.48,
+            0.42
+          ],
+          "upstream": [
+            0.51,
+            0.32
+          ],
+          "radius": 0.026,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        },
+        {
+          "id": "tanium-central-lower-drop",
+          "lip": [
+            0.3795798729848559,
+            0.5627747923790913
+          ],
+          "foot": [
+            0.36,
+            0.64
+          ],
+          "upstream": [
+            0.395,
+            0.545
+          ],
+          "radius": 0.026,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        },
+        {
+          "id": "tanium-central-coast-drop",
+          "lip": [
+            0.23937469467513434,
+            0.802638006839277
+          ],
+          "foot": [
+            0.229,
+            0.856
+          ],
+          "upstream": [
+            0.25,
+            0.77
+          ],
+          "radius": 0.03,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        },
+        {
+          "id": "tanium-east-upper-drop",
+          "lip": [
+            0.8182706399609184,
+            0.43575964826575475
+          ],
+          "foot": [
+            0.7972642892037127,
+            0.5280898876404494
+          ],
+          "upstream": [
+            0.8231558378114313,
+            0.4069369809477284
+          ],
+          "radius": 0.024,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        },
+        {
+          "id": "tanium-east-middle-drop",
+          "lip": [
+            0.7703957010258915,
+            0.6380068392769908
+          ],
+          "foot": [
+            0.7371763556424035,
+            0.7269174401563263
+          ],
+          "upstream": [
+            0.7835857352222765,
+            0.5964826575476306
+          ],
+          "radius": 0.025,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        },
+        {
+          "id": "tanium-east-coast-drop",
+          "lip": [
+            0.7,
+            0.84
+          ],
+          "foot": [
+            0.68,
+            0.935
+          ],
+          "upstream": [
+            0.7103077674645824,
+            0.8001954079140206
+          ],
+          "radius": 0.025,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        }
+      ],
+      "sha256": "33d118b5649b8fa37cfb9422887ffe780ca6411caea4cfb16aa64dcec1b3ec82"
+    },
+    {
+      "tileId": "l2-tanium-c4-1",
+      "note": "Closed plateau tarn and an isolated short western seep fall.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c4-1-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [
+        {
+          "id": "tanium-limestone-tarn",
+          "point": [
+            0.57,
+            0.315
+          ],
+          "radius": 0.15
+        }
+      ],
+      "falls": [
+        {
+          "id": "tanium-western-seep",
+          "lip": [
+            0.15486077186126038,
+            0.5583781143136297
+          ],
+          "foot": [
+            0.15,
+            0.685
+          ],
+          "upstream": [
+            0.15486077186126038,
+            0.5583781143136297
+          ],
+          "radius": 0.028,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        }
+      ],
+      "sha256": "3fbfd0731dd2a16f7d99c6331da0968eaf93e27d4cb20d9b7786275fc52d64c4"
+    },
+    {
+      "tileId": "l2-tanium-c4-2",
+      "note": "Western stepped beck and separate fern-hollow spring outlet, both reaching the coast.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c4-2-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "tanium-western-steps",
+          "path": [
+            [
+              0.315,
+              0
+            ],
+            [
+              0.395,
+              0.105
+            ],
+            [
+              0.42,
+              0.19
+            ],
+            [
+              0.39,
+              0.29
+            ],
+            [
+              0.31,
+              0.41
+            ],
+            [
+              0.25,
+              0.52
+            ],
+            [
+              0.2,
+              0.65
+            ],
+            [
+              0.18,
+              0.77
+            ],
+            [
+              0.19,
+              0.89
+            ],
+            [
+              0.25,
+              1
+            ]
+          ],
+          "radius": 0.035
+        },
+        {
+          "id": "tanium-fern-outlet",
+          "path": [
+            [
+              0.635,
+              0.345
+            ],
+            [
+              0.66,
+              0.45
+            ],
+            [
+              0.67,
+              0.51
+            ],
+            [
+              0.78,
+              0.58
+            ],
+            [
+              0.85,
+              0.69
+            ],
+            [
+              0.88,
+              0.77
+            ],
+            [
+              0.855,
+              0.93
+            ]
+          ],
+          "radius": 0.035
+        }
+      ],
+      "pools": [
+        {
+          "id": "tanium-fern-spring",
+          "point": [
+            0.6248168050806058,
+            0.3409868099658036
+          ],
+          "radius": 0.065
+        }
+      ],
+      "falls": [
+        {
+          "id": "tanium-west-first-drop",
+          "lip": [
+            0.305,
+            0.405
+          ],
+          "foot": [
+            0.27357107962872496,
+            0.4899853444064485
+          ],
+          "upstream": [
+            0.336590131900342,
+            0.3663898387884709
+          ],
+          "radius": 0.035,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        },
+        {
+          "id": "tanium-west-second-drop",
+          "lip": [
+            0.2066438690766976,
+            0.6101612115290669
+          ],
+          "foot": [
+            0.20517830972154372,
+            0.7000488519785051
+          ],
+          "upstream": [
+            0.22,
+            0.57
+          ],
+          "radius": 0.035,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        },
+        {
+          "id": "tanium-west-coast-fall",
+          "lip": [
+            0.183,
+            0.83
+          ],
+          "foot": [
+            0.20371275036638983,
+            0.9316072300928188
+          ],
+          "upstream": [
+            0.19394235466536394,
+            0.7874938935026868
+          ],
+          "radius": 0.035,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        },
+        {
+          "id": "tanium-fern-bench-fall",
+          "lip": [
+            0.6746458231558378,
+            0.4948705422569614
+          ],
+          "foot": [
+            0.7200781631656082,
+            0.5412799218368344
+          ],
+          "upstream": [
+            0.667,
+            0.46
+          ],
+          "radius": 0.035,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        },
+        {
+          "id": "tanium-fern-coast-fall",
+          "lip": [
+            0.8588177821201759,
+            0.7743038593063019
+          ],
+          "foot": [
+            0.855,
+            0.92
+          ],
+          "upstream": [
+            0.84904738641915,
+            0.7342452369320958
+          ],
+          "radius": 0.035,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        }
+      ],
+      "sha256": "459dbfc50de1da9a6af004c1511ed7df2bb362aadaec83d5a96a38e7aa4b1bf7"
+    },
+    {
+      "tileId": "l2-tanium-c5-0",
+      "note": "Coastal cove only.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c5-0-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "37a3a12826491b2ccc170567a1d69ff3123740cfe334e3f4aeeac7de3aad0f20"
+    },
+    {
+      "tileId": "l2-tanium-c5-1",
+      "note": "East-to-west ridge-fed shallow stream with broad connected shelf pool.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c5-1-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "tanium-ridge-stream",
+          "path": [
+            [
+              0.935,
+              0.25
+            ],
+            [
+              0.81,
+              0.235
+            ],
+            [
+              0.67,
+              0.205
+            ],
+            [
+              0.53,
+              0.17
+            ],
+            [
+              0.385,
+              0.15
+            ],
+            [
+              0.245,
+              0.15
+            ],
+            [
+              0.065,
+              0.135
+            ]
+          ],
+          "radius": 0.05
+        }
+      ],
+      "pools": [
+        {
+          "id": "tanium-ridge-pool",
+          "point": [
+            0.335,
+            0.2
+          ],
+          "radius": 0.11
+        }
+      ],
+      "falls": [],
+      "sha256": "a9649c830d88d19c0121b28ad2898431091ae4ddad78c06ef1dbd0ebdd19181c"
+    },
+    {
+      "tileId": "l2-tanium-c5-2",
+      "note": "Two distinct narrow becks drain to coastal water.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c5-2-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "tanium-west-coast-beck",
+          "path": [
+            [
+              0.065,
+              0
+            ],
+            [
+              0.1,
+              0.15
+            ],
+            [
+              0.11,
+              0.3
+            ],
+            [
+              0.1,
+              0.4
+            ],
+            [
+              0.14,
+              0.5
+            ],
+            [
+              0.18,
+              0.6
+            ],
+            [
+              0.25,
+              0.71
+            ]
+          ],
+          "radius": 0.025
+        },
+        {
+          "id": "tanium-east-coast-beck",
+          "path": [
+            [
+              1,
+              0.39
+            ],
+            [
+              0.955,
+              0.48
+            ],
+            [
+              0.94,
+              0.58
+            ],
+            [
+              0.92,
+              0.7
+            ],
+            [
+              0.9,
+              0.795
+            ]
+          ],
+          "radius": 0.025
+        }
+      ],
+      "pools": [],
+      "falls": [],
+      "sha256": "e32caad739aa73edc11a5c20096d047d2f1ff45108a5958abd459045afdd373f"
+    },
+    {
+      "tileId": "l2-tanium-c6-0",
+      "note": "Rocky sea cove only.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c6-0-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "c52d5a78e387eba0257945d4ffefa98e1c846129508fc78414ffee274ba37a96"
+    },
+    {
+      "tileId": "l2-tanium-c6-1",
+      "note": "Dry coastal promontory; no inland water.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c6-1-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "b92ce5acfb32676fe435b026f2d7fdce4fab35fba9fdb75bea94cb8277b2be5d"
+    },
+    {
+      "tileId": "l2-tanium-c6-2",
+      "note": "Quarry streams and pit; source edge handoffs are visibly misregistered and are not repaired here.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c6-2-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "tanium-quarry-rim",
+          "path": [
+            [
+              0,
+              0.34
+            ],
+            [
+              0.035,
+              0.25
+            ],
+            [
+              0.08,
+              0.195
+            ],
+            [
+              0.16,
+              0.16
+            ],
+            [
+              0.27,
+              0.145
+            ],
+            [
+              0.38,
+              0.17
+            ],
+            [
+              0.48,
+              0.236
+            ],
+            [
+              0.67,
+              0.32
+            ],
+            [
+              0.883,
+              0.391
+            ],
+            [
+              0.94,
+              0.425
+            ]
+          ],
+          "radius": 0.03
+        },
+        {
+          "id": "tanium-quarry-outlet",
+          "path": [
+            [
+              0.46,
+              0.25
+            ],
+            [
+              0.43,
+              0.29
+            ],
+            [
+              0.4,
+              0.36
+            ],
+            [
+              0.4,
+              0.405
+            ],
+            [
+              0.44,
+              0.46
+            ],
+            [
+              0.455,
+              0.49
+            ],
+            [
+              0.53,
+              0.547
+            ],
+            [
+              0.544,
+              0.6
+            ],
+            [
+              0.54,
+              0.635
+            ],
+            [
+              0.56,
+              0.68
+            ],
+            [
+              0.562,
+              0.754
+            ],
+            [
+              0.63,
+              0.83
+            ],
+            [
+              0.66,
+              0.89
+            ],
+            [
+              0.68,
+              0.93
+            ],
+            [
+              0.69,
+              0.973
+            ]
+          ],
+          "radius": 0.03
+        }
+      ],
+      "pools": [
+        {
+          "id": "tanium-quarry-pit",
+          "point": [
+            0.3,
+            0.34
+          ],
+          "radius": 0.105
+        }
+      ],
+      "falls": [
+        {
+          "id": "tanium-quarry-inlet",
+          "lip": [
+            0.45,
+            0.255
+          ],
+          "foot": [
+            0.419,
+            0.31
+          ],
+          "upstream": [
+            0.48,
+            0.236
+          ],
+          "radius": 0.03,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        },
+        {
+          "id": "tanium-quarry-upper-cut",
+          "lip": [
+            0.529066927210552,
+            0.5696140693698095
+          ],
+          "foot": [
+            0.5461651196873474,
+            0.6340986809965804
+          ],
+          "upstream": [
+            0.5192965315095261,
+            0.5398143624816805
+          ],
+          "radius": 0.035,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        },
+        {
+          "id": "tanium-quarry-lower-cut",
+          "lip": [
+            0.570591108939912,
+            0.6829506595017099
+          ],
+          "foot": [
+            0.563751831949194,
+            0.7537860283341475
+          ],
+          "upstream": [
+            0.5603321934538349,
+            0.651685393258427
+          ],
+          "radius": 0.035,
+          "hasLanding": true,
+          "backingOffset": [
+            0.035,
+            0
+          ]
+        }
+      ],
+      "sha256": "c93f36364ff3bd22eb6dd95c5a975469c3119a22268dd3a362466f7ce429c249"
+    },
+    {
+      "tileId": "l2-review-tanium-c1-1",
+      "note": "Candidate forest river; source-bound snapshot, north-to-south flow.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-review/tanium-c1-1-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "tanium-candidate-forest-river",
+          "path": [
+            [
+              0.605,
+              0.11
+            ],
+            [
+              0.6,
+              0.22
+            ],
+            [
+              0.54,
+              0.31
+            ],
+            [
+              0.485,
+              0.39
+            ],
+            [
+              0.45,
+              0.45
+            ],
+            [
+              0.455,
+              0.53
+            ],
+            [
+              0.495,
+              0.605
+            ],
+            [
+              0.485,
+              0.67
+            ],
+            [
+              0.42,
+              0.78
+            ],
+            [
+              0.355,
+              0.9
+            ],
+            [
+              0.265,
+              1
+            ]
+          ],
+          "radius": 0.05
+        }
+      ],
+      "pools": [],
+      "falls": [],
+      "sha256": "460a71cbd796f9f805a582cda5ea689648023836e575ecbb5ad6203b0f181344"
+    },
+    {
+      "tileId": "l2-review-tanium-c2-1",
+      "note": "Candidate narrow forest beck with rock-occluded continuation.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-review/tanium-c2-1-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "tanium-candidate-narrow-beck",
+          "path": [
+            [
+              0.21,
+              0
+            ],
+            [
+              0.22,
+              0.15
+            ],
+            [
+              0.28,
+              0.215
+            ],
+            [
+              0.27,
+              0.27
+            ],
+            [
+              0.3,
+              0.37
+            ],
+            [
+              0.325,
+              0.47
+            ],
+            [
+              0.38,
+              0.6
+            ],
+            [
+              0.42,
+              0.675
+            ],
+            [
+              0.455,
+              0.76
+            ],
+            [
+              0.43,
+              0.85
+            ],
+            [
+              0.4,
+              0.92
+            ],
+            [
+              0.45,
+              1
+            ]
+          ],
+          "radius": 0.028
+        }
+      ],
+      "pools": [],
+      "falls": [],
+      "sha256": "da91c296809eb8319cdd579331772ed7d343eac9b6e392333488887e59119771"
+    },
+    {
+      "tileId": "l2-review-tanium-c3-1",
+      "note": "Candidate central river and shelf pool.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-review/tanium-c3-1-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "tanium-candidate-central-river",
+          "path": [
+            [
+              0.75,
+              0
+            ],
+            [
+              0.9,
+              0.13
+            ],
+            [
+              0.925,
+              0.195
+            ],
+            [
+              0.88,
+              0.25
+            ],
+            [
+              0.84,
+              0.3
+            ],
+            [
+              0.82,
+              0.43
+            ],
+            [
+              0.8,
+              0.52
+            ],
+            [
+              0.775,
+              0.625
+            ],
+            [
+              0.81,
+              0.72
+            ],
+            [
+              0.75,
+              0.85
+            ],
+            [
+              0.64,
+              1
+            ]
+          ],
+          "radius": 0.05
+        }
+      ],
+      "pools": [
+        {
+          "id": "tanium-candidate-shelf-pool",
+          "point": [
+            0.85,
+            0.295
+          ],
+          "radius": 0.07
+        }
+      ],
+      "falls": [],
+      "sha256": "bf5263e799d01edbdbab3ad9fb2cb425b09f4f2e2908b2467e78b8313d4d6021"
+    },
+    {
+      "tileId": "l2-review-tanium-c4-0",
+      "note": "Candidate closed lower-step pool; no source-visible river connection.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-review/tanium-c4-0-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [
+        {
+          "id": "tanium-candidate-closed-pool",
+          "point": [
+            0.28,
+            0.8
+          ],
+          "radius": 0.095
+        }
+      ],
+      "falls": [],
+      "sha256": "a9ae622b60a3853b6032c4381465d8c0c0840ae82ba00a4dc34c1e4604063071"
+    },
+    {
+      "tileId": "l2-coast-c2-0",
+      "note": "Open sea only.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c2-0-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "feca052485672c736da5d1804254abc1fc5398cf4a5b201e985a2443030cb3a7"
+    },
+    {
+      "tileId": "l2-coast-c4-0",
+      "note": "North headwater shelf and rock-occluded beck to the northern coast.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c4-0-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [
+        {
+          "id": "north-coast-beck",
+          "path": [
+            [
+              0.34,
+              1
+            ],
+            [
+              0.31,
+              0.91
+            ],
+            [
+              0.29,
+              0.82
+            ],
+            [
+              0.26,
+              0.78
+            ],
+            [
+              0.26,
+              0.71
+            ],
+            [
+              0.29,
+              0.645
+            ],
+            [
+              0.31,
+              0.603
+            ],
+            [
+              0.335,
+              0.56
+            ],
+            [
+              0.34,
+              0.51
+            ],
+            [
+              0.356,
+              0.45
+            ],
+            [
+              0.38,
+              0.4
+            ]
+          ],
+          "radius": 0.022
+        }
+      ],
+      "pools": [
+        {
+          "id": "north-coast-headwater",
+          "point": [
+            0.34,
+            0.995
+          ],
+          "radius": 0.04
+        }
+      ],
+      "falls": [],
+      "sha256": "02f0282ac0b8d793777c55276e0f661b7d5d25e47d91c10bb927f5b5eadeb04d"
+    },
+    {
+      "tileId": "l2-coast-c5-0",
+      "note": "Open sea only.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c5-0-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "d5b67f6d195a26c44157601e7768ec6184ef198404ca4d147fbaa4b16b4edf71"
+    },
+    {
+      "tileId": "l2-coast-c6-0",
+      "note": "Open sea only.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c6-0-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "104d6f0602382f6067ffbce7aef8b4c6195fd6886e22ae4f92362c9f044012b6"
+    }
+  ]
+}
