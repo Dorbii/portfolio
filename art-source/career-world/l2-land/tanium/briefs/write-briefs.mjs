@@ -581,7 +581,12 @@ world. Level rock on the shore at both ends of the arc for the line to leave
 and rejoin.
 
 Becks in two gullies run south to the sea. Carry land to the NORTH, EAST and
-WEST edges.`;
+WEST edges.
+
+**Every beck is cut water the full width of its painted bed.** No pale dry
+gravel bed beside a thread of water: where a bed is painted, the water fills
+it bank to bank, 2-4 m wide, and the mask covers all of it.
+`;
 
 B["6,2"] = `The CONSTRUCTION ZONE — south-east corner. Open sea on the SOUTH and the EAST.
 
