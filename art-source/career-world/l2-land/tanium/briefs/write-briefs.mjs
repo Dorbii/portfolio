@@ -277,6 +277,16 @@ side; nothing spans the air. East of the gorge it runs on between the trunks,
 over the forest floor, all the way to the east edge. No rune panels and no
 marks anywhere in this cell.
 
+**The seams must not show (owner 2026-09-05, on the live world: "needs a
+cleaner transition, its too dark and obvious seam").** Seen from above, this
+cell must not read as one dark square set into brighter ground: the darkest
+stand is the DEEP-STAND site and the gorge's shade, not the whole cell. Toward
+the WEST edge the stands break into glades and scattered groups over the last
+third of the cell, so the heath of (0,1) runs in between the trees before the
+seam; toward the EAST edge the same, into the thinning forest of (2,1). The
+canopy's value where it meets any neighbour is that neighbour's own value: the
+change is gradual across the outer third, never at a line.
+
 Land to all four edges.`;
 
 B["2,1"] = `THE EASTERN EDGE OF THE FOREST, and the cell that has to make the forest read
@@ -494,6 +504,17 @@ the shelf's gold meadow from the east and the sound coast's pale grey-green
 grass from the west continue at their own brightness and colour for the first
 10 m inside each seam. The dark stands begin beyond those bands and close to
 the full forest through the middle of the cell.
+
+**The seams must not show (owner 2026-09-05, on the live world: "needs a
+cleaner transition, its too dark and obvious seam").** Seen from above, this
+cell must not read as one dark square set into brighter ground. The canopy is
+NO DARKER than the forest of the cell to the NORTH-EAST (2,1): dark green with
+the haze over it, never near-black. Toward the EAST edge the stands break into
+glades and scattered groups over the last third of the cell, so the meadow
+shelf's grass runs in between the trees before the seam — the change is
+gradual across that third, never at a line. The same toward the WEST edge with
+the sound coast's pale grass. The dense dark heart of the forest is the middle
+of the cell, around the inlet.
 
 Carry land to the NORTH, EAST and WEST edges; the south is sea.`;
 

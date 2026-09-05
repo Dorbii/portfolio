@@ -66,13 +66,35 @@ date -u +%H:%M:%SZ > "$PRELUDE_DONE"
 fi   # prelude
 if [ "${STOP_BEFORE_COAST:-0}" = 1 ]; then say "stopping before the coast (STOP_BEFORE_COAST=1)"; exit 0; fi
 
-say "the coast misses with the sea painted in (18i), then c7-8's send-back and c8-6 beneath c8-5"
+# owner 2026-09-05 19:20, on the live world (eleven crops): T c1-2 "needs a
+# cleaner transition, its too dark and obvious seam" — one attempt with the
+# seam paragraph in its brief, before the coast (the coast cell c2-8 below it
+# bakes against whatever lands)
+say "T c1-2: the forest's east seam, one attempt (owner: 'needs a cleaner transition')"
+node docs/career-world/session3-tools/bake-tanium.mjs --only c1-2
+git add -A -- art-source/career-world/l2-land/tanium "$AUTH" docs/career-world/session3-tools/tanium-rejects >/dev/null 2>&1
+git commit -q -m "Tanium c1-2: one attempt on the owner's 'needs a cleaner transition'" -m "Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>" >/dev/null 2>&1 && say "c1-2 committed"
+
+# the coast on locks 18i-b/18j/18k (owner 19:20 'sorry proceed'), in two waves
+# so every cell of the second wave sees both neighbours along the shore:
+#   wave 1: c7-0 (c6-0's inlets), c7-2 (N c4-1's peninsula), c7-4 (N c4-3),
+#           c8-6 (beneath c8-5), c6-8 (a shore, not a plateau), c4-8 (T c3-2's
+#           falls), c1-0 (the corner), c1-2 (N c0-1's bay), c1-8 (18j)
+#   wave 2: c7-1 (N c4-0's bay, between c7-0 and c7-2), c7-3 (between c7-2
+#           and c7-4), c8-7 (beneath c8-6), c7-8 (between c6-8 and c8-7),
+#           c1-3 (beneath c1-2), c2-8 (beside c1-8, beneath T c1-2)
+say "the coast, wave 1: c7-0,c7-2,c7-4,c8-6,c6-8,c4-8,c1-0,c1-2,c1-8"
 node docs/career-world/session3-tools/coast-briefs.mjs >/dev/null 2>&1
-git add -A -- art-source/career-world/l2-land/coast/briefs art-source/career-world/l2-land/tanium/briefs >/dev/null 2>&1
-git commit -q -m "Briefs refreshed before the misses run" -m "Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>" >/dev/null 2>&1
-node docs/career-world/session3-tools/bake-tanium.mjs --territory coast --only c1-0,c7-4,c8-7,c1-2,c4-8,c7-0,c1-3,c7-8,c8-6
+git add -A -- art-source/career-world/l2-land/coast/briefs art-source/career-world/l2-land/tanium/briefs docs/career-world/session3-tools/coast-briefs.mjs >/dev/null 2>&1
+git commit -q -m "Briefs refreshed before the coast run (owner 19:20: the eleven crops)" -m "Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>" >/dev/null 2>&1
+node docs/career-world/session3-tools/bake-tanium.mjs --territory coast --only c7-0,c7-2,c7-4,c8-6,c6-8,c4-8,c1-0,c1-2,c1-8
+say "the coast, wave 2: c7-1,c7-3,c8-7,c7-8,c1-3,c2-8"
+node docs/career-world/session3-tools/coast-briefs.mjs >/dev/null 2>&1
+git add -A -- art-source/career-world/l2-land/coast/briefs >/dev/null 2>&1
+git commit -q -m "Briefs refreshed between the coast waves" -m "Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>" >/dev/null 2>&1
+node docs/career-world/session3-tools/bake-tanium.mjs --territory coast --only c7-1,c7-3,c8-7,c7-8,c1-3,c2-8
 say "conform pass: shore candidates refused on water continuity alone, drift within 12 m, mask only"
 node docs/career-world/session3-tools/conform-pass.mjs --max 12 2>&1 | tail -12
 say "serve"
-bash .codex-tmp/session4/serve.sh 2>&1 | grep -E "^\[|committed"
+bash .codex-tmp/session4/serve.sh 2>&1 | grep -E "^[|committed"
 say "misses done"

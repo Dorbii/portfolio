@@ -170,7 +170,9 @@ Each inlet is OPEN WATER at the seam and continues into this cell as a cove
 that opens to the sea; the land between the inlets continues 15-40 m as low
 headlands and ends. The first candidate met only the sea and walled off the
 inlets; that is wrong. Your south edge meets the shore cell below (c7-1):
-carry the shoreline down to it, not across it.`,
+carry the shoreline down to it, not across it. The second candidate (owner
+2026-09-05 19:20, on the live world: "coast issues") ended c6-0's land in a
+straight cut at the seam and ran its own land to the south edge; both wrong.`,
   // owner 2026-09-05 07:30, crop 1: the fill line from c0-6's corner up to
   // T c0-0's west edge
   "c0-5": `**A headland down to c0-6.** T c0-0's cliffs arrive across the bottom 15% of
@@ -197,6 +199,47 @@ c6-0's edge, swelling 15-40 m east into this cell, and coming back to T
 c6-1's cliff at the top of the cell below (c8-6). So: a rounded headland,
 widest at your south edge, its rim of broken column tops facing east and
 south; open sea north of it and east of it.`,
+  // owner 2026-09-05 19:20, on the live world: c6-8's candidate is "not a
+  // coastline, the seam just cuts off" — a whole plateau to the south edge,
+  // its cliff wall cut by the world's edge
+  "c6-8": `**A shore, not a plateau — hard.** T c5-2's ground reaches your NORTH edge
+only in the last 7% of it, at the east end, with a watercourse beside it; the
+other 89% of that edge is the island's SEA and it stays sea. Carry that one
+strip of ground 15-40 m south as a low headland and END IT at broken column
+tops with talus and surf; everything south, west and east of that headland is
+open sea to every edge of this cell. The previous candidate filled the whole
+cell with a plateau whose cliff wall ran straight to the south edge and was
+cut off there (owner: "this is not a coastline, the seam just cuts off"); that
+is wrong. No land may touch your SOUTH, EAST or WEST edge.`,
+  // owner 2026-09-05 19:20: N c4-0's bay and cliff are cut off by a straight
+  // vertical line at this cell's west edge — the candidate had only skerries
+  "c7-1": `**Continue N c4-0's shore — hard.** N c4-0's ground arrives across the lower
+part of your WEST edge with a bay in it: the bay's water is OPEN WATER at the
+seam and opens out east into the sea; the ground on either side of it continues
+15-40 m east as low headlands of broken columns and ends. The previous
+candidate painted only skerries and left N c4-0's cliff and bay cut off by a
+straight line at the seam (owner: "the seam just cuts off"); that is wrong. The
+shore cells above (c7-0) and below (c7-2) carry the same coast: meet their land
+at your north and south edges where the map says ground.`,
+  // owner 2026-09-05 19:20: N c4-1's peninsula ends in a vertical cut at the
+  // seam; the candidate's sea and skerries started right at the line
+  "c7-2": `**Continue the peninsula — hard.** N c4-1's ground reaches your WEST edge in
+three stretches; the northern one is a peninsula with cliffs on both sides.
+Every stretch continues east 15-40 m at exactly the width it arrives and ends
+in broken column tops; the sea between them is open water at the seam. The
+previous candidate started its sea and skerries at the seam over the last of
+those stretches, so N c4-1's land ends in a straight vertical cut; that is
+wrong. Your north edge meets c7-1 and your south edge meets c7-3: carry the
+shoreline to both, not across them.`,
+  // owner 2026-09-05 19:20: a straight strip of dark water along the seam —
+  // the candidate put land where N c4-2's sea arrives and sea where its ground does
+  "c7-3": `**The sea at the seam is the island's own sea — hard.** N c4-2's edge is sea
+for almost its whole length, with one short stretch of ground near the middle.
+Where the sea arrives it stays OPEN SEA right at the seam: no shore, no rock,
+no strip of land along the line. The one stretch of ground continues 15-40 m
+east and ends. The previous candidate painted a coast along the whole seam and
+left a straight channel of dark water between it and N c4-2's cliffs (owner:
+"alignment issues and coast issues"); that is wrong.`,
   "c8-6": `**The bulge closes; then the chain's end.** The rounded headland from c8-5
 above comes down across your NORTH edge and closes back onto T c6-1's cliff,
 which arrives across the top 19% of your WEST edge. Below that, T c6-1's
