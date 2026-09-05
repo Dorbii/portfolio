@@ -63,6 +63,11 @@ const streamLike = (i) => {
   // by GROW_REGIONS as always; the stony ground is the same colour, so the
   // regions must hug the channel.
   if (process.env.GROW_CLASS === "pale") return v >= 0.42 && s <= 0.34 && Math.abs(bl - r) < 40;
+  // GROW_CLASS=bed: the painted stream BED — grey-green gravel, mid value, low
+  // saturation, not yellow (grass is b-r ~ -100) and not the bright stones
+  // (v > 0.62). The owner on c5-2: "the water doesnt seem to line up with the
+  // banks" — the cut is a thread beside the bed; the bed is what to cut.
+  if (process.env.GROW_CLASS === "bed") return v >= 0.36 && v <= 0.62 && s <= 0.30 && (bl - r) > -35;
   if (bl - r > -25) return true;                             // the channel
   return h >= 150 && h <= 250 && s >= 0.15;                  // any frank blue
 };
