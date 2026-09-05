@@ -16,6 +16,9 @@ cd "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-complet
 say() { echo "[$(date -u +%H:%M:%S)Z] $*"; }
 if [ -e .codex-tmp/authoring/cell.lock ]; then say "lock present — not starting"; exit 1; fi
 AUTH=public/career-world/layers/terrain/authority
+PRELUDE_DONE=.codex-tmp/session4/misses-prelude.done
+
+if [ -f "$PRELUDE_DONE" ]; then say "prelude already done ($(cat "$PRELUDE_DONE")) — straight to the coast"; else
 
 # owner 2026-09-05 17:20 on c8-5's candidate, the only fault named: "the 3rd is
 # cut off at the bottom" — the cut is c8-6's empty slot; c8-5 goes in so c8-6
@@ -58,6 +61,10 @@ node art-source/career-world/l2-land/tanium/briefs/write-briefs.mjs >/dev/null 2
 node docs/career-world/session3-tools/bake-tanium.mjs --only c4-0
 node art-source/career-world/l2-land/tanium/briefs/write-briefs.mjs >/dev/null 2>&1
 node docs/career-world/session3-tools/bake-tanium.mjs --only c2-1
+
+date -u +%H:%M:%SZ > "$PRELUDE_DONE"
+fi   # prelude
+if [ "${STOP_BEFORE_COAST:-0}" = 1 ]; then say "stopping before the coast (STOP_BEFORE_COAST=1)"; exit 0; fi
 
 say "the coast misses with the sea painted in (18i), then c7-8's send-back and c8-6 beneath c8-5"
 node docs/career-world/session3-tools/coast-briefs.mjs >/dev/null 2>&1
