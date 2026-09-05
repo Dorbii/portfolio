@@ -433,8 +433,16 @@ async function composeTile(seam, authored, contributors, sourceOf, tx, ty, kind)
 // (the position the foreign cell occupies on this grid); the value says where
 // its sources live. Populated once the cell's position is known.
 const FOREIGN = new Map();
+// Neighbours beyond this grid's edge — the cells across a territory border
+// (lock change 18h, 2026-09-05: c4-0 painted no water where N c3-3 delivers
+// a beck, because nothing across the border reached its edit target or its
+// gates). Keyed "<territory>:<cell>". They condition the edit target and are
+// judged by the seam gates, but they are NOT in FOREIGN: the stitch, the seam
+// network and the conditioning window are this grid's, and the border seam
+// stays the straight edge it always was.
+const FOREIGN_OUT = new Map();
 function srcFileFor(paths, cid, kind) {
-  const f = FOREIGN.get(cid);
+  const f = FOREIGN.get(cid) || FOREIGN_OUT.get(cid);
   return f ? path.join(f.dir, `${f.id}-${kind}.png`) : path.join(paths.sources, cid, `${cid}-${kind}.png`);
 }
 function makeSourceOf(paths) {
@@ -721,14 +729,22 @@ const authoredNeighbours = NEIGHBOURS
       const cells = JSON.parse(fs.readFileSync(manFile, "utf8")).cells || {};
       for (const [dx, dy] of NEIGHBOURS) {
         const c = col + dx, r = row + dy;
-        if (c < 0 || r < 0 || c >= plan.grid.cols || r >= plan.grid.rows) continue;
+        const outside = c < 0 || r < 0 || c >= plan.grid.cols || r >= plan.grid.rows;
         const local = `c${c}-${r}`;
-        if (ledger.cells[local] || FOREIGN.has(local)) continue;
+        if (!outside && (ledger.cells[local] || FOREIGN.has(local))) continue;
         const wc = block[0] + c, wr = block[1] + r;              // world lattice cell
         const fc = wc - b[0], fr = wr - b[1];                    // that cell in the foreign grid
         if (fc < 0 || fr < 0 || fc >= d.grid.cols || fr >= d.grid.rows) continue;
         const fid = `c${fc}-${fr}`;
         if (!cells[fid]) continue;
+        if (outside) {
+          // across the territory border (18h): conditions and is judged, not stitched
+          const key = `${tid}:${fid}`;
+          if (FOREIGN_OUT.has(key)) continue;
+          FOREIGN_OUT.set(key, { territory: tid, id: fid, dir: `${root}/${tid}/${fid}`, cell: [c, r] });
+          authoredNeighbours.push({ cell: [c, r], id: key, foreign: { territory: tid, id: fid }, outside: true });
+          continue;
+        }
         FOREIGN.set(local, { territory: tid, id: fid, dir: `${root}/${tid}/${fid}` });
         authoredNeighbours.push({ cell: [c, r], id: local, foreign: { territory: tid, id: fid } });
       }
@@ -754,6 +770,7 @@ fs.mkdirSync(cellDir, { recursive: true });
 // water is visible as painted water, so an arriving stream or shoreline is a
 // feature to continue, not a transparent hole — plus an ownership map showing
 // which pixels are binding (the stitch preserves them regardless of the draw)
+let seaPrefilled = 0;   // px of the island's sea painted on into the target (18i)
 if (authoredNeighbours.length) {
   const win = windowOf(col, row, gridW, gridH);
   const ctxDir = path.join(cellDir, "context");
@@ -827,6 +844,119 @@ if (authoredNeighbours.length) {
             target[o] = t[si]; target[o + 1] = t[si + 1]; target[o + 2] = t[si + 2];
           }
         }
+      }
+    }
+    // Across the territory border (18h): an outside neighbour is not in the
+    // seam network, so its concept paint is laid straight into the target
+    // wherever its canvas covers mine and mine is still grey — its kept paint
+    // first (the truth), then an orthogonal neighbour's bleed (its prediction
+    // of my ground): the same band an in-grid neighbour contributes.
+    {
+      const isGreyAt = (o) => target[o] === EDIT_GREY[0] && target[o + 1] === EDIT_GREY[1] && target[o + 2] === EDIT_GREY[2];
+      const outsideNbs = authoredNeighbours.filter((n) => n.outside);
+      for (const pass of ["kept", "bleed"]) {
+        for (const nb of outsideNbs) {
+          const [nc, nr] = nb.cell;
+          if (pass === "bleed" && Math.abs(nc - col) + Math.abs(nr - row) !== 1) continue;
+          const their = await ctxSourceOf(nb.id, "concept");
+          const dx = (col - nc) * CELL_PX, dy = (row - nr) * CELL_PX;   // my (x,y) is their (x+dx, y+dy)
+          for (let y = 0; y < GEN_PX; y++) {
+            const ty = y + dy;
+            if (ty < 0 || ty >= GEN_PX) continue;
+            const tyKept = ty >= BLEED && ty < BLEED + CELL_PX;
+            for (let x = 0; x < GEN_PX; x++) {
+              const tx = x + dx;
+              if (tx < 0 || tx >= GEN_PX) continue;
+              const inKept = tyKept && tx >= BLEED && tx < BLEED + CELL_PX;
+              if ((pass === "kept") !== inKept) continue;
+              const si = (ty * GEN_PX + tx) * 4;
+              if (their.data[si + 3] < 128) continue;
+              const o = (y * GEN_PX + x) * 4;
+              if (!isGreyAt(o)) continue;
+              target[o] = their.data[si]; target[o + 1] = their.data[si + 1]; target[o + 2] = their.data[si + 2];
+            }
+          }
+        }
+      }
+    }
+    // SEA PRE-FILL (18i, 2026-09-05): a shore cell's target carries the
+    // island's sea on into the cell, and leaves grey only where land may go.
+    if (/^shore$/i.test(biomeId) || plan.biomes?.[biomeId]?.seaFill) {
+      const isGreyPx = (o) => target[o] === EDIT_GREY[0] && target[o + 1] === EDIT_GREY[1] && target[o + 2] === EDIT_GREY[2];
+      const STRIP = Math.round(40 / (97.6 / CELL_PX));                                                                    // 40 m in canvas px
+      const MARGIN = Math.round(6 / (97.6 / CELL_PX));                                                                  // 6 m
+      const SEA_RUN = Math.round(15 / (97.6 / CELL_PX));                                                                 // a run this wide is sea, not a stream
+      const allowed = new Uint8Array(GEN_PX * GEN_PX);
+      const swatch = [];
+      let seaSeams = 0;
+      for (const nb of authoredNeighbours) {
+        const [nc, nr] = nb.cell;
+        if (Math.abs(nc - col) + Math.abs(nr - row) !== 1) continue;
+        const nRaw = await rawOf(srcFileFor(paths, nb.id, "l2"));
+        const nCon = await ctxSourceOf(nb.id, "concept");
+        const east = nc > col, west = nc < col, south = nr > row, north = nr < row;
+        const vertical = east || west;                       // the seam is a vertical line
+        // their facing kept edge in THEIR canvas, and the inward direction in MINE
+        const theirEdge = east || south ? BLEED : BLEED + CELL_PX - 1;
+        const myEdge = east ? BLEED + CELL_PX - 1 : west ? BLEED : south ? BLEED + CELL_PX - 1 : BLEED;
+        const inward = east || south ? -1 : 1;
+        const wet = new Uint8Array(GEN_PX);
+        for (let t = BLEED; t < BLEED + CELL_PX; t += 1) {    // along the seam, same axis in both canvases
+          let mn = 255;
+          for (let d = -8; d <= 8; d += 1) {
+            const tx = vertical ? theirEdge + d : t, ty = vertical ? t : theirEdge + d;
+            if (tx < 0 || ty < 0 || tx >= GEN_PX || ty >= GEN_PX) continue;
+            mn = Math.min(mn, nRaw.data[(ty * GEN_PX + tx) * 4 + 3]);
+          }
+          wet[t] = mn < 128 ? 1 : 0;
+        }
+        // sea runs (>= SEA_RUN); everything else along the kept edge is ground for the strip
+        const seaRuns = [];
+        let s = -1;
+        for (let t = BLEED; t <= BLEED + CELL_PX; t += 1) {
+          const w = t < BLEED + CELL_PX && wet[t];
+          if (w && s < 0) s = t;
+          if (!w && s >= 0) { if (t - s >= SEA_RUN) seaRuns.push([s, t - 1]); s = -1; }
+        }
+        if (!seaRuns.length) continue;
+        seaSeams += 1;
+        // the swatch: their sea paint in the 96 px beside their edge
+        for (const [a, b] of seaRuns) for (let t = a; t <= b; t += 3) for (let k = 0; k < 96; k += 3) {
+          const tx = vertical ? theirEdge + (east || south ? k : -k) : t, ty = vertical ? t : theirEdge + (east || south ? k : -k);
+          if (tx < 0 || ty < 0 || tx >= GEN_PX || ty >= GEN_PX) continue;
+          const o = (ty * GEN_PX + tx) * 4;
+          if (nRaw.data[o + 3] < 128) swatch.push([nCon.data[o], nCon.data[o + 1], nCon.data[o + 2]]);
+        }
+        // the allowed strips beside the ground stretches between sea runs
+        const isSea = (t) => seaRuns.some(([a, b]) => t >= a && t <= b);
+        let g = -1;
+        for (let t = BLEED; t <= BLEED + CELL_PX; t += 1) {
+          const ground = t < BLEED + CELL_PX && !isSea(t);
+          if (ground && g < 0) g = t;
+          if (!ground && g >= 0) {
+            const a = Math.max(0, g - MARGIN), b = Math.min(GEN_PX - 1, t - 1 + MARGIN);
+            for (let u = a; u <= b; u += 1) for (let k = 0; k <= STRIP; k += 1) {
+              const x = vertical ? myEdge + inward * k : u, y = vertical ? u : myEdge + inward * k;
+              if (x < 0 || y < 0 || x >= GEN_PX || y >= GEN_PX) continue;
+              allowed[y * GEN_PX + x] = 1;
+            }
+            g = -1;
+          }
+        }
+      }
+      if (seaSeams && swatch.length >= 500) {
+        let h = 2166136261;
+        const rnd = () => { h ^= h << 13; h >>>= 0; h ^= h >>> 17; h ^= h << 5; h >>>= 0; return h; };
+        for (let y = 0; y < GEN_PX; y += 1) for (let x = 0; x < GEN_PX; x += 1) {
+          const o = (y * GEN_PX + x) * 4;
+          if (allowed[y * GEN_PX + x] || !isGreyPx(o)) continue;
+          // four random swatch samples averaged: the sea's own colours, without a tile
+          let r = 0, gg = 0, b = 0;
+          for (let k = 0; k < 4; k += 1) { const p = swatch[rnd() % swatch.length]; r += p[0]; gg += p[1]; b += p[2]; }
+          target[o] = r >> 2; target[o + 1] = gg >> 2; target[o + 2] = b >> 2;
+          seaPrefilled += 1;
+        }
+        console.log(`  sea pre-fill  ${seaPrefilled} px of the island's sea painted on (${seaSeams} seam(s), swatch ${swatch.length}); grey left only within 40 m of arriving ground`);
       }
     }
     // tone ramp (owner 2026-09-02, "need a better transition"): the Transitions
@@ -922,6 +1052,12 @@ const transitionLines = [["north", col, row - 1], ["east", col + 1, row], ["sout
       // — that rule governs, and saying "nothing arrives" here would flatly
       // contradict it in the same packet.
       const borderRule = plan.rules?.[`${dir}Border`];
+      const across = [...FOREIGN_OUT.values()].find((f) => f.cell[0] === c && f.cell[1] === r);
+      if (across) {
+        return `- **${dir} (${across.territory} ${across.id}):** authored across the territory border — `
+          + `its paint arrives as real pixels in the edit target; continue it at the edge exactly as it arrives`
+          + (borderRule ? `, and **${dir}Border** in Territory rules below still governs this side.` : ".");
+      }
       if (borderRule) {
         return `- **${dir}:** territory edge, but **${dir}Border applies** — read it in `
           + `Territory rules below and obey it exactly. Do NOT end your terrain `
@@ -1015,7 +1151,11 @@ ${editMode ? `## Neighbour context — you EDIT this cell into existence, you do
 
 \`${cellDir}/context/edit-target.jpg\` is your canvas: the authored
 neighbours' real paint wherever it reaches into this cell's window, and flat
-grey wherever this cell is still unpainted. \`${canonPath}\` is the
+grey wherever this cell is still unpainted.${seaPrefilled ? ` THE SEA ALREADY PAINTED across
+most of this canvas is the island's own sea, continued into this cell: it is
+FINAL. Do not paint land, rock, beach or stacks on it. Paint ONLY the flat
+grey strips — they are where the island's ground continues into this cell and
+ends at its shore — and keep every painted sea pixel as sea.` : ""} \`${canonPath}\` is the
 style canon of this world. Load both with the built-in \`view_image\` tool,
 then make ONE \`image_gen\` call in EDIT mode with BOTH images attached — the
 edit target as the image to edit, the canon as a second input that is a

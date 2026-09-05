@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-05T00:53:57.256Z",
+ "solidifiedAt": "2026-09-05T16:59:08.598Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "b1d67d2f6f4d26b4",
+  "cell.mjs": "f8307db6fe8241d6",
   "plan-territory.mjs": "e8d86a90b2e32796",
   "AGENTS.md": "a1ab4eaec1d4c6ac"
  },
@@ -471,6 +471,15 @@
    "reason": "owner approved 2026-09-04 (in chat, on the picture of c4-2's refused candidate in place and its east seam: 'yeah its fine'): CELL_OWNER_ACCEPT carries the owner's words and lets a run stitch past failed gates, printed loudly and recorded in the manifest entry with the gates overridden; never set by the runner; nothing else changes",
    "hashes": {
     "cell.mjs": "b1d67d2f6f4d26b4",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-05T16:59:08.599Z",
+   "reason": "owner 2026-09-05 17:10, after the plain description of both: 'sure go for it' — lock 18h (a cell sees the authored cell across a territory border: its paint in the edit target, its seam judged by the gates, the stitch untouched) and lock 18i (a shore cell's edit target carries the island's sea on into the cell from its own sea pixels, grey only within 40 m of arriving ground; the packet calls the painted sea final; stitch, gates and mask untouched)",
+   "hashes": {
+    "cell.mjs": "f8307db6fe8241d6",
     "plan-territory.mjs": "e8d86a90b2e32796",
     "AGENTS.md": "a1ab4eaec1d4c6ac"
    }
