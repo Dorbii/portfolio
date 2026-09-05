@@ -8,8 +8,13 @@ import type { TerrainResidencyPolicy } from "./residency";
 // only to exercise the streamer before the land had a world registration, and
 // stream-r3 was the placeholder tiling that registration replaced.
 const manifest = releaseManifest;
+// One folder per registered territory (world-register.mjs writes them all
+// from the same feed): NinjaOne, Tanium, and the coast — the shore cells
+// authored in the sea beside the island.
 const STREAM_PATH_PREFIXES = [
   "/career-world/layers/terrain/authority/tiles/l2-ninjaone/",
+  "/career-world/layers/terrain/authority/tiles/l2-tanium/",
+  "/career-world/layers/terrain/authority/tiles/l2-coast/",
 ];
 
 export type TerrainStreamSourceTier = Extract<

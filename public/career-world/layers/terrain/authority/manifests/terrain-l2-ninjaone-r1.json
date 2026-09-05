@@ -84,7 +84,8 @@
         0.4444444444444444
       ]
     },
-    "ruling": "owner 2026-09-03: the authored grid is authoritative and expands as needed"
+    "ruling": "owner 2026-09-03: the authored grid is authoritative and expands as needed",
+    "feed": "terrain-stream-runtime-r4.json"
   },
   "cells": {
     "c4-3": {
