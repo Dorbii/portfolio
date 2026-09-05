@@ -43,22 +43,43 @@ const ALL = ["ninjaone", "tanium", "coast"];      // feed order: NinjaOne first 
 // tiles only; the authored pyramids are untouched. With --tone, every cell is
 // re-sliced (a gain change is not visible to the mtime check).
 const TONE = arg1("--tone");
-const gains = new Map();
+const gains = new Map(), edges = new Map();
 if (TONE) {
   const table = JSON.parse(fs.readFileSync(TONE, "utf8"));
-  for (const c of table.cells) gains.set(c.world.join(","), c.gain);
-  console.log(`tone: ${gains.size} cell gains from ${TONE} (strength ${table.strength}, cap ±${table.cap})`);
+  for (const c of table.cells) { gains.set(c.world.join(","), c.gain); if (c.edges) edges.set(c.world.join(","), c.edges); }
+  console.log(`tone: ${gains.size} cell gains from ${TONE} (strength ${table.strength}, cap ±${table.cap}); seam feather on ${[...edges.values()].reduce((s, e) => s + Object.keys(e).length, 0)} edges`);
 }
+// the seam feather (2026-09-05): beside an authored edge whose band means
+// the table carries, each channel is scaled so this side's band meets the
+// two bands' mean at the line, fading to unchanged 12 m in; colour as well
+// as luma, land pixels only. The other side does the same, so the step at
+// the line closes from both sides.
+const FEATHER_M = 12, CELL_M = 97.6;
 function applyTone(raw, size, wx, wy) {
   const own = gains.get(`${wx},${wy}`) ?? 1;
   const at = (x, y) => gains.get(`${x},${y}`) ?? own;
+  const e = edges.get(`${wx},${wy}`) || {};
+  const D = Math.round(size * FEATHER_M / CELL_M);
+  // each channel's move is capped at ±20%: a blue-poor yellow heath beside a
+  // grey moor would otherwise take a +49% blue multiplier and turn mauve
+  const factor = (band) => band ? band.mine.map((m, k) => (m > 0 ? Math.max(-0.2, Math.min(0.2, ((m + band.theirs[k]) / 2) / m - 1)) : 0)) : null;
+  const fN = factor(e.N), fS = factor(e.S), fE = factor(e.E), fW = factor(e.W);
+  // a smooth ramp (no visible edge where the feather starts): full at the line, nothing at D
+  const ramp = (d) => { const t = d / D; return t >= 1 ? 0 : 1 - t * t * (3 - 2 * t); };
   for (let y = 0; y < size; y += 1) {
     const fy = (y + 0.5) / size - 0.5, sy = fy < 0 ? -1 : 1, ty = Math.abs(fy);
+    const wN = fN ? ramp(y) : 0, wS = fS ? ramp(size - 1 - y) : 0;
     for (let x = 0; x < size; x += 1) {
       const fx = (x + 0.5) / size - 0.5, sx = fx < 0 ? -1 : 1, tx = Math.abs(fx);
       const g = own * (1 - tx) * (1 - ty) + at(wx + sx, wy) * tx * (1 - ty) + at(wx, wy + sy) * (1 - tx) * ty + at(wx + sx, wy + sy) * tx * ty;
       const o = (y * size + x) * 4;
-      for (let k = 0; k < 3; k += 1) raw[o + k] = Math.min(255, Math.round(raw[o + k] * g));
+      const wW = fW ? ramp(x) : 0, wE = fE ? ramp(size - 1 - x) : 0;
+      const land = raw[o + 3] >= 250 && (wN || wS || wE || wW);
+      for (let k = 0; k < 3; k += 1) {
+        let f = g;
+        if (land) f *= (1 + (wN ? fN[k] * wN : 0)) * (1 + (wS ? fS[k] * wS : 0)) * (1 + (wE ? fE[k] * wE : 0)) * (1 + (wW ? fW[k] * wW : 0));
+        raw[o + k] = Math.min(255, Math.round(raw[o + k] * f));
+      }
     }
   }
   return raw;

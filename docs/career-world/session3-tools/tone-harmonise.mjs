@@ -76,7 +76,40 @@ for (const c of cells.values()) {
   const capped = Math.min(1 + CAP, Math.max(1 - CAP, c.g));
   c.gain = 1 + (capped - 1) * STRENGTH;
 }
-const table = [...cells.values()].map((c) => ({ territory: c.t, id: c.id, world: [c.wx, c.wy], luma: +c.luma.toFixed(1), gain: +c.gain.toFixed(4) }))
+// 2b. the seam feather (2026-09-05 20:40; reviewer rows 21, 31-33 and the
+//     forest seams: a step the whole-cell gains leave at the line): per cell
+//     and per authored edge, the mean RGB of the 64-px land band on each side
+//     of the shared line with the gains applied. The serve-time pass moves
+//     each side's band toward the two bands' mean within 12 m of the seam,
+//     fading to nothing further in — colour as well as luma, land only.
+const BAND = 64 / S;
+const bandMean = (data, edge) => {
+  const sum = [0, 0, 0]; let n = 0;
+  for (let u = 0; u < CELL; u += 1) for (let v = 0; v < BAND; v += 1) {
+    const x = edge === "W" ? v : edge === "E" ? CELL - 1 - v : u, y = edge === "N" ? v : edge === "S" ? CELL - 1 - v : u;
+    const o = (y * CELL + x) * 4;
+    if (data[o + 3] < 250) continue;
+    sum[0] += data[o]; sum[1] += data[o + 1]; sum[2] += data[o + 2]; n += 1;
+  }
+  return n >= BAND * CELL * 0.15 ? sum.map((s) => s / n) : null;   // under 15% land: a coast edge, not a tone seam
+};
+const OPP = { N: "S", S: "N", E: "W", W: "E" }, DIR = { N: [0, -1], S: [0, 1], E: [1, 0], W: [-1, 0] };
+for (const c of cells.values()) {
+  c.edges = {};
+  for (const e of ["N", "S", "E", "W"]) {
+    const n = cells.get(`${c.wx + DIR[e][0]},${c.wy + DIR[e][1]}`);
+    if (!n) continue;
+    const mine = bandMean(c.data, e), theirs = bandMean(n.data, OPP[e]);
+    if (!mine || !theirs) continue;
+    // at the shared line the bilinear gain field gives BOTH sides the mean of
+    // the two cells' gains, so that is the gain the bands are seen under; a
+    // per-cell gain here would invent a step the field does not leave (T
+    // c1-2|c2-2: raw bands 121 and 126, cell gains 1.15 and 0.84)
+    const gAvg = (c.gain + n.gain) / 2;
+    c.edges[e] = { mine: mine.map((v) => +(v * gAvg).toFixed(1)), theirs: theirs.map((v) => +(v * gAvg).toFixed(1)) };
+  }
+}
+const table = [...cells.values()].map((c) => ({ territory: c.t, id: c.id, world: [c.wx, c.wy], luma: +c.luma.toFixed(1), gain: +c.gain.toFixed(4), edges: c.edges }))
   .sort((p, q) => Math.abs(q.gain - 1) - Math.abs(p.gain - 1));
 fs.mkdirSync(".codex-tmp/session4/island", { recursive: true });
 fs.writeFileSync(".codex-tmp/session4/tone-gains.json", JSON.stringify({ strength: STRENGTH, cap: CAP, lambda: LAMBDA, meanLuma: +meanL.toFixed(1), cells: table }, null, 1));
