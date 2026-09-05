@@ -128,6 +128,18 @@ function keepReject(id, biome, out) {
   fs.appendFileSync(`${REJECTS}/README.md`,
     `- \`${id}\` ${biome} — rejected on **${m ? m[1] : "a gate"} ${m ? m[2] : ""}**\n`);
   say(`    candidate kept at ${REJECTS}/${id}.webp`);
+  // Keep the candidate's FULL artefacts too (gitignored, survives the clear
+  // at the next dispatch). The owner now accepts refused candidates on his
+  // eye, and c3-1's accepted one had already been wiped by a later dispatch
+  // (2026-09-05) — a preview cannot be stitched, a source can (cell.mjs --from).
+  const keep = `.codex-tmp/rejected/${TERRITORY}/${id}-${new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19)}`;
+  fs.mkdirSync(keep, { recursive: true });
+  let kept = 0;
+  for (const f of ["source.png", "water-source.png", "water.json", "report.json", "concept.png"]) {
+    const p = `.codex-tmp/authoring/cells/${TERRITORY}/${id}/${id}-${f}`;
+    if (fs.existsSync(p)) { fs.copyFileSync(p, `${keep}/${id}-${f}`); kept += 1; }
+  }
+  if (kept) say(`    full artefacts kept at ${keep} (${kept} files) — stitch later with cell.mjs --from`);
 }
 
 function bakeOnce(cell, describeFile, forced, t0) {
