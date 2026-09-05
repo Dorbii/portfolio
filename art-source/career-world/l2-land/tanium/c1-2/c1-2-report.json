@@ -1,0 +1,112 @@
+{
+  "cell": "c1-2",
+  "territory": "tanium",
+  "status": "quarantine candidate; mechanical deliverables complete; visual and west-seam self-checks fail",
+  "generation": {
+    "filename": "c1-2-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "1E6A68D65166EA30764D905F21E927448F284957759C19D6819CB1BCA3B5683D",
+    "mode": "single built-in ImageGen whole-canvas edit with the edit target and canon attached",
+    "imageGenCallsUsed": 1,
+    "retryUsed": false,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "promptRecord": "c1-2-imagegen-prompt-attempt2.txt"
+  },
+  "generationSizePx": [1254, 1254],
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean on the delivered source; water-mask pixels and gradients below 12 luminance units excluded",
+    "peakVsUniformOverLand": 1.350485,
+    "uniformReference": 1.0,
+    "directionalKeyFirstMoment": 0.001339,
+    "gradientSamples": 1053093,
+    "aggregateDirectionalityNumericPass": true,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No coherent whole-cell sun direction or cast-shadow field is visible, but basalt caps and some conifer branch tiers remain brighter than adjacent faces. The aggregate metric does not prove the literal equal-value rule."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "manual estimated fraction of non-water land area at native source resolution",
+    "buildable": 0.46,
+    "steep": 0.21,
+    "otherTalusBrokenRockOrDenseVegetation": 0.33,
+    "method": "Broad forest plateau and the two natural bank shelves count as buildable ground; inlet and coastal column faces count as steep; talus, broken shoreline rock, and uncertain densely vegetated margins make up the remainder."
+  },
+  "waterFootprintFraction": 0.18189767,
+  "finalDerivedLandCoverageFraction": 0.81810233,
+  "crown": {
+    "medianMetres": 2.156,
+    "medianPx": 44.912,
+    "sampleCount": 118,
+    "method": "Full-cell census of all 118 visually separable conifer crowns located by the diagnostic component survey, including saplings and edge crowns; outer-foliage widths were checked at 2x and the median 22 source px was scaled by 2560/1254 at 0.048 m per final pixel.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c1-2-water-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "13C7165F70239498BEBA63446EFD660EB757E737A8FF544567790D38A91084C7",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "opaqueWaterPixels": 286037,
+    "transparentNonWaterPixels": 1286479,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedComponents8": 70,
+    "componentNote": "The sea and inlet are one connected system; the remaining components are visible stream, fall, foam, and ripple fragments separated in the painted source by crowns, rock, or unpainted gaps.",
+    "interiorTransparentHolesAfterFill": 0,
+    "edgeWaterPixels": {
+      "north": 0,
+      "east": 227,
+      "south": 1254,
+      "west": 263
+    },
+    "method": "Native-resolution cool-water classification constrained to the hand-traced stream and inlet envelope, expanded through adjacent shallows and neutral foam, with the south edge forced to water corner to corner; the complete result was inspected as a magenta overlay."
+  },
+  "seamSelfCheck": {
+    "method": "Local reproduction of the pipeline 16-176 final-pixel median bands after applying the delivered water mask; System.Drawing high-quality bicubic resampling was used because the sandbox permits node --version but denies node script execution.",
+    "westAgainstC0_2": {
+      "allLandDLuma": 9.9382,
+      "vegetationDLuma": 36.801,
+      "vegetationDBG": 0.289448,
+      "limits": { "allLandDLuma": 21, "vegetationDLuma": 13, "vegetationDBG": 0.2 },
+      "pass": false
+    },
+    "eastAgainstC2_2": {
+      "allLandDLuma": 17.9864,
+      "vegetationDLuma": 5.3582,
+      "vegetationDBG": 0.001854,
+      "limits": { "allLandDLuma": 21, "vegetationDLuma": 13, "vegetationDBG": 0.2 },
+      "pass": true
+    }
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasEdit": true,
+    "rawGenerationUntouched": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "landContinuesNorthEastAndWest": true,
+    "southEdgeEntirelySea": true,
+    "waterMaskSameDimensionsBinaryAndHoleFree": true,
+    "crownMedianInsideAcceptedTerritoryBand": true,
+    "eastSeamPaletteGateProxy": true,
+    "westSeamPaletteGateProxy": false,
+    "strictEqualValueOnAllFormSides": false,
+    "oneFlatValuePerCrown": false,
+    "clearThirtyMetreCrossingShoulders": false
+  },
+  "selfCheckFailures": [
+    "The west vegetation band misses c0-2 materially: dLuma 36.801 exceeds 13 and dBG 0.289448 exceeds 0.20, although the all-land west tone passes.",
+    "Basalt caps and conifer branch tiers retain visible intra-form value changes, so the literal neutral-face and one-flat-value-per-crown rules are not met by eye.",
+    "The inlet is broad at the sea but narrows early, and the facing rock shoulders are not both clearly level and tree-free across an approximately 30 m crossing."
+  ],
+  "verificationLimits": [
+    "The mutating stitch command was not run because this task is quarantine-only and a passing gate would write outside the permitted directory.",
+    "The seam proxy uses bicubic rather than the pipeline's Lanczos resampling; the west miss is too large to be plausibly explained by that kernel difference.",
+    "Seam invisibility, shoreline-mask judgment, geological naturalism, and overall visual quality remain director and owner visual judgments."
+  ]
+}

@@ -1528,6 +1528,115 @@
      1
     ]
    }
+  },
+  "c1-2": {
+   "authoredAt": "2026-09-05T04:30:11.139Z",
+   "ownerOverride": {
+    "at": "2026-09-05T04:30:11.139Z",
+    "reason": "owner 2026-09-05, on the seven-cell picture with the candidate drawn in place: 'the bottom row looks fine I think'",
+    "failedGates": [
+     "palette conformance veg worst dBG 0.289 dLuma 36.8 over 2 seam(s); tone worst dLuma 17.9 on all land over 2 seam(s)"
+    ]
+   },
+   "describe": "THE FOREST COMING DOWN TO THE SEA. The cell NORTH of this one (1,1) is dense\ndark forest and its canopy continues into this cell unbroken; the SOUTH edge is\nopen sea, the world's southern coast.\n\nSo: forest over most of the cell, thinning only in the last 30-40 m before the\ncliff edge where the wind gets at it — the outermost conifers low, wind-shaped\nand leaning inland, with bare rock and thin gr",
+   "sourcePx": 1254,
+   "gates": [
+    {
+     "name": "key-light asymmetry",
+     "value": 0.0026,
+     "pass": true,
+     "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004"
+    },
+    {
+     "name": "gradient ratio",
+     "value": "1.247 (reported)",
+     "pass": true,
+     "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
+    },
+    {
+     "name": "rock lighting",
+     "value": 0.115,
+     "pass": true,
+     "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.14; limit 0.16 on the owner's eye (2026-09-02, the dark-forest gorge at 0.153)"
+    },
+    {
+     "name": "land coverage",
+     "value": "81.1%",
+     "pass": true
+    },
+    {
+     "name": "water cut clear",
+     "value": "0 px",
+     "pass": true,
+     "note": "paint surviving where the mask is fully water; exact zero by construction for pipeline-derived cells"
+    },
+    {
+     "name": "mask completion",
+     "value": "+132 px grown, 9 px holes filled (reported)",
+     "pass": true,
+     "note": "the delivered mask grown into contiguous painted water within 48 px and speckle holes <=64 px filled before the cut (owner 2026-09-02); dry paint stops the growth, so a polyline mask still fails the rings"
+    },
+    {
+     "name": "water fringe",
+     "value": "0.22%",
+     "pass": true,
+     "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
+    },
+    {
+     "name": "water fringe (48px)",
+     "value": "0.1%",
+     "pass": true,
+     "note": "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)"
+    },
+    {
+     "name": "water continuity",
+     "value": "ok (2 crossings checked, 1 bridged)",
+     "pass": true,
+     "note": "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint"
+    },
+    {
+     "name": "palette conformance",
+     "value": "veg worst dBG 0.289 dLuma 36.8 over 2 seam(s); tone worst dLuma 17.9 on all land over 2 seam(s)",
+     "pass": false,
+     "note": "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13"
+    },
+    {
+     "name": "crown scale",
+     "value": "2.156 m over 118 crowns (accepted range 1.7-5.2 m)",
+     "pass": true,
+     "note": "the worker's own median crown from c1-2-report.json, against the 1.7-5.2 m range the accepted cells measured (NOT the plan's written 4-7 m — see CROWN_MIN_M); crown.excludedElements must be empty, so an out-of-scale element cannot be measured around"
+    }
+   ],
+   "shelf": null,
+   "features": [
+    "water crossing"
+   ],
+   "waterZones": [
+    "coast",
+    "stream",
+    "fall"
+   ],
+   "bridged": [
+    "c0-2 edge: rerouted my crossing 2380 -> 2449 (69px)"
+   ],
+   "maskCompletion": {
+    "grownPx": 132,
+    "holePx": 9
+   },
+   "biome": "dark-forest",
+   "source": "art-source/career-world/l2-land/tanium/c1-2",
+   "stitch": {
+    "order": 16,
+    "tiles": [
+     90,
+     30,
+     12,
+     6,
+     4,
+     1,
+     1
+    ]
+   }
   }
  }
 }
