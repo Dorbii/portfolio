@@ -8,3 +8,5 @@
 - `c7-1` coast-cliff — rejected on **key-light asymmetry 0.0118**
 - `c0-6` coast-cliff — rejected on **rock lighting 0.293**
 - `c4-8` coast-cliff — rejected on **water continuity 5**
+- `c3-0` shore — rejected on **a gate **
+- `c5-0` shore — rejected on **a gate **
