@@ -49,34 +49,56 @@ test("the generalised plan script reproduces NinjaOne's plan byte-identically", 
   }
 });
 
+// A SPARSE territory (the coast, owner 2026-09-04: coasts are authored in the
+// sea cells beside the island's placed art) has a `coastCells` list: its block
+// covers the island plus a margin, but it authors only the listed cells. The
+// planner cannot make it (no capital, no loop, no biome per cell), so
+// docs/career-world/session3-tools/coast-plan.mjs writes its definition and
+// plan together, copying the world canon verbatim from the planner's own output.
+const readDef = (id) => JSON.parse(fs.readFileSync(`${L2}${id}/territory.def.json`, "utf8"));
+const territoryIds = () => fs.readdirSync(L2, { withFileTypes: true })
+  .filter((d) => d.isDirectory() && fs.existsSync(`${L2}${d.name}/territory.def.json`))
+  .map((d) => d.name);
+
 test("every authored territory definition still produces its plan", () => {
-  const ids = fs.readdirSync(L2, { withFileTypes: true })
-    .filter((d) => d.isDirectory() && fs.existsSync(`${L2}${d.name}/territory.def.json`))
-    .map((d) => d.name);
+  const ids = territoryIds();
   assert.ok(ids.length >= 1, "no territory definitions found");
   for (const id of ids) {
+    const def = readDef(id);
+    if (def.coastCells) {
+      // sparse: the plan is the coast writer's, and must agree with the definition
+      const planPath = `${L2}${id}/plan.json`;
+      assert.ok(fs.existsSync(planPath), `${id} is sparse and has no plan.json (run coast-plan.mjs)`);
+      const plan = JSON.parse(fs.readFileSync(planPath, "utf8"));
+      assert.equal(plan.territory, id);
+      assert.deepEqual(plan.cellBiomes, def.cellBiomes, `${id}: plan and definition disagree on cell biomes`);
+      for (const x of def.coastCells) {
+        const key = `${x.at[0]},${x.at[1]}`;
+        assert.ok(plan.biomes[def.cellBiomes[key]], `${id} ${key}: biome ${def.cellBiomes[key]} is not in the plan`);
+      }
+      continue;
+    }
     const r = run(id);
     assert.ok(r.ok, `${id} failed to plan:\n${r.err}`);
   }
 });
 
-test("territory blocks fit the plane and do not overlap each other", () => {
+test("territory blocks fit the plane and no two territories author the same lattice cell", () => {
   const PLANE = [16, 9];
-  const blocks = fs.readdirSync(L2, { withFileTypes: true })
-    .filter((d) => d.isDirectory() && fs.existsSync(`${L2}${d.name}/territory.def.json`))
-    .map((d) => {
-      const def = JSON.parse(fs.readFileSync(`${L2}${d.name}/territory.def.json`, "utf8"));
-      return { id: d.name, x: def.lattice.block[0], y: def.lattice.block[1], w: def.grid.cols, h: def.grid.rows };
-    });
-  for (const b of blocks) {
-    assert.ok(b.x >= 0 && b.y >= 0 && b.x + b.w <= PLANE[0] && b.y + b.h <= PLANE[1],
-      `${b.id} block does not fit the plane`);
-  }
-  for (let i = 0; i < blocks.length; i += 1) {
-    for (let j = i + 1; j < blocks.length; j += 1) {
-      const a = blocks[i], b = blocks[j];
-      const overlap = a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
-      assert.ok(!overlap, `${a.id} and ${b.id} claim the same lattice cells`);
+  const claims = new Map();   // "wx,wy" -> territory id
+  for (const id of territoryIds()) {
+    const def = readDef(id);
+    const [bx, by] = def.lattice.block, w = def.grid.cols, h = def.grid.rows;
+    assert.ok(bx >= 0 && by >= 0 && bx + w <= PLANE[0] && by + h <= PLANE[1], `${id} block does not fit the plane`);
+    // a dense territory authors every cell of its block; a sparse one only its listed cells
+    const cells = def.coastCells
+      ? def.coastCells.map((x) => [bx + x.at[0], by + x.at[1]])
+      : Array.from({ length: w * h }, (_, i) => [bx + (i % w), by + Math.floor(i / w)]);
+    for (const [wx, wy] of cells) {
+      assert.ok(wx >= 0 && wy >= 0 && wx < PLANE[0] && wy < PLANE[1], `${id} authors [${wx},${wy}], outside the plane`);
+      const key = `${wx},${wy}`;
+      assert.ok(!claims.has(key), `${claims.get(key)} and ${id} both author lattice cell [${key}]`);
+      claims.set(key, id);
     }
   }
 });
