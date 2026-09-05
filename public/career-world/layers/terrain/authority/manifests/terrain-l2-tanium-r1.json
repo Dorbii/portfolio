@@ -348,38 +348,31 @@
    }
   },
   "c4-1": {
-   "authoredAt": "2026-09-05T16:54:13.230Z",
-   "ownerOverride": {
-    "at": "2026-09-05T16:54:13.232Z",
-    "reason": "owner 2026-09-05 16:55, a crop of the served c4-1 (the plateau with the pond) among six 'these area needs to be fixed'; this candidate was baked in chain order against the accepted c3-1 and was refused on vegetation colour 0.230 alone",
-    "failedGates": [
-     "palette conformance veg worst dBG 0.230 dLuma 4.5 over 2 seam(s); tone worst dLuma 15.6 on all land over 3 seam(s)"
-    ]
-   },
+   "authoredAt": "2026-09-05T23:25:39.584Z",
    "describe": "Bare plateau: pale basalt benches with hexagonal-jointed tops, scree fans, thin\nwind-scoured grass only in the cracks. No meadow anywhere in this cell. Pale\nwarm greys and creams, cool teal water, sparse grey-green — the brightest,\nbarest ground in the territory.\n\nStepped benches rise from west to east, three of them, each 8–12 m above the\nlast, with low column walls and talus at every foot.\n\nThe ",
    "sourcePx": 1254,
    "gates": [
     {
      "name": "key-light asymmetry",
-     "value": 0.0013,
+     "value": 0.0006,
      "pass": true,
-     "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004"
+     "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004; report-only under 5% land (18j, 2026-09-05: a 98%-sea shore cell read 0.0116 on noise)"
     },
     {
      "name": "gradient ratio",
-     "value": "1.512 (reported)",
+     "value": "1.51 (reported)",
      "pass": true,
      "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
     },
     {
      "name": "rock lighting",
-     "value": 0.135,
+     "value": 0.083,
      "pass": true,
      "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.14; limit 0.16 on the owner's eye (2026-09-02, the dark-forest gorge at 0.153)"
     },
     {
      "name": "land coverage",
-     "value": "98.2%",
+     "value": "97.4%",
      "pass": true
     },
     {
@@ -390,7 +383,7 @@
     },
     {
      "name": "mask completion",
-     "value": "+17 px grown, 0 px holes filled (reported)",
+     "value": "+0 px grown, 0 px holes filled (reported)",
      "pass": true,
      "note": "the delivered mask grown into contiguous painted water within 48 px and speckle holes <=64 px filled before the cut (owner 2026-09-02); dry paint stops the growth, so a polyline mask still fails the rings"
     },
@@ -402,25 +395,25 @@
     },
     {
      "name": "water fringe (48px)",
-     "value": "0.01%",
+     "value": "0.03%",
      "pass": true,
      "note": "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)"
     },
     {
      "name": "water continuity",
-     "value": "ok (2 crossings checked)",
+     "value": "ok (2 crossings checked, 1 bridged)",
      "pass": true,
      "note": "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint"
     },
     {
      "name": "palette conformance",
-     "value": "veg worst dBG 0.230 dLuma 4.5 over 2 seam(s); tone worst dLuma 15.6 on all land over 3 seam(s)",
-     "pass": false,
+     "value": "veg worst dBG 0.183 dLuma 8.9 over 2 seam(s); tone worst dLuma 14.3 on all land over 4 seam(s)",
+     "pass": true,
      "note": "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13"
     },
     {
      "name": "crown scale",
-     "value": "2.156 m over 19 crowns (accepted range 1.7-5.2 m)",
+     "value": "2.548 m over 33 crowns (accepted range 1.7-5.2 m)",
      "pass": true,
      "note": "the worker's own median crown from c4-1-report.json, against the 1.7-5.2 m range the accepted cells measured (NOT the plan's written 4-7 m — see CROWN_MIN_M); crown.excludedElements must be empty, so an out-of-scale element cannot be measured around"
     }
@@ -430,14 +423,14 @@
     "tunnelled ridge"
    ],
    "waterZones": [
-    "lake",
     "stream",
-    "fall"
+    "lake",
+    "fall",
+    "stream"
    ],
-   "maskCompletion": {
-    "grownPx": 17,
-    "holePx": 0
-   },
+   "bridged": [
+    "c4-2 edge: rerouted my crossing 740 -> 845 (105px)"
+   ],
    "biome": "bare-plateau",
    "source": "art-source/career-world/l2-land/tanium/c4-1",
    "stitch": {

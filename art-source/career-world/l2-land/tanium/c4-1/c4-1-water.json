@@ -1,14 +1,18 @@
 [
   {
-    "class": "lake",
-    "note": "Round cool-teal plateau tarn on the middle bench; the mask covers the full painted water surface inside the complete shingle rim, including dim edge reflections."
+    "class": "stream",
+    "note": "Existing narrow north-west neighbour stream and its full west-edge wash, traced bank to bank."
   },
   {
-    "class": "stream",
-    "note": "Narrow cool-teal runoff continuing from the painted south edge to the west-bench fall; the mask follows the complete wet run, including wash between stones and ripple highlights."
+    "class": "lake",
+    "note": "Round cool-teal plateau tarn on the middle pale-rock bench, including its complete ripple and reflection extent inside the shingle rim."
   },
   {
     "class": "fall",
-    "note": "Thin vertical fall and its connected spray and splash footprint at the west bench; the full pale water column and wet base are included."
+    "note": "Thin west-bench fall, including the full falling-water ribbon, pale spray, splash and pool."
+  },
+  {
+    "class": "stream",
+    "note": "South-going outlet below the fall, traced as a continuous full-width wet ribbon through the rocks to the south edge."
   }
 ]
