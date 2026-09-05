@@ -44,8 +44,19 @@ for (const x of COAST) {
   const key = `${x.at[0]},${x.at[1]}`;
   if (cellBiomes[key]) throw new Error(`coast cell ${key} collides with island cell ${cellBiomes[key]}`);
   if (x.at[0] < 0 || x.at[1] < 0 || x.at[0] >= COLS || x.at[1] >= ROWS) throw new Error(`coast cell ${key} outside the block`);
-  cellBiomes[key] = "coast-cliff";
+  cellBiomes[key] = "shore";
 }
+
+// The shore biome: wild coast in every respect but one — it has no trees of
+// its own, so a treeless shore cell passes the crown gate (which accepts zero
+// crowns only when the biome's trees text begins with "none"). Coast c2-0 was
+// refused at 01:49 on exactly that: "0 m over 0 crowns" against coast-cliff's
+// "dark conifers only in gullies".
+const SHORE = {
+  ...canon.biomes["coast-cliff"],
+  name: "Shore",
+  trees: "none of its own — only what arrives from the island's paint, continued to the shore and no further",
+};
 
 const def = {
   territory: "coast",
@@ -68,7 +79,7 @@ const plan = {
   grid: { cols: COLS, rows: ROWS, cells: COAST.length },
   cell: canon.cell, territoryMetres: canon.territoryMetres,
   shelves: [], loop: [], railFeatures: [],
-  biomes: canon.biomes,                       // the world canon, verbatim
+  biomes: { ...canon.biomes, shore: SHORE },  // the world canon, verbatim, plus the shore
   cellBiomes,
   sites: [],
   rules: { ...canon.rules, outerEdge: def.rules.outerEdge },

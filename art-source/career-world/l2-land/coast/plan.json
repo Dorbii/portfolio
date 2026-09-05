@@ -117,6 +117,15 @@
    "water": "the sea below the arcade, surf breaking between the stacks and through the arches",
    "palette": "pale warm basalt against deep teal sea; the arcade reads by the gaps between its columns, not by shading",
    "wonders": "the colonnade itself — an unbroken chain of equal columns, each joined only to the next, all leaning one way, running on past the horizon"
+  },
+  "shore": {
+   "name": "Shore",
+   "ground": "bare basalt benches and talus above sea-cliffs, thin grass, shingle coves; no meadow",
+   "rock": "tall columnar sea-cliffs, WEATHERED and irregular: columns of uneven height and width, tops broken at different levels, split and leaning columns, collapsed drums lying in talus at the foot, lichen in the joints; the cliff line wanders in plan with bays and buttresses, never a straight run or a square corner, never a regular palisade of identical cylinders (this is ordinary coast, where regularity would be an accident — the linked-colonnade biome is the deliberate exception and says so); a natural ledge partway up the face; sea stacks offshore",
+   "trees": "none of its own — only what arrives from the island's paint, continued to the shore and no further",
+   "water": "the sea on the seaward edge with surf and wash; an occasional tarn on a shelf",
+   "palette": "pale grey rock, teal to deep-blue sea, sparse green",
+   "wonders": "none"
   }
  },
  "cellBiomes": {
@@ -161,17 +170,17 @@
   "5,7": "mixed-bench",
   "6,7": "moor",
   "7,7": "quarry",
-  "2,0": "coast-cliff",
-  "3,0": "coast-cliff",
-  "4,0": "coast-cliff",
-  "5,0": "coast-cliff",
-  "6,0": "coast-cliff",
-  "1,1": "coast-cliff",
-  "1,2": "coast-cliff",
-  "7,1": "coast-cliff",
-  "0,6": "coast-cliff",
-  "1,4": "coast-cliff",
-  "4,8": "coast-cliff"
+  "2,0": "shore",
+  "3,0": "shore",
+  "4,0": "shore",
+  "5,0": "shore",
+  "6,0": "shore",
+  "1,1": "shore",
+  "1,2": "shore",
+  "7,1": "shore",
+  "0,6": "shore",
+  "1,4": "shore",
+  "4,8": "shore"
  },
  "sites": [],
  "rules": {
