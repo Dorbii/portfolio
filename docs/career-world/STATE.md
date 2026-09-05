@@ -768,6 +768,33 @@ Not yet served: registration of the coast pyramid is a later step (the
 owner reviews on the mosaic; `island-grid.mjs --margin 1` draws the island
 with its sea margin).
 
+## THE OWNER'S STAGE ORDER (owner 2026-09-04, in his words)
+
+*"after we get this tanium territory landed I think we should put any
+coastal edges missed and wrap up this island and move to the next stage.
+That way we prove this works with the main island and hash out the workflow
+in full then can apply it to the others"* and *"this would be after we
+finish the island and move to the next step which would be the land
+animation and detail layer. Then wed probably do the city and building layer
+after that."*
+
+1. **Finish the island.** Tanium to 21 of 21, the coast cells, the chain
+   complete end to end, the two territory seams judged on the mosaic, and
+   the pyramid served and walked once from world zoom to a doorway. The
+   workflow written down as the deliverable for the other islands (the open
+   gate rulings, the review loop as default, the model policy, the brief
+   writer stating every measured target itself).
+2. **The land animation and detail layer.** Effects over static albedo:
+   fog over the gorges (N c3-1 first), the floating islands warped in place
+   (masked bob and breathing from the baked pixels — no regeneration, no
+   sprites), canopy sway from the crown masks, the rune chain's travelling
+   light, foliage detail. Respects reduced-motion; lives above land, below
+   structures.
+3. **The city and building layer**, on ground that no longer moves.
+
+The water layers are the owner's own lane, running alongside; the two
+runtime files the ocean session owns stay untouched by the land lane.
+
 ## THE OWNER'S RULINGS ON THE FOUR CELLS THAT WAITED (00:40)
 
 - **N c1-3** — *"This one is fine."* Untouched.
