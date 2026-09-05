@@ -4,7 +4,27 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-04 late, LATEST (current):** **THE LOOP HAS A SECOND MODEL IN IT
+**2026-09-05 00:35, LATEST (current):** **THE OWNER MARKED UP THE ISLAND AND
+THE COAST GETS ITS OWN TERRITORY.** Read `PUNCH-LIST-2026-09-04.md` first:
+18 marks, each resolved into a mask fix (seeded fills, no regeneration), a
+forced rebake (c6-1 becomes the chain's seaward end — the colonnade is
+withdrawn; c4-1's groove must leave the west edge; c5-2's becks fill their
+beds), or a coast cell. Owner rulings tonight, in his words: Codex back to
+**gpt-5.6-sol** for everything (*"we just chewed through 40% usage with
+astra"*); coasts are authored **in the sea cells beside the placed art,
+extending it, never replacing it**; *"perspective is important"* (a north
+shore is seen from behind in this view). So: cell.mjs looks neighbours up
+across territories (lock 18f), the sparse **coast** territory holds nine
+shore cells (`coast-plan.mjs`, `coast-briefs.mjs`), and the runner takes
+`--territory`. Codex 0.153's image loader flaked on 7-10 MB PNG edit targets
+(three dead dispatches); the target is a 3 MB JPEG now (lock 18d) and the
+runner re-dispatches a dead one. The review loop works end to end (the
+addendum parser had a multiline-regex bug, fixed 00:08). A run is in flight
+on 5.6 (c4-2, c1-2, c2-1, c3-1, c6-2, c4-0); `.codex-tmp/session4/after-run.sh`
+follows it. Two seams need the owner (SESSION 11 below). Resume from
+`SESSION 11` below.
+
+**2026-09-04 late, superseded:** **THE LOOP HAS A SECOND MODEL IN IT
 NOW.** Owner rulings tonight, all in his own words in chat: the dispatch model
 is `gpt-6-astra` (lock 18); Codex reviews every refused candidate BEFORE the
 director and the worker gets one more attempt with its notes (the runner's
@@ -711,6 +731,55 @@ the number the gate measured — see the commit message. c3-1 first (the
 capital node of the chain); the two forest cells last. Every accepted cell
 commits itself. Results go under `RESULTS` below as they land.
 
+## 00:35 — THE OWNER'S MARKUP, AND WHAT EACH MARK BECAME
+
+The full list with regions and status is `docs/career-world/PUNCH-LIST-2026-09-04.md`.
+In short: four accepted cells get painted water the mask missed
+(`seed-water-mask.mjs`: a flood fill from a seed point over the concept
+paint into the worker's SOURCE mask, then `cell.mjs --redo --force` — c0-1,
+c2-2, c3-2, c5-1, fills written, re-derive pending the lock); c6-1's
+colonnade is withdrawn for the chain's seaward end (def 6,1 -> coast-cliff,
+site chain-end, brief rewritten with the perspective rule); c4-1's groove ran
+into the tarn's outlet fall instead of leaving the west edge (brief 4,1);
+c5-2's becks have pale dry beds beside a thread of cut water (brief 5,2;
+the growth tool cannot see them — its regions are KEPT coordinates, not
+canvas, which is why earlier previews missed).
+
+## THE COAST TERRITORY (owner: extend, never replace)
+
+`art-source/career-world/l2-land/coast/`: a sparse 9x9 block at lattice
+[1,0] — the island plus a one-cell margin — with nine planned shore cells:
+c2-0..c6-0 above NinjaOne's north row, c1-1/c1-2 west of N c0-0/c0-1, c7-1
+east of N c4-0, c0-6 west of T c0-1. The planner cannot make it (it demands
+a capital, a loop and a biome per cell), so `coast-plan.mjs` writes the
+definition and plan directly, copying the canon verbatim from the planner's
+Tanium plan and mirroring the island's cells so transitions name the right
+arriving biome. `coast-briefs.mjs` writes each brief: continue the arriving
+ground 15-40 m, end it at a wild coast, the rest open sea, perspective per
+shore, water arriving across the shared edge measured off the island's
+land layer. **Lock 18f:** cell.mjs finds authored neighbours by world
+lattice position across every territory (FOREIGN map, srcFileFor): the
+island's pixels enter the coast cell's edit target, the content-aware seam
+is cut against them inside the coast pyramid, the gates judge the shared
+edge, the packet calls them authored. Dry run of coast c4-0: three foreign
+neighbours found (=ninjaone c2-0, c3-0, c1-0). Bake:
+`bake-tanium.mjs --territory coast --review --only c2-0,c3-0,c4-0,c5-0,c6-0,c1-1,c1-2,c7-1,c0-6`.
+Not yet served: registration of the coast pyramid is a later step (the
+owner reviews on the mosaic; `island-grid.mjs --margin 1` draws the island
+with its sea margin).
+
+## TWO SEAMS THAT NEED THE OWNER
+
+- **The sound edge between the territories.** N c0-3 and c1-3 end
+  mid-ground on their south edges (the old grid-edge rule) while T c1-0 and
+  c2-0 open into the sound as ruled. No sea cell lies between them. Either a
+  NinjaOne rebake of those two south edges (replacing accepted art) or
+  leaving it.
+- **T c3-2's south edge.** The lowest bench ends in a straight line against
+  the sea; the only cell to extend into is row 8, which the owner ruled
+  stays sea so the island reads as an island. A shore cell there would hold
+  only a coast foot and open water.
+
 ## RESULTS — the six-cell run (c3-1 on gpt-5.6-sol; the rest on gpt-6-astra)
 
 - **c3-1** (gpt-5.6-sol, 12.6 min) — REFUSED on one gate: a stream out the
@@ -903,7 +972,21 @@ the owner's:
 **Do not roll a seventh candidate.** Whatever he rules, re-run
 `write-briefs.mjs` first: c1-1's neighbours may have changed by then.
 
-## NEXT, in order
+## THE RUN OF 00:16 (gpt-5.6-sol, review-and-retry)
+
+(pending)
+
+## NEXT, in order (superseded list kept below)
+
+1. `.codex-tmp/session4/after-run.sh` when the run ends and the lock is
+   free: the four mask re-derives; c6-1 + c4-1 forced through the loop; the
+   nine coast cells; c5-2 forced. 2. The owner's two seam calls and c1-1's
+   ruling. 3. Register the coast pyramid for serving when the owner wants to
+   see it live. Before every Tanium dispatch: re-run `write-briefs.mjs`;
+   before every coast dispatch: `coast-briefs.mjs` (arrivals change when
+   an island cell is re-derived).
+
+## (superseded) NEXT, in order
 
 1. **c3-2's seam** (approved): `grow-water-along-stream.mjs tanium c3-2 --write`
    with `GROW_REGIONS` around canvas x 1521 / y 256, then

@@ -52,15 +52,38 @@ brief is committed; needs the lock.
 | T c3-2 (south) | the lowest bench ends in a straight line against the sea | forced rebake with a coast foot; keep the widened north seam | open |
 | T c6-1, c6-2 (east) | c6-1 the colonnade (C); c6-2 in the run | see C and B | — |
 
-## E. Unclear
+## E. Resolved after the owner's second markup
 
-- **T c4-1**: no red mark in the crop. Either the fall's cut reading as a
-  black smear on the west wall, or the groove touching the tarn. Asked.
+- **T c4-1**: the outline traced the groove from the east edge past the tarn
+  down INTO the fall on the west rim ("idk what this part is for") — the
+  black smear is the tarn's outlet cut as water (the water layer will draw the
+  fall), but the groove ends in it instead of leaving the west edge at 48%.
+  Brief 4,1 rewritten (the fall 15 m south of the groove; the groove crosses
+  edge to edge); forced rebake. status: prepped.
+- **T c5-2**: the growth tool's blue-leaning classifier cannot see the pale
+  gravel beds and a pale-gravel mode picks stones instead, so the mask route
+  is out. Brief 5,2 now says the becks are cut water the full width of their
+  painted beds; forced rebake. status: prepped.
+- **D, revised by the owner** (*"generate those in the tiles next to the
+  placed art ... not replacing those tiles just extending them into the
+  neighbor to transition better"*): no accepted cell is rebaked for its
+  coast. The **coast territory** (`coast-plan.mjs`, `coast-briefs.mjs`;
+  sparse 9x9 block at lattice [1,0]) holds nine shore cells beside the island
+  — NinjaOne's north row (coast c2-0..c6-0), its west (c1-1, c1-2), its east
+  (c7-1), Tanium's west (c0-6) — each continuing the island's arriving paint
+  15-40 m and ending it at the shore, with the perspective rule per shore.
+  cell.mjs now finds neighbours across territories (lock 18f), so the island's
+  pixels arrive in the edit target and the gates judge the shared edge.
+  status: prepped; bakes after the run.
+- **Two seams have no sea cell to extend into and need the owner's call**:
+  the NinjaOne–Tanium sound edge (N c0-3 / c1-3 end mid-ground against
+  T c1-0 / c2-0's water), and T c3-2's south edge (row 8 stays sea by the
+  owner's ruling; a shore cell there would put a coast foot in that row).
 
-## Order
+## Order (as of 00:35)
 
-1. The run of 00:09 finishes (c4-2, c1-2, c2-1, c3-1, c6-2, c4-0).
-2. A — five mask fixes, minutes each, no Codex.
-3. C — c6-1.
-4. D — Tanium's c0-1 and c3-2, then NinjaOne's eight once its def carries an
-   outer-edge rule and the runner takes `--territory`.
+1. The run of 00:16 finishes (c4-2, c1-2, c2-1, c3-1, c6-2, c4-0), on
+   gpt-5.6-sol with review-and-retry.
+2. `.codex-tmp/session4/after-run.sh`: the four mask re-derives (A), then
+   c6-1 + c4-1 forced (C, E), then the nine coast cells (D), then c5-2.
+3. The owner's two seam calls; c1-1's key-light ruling.
