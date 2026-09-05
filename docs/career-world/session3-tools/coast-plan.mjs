@@ -33,6 +33,8 @@ const COAST = [
   // owner 2026-09-04 on the sound edge: N c1-3 "is fine"; N c0-3 "just expand to the side" —
   // the sea cell west of it, which also meets Tanium c0-0 below
   { at: local(ninja, -1, 3), island: "E", extends: { territory: "ninjaone", id: "c0-3" }, shore: "west" },
+  // owner 2026-09-04 on T c3-2's south edge: "expand this one" — the row-8 sea cell below it
+  { at: local(tan, 3, 3), island: "N", extends: { territory: "tanium", id: "c3-2" }, shore: "south" },
 ];
 
 const cellBiomes = {};

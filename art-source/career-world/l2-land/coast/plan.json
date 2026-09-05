@@ -3,7 +3,7 @@
  "grid": {
   "cols": 9,
   "rows": 9,
-  "cells": 10
+  "cells": 11
  },
  "cell": {
   "keptPx": 2048,
@@ -170,7 +170,8 @@
   "1,2": "coast-cliff",
   "7,1": "coast-cliff",
   "0,6": "coast-cliff",
-  "1,4": "coast-cliff"
+  "1,4": "coast-cliff",
+  "4,8": "coast-cliff"
  },
  "sites": [],
  "rules": {

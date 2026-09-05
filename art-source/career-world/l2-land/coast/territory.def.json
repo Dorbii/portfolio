@@ -132,6 +132,18 @@
     "id": "c0-3"
    },
    "shore": "west"
+  },
+  {
+   "at": [
+    4,
+    8
+   ],
+   "island": "N",
+   "extends": {
+    "territory": "tanium",
+    "id": "c3-2"
+   },
+   "shore": "south"
   }
  ],
  "shelves": [],
@@ -189,7 +201,8 @@
   "1,2": "coast-cliff",
   "7,1": "coast-cliff",
   "0,6": "coast-cliff",
-  "1,4": "coast-cliff"
+  "1,4": "coast-cliff",
+  "4,8": "coast-cliff"
  },
  "runeChain": null,
  "rules": {
