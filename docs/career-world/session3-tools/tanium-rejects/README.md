@@ -69,3 +69,6 @@ They are kept because a rejected cell nobody sees cannot be ruled on.
 - `c6-2` quarry — rejected on **water continuity 1**
 - `c4-2` mixed-bench — rejected on **rock lighting 0.331**
 - `c2-1` dark-forest — rejected on **a gate **
+- `c6-2` quarry — rejected on **rock lighting 0.203**
+- `c6-2` quarry — rejected on **rock lighting 0.203**
+- `c4-2` mixed-bench — rejected on **rock lighting 0.407**

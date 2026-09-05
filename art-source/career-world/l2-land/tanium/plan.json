@@ -281,7 +281,7 @@
   "3,1": "lush-shelf",
   "4,1": "bare-plateau",
   "5,1": "lush-shelf",
-  "6,1": "linked-colonnade",
+  "6,1": "coast-cliff",
   "0,2": "sound-coast",
   "1,2": "dark-forest",
   "2,2": "lush-shelf",
@@ -384,8 +384,8 @@
     6,
     1
    ],
-   "id": "colonnade-head",
-   "terrain": "where the arcade leaves the land: the last column standing on the bench, the first standing in the sea, and level ground beside them to stand on"
+   "id": "chain-end",
+   "terrain": "where the groove leaves the land: the cut through the cliff rim, the last panels on the bench beside it, and level ground to stand on and look along the line out to sea"
   }
  ],
  "rules": {
