@@ -20,6 +20,9 @@ if (!T || T.startsWith("--")) {
   process.exit(1);
 }
 const LEVEL = Number(arg("--level", 2));
+// --bg r,g,b  the backdrop behind the art (cut water shows it); default the
+// review navy, or a sea tone when the picture is meant to read as a map
+const BG = arg("--bg", "13,22,32").split(",").map(Number);
 const HIGHLIGHT = new Set((arg("--highlight", "") || "").split(",").filter(Boolean));
 const OUT = arg("--out", `docs/career-world/session3-tools/${T}-mosaic.png`);
 const SNAP = ".codex-tmp/reject-snapshot";
@@ -84,7 +87,7 @@ for (let r = 0; r < ROWS; r += 1) {
   }
 }
 
-await sharp({ create: { width: W, height: H, channels: 4, background: { r: 13, g: 22, b: 32, alpha: 255 } } })
+await sharp({ create: { width: W, height: H, channels: 4, background: { r: BG[0], g: BG[1], b: BG[2], alpha: 255 } } })
   .composite([...comps, { input: Buffer.from(`<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">${svg.join("")}</svg>`), left: 0, top: 0 }])
   .png().toFile(OUT);
 
