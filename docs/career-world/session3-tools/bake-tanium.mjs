@@ -244,7 +244,10 @@ Keep the whole file under 700 words.
   const reviewFile = `${dir}/codex-review.md`;
   if (!fs.existsSync(reviewFile)) { say(`    reviewer wrote nothing (exit ${rv.status}) — see ${dir}/codex.log`); return null; }
   const review = fs.readFileSync(reviewFile, "utf8").replace(/\r\n/g, "\n");
-  const m = review.match(/^##\s*3\.[^\n]*\n([\s\S]*?)(?=^##\s*\d\.|\s*$)/m);
+  // section 3 runs to the next numbered heading or the end of the file — the
+  // first version's `\s*$` alternative matched at the end of the heading line
+  // in multiline mode, so the lazy capture was always empty (c6-2, 00:06)
+  const m = review.match(/^#{1,3}\s*3\.[^\n]*\n([\s\S]*?)(?=^#{1,3}\s*\d\.|(?![\s\S]))/m);
   const addendum = m ? m[1].trim() : "";
   if (!addendum) { say(`    reviewer gave no addendum — see ${reviewFile}`); return null; }
   const why = (review.match(/^##\s*1\.[^\n]*\n([\s\S]*?)(?=^##)/m) || [])[1] || "";
