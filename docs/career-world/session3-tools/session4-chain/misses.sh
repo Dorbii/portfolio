@@ -96,5 +96,5 @@ node docs/career-world/session3-tools/bake-tanium.mjs --territory coast --only c
 say "conform pass: shore candidates refused on water continuity alone, drift within 12 m, mask only"
 node docs/career-world/session3-tools/conform-pass.mjs --max 12 2>&1 | tail -12
 say "serve"
-bash .codex-tmp/session4/serve.sh 2>&1 | grep -E "^[|committed"
+bash .codex-tmp/session4/serve.sh 2>&1 | tee -a .codex-tmp/session4/serve.log | grep -E "^\[|committed"
 say "misses done"

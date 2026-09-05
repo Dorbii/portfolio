@@ -53,15 +53,31 @@ for (const x of def.coastCells) {
   // coast over the island's sea or its inlets (c7-0, 2026-09-05 20:04) — the
   // whole-shore conform: every run opened, land beyond the limit trimmed
   // (conform-band.mjs); its preview is kept for the owner's eye either way.
-  const band = deepest > MAX;
+  // the whole-shore conform also when the seam matched but the land overflows
+  // the limit (c6-8, 2026-09-05 23:05: seam drift 0.4 m, a plateau across the
+  // cell; the band's dry run reports what it would trim)
+  const bandDry = execSync(`node docs/career-world/session3-tools/conform-band.mjs coast ${id}`, { encoding: "utf8" });
+  const trimPct = Number((bandDry.match(/trimmed beyond it \d+ mask px \(([\d.]+)%/) || [0, 0])[1]);
+  const band = deepest > MAX || trimPct > 5;
   const preview = `docs/career-world/session3-tools/coast-rejects/${id}-conform.jpg`;
-  if (DRY) { results.push(`${id}: WOULD ${band ? `band-conform (seam drift ${deepest.toFixed(1)} m > ${MAX})` : `seam-conform (deepest ${deepest.toFixed(1)} m)`} and redo`); continue; }
+  if (DRY) { results.push(`${id}: WOULD ${band ? `band-conform (seam drift ${deepest.toFixed(1)} m, ${trimPct}% beyond the limit)` : `seam-conform (deepest ${deepest.toFixed(1)} m)`} and redo`); continue; }
+  const redoCmd = `node tools/world-authoring/cell.mjs --territory coast --cell ${x.at[0]},${x.at[1]} --redo --force --describe-file ${ART}/coast/briefs/${id}.md 2>&1 || true`;
   if (band) execSync(`node docs/career-world/session3-tools/conform-band.mjs coast ${id} --preview ${preview} --write`, { encoding: "utf8" });
   else execSync(`${cmd} --preview ${preview} --write`, { encoding: "utf8" });
-  const redo = execSync(`node tools/world-authoring/cell.mjs --territory coast --cell ${x.at[0]},${x.at[1]} --redo --force --describe-file ${ART}/coast/briefs/${id}.md 2>&1 || true`, { encoding: "utf8", shell: "bash" });
-  const accepted = /accepted, stitched/.test(redo);
-  const gates = (redo.match(/FAIL\s+[a-z][a-z -]+?\s{2,}[^\n]*/g) || []).map((s) => s.trim()).join(" | ");
-  const how = band ? `band-conformed (seam drift ${deepest.toFixed(1)} m)` : `seam-conformed (deepest ${deepest.toFixed(1)} m)`;
+  let redo = execSync(redoCmd, { encoding: "utf8", shell: "bash" });
+  let accepted = /accepted, stitched/.test(redo);
+  let gates = (redo.match(/FAIL\s+[a-z][a-z -]+?\s{2,}[^\n]*/g) || []).map((s) => s.trim()).join(" | ");
+  let how = band ? `band-conformed (seam drift ${deepest.toFixed(1)} m, ${trimPct}% beyond the limit)` : `seam-conformed (deepest ${deepest.toFixed(1)} m)`;
+  // a seam conform that still leaves a crossing unmet (c2-8: the crossings were
+  // on the shore neighbour's edge, which the seam conform does not read) gets
+  // the whole-shore conform as a second step
+  if (!accepted && !band && /water continuity/.test(gates)) {
+    execSync(`node docs/career-world/session3-tools/conform-band.mjs coast ${id} --preview ${preview} --write`, { encoding: "utf8" });
+    redo = execSync(redoCmd, { encoding: "utf8", shell: "bash" });
+    accepted = /accepted, stitched/.test(redo);
+    gates = (redo.match(/FAIL\s+[a-z][a-z -]+?\s{2,}[^\n]*/g) || []).map((s) => s.trim()).join(" | ");
+    how += `, then band-conformed`;
+  }
   results.push(`${id}: ${how} — ${accepted ? "ACCEPTED and stitched" : `still refused: ${gates}`}; preview ${preview}`);
   if (accepted) {
     execSync(`git add -A -- ${ART}/coast ${A} docs/career-world/session3-tools/coast-rejects && git commit -q -m "Coast ${id}: ${band ? "shore conformed to the plan (every run opened, land beyond the limit trimmed; mask only)" : `seam conformed to the island's water (mask only, deepest cut ${deepest.toFixed(1)} m)`} and stitched" -m "Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"`, { encoding: "utf8", shell: "bash" });
