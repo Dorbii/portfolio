@@ -4,7 +4,37 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-05 21:50 UTC, LATEST (current):** **LOCK 18m IS IN ON THE OWNER'S
+**2026-09-05 23:15 UTC, LATEST (current):** **THE COAST RUN IS DONE — 10
+NEW SHORE CELLS IN THE PYRAMID, NOT YET SERVED; THE CHAIN RUN STARTED
+ITSELF AT 23:10Z.** misses.sh (waves on locks 18i-b/18j/18k): wave 1
+landed c7-2, c8-6, c1-0, c1-8; wave 2 landed c7-1; every other candidate
+painted its coast over the pre-filled sea. **The conform pass (mask only)
+then landed c1-2, c7-3, c7-4, c8-7, c7-8** — band-conformed at 22-24 m seam
+drift, every crossing opened, land beyond the wandering limit trimmed;
+previews in `session3-tools/coast-rejects/<id>-conform.jpg`. Still
+candidates: c7-0 (band-conformed, refused on tone 22.7 alone → the owner's
+eye), c1-3 (tone 21 alone, its bay met — his eye), c4-8, c2-8, c6-8
+(seam-conformed, still refused: the pass now band-conforms an overflow and
+falls back to the band when a seam conform leaves a crossing unmet — they
+get that in the chain run's pass), c0-6 and c1-4 (chain.sh: c0-6 stitched on
+his eye, c1-4 rebaked). **Coast: 12 of 28 authored** (7 + 5 conformed) plus
+c3-0, c0-6 stitching now = 14, and c0-5, c0-7, c1-4 to come. **THE SERVE DID
+NOT RUN:** misses.sh piped serve.sh into a grep whose backslash was lost
+(`"^[|committed"` → "Unmatched ["), grep died, serve.sh took SIGPIPE at its
+first line — the runtime feed is still 18:42Z's 45 tiles. It cannot run now
+(chain.sh holds the lock for ~2.5 h; registration must not race a stitch);
+**chain.sh ends with its own serve** (its grep is correct; misses.sh's line
+is fixed for the record). If chain.sh's serve fails too: `bash
+.codex-tmp/session4/serve.sh` by hand once the lock is free. **chain.sh
+(log `.codex-tmp/session4/chain.log`)**: T c4-0 stitched on his eye at
+23:11Z (override past vegetation colour dBG 0.503 / dLuma 40.9 at the
+border); then C c3-0, C c0-6; then c4-1 forced, c2-1, c1-1, c6-1 forced,
+c1-2 forced with the floor drawn (18m dry-run verified on c4-1: 54% → 50%,
+"chain pre-fill 41475 px"); then coast c0-5, c0-7, c1-4; conform pass;
+serve. **Then:** island picture (world-mosaic ×3 → island-grid) and the
+candidate views to the owner; his eye on c7-0, c1-3, and the chain cells.
+
+**2026-09-05 21:50 UTC:** **LOCK 18m IS IN ON THE OWNER'S
 WORD; HIS RULINGS ARE QUEUED BEHIND THE COAST RUN; c0-7 JOINS THE PLAN.**
 Owner 21:40, on the 18m preview and the four 3x3 views: *"Tc4-0 looks fine,
 c3-0 fine, c0-6 needs work and or needs to finish the coast in the cells
