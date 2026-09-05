@@ -35,7 +35,12 @@ for (const x of def.coastCells) {
   const v = lastVerdict(id);
   if (!v || !/FAILED after/.test(v)) continue;
   const fails = (v.match(/FAIL\s+[a-z][a-z -]+?\s{2,}/g) || []).map((s) => s.replace(/^FAIL\s+/, "").trim());
-  if (!(fails.length === 1 && /water continuity/.test(fails[0]))) { results.push(`${id}: refused on ${fails.join(", ") || "?"} — not a conform case`); continue; }
+  // water continuity among the failures is enough (2026-09-05 21:02, c6-8:
+  // continuity + rock lighting + tone on a plateau carried into open sea —
+  // the cut removes most of the rock and the seam band the tone was read on,
+  // so the other gates are re-read on what remains); a candidate refused
+  // without a continuity fault is not a conform case
+  if (!fails.some((f) => /water continuity/.test(f))) { results.push(`${id}: refused on ${fails.join(", ") || "?"} — not a conform case`); continue; }
   const edge = { E: "right", W: "left", N: "top", S: "bottom" }[x.island];
   const nb = `${ART}/${x.extends.territory}/${x.extends.id}/${x.extends.id}-l2.png`;
   if (!fs.existsSync(nb)) { results.push(`${id}: ${x.extends.territory} ${x.extends.id} has no land layer — skipped`); continue; }
