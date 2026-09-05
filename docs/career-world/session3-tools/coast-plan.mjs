@@ -64,6 +64,7 @@ const COAST = [
   { at: local(tan, 4, 3), island: "N", extends: { territory: "tanium", id: "c4-2" }, shore: "south" },      // c5-8 — T c4-2's south edge, 71% land
   { at: local(tan, 5, 3), island: "N", extends: { territory: "tanium", id: "c5-2" }, shore: "south" },      // c6-8 — T c5-2's south edge
   { at: local(tan, 6, 3), island: "N", extends: { territory: "tanium", id: "c6-2" }, shore: "south" },      // c7-8 — T c6-2's south edge, 49% land
+  { at: [0, 7], island: "N", extends: { territory: "coast", id: "c0-6" }, shore: "south" },                  // c0-7 — owner 2026-09-05 21:40: c0-6 "needs to finish the coast in the cells above and below it"
 ];
 
 const cellBiomes = {};

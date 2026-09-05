@@ -240,6 +240,23 @@ no strip of land along the line. The one stretch of ground continues 15-40 m
 east and ends. The previous candidate painted a coast along the whole seam and
 left a straight channel of dark water between it and N c4-2's cliffs (owner:
 "alignment issues and coast issues"); that is wrong.`,
+  // owner 2026-09-05 21:40, on the candidate's 3x3 view: "C1-4 almost but
+  // needs to finish the coast or expand to do so"
+  "c1-4": `**Finish the coast — hard.** N c0-3's ground arrives across your EAST edge
+and the shore cell c1-3 above you carries the same coast to your NORTH edge;
+T c0-0's cliffs stand at your SOUTH edge. The shoreline runs CONTINUOUSLY
+from c1-3's land at the north edge, down the west side of N c0-3's ground,
+to T c0-0's cliffs at the south edge — one coast, no land ending in a
+straight cut and no gap of open water between two pieces of coast. Expand
+the land where that is needed to join them. The previous candidate left the
+coast unfinished at both ends and a rectangle of painted water at the
+south-east corner; both wrong.`,
+  // owner 2026-09-05 21:40: c0-6 "needs to finish the coast in the cells
+  // above and below it" — c0-7 is the cell below, new in the plan
+  "c0-7": `**End c0-6's coast.** c0-6's land arrives across your NORTH edge; carry it
+15-40 m south as the same cliffed shore, wandering, and END it — every edge
+of this cell but the north is open sea, and nothing stands in it beyond a
+stack or two close in.`,
   "c8-6": `**The bulge closes; then the chain's end.** The rounded headland from c8-5
 above comes down across your NORTH edge and closes back onto T c6-1's cliff,
 which arrives across the top 19% of your WEST edge. Below that, T c6-1's
