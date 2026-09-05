@@ -4,7 +4,26 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-05 10:50 UTC, LATEST (current):** **THE WATER REFACTOR IS IN THE
+**2026-09-05 11:40 UTC, LATEST (current):** **THE BLUR WAS THE LOD POLICY;
+THE PATCHES ARE THE PREVIEWS AND THE UNSERVED COAST.** The owner walked the
+live server (five screenshots: rough coast, chain not lined up, patchy
+colour, blur). Measured: the regenerated overview plates match the served
+tiles to 0.5 units in every cell, and the four review tiles match their
+candidates exactly — nothing served is off-colour. What he saw: (1) **blur**
+— `shared/lod/policy.ts` faded each tier in by camera span AFTER the coarser
+tier was magnified (capital → site over span 0.075-0.05, while the capital
+tile is 1:1 at 0.13 and the camera's minimum span is 0.052, so the site tier
+could never fully arrive); now capital is in by 0.22 and site by 0.10, and
+the pane reads site 100% at span 0.085 with the residency estimate under
+budget. (2) **patchy colour and the chain** — the Codex mount previews the
+four unaccepted Tanium candidates in place (c1-1's greyer fine canopy reads
+as a dark veil beside the authored forest; c2-1 blind of c3-1; c4-0), and the
+water layer marks ocean beside cut land edges as provisional coast, so every
+unserved coast slot (c3-0's notch) reads as a lighter rectangle. Both go away
+as cells are accepted; nothing to fix in the data. (3) **rough coast** — 4 of
+27 shore cells served. The rulings listed at 10:00 are still the whole path.
+
+**2026-09-05 10:50 UTC, superseded:** **THE WATER REFACTOR IS IN THE
 LANE.** Owner: *"could you merge in the water work from the codex layer."*
 The Codex session's refactor (`codex/water-pyramid-refactor`, its record
 `docs/career-world/WATER-REFACTOR.md`) replaces the old `layers/ocean` and
