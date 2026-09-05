@@ -24,3 +24,7 @@
 - `c8-5` shore — rejected on **crown scale 5.585**
 - `c8-7` shore — rejected on **rock lighting 0.243**
 - `c7-8` shore — rejected on **a gate **
+- `c7-2` shore — rejected on **water continuity 1**
+- `c7-3` shore — rejected on **water continuity 2**
+- `c1-8` shore — rejected on **key-light asymmetry 0.0116**
+- `c6-8` shore — rejected on **rock lighting 0.259**
