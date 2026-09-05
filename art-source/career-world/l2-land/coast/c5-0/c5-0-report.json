@@ -1,0 +1,110 @@
+{
+  "cell": "c5-0",
+  "territory": "ninjaone",
+  "biome": "shore",
+  "status": "quarantine_refused",
+  "generation": {
+    "filename": "c5-0-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "0D33B1D5717499D2EB7B1DA794C118ACE6579E4FF95E5BE6B014D35C2D082559",
+    "mode": "one built-in ImageGen whole-canvas edit with the edit target first and the style canon second as reference only",
+    "editCallsUsed": 1,
+    "retryUsed": false,
+    "bothImagesAccepted": true,
+    "rawOutputPreserved": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "promptFile": "c5-0-imagegen-prompt-used.txt"
+  },
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by the uniform-bin mean on the delivered source; delivered water-mask pixels and gradients below 12 luminance units were excluded",
+    "peakVsUniformOverLand": 1.745957,
+    "uniformReference": 1.0,
+    "directionalKeyFirstMoment": 0.002486,
+    "peakBinDegrees": [220, 230],
+    "gradientSamples": 995212,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No whole-canvas sun gradient is obvious, but repeated pale top facets, darker rock sides, and dark conifer-side/ground shapes still create a directional upper-left light reading. The strict flat-lighting rule is not met."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "manual estimated fraction of non-water land at native source resolution",
+    "buildable": 0.58,
+    "steep": 0.06,
+    "otherBrokenRockTalusOrVegetation": 0.36,
+    "method": "The broad coherent pale central bench counts as buildable; only the narrow broken shoreline rim and abrupt shelf margins count as steep; jointed rubble, talus, the tarn margin, scrub, and conifer ground make up the remainder."
+  },
+  "waterFootprintFraction": 0.275180666,
+  "finalDerivedLandCoverageFraction": 0.724819334,
+  "shoreLandReachMetres": {
+    "requiredRange": [15, 40],
+    "estimatedRange": [62, 84],
+    "estimatedMedian": 70,
+    "method": "Manual native-resolution shoreline-rim samples across the frame converted by 97.6/1254 metres per source pixel; offshore stacks were not treated as the main shore.",
+    "pass": false
+  },
+  "crown": {
+    "medianMetres": 3.038,
+    "medianPx": 63.285,
+    "sampleCount": 47,
+    "method": "Manual full-frame census of every visually identifiable conifer crown, including saplings, edge-clipped crowns, and readable crowns in overlapping groups; widths were measured on the 1254 px source using the 100 px grid and 2x/3x crops, with a 31 source-pixel median scaled by 2560/1254 and converted at 0.048 m per final pixel.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c5-0-water-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "CAB2076D988C37F31210BB4785270184B78EFB0C18E0EDD29A20AEE0BEAE9F89",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "opaqueWaterPixels": 432726,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedWaterComponents8Connected": 2,
+    "connectedWaterComponentSizesPx": [426461, 6265],
+    "accidentalSmallWetComponents": 0,
+    "edgeWaterPixels": {
+      "north": 1254,
+      "east": 172,
+      "south": 0,
+      "west": 456
+    },
+    "method": "Flooded blue/teal water from the north, east, and west sea edges; separately flooded the southern shelf tarn; grew connected pale surf and wash; removed warm rock, dark vegetation, and wet components below 64 pixels; then inspected the cyan overlay at native resolution."
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleEditCall": true,
+    "secondReferenceAccepted": true,
+    "rawGenerationUntouched": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "northShoreSeenFromBehindWithoutExposedViewerFacingCliff": true,
+    "waterMaskSameDimensions": true,
+    "waterMaskBinaryWhiteOnTransparent": true,
+    "waterMaskCoversSeaSurfWashAndTarn": true,
+    "allMeasuredCrownsIncluded": true,
+    "crownMedianInsideAcceptedTerritoryBand": true,
+    "landReachWithin15To40Metres": false,
+    "northEastAndWestEdgesAreSea": false,
+    "oneOrTwoOffshoreSkerryGroupsMaximum": false,
+    "strictEqualValueOnAllFormSides": false
+  },
+  "refusalReasons": [
+    "The main shore lies roughly 62-84 m inward from the southern edge, with an estimated 70 m median, instead of the required varying 15-40 m continuation; the candidate therefore leaves only 27.52% open water rather than making the rest of the cell open sea.",
+    "The east and west edges are only partly sea (172/1254 and 456/1254 water pixels respectively), contradicting the explicit seaward-edge requirement even though this follows inherited painted overlap visible in the edit target.",
+    "Three distinct offshore skerry groups are visible, exceeding the requested one or two.",
+    "Rock facets and conifer-side/ground values retain a directional lighting read, so the strict same-value-on-every-side rule fails visual inspection despite the low aggregate first-moment metric."
+  ],
+  "openRisks": [
+    "The water mask was traced and overlay-inspected at source resolution, but no pipeline cut/bake was run because the task is quarantine-only.",
+    "The crown census includes every identified sapling and clipped/overlapping crown with no exclusions, but boundaries inside dense overlap remain an approximate manual measurement.",
+    "The preserved eastern and western neighbor paint conflicts with the written requirement that those entire cell edges be sea; resolving that authority conflict would require a new source/context decision, not post-processing this one-call output."
+  ],
+  "evidence": {
+    "waterOverlay": "diagnostics/c5-0-water-overlay-current.png",
+    "crownCensusOverlay": "diagnostics/c5-0-crown-census-current.png",
+    "measurementLog": "diagnostics/c5-0-measurements-current.txt",
+    "grid": "diagnostics/c5-0-grid-current.png"
+  }
+}

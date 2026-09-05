@@ -77,3 +77,10 @@ They are kept because a rejected cell nobody sees cannot be ruled on.
 - `c1-2` dark-forest — rejected on **a gate **
 - `c1-2` dark-forest — rejected on **a gate **
 - `c1-1` dark-forest — rejected on **a gate **
+- `c1-1` dark-forest — rejected on **water fringe 1.25**
+- `c3-1` lush-shelf — rejected on **rock lighting 0.244**
+- `c2-1` dark-forest — rejected on **crown scale 1.176**
+- `c4-1` bare-plateau — rejected on **a gate **
+- `c5-2` moor — rejected on **a gate **
+- `c4-0` moor — rejected on **a gate **
+- `c5-2` moor — rejected on **water continuity 1**

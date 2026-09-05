@@ -10,3 +10,4 @@
 - `c4-8` coast-cliff — rejected on **water continuity 5**
 - `c3-0` shore — rejected on **a gate **
 - `c5-0` shore — rejected on **a gate **
+- `c3-0` shore — rejected on **rock lighting 0.305**
