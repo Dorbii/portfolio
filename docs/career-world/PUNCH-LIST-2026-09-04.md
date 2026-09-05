@@ -129,3 +129,28 @@ brief is committed; needs the lock.
 2. `.codex-tmp/session4/after-run.sh`: the four mask re-derives (A), then
    c6-1 + c4-1 forced (C, E), then the nine coast cells (D), then c5-2.
 3. The owner's two seam calls; c1-1's key-light ruling.
+
+## Status as of 03:15 UTC (2026-09-05)
+
+- A (mask fixes): c0-1, c2-2 **done**. c3-2's re-derive refused on the tone
+  step of the c4-2 seam the owner accepted (38.3) → re-runs under his
+  acceptance in `after-chain.sh`. c5-1's re-derive refused on the vegetation
+  arm (dBG 0.090, dLuma 68 over three seams) → re-runs with full output;
+  if refused again it goes to the owner. c5-2 → regenerates once (brief 5,2).
+- B: c4-2 **done** (override). c1-2, c6-2 → stitched by override in
+  `after-chain.sh` ("the bottom row looks fine"). c4-0 is UNAUTHORED (its
+  astra dispatches never generated; the 00:16 run was stopped before it) →
+  one attempt after c4-1, on the fixed brief (the border river meets
+  N c3-3's at the seam). c1-1 → one attempt AFTER c1-2 is stitched
+  (`chain-handoff.sh` reorders it behind the chain).
+- C: c6-1 **done** at 01:39 — the chain's seaward end, every gate passed.
+- D (coast): c6-0 **done** (02:48, the first shore cell). c2-0, c3-0, c4-0,
+  c5-0, c1-1 refused on rock lighting alone (0.18-0.31); the owner read the
+  four north shores ("yeah its fine") and their seams ("these parts are not
+  good though" — generated blind of each other). → c2-0, c4-0 by override;
+  c3-0, c5-0 regenerate between accepted neighbours; coast c7-0 (world 8,0)
+  added for c6-0's cut east edge. c1-2, c1-4, c7-1, c0-6, c4-8 baking.
+  **Open owner calls:** a shore limit for the rock-lighting gate; every
+  refused shore.
+- E: c4-1 → forced rebake in `after-chain.sh` (one attempt); c5-2 → one
+  regeneration.

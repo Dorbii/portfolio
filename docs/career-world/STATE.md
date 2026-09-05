@@ -4,7 +4,30 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-05 00:35, LATEST (current):** **THE OWNER MARKED UP THE ISLAND AND
+**2026-09-05 03:15 UTC, LATEST (current):** **THE CHAIN IS BAKING THE COAST;
+THE NORTH SHORE'S SEAMS ARE THE FINDING.** (Times here are UTC as the runner
+logs them; the shell's `date` is CDT, five hours behind.) Tanium is 15 of 21
+(c4-2 accepted on the owner's eye; c6-1 rebaked as the chain's seaward end;
+c1-1, c1-2, c2-1, c3-1, c6-2 and c4-0 open). The coast territory has its
+first authored cell — c6-0, the north-east corner, 02:48 — and every other
+shore so far was refused on ONE gate, rock lighting (0.305, 0.209, 0.188,
+0.183, 0.247): a cliff's pale rim over its darker face reads to that gate as
+a lit side, the canopy story again on rock; the owner accepted 0.215 on c4-2
+and a shore limit is his call. He read the four north-shore candidates in
+place — *"yeah its fine"* — then, on the seams between them, *"these parts
+are not good though"*: they were generated blind of each other. So c2-0 and
+c4-0 are accepted by override, c3-0 and c5-0 regenerate BETWEEN their
+accepted neighbours, and a corner cell (coast c7-0, world 8,0) carries c6-0's
+cut east edge round. The chain (`.codex-tmp/session4/after-run.sh`, since
+01:24) is on coast c1-2 with c1-4, c7-1, c0-6, c4-8 to go;
+`chain-handoff.sh` then takes the lock so Tanium c1-1 bakes AFTER c1-2 is
+stitched, and runs `after-chain.sh` (c5-1/c3-2 mask redos, c1-2/c6-2
+overrides, c1-1, c3-1, c2-1, c4-1, c4-0, c5-2 one attempt each, the coast
+overrides, coast c3-0/c5-0/c7-0). Then the boxed island picture, which now
+draws the coast (`world-mosaic.mjs`, `island-grid.mjs`, tag C). Resume from
+`SESSION 11` below, its first section.
+
+**2026-09-05 00:35, superseded:** **THE OWNER MARKED UP THE ISLAND AND
 THE COAST GETS ITS OWN TERRITORY.** Read `PUNCH-LIST-2026-09-04.md` first:
 18 marks, each resolved into a mask fix (seeded fills, no regeneration), a
 forced rebake (c6-1 becomes the chain's seaward end — the colonnade is
@@ -682,7 +705,98 @@ adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 `brief-c3-1-r2.md` (magical gorge, rail gorge span), `brief-c2-2-r2.md`
 (bench country, waystation bench, hot spring).
 
-**SESSION 11 (2026-09-04, evening) — RESUME HERE, ANY MODEL.** **c1-1 STOPPED; SIX CELLS BAKING.**
+**SESSION 11 (2026-09-04 evening → 2026-09-05 03:15 UTC) — RESUME HERE, ANY MODEL.** **THE CHAIN IS ON THE COAST; `chain-handoff.sh` → `after-chain.sh` FOLLOW IT; THEN THE PICTURE.**
+
+## 03:15 — THE CHAIN SO FAR, THE COAST'S FIRST LESSON, WHAT IS QUEUED
+
+Times in this file are UTC, as the runner logs them (`[HH:MM:SS]`); the
+shell's `date` and the bash scripts' own stamps are CDT, five hours behind.
+
+**The chain** (`.codex-tmp/session4/after-run.sh`, task since 01:24; the
+coast's log is `.codex-tmp/bake-coast.log`, Tanium's `.codex-tmp/bake-tanium.log`;
+verdicts are logged as they land in `.codex-tmp/session4/results-run3.md`):
+
+- c4-2 stitched by override at 01:24 (Tanium 15 of 21).
+- Mask re-derives: **c0-1 and c2-2 landed**; **c3-2 refused** on the tone
+  step of its seam with c4-2 (38.3 — the seam the owner accepted with c4-2);
+  **c5-1 refused** on the vegetation arm (dBG 0.090, dLuma 68 over three
+  seams; tone 18.4 over four) — its seed fill changed what the palette gate
+  reads near a seam. Both re-run in `after-chain.sh`, c3-2 under the c4-2
+  acceptance, c5-1 with full output to see which seam.
+- **c6-1 accepted** at 01:39 (13.5 min, every gate): the colonnade is gone;
+  the cell is the chain's seaward end. Tanium stays 15 (a rebake).
+- The coast, one attempt each: **c2-0 refused** (rock lighting 0.305; crown
+  0 over 0 — the coast-cliff vocabulary, fixed by the `shore` biome),
+  **c3-0 refused** (0.209, everything else passed), **c4-0 refused** (0.188),
+  **c5-0 refused** (0.183), **c6-0 ACCEPTED** at 02:48 (10.9 min — the first
+  shore cell in the world; the coast manifest and pyramid exist),
+  **c1-1 refused** (0.247; land coverage 65%, the ground ran deep). c1-2
+  dispatched 03:07; c1-4, c7-1, c0-6, c4-8 follow.
+
+**Five shores of six refused on rock lighting alone (0.305, 0.209, 0.188,
+0.183, 0.247).** The gate reads a cliff's pale rim over its darker face as a
+lit side — the same morphology story the key-light gate tells on a dense
+canopy, here on rock. Every other gate passed on all five (c2-0's crown count
+was vocabulary). The owner accepted 0.215 on c4-2 on his eye; **a limit for
+shores is his call** — options: (a) a shore biome exemption, (b) a higher
+limit for `shore` cells (0.35 would pass all five), (c) keep accepting by
+override on his eye. Ask in the picture.
+
+**The owner read the four north-shore candidates in place (02:50-02:55):**
+*"yeah its fine"* to the shores, then on three seam crops (c2-0|c3-0,
+c5-0|c6-0, c6-0's east edge): *"these parts are not good though."* The four
+were generated blind of each other — each saw only the island cell below it
+— so their coastlines meet at different distances with different rock.
+Applied: **c2-0 and c4-0 accepted by override** (his words recorded), **c3-0
+and c5-0 regenerate BETWEEN accepted neighbours** so each coastline must meet
+both (c3-0's brief adds "Distance, hard": the plateau ends 15-40 m in, never
+more — its candidate carried a blank slab nearly the whole cell), and
+**coast c7-0** (world 8,0; `coast-plan.mjs`) is the corner cell east of c6-0
+for its cut east edge (`coast-briefs.mjs` can now extend a coast cell). The
+workflow lesson for the other islands: **shore cells along one edge bake
+alternately** — every second cell first, then the ones between, so each has
+an authored shore on at least one side.
+
+**`chain-handoff.sh`** (`.codex-tmp/session4/`, running in the background,
+log `chain-handoff.log`): the chain's last step is Tanium c1-1, but it would
+bake before c1-2 is stitched and the gorge river arrives across that seam.
+A running bash script cannot be edited, so the handoff takes the authoring
+lock the instant the coast run's last cell ends; the chain's c1-1 dispatch
+dies on it (cell.mjs registers its lock-removing exit handler only after it
+owns the lock), the chain says "chain done", the handoff releases the lock
+and runs `after-chain.sh` with `C11_DONE=0`. If the chain's dispatch wins the
+race, that attempt counts (`C11_DONE=1`) and after-chain skips c1-1.
+
+**`after-chain.sh`**, in order: c5-1 redo (full output); c3-2 redo under the
+c4-2 acceptance; c1-2 and c6-2 stitched by override from their working
+folders (*"the bottom row looks fine I think"*); **c1-1** one attempt with
+c1-2 below it; **c3-1** one attempt (its accepted candidate's source was
+lost to the astra dispatch that died; the review packet keeps only a
+1024 px copy); **c2-1** one attempt against c3-1; **c4-1** forced (the groove
+leaves the west edge at 48%); **c4-0** one attempt (unauthored — its astra
+dispatches never generated and the 00:16 run was stopped before it; the
+border river meets N c3-3's); **c5-2** forced (the becks fill their beds);
+coast c2-0 and c4-0 by override; `coast-briefs.mjs`; `bake-tanium.mjs
+--territory coast --only c3-0,c5-0,c7-0`. Each accepted cell commits itself.
+About three hours.
+
+**Then the picture**, for every cell that needs him:
+`world-mosaic.mjs <t> --level 2 --bg 31,96,108 --out .codex-tmp/session4/island/mosaic-<t>-L2.png`
+for coast, ninjaone, tanium, then `island-grid.mjs --level 2 --margin 1
+--mark "..."`. The tools know the coast now: `world-mosaic.mjs` draws only a
+sparse territory's planned cells, finds an unauthored cell's candidate in
+its working folder first (`.codex-tmp/authoring/cells/<t>/<id>/<id>-l2.png`),
+then `.codex-tmp/reject-snapshot/<t>/`, and uses the old unscoped snapshots
+only for Tanium (a coast c2-0 must never wear Tanium's c2-0); `island-grid.mjs`
+composites the coast mosaic under the island's, tag C, planned cells boxed
+and labelled, block borders only for the island. Verified at 03:00 on the
+current world (`.codex-tmp/session4/island/island-grid-L2.jpg`).
+
+**Needs the owner in that picture:** the shore limit for rock lighting;
+every refused shore (c1-1 and whatever c1-2, c1-4, c7-1, c0-6, c4-8, c3-0,
+c5-0, c7-0 do); Tanium c1-1 after its attempt (the key-light gate is
+unchanged — options a-e further down); c4-0, c3-1, c2-1, c4-1, c5-2 if
+refused; c5-1's mask fix if refused again.
 
 ## c1-1: THE SIXTH REFUSAL, AND WHY THERE IS NO SEVENTH
 

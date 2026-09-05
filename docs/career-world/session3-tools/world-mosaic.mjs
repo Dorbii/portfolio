@@ -33,6 +33,22 @@ if (!fs.existsSync(MAN)) { console.error(`no manifest for ${T} at ${MAN}`); proc
 const man = JSON.parse(fs.readFileSync(MAN, "utf8"));
 const def = JSON.parse(fs.readFileSync(`art-source/career-world/l2-land/${T}/territory.def.json`, "utf8"));
 const authored = Object.keys(man.cells);
+// A sparse territory (the coast) plans only some of its block's cells; the
+// rest are the island's, mirrored into cellBiomes, and are drawn by their own
+// territories — here they stay backdrop.
+const planned = def.coastCells ? new Set(def.coastCells.map((x) => `c${x.at[0]}-${x.at[1]}`)) : null;
+// Where an unauthored cell's last candidate is: the working folder holds it in
+// full until the next dispatch clears it; the snapshot folder keeps copies by
+// territory; the unscoped snapshots are Tanium's from before the coast existed
+// (a coast c2-0 must never wear Tanium's c2-0).
+const candidateFor = (id) => {
+  const live = `.codex-tmp/authoring/cells/${T}/${id}/${id}-l2.png`;
+  if (fs.existsSync(live)) return live;
+  const scoped = `${SNAP}/${T}/${id}.png`;
+  if (fs.existsSync(scoped)) return scoped;
+  const legacy = `${SNAP}/${id}.png`;
+  return T === "tanium" && fs.existsSync(legacy) ? legacy : null;
+};
 const COLS = def.grid.cols, ROWS = def.grid.rows;
 const CELL_PX = man.contract.keptPx, TILE = man.contract.tilePx;
 
@@ -62,9 +78,10 @@ for (let r = 0; r < ROWS; r += 1) {
   for (let c = 0; c < COLS; c += 1) {
     const id = `c${c}-${r}`;
     const x = Math.round(c * cellPx), y = Math.round(r * cellPx), w = Math.round(cellPx);
+    if (planned && !planned.has(id)) continue;
     if (!authored.includes(id)) {
-      const src = `${SNAP}/${id}.png`;
-      if (fs.existsSync(src)) {
+      const src = candidateFor(id);
+      if (src) {
         const m = await sharp(src).metadata();
         const bleed = Math.round((m.width - CELL_PX) / 2);
         comps.push({ input: await sharp(src).extract({ left: bleed, top: bleed, width: CELL_PX, height: CELL_PX })
@@ -72,7 +89,9 @@ for (let r = 0; r < ROWS; r += 1) {
         refused += 1;
         svg.push(`<rect x="${x + 1}" y="${y + 1}" width="${w - 2}" height="${w - 2}" fill="none" stroke="#ff9d5c" stroke-width="2" stroke-dasharray="10 8"/>`);
         svg.push(`<text x="${x + 8}" y="${y + 22}" fill="#ff9d5c" font-family="monospace" font-size="15">${id} refused</text>`);
-      } else {
+      } else if (!planned) {
+        // a planned shore cell with no candidate yet stays sea (the island
+        // picture labels it); a block territory's hole is drawn as a hole
         svg.push(`<rect x="${x}" y="${y}" width="${w}" height="${w}" fill="#141d27"/>`);
         svg.push(`<text x="${x + w / 2}" y="${y + w / 2}" fill="#5c6874" font-family="monospace" font-size="${Math.round(w / 14)}" text-anchor="middle">${id}</text>`);
       }

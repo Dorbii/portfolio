@@ -17,13 +17,19 @@ const LEVEL = Number(arg("--level", 2)), DIR = arg("--dir", ".codex-tmp/session4
 const MARGIN = Number(arg("--margin", 1));
 const SEA = arg("--sea", "31,96,108").split(",").map(Number);
 const CELL = 2048 / 2 ** LEVEL;
+const load = (id) => JSON.parse(fs.readFileSync(`art-source/career-world/l2-land/${id}/territory.def.json`, "utf8"));
+// The coast is drawn first: a sparse block over the whole window whose planned
+// cells are the shore cells in the sea margin; the island's blocks go on top.
+// Its mosaic is optional until its manifest exists.
 const terr = [
-  { id: "ninjaone", tag: "N", ...JSON.parse(fs.readFileSync("art-source/career-world/l2-land/ninjaone/territory.def.json", "utf8")) },
-  { id: "tanium", tag: "T", ...JSON.parse(fs.readFileSync("art-source/career-world/l2-land/tanium/territory.def.json", "utf8")) },
+  { id: "coast", tag: "C", sparse: true, optional: true, ...load("coast") },
+  { id: "ninjaone", tag: "N", ...load("ninjaone") },
+  { id: "tanium", tag: "T", ...load("tanium") },
 ];
+const island = terr.filter((t) => !t.sparse);
 // the island's lattice window (world cols 2..8, rows 1..7), plus the margin
-const X0 = Math.min(...terr.map((t) => t.lattice.block[0])) - MARGIN, Y0 = Math.min(...terr.map((t) => t.lattice.block[1])) - MARGIN;
-const X1 = Math.max(...terr.map((t) => t.lattice.block[0] + t.grid.cols)) + MARGIN, Y1 = Math.max(...terr.map((t) => t.lattice.block[1] + t.grid.rows)) + MARGIN;
+const X0 = Math.min(...island.map((t) => t.lattice.block[0])) - MARGIN, Y0 = Math.min(...island.map((t) => t.lattice.block[1])) - MARGIN;
+const X1 = Math.max(...island.map((t) => t.lattice.block[0] + t.grid.cols)) + MARGIN, Y1 = Math.max(...island.map((t) => t.lattice.block[1] + t.grid.rows)) + MARGIN;
 if (X0 < 0 || Y0 < 0 || X1 > 16 || Y1 > 9) throw new Error(`window ${X0}..${X1} x ${Y0}..${Y1} leaves the 16 x 9 plane`);
 const COLS = X1 - X0, ROWS = Y1 - Y0;
 const W = COLS * CELL, H = ROWS * CELL;
@@ -31,12 +37,16 @@ const comps = [], svg = [];
 const land = new Set();
 for (const t of terr) {
   const file = path.join(DIR, `mosaic-${t.id}-L${LEVEL}.png`);
+  const manFile = `public/career-world/layers/terrain/authority/manifests/terrain-l2-${t.id}-r1.json`;
+  if (t.optional && !(fs.existsSync(file) && fs.existsSync(manFile))) { console.log(`(${t.id}: no mosaic or manifest yet — skipped)`); continue; }
   if (!fs.existsSync(file)) throw new Error(`missing ${file} — run world-mosaic.mjs ${t.id} --level ${LEVEL} --bg ${SEA.join(",")} --out ${file}`);
   const ox = (t.lattice.block[0] - X0) * CELL, oy = (t.lattice.block[1] - Y0) * CELL;
   comps.push({ input: file, left: ox, top: oy });
-  const man = JSON.parse(fs.readFileSync(`public/career-world/layers/terrain/authority/manifests/terrain-l2-${t.id}-r1.json`, "utf8"));
+  const man = JSON.parse(fs.readFileSync(manFile, "utf8"));
+  const planned = t.sparse ? new Set(t.coastCells.map((x) => `c${x.at[0]}-${x.at[1]}`)) : null;
   for (let r = 0; r < t.grid.rows; r += 1) for (let c = 0; c < t.grid.cols; c += 1) {
     const id = `c${c}-${r}`, x = ox + c * CELL, y = oy + r * CELL;
+    if (planned && !planned.has(id)) continue;
     land.add(`${t.lattice.block[0] + c},${t.lattice.block[1] + r}`);
     const authored = Boolean(man.cells[id]);
     svg.push(`<rect x="${x + 0.5}" y="${y + 0.5}" width="${CELL - 1}" height="${CELL - 1}" fill="none" stroke="${authored ? "rgba(255,255,255,0.55)" : "rgba(255,157,92,0.8)"}" stroke-width="1"/>`);
@@ -44,7 +54,7 @@ for (const t of terr) {
     svg.push(`<text x="${x + 10}" y="${y + 20}" fill="${authored ? "#ffffff" : "#ff9d5c"}" font-family="monospace" font-size="15" font-weight="bold">${t.tag} ${id}</text>`);
     svg.push(`<text x="${x + CELL - 6}" y="${y + CELL - 8}" fill="rgba(255,255,255,0.55)" font-family="monospace" font-size="12" text-anchor="end">w${t.lattice.block[0] + c},${t.lattice.block[1] + r}</text>`);
   }
-  svg.push(`<rect x="${ox + 1.5}" y="${oy + 1.5}" width="${t.grid.cols * CELL - 3}" height="${t.grid.rows * CELL - 3}" fill="none" stroke="${t.tag === "N" ? "#7fb3d0" : "#e0b94f"}" stroke-width="3"/>`);
+  if (!t.sparse) svg.push(`<rect x="${ox + 1.5}" y="${oy + 1.5}" width="${t.grid.cols * CELL - 3}" height="${t.grid.rows * CELL - 3}" fill="none" stroke="${t.tag === "N" ? "#7fb3d0" : "#e0b94f"}" stroke-width="3"/>`);
 }
 // --mark "T c1-1=why;N c0-3=why": cells that need the owner, boxed heavily and captioned
 const MARKS = (arg("--mark", "") || "").split(";").filter(Boolean).map((s) => { const [cell, why] = s.split("="); const [tag, id] = cell.trim().split(/\s+/); return { tag, id, why: (why || "").trim() }; });
@@ -65,8 +75,8 @@ for (let r = 0; r < ROWS; r += 1) for (let c = 0; c < COLS; c += 1) {
   svg.push(`<rect x="${x + 0.5}" y="${y + 0.5}" width="${CELL - 1}" height="${CELL - 1}" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1" stroke-dasharray="6 6"/>`);
   svg.push(`<text x="${x + CELL - 6}" y="${y + CELL - 8}" fill="rgba(255,255,255,0.45)" font-family="monospace" font-size="12" text-anchor="end">w${wx},${wy} · open sea</text>`);
 }
-svg.push(`<rect x="8" y="${H - 44}" width="820" height="36" rx="4" fill="rgba(0,0,0,0.65)"/>`);
-svg.push(`<text x="18" y="${H - 20}" fill="#ffffff" font-family="monospace" font-size="16">N = NinjaOne (blue border)   T = Tanium (gold)   orange label = not authored (dashed box = refused candidate shown)   dashed sea cells = open water   wX,Y = world lattice cell</text>`);
+svg.push(`<rect x="8" y="${H - 44}" width="1130" height="36" rx="4" fill="rgba(0,0,0,0.65)"/>`);
+svg.push(`<text x="18" y="${H - 20}" fill="#ffffff" font-family="monospace" font-size="16">N = NinjaOne (blue border)   T = Tanium (gold)   C = coast (shore cells authored in the sea beside the island)   orange label = not authored (dashed box = refused candidate shown)   dashed sea cells = open water   wX,Y = world lattice cell</text>`);
 const out = path.join(DIR, `island-grid-L${LEVEL}.png`);
 await sharp({ create: { width: W, height: H, channels: 4, background: { r: SEA[0], g: SEA[1], b: SEA[2], alpha: 255 } } })
   .composite([...comps, { input: Buffer.from(`<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">${svg.join("")}</svg>`), left: 0, top: 0 }])
