@@ -27,6 +27,17 @@ CELL_OWNER_ACCEPT="owner 2026-09-05 17:20, on the candidate's view with its neig
 git add -A -- art-source/career-world/l2-land/coast "$AUTH" docs/career-world/session3-tools/coast-rejects >/dev/null 2>&1
 git commit -q -m "Coast c8-5: the owner's bulge, stitched on his eye ('cut off at the bottom' — c8-6 follows)" -m "Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>" && say "c8-5 committed"
 
+# owner 2026-09-05 16:55 crop: "the lake cut by a straight line" — c6-2's bay met
+# the new c6-1's land along 44 m. The rebake against the new c6-1 matches that
+# seam to 5 px; refused on c5-2's beck (which the served c6-2 misses too) and
+# vegetation colour 0.254 at that seam. The fix for his crop goes in.
+say "c6-2: the rebake against the new c6-1, stitched on the owner's crop (its north seam now matches)"
+CELL_OWNER_ACCEPT="owner 2026-09-05 16:55, a crop of c6-2's bay cut by a straight line against the new c6-1 among 'these area needs to be fixed'; this rebake against the new c6-1 matches that seam to 5 px; refused only on c5-2's beck (unmet by the served c6-2 as well) and vegetation colour 0.254" \
+  node tools/world-authoring/cell.mjs --territory tanium --cell 6,2 --redo --force \
+  --describe-file art-source/career-world/l2-land/tanium/briefs/c6-2.md 2>&1 | grep -E "OVERRIDE|FAIL|accepted, stitched|NOT accepted" | head -6
+git add -A -- art-source/career-world/l2-land/tanium "$AUTH" docs/career-world/session3-tools/tanium-rejects >/dev/null 2>&1
+git commit -q -m "Tanium c6-2: the rebake against the new c6-1 stitched on the owner's crop (the bay now meets c6-1's water)" -m "Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>" && say "c6-2 committed"
+
 say "c4-0 with the border seen (18h); then c2-1 with the chain as a groove, not a wall"
 node art-source/career-world/l2-land/tanium/briefs/write-briefs.mjs >/dev/null 2>&1
 node docs/career-world/session3-tools/bake-tanium.mjs --only c4-0
@@ -38,6 +49,8 @@ node docs/career-world/session3-tools/coast-briefs.mjs >/dev/null 2>&1
 git add -A -- art-source/career-world/l2-land/coast/briefs art-source/career-world/l2-land/tanium/briefs >/dev/null 2>&1
 git commit -q -m "Briefs refreshed before the misses run" -m "Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>" >/dev/null 2>&1
 node docs/career-world/session3-tools/bake-tanium.mjs --territory coast --only c7-4,c8-7,c1-2,c4-8,c7-0,c1-3,c7-8,c8-6
+say "conform pass: shore candidates refused on water continuity alone, drift within 12 m, mask only"
+node docs/career-world/session3-tools/conform-pass.mjs --max 12 2>&1 | tail -12
 say "serve"
 bash .codex-tmp/session4/serve.sh 2>&1 | grep -E "^\[|committed"
 say "misses done"
