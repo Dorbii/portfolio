@@ -1215,31 +1215,31 @@
    }
   },
   "c6-1": {
-   "authoredAt": "2026-09-04T19:04:12.880Z",
-   "describe": "THE LINKED COLONNADE — Tanium's one wonder, and the whole reason this cell\nexists. Draw the arcade first and fit everything else around it.\n\n**What it is, in shapes:** a run of basalt columns along the east coast that have\nALL TOPPLED THE SAME WAY and come to rest against each other, so that each\ncolumn leans on the next and their tops meet. Between every neighbouring pair\nthat leaves a TRIANGULAR",
+   "authoredAt": "2026-09-05T01:39:49.263Z",
+   "describe": "THE CHAIN'S SEAWARD END — the east coast, where the rune chain leaves the\nworld. Wild coast: the EAST edge is sea.\n\nA cliff-top bench of thin grass and bare rock runs the height of the cell,\n30-50 m wide, quiet and plain: nothing on it competes with the chain. Below\nit, weathered columnar sea-cliffs 25-40 m tall — columns of uneven height and\nwidth, tops broken at different levels, split and leani",
    "sourcePx": 1254,
    "gates": [
     {
      "name": "key-light asymmetry",
-     "value": 0.0032,
+     "value": 0.0014,
      "pass": true,
      "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004"
     },
     {
      "name": "gradient ratio",
-     "value": "1.511 (reported)",
+     "value": "1.586 (reported)",
      "pass": true,
      "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
     },
     {
      "name": "rock lighting",
-     "value": 0.082,
+     "value": 0.097,
      "pass": true,
      "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.14; limit 0.16 on the owner's eye (2026-09-02, the dark-forest gorge at 0.153)"
     },
     {
      "name": "land coverage",
-     "value": "65.9%",
+     "value": "78%",
      "pass": true
     },
     {
@@ -1250,19 +1250,19 @@
     },
     {
      "name": "mask completion",
-     "value": "+103 px grown, 0 px holes filled (reported)",
+     "value": "+62 px grown, 1 px holes filled (reported)",
      "pass": true,
      "note": "the delivered mask grown into contiguous painted water within 48 px and speckle holes <=64 px filled before the cut (owner 2026-09-02); dry paint stops the growth, so a polyline mask still fails the rings"
     },
     {
      "name": "water fringe",
-     "value": "0.44%",
+     "value": "0.08%",
      "pass": true,
      "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
     },
     {
      "name": "water fringe (48px)",
-     "value": "0.2%",
+     "value": "0.01%",
      "pass": true,
      "note": "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)"
     },
@@ -1274,13 +1274,13 @@
     },
     {
      "name": "palette conformance",
-     "value": "veg worst dBG 0.075 dLuma 4.9 over 2 seam(s); tone worst dLuma 4.5 on all land over 2 seam(s)",
+     "value": "veg worst dBG 0.142 dLuma 9.2 over 2 seam(s); tone worst dLuma 6.2 on all land over 2 seam(s)",
      "pass": true,
      "note": "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13"
     },
     {
      "name": "crown scale",
-     "value": "3.136 m over 31 crowns (accepted range 1.7-5.2 m)",
+     "value": "3.136 m over 24 crowns (accepted range 1.7-5.2 m)",
      "pass": true,
      "note": "the worker's own median crown from c6-1-report.json, against the 1.7-5.2 m range the accepted cells measured (NOT the plan's written 4-7 m — see CROWN_MIN_M); crown.excludedElements must be empty, so an out-of-scale element cannot be measured around"
     }
@@ -1293,10 +1293,10 @@
     "coast"
    ],
    "maskCompletion": {
-    "grownPx": 103,
-    "holePx": 0
+    "grownPx": 62,
+    "holePx": 1
    },
-   "biome": "linked-colonnade",
+   "biome": "coast-cliff",
    "source": "art-source/career-world/l2-land/tanium/c6-1",
    "stitch": {
     "order": 13,
