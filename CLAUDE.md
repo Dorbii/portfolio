@@ -24,3 +24,15 @@
   Numbers alone mislead: six cells were once refused on a "palette" gate reading
   `dBG 0.011-0.049` with `dLuma 14-56`, which is a lighting fault wearing a
   palette gate's name, and only the picture said so.
+- **Ask the owner with the island picture, not a list of cell ids.** Owner,
+  2026-09-04: *"that red box grid picture was perfect for me reviewing the ask
+  ... keep doing that."* Anything that needs his call — a ruling, a choice
+  between fixes, cells to accept — goes out as
+  `node docs/career-world/session3-tools/island-grid.mjs --level 2 --margin 1
+  --mark "T c1-1=why;N c0-3=why"` (after `world-mosaic.mjs <territory>
+  --level 2 --bg 31,96,108 --out .codex-tmp/session4/island/mosaic-<territory>-L2.png`
+  for each territory), sent as the JPEG it writes: every cell labelled, the
+  sea drawn as sea, and each cell that needs him boxed in red with the
+  question under it. He marks it up and sends crops back; the punch list
+  (`docs/career-world/PUNCH-LIST-2026-09-04.md`) shows how a crop becomes a
+  fix.

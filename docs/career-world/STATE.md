@@ -768,17 +768,20 @@ Not yet served: registration of the coast pyramid is a later step (the
 owner reviews on the mosaic; `island-grid.mjs --margin 1` draws the island
 with its sea margin).
 
-## TWO SEAMS THAT NEED THE OWNER
+## THE OWNER'S RULINGS ON THE FOUR CELLS THAT WAITED (00:40)
 
-- **The sound edge between the territories.** N c0-3 and c1-3 end
-  mid-ground on their south edges (the old grid-edge rule) while T c1-0 and
-  c2-0 open into the sound as ruled. No sea cell lies between them. Either a
-  NinjaOne rebake of those two south edges (replacing accepted art) or
-  leaving it.
-- **T c3-2's south edge.** The lowest bench ends in a straight line against
-  the sea; the only cell to extend into is row 8, which the owner ruled
-  stays sea so the island reads as an island. A shore cell there would hold
-  only a coast foot and open water.
+- **N c1-3** — *"This one is fine."* Untouched.
+- **N c0-3** — *"just expand to the side."* A shore cell in the sea west
+  of it: coast c1-4 (world 2,4), which also meets T c0-0 below. Queued.
+- **T c3-2** — *"expand this one."* A shore cell in row 8 below it: coast
+  c4-8 (world 5,8), the one exception to row 8 staying sea. Queued.
+- **T c1-1** — *"regen this one."* Queued through the review loop after the
+  coast cells. The key-light gate is unchanged, so a seventh refusal is
+  likely; if so, the best candidate goes to the owner for an accept-on-eye
+  call rather than an eighth roll.
+
+Eleven coast cells in all: c2-0..c6-0 (NinjaOne's north), c1-1, c1-2, c1-4
+(its west), c7-1 (its east), c0-6 (Tanium's west), c4-8 (Tanium's south).
 
 ## RESULTS — the six-cell run (c3-1 on gpt-5.6-sol; the rest on gpt-6-astra)
 
