@@ -4,7 +4,25 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-05 10:00 UTC, LATEST (current):** **THE WHOLE COAST IS PLANNED;
+**2026-09-05 10:50 UTC, LATEST (current):** **THE WATER REFACTOR IS IN THE
+LANE.** Owner: *"could you merge in the water work from the codex layer."*
+The Codex session's refactor (`codex/water-pyramid-refactor`, its record
+`docs/career-world/WATER-REFACTOR.md`) replaces the old `layers/ocean` and
+`layers/inland-water` with one `layers/water` owner and adds `layers/lighting`;
+its water fields are derived from the SERVED land, and the runtime now reads
+`terrain-local-mount-r1.json` — the release feed plus four review candidates
+snapshotted from this worktree's `.codex-tmp` (Tanium c1-1, c2-1, c3-1, c4-0;
+"preview snapshots, not authoring acceptance"). It came in as a binary patch
+of that worktree's uncommitted tree (committing there was not permitted);
+that branch stays uncommitted. **After every `world-register.mjs` run, two
+more steps keep the runtime honest: `npm run build:land-mount` then
+`npm run build:water`** (25 s) — the mount records the feed's bytes and the
+fields record the mount's. Typecheck clean; suite 106 pass / 4 fail (the four
+pre-existing) / 1 skipped. The two runtime files the ocean session owns
+(`WorldScene.tsx`, `layers.ts`) changed by that patch, not by this lane.
+Everything below about the coast still stands.
+
+**2026-09-05 10:00 UTC, superseded:** **THE WHOLE COAST IS PLANNED;
 THE MODEL PLACES SHORELINES BY PIXELS, NOT WORDS; TWO PROPOSALS WAIT.** The
 owner at 07:30: *"we need it so the coast is cohesive not constantly have
 this edge issue"* with five outlined crops. `coast-audit.mjs` (new) then
