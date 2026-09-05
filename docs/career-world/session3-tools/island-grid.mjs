@@ -12,6 +12,7 @@ import path from "node:path";
 import sharp from "sharp";
 sharp.cache(false);
 const arg = (f, d) => { const i = process.argv.indexOf(f); return i >= 0 ? process.argv[i + 1] : d; };
+const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const LEVEL = Number(arg("--level", 2)), DIR = arg("--dir", ".codex-tmp/session4/island");
 const MARGIN = Number(arg("--margin", 1));
 const SEA = arg("--sea", "31,96,108").split(",").map(Number);
@@ -44,6 +45,17 @@ for (const t of terr) {
     svg.push(`<text x="${x + CELL - 6}" y="${y + CELL - 8}" fill="rgba(255,255,255,0.55)" font-family="monospace" font-size="12" text-anchor="end">w${t.lattice.block[0] + c},${t.lattice.block[1] + r}</text>`);
   }
   svg.push(`<rect x="${ox + 1.5}" y="${oy + 1.5}" width="${t.grid.cols * CELL - 3}" height="${t.grid.rows * CELL - 3}" fill="none" stroke="${t.tag === "N" ? "#7fb3d0" : "#e0b94f"}" stroke-width="3"/>`);
+}
+// --mark "T c1-1=why;N c0-3=why": cells that need the owner, boxed heavily and captioned
+const MARKS = (arg("--mark", "") || "").split(";").filter(Boolean).map((s) => { const [cell, why] = s.split("="); const [tag, id] = cell.trim().split(/\s+/); return { tag, id, why: (why || "").trim() }; });
+for (const m of MARKS) {
+  const t = terr.find((x) => x.tag === m.tag); if (!t) continue;
+  const [c, r] = m.id.slice(1).split("-").map(Number);
+  const x = (t.lattice.block[0] - X0 + c) * CELL, y = (t.lattice.block[1] - Y0 + r) * CELL;
+  svg.push(`<rect x="${x + 4}" y="${y + 4}" width="${CELL - 8}" height="${CELL - 8}" fill="rgba(255,60,40,0.10)" stroke="#ff3c28" stroke-width="7"/>`);
+  svg.push(`<rect x="${x + 10}" y="${y + CELL - 62}" width="${CELL - 20}" height="50" rx="4" fill="rgba(0,0,0,0.75)"/>`);
+  svg.push(`<text x="${x + CELL / 2}" y="${y + CELL - 40}" fill="#ff6a5a" font-family="monospace" font-size="20" font-weight="bold" text-anchor="middle">${esc(`${m.tag} ${m.id}`)} · needs you</text>`);
+  svg.push(`<text x="${x + CELL / 2}" y="${y + CELL - 18}" fill="#ffffff" font-family="monospace" font-size="16" text-anchor="middle">${esc(m.why)}</text>`);
 }
 // the sea cells: lattice grid and a quiet label, so the margin reads as world, not padding
 for (let r = 0; r < ROWS; r += 1) for (let c = 0; c < COLS; c += 1) {
