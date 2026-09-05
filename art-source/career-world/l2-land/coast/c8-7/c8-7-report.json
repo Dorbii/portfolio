@@ -1,0 +1,116 @@
+{
+  "cell": "c8-7",
+  "territory": "coast",
+  "biome": "shore",
+  "status": "quarantine_candidate_failed_hard_constraints",
+  "generationSizePx": [1254, 1254],
+  "generation": {
+    "filename": "c8-7-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "754DAE611E99DC25E2F7DF19CE0FBC92E629ACCC0A3E3FBBD8501D7F06CE0463",
+    "mode": "single built-in ImageGen edit with the edit target as Image 1 and the style canon as reference-only Image 2",
+    "imageGenCallsUsed": 1,
+    "retryUsed": false,
+    "secondReferenceAccepted": true,
+    "bothImagesAttachedToSameCall": true,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "byteIdenticalToGeneratedOutput": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "promptRecord": "c8-7-imagegen-prompt-used.txt"
+  },
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by the uniform-bin mean on the delivered source; final water-mask pixels and gradients below 12 luminance units excluded.",
+    "peakVsUniformOverLand": 1.621393,
+    "uniformReference": 1.0,
+    "peakBinDegrees": [220, 230],
+    "directionalKeyFirstMoment": 0.002401,
+    "gradientSamples": 597938,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No whole-cell sun gradient or cast-shadow field is visible, but the basalt top planes are repeatedly much paler than the vertical faces. The literal equal-value lighting rule is not met."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "Manual estimated fraction of non-water terrain at native source resolution.",
+    "buildable": 0.56,
+    "steep": 0.26,
+    "otherTalusBrokenRockOrVegetation": 0.18,
+    "canvasFractions": {
+      "buildable": 0.239424006,
+      "steep": 0.111161146,
+      "otherTerrain": 0.076957716
+    },
+    "method": "Broad coherent cliff-top quarry benches count as buildable; exposed column faces and abrupt cliff banks count as steep; talus, broken margins, sparse vegetation, and the skerry make up the remainder. Approximate uncertainty is plus or minus 0.08 per land-relative fraction."
+  },
+  "waterFootprintFraction": 0.572457132,
+  "finalDerivedLandCoverageFraction": 0.427542868,
+  "crown": {
+    "medianMetres": 2.156,
+    "medianPx": 44.912,
+    "sampleCount": 5,
+    "method": "Full visual census of all five conifer crowns, including the small sapling, with pixel-ruler outer-foliage widths of 22, 9, 23, 20, and 29 source pixels; the 22 px median was scaled by 2560/1254 and converted at 4.8 cm/px.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c8-7-water-source.png",
+    "classification": "c8-7-water.json",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "D658B4CBFA9AB1A6B601BC11ABACD9F7686242D1CFE96DEB6AC211F4934C2456",
+    "encoding": "Opaque white water pixels on fully transparent non-water pixels; binary alpha.",
+    "opaqueWaterPixels": 900198,
+    "transparentTerrainPixels": 672318,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedWaterComponents8Connected": 1,
+    "filledEnclosedPinholeComponents": 211,
+    "removedDisconnectedWaterSpeckComponents": 2,
+    "edgeWaterPixels": {
+      "north": 1254,
+      "east": 1254,
+      "south": 1119,
+      "west": 99
+    },
+    "method": "Classified edge-connected teal and blue source pixels, expanded through adjacent pale surf, wash, reflections, ripple highlights, and water gaps between shore rocks, closed 211 tiny enclosed classifier pinholes, retained the visibly dry skerry and shoreline rocks, removed two disconnected false-wet specks, and inspected the full-source overlay."
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasEdit": true,
+    "secondReferenceAttached": true,
+    "rawGenerationUntouched": true,
+    "terrainOnlyNoStructures": true,
+    "highOblique2_5D": true,
+    "waterMaskSameDimensionsBinaryAndOverlayInspected": true,
+    "waterMaskOneConnectedCoastalComponent": true,
+    "crownObjectComplete": true,
+    "crownCensusIncludesAllFoundCrowns": true,
+    "crownMedianInsideAcceptedTerritoryBand": true,
+    "strictEqualValueOnAllRockFaces": false,
+    "weatheredIrregularColumnsWithoutDefaultRegularity": false,
+    "treesOnlyWhereNeighbourPaintArrives": false,
+    "rawNorthEastSouthEdgesSeaOnly": false,
+    "greyWindowTransitionsBackToSeaBeforeItsSeawardBoundary": false
+  },
+  "refusalReasons": [
+    "Repeated pale basalt caps over distinctly darker vertical faces violate the literal flat-lighting rule even though there is no whole-cell sun gradient or cast-shadow field.",
+    "Long cliff runs read as upright columns with repeated widths, spacing, and cap rhythm rather than consistently broken, split, leaning, irregular coastal basalt.",
+    "The single edit introduced five conifers across the repainted headland instead of limiting trees to crowns visibly arriving from the island paint.",
+    "The raw edit repainted land through the southern and lower-western frame even though those reaches are sea; the documented downstream stitch is expected to restore protected neighbour pixels, but that stitch was not run or verified here.",
+    "Visual inspection indicates the generated land remains present through the seaward boundary of the supplied grey window instead of transitioning fully back to matching sea inside the window, so the stitch is likely to expose a hard land-to-sea cutoff."
+  ],
+  "openRisks": [
+    "The water mask mechanically and visually tracks the delivered raw source; it does not correct noncompliant source terrain topology.",
+    "Buildable and steep fractions and crown widths are screen-space image measurements rather than surveyed geometry.",
+    "The square result did not qualify for the framing-only retry, so no second ImageGen call was made.",
+    "No artifact was promoted outside quarantine; visual judgment remains with the owner and director."
+  ],
+  "evidence": [
+    "diagnostics/c8-7-measurements.json",
+    "diagnostics/c8-7-water-overlay.png",
+    "diagnostics/c8-7-crown-census.json",
+    "diagnostics/c8-7-crown-census.png"
+  ]
+}
