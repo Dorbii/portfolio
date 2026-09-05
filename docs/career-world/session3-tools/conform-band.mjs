@@ -145,17 +145,22 @@ for (const [edge, dx, dy] of EDGES) {
     // it lies within 46 m of the seam (a coast drawn at 40 m must not lose
     // its cliff faces to the limit); only land carried further than that — a
     // plateau across the cell — is trimmed at the wandering limit
+    // an isolated headland (sea at both ends) is no deeper than four fifths
+    // of its width, and its two roundings may meet in the middle; a stretch
+    // that runs on past a cove keeps its depth and rounds only a third
+    const isolated = taperA && taperB, width = b - a + 1;
+    const widthCap = isolated ? Math.round(0.8 * width) : Infinity;
     const base = [];
     for (let i = a; i <= b; i += 1) {
       const last = extent(i);
-      base.push(last <= SLACK ? last + 1 : D_MIN + (D_MAX - D_MIN) * Math.max(0, Math.min(1, wav[i])));
+      base.push(Math.min(widthCap, last <= SLACK ? last + 1 : D_MIN + (D_MAX - D_MIN) * Math.max(0, Math.min(1, wav[i]))));
     }
     // the rounding at an end against the sea is a quarter-ellipse whose
     // length along the edge is four fifths of the limit's depth there (a
-    // headland as round as it is deep, not a flat wedge), never more than a
-    // third of the stretch and never less than 10 m
-    const rA = taperA ? Math.min(Math.max(TAPER, Math.round(0.8 * base[0])), Math.round((b - a + 1) / 3)) : 0;
-    const rB = taperB ? Math.min(Math.max(TAPER, Math.round(0.8 * base[base.length - 1])), Math.round((b - a + 1) / 3)) : 0;
+    // headland as round as it is deep, not a flat wedge), never less than 10 m
+    const rCap = Math.round(width / (isolated ? 2 : 3));
+    const rA = taperA ? Math.min(Math.max(TAPER, Math.round(0.8 * base[0])), rCap) : 0;
+    const rB = taperB ? Math.min(Math.max(TAPER, Math.round(0.8 * base[base.length - 1])), rCap) : 0;
     for (let i = a; i <= b; i += 1) {
       let d = base[i - a];
       if (rA > 0 && i - a < rA) { const u = (rA - (i - a) - 1) / rA; d *= Math.sqrt(Math.max(0, 1 - u * u)); }
