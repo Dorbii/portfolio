@@ -137,7 +137,8 @@ for (const [edge, dx, dy] of EDGES) {
     // an end faces the sea when the run beside it is the sea, or when the
     // next ground along the edge is more than 15 m away (a cove and then
     // open sea: the land beyond the cove is a headland too)
-    const nextGround = stretches.find(([p]) => p > b), prevGround = [...stretches].reverse().find(([, q]) => q < a);
+    const solid = stretches.filter(([p, q]) => q - p + 1 >= px(5));   // a sliver under 5 m is not ground to run on to
+    const nextGround = solid.find(([p]) => p > b), prevGround = [...solid].reverse().find(([, q]) => q < a);
     const taperA = a > 0 && (seaAt(a - 1) || !prevGround || a - prevGround[1] > px(15));
     const taperB = b < KEPT - 1 && (seaAt(b + 1) || !nextGround || nextGround[0] - b > px(15));
     // the limit before rounding: the candidate's own coast is kept whole when
