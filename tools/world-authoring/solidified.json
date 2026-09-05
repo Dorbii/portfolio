@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-05T19:30:43.530Z",
+ "solidifiedAt": "2026-09-05T21:35:57.940Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "9fa45296c5e99d43",
+  "cell.mjs": "616ef7059d95f3cf",
   "plan-territory.mjs": "e8d86a90b2e32796",
   "AGENTS.md": "a1ab4eaec1d4c6ac"
  },
@@ -489,6 +489,15 @@
    "reason": "owner 2026-09-05 19:20 UTC: 'sorry proceed' — in reply to the ask 'Say yes to all three or name the ones you want' on proposals 18i-b (sea texture: the pre-fill tiles a real sea patch), 18j (key-light report-only under 5% land), 18k (wet runs split by a gap under 30 px are one run); all three applied",
    "hashes": {
     "cell.mjs": "9fa45296c5e99d43",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-05T21:35:57.941Z",
+   "reason": "owner 2026-09-05 21:40 UTC, on the 18m preview (T c4-1's edit target with the groove's floor drawn from c3-1's groove to c5-1's): '18m is fine the line sjust need to connect' — lock 18m applied: a cell the rune chain crosses carries the groove's floor in its edit target, its ends read off the authored neighbours' own grooves, the canon between them shifted; FINAL and exact in the packet",
+   "hashes": {
+    "cell.mjs": "616ef7059d95f3cf",
     "plan-territory.mjs": "e8d86a90b2e32796",
     "AGENTS.md": "a1ab4eaec1d4c6ac"
    }

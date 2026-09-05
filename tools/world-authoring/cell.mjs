@@ -771,6 +771,7 @@ fs.mkdirSync(cellDir, { recursive: true });
 // feature to continue, not a transparent hole — plus an ownership map showing
 // which pixels are binding (the stitch preserves them regardless of the draw)
 let seaPrefilled = 0;   // px of the island's sea painted on into the target (18i)
+let chainPrefilled = 0; // px of the rune chain's floor drawn into the target (18m)
 if (authoredNeighbours.length) {
   const win = windowOf(col, row, gridW, gridH);
   const ctxDir = path.join(cellDir, "context");
@@ -987,6 +988,87 @@ if (authoredNeighbours.length) {
         console.log(`  sea pre-fill  ${seaPrefilled} px of the island's sea painted on (${seaSeams} seam(s), ${seaPatch ? `a ${seaPatch.size} px sea patch tiled` : `swatch ${swatch.length}, averaged`}); grey left only within 40 m of arriving ground`);
       }
     }
+    // CHAIN PRE-FILL (18m, 2026-09-05): a cell the rune chain crosses carries
+    // the groove's floor as a dark line along the territory's route, so the
+    // line meets its neighbours exactly; the model cuts the slot around it.
+    {
+      const defFile = `art-source/career-world/l2-land/${plan.territory}/territory.def.json`;
+      const rc = fs.existsSync(defFile) ? JSON.parse(fs.readFileSync(defFile, "utf8")).runeChain : null;
+      const W = rc?.waypoints;
+      if (W && W.length > 1) {
+        const yAt = (x) => {
+          for (let i = 1; i < W.length; i += 1) {
+            const a = W[i - 1], b = W[i];
+            if (a[0] === b[0] || (a[0] - x) * (b[0] - x) > 0) continue;
+            const t = (x - a[0]) / (b[0] - a[0]);
+            if (t < 0 || t > 1) continue;
+            return a[1] + t * (b[1] - a[1]);
+          }
+          return null;
+        };
+        let yIn = yAt(col), yOut = yAt(col + 1);
+        if (yIn != null && yOut != null && (Math.floor(yIn) === row || Math.floor(yOut) === row)) {
+          // where the chain actually arrives: the authored neighbour's own groove
+          const chainAt = async (nb, facing, canonY) => {
+            const nRaw = await rawOf(srcFileFor(paths, nb.id, "l2"));
+            const NW = nRaw.info?.width || GEN_PX, nbBleed = Math.round((NW - CELL_PX) / 2);
+            const xs = facing === "west" ? [nbBleed + 4, nbBleed + 100] : [nbBleed + CELL_PX - 100, nbBleed + CELL_PX - 4];
+            const y0 = Math.round(nbBleed + (canonY - 0.12) * CELL_PX), y1 = Math.round(nbBleed + (canonY + 0.12) * CELL_PX);
+            const rows = []; let landRows = 0;
+            for (let y = y0; y < y1; y += 1) {
+              const v = [];
+              for (let x = xs[0]; x < xs[1]; x += 2) { const o = (y * NW + x) * 4; if (nRaw.data[o + 3] < 200) continue; v.push(0.2126 * nRaw.data[o] + 0.7152 * nRaw.data[o + 1] + 0.0722 * nRaw.data[o + 2]); }
+              v.sort((p, q) => p - q); if (v.length) landRows += 1; rows.push(v.length ? v[v.length >> 1] : null);
+            }
+            if (landRows < rows.length / 2) return null;
+            const med = rows.filter((r) => r != null).sort((p, q) => p - q)[landRows >> 1];
+            const runs = []; let s = -1;
+            for (let i = 0; i <= rows.length; i += 1) {
+              const dark = i < rows.length && rows[i] != null && rows[i] < med - 18;
+              if (dark && s < 0) s = i;
+              if (!dark && s >= 0) { const tall = (i - s) * (97.6 / CELL_PX); if (tall >= 0.3 && tall <= 3) { let mn = 999; for (let k = s; k < i; k += 1) mn = Math.min(mn, rows[k]); runs.push({ c: (y0 + (s + i) / 2 - nbBleed) / CELL_PX, depth: med - mn }); } s = -1; }
+            }
+            runs.sort((p, q) => q.depth - p.depth);
+            return runs.length && runs[0].depth >= 25 ? runs[0].c : null;
+          };
+          const west = authoredNeighbours.find((n) => n.cell[0] === col - 1 && n.cell[1] === row && !n.outside);
+          const east = authoredNeighbours.find((n) => n.cell[0] === col + 1 && n.cell[1] === row && !n.outside);
+          const wIn = west ? await chainAt(west, "east", yIn - row) : null, wOut = east ? await chainAt(east, "west", yOut - row) : null;
+          const dIn = wIn != null ? wIn + row - yIn : 0, dOut = wOut != null ? wOut + row - yOut : 0;
+          if (wIn != null) yIn = wIn + row;
+          if (wOut != null) yOut = wOut + row;
+          const shift = (wx) => dIn + (dOut - dIn) * Math.max(0, Math.min(1, wx - col));   // the canon shape, shifted linearly between the two ends
+          const isGreyPx = (o) => target[o] === EDIT_GREY[0] && target[o + 1] === EDIT_GREY[1] && target[o + 2] === EDIT_GREY[2];
+          const HALF = Math.round(0.6 / (97.6 / CELL_PX));   // half of a 1.2 m floor
+          const FLOOR = [38, 36, 33];                          // the slot's floor in shade
+          const toX = (wx) => BLEED + (wx - col) * CELL_PX, toY = (wy) => BLEED + (wy - row) * CELL_PX;
+          // the route through this cell's window, the bleed included
+          const pts = [];
+          const x0 = col - BLEED / CELL_PX, x1 = col + 1 + BLEED / CELL_PX;
+          for (let k = 0; k <= 64; k += 1) {
+            const wx = x0 + (x1 - x0) * k / 64, wy = yAt(wx);
+            if (wy != null) pts.push([toX(wx), toY(wy + shift(wx))]);
+          }
+          for (let i = 1; i < pts.length; i += 1) {
+            const [ax, ay] = pts[i - 1], [bx, by] = pts[i];
+            const steps = Math.ceil(Math.hypot(bx - ax, by - ay));
+            for (let s = 0; s <= steps; s += 1) {
+              const cx = ax + (bx - ax) * s / steps, cy = ay + (by - ay) * s / steps;
+              for (let dy = -HALF; dy <= HALF; dy += 1) for (let dx = -HALF; dx <= HALF; dx += 1) {
+                if (dx * dx + dy * dy > HALF * HALF) continue;
+                const x = Math.round(cx + dx), y = Math.round(cy + dy);
+                if (x < 0 || y < 0 || x >= GEN_PX || y >= GEN_PX) continue;
+                const o = (y * GEN_PX + x) * 4;
+                if (!isGreyPx(o)) continue;
+                target[o] = FLOOR[0]; target[o + 1] = FLOOR[1]; target[o + 2] = FLOOR[2];
+                chainPrefilled += 1;
+              }
+            }
+          }
+          if (chainPrefilled) console.log(`  chain pre-fill ${chainPrefilled} px: the groove's floor drawn along the route, ${Math.round((yIn - row) * 100)}% down the west edge to ${Math.round((yOut - row) * 100)}% down the east`);
+        }
+      }
+    }
     // tone ramp (owner 2026-09-02, "need a better transition"): the Transitions
     // words did not place the biome change inside the cell — the model changed
     // tone at the line. So the transition is given as pixels: along each
@@ -1183,7 +1265,11 @@ grey wherever this cell is still unpainted.${seaPrefilled ? ` THE SEA ALREADY PA
 most of this canvas is the island's own sea, continued into this cell: it is
 FINAL. Do not paint land, rock, beach or stacks on it. Paint ONLY the flat
 grey strips — they are where the island's ground continues into this cell and
-ends at its shore — and keep every painted sea pixel as sea.` : ""} \`${canonPath}\` is the
+ends at its shore — and keep every painted sea pixel as sea.` : ""}${chainPrefilled ? ` THE RUNE CHAIN'S FLOOR is
+already drawn: the thin dark line crossing the canvas from edge to edge is the
+groove's floor, FINAL and exact. Cut the slot's two walls and its rounded,
+paler rims along that line, on both sides of it; never move it, bend it, break
+it, widen it into a path, or paint ground, water or trees over it.` : ""} \`${canonPath}\` is the
 style canon of this world. Load both with the built-in \`view_image\` tool,
 then make ONE \`image_gen\` call in EDIT mode with BOTH images attached — the
 edit target as the image to edit, the canon as a second input that is a
