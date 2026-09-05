@@ -4,7 +4,58 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-05 18:45 UTC, LATEST (current):** **LOCKS 18h AND 18i ARE IN AND
+**2026-09-05 19:55 UTC, LATEST (current):** **THE OWNER'S ELEVEN CROPS OF
+THE LIVE WORLD; LOCKS 18i-b, 18j, 18k IN; THE COAST RUN IS BAKING; THE CHAIN
+WAITS ON 18m.** Owner 19:20, eleven crops of the live server with five notes,
+then *"sorry proceed"* (in reply to "yes to all three releases the held coast
+run") → cell.mjs locks **18i-b** (the sea pre-fill tiles a real sea patch from
+a neighbour's concept, mirror repeats), **18j** (key-light report-only under
+5% land), **18k** (wet runs split by a gap under 30 px are one run), recorded
+with his words; commit 4f7b1f81. **His crops, located on the L1 composite
+(`.codex-tmp/session4/view.mjs c,r` and `region.mjs` draw labelled views):**
+*"natural stone overpass … as it is a nogo"* = **T c4-1** (the bare-plateau
+canon cell: its groove leaves the west edge 25% down where c3-1's wall arrives
+52% down, its east 40% where c5-1's begins 50% — the chain steps at both
+seams); *"not a coastline, the seam just cuts off"* = **C c6-8**'s candidate
+(a plateau to the south edge, cliff wall cut by the world's edge) and the
+**C c6-8/c7-8** channel; *"too dark and obvious seam"* = **T c1-2** (its east
+seam against c2-2's meadow, and c1-1 the same); *"slight misalignments"* =
+the chain at c2-1's candidate vs c3-1 (~5%); *"more alignment issues and
+coast issues"* = **N c4-0's bay cut by a straight line at c7-1** (the
+candidate had skerries only), **N c4-1's peninsula cut at c7-2**, **the strip
+of dark water along the N c4-2/c7-3 seam** (the candidate painted a coast
+over the island's sea), **c7-1(sea)/c7-2(land)** cut, **c1-0's empty slot**
+over c1-1, **c8-5/c8-6**. **Running now (`.codex-tmp/session4/misses.sh`, log
+`misses.log`, released 19:43Z):** the coast in two waves on the new locks with
+the owner's notes in the briefs (coast-briefs.mjs NOTES: c6-8 a shore not a
+plateau, c7-1 continues N c4-0's bay, c7-2 the peninsula, c7-3 the sea at the
+seam, c7-0's cut) — wave 1 c7-0, c7-2, c7-4, c8-6, c6-8, c4-8, c1-0, c1-2,
+c1-8; wave 2 c7-1, c7-3, c8-7, c7-8, c1-3, c2-8; then conform-pass, then
+serve.sh (which commits). **T c1-2's attempt at the head of the run was
+SKIPPED** — the runner skips an authored cell without `--force c1-2`; it
+joins the chain run. **Proposed, not applied — needs his word: 18m** (the
+rune chain's floor drawn into the edit target along the def's runeChain
+waypoints, 1.2 m wide, FINAL; `.codex-tmp/session4/proposals/chain-prefill.apply.mjs`,
+tracked copy under session3-tools/proposals/); on his yes: apply, approve,
+then `bake-tanium.mjs --only c4-1,c2-1,c1-1,c1-2 --force c4-1,c1-2` after
+the coast run releases the lock, then serve. **Briefs:** T c1-2 and c1-1
+carry "the seams must not show" (his words); c4-1's stays the canon plateau
+(the wind-arch is the "overpass" he likes) — rewrite it before the chain run
+so its benches do not end at a cell edge. **A reviewer agent** (Claude,
+background) is auditing every seam of the composite numerically and by eye →
+`.codex-tmp/session4/review/drifts.md`; the owner's "astra reviewer on high"
+is the pipeline's own model (bake-tanium `--model astra --effort high`,
+REVIEW_MODEL) — run one Codex review job if the agent's list is thin. **The
+stitch tests are stale since 18d** (edit-target.jpg; `tests/world-authoring-stitch.test.mjs`
+still expects .png; 4-5 failures, none from today's locks) — fix the test file
+when no bake holds the lock. **Asked of the owner (picture sent 19:55):** 18m
+yes/no; accepts for T c4-0, C c3-0, C c0-6, C c1-4. Tanium 18 of 21 (open
+c1-1, c2-1, c4-0), coast 7 of 27 (+15 baking), N 20 of 20. **RESUME:** read
+`misses.log`; if the run has finished, view every landing and candidate
+with view.mjs/crops.mjs and send the owner the views; then the chain run on
+his 18m word.
+
+**2026-09-05 18:45 UTC:** **LOCKS 18h AND 18i ARE IN AND
 BOTH WORK; THREE SMALL REFINEMENTS WAIT ON THE OWNER; THE COAST RUN IS HELD
 FOR THEM.** Owner 17:10: *"sure go for it"* → cell.mjs locks **18h** (the
 cell across a territory border in the edit target and the seam gates) and
