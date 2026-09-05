@@ -225,25 +225,26 @@ test("frontier cell stitches aligned, bleeds one ring, and removes water", async
   }
 });
 
-test("edit target carries the neighbour's concept paint byte-exact and grey elsewhere", async () => {
+const near = (got, want, what, tol = 6) => { for (let c = 0; c < 3; c += 1) assert.ok(Math.abs(got[c] - want[c]) <= tol, `${what}: got ${got}, expected ${want} (±${tol})`); };
+test("edit target carries the neighbour's concept paint (JPEG-close since lock 18d) and grey elsewhere", async () => {
   // c1-1 is authored; a dry run for its east neighbour must build the target
   const log = execFileSync(process.execPath, [SCRIPT, "--territory", "ninjaone", "--cell", "2,1", "--dry-run"],
     { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" });
   assert.match(log, /edit target/);
-  const f = path.join(WORKT, "c2-1", "context", "edit-target.png");
+  const f = path.join(WORKT, "c2-1", "context", "edit-target.jpg");
   const { data, info } = await sharp(f).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   assert.equal(info.width, GEN); assert.equal(info.height, GEN);
   const px = (x, y) => { const o = (y * GEN + x) * 4; return [data[o], data[o + 1], data[o + 2]]; };
   const ox = 2 * CELL - BLEED, oy = 1 * CELL - BLEED;   // c2-1's canvas origin in territory px
   // inside c1-1's kept area: the neighbour's concept, byte-exact
   for (const [x, y] of [[100, 1280], [200, 600], [40, 2000]]) {
-    assert.deepEqual(px(x, y), F(ox + x, oy + y).slice(0, 3), `neighbour paint at ${x},${y}`);
+    near(px(x, y), F(ox + x, oy + y).slice(0, 3), `neighbour paint at ${x},${y}`);
   }
   // c1-1's bleed over c2-1's own ground (territory x 4096..4352): still the neighbour's paint
-  assert.deepEqual(px(400, 1280), F(ox + 400, oy + 1280).slice(0, 3), "bleed paint");
+  near(px(400, 1280), F(ox + 400, oy + 1280).slice(0, 3), "bleed paint");
   // beyond the outer third of any authored edge: the grey fill
   for (const [x, y] of [[1280, 1280], [2400, 300], [1300, 2500]]) {
-    assert.deepEqual(px(x, y), [96, 104, 88], `grey at ${x},${y}`);
+    near(px(x, y), [96, 104, 88], `grey at ${x},${y}`);
   }
   // lock change 6b: inside the outer third of the west edge the grey carries
   // the neighbour's tone, fading with distance from the kept edge
@@ -258,7 +259,7 @@ test("edit target carries the neighbour's concept paint byte-exact and grey else
       const w = 1 - (v - BLEED) / (THIRD - BLEED);
       const expect = [96, 104, 88].map((gv, c) => Math.round(gv + (tone[c] - gv) * w));
       const got = px(x, 1300);
-      for (let c = 0; c < 3; c++) assert.ok(Math.abs(got[c] - expect[c]) <= 2, `tone ramp at x=${x}: got ${got}, expected ${expect}`);
+      for (let c = 0; c < 3; c++) assert.ok(Math.abs(got[c] - expect[c]) <= 6, `tone ramp at x=${x}: got ${got}, expected ${expect}`);
     }
   }
   // the packet mandates edit mode with the verbatim framing preamble
@@ -278,7 +279,7 @@ test("edit target carries the neighbour's concept paint byte-exact and grey else
   const log3 = execFileSync(process.execPath, [SCRIPT, "--territory", "ninjaone", "--cell", "3,1", "--dry-run"],
     { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" });
   assert.doesNotMatch(log3, /edit target/);
-  assert.ok(!fs.existsSync(path.join(WORKT, "c3-1", "context", "edit-target.png")),
+  assert.ok(!fs.existsSync(path.join(WORKT, "c3-1", "context", "edit-target.jpg")),
     "frontier cell must not get an edit target");
   assert.match(fs.readFileSync(path.join(WORKT, "c3-1", "packet-c3-1.md"), "utf8"), /ONE generation, whole canvas/);
   // interior sites (owner-directed): a cell with sites carries them as terrain to offer
@@ -418,15 +419,15 @@ test("re-stitching a cell from the same source is byte-idempotent", async () => 
 test("edit target for a replacement never carries the cell's own previous paint", async () => {
   execFileSync(process.execPath, [SCRIPT, "--territory", "ninjaone", "--cell", "2,1", "--dry-run", "--force"],
     { cwd: ROOT, env: { ...process.env, L2_OUT_ROOT: OUT }, encoding: "utf8" });
-  const f = path.join(WORKT, "c2-1", "context", "edit-target.png");
+  const f = path.join(WORKT, "c2-1", "context", "edit-target.jpg");
   const { data } = await sharp(f).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const px = (x, y) => { const o = (y * GEN + x) * 4; return [data[o], data[o + 1], data[o + 2]]; };
   // c2-1 is authored (G), yet its own kept interior must be grey, not G
   for (const [x, y] of [[1280, 1280], [2000, 800]]) {
-    assert.deepEqual(px(x, y), [96, 104, 88], `own paint excluded at ${x},${y}`);
+    near(px(x, y), [96, 104, 88], `own paint excluded at ${x},${y}`);
   }
   const ox = 2 * CELL - BLEED, oy = 1 * CELL - BLEED;
-  assert.deepEqual(px(100, 1280), F(ox + 100, oy + 1280).slice(0, 3), "neighbour paint kept");
+  near(px(100, 1280), F(ox + 100, oy + 1280).slice(0, 3), "neighbour paint kept");
 });
 
 test("a +34 luma step across an authored seam fails the all-land tone gate", async () => {

@@ -47,7 +47,17 @@ chain.sh), c8-4 (nothing arrives; leave). **chain.sh** (`.codex-tmp/session4/cha
 tracked under session4-chain/): refuses to start without 18m applied or with
 the lock held; bakes c4-1 (forced), c2-1, c1-1, c6-1 (forced), c1-2 (forced),
 then coast c0-5, then conform-pass and serve. Asked of the owner (19:55
-picture): 18m yes/no; accepts for T c4-0, C c3-0, C c0-6, C c1-4.
+picture): 18m yes/no; accepts for T c4-0, C c3-0, C c0-6, C c1-4. **Also in
+since 20:35 (serve-time, my tools):** a seam feather — tone-harmonise.mjs
+writes each authored edge's 64-px band means under the field's gain into
+the table; world-register.mjs moves each side toward the two bands' mean
+within 12 m of the line (smooth ramp, per channel capped ±20%, land only);
+the residual steps it targets are the N/T colour borders (34, 32, 16) and
+T c4-1|c5-1 (17) — the forest seams are already flat under the field, their
+visible edge is the canopy (the rebake). serve.sh needs no change. The
+stitch test file now expects edit-target.jpg with ±6 tolerance (lock 18d,
+2026-09-04) — NOT yet run: the suite takes the real cell lock, run it when
+no bake holds it (tests 17/18's causes still unknown).
 
 **2026-09-05 19:55 UTC:** **THE OWNER'S ELEVEN CROPS OF
 THE LIVE WORLD; LOCKS 18i-b, 18j, 18k IN; THE COAST RUN IS BAKING; THE CHAIN
