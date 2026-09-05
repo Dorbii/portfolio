@@ -66,12 +66,12 @@ const FORCE = new Set(listArg("--force"));
 //                 (owner 2026-09-04: review before the director, cut the cycles)
 // --model M       the generation model (cell.mjs reads CELL_MODEL; default astra)
 // --effort E      its reasoning effort (CELL_EFFORT; default high)
-// REVIEW_MODEL    env, the reviewer's model (default gpt-6-astra)
+// REVIEW_MODEL    env, the reviewer's model (default gpt-5.6-sol; owner 2026-09-04: astra chewed 40% of usage)
 const REVIEW = process.argv.includes("--review");
 const modelArg = listArg("--model")[0], effortArg = listArg("--effort")[0];
 if (modelArg) process.env.CELL_MODEL = modelArg;
 if (effortArg) process.env.CELL_EFFORT = effortArg;
-const REVIEW_MODEL = process.env.REVIEW_MODEL || "gpt-6-astra";
+const REVIEW_MODEL = process.env.REVIEW_MODEL || "gpt-5.6-sol";
 const TERRITORY = "tanium";
 const BRIEFS = `art-source/career-world/l2-land/${TERRITORY}/briefs`;
 const LOG = `.codex-tmp/bake-${TERRITORY}.log`;

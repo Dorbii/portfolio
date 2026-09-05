@@ -1142,7 +1142,7 @@ for attempt in 1 2 3 4; do
   "$CODEX" exec \\
     --sandbox workspace-write \\
     -c sandbox_workspace_write.network_access=true \\
-    -c model=${process.env.CELL_MODEL || "gpt-6-astra"} \\
+    -c model=${process.env.CELL_MODEL || "gpt-5.6-sol"} \\
     -c model_reasoning_effort=${process.env.CELL_EFFORT || "high"} \\
     "$(cat ${P(path.join(cellDir, `packet-${id}.md`))})" \\
     < /dev/null > "$A" 2>&1
