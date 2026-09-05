@@ -1,0 +1,18 @@
+[
+    {
+        "class":  "coast",
+        "note":  "Connected northern bay, eastern and southern open sea and southwest inlet. Includes surf, white wash, reflections, intertidal water and water between shoreline rocks. One dry offshore stack is retained as land."
+    },
+    {
+        "class":  "lake",
+        "note":  "Milky turquoise flooded quarry pit northwest of the working floor. Mask includes dusty shallow water to the banks, submerged stones and reflections."
+    },
+    {
+        "class":  "stream",
+        "note":  "Visible western beck, northern rim creek, pit inlet and continuous southeast pit outlet through cut bench channels. Classified where painted; the required north and upper-west edge handoffs are not correctly registered in the artwork."
+    },
+    {
+        "class":  "fall",
+        "note":  "Short pit-inlet drop and bench cascades continuing to the southern coastal outlet, including bright falling water and terminal foam."
+    }
+]
