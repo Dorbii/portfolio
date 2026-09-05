@@ -1,0 +1,111 @@
+{
+  "cell": "c7-3",
+  "territory": "coast",
+  "biome": "shore",
+  "status": "quarantine_candidate_failed_hard_constraints",
+  "generationSizePx": [1254, 1254],
+  "generation": {
+    "filename": "c7-3-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "4F61692B00655DD10837E7369B17740ED6FEACA0B7F724676F27A5EF560846D4",
+    "mode": "single built-in ImageGen edit with edit-target as Image 1 and style canon as reference-only Image 2",
+    "imageGenCallsUsed": 1,
+    "retryUsed": false,
+    "secondReferenceAccepted": true,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "byteIdenticalToGeneratedOutput": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "promptFile": "c7-3-imagegen-prompt-used.txt"
+  },
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "Thirty-six-bin land-luminance-gradient magnitude peak divided by the uniform-bin mean; water-mask pixels and their four immediate neighbours are excluded, as are gradients below twelve luminance units.",
+    "peakVsUniformOverLand": 1.498824,
+    "uniformReference": 1.0,
+    "peakBinDegrees": [220, 230],
+    "directionalKeyFirstMoment": 0.006089,
+    "gradientSamples": 281735,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No coherent whole-cell sun gradient or cast-shadow field is evident, but the basalt uses pale top caps over darker vertical faces. The literal same-value-on-every-side requirement is not met."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "Manual visual estimate as fractions of non-water terrain at native source resolution.",
+    "buildable": 0.40,
+    "steep": 0.34,
+    "otherTalusShingleScrubTreesOrStacks": 0.26,
+    "canvasFractions": {
+      "buildable": 0.080178,
+      "steep": 0.068151,
+      "otherTerrain": 0.052116
+    },
+    "method": "Broad coherent bench and headland tops count as buildable; exposed column faces and abrupt banks count as steep; talus, shingle, broken rim rock, sparse scrub, inherited conifers, and dry stacks make up the remainder. Approximate uncertainty is plus or minus 0.08 per land-relative fraction."
+  },
+  "waterFootprintFraction": 0.79955434,
+  "finalDerivedLandCoverageFraction": 0.20044566,
+  "crown": {
+    "medianMetres": 3.626,
+    "medianPx": 75.534,
+    "sampleCount": 5,
+    "method": "Manual full-silhouette width census of all five visible conifer crowns; native source widths 27, 40, 37, 37, and 35 px were scaled by 2560/1254 and converted at 4.8 cm per final pixel. The separate low scrub patch is not a conifer crown.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c7-3-water-source.png",
+    "classification": "c7-3-water.json",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "013057F609B5F034910216912843BC7B9486387980FF5AD0BCCF7CA80FBD5A4A",
+    "encoding": "Opaque white water pixels on fully transparent non-water pixels; binary alpha.",
+    "opaqueWaterPixels": 1257312,
+    "transparentTerrainPixels": 315204,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedWaterComponents8Connected": 1,
+    "enclosedDryRockComponents": 4,
+    "enclosedDryRockComponentSizesPx": [4376, 1262, 927, 567],
+    "method": "Flood edge-connected teal and blue water, close small texture pinholes, grow through adjacent pale surf, foam, wash, reflections, and ripple highlights without crossing warm basalt, remove isolated chromatic flecks on dry land, and retain the single connected coastal-water component.",
+    "visualInspection": "Native overlay inspection found open sea, shoreline surf and wash, water between shore rocks, reflections, ripple highlights, and water around stacks included; dry columns, talus, shingle, and stack bodies remain transparent terrain."
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasEditCall": true,
+    "secondReferenceAccepted": true,
+    "rawSourceUnmodified": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "openSeaDominatesCell": true,
+    "noMeadowFlowersStructuresOrIndependentTreeGroves": true,
+    "waterMaskSameDimensionsBinaryAndSingleComponent": true,
+    "waterMaskCoversSurfWashRipplesAndReflectionsByOverlayInspection": true,
+    "crownObjectComplete": true,
+    "crownCensusIncludesAllFoundCrowns": true,
+    "crownMedianWithin1_7To5_2Metres": true,
+    "crownExcludedElementsEmpty": true,
+    "strictEqualValueOnAllRockFaces": false,
+    "weatheredIrregularColumnsWithoutDefaultPalisadeRegularity": false,
+    "stitchPreservesNeighbourPixelsVerified": false
+  },
+  "refusalReasons": [
+    "Basalt top caps remain consistently lighter than vertical faces, violating the literal neutral-lighting rule even though the measured first-moment directional field is low.",
+    "The lower cliff run repeats upright, similarly capped columns and still reads as a regular palisade rather than fully weathered irregular basalt."
+  ],
+  "openRisks": [
+    "Only the permitted single edit call was used; a lighting or cliff-regularity correction would require a prohibited additional call.",
+    "The pipeline stitch that preserves neighbour pixels was not executed in this authoring task, so final seam preservation remains unverified here.",
+    "Buildable and steep fractions are manual screen-space estimates rather than surveyed terrain geometry.",
+    "Crown widths are manual full-silhouette measurements with approximately plus or minus 3 source-pixel uncertainty.",
+    "Exact wet-pixel boundary judgment and visual quality remain director and owner decisions; this report makes no visual-acceptance claim."
+  ],
+  "evidence": [
+    "diagnostics/c7-3-measurements.json",
+    "diagnostics/c7-3-water-overlay.png",
+    "diagnostics/c7-3-water-overlay-coast-2x.png",
+    "diagnostics/c7-3-crown-census.png",
+    "diagnostics/c7-3-crown-census-corrected.json",
+    "diagnostics/c7-3-land-crop-2x.png"
+  ]
+}
