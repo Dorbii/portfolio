@@ -1,0 +1,14 @@
+[
+  {
+    "class": "coast",
+    "note": "Open sea including the complete source-painted surf, foam, wash between shoreline rocks, ripple highlights, and reflections; dry stacks and skerries remain terrain."
+  },
+  {
+    "class": "stream",
+    "note": "The short source-visible channel through the northern rim is masked in full; the generated image does not connect it to the required south-edge water arrival."
+  },
+  {
+    "class": "fall",
+    "note": "The tiny source-visible drop and wash where the short channel meets the sea are included in the water mask."
+  }
+]

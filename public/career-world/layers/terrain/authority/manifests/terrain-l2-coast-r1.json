@@ -1,0 +1,165 @@
+{
+ "format": "l2-cell-pyramid",
+ "territory": "coast",
+ "contract": {
+  "keptPx": 2048,
+  "bleedPx": 256,
+  "generatedPx": 2560,
+  "artPxPerWorldPx": 9.45,
+  "mPerWorldPx": 0.4503,
+  "tilePx": 256,
+  "levels": 7,
+  "reduction": "lanczos3, premultiplied, chained exact 2:1",
+  "seam": {
+   "cornerJitterPx": 64,
+   "wigglePx": 64,
+   "featherPx": 8,
+   "contentAware": {
+    "bandPx": 128,
+    "stepPenalty": 2,
+    "cost": "l2 RGB rms per pixel; a water-cut mismatch costs 255",
+    "between": "authored cells only; edges to unauthored ground keep the wiggle"
+   }
+  }
+ },
+ "gridPx": [
+  18432,
+  18432
+ ],
+ "levelTiles": [
+  [
+   72,
+   72
+  ],
+  [
+   36,
+   36
+  ],
+  [
+   18,
+   18
+  ],
+  [
+   9,
+   9
+  ],
+  [
+   5,
+   5
+  ],
+  [
+   3,
+   3
+  ],
+  [
+   2,
+   2
+  ]
+ ],
+ "tilePath": "L{level}/{x}-{y}.webp",
+ "registration": {
+  "status": "territory-local; world placement pending the world-scale-reset re-derivation"
+ },
+ "cells": {
+  "c6-0": {
+   "authoredAt": "2026-09-05T02:48:43.469Z",
+   "describe": "THE NORTH SHORE beside NinjaOne's c4-0 (Settlement shelf).\n\nThe island lies to the SOUTH. Its ground — the richest ground in its neighbourhood: meadow green warmed with gold, glades, flowers allowed here —\narrives across your SOUTH edge as real paint. **Continue it exactly as it\narrives** for 15-40 m into this cell, the distance varying along the edge so\nthe shoreline wanders, and end it at the sh",
+   "sourcePx": 1254,
+   "gates": [
+    {
+     "name": "key-light asymmetry",
+     "value": 0.0069,
+     "pass": true,
+     "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004"
+    },
+    {
+     "name": "gradient ratio",
+     "value": "1.583 (reported)",
+     "pass": true,
+     "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
+    },
+    {
+     "name": "rock lighting",
+     "value": 0.033,
+     "pass": true,
+     "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.14; limit 0.16 on the owner's eye (2026-09-02, the dark-forest gorge at 0.153)"
+    },
+    {
+     "name": "land coverage",
+     "value": "65.9%",
+     "pass": true
+    },
+    {
+     "name": "water cut clear",
+     "value": "0 px",
+     "pass": true,
+     "note": "paint surviving where the mask is fully water; exact zero by construction for pipeline-derived cells"
+    },
+    {
+     "name": "mask completion",
+     "value": "+33 px grown, 1192 px holes filled (reported)",
+     "pass": true,
+     "note": "the delivered mask grown into contiguous painted water within 48 px and speckle holes <=64 px filled before the cut (owner 2026-09-02); dry paint stops the growth, so a polyline mask still fails the rings"
+    },
+    {
+     "name": "water fringe",
+     "value": "0%",
+     "pass": true,
+     "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
+    },
+    {
+     "name": "water fringe (48px)",
+     "value": "0.09%",
+     "pass": true,
+     "note": "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)"
+    },
+    {
+     "name": "water continuity",
+     "value": "ok (2 crossings checked, 1 bridged)",
+     "pass": true,
+     "note": "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint"
+    },
+    {
+     "name": "palette conformance",
+     "value": "veg worst dBG 0.082 dLuma 1.5 over 1 seam(s); tone worst dLuma 0.6 on all land over 1 seam(s)",
+     "pass": true,
+     "note": "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13"
+    },
+    {
+     "name": "crown scale",
+     "value": "2.842 m over 85 crowns (accepted range 1.7-5.2 m)",
+     "pass": true,
+     "note": "the worker's own median crown from c6-0-report.json, against the 1.7-5.2 m range the accepted cells measured (NOT the plan's written 4-7 m — see CROWN_MIN_M); crown.excludedElements must be empty, so an out-of-scale element cannot be measured around"
+    }
+   ],
+   "shelf": null,
+   "features": [],
+   "waterZones": [
+    "coast",
+    "stream",
+    "fall"
+   ],
+   "bridged": [
+    "c6-1 edge: rerouted my crossing 2310 -> 2458 (149px)"
+   ],
+   "maskCompletion": {
+    "grownPx": 33,
+    "holePx": 1192
+   },
+   "biome": "shore",
+   "source": "art-source/career-world/l2-land/coast/c6-0",
+   "stitch": {
+    "order": 1,
+    "tiles": [
+     90,
+     30,
+     12,
+     6,
+     2,
+     1,
+     1
+    ]
+   }
+  }
+ }
+}

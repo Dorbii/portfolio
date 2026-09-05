@@ -1,0 +1,138 @@
+{
+  "cell": "c6-0",
+  "territory": "ninjaone",
+  "biome": "shore",
+  "status": "refused",
+  "generation": {
+    "filename": "c6-0-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "D2586D372B3329D1B68364D23B1BE30EF075E1A20808F2DB3B89612BF6C5FDB5",
+    "mode": "built-in ImageGen edit with edit-target as Image 1 and style canon as reference-only Image 2",
+    "imageGenCallsUsed": 1,
+    "selectedCandidate": 1,
+    "retryUsed": false,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "secondReferenceAccepted": true,
+    "promptFile": "c6-0-imagegen-prompt-used.txt"
+  },
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean on the delivered source; mask water and its four immediate neighbours are excluded, as are gradients below 12 luminance units.",
+    "peakVsUniformOverLand": 1.731033,
+    "uniformReference": 1.0,
+    "directionalKeyFirstMoment": 0.005838,
+    "gradientSamples": 898867,
+    "aggregateDirectionalityNumericPass": true,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No whole-cell sun gradient or long cast-shadow field is visible, but basalt columns repeatedly have pale caps over darker side faces and the conifers retain directional light-dark modelling. The aggregate statistic does not establish the literal equal-value rule."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "Manual estimated fraction of non-water land area at native source resolution.",
+    "buildable": 0.78,
+    "steep": 0.06,
+    "otherBrokenRockTalusOrVegetation": 0.16,
+    "method": "The broad coherent grassy rock shelf counts as buildable; the narrow broken shoreline rim and exposed stack sides count as steep; talus, shingle, boulders, scrub, and conifer groups make up the remainder. Approximate uncertainty is plus or minus 0.08 per fraction."
+  },
+  "waterFootprintFraction": 0.331270,
+  "finalDerivedLandCoverageFraction": 0.668730,
+  "edgeTopology": {
+    "north": {
+      "required": "open sea across the edge",
+      "waterPixels": 1254,
+      "landPixels": 0,
+      "pass": true
+    },
+    "east": {
+      "required": "open sea across the edge",
+      "waterPixels": 1254,
+      "landPixels": 0,
+      "pass": true
+    },
+    "south": {
+      "required": "island ground except for the approximately 2 m arriving watercourse at its far end",
+      "waterPixels": 244,
+      "landPixels": 1010,
+      "maskedWaterWidthMetres": 18.99,
+      "pass": false
+    },
+    "west": {
+      "required": "open sea across the edge",
+      "waterPixels": 353,
+      "landPixels": 901,
+      "pass": false
+    }
+  },
+  "crown": {
+    "medianMetres": 2.842,
+    "medianPx": 59.203,
+    "sampleCount": 85,
+    "method": "Manual outer-foliage width census of every visually distinguishable conifer crown, including saplings, overlapping-stand crowns, and edge-clipped crowns; native median 29 px scaled by 2560/1254 and converted at 4.8 cm per final pixel.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c6-0-water-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "9D0984F894B9E31337777C977116BE7BAEDB99D838A529FA9A0DB4BC9933F90E",
+    "encoding": "Opaque white water pixels on fully transparent non-water pixels; binary alpha.",
+    "opaqueWaterPixels": 520928,
+    "transparentLandPixels": 1051588,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedWaterComponents8Connected": 2,
+    "connectedWaterComponentSizesPx": [520817, 111],
+    "componentNote": "The large component is the open sea and its full surf and wash. The second is the source-visible short channel/drop, whose painted mouth is separated from the sea by the generated rock rim.",
+    "edgeWaterPixels": {
+      "north": 1254,
+      "east": 1254,
+      "south": 244,
+      "west": 353
+    },
+    "method": "Flooded source-raster teal and blue from all sea edges, grew through adjacent source-painted pale surf and wash, retained the separate short channel/drop, protected warm dry rock and vegetation, and removed sub-16-pixel water speckles. Dry stacks and skerries remain transparent terrain."
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasEdit": true,
+    "secondReferenceAttached": true,
+    "rawGenerationUntouched": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "northEdgeOpenSea": true,
+    "eastEdgeOpenSea": true,
+    "westEdgeOpenSea": false,
+    "southEdgeWatercourseApproximately2mWide": false,
+    "arrivingSouthWatercourseReachesSeaContinuously": false,
+    "landContinuationLimitedTo15To40Metres": false,
+    "shoreBiomeDominatesBeyondArrivalBand": false,
+    "northShoreCliffFaceHiddenBehindRim": false,
+    "weatheredIrregularColumnarBasalt": false,
+    "oneOrTwoCloseInStacksOnly": false,
+    "strictEqualValueOnAllFormSides": false,
+    "waterMaskSameDimensions": true,
+    "waterMaskBinaryWhiteOnTransparent": true,
+    "waterMaskCoversAllSourceVisibleWater": true,
+    "allMeasuredCrownsIncluded": true,
+    "crownMedianInsideAcceptedTerritoryBand": true
+  },
+  "refusalReasons": [
+    "The island shelf occupies roughly the southern two-thirds of the source instead of continuing only 15-40 m into the 97.6 m cell.",
+    "Land reaches 901 pixels of the west edge, which must be entirely sea.",
+    "The source paints 244 pixels, about 18.99 m, of sea along the south edge instead of preserving island ground with only the approximately 2 m arriving watercourse at the far end.",
+    "The generated short channel meets the sea near the middle of the north rim but does not continue from the required south-edge water arrival.",
+    "The overextended shelf remains rich grassy settlement-like ground with extensive conifers instead of transitioning to sparse Shore basalt, talus, and shingle across the south third.",
+    "Repeated bright basalt caps over darker side faces and modelled conifer sides violate the literal neutral-lighting rule.",
+    "Several shore and offshore columns expose viewer-facing sides and read as regular upright capped cylinders rather than only a thin behind-view rim of weathered broken tops.",
+    "More than the allowed one or two close-in offshore stack or skerry groups are present."
+  ],
+  "openRisks": [
+    "The water mask follows the raw source rather than repairing its wrong south and west edge topology or its disconnected generated channel.",
+    "Buildable and steep fractions and the crown census are manual image measurements rather than surveyed geometry.",
+    "No second ImageGen call was made because the returned source was square and the task authorizes a retry only for non-square framing.",
+    "Seam continuity and overall visual quality remain director and owner judgments; this report does not claim visual acceptance."
+  ]
+}

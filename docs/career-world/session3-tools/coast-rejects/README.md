@@ -1,0 +1,4 @@
+- `c2-0` coast-cliff — rejected on **rock lighting 0.305**
+- `c3-0` coast-cliff — rejected on **rock lighting 0.209**
+- `c4-0` coast-cliff — rejected on **rock lighting 0.188**
+- `c5-0` coast-cliff — rejected on **rock lighting 0.183**
