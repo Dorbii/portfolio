@@ -12,10 +12,16 @@
 //
 // THE CHANGE: for a cell the territory's rune chain crosses (its def's
 // runeChain.waypoints, the same route the briefs are written from), the edit
-// target carries the groove's FLOOR as a dark line about 1.2 m wide along
-// the route, painted only over unpainted grey (the neighbours' bleed stays),
-// and the packet says the floor is FINAL and exact: cut the walls and rims
-// along it, never move it. Nothing else changes.
+// target carries the groove's FLOOR as a dark line about 1.2 m wide, painted
+// only over unpainted grey (the neighbours' bleed stays), and the packet says
+// the floor is FINAL and exact: cut the walls and rims along it, never move
+// it. Its two ends are where the chain ACTUALLY arrives: at an edge whose
+// neighbour is authored, the neighbour's own groove is read off its layer
+// (the darkest 0.3-3 m run in the 96 px beside the shared line, within 12%
+// of the canon — measured 2026-09-05: c0-1 east 51%, c3-1 west 49% / east
+// 54%, c5-1 west 50% / east 57%, where the canon says 47 / 52 / 48 / 45 / 50);
+// where no authored neighbour has a chain, the canon route. Between the two
+// ends the route keeps its canon shape, shifted linearly. Nothing else changes.
 //
 //   node .codex-tmp/session4/proposals/chain-prefill.apply.mjs [--check]
 import fs from "node:fs";
@@ -55,8 +61,38 @@ replace("2 paint",
           }
           return null;
         };
-        const yIn = yAt(col), yOut = yAt(col + 1);
+        let yIn = yAt(col), yOut = yAt(col + 1);
         if (yIn != null && yOut != null && (Math.floor(yIn) === row || Math.floor(yOut) === row)) {
+          // where the chain actually arrives: the authored neighbour's own groove
+          const chainAt = async (nb, facing, canonY) => {
+            const nRaw = await rawOf(srcFileFor(paths, nb.id, "l2"));
+            const NW = nRaw.info?.width || GEN_PX, nbBleed = Math.round((NW - CELL_PX) / 2);
+            const xs = facing === "west" ? [nbBleed + 4, nbBleed + 100] : [nbBleed + CELL_PX - 100, nbBleed + CELL_PX - 4];
+            const y0 = Math.round(nbBleed + (canonY - 0.12) * CELL_PX), y1 = Math.round(nbBleed + (canonY + 0.12) * CELL_PX);
+            const rows = []; let landRows = 0;
+            for (let y = y0; y < y1; y += 1) {
+              const v = [];
+              for (let x = xs[0]; x < xs[1]; x += 2) { const o = (y * NW + x) * 4; if (nRaw.data[o + 3] < 200) continue; v.push(0.2126 * nRaw.data[o] + 0.7152 * nRaw.data[o + 1] + 0.0722 * nRaw.data[o + 2]); }
+              v.sort((p, q) => p - q); if (v.length) landRows += 1; rows.push(v.length ? v[v.length >> 1] : null);
+            }
+            if (landRows < rows.length / 2) return null;
+            const med = rows.filter((r) => r != null).sort((p, q) => p - q)[landRows >> 1];
+            const runs = []; let s = -1;
+            for (let i = 0; i <= rows.length; i += 1) {
+              const dark = i < rows.length && rows[i] != null && rows[i] < med - 18;
+              if (dark && s < 0) s = i;
+              if (!dark && s >= 0) { const tall = (i - s) * (97.6 / CELL_PX); if (tall >= 0.3 && tall <= 3) { let mn = 999; for (let k = s; k < i; k += 1) mn = Math.min(mn, rows[k]); runs.push({ c: (y0 + (s + i) / 2 - nbBleed) / CELL_PX, depth: med - mn }); } s = -1; }
+            }
+            runs.sort((p, q) => q.depth - p.depth);
+            return runs.length && runs[0].depth >= 25 ? runs[0].c : null;
+          };
+          const west = authoredNeighbours.find((n) => n.cell[0] === col - 1 && n.cell[1] === row && !n.outside);
+          const east = authoredNeighbours.find((n) => n.cell[0] === col + 1 && n.cell[1] === row && !n.outside);
+          const wIn = west ? await chainAt(west, "east", yIn - row) : null, wOut = east ? await chainAt(east, "west", yOut - row) : null;
+          const dIn = wIn != null ? wIn + row - yIn : 0, dOut = wOut != null ? wOut + row - yOut : 0;
+          if (wIn != null) yIn = wIn + row;
+          if (wOut != null) yOut = wOut + row;
+          const shift = (wx) => dIn + (dOut - dIn) * Math.max(0, Math.min(1, wx - col));   // the canon shape, shifted linearly between the two ends
           const isGreyPx = (o) => target[o] === EDIT_GREY[0] && target[o + 1] === EDIT_GREY[1] && target[o + 2] === EDIT_GREY[2];
           const HALF = Math.round(0.6 / (97.6 / CELL_PX));   // half of a 1.2 m floor
           const FLOOR = [38, 36, 33];                          // the slot's floor in shade
@@ -66,7 +102,7 @@ replace("2 paint",
           const x0 = col - BLEED / CELL_PX, x1 = col + 1 + BLEED / CELL_PX;
           for (let k = 0; k <= 64; k += 1) {
             const wx = x0 + (x1 - x0) * k / 64, wy = yAt(wx);
-            if (wy != null) pts.push([toX(wx), toY(wy)]);
+            if (wy != null) pts.push([toX(wx), toY(wy + shift(wx))]);
           }
           for (let i = 1; i < pts.length; i += 1) {
             const [ax, ay] = pts[i - 1], [bx, by] = pts[i];
