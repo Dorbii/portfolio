@@ -4,7 +4,32 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-05 03:15 UTC, LATEST (current):** **THE CHAIN IS BAKING THE COAST;
+**2026-09-05 07:00 UTC, LATEST (current):** **THE ISLAND IS SERVED END TO
+END, AND FIFTEEN CELLS WAIT ON THE OWNER'S PICTURE.** Tanium is 17 of 21
+(c1-2, c6-2 and c4-2 by his accept; c6-1 rebaked as the chain's seaward end;
+c0-1, c2-2, c3-2, c5-1 carry his mask fixes; open: c1-1, c2-1, c3-1, c4-0,
+and c4-1's rebake). The coast has four shore cells in the world: c2-0 and
+c4-0 by his accept, **c5-0 on every gate** — generated BETWEEN accepted
+neighbours, the alternate-cell order that cures blind seams — and c6-0.
+`world-register.mjs` slices every territory's authored cells into the
+release feed (41 tiles) and `streamTiles.ts` admits the new folders: **Tanium
+and the coast are served** (suite 98 pass / 6 fail, the six pre-existing and
+outside this lane; typecheck clean). The picture
+(`.codex-tmp/session4/island/island-grid-L2.jpg`, sent 07:00, with
+`c5-2-old-vs-new.jpg`) boxes fifteen cells: accept-on-eye candidates (T c3-1
+refused by ONE pixel; T c1-1's seventh, the first to pass key-light, crowns
+too fine; coast c3-0, c1-1, c1-4, c7-1, c0-6), send-backs (coast c1-2, c4-8,
+c7-0; T c5-2's regeneration), two seams (c6-1|c6-2, where c6-2's bay meets
+the new c6-1's land; T c4-0, no river where N c3-3 delivers one), and c2-1 /
+c4-1 waiting on the c3-1 ruling. **Three rulings unblock everything:** a
+rock-lighting limit for shores (7 of 11 refused on it alone, 0.18-0.31);
+approval of **lock 18h** (cell.mjs sees the cell across a territory border —
+the N|T border was baked blind from both sides; the proposal at
+`.codex-tmp/session4/proposals/cross-grid-lookup.apply.mjs` applies only on
+his word); and the c3-1 accept. Resume from `SESSION 11` below, its first
+section.
+
+**2026-09-05 03:15 UTC, superseded:** **THE CHAIN IS BAKING THE COAST;
 THE NORTH SHORE'S SEAMS ARE THE FINDING.** (Times here are UTC as the runner
 logs them; the shell's `date` is CDT, five hours behind.) Tanium is 15 of 21
 (c4-2 accepted on the owner's eye; c6-1 rebaked as the chain's seaward end;
@@ -705,7 +730,104 @@ adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 `brief-c3-1-r2.md` (magical gorge, rail gorge span), `brief-c2-2-r2.md`
 (bench country, waystation bench, hot spring).
 
-**SESSION 11 (2026-09-04 evening → 2026-09-05 03:15 UTC) — RESUME HERE, ANY MODEL.** **THE CHAIN IS ON THE COAST; `chain-handoff.sh` → `after-chain.sh` FOLLOW IT; THEN THE PICTURE.**
+**SESSION 11 (2026-09-04 evening → 2026-09-05 07:00 UTC) — RESUME HERE, ANY MODEL.** **THE NIGHT'S BAKES ARE DONE; THE LOCK IS FREE; NOTHING DISPATCHES UNTIL THE OWNER RULES ON THE PICTURE.**
+
+## 07:00 — THE NIGHT'S END: WHAT LANDED, WHAT NEEDS THE OWNER, WHAT COMES NEXT
+
+Every verdict of the night, with numbers, is in
+`.codex-tmp/session4/results-run3.md` (gitignored — copy anything durable
+into this file). The scripts that ran it: `after-run.sh` (the chain, 01:24),
+`chain-handoff.sh` (took the lock at the coast run's end so c1-1 baked after
+c1-2), `after-chain.sh`, `hold-after-c2-1.sh` (took the lock again when c3-1
+was refused by one pixel, so c2-1 and c4-1 would not bake blind of it) and
+`after-chain-2.sh`. **Do not run anything from them again**; they are the
+record of how the night was sequenced.
+
+**Landed tonight** (each committed by itself): T c4-2, c1-2, c6-2 by the
+owner's accept; c6-1 rebaked (the chain's seaward end); c0-1, c2-2, c3-2,
+c5-1 re-derived with his mask fixes (c3-2 under the c4-2 acceptance, c5-1 by
+override past the vegetation arm on the c5-0 seam, which the fix does not
+touch); coast c6-0 and c5-0 on every gate, c2-0 and c4-0 by his accept.
+Then `world-register.mjs` (new): 41 cells served across three territories;
+`streamTiles.ts` lists the three tile folders; the sparse-territory tests
+(98, 99) rewritten to the real rule (no two territories author the same
+lattice cell; a sparse plan comes from `coast-plan.mjs`).
+
+**Refused, to the owner's eye** (candidates in their working folders under
+`.codex-tmp/authoring/cells/<t>/<id>/`, copies under `.codex-tmp/rejected/`):
+- **T c3-1** — by ONE pixel: its stream meets c3-2's 49 px from the gate's 48;
+  rock lighting 0.244 on the bench walls (he accepted 0.215 on c4-2); every
+  other gate clean. An accept unblocks c2-1 and c4-1, which then bake AGAINST
+  its pixels (the seam he flagged: "the chain between these doesnt line up").
+- **T c1-1**, seventh — the first to PASS key-light (0.0084) and it meets
+  both rivers; refused on seam colour (0.235/0.254, he accepted c1-2 at
+  0.289), the c0-1 seam tone 29.7, fringe 1.25%, and **crowns 1.18 m median
+  over 1093** — the dark-forest canopy comes out too fine (c2-1's blind
+  candidate has the same 1.18 m). Accept, or send back for larger crowns.
+- **T c2-1** (blind of c3-1, a bonus) — c2-2 seam colour, crowns 1.18 m.
+- **T c4-0** — clean but NO water at its north edge where N c3-3 delivers a
+  4.3 m beck at 57% (`edge-runs.mjs`): the pipeline never showed it the cell
+  across the border (below). Real attempt after lock 18h.
+- **T c5-2** regeneration — refused on the c4-2 colour seam (inherited from
+  his c4-2 accept) and c6-2's water at 34% unmet by 60 m; whether the becks
+  now fill their beds is his eye (`c5-2-old-vs-new.jpg`).
+- **Coast, close:** c3-0 (meets c2-0 to 11 px and c4-0 exactly — a skerry
+  splits its sea into two runs and the gate matches run CENTRES, an artefact;
+  rock 0.305), c1-1 (rock 0.247 only), c1-4 (water 6 m off and narrow; rock
+  0.255; washy fringe 7%), c7-1 (key-light 0.0118; one stray thread; passed
+  rock lighting), c0-6 (one thread 3.6 m off; rock 0.293).
+- **Coast, misses:** c1-2 (N c0-1's 53 m bay painted over), c4-8 (all five
+  of T c3-2's falls painted over), c7-0 (four of c6-0's inlets dead-end at
+  the seam; its south edge is land where the c7-1 candidate is sea). Order
+  for the send-backs: c7-1 first, then c7-0 between c6-0 and c7-1.
+
+**Two seams for his eye:** c6-1|c6-2 — c6-2's bay runs 33-100% of its north
+edge (painted against the OLD c6-1), the new c6-1 has water only at 78-100%:
+44 m of bay meeting cliff-top land; he ruled on c6-2 before the new c6-1
+landed. And c4-0's border (above).
+
+**Three rulings needed:**
+1. **A rock-lighting limit for shores.** 7 of 11 shores refused on that gate
+   alone (0.183-0.305); a pale rim over a darker face reads as a lit side.
+   Options: exempt the `shore` biome; a shore limit of 0.35; or keep
+   accepting on his eye. (c5-0 passed at 0.158, c7-1 at 0.02, c4-8 at 0.10.)
+2. **Lock 18h — cell.mjs sees across a territory border.** The 18f lookup
+   admits a foreign cell only INSIDE this grid, so every N|T border cell was
+   baked blind of the other side (briefs carried measured handovers, pixels
+   and gates did not). The proposal admits out-of-grid foreign neighbours
+   for the edit target and the seam gates, never the stitch (no tile of this
+   pyramid exists there); four anchored edits, checked against the current
+   file (`node .codex-tmp/session4/proposals/cross-grid-lookup.apply.mjs
+   --check`). Apply only on his words, then
+   `check-solidified.mjs --approve "<his words>"`, then a dry run of c4-0.
+3. **c3-1**: accept (then c2-1, c4-1 bake against it) or send back.
+
+**When he has ruled, in this order:** overrides for the accepted candidates
+(`CELL_OWNER_ACCEPT="<his words>" cell.mjs --territory <t> --cell C,R --redo
+--force --describe-file <brief>`; coast cells need `coast-briefs.mjs` first,
+Tanium cells `write-briefs.mjs`); then c4-1 forced and c2-1 against the
+accepted c3-1; then c4-0 after 18h; then the coast send-backs (c7-1 → c7-0;
+c1-2 between c1-1 and the sea; c4-8); then c6-2 regenerated against the new
+c6-1 if he wants the bay met; then `world-register.mjs` again (only changed
+cells re-slice) and the picture. Then the stage-1 close: walk the served
+island once from world zoom to a doorway; write the workflow down for the
+other islands.
+
+**Workflow lessons for the other islands, from tonight:** bake shore cells
+along an edge ALTERNATELY (every second cell, then the ones between —
+c5-0 passed every gate that way after the blind c5-0 was refused); the
+continuity gate should compare water SPANS, not run centres, where a
+shore's sea is one wide run (c3-0); the vegetation arm below its 500 px
+floor compares noise (c5-1: dLuma 68 on a seam the change never touched);
+dark-forest cells come out with 1.2 m crowns — the brief needs a crown-size
+peg the model can see (a scale reference), not a number; a position given
+in prose with nothing in the edit target to anchor it is ignored (c4-0's
+beck, c7-0's inlets, c1-2's bay) — pixels arrive, prose does not; a running
+bash chain is reordered by holding the lock, never by killing a dispatch.
+
+**Timing:** 11 coast attempts 9.4-23.7 min (mean 15), Tanium attempts 12.8-
+28.2 min; overrides and re-derives 20-40 s each; `world-register.mjs` 2 min
+for 21 cells; the suite 20 s.
 
 ## 03:15 — THE CHAIN SO FAR, THE COAST'S FIRST LESSON, WHAT IS QUEUED
 

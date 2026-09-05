@@ -11,3 +11,4 @@
 - `c3-0` shore — rejected on **a gate **
 - `c5-0` shore — rejected on **a gate **
 - `c3-0` shore — rejected on **rock lighting 0.305**
+- `c7-0` shore — rejected on **key-light asymmetry 0.0119**

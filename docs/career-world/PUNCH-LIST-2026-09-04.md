@@ -154,3 +154,20 @@ brief is committed; needs the lock.
   refused shore.
 - E: c4-1 → forced rebake in `after-chain.sh` (one attempt); c5-2 → one
   regeneration.
+
+## Status at the night's end (07:00 UTC, 2026-09-05)
+
+- A: c0-1, c2-2, c3-2, c5-1 **done** (c3-2 under the c4-2 acceptance; c5-1
+  by override past a seam gate the fix never touched). c5-2 → regenerated
+  once, refused (the c4-2 colour seam, c6-2's water) → his eye, old vs new.
+- B: c4-2, c1-2, c6-2 **done** by his accept. c4-0 → one attempt, clean but
+  no river at the border: the pipeline could not show it N c3-3 (lock 18h
+  proposal). c1-1 → seventh candidate, first to pass key-light → his eye.
+- C: c6-1 **done**. But c6-2 was accepted against the OLD c6-1: their seam
+  now has 44 m of bay meeting land → his eye.
+- D: coast c2-0, c4-0 (accept), c5-0 (every gate), c6-0 **in the world and
+  served**; c3-0, c1-1, c1-4, c7-1, c0-6 close → his eye; c1-2, c4-8, c7-0
+  send-backs (c7-1 first, then c7-0). Shore rock-lighting limit → his ruling.
+- E: c4-1 → waits for c3-1's ruling, then rebakes against it. c3-1 → refused
+  by one pixel → his eye (the accept unblocks c2-1 and c4-1).
+- Served: `world-register.mjs` — 41 cells, three territories (f6f0e2ab).
