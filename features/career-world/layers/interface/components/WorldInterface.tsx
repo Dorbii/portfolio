@@ -2,7 +2,7 @@ import {
   useSyncExternalStore,
   type CSSProperties,
 } from "react";
-import type { WaterRenderState } from "../../ocean";
+import type { WaterRenderState } from "../../water";
 import type { Territory } from "../../terrain/model/territories";
 import type { CameraView, Pair } from "../../../shared/camera";
 import {

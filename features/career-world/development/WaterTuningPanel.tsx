@@ -10,23 +10,13 @@ import {
 } from "../shared/waterTuning";
 
 const GROUP_TITLES = Object.freeze({
-  city: "City water",
-  effects: "Coastal effects",
-  ocean: "Ocean",
+  water: "Water",
 });
 
 const DIAL_LABELS: Readonly<Record<WaterTuningKey, string>> = Object.freeze({
-  cityWaterOpacity: "Paint opacity",
-  cityWaterShoreRamp: "Shore ramp",
-  crest: "Crest",
-  cycling: "Palette cycle",
-  effectSparkle: "Sparkle",
-  foam: "Foam",
   oceanOpacity: "Opacity",
   oceanTimeScale: "Wave clock",
   oceanWeather: "Weather (calm to heavy)",
-  relight: "Stroke relight",
-  swell: "Traveling swells",
 });
 
 function formatValue(value: number): string {
@@ -67,10 +57,10 @@ export function WaterTuningPanel({
   }, [onChange, tuning]);
 
   const copyUrl = useCallback(async () => {
-    const query = serializeWaterTuning(tuning);
-    const url = `${window.location.origin}${window.location.pathname}${query}`;
+    const url = new URL(window.location.href);
+    for (const [key, value] of new URLSearchParams(serializeWaterTuning(tuning))) url.searchParams.set(key, value);
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(url.toString());
       setCopyStatus("Copied");
     } catch {
       setCopyStatus("Clipboard unavailable");
@@ -100,7 +90,12 @@ export function WaterTuningPanel({
           −
         </button>
       </header>
-      {(["ocean", "city", "effects"] as const).map((group) => (
+      <div className="career-world__water-presets">
+        {[["Calm", 0], ["Coastal", 0.45], ["Storm", 1]].map(([name, value]) => (
+          <button key={name} type="button" onClick={() => updateDial("oceanWeather", Number(value))}>{name}</button>
+        ))}
+      </div>
+      {(["water"] as const).map((group) => (
         <section key={group}>
           <h2>{GROUP_TITLES[group]}</h2>
           {WATER_TUNING_DIALS.filter((dial) => dial.group === group).map((dial) => (
@@ -116,18 +111,6 @@ export function WaterTuningPanel({
                 type="range"
                 value={tuning[dial.key]}
               />
-              {"toggleable" in dial && dial.toggleable ? (
-                <button
-                  aria-pressed={tuning[dial.key] > 0}
-                  onClick={() => updateDial(
-                    dial.key,
-                    tuning[dial.key] > 0 ? 0 : dial.defaultValue,
-                  )}
-                  type="button"
-                >
-                  {tuning[dial.key] > 0 ? "On" : "Off"}
-                </button>
-              ) : null}
               <small>{dial.minimum}–{dial.maximum}</small>
               <button
                 onClick={() => updateDial(dial.key, dial.defaultValue)}

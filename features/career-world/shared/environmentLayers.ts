@@ -1,7 +1,10 @@
 export type EnvironmentLayerId =
   | "L1"
+  | "L1_0"
   | "L1_1"
   | "L1_2"
+  | "L1_3"
+  | "L1_4"
   | "L2"
   | "L2_1"
   | "L2_2"
@@ -19,13 +22,17 @@ export type EnvironmentLayerId =
   | "L4_5"
   | "L4_6"
   | "L4_7"
-  | "L4_8";
+  | "L4_8"
+  | "L5"
+  | "L5_1"
+  | "L5_2";
+// Lighting owns land/water illumination; historical layer IDs remain stable.
 
 export interface EnvironmentLayerDefinition {
   readonly available: boolean;
   readonly id: EnvironmentLayerId;
   readonly label: string;
-  readonly parentId?: Extract<EnvironmentLayerId, "L1" | "L2" | "L3" | "L4">;
+  readonly parentId?: EnvironmentLayerId;
   readonly owns: string;
 }
 
@@ -38,28 +45,49 @@ export const ENVIRONMENT_LAYER_DEFINITIONS: readonly EnvironmentLayerDefinition[
     Object.freeze({
       available: true,
       id: "L1",
-      label: "Ocean authority",
-      owns: "registered open-water extent and coastline contact",
+      label: "Water authority",
+      owns: "ocean and inland water, independently of terrain and shared lighting",
+    }),
+    Object.freeze({
+      available: true,
+      id: "L1_0",
+      label: "Ocean",
+      owns: "open-water surface and coastal response",
+      parentId: "L1",
     }),
     Object.freeze({
       available: true,
       id: "L1_1",
       label: "Ocean motion",
       owns: "time-varying open-water surface",
-      parentId: "L1",
+      parentId: "L1_0",
     }),
     Object.freeze({
       available: true,
       id: "L1_2",
       label: "Coastal ambience",
       owns: "wet shoreline contact, swash, breakers, and foam",
-      parentId: "L1",
+      parentId: "L1_0",
+    }),
+    Object.freeze({
+      available: true,
+      id: "L1_3",
+      label: "Ocean seabed",
+      owns: "submerged shelves, rock and sand following the current island coastline",
+      parentId: "L1_0",
+    }),
+    Object.freeze({
+      available: true,
+      id: "L1_4",
+      label: "Ocean details",
+      owns: "coral, reefs and marine growth above the land in compositing order, viewed through water optics",
+      parentId: "L1_0",
     }),
     Object.freeze({
       available: true,
       id: "L2",
       label: "Land authority",
-      owns: "frozen registered r2 terrain master",
+      owns: "authored land grid and derived terrain pyramid",
     }),
     Object.freeze({
       available: true,
@@ -85,8 +113,9 @@ export const ENVIRONMENT_LAYER_DEFINITIONS: readonly EnvironmentLayerDefinition[
     Object.freeze({
       available: true,
       id: "L3",
-      label: "Inland-water authority",
+      label: "Inland water",
       owns: "registered rivers, lakes, rapids, and waterfall geometry",
+      parentId: "L1",
     }),
     Object.freeze({
       available: true,
@@ -103,7 +132,7 @@ export const ENVIRONMENT_LAYER_DEFINITIONS: readonly EnvironmentLayerDefinition[
       parentId: "L3",
     }),
     Object.freeze({
-      available: true,
+      available: false,
       id: "L3_4",
       label: "Inland habitat detail",
       owns: "deterministic submerged stones, wood, reeds, and aquatic vegetation",
@@ -178,11 +207,15 @@ export const ENVIRONMENT_LAYER_DEFINITIONS: readonly EnvironmentLayerDefinition[
       owns: "registered city-owned extensions to the coastline, exported as the coast authority the ocean solve consumes",
       parentId: "L4",
     }),
+    Object.freeze({ available: true, id: "L5", label: "Shared lighting", owns: "world light, daylight cycle and common cloud shadows" }),
+    Object.freeze({ available: true, id: "L5_1", parentId: "L5", label: "Land lighting", owns: "land illumination and the shared cloud field; terrain alpha unchanged" }),
+    Object.freeze({ available: true, id: "L5_2", parentId: "L5", label: "Water lighting", owns: "water material lighting and the same world-registered cloud field" }),
   ]);
 
 export const DEFAULT_ENVIRONMENT_LAYER_VISIBILITY: EnvironmentLayerVisibility =
   Object.freeze({
     L1: true,
+    L1_0: true,
     L1_1: true,
     // Owns "wet shoreline contact, swash, breakers, and foam" -- and it was off,
     // which is why the default view had none of them. The flag predates the
@@ -190,7 +223,9 @@ export const DEFAULT_ENVIRONMENT_LAYER_VISIBILITY: EnvironmentLayerVisibility =
     // to switch on. There is one now, it runs every frame either way (only its
     // gain is zeroed), so this costs nothing and is the difference between a sea
     // that meets the rock and a sea that stops at it.
-    L1_2: true,
+  L1_2: true,
+  L1_3: true,
+  L1_4: true,
     L2: true,
     L2_1: true,
     L2_2: true,
@@ -209,6 +244,9 @@ export const DEFAULT_ENVIRONMENT_LAYER_VISIBILITY: EnvironmentLayerVisibility =
     L4_6: true,
     L4_7: true,
     L4_8: true,
+    L5: true,
+    L5_1: true,
+    L5_2: true,
   });
 
 const ENVIRONMENT_LAYER_BY_ID = new Map(
@@ -223,5 +261,5 @@ export function isEnvironmentLayerEffectivelyVisible(
   if (!layer?.available || !visibility[id]) {
     return false;
   }
-  return layer.parentId ? visibility[layer.parentId] : true;
+  return layer.parentId ? isEnvironmentLayerEffectivelyVisible(visibility, layer.parentId) : true;
 }

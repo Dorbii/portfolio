@@ -20,11 +20,11 @@ export function EnvironmentLayerInspector({
       data-layer-inspector="environment"
       open
     >
-      <summary>Layer inspection · L1–L4</summary>
+      <summary>Layer inspection</summary>
       <div className="career-world__layer-inspector-list">
         {ENVIRONMENT_LAYER_DEFINITIONS.map((layer) => {
           const parentVisible = layer.parentId
-            ? visibility[layer.parentId]
+            ? isEnvironmentLayerEffectivelyVisible(visibility, layer.parentId)
             : true;
           const effective = isEnvironmentLayerEffectivelyVisible(
             visibility,

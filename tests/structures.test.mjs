@@ -3,6 +3,7 @@ import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import ts from "typescript";
 import {
   resolveDetailState,
   resolveNodeVisibility,
@@ -873,7 +874,24 @@ test("structures share composition camera, LOD, and light contracts", async () =
   );
   assert.match(scene, /<StructuresLayer[\s\S]*camera=\{camera\}/);
   assert.match(scene, /<StructuresLayer[\s\S]*detailState=\{detailState\}/);
-  assert.match(scene, /<StructuresLayer[\s\S]*light=\{WORLD_LIGHT\}/);
+  const syntax = ts.createSourceFile("WorldScene.tsx", scene, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const lightBindings = new Map();
+  const inspect = (node) => {
+    if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
+      const tag = node.tagName.getText(syntax);
+      if (["StructuresLayer", "LandLighting", "WaterLayer", "InfrastructureLayer"].includes(tag)) {
+        const attribute = node.attributes.properties.find((p) => ts.isJsxAttribute(p) && p.name.text === "light");
+        let expression = attribute?.initializer?.expression;
+        if (expression && ts.isConditionalExpression(expression)) expression = expression.whenTrue;
+        assert.ok(expression && ts.isIdentifier(expression), `${tag} must consume the shared lighting value`);
+        lightBindings.set(tag, expression.text);
+      }
+    }
+    ts.forEachChild(node, inspect);
+  };
+  inspect(syntax);
+  assert.ok(lightBindings.has("StructuresLayer") && lightBindings.has("WaterLayer") && lightBindings.has("LandLighting"));
+  assert.equal(new Set(lightBindings.values()).size, 1);
   assert.match(layer, /cameraViewBox\(\s*camera,/);
   assert.match(layer, /resolveNodeVisibility\(CAPITAL_NODE_POLICY/);
   assert.match(layer, /data-light-source=\{light\.id\}/);

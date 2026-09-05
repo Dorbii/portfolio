@@ -1,0 +1,24 @@
+{
+  "source": "terrain-local-mount-r1.json",
+  "inputHash": "c34f8631fe6840474f2b9f82bb91143fb9c2a2617dd01a8e7376a943759a1052",
+  "world": {
+    "path": "/career-world/layers/terrain/authority/textures/world-land-r1.png?v=c34f8631fe684047",
+    "dimensions": [
+      1664,
+      936
+    ],
+    "sha256": "39c97ed3aea63deecb1662c720287a0d67e6ac2810c343e6f0976679966c19f3"
+  },
+  "territory": {
+    "path": "/career-world/layers/terrain/authority/textures/world-land-detail-4x-r1.png?v=c34f8631fe684047",
+    "dimensions": [
+      6656,
+      3744
+    ],
+    "sha256": "86d7c19d3a298251b686cfb1f0d638d7d3d469b59c5ba736ce32172b51f28678"
+  },
+  "mask": {
+    "path": "/career-world/layers/terrain/authority/masks/world-land-mask-r5.png",
+    "sha256": "653b6de002bbec7cff783d5eed137d3b30a0eabe2b312f97f60e5d1019d6e754"
+  }
+}

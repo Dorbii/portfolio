@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
@@ -29,13 +28,6 @@ async function authoredTerritories() {
       .map((file) => file.match(/^terrain-l2-(.+)-r\d+\.json$/)?.[1])
       .filter(Boolean),
   );
-}
-
-async function sha256(relativePath) {
-  return createHash("sha256")
-    .update(await readFile(path.join(root, relativePath)))
-    .digest("hex")
-    .toUpperCase();
 }
 
 function paeth(left, up, upperLeft) {
@@ -646,101 +638,5 @@ test("close land tiles are authored from dedicated high-fidelity materials", asy
   );
 });
 
-test("coast field is derived across the complete authored shoreline", async () => {
-  const mask = await decodePng(
-    "public/career-world/layers/terrain/authority/masks/world-land-mask-r4.png",
-  );
-  const coast = await decodePng(
-    "public/career-world/layers/ocean/authority/fields/coast-geometry-r5.png",
-  );
-  assert.deepEqual([coast.width, coast.height], [mask.width, mask.height]);
-  assert.equal(coast.channels, 4);
-
-  let boundaryPixels = 0;
-  let innerBoundaryPixels = 0;
-  const substrateValues = new Set();
-  const boundarySubstrate = [];
-  for (let y = 1; y < mask.height - 1; y += 1) {
-    for (let x = 1; x < mask.width - 1; x += 1) {
-      const maskOffset = y * mask.width + x;
-      const coastOffset = maskOffset * 4;
-      const land = mask.pixels[maskOffset] >= 128;
-      assert.equal(coast.pixels[coastOffset] >= 128, land);
-      if (land) {
-        const neighborWater = (
-          mask.pixels[maskOffset - 1] < 128
-          || mask.pixels[maskOffset + 1] < 128
-          || mask.pixels[maskOffset - mask.width] < 128
-          || mask.pixels[maskOffset + mask.width] < 128
-        );
-        if (neighborWater) {
-          innerBoundaryPixels += 1;
-          assert.ok(coast.pixels[coastOffset + 2] > 0);
-        }
-        continue;
-      }
-      const neighborLand = (
-        mask.pixels[maskOffset - 1] >= 128
-        || mask.pixels[maskOffset + 1] >= 128
-        || mask.pixels[maskOffset - mask.width] >= 128
-        || mask.pixels[maskOffset + mask.width] >= 128
-      );
-      if (neighborLand) {
-        boundaryPixels += 1;
-        assert.ok(coast.pixels[coastOffset + 2] > 0);
-        substrateValues.add(coast.pixels[coastOffset + 3]);
-        boundarySubstrate.push(coast.pixels[coastOffset + 3]);
-      }
-    }
-  }
-  assert.ok(boundaryPixels > 1000);
-  assert.ok(innerBoundaryPixels > 1000);
-  assert.ok(
-    substrateValues.size > 8,
-    "coast substrate must continue authored land value instead of a constant",
-  );
-  boundarySubstrate.sort((left, right) => left - right);
-  assert.ok(
-    boundarySubstrate[Math.floor(boundarySubstrate.length / 2)] >= 68,
-    "coast substrate must exclude dark authored edge ink",
-  );
-});
-
-test("the solved ocean fields are the accepted checkpoint", async () => {
-  // These four replace 40.3 MB of painted water plates. The phase field is an
-  // ASSET rather than a runtime cost because the coastline is fixed once set,
-  // so a change here is a change to the sea itself and should be deliberate:
-  // re-bake with bake_world.py, re-encode with encode_world.py, and update
-  // these hashes in the same commit that changes the water.
-  //
-  // Both bake and encode read WORLD_LAMBDA. Setting it for one and not the
-  // other writes a texture at one scale and a manifest claiming another, which
-  // is silent -- the pixels are fine and every length derived from them is
-  // wrong. Run them with the same environment.
-  const acceptedAssets = [
-    [
-      "public/career-world/layers/ocean/fields/ocean-flow-r2.png",
-      "498D0BA5D259DFCD26F85B1D43191E694163A325AF92D1B3F93441BE039F534E",
-    ],
-    [
-      "public/career-world/layers/ocean/fields/ocean-noise-fine-r2.png",
-      "D032B31C204FF7F7451F34EA722CBCF4EDB6F7765511071E8512456616EADDE9",
-    ],
-    [
-      "public/career-world/layers/ocean/fields/ocean-noise-r2.png",
-      "C111F6D9F022DA282EFEF222C5E0FB83716E1264A855FB0DD2C0BBA1F58695C9",
-    ],
-    [
-      "public/career-world/layers/ocean/fields/ocean-phase-r2.png",
-      "8F9292A48BFE30F0DD0B08ED9CA6F629F1F52BC0662188D428BEE1710131B3A0",
-    ],
-  ];
-
-  for (const [relativePath, expectedHash] of acceptedAssets) {
-    assert.equal(
-      await sha256(relativePath),
-      expectedHash,
-      `${relativePath} changed after the accepted checkpoint`,
-    );
-  }
-});
+// Water geometry and derived-field provenance are covered against the current
+// served land in water.test.mjs; the old fixed-coast solver was retired.

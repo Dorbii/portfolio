@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "sources": {
+    "public/career-world/layers/water/ocean/seabed/seabed-albedo-r1.png": "6b5ef7a17b39d40cfca71c30c38ccc9197fb76b2512516d3545ee01a91d5a63f",
+    "public/career-world/layers/water/ocean/details/ocean-details-r1.png": "001de2d218a09250c9b37be02a8e57f46e5667101b465065bab6f0eca50d1ebe",
+    "public/career-world/layers/water/ocean/details/ocean-detail-labels-r1.png": "de2f44c7171ecc73a0cf5846b2d7a4b9141155d360b4da29b0a07267ac957a87",
+    "public/career-world/layers/water/ocean/details/ocean-detail-layout-r1.json": "8541b25f7b5236ec43638c0699dd3a4abd915005338386d3456ed6ba103a0db0"
+  },
+  "outputs": {
+    "floor": {
+      "path": "/career-world/layers/water/ocean/seabed/seabed-varied-r1.webp",
+      "dimensions": [
+        4096,
+        4096
+      ],
+      "metrePeriod": 256,
+      "sha256": "99c135c198d812cc8de5c7c0894c8945c9f1bf3036dd36435beb9c6d0789fe19"
+    },
+    "details": {
+      "path": "/career-world/layers/water/ocean/details/ocean-details-scattered-r1.webp",
+      "dimensions": [
+        4096,
+        4096
+      ],
+      "metrePeriod": 288,
+      "sha256": "d16a5bbaeadbbab8c878a506c9dd6197eeee9ba4217a9a9f6d74b19dcdf3127a"
+    }
+  },
+  "layout": {
+    "floorCells": [
+      8,
+      8
+    ],
+    "detailPotentialSites": 576,
+    "detailPlacements": 455,
+    "detailScaleRange": [
+      0.65,
+      1.25
+    ],
+    "detailRotationDegrees": [
+      -8,
+      8
+    ],
+    "floorSeed": "0x2560f10a",
+    "detailSeed": "0x2880c0a1"
+  }
+}

@@ -1,0 +1,6213 @@
+{
+  "version": 1,
+  "source": "public/career-world/layers/terrain/authority/manifests/terrain-local-mount-r1.json",
+  "sourceHash": "3015128348a6a0b305e9ebede724842d3f902df06ed4f8d90a525f0a474bf13e",
+  "inputHash": "0a1446435d8d2b8620bde2b54e347c142663b2e29f12fc72dff6f480b3f74271",
+  "generatorHash": "f2ab78a89825c8102dadc61fa8bbe6b05af93c988e8ad068fcef905cbc41ed30",
+  "sourceAssets": [
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-0-site.webp",
+      "sha256": "4d35a7f217d5e90125e9e43376f5b6da078d1a020411b5c69f43cbec391b1fe0"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-1-site.webp",
+      "sha256": "54a51f934a9f909f3f4f330d9061d6a60acde18ebd47d460deb7c2ff6c7f8e41"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-2-site.webp",
+      "sha256": "e40f91a525f819d704a9f358c4ce615438b98ec323aae72aca6caac1ae42caba"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-3-site.webp",
+      "sha256": "31205f3618dd2320adbfb073354de12cfff6a0aad7cd9c141460f399285c3acc"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c1-0-site.webp",
+      "sha256": "b9861cc6ca675e75df13bbebd5a682b746ab44e3ef03a162bd11e40ef9073f7b"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c1-1-site.webp",
+      "sha256": "d4509fdd27666b2637999d4ee5319a5e5a4d2b7ccba79521c96cb80156ec0d11"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c1-2-site.webp",
+      "sha256": "eac4d8bf2e9035f75f975f9107a55192558820e3faf0f8d96347d62f3496a3a1"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c1-3-site.webp",
+      "sha256": "e9d5a5bdf1cf0d6692bfbf4a7308997510a3d7eb44f5fccaa774c5c73d596c64"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-0-site.webp",
+      "sha256": "03f90863322655cc7465f0f330d161f52d07031a39c2716de1d059fbd208ae64"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-1-site.webp",
+      "sha256": "9ea59d62fcbac0c27d83c3bb48c99ce078ac3d8c207fa2eddaa3c653ab86babe"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-2-site.webp",
+      "sha256": "14bf6b12c948da501deb0ea6b55a48ba620e41175f5dfc6cc86a2f287f566862"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-3-site.webp",
+      "sha256": "b88a20c7228c9cf24dfd812c4c461ccbdc27e9dbc11961c62919094a5846b13c"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-0-site.webp",
+      "sha256": "247bce9ecab7751703799fe3bf841cd89a072bb25ceb8387d03c663b93d6a39d"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-1-site.webp",
+      "sha256": "854d009d628f8f047c64bf2b9fc5cf90af7dd5985c507818c388a20c366d1df1"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-2-site.webp",
+      "sha256": "203ed02df813414097e5a06dff87191afbed5a114fa69f21036a37e1fd17d17c"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-3-site.webp",
+      "sha256": "8f2aadcb1a0e51cbca2572f63d09d770d9e1be97a1c5afa0d3ea2a252e98725f"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-0-site.webp",
+      "sha256": "7cac8560d26b5f39d0ba9df198511ae2468f2a8703a80c8912d88b23b3ba1005"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-1-site.webp",
+      "sha256": "d50951024a5ecd257dfc5f5650083aebfdf1c22c84f52130bf37205e01cce69a"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-2-site.webp",
+      "sha256": "b805dff99730129de80d184ab986071d992bf51d7f791fd07d1593585374dac0"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-3-site.webp",
+      "sha256": "dd1c4a30fcd950f8341b731c992c856367692d64b54b6b9c7798d412d6978975"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c0-0-site.webp",
+      "sha256": "db0c975952db9bcda779389a0387d2aa4305b432ea07bcbf5b30813f4762613f"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c0-1-site.webp",
+      "sha256": "d76d9b6eb32a9fd2f0404b60de9f302da069297b01c8ca27f4b2d254f90328e1"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c0-2-site.webp",
+      "sha256": "72d441a729b66f729d37460e8b9dbd108b400298c98980d382b27b64183c60a6"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c1-0-site.webp",
+      "sha256": "49ad65442fef3318a334607da77da97bd582d487dcdefad7a60c25c25e3c7dd6"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c1-2-site.webp",
+      "sha256": "02f3bbf60c8ae7af057329e2cac3a56c163a5f6631d28b7bdd443455706761e1"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c2-0-site.webp",
+      "sha256": "22dd7f9c360c98e9636dac588bcc7d63690f3a272844d62a324319efffd1f1a2"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c2-2-site.webp",
+      "sha256": "7c12ba938f272164eb45e4ce0bf1bbf7fabb058500dc76edff5dfff8e417065d"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-0-site.webp",
+      "sha256": "7cd0227984246cb5ca4384c34a85bd4b36bd800f0dfa8faee500e5e298dd3440"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-2-site.webp",
+      "sha256": "33d118b5649b8fa37cfb9422887ffe780ca6411caea4cfb16aa64dcec1b3ec82"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c4-1-site.webp",
+      "sha256": "3fbfd0731dd2a16f7d99c6331da0968eaf93e27d4cb20d9b7786275fc52d64c4"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c4-2-site.webp",
+      "sha256": "459dbfc50de1da9a6af004c1511ed7df2bb362aadaec83d5a96a38e7aa4b1bf7"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c5-0-site.webp",
+      "sha256": "37a3a12826491b2ccc170567a1d69ff3123740cfe334e3f4aeeac7de3aad0f20"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c5-1-site.webp",
+      "sha256": "a9649c830d88d19c0121b28ad2898431091ae4ddad78c06ef1dbd0ebdd19181c"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c5-2-site.webp",
+      "sha256": "e32caad739aa73edc11a5c20096d047d2f1ff45108a5958abd459045afdd373f"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c6-0-site.webp",
+      "sha256": "c52d5a78e387eba0257945d4ffefa98e1c846129508fc78414ffee274ba37a96"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c6-1-site.webp",
+      "sha256": "b92ce5acfb32676fe435b026f2d7fdce4fab35fba9fdb75bea94cb8277b2be5d"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c6-2-site.webp",
+      "sha256": "c93f36364ff3bd22eb6dd95c5a975469c3119a22268dd3a362466f7ce429c249"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-coast/c2-0-site.webp",
+      "sha256": "feca052485672c736da5d1804254abc1fc5398cf4a5b201e985a2443030cb3a7"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-coast/c4-0-site.webp",
+      "sha256": "02f0282ac0b8d793777c55276e0f661b7d5d25e47d91c10bb927f5b5eadeb04d"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-coast/c5-0-site.webp",
+      "sha256": "d5b67f6d195a26c44157601e7768ec6184ef198404ca4d147fbaa4b16b4edf71"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-coast/c6-0-site.webp",
+      "sha256": "104d6f0602382f6067ffbce7aef8b4c6195fd6886e22ae4f92362c9f044012b6"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-review/tanium-c1-1-site.webp",
+      "sha256": "460a71cbd796f9f805a582cda5ea689648023836e575ecbb5ad6203b0f181344"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-review/tanium-c2-1-site.webp",
+      "sha256": "da91c296809eb8319cdd579331772ed7d343eac9b6e392333488887e59119771"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-review/tanium-c3-1-site.webp",
+      "sha256": "bf5263e799d01edbdbab3ad9fb2cb425b09f4f2e2908b2467e78b8313d4d6021"
+    },
+    {
+      "path": "public/career-world/layers/terrain/authority/tiles/l2-review/tanium-c4-0-site.webp",
+      "sha256": "a9ae622b60a3853b6032c4381465d8c0c0840ae82ba00a4dc34c1e4604063071"
+    }
+  ],
+  "features": [
+    {
+      "id": "purple-clearing-brook",
+      "kind": "stream",
+      "waterPixels": 4692,
+      "points": [
+        [
+          0.29296875,
+          0.2450629340277778
+        ],
+        [
+          0.29083251953125,
+          0.2497287326388889
+        ],
+        [
+          0.292572021484375,
+          0.2533637152777778
+        ],
+        [
+          0.2900390625,
+          0.2578125
+        ],
+        [
+          0.29412841796875,
+          0.2635633680555555
+        ],
+        [
+          0.2919921875,
+          0.26822916666666663
+        ],
+        [
+          0.29150390625,
+          0.27197265625
+        ],
+        [
+          0.29364013671875,
+          0.2752821180555555
+        ],
+        [
+          0.28985595703125,
+          0.2789171006944444
+        ],
+        [
+          0.29034423828125,
+          0.2832573784722222
+        ],
+        [
+          0.291015625,
+          0.2888997395833333
+        ],
+        [
+          0.287689208984375,
+          0.29052734375
+        ],
+        [
+          0.28411865234375,
+          0.29296875
+        ],
+        [
+          0.28070068359375,
+          0.29611545138888884
+        ],
+        [
+          0.277587890625,
+          0.2987196180555555
+        ],
+        [
+          0.27362060546875,
+          0.3001844618055555
+        ]
+      ]
+    },
+    {
+      "id": "gorge-feeder",
+      "kind": "stream",
+      "waterPixels": 638,
+      "points": [
+        [
+          0.42333984375,
+          0.2625868055555555
+        ],
+        [
+          0.42120361328125,
+          0.2642144097222222
+        ],
+        [
+          0.419677734375,
+          0.26611328125
+        ],
+        [
+          0.418609619140625,
+          0.2690972222222222
+        ]
+      ]
+    },
+    {
+      "id": "great-gorge-fall",
+      "kind": "fall",
+      "waterPixels": 2606,
+      "points": [
+        [
+          0.418609619140625,
+          0.2690972222222222
+        ],
+        [
+          0.418212890625,
+          0.2788628472222222
+        ],
+        [
+          0.4180908203125,
+          0.2870008680555555
+        ],
+        [
+          0.4178466796875,
+          0.29611545138888884
+        ]
+      ]
+    },
+    {
+      "id": "gorge-lower-cascade",
+      "kind": "fall",
+      "waterPixels": 1238,
+      "points": [
+        [
+          0.4205322265625,
+          0.3065321180555555
+        ],
+        [
+          0.4202880859375,
+          0.3103298611111111
+        ],
+        [
+          0.41998291015625,
+          0.3135850694444444
+        ]
+      ]
+    }
+  ],
+  "worldSize": [
+    3472,
+    1953
+  ],
+  "metresPerWorldUnit": 0.4503,
+  "rangeMetres": 24,
+  "dimensions": [
+    8192,
+    4608
+  ],
+  "tileSize": 256,
+  "levels": [
+    {
+      "level": 0,
+      "dimensions": [
+        8192,
+        4608
+      ],
+      "tiles": [
+        {
+          "id": "0/5-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/5-0.png",
+          "origin": [
+            0.15625,
+            0
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "1c836ea040fecbcdd268e07cce498f91f70b3c9967e3e7ed99231549c6d94c4c"
+        },
+        {
+          "id": "0/6-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/6-0.png",
+          "origin": [
+            0.1875,
+            0
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "f18add3b0091c6597704e82e3ec20ae07b74525b6c7c8c69a1ca671205026b3b"
+        },
+        {
+          "id": "0/7-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/7-0.png",
+          "origin": [
+            0.21875,
+            0
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "09fb71f3bced7ec44f043260efd46765791c96ccca95294b60501d01aa674cf6"
+        },
+        {
+          "id": "0/8-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/8-0.png",
+          "origin": [
+            0.25,
+            0
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "0a9ab437fe2c1d1e91694d2623284a418ece4684b9778f010c7ec251f0f0e438"
+        },
+        {
+          "id": "0/9-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/9-0.png",
+          "origin": [
+            0.28125,
+            0
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "27d7faf5c86df0103c46ddc0199a923d699bae2101665f4c8056ed62362ea1a6"
+        },
+        {
+          "id": "0/10-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/10-0.png",
+          "origin": [
+            0.3125,
+            0
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "b5aad59e6d94dae7c6cae9d699d039a3b1ee0bc8c7aa77e4a2f126a228086219"
+        },
+        {
+          "id": "0/11-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/11-0.png",
+          "origin": [
+            0.34375,
+            0
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "f6e24d863465a046c46b5f9519475afcaa0d3d690460520c233727965f9a0994"
+        },
+        {
+          "id": "0/12-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/12-0.png",
+          "origin": [
+            0.375,
+            0
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "b80ee7465691857817111ab16309beba9ba088548ef9dccf78b7612c6fc7e25b"
+        },
+        {
+          "id": "0/13-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/13-0.png",
+          "origin": [
+            0.40625,
+            0
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "26fac9faa3e8732613805ed005630a769cd20ae7a530e80581cbc30d6c98de25"
+        },
+        {
+          "id": "0/14-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/14-0.png",
+          "origin": [
+            0.4375,
+            0
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "65391b541b87813125eb0138e9777247bd6a2d5c7c095f84b583dfee721fdf97"
+        },
+        {
+          "id": "0/15-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/15-0.png",
+          "origin": [
+            0.46875,
+            0
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "584a2d8d30593b2841f396e6ca810e2db73fab9f73b149a7cd25d04e903a5788"
+        },
+        {
+          "id": "0/16-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/16-0.png",
+          "origin": [
+            0.5,
+            0
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "868be23fd56361133ee2cc63a1b152096c1a89f22c4d70a4c3ea7041e3483a5f"
+        },
+        {
+          "id": "0/5-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/5-1.png",
+          "origin": [
+            0.15625,
+            0.05555555555555555
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "d0e51a2141f67393e05dd51da930587ee9e2afcb970dc867e1b7c9c3097d04af"
+        },
+        {
+          "id": "0/6-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/6-1.png",
+          "origin": [
+            0.1875,
+            0.05555555555555555
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "52cb8cd27110149d77329ba8dc35a465bbf929b23af26da679bd3e7e7664defc"
+        },
+        {
+          "id": "0/7-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/7-1.png",
+          "origin": [
+            0.21875,
+            0.05555555555555555
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "9ec3d466068ea91ef9ba5ec6679257ae8a58c9c3e38d76babb58aeca8baaef58"
+        },
+        {
+          "id": "0/8-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/8-1.png",
+          "origin": [
+            0.25,
+            0.05555555555555555
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "eff9f9009cd12af8da7f8b0c76faab481d41c544e8caea5ed0410ee77a72b8a2"
+        },
+        {
+          "id": "0/9-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/9-1.png",
+          "origin": [
+            0.28125,
+            0.05555555555555555
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "c839f0f1cc357bd4be5d5237feffa86b653e0cad41b0caa74abc190a7dcb7306"
+        },
+        {
+          "id": "0/10-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/10-1.png",
+          "origin": [
+            0.3125,
+            0.05555555555555555
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "503a2419f52b554c2e748230b8d33011267b6b6ed3dd486985b61e8ff8a4741d"
+        },
+        {
+          "id": "0/11-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/11-1.png",
+          "origin": [
+            0.34375,
+            0.05555555555555555
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "1507b12e4162aac4e97604ebf673e64235416a221caebe9c357ca0d51345edee"
+        },
+        {
+          "id": "0/12-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/12-1.png",
+          "origin": [
+            0.375,
+            0.05555555555555555
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "f77e7577bcf3859effa87ef89c490618c99a97685a652e432a91e42d2e4ba7cf"
+        },
+        {
+          "id": "0/13-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/13-1.png",
+          "origin": [
+            0.40625,
+            0.05555555555555555
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "63f41bafb4a06088e1cad61c94446300dd1c74c58d74d4e410cfa8273060c9e4"
+        },
+        {
+          "id": "0/14-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/14-1.png",
+          "origin": [
+            0.4375,
+            0.05555555555555555
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "88482d68d005eaa3070c432ce3dd60afe7f164e3d53019c6af0f5f819a7518a1"
+        },
+        {
+          "id": "0/15-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/15-1.png",
+          "origin": [
+            0.46875,
+            0.05555555555555555
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "ef5be5fa74f499bf921a18c7c93bf4b4be20203890647d70e68db09f2cd0a73f"
+        },
+        {
+          "id": "0/16-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/16-1.png",
+          "origin": [
+            0.5,
+            0.05555555555555555
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "384d69cb83da2e9b4561ec8c179571ae6d290f8962c586c2588c9eaccb2ea9ef"
+        },
+        {
+          "id": "0/5-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/5-2.png",
+          "origin": [
+            0.15625,
+            0.1111111111111111
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "d0e51a2141f67393e05dd51da930587ee9e2afcb970dc867e1b7c9c3097d04af"
+        },
+        {
+          "id": "0/6-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/6-2.png",
+          "origin": [
+            0.1875,
+            0.1111111111111111
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "0523be3a2595312ec4ccb68ca640d6505285883d462f308f780781fb638b96a1"
+        },
+        {
+          "id": "0/7-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/7-2.png",
+          "origin": [
+            0.21875,
+            0.1111111111111111
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "10526417963bc68d30ae2c2fdb609efb36f7e8682da67100c4683ded68ed1b2e"
+        },
+        {
+          "id": "0/8-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/8-2.png",
+          "origin": [
+            0.25,
+            0.1111111111111111
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "050fd590b177eaf921e28fff4badc28ed8daf6608bc742ac8314179a39130b3f"
+        },
+        {
+          "id": "0/9-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/9-2.png",
+          "origin": [
+            0.28125,
+            0.1111111111111111
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "e20765e2f3dd4f9beba226279128eb1526db293a2d2fa00903510f8e03ab3ce8"
+        },
+        {
+          "id": "0/10-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/10-2.png",
+          "origin": [
+            0.3125,
+            0.1111111111111111
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "c902c72a3b2b673784ca24015325fc5ba04ff4758637e343cb0ced84c110318b"
+        },
+        {
+          "id": "0/11-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/11-2.png",
+          "origin": [
+            0.34375,
+            0.1111111111111111
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "eb50053eb5358c96316a71036d121d40b8748f4031c12de29f2d90391d136c4c"
+        },
+        {
+          "id": "0/12-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/12-2.png",
+          "origin": [
+            0.375,
+            0.1111111111111111
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "6ac5e4eb2fec88e5427da6ef259ab4530d2f9a2b4aa0f5161b25d02856d59c62"
+        },
+        {
+          "id": "0/13-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/13-2.png",
+          "origin": [
+            0.40625,
+            0.1111111111111111
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "f5618c06f06281f86e95eb31177a5178ef725b9c00cc4061c6de6ee53cc9e6e3"
+        },
+        {
+          "id": "0/14-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/14-2.png",
+          "origin": [
+            0.4375,
+            0.1111111111111111
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "d93b627d151b5cb4194344be5e3054e9e9822df19ce35b8ef2803a955fcd2893"
+        },
+        {
+          "id": "0/15-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/15-2.png",
+          "origin": [
+            0.46875,
+            0.1111111111111111
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "39ecee3ff214ee4c27a5d34fd7b95bba05760fe3e1832ee3c79b30ab93df952b"
+        },
+        {
+          "id": "0/16-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/16-2.png",
+          "origin": [
+            0.5,
+            0.1111111111111111
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "a2a07a8df5c636d46a6746a95ae7dd4ce503d83bb2bc10a3aa6c98b19eb0f8b0"
+        },
+        {
+          "id": "0/5-3",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/5-3.png",
+          "origin": [
+            0.15625,
+            0.16666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "d0e51a2141f67393e05dd51da930587ee9e2afcb970dc867e1b7c9c3097d04af"
+        },
+        {
+          "id": "0/6-3",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/6-3.png",
+          "origin": [
+            0.1875,
+            0.16666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "89349ad270423a3656d54995fe664fed91864ed802ca744f78e747a7785d2bf4"
+        },
+        {
+          "id": "0/7-3",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/7-3.png",
+          "origin": [
+            0.21875,
+            0.16666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "9a65769927dd18dfbd55207d6259545f5a523680318079c8c8d8508654b2ccb2"
+        },
+        {
+          "id": "0/8-3",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/8-3.png",
+          "origin": [
+            0.25,
+            0.16666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "7928ab9aa5c5caf17f46c04a6b4c2c67167cc8ff8abf4d1cd3128531ba8c3d49"
+        },
+        {
+          "id": "0/9-3",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/9-3.png",
+          "origin": [
+            0.28125,
+            0.16666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "3f4dc879bcdd66b9a1306aab97b73c481be543a1f0dd2e970344a8a90ed7cf3d"
+        },
+        {
+          "id": "0/10-3",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/10-3.png",
+          "origin": [
+            0.3125,
+            0.16666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "7638c0bee06a875d09ffa2d03d330e2889cdb1f64bfcc1f4f201aa61ee6f1b6c"
+        },
+        {
+          "id": "0/11-3",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/11-3.png",
+          "origin": [
+            0.34375,
+            0.16666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "30c0a57781f9da28d059b8251900eca5ba5383176b280f4872b127eac91ccc62"
+        },
+        {
+          "id": "0/12-3",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/12-3.png",
+          "origin": [
+            0.375,
+            0.16666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "86b5ad2158c3a696a9f7944d30efbd2a69b78ce0958a3b5fcdcc4a620298d94c"
+        },
+        {
+          "id": "0/13-3",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/13-3.png",
+          "origin": [
+            0.40625,
+            0.16666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "b151a5e5c36cc436e985b424af3af2bf24e069788b992c4540a57bad081bbbbe"
+        },
+        {
+          "id": "0/14-3",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/14-3.png",
+          "origin": [
+            0.4375,
+            0.16666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "7f57967e40c867c68ade249b7d8b4871a710bc4409836b572469ca9b14b8239e"
+        },
+        {
+          "id": "0/15-3",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/15-3.png",
+          "origin": [
+            0.46875,
+            0.16666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "0b4c5b76d443f134bad3be4d01775b2dad92f4a25f8ba14a5f2dc59721868d4c"
+        },
+        {
+          "id": "0/16-3",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/16-3.png",
+          "origin": [
+            0.5,
+            0.16666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "49c4d64bf8b1d313f7bb7d44d39bd3859c87b7194148397864c81f9a3a7a22be"
+        },
+        {
+          "id": "0/5-4",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/5-4.png",
+          "origin": [
+            0.15625,
+            0.2222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "19cc60c1d307d6fcda575ca4692704f8a6da408260394ea038f6422e816b3e71"
+        },
+        {
+          "id": "0/6-4",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/6-4.png",
+          "origin": [
+            0.1875,
+            0.2222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "a6fdb56217b068d676d072f67da4a5e76cb0741af9292d2431590ee776a436b5"
+        },
+        {
+          "id": "0/7-4",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/7-4.png",
+          "origin": [
+            0.21875,
+            0.2222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "348067c98ee6f31139a246762e6673cafd8e0d62c863d0830e639f67bac2ebef"
+        },
+        {
+          "id": "0/8-4",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/8-4.png",
+          "origin": [
+            0.25,
+            0.2222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "886e4e5603934da149ddc8480fc583751153158d07d10e6d868dc0c511714e89"
+        },
+        {
+          "id": "0/9-4",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/9-4.png",
+          "origin": [
+            0.28125,
+            0.2222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "e72e7a0448dc57f0feeaeb403ab8dc39b0803def93a191edcdd186d797f5cb2a"
+        },
+        {
+          "id": "0/10-4",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/10-4.png",
+          "origin": [
+            0.3125,
+            0.2222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "cb6c4f232f3d6b2ea01eaaef881dfa0fea52f7532b45fc8efa079e6665f7e69b"
+        },
+        {
+          "id": "0/11-4",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/11-4.png",
+          "origin": [
+            0.34375,
+            0.2222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "30e4843d2521f5fa246e8dbf57d2c8e70aca3307fb1c8ee8ca583222b025ea75"
+        },
+        {
+          "id": "0/12-4",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/12-4.png",
+          "origin": [
+            0.375,
+            0.2222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "6da0e13864afbbfa770e3557ab20fa18090987afa8c232e08f0decc89588c1d5"
+        },
+        {
+          "id": "0/13-4",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/13-4.png",
+          "origin": [
+            0.40625,
+            0.2222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "5b2c21be5bd02346537a1662c3251657e44595c6091b9f5c9a6ed1124017dbf3"
+        },
+        {
+          "id": "0/14-4",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/14-4.png",
+          "origin": [
+            0.4375,
+            0.2222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "624afe52f7f36ae7ed68493b5df2062123059a11ea080622ddd44e52ad68a308"
+        },
+        {
+          "id": "0/15-4",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/15-4.png",
+          "origin": [
+            0.46875,
+            0.2222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "23608546c92bd2d827d17f4105b0d357145df302835a0fb08c706a3f03517e48"
+        },
+        {
+          "id": "0/16-4",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/16-4.png",
+          "origin": [
+            0.5,
+            0.2222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "61eed50099fb8371490022a8b6e8a846dda448f04a67e3dfa997643bfbce9968"
+        },
+        {
+          "id": "0/5-5",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/5-5.png",
+          "origin": [
+            0.15625,
+            0.2777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "fed1c45883d68aad87beadf5303c88aa3a5cf01da50b95503e5a67f6187eed93"
+        },
+        {
+          "id": "0/6-5",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/6-5.png",
+          "origin": [
+            0.1875,
+            0.2777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "7b1c6150ce4c81ce62dd15de1654ca6f56f7c55c66f99a101894b54d149c7c10"
+        },
+        {
+          "id": "0/7-5",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/7-5.png",
+          "origin": [
+            0.21875,
+            0.2777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "09dcf88e403e85af8bfc437ed2c7ba1930e5f8b7f71aaf8420d3e91ea9ef9f0a"
+        },
+        {
+          "id": "0/8-5",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/8-5.png",
+          "origin": [
+            0.25,
+            0.2777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "e6b5ae1a3da0907e868053a005c33efc4cf3c91e4db7c84f5a189fc88cf7b1c5"
+        },
+        {
+          "id": "0/9-5",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/9-5.png",
+          "origin": [
+            0.28125,
+            0.2777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "886ccefb3efaccecc04a00883953e473f92b35d4f08c4a902cbb2994046ad336"
+        },
+        {
+          "id": "0/10-5",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/10-5.png",
+          "origin": [
+            0.3125,
+            0.2777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "11f3fbf22ea2b91fff5418c65b782559c4ce079b2b2046e84eb8fe6570eb084a"
+        },
+        {
+          "id": "0/11-5",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/11-5.png",
+          "origin": [
+            0.34375,
+            0.2777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "73e99b3ff96e9d3eaf9a845e5f1b673548e2075c31beb6e741f22bd33de068e5"
+        },
+        {
+          "id": "0/12-5",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/12-5.png",
+          "origin": [
+            0.375,
+            0.2777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "c53bd36a5623a6bca9a7e3b6f1ee723043971a3a6f108758b611b104edcc97bc"
+        },
+        {
+          "id": "0/13-5",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/13-5.png",
+          "origin": [
+            0.40625,
+            0.2777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "694dc80c41eaad4a11c38e07a7f44d6aa8e4e4e06221fc841db74316d410f06e"
+        },
+        {
+          "id": "0/14-5",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/14-5.png",
+          "origin": [
+            0.4375,
+            0.2777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "1cbc9a04bbe316337d75c25f8bdc83401649ffc99bcfff37603c0b706ed9e59f"
+        },
+        {
+          "id": "0/15-5",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/15-5.png",
+          "origin": [
+            0.46875,
+            0.2777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "ff5c2d451364f61a2ab5d0c2c535f6b0c2da14d57703887af8ac6c4363134957"
+        },
+        {
+          "id": "0/16-5",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/16-5.png",
+          "origin": [
+            0.5,
+            0.2777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "d0b2eff4d5d8515a0c1865afd575c0ef930b13de99162922725c1a3e4f0a05e5"
+        },
+        {
+          "id": "0/5-6",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/5-6.png",
+          "origin": [
+            0.15625,
+            0.3333333333333333
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "ac9aa305f43438ea7bc26d698c20a96cd136e5115fca570573241cc43b252437"
+        },
+        {
+          "id": "0/6-6",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/6-6.png",
+          "origin": [
+            0.1875,
+            0.3333333333333333
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "a65b58e90e54b6987ede5deb94628be2ae40e9e5c3f998208573f7d3d693243e"
+        },
+        {
+          "id": "0/7-6",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/7-6.png",
+          "origin": [
+            0.21875,
+            0.3333333333333333
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "7f53f8a2370b385b5d46007211ac9c835e2b1b5dc69669e1e03b0f25e4416553"
+        },
+        {
+          "id": "0/8-6",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/8-6.png",
+          "origin": [
+            0.25,
+            0.3333333333333333
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "6e1cead1a0bed9290879658bc1e91eac84eec457917e8ef85d0c5cd11c26036b"
+        },
+        {
+          "id": "0/9-6",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/9-6.png",
+          "origin": [
+            0.28125,
+            0.3333333333333333
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "1775b5c7ef0f8a2b6f6f92f90a2990221f1a4ee9edd941bba8e0941cee733932"
+        },
+        {
+          "id": "0/10-6",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/10-6.png",
+          "origin": [
+            0.3125,
+            0.3333333333333333
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "fb7e1cdf4c288a5a5f4b61701481426992898d2b710608c550cb543e9d2ae2ad"
+        },
+        {
+          "id": "0/11-6",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/11-6.png",
+          "origin": [
+            0.34375,
+            0.3333333333333333
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "bb8ca9cf1c4388c0807118ad663c6527c926b678d0602a6b8fd39856fc309665"
+        },
+        {
+          "id": "0/12-6",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/12-6.png",
+          "origin": [
+            0.375,
+            0.3333333333333333
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "6e9496b58946b2f683aacb94e88083db59651171ada6d948c6e2a85533aacc07"
+        },
+        {
+          "id": "0/13-6",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/13-6.png",
+          "origin": [
+            0.40625,
+            0.3333333333333333
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "e51e311a3b2205859597ebe285ad4572610d279f7221e75b93a731620303f1fd"
+        },
+        {
+          "id": "0/14-6",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/14-6.png",
+          "origin": [
+            0.4375,
+            0.3333333333333333
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "391d40d28bebcc076b6727ee23a74f80fcb4e60bee7e69c4cb528804d8b3fec8"
+        },
+        {
+          "id": "0/15-6",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/15-6.png",
+          "origin": [
+            0.46875,
+            0.3333333333333333
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "68ab54a31b739fd3632d1bf64e40a53f8fc7c3f473e1178bf5f162abaf7d9811"
+        },
+        {
+          "id": "0/16-6",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/16-6.png",
+          "origin": [
+            0.5,
+            0.3333333333333333
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "a4e375602d1b3d0a0457707319a37eb7bdfe032b38968407e36b48d81638ad71"
+        },
+        {
+          "id": "0/5-7",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/5-7.png",
+          "origin": [
+            0.15625,
+            0.3888888888888889
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "386e27dc6076b50cdab04771f807799a1859a1b0b4b4068d7f38190251015073"
+        },
+        {
+          "id": "0/6-7",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/6-7.png",
+          "origin": [
+            0.1875,
+            0.3888888888888889
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "1a31bf29f4aba3ac100eaa27d47d5e22f6150bb75c3f931b8dfd12c99367b275"
+        },
+        {
+          "id": "0/7-7",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/7-7.png",
+          "origin": [
+            0.21875,
+            0.3888888888888889
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "c305abb51852264641913b910a3c00525a35449eb8a266fc24cf3d050f4d8359"
+        },
+        {
+          "id": "0/8-7",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/8-7.png",
+          "origin": [
+            0.25,
+            0.3888888888888889
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "531d0330a18f91df7b2d5f8128d8ed0510a96df10d90448686607600e5bdbf05"
+        },
+        {
+          "id": "0/9-7",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/9-7.png",
+          "origin": [
+            0.28125,
+            0.3888888888888889
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "0115bd0fa52f2d2b7e3e6ecd50cd6fae729676ba93923068f69c06ba18d61211"
+        },
+        {
+          "id": "0/10-7",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/10-7.png",
+          "origin": [
+            0.3125,
+            0.3888888888888889
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "6a0e5d231bb4cf0124a753bc78a5b0b683805bee3effbfb99aae29cdfa3bb0f4"
+        },
+        {
+          "id": "0/11-7",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/11-7.png",
+          "origin": [
+            0.34375,
+            0.3888888888888889
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "67097f47bf1ec12df83156ab52b7d5c7c7ee97793814a6111a69b7a8ec955376"
+        },
+        {
+          "id": "0/12-7",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/12-7.png",
+          "origin": [
+            0.375,
+            0.3888888888888889
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "791e739fd230e2aa3da88887bbaa3616071577b1f0e32ee45fc032405d40007e"
+        },
+        {
+          "id": "0/13-7",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/13-7.png",
+          "origin": [
+            0.40625,
+            0.3888888888888889
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "93ea5ee9a5af9a794e8c924f58c79bc4a5bc70f0170e88c42554e48979cb723e"
+        },
+        {
+          "id": "0/14-7",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/14-7.png",
+          "origin": [
+            0.4375,
+            0.3888888888888889
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "693f4c09afab046469cce50eee6e60f8cd987ff186851b94f9206eccdb1c8883"
+        },
+        {
+          "id": "0/15-7",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/15-7.png",
+          "origin": [
+            0.46875,
+            0.3888888888888889
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "7e1e89424d6172581f1987974cb5a413e084aa96d8c5039eab689991e8e4911d"
+        },
+        {
+          "id": "0/16-7",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/16-7.png",
+          "origin": [
+            0.5,
+            0.3888888888888889
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "3c6c894829a590f34da749a595631c735e67603cb888ccbe33a75595457a62de"
+        },
+        {
+          "id": "0/5-8",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/5-8.png",
+          "origin": [
+            0.15625,
+            0.4444444444444444
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "d0e51a2141f67393e05dd51da930587ee9e2afcb970dc867e1b7c9c3097d04af"
+        },
+        {
+          "id": "0/6-8",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/6-8.png",
+          "origin": [
+            0.1875,
+            0.4444444444444444
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "755d286e45900b63471b0c458e2b6eb996b780ef4b810b62d07c329f54b7ed9f"
+        },
+        {
+          "id": "0/7-8",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/7-8.png",
+          "origin": [
+            0.21875,
+            0.4444444444444444
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "55fe5f2d2cb3215f9a0ca2cc5f63514271a90af6ce7696264f8596cb8ad032f1"
+        },
+        {
+          "id": "0/8-8",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/8-8.png",
+          "origin": [
+            0.25,
+            0.4444444444444444
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "65805d17de9cdc5988e227fbf3650ae4e15e8c351886a0e3404e9756f2a1a35f"
+        },
+        {
+          "id": "0/9-8",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/9-8.png",
+          "origin": [
+            0.28125,
+            0.4444444444444444
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "2b289f641711bef427e18f8a7099889f39b2fcbc303772c4f75ce9d474cf4b50"
+        },
+        {
+          "id": "0/10-8",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/10-8.png",
+          "origin": [
+            0.3125,
+            0.4444444444444444
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "2021ffee58c0ca2d2d5c0c6bd7c53d7d9f3adfedb1b9d6786ac3d6aef06a7324"
+        },
+        {
+          "id": "0/11-8",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/11-8.png",
+          "origin": [
+            0.34375,
+            0.4444444444444444
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "e2fa1c3bc1bbf33fe2d5dd5e283e7efc1ec8e5cd339b4a38d19bf4a25c3f816c"
+        },
+        {
+          "id": "0/12-8",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/12-8.png",
+          "origin": [
+            0.375,
+            0.4444444444444444
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "402dc914715ea7e0def000cdaf70c06739ddd5d1e3565ed9c4a995bb2ef31ff6"
+        },
+        {
+          "id": "0/13-8",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/13-8.png",
+          "origin": [
+            0.40625,
+            0.4444444444444444
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "3e5f802e2ef8ab462c8dc8351b85b626fc89ee6d4ebcf0a3256ddf6147e38a78"
+        },
+        {
+          "id": "0/14-8",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/14-8.png",
+          "origin": [
+            0.4375,
+            0.4444444444444444
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "4f5bd7f170c470ae729654d92c51032b493b39a14f40ce664d8905a8ca9d8640"
+        },
+        {
+          "id": "0/15-8",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/15-8.png",
+          "origin": [
+            0.46875,
+            0.4444444444444444
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "8d5a68493239ed79b3cfc6f0793a13be4e2e58f13d51110a4658c708d33d9491"
+        },
+        {
+          "id": "0/16-8",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/16-8.png",
+          "origin": [
+            0.5,
+            0.4444444444444444
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "23dd518fb65e1cfdeca106de89100d33d4f41df5f6f4373b6fed9fece33e7bcc"
+        },
+        {
+          "id": "0/3-9",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/3-9.png",
+          "origin": [
+            0.09375,
+            0.5
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "61df7d6ace3013f12f3ff8a3f5c12472424fc6b66f70d5647483bc7f5018e84a"
+        },
+        {
+          "id": "0/4-9",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/4-9.png",
+          "origin": [
+            0.125,
+            0.5
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "a00f578581f6f32ccf8c9ab89b746c7282c188aa70ea95ea41dfacf62871d0da"
+        },
+        {
+          "id": "0/5-9",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/5-9.png",
+          "origin": [
+            0.15625,
+            0.5
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "2177c36d0b70bf844b2fa976792ed63aa004d8a577c5ecf4879fec59aa03bb38"
+        },
+        {
+          "id": "0/6-9",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/6-9.png",
+          "origin": [
+            0.1875,
+            0.5
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "1cc64d502d1b1652d1e05d4289ae0f8234d236aacadc1967311f03b46b2fabcc"
+        },
+        {
+          "id": "0/7-9",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/7-9.png",
+          "origin": [
+            0.21875,
+            0.5
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "7971a10db7ddd9da19d273ddc6e16806949e248324a52bdfe5ef25a19cdfbd67"
+        },
+        {
+          "id": "0/8-9",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/8-9.png",
+          "origin": [
+            0.25,
+            0.5
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "906f5434bff0532f32d0e282af83294fb9f58379ee2f84702fb645043e90d1ff"
+        },
+        {
+          "id": "0/9-9",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/9-9.png",
+          "origin": [
+            0.28125,
+            0.5
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "a7cdda0e8e4bd0e589e230883266af172549b7d6272a07c902cc3871e9251f12"
+        },
+        {
+          "id": "0/10-9",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/10-9.png",
+          "origin": [
+            0.3125,
+            0.5
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "cbd308d93e2c8796f6abfaaf6274f79e301dca3c84dbd42bd8f103fd99037b6b"
+        },
+        {
+          "id": "0/11-9",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/11-9.png",
+          "origin": [
+            0.34375,
+            0.5
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "424f81191611a830b420d8b07883d4a16d6fa550bb0b9dddf48167db2e3cadfb"
+        },
+        {
+          "id": "0/12-9",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/12-9.png",
+          "origin": [
+            0.375,
+            0.5
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "740791539e506284eff70ab471c6788ddb1140789472572ccf2e72a697355d30"
+        },
+        {
+          "id": "0/13-9",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/13-9.png",
+          "origin": [
+            0.40625,
+            0.5
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "06de5d649e70d6883cf2cc81d369447add4e0e1e85547f95ba55c04835646435"
+        },
+        {
+          "id": "0/14-9",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/14-9.png",
+          "origin": [
+            0.4375,
+            0.5
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "3641005f2cfec3ce7766fe29ae7be1a5cdbe4cf33a7e8da853fb184c733c69c0"
+        },
+        {
+          "id": "0/15-9",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/15-9.png",
+          "origin": [
+            0.46875,
+            0.5
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "a9ba5145116f911e78ce9e7c7bf7536c98da8f2af33e7f5634109b6817edfd14"
+        },
+        {
+          "id": "0/16-9",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/16-9.png",
+          "origin": [
+            0.5,
+            0.5
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "4c72b4b2ab64ade9d3e31d580a23e3cb689aa8b135883cfc1d7952ee7bbef4c7"
+        },
+        {
+          "id": "0/17-9",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/17-9.png",
+          "origin": [
+            0.53125,
+            0.5
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "024656b81344423327a5d2feab486d3f76fac39766fc92dbed2625d3bcfd7199"
+        },
+        {
+          "id": "0/18-9",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/18-9.png",
+          "origin": [
+            0.5625,
+            0.5
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "9119b2a3088fa32ab5acfa2b646b60f4f556acdd178be28ec6a226a123685fce"
+        },
+        {
+          "id": "0/3-10",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/3-10.png",
+          "origin": [
+            0.09375,
+            0.5555555555555556
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "7d7eea8803a48cb206a654a2f625212f134aff8ebb7dad7fab1f1abe7011cdb3"
+        },
+        {
+          "id": "0/4-10",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/4-10.png",
+          "origin": [
+            0.125,
+            0.5555555555555556
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "f3ac4ca1497845dc222c7d270886fd20e69da533f1083636d193d48eec4c0dc1"
+        },
+        {
+          "id": "0/5-10",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/5-10.png",
+          "origin": [
+            0.15625,
+            0.5555555555555556
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "ef2328efaa511c033f52aaa9e71ee91c1350a33a48ec4a3d245cabcb525cb9f2"
+        },
+        {
+          "id": "0/6-10",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/6-10.png",
+          "origin": [
+            0.1875,
+            0.5555555555555556
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "f2d2e57cf282728316677a4c7d4d7b0ac0add01b09442a3196bf4b679fdead21"
+        },
+        {
+          "id": "0/7-10",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/7-10.png",
+          "origin": [
+            0.21875,
+            0.5555555555555556
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "033cbdc2cad2192153bc032e7a23c8818d591453c02d4e8a47d1a8cec9ba9d23"
+        },
+        {
+          "id": "0/8-10",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/8-10.png",
+          "origin": [
+            0.25,
+            0.5555555555555556
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "d311e08c62daefc0407a680c21fe60bdd0199830f982a1f8846ff8c8dcee09d9"
+        },
+        {
+          "id": "0/9-10",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/9-10.png",
+          "origin": [
+            0.28125,
+            0.5555555555555556
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "6d416b7749c9a7188ce6e00e3df676088782a315f2ce8eff8083ed3a5a0320dc"
+        },
+        {
+          "id": "0/10-10",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/10-10.png",
+          "origin": [
+            0.3125,
+            0.5555555555555556
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "3800ccc8a665221d0a9f87ec06f8813f39d091560580a4b0fd9bc123950e0b3b"
+        },
+        {
+          "id": "0/11-10",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/11-10.png",
+          "origin": [
+            0.34375,
+            0.5555555555555556
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "fad9313293f48279b1f66b3da4cc82f8caa6394ab0fc81addc5429723913474d"
+        },
+        {
+          "id": "0/12-10",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/12-10.png",
+          "origin": [
+            0.375,
+            0.5555555555555556
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "6ce43224ad5a41fe25eb1f6e28569aad4caa8bbcf7af3fa47495b73077af5419"
+        },
+        {
+          "id": "0/13-10",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/13-10.png",
+          "origin": [
+            0.40625,
+            0.5555555555555556
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "a608d32412b23b07de1cf28f1c634c30600fae364ddf6641b84d4c11a6095728"
+        },
+        {
+          "id": "0/14-10",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/14-10.png",
+          "origin": [
+            0.4375,
+            0.5555555555555556
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "b16c7b433088726589132421539624d1298af41a9745de12cdcd9200fb244556"
+        },
+        {
+          "id": "0/15-10",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/15-10.png",
+          "origin": [
+            0.46875,
+            0.5555555555555556
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "baaf2e2d4e9dd172f65a85a89cf593071bf94cd4f4a4da88a8a0237e5f754800"
+        },
+        {
+          "id": "0/16-10",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/16-10.png",
+          "origin": [
+            0.5,
+            0.5555555555555556
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "c59d41665874ac2664c0ca31101fe594eaf98a468adf09c18fade194aa546652"
+        },
+        {
+          "id": "0/17-10",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/17-10.png",
+          "origin": [
+            0.53125,
+            0.5555555555555556
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "b5f834cdc0ca059756d165b98a1a2c052b1b9fb5782cfc218cfe8d5a20afff26"
+        },
+        {
+          "id": "0/18-10",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/18-10.png",
+          "origin": [
+            0.5625,
+            0.5555555555555556
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "1963ebf5417b6621d2edf4dc9eec0fa9b2a7e0595d3de470dc554edabdde2a88"
+        },
+        {
+          "id": "0/3-11",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/3-11.png",
+          "origin": [
+            0.09375,
+            0.6111111111111112
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "dfac28da07d940d475146036466dc0210d79e3bb4b0431f0b960a32076056955"
+        },
+        {
+          "id": "0/4-11",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/4-11.png",
+          "origin": [
+            0.125,
+            0.6111111111111112
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "d5effb8142bf15a680271dc92d809a872ac6a4c2e08a6680aabc459b59302505"
+        },
+        {
+          "id": "0/5-11",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/5-11.png",
+          "origin": [
+            0.15625,
+            0.6111111111111112
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "1c7afa5a9e7ac6b4f68fd2754db66cf13d2d7355f902f3a1e9c5e9e06a2f0e84"
+        },
+        {
+          "id": "0/6-11",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/6-11.png",
+          "origin": [
+            0.1875,
+            0.6111111111111112
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "0d69feaaf30a1d5cb825ff14f36e97a3f3f425bf4efa9184ae1f9561efcc798d"
+        },
+        {
+          "id": "0/7-11",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/7-11.png",
+          "origin": [
+            0.21875,
+            0.6111111111111112
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "b039740781b0a3a53c9ad21568ceb201eec43123e46f6baf1dc49bad76a7002e"
+        },
+        {
+          "id": "0/8-11",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/8-11.png",
+          "origin": [
+            0.25,
+            0.6111111111111112
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "8764f13db84938003ff95e2eb34799ba507c037193e2ae685298d8343f3a8033"
+        },
+        {
+          "id": "0/9-11",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/9-11.png",
+          "origin": [
+            0.28125,
+            0.6111111111111112
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "53742a2e255c766c1e5cdc7b827e021bb46e6c2776f0a4729ec583001f83434a"
+        },
+        {
+          "id": "0/10-11",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/10-11.png",
+          "origin": [
+            0.3125,
+            0.6111111111111112
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "1b062428f5a721832aeca302e1592a56af6c67cecc86e66b3038fea695149b13"
+        },
+        {
+          "id": "0/11-11",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/11-11.png",
+          "origin": [
+            0.34375,
+            0.6111111111111112
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "0c059293fd3a288d903e4798da3514ee20af7474f4ae155ecac2883555240f36"
+        },
+        {
+          "id": "0/12-11",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/12-11.png",
+          "origin": [
+            0.375,
+            0.6111111111111112
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "d99787163a981a24af56d5e940d770578dde091c1385304e6717e29a86722dea"
+        },
+        {
+          "id": "0/13-11",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/13-11.png",
+          "origin": [
+            0.40625,
+            0.6111111111111112
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "f5bb93cb8c119794e10abb71804b36c04e27ac66bab58d6444b9f9c34850532b"
+        },
+        {
+          "id": "0/14-11",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/14-11.png",
+          "origin": [
+            0.4375,
+            0.6111111111111112
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "d3ecd461ef6400babcca110ffd93a3ff8437e0a40cead894b1bd4156587e0143"
+        },
+        {
+          "id": "0/15-11",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/15-11.png",
+          "origin": [
+            0.46875,
+            0.6111111111111112
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "d2becd6d6f6e05f17e400235b85c06a95f5d512e475b886d67da36e007a98016"
+        },
+        {
+          "id": "0/16-11",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/16-11.png",
+          "origin": [
+            0.5,
+            0.6111111111111112
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "037bdaca84f4f650c8d33ff1eb59e28109ac5603045d1d3dbf623c7ea74cf8fd"
+        },
+        {
+          "id": "0/17-11",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/17-11.png",
+          "origin": [
+            0.53125,
+            0.6111111111111112
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "c2f15aef719abf8ec2982bdc2576752fadb2ae096ec9a8040d8bc7fc810e78df"
+        },
+        {
+          "id": "0/18-11",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/18-11.png",
+          "origin": [
+            0.5625,
+            0.6111111111111112
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "b7d46b8f5c959f95d9760b87e8c23a3ab14c12b7ff111c34e9ff22ef61df0449"
+        },
+        {
+          "id": "0/3-12",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/3-12.png",
+          "origin": [
+            0.09375,
+            0.6666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "d0e51a2141f67393e05dd51da930587ee9e2afcb970dc867e1b7c9c3097d04af"
+        },
+        {
+          "id": "0/4-12",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/4-12.png",
+          "origin": [
+            0.125,
+            0.6666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "b259f7dd58845183bf9bc06c4f6121b47ee39cfd1b550fa9bc6b599274ed6c75"
+        },
+        {
+          "id": "0/5-12",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/5-12.png",
+          "origin": [
+            0.15625,
+            0.6666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "e084451cfd59704636a2d2d4aec4c0bf28ed8cb408084c583b11b9790f1c02df"
+        },
+        {
+          "id": "0/6-12",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/6-12.png",
+          "origin": [
+            0.1875,
+            0.6666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "beec824fef86cefa7b4ef6748f14f3b0a86ff20c3aed0601b662810a75e935c9"
+        },
+        {
+          "id": "0/7-12",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/7-12.png",
+          "origin": [
+            0.21875,
+            0.6666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "3c3e1e517fd35b1e5a42409846c58dcef26c15eb815dcf31e064901183ff57a1"
+        },
+        {
+          "id": "0/8-12",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/8-12.png",
+          "origin": [
+            0.25,
+            0.6666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "14f8c6da7cfafba76eec43cf8824bce9069462787465f079f88f9fb4fdbf910f"
+        },
+        {
+          "id": "0/9-12",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/9-12.png",
+          "origin": [
+            0.28125,
+            0.6666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "f2801465cdda862f72f4975ec68b4e154e27fae27e55107d409923e87d592933"
+        },
+        {
+          "id": "0/10-12",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/10-12.png",
+          "origin": [
+            0.3125,
+            0.6666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "45638be975b6b8022f062d0bcdf4a9d60b61581fd9cab8762e360d7d7e06fcce"
+        },
+        {
+          "id": "0/11-12",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/11-12.png",
+          "origin": [
+            0.34375,
+            0.6666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "36b7e2deef39e682edee31914254fce6aef25cdc1d723cc6ccef135fad8dcc5b"
+        },
+        {
+          "id": "0/12-12",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/12-12.png",
+          "origin": [
+            0.375,
+            0.6666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "7e117e2134154b0905e05d83ad0c62d7484b32869a12339f9c58e94af91786eb"
+        },
+        {
+          "id": "0/13-12",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/13-12.png",
+          "origin": [
+            0.40625,
+            0.6666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "c468f98f85ca0a4c4c8b2d18db65336829231cda9bd2c4c78e26292b098c2488"
+        },
+        {
+          "id": "0/14-12",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/14-12.png",
+          "origin": [
+            0.4375,
+            0.6666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "da8da58d87c8e84f5852280136831066e4bbd975a3da9fd21cc49b4ff52ecd22"
+        },
+        {
+          "id": "0/15-12",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/15-12.png",
+          "origin": [
+            0.46875,
+            0.6666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "df969a590645f49f4af64dce714be37b854ba7fe67dfc551e4fe318fd5bc0749"
+        },
+        {
+          "id": "0/16-12",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/16-12.png",
+          "origin": [
+            0.5,
+            0.6666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "7dd44838eca62fcff53b3e46370db2e374a982e8bf774add504418168daa2b2b"
+        },
+        {
+          "id": "0/17-12",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/17-12.png",
+          "origin": [
+            0.53125,
+            0.6666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "c9702c79b80483e23925f1e62eabcbd6b3b4b23e393cdc755bb7a71dd92ef8ed"
+        },
+        {
+          "id": "0/18-12",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/18-12.png",
+          "origin": [
+            0.5625,
+            0.6666666666666666
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "729ce4a2be80404b68f87997e49ea74a62b92a41b0cd5081436335808fec227d"
+        },
+        {
+          "id": "0/3-13",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/3-13.png",
+          "origin": [
+            0.09375,
+            0.7222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "5b3684efafe907082cdcbcf802d5e980f57bf3ace3536af06c08f46c8fe4243f"
+        },
+        {
+          "id": "0/4-13",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/4-13.png",
+          "origin": [
+            0.125,
+            0.7222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "57d366256fccc2e5526e1c003a9fe7d14fa5cbce673222c10cd4acff2f6f8245"
+        },
+        {
+          "id": "0/5-13",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/5-13.png",
+          "origin": [
+            0.15625,
+            0.7222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "cbba9000ce79fa084998cb4da5ca9bff78082a1747dd98f4f36a52879653874f"
+        },
+        {
+          "id": "0/6-13",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/6-13.png",
+          "origin": [
+            0.1875,
+            0.7222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "4629e64b8f864947db2adde06892fb752c2f642e73fedcdf525bc9067276df9d"
+        },
+        {
+          "id": "0/7-13",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/7-13.png",
+          "origin": [
+            0.21875,
+            0.7222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "44c547ca0e1e57ce7f4fa71503a0ac65f199d4d7a9b47e47f0e06c871410d93a"
+        },
+        {
+          "id": "0/8-13",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/8-13.png",
+          "origin": [
+            0.25,
+            0.7222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "6270a9e26ff93fcb5980ba9ba81b935ad0fad6a09ae1217e0e80ae1e658134d2"
+        },
+        {
+          "id": "0/9-13",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/9-13.png",
+          "origin": [
+            0.28125,
+            0.7222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "5f7a9a8286195607c84f5600994d0bbd362da48d31b465d91db608b821eeb840"
+        },
+        {
+          "id": "0/10-13",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/10-13.png",
+          "origin": [
+            0.3125,
+            0.7222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "2327b6120b2c4d3bbb0e4c9a08ad75624e742703b5c5b3b91acf05da56b4d4f0"
+        },
+        {
+          "id": "0/11-13",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/11-13.png",
+          "origin": [
+            0.34375,
+            0.7222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "9c857c7107b2ee08fd54bc2ddb027ab05daffb649e55e755c1a5bd319a1fba5a"
+        },
+        {
+          "id": "0/12-13",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/12-13.png",
+          "origin": [
+            0.375,
+            0.7222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "7a8f52d253ba484d3cbf4a5ee2a70de2b428946f4066d36c756d54b178ca93ae"
+        },
+        {
+          "id": "0/13-13",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/13-13.png",
+          "origin": [
+            0.40625,
+            0.7222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "6c609cd9817f755cc033992b98603e2ca86655fa064dcaf1af8b5ad133cf57fa"
+        },
+        {
+          "id": "0/14-13",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/14-13.png",
+          "origin": [
+            0.4375,
+            0.7222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "f026fea4dda03dd962145e1634b11d78933d18275593a329d4b7df48811c5443"
+        },
+        {
+          "id": "0/15-13",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/15-13.png",
+          "origin": [
+            0.46875,
+            0.7222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "4bacdb35c412f325e2a41c5bae2ebcf55eda0fc211dbfd98e949366f2778317b"
+        },
+        {
+          "id": "0/16-13",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/16-13.png",
+          "origin": [
+            0.5,
+            0.7222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "346297ebfce864e45256c41144da86036da6fdb039c23e83fc72a53cd46374cd"
+        },
+        {
+          "id": "0/17-13",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/17-13.png",
+          "origin": [
+            0.53125,
+            0.7222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "12dffecf1c01e0bdb5250f2a8250adb97c03d433906601c348e5cf579dbec13b"
+        },
+        {
+          "id": "0/18-13",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/18-13.png",
+          "origin": [
+            0.5625,
+            0.7222222222222222
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "8d363b84f34b4c9cfaa5d26e2bfdc121d381b5d5c487da9b1dad5c57c785e489"
+        },
+        {
+          "id": "0/3-14",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/3-14.png",
+          "origin": [
+            0.09375,
+            0.7777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "283aa1469c18db9dbf92bc16c713e950ddf69903df0ef94946fc22a5720b4f95"
+        },
+        {
+          "id": "0/4-14",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/4-14.png",
+          "origin": [
+            0.125,
+            0.7777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "8bb27c928db19fdec2e741e8fc3b3d2b979441de117648bfb11f7bb65a185f42"
+        },
+        {
+          "id": "0/5-14",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/5-14.png",
+          "origin": [
+            0.15625,
+            0.7777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "9a9511e1321abd4ea69077b228bd560bc7925f2fc3f64c7083c0ac78244499ea"
+        },
+        {
+          "id": "0/6-14",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/6-14.png",
+          "origin": [
+            0.1875,
+            0.7777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "83b57a13e97191acc912ac30045aa9a3477d4ed7af3e41fb99df5c3d3ce37880"
+        },
+        {
+          "id": "0/7-14",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/7-14.png",
+          "origin": [
+            0.21875,
+            0.7777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "ef1f25a533941be5feeabda9e3110fbe961a4adb4987f44911dced3d0b656d7e"
+        },
+        {
+          "id": "0/8-14",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/8-14.png",
+          "origin": [
+            0.25,
+            0.7777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "378a3a3e0c24734b1cffe0afe98e05d2d4cd1ac421cb35e81fb0f4169b9ae23a"
+        },
+        {
+          "id": "0/9-14",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/9-14.png",
+          "origin": [
+            0.28125,
+            0.7777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "61ff9882f2ad0ea45bde8b41ccf88be6edf0ea09c80a2c4c6aa465044811daf6"
+        },
+        {
+          "id": "0/10-14",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/10-14.png",
+          "origin": [
+            0.3125,
+            0.7777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "fb3833109557b2c50d729c88bd1b8d9e2db51f3fbc81b765d9deb5f129cbda75"
+        },
+        {
+          "id": "0/11-14",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/11-14.png",
+          "origin": [
+            0.34375,
+            0.7777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "e40d9ef79e2c0914cdf8c58cfe8c2dcb1b0111850890b281afefbd7ca0e7fec9"
+        },
+        {
+          "id": "0/12-14",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/12-14.png",
+          "origin": [
+            0.375,
+            0.7777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "d0313df8f433fd4e8a0ebcb7b00472e27063c85212300f0017f5faca62581c61"
+        },
+        {
+          "id": "0/13-14",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/13-14.png",
+          "origin": [
+            0.40625,
+            0.7777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "08821c6531f9e2e5dcd4c8c6b5c59efb8dc2650a4212bf443e319e78808441ef"
+        },
+        {
+          "id": "0/14-14",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/14-14.png",
+          "origin": [
+            0.4375,
+            0.7777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "5b895947881915b80906c7ad04859ed9efc2504e44dea264011a9ce68da5a801"
+        },
+        {
+          "id": "0/15-14",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/15-14.png",
+          "origin": [
+            0.46875,
+            0.7777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "376cbd66229fd07882f8bf6928451d3b7533f09741a2f8b790cc539860a58b81"
+        },
+        {
+          "id": "0/16-14",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/16-14.png",
+          "origin": [
+            0.5,
+            0.7777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "908276f910f915906cf3c20e6626a395aca62eda85e46437ce4fa196023eb78e"
+        },
+        {
+          "id": "0/17-14",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/17-14.png",
+          "origin": [
+            0.53125,
+            0.7777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "5c2a1966ad74eb7df7a9b71ef6556c46c52c28cd141c8e63983c2a829ff3baef"
+        },
+        {
+          "id": "0/18-14",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/18-14.png",
+          "origin": [
+            0.5625,
+            0.7777777777777778
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "5e4569ba2f13a7eee35e7b34883b170d8a0faa66dd606ec6f01f2cf12df80f24"
+        },
+        {
+          "id": "0/4-15",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/4-15.png",
+          "origin": [
+            0.125,
+            0.8333333333333334
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "64997ec50fcffcff33bfc74e5164063d60389675c4d9655a6948e6e4eb592522"
+        },
+        {
+          "id": "0/5-15",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/5-15.png",
+          "origin": [
+            0.15625,
+            0.8333333333333334
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "f8f422f96e15a728415ab6c06a83fedc264b4099590de0dc533f62c95f25470f"
+        },
+        {
+          "id": "0/6-15",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/6-15.png",
+          "origin": [
+            0.1875,
+            0.8333333333333334
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "dc4a83be520f1a9cdbfc4d1afeaf029dbf8319a11745125e569171b9402fd7c6"
+        },
+        {
+          "id": "0/7-15",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/7-15.png",
+          "origin": [
+            0.21875,
+            0.8333333333333334
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "b8a6480ebbe17187dd96925aa07b872d56f94285928f67a7254a60e72e7e03a4"
+        },
+        {
+          "id": "0/8-15",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/8-15.png",
+          "origin": [
+            0.25,
+            0.8333333333333334
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "d66dce9fba355d2a797898932db5d94d7ac8e663914d823b2251a7ef24746cbf"
+        },
+        {
+          "id": "0/9-15",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/9-15.png",
+          "origin": [
+            0.28125,
+            0.8333333333333334
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "b1928df750aecfbf568fdf31063451880f25b8d09052966c47a55fb5d39d2c2a"
+        },
+        {
+          "id": "0/10-15",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/10-15.png",
+          "origin": [
+            0.3125,
+            0.8333333333333334
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "016cd3d89c48e0c39aacce20ab0e31e8a48366fa28951aadb7f19010c3765851"
+        },
+        {
+          "id": "0/11-15",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/11-15.png",
+          "origin": [
+            0.34375,
+            0.8333333333333334
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "6b62aa3f40d2a546313ed63e9aa3ad7faa4f18184dd7c6a263c1f7afd7f86f4c"
+        },
+        {
+          "id": "0/12-15",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/12-15.png",
+          "origin": [
+            0.375,
+            0.8333333333333334
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "f74b2f6dc3dc4919c80e95414cdd4893732a23d91e9197a1fb1894ce4a099546"
+        },
+        {
+          "id": "0/13-15",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/13-15.png",
+          "origin": [
+            0.40625,
+            0.8333333333333334
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "954919e41fd9e5524d884a818da60f15d82721664cbc6d18cd9161c2e5975a57"
+        },
+        {
+          "id": "0/14-15",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/14-15.png",
+          "origin": [
+            0.4375,
+            0.8333333333333334
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "24dc246bb2019414eda170d6236fe69117bcbd262fe21928156bfd061b3d4d4c"
+        },
+        {
+          "id": "0/15-15",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/15-15.png",
+          "origin": [
+            0.46875,
+            0.8333333333333334
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "4d00cf48c99f5623edc70cf6909566d1bb44a4c0a3bf8b405bcab3593339eee1"
+        },
+        {
+          "id": "0/16-15",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/16-15.png",
+          "origin": [
+            0.5,
+            0.8333333333333334
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "ba308b1ba070742e6bea6623e97c88a4b2b86ae274f1c6702a92c8b8372a0eae"
+        },
+        {
+          "id": "0/17-15",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/17-15.png",
+          "origin": [
+            0.53125,
+            0.8333333333333334
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "08cb3f65199b5bceb91a4f8024b780e27831984cb8b58999f0011010b73fd68d"
+        },
+        {
+          "id": "0/18-15",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/18-15.png",
+          "origin": [
+            0.5625,
+            0.8333333333333334
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "6395887d41f094ed2defa1516df14d7a049ad1a9a4af67337e6b3513c098c5b0"
+        },
+        {
+          "id": "0/5-16",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/5-16.png",
+          "origin": [
+            0.15625,
+            0.8888888888888888
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "d0dba90b7fbb4a44c9ab3f0e599f0e18b86bc3606634c019cbd4753d5ebc7ead"
+        },
+        {
+          "id": "0/6-16",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/6-16.png",
+          "origin": [
+            0.1875,
+            0.8888888888888888
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "145c4bc2267e5ceadc94bad4b58f8da2ad44378eca5f53c350ff0dd196204bd1"
+        },
+        {
+          "id": "0/7-16",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/7-16.png",
+          "origin": [
+            0.21875,
+            0.8888888888888888
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "a57d2741338f299bf8c5de9a9f3bf2adeedc9536f3ba9ed387cce2c612c3c13e"
+        },
+        {
+          "id": "0/8-16",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/8-16.png",
+          "origin": [
+            0.25,
+            0.8888888888888888
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "7f10c6d8d468131a9b0559640948ac2396e2d06722ea1829a850e76c5e048172"
+        },
+        {
+          "id": "0/9-16",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/9-16.png",
+          "origin": [
+            0.28125,
+            0.8888888888888888
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "1cf0b8b419544f6a16f34b8489a1047066e4703bc342a1b023e8e0d39f9c38b5"
+        },
+        {
+          "id": "0/10-16",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/10-16.png",
+          "origin": [
+            0.3125,
+            0.8888888888888888
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "59e08bd7f0aca8e2c7aff20d414c5eab3506aa6b3bb847c8fb2d5acc06d2a044"
+        },
+        {
+          "id": "0/11-16",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/11-16.png",
+          "origin": [
+            0.34375,
+            0.8888888888888888
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "464a44ef484563a037b202ebf5fd203748dcfe2eaab4f812c5b08306d507ed0f"
+        },
+        {
+          "id": "0/12-16",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/12-16.png",
+          "origin": [
+            0.375,
+            0.8888888888888888
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "b9dfa6368739f7492895622dbaf755e87403c9b4703457e5c95999a6cf0e742b"
+        },
+        {
+          "id": "0/13-16",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/13-16.png",
+          "origin": [
+            0.40625,
+            0.8888888888888888
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "0b35c69ee44a285874ed35006168657f2185a662ebc0459df85cbda1af74608c"
+        },
+        {
+          "id": "0/14-16",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/14-16.png",
+          "origin": [
+            0.4375,
+            0.8888888888888888
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "9263ab9e30e6a5879e67f6ef6254b6fd7d121226b65aa0454abc62a9eb4661bb"
+        },
+        {
+          "id": "0/15-16",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/15-16.png",
+          "origin": [
+            0.46875,
+            0.8888888888888888
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "34107148fc272b2c883b47db67652985a339ff26dfebec51f2e04761ce7d11ac"
+        },
+        {
+          "id": "0/16-16",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/16-16.png",
+          "origin": [
+            0.5,
+            0.8888888888888888
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "1d4aba24dd289c3a575182e7d64ba253e01c45aa1d71121ca9f0d37eaf1162c6"
+        },
+        {
+          "id": "0/17-16",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/17-16.png",
+          "origin": [
+            0.53125,
+            0.8888888888888888
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "b011e8fc81b51e8b59c3f5bc2a488785e8fc4af4b0dcb771ee654fa30b20a2f4"
+        },
+        {
+          "id": "0/18-16",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L0/18-16.png",
+          "origin": [
+            0.5625,
+            0.8888888888888888
+          ],
+          "span": [
+            0.03125,
+            0.05555555555555555
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "91114b20eb03b2d07d6980ac802000eeb1fde448ae0fd570937d6642ac43f82a"
+        }
+      ]
+    },
+    {
+      "level": 1,
+      "dimensions": [
+        4096,
+        2304
+      ],
+      "tiles": [
+        {
+          "id": "1/2-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/2-0.png",
+          "origin": [
+            0.125,
+            0
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "1e89c3f4f342285c8f3f3d563149a397ab0910aa124c145c4666866bcee5db41"
+        },
+        {
+          "id": "1/3-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/3-0.png",
+          "origin": [
+            0.1875,
+            0
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "b1f4f7ddee343c3566067b6aa7f00490da234ddb6cfcbad95398de60c0b7457a"
+        },
+        {
+          "id": "1/4-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/4-0.png",
+          "origin": [
+            0.25,
+            0
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "0c3916d884fb70520095d8016b877ff58a5f7e78f2f27b135cfcc8716827683b"
+        },
+        {
+          "id": "1/5-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/5-0.png",
+          "origin": [
+            0.3125,
+            0
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "8a97d40b918ef406a7423261852370e2193ff420b9417efd79381edb4ee79e98"
+        },
+        {
+          "id": "1/6-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/6-0.png",
+          "origin": [
+            0.375,
+            0
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "ae262e4976802375cd25a9a92ae71dbbe67614f31a2199de95649ba27293d3cc"
+        },
+        {
+          "id": "1/7-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/7-0.png",
+          "origin": [
+            0.4375,
+            0
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "5a973085ae3c8a9975e247c6f7c3bb65f1d7dedb73728cc1ca6774b84191470d"
+        },
+        {
+          "id": "1/8-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/8-0.png",
+          "origin": [
+            0.5,
+            0
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "5aa118ebd7d38e02b9ae024506b37988c148c50a81b9e844abf776d1f4eb3454"
+        },
+        {
+          "id": "1/2-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/2-1.png",
+          "origin": [
+            0.125,
+            0.1111111111111111
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "ac725b0b8d4032ef77b7ac534049223168242db1339c0d73a309fe87faceea97"
+        },
+        {
+          "id": "1/3-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/3-1.png",
+          "origin": [
+            0.1875,
+            0.1111111111111111
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "2b277f5ca4b84daaa426c515d339f7432ae17efaadd04015ab2760b6f3e16fb9"
+        },
+        {
+          "id": "1/4-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/4-1.png",
+          "origin": [
+            0.25,
+            0.1111111111111111
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "ed2b8287b82dbcd42479098e05b83f8219f279f0f2bd56e651b83440756bc719"
+        },
+        {
+          "id": "1/5-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/5-1.png",
+          "origin": [
+            0.3125,
+            0.1111111111111111
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "0052a1fe5b1a43270cd8b017e78432358d56e9503999a8e9b492a823d44b2d2d"
+        },
+        {
+          "id": "1/6-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/6-1.png",
+          "origin": [
+            0.375,
+            0.1111111111111111
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "1b29c32965d832eed984d5653bcf2979e724fc4b860c75060de735e7e3e695d7"
+        },
+        {
+          "id": "1/7-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/7-1.png",
+          "origin": [
+            0.4375,
+            0.1111111111111111
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "3c05cf777ba926153ad4665ce0028ddb9cea30b59551b79b96724c97c27f39c5"
+        },
+        {
+          "id": "1/8-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/8-1.png",
+          "origin": [
+            0.5,
+            0.1111111111111111
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "864f0aa8c58fed49b12bddcef22761c30de2ca1439e222ee13507273061916b3"
+        },
+        {
+          "id": "1/2-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/2-2.png",
+          "origin": [
+            0.125,
+            0.2222222222222222
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "83a9dd49bf09311876c6ba61d6323e96ed5c0bf94d8849cb4a094d676f18040d"
+        },
+        {
+          "id": "1/3-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/3-2.png",
+          "origin": [
+            0.1875,
+            0.2222222222222222
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "e605a8a082563086f947d13f5c264e3902d617f870eb7329bada63383dcf2f75"
+        },
+        {
+          "id": "1/4-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/4-2.png",
+          "origin": [
+            0.25,
+            0.2222222222222222
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "a2d239d92d7721b6cd7d33629f2e3ab559af63b37a03491762d6c9187338456f"
+        },
+        {
+          "id": "1/5-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/5-2.png",
+          "origin": [
+            0.3125,
+            0.2222222222222222
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "5bdcb287b5d25952d7d674399702c243bead5fea376d3a16861b721a980ef26c"
+        },
+        {
+          "id": "1/6-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/6-2.png",
+          "origin": [
+            0.375,
+            0.2222222222222222
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "47cef261cfab75e1d8239a1780b0a5ee83e46809c5e3ccd42808c2c1e9aeab17"
+        },
+        {
+          "id": "1/7-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/7-2.png",
+          "origin": [
+            0.4375,
+            0.2222222222222222
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "e880dff771bda53947356c20838d2a042e7e3e0d0a261e2a99b7576297819017"
+        },
+        {
+          "id": "1/8-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/8-2.png",
+          "origin": [
+            0.5,
+            0.2222222222222222
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "d43f2684afcf7131460c18b54a2e7f1deb05da3daea1cf8e683bd46824fccfe5"
+        },
+        {
+          "id": "1/2-3",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/2-3.png",
+          "origin": [
+            0.125,
+            0.3333333333333333
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "217241862ebff84cac5c5a530642516442cdc0e34cf7a64e7be18e785a54291a"
+        },
+        {
+          "id": "1/3-3",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/3-3.png",
+          "origin": [
+            0.1875,
+            0.3333333333333333
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "93ed01607984a312eafcf154fd358125d3885797163bd59532493b1006e5937a"
+        },
+        {
+          "id": "1/4-3",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/4-3.png",
+          "origin": [
+            0.25,
+            0.3333333333333333
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "12728b31203b674240f6699395b8a77ac618558cf3702be384e79fb03c4ff846"
+        },
+        {
+          "id": "1/5-3",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/5-3.png",
+          "origin": [
+            0.3125,
+            0.3333333333333333
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "43af5c5f1321d81220ec44e00f0a1bbc34aee356039120e17b692a1e392d5312"
+        },
+        {
+          "id": "1/6-3",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/6-3.png",
+          "origin": [
+            0.375,
+            0.3333333333333333
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "89ce662492ddfa5c6c77655a80de2b58c4280cebdb5f645e57a0ee615cc13ede"
+        },
+        {
+          "id": "1/7-3",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/7-3.png",
+          "origin": [
+            0.4375,
+            0.3333333333333333
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "559e54b30ff2ad8644caf637868e81f1f572027fde202acadbc55c9a4ca41d02"
+        },
+        {
+          "id": "1/8-3",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/8-3.png",
+          "origin": [
+            0.5,
+            0.3333333333333333
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "0349120c082b674f6759c5c9c250919cf211e89151897ecc07ff9c828d22493b"
+        },
+        {
+          "id": "1/1-4",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/1-4.png",
+          "origin": [
+            0.0625,
+            0.4444444444444444
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "3bef3d12800970fcc816e18f096eec893f40ca54d97e4408ad1858673b9afbec"
+        },
+        {
+          "id": "1/2-4",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/2-4.png",
+          "origin": [
+            0.125,
+            0.4444444444444444
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "7dfc22fdb5f5002060f26ee624ef5e41a97b03f15cb5948fef1fd5cadf876a25"
+        },
+        {
+          "id": "1/3-4",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/3-4.png",
+          "origin": [
+            0.1875,
+            0.4444444444444444
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "d0c2ab14a51d417399a303c14071433a467d8ff438a7181129f4d05433a9194c"
+        },
+        {
+          "id": "1/4-4",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/4-4.png",
+          "origin": [
+            0.25,
+            0.4444444444444444
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "839db26893d9f445dfcd637a53deec8f512359c70ba68fc4c8789525486da51e"
+        },
+        {
+          "id": "1/5-4",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/5-4.png",
+          "origin": [
+            0.3125,
+            0.4444444444444444
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "aa59e0bbc4c064763e0d4767f1085f8ec7f447d0fcecf50f9ccb409121463134"
+        },
+        {
+          "id": "1/6-4",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/6-4.png",
+          "origin": [
+            0.375,
+            0.4444444444444444
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "ef68a2ae8cf937c4e4e7a2c64590c5eee1059da1757ba00d89b7753979c00924"
+        },
+        {
+          "id": "1/7-4",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/7-4.png",
+          "origin": [
+            0.4375,
+            0.4444444444444444
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "288990a64bffa4f7d6e73561464d98feaf04663f7ef89f8efcdddfa6eb046c49"
+        },
+        {
+          "id": "1/8-4",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/8-4.png",
+          "origin": [
+            0.5,
+            0.4444444444444444
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "eb226d25b4eed8dcf3c2d5cab74ff836d0b937102e74196248bb31d44bde8eb8"
+        },
+        {
+          "id": "1/9-4",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/9-4.png",
+          "origin": [
+            0.5625,
+            0.4444444444444444
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "0266b241c8b167ceb8b6c86901d53100cffae033b7fdcd785d6737b7d9d30345"
+        },
+        {
+          "id": "1/1-5",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/1-5.png",
+          "origin": [
+            0.0625,
+            0.5555555555555556
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "3c9d73c47598007129643fa78ce9a42cc06b5d23d151f1556550de67fbc54167"
+        },
+        {
+          "id": "1/2-5",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/2-5.png",
+          "origin": [
+            0.125,
+            0.5555555555555556
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "6b145a9e9304ca6b1d1b00bc53fed884fb040cf1b9f319ec8f178aebaa7bbc70"
+        },
+        {
+          "id": "1/3-5",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/3-5.png",
+          "origin": [
+            0.1875,
+            0.5555555555555556
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "47c2a34c37c8e7e937a44a5e9322a0522b04936930edec89c223228b0a10035b"
+        },
+        {
+          "id": "1/4-5",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/4-5.png",
+          "origin": [
+            0.25,
+            0.5555555555555556
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "2278274c1b50c89e69648b80503bd6b32949892437470f90914f1b685f2735d3"
+        },
+        {
+          "id": "1/5-5",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/5-5.png",
+          "origin": [
+            0.3125,
+            0.5555555555555556
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "fa54e75e5c28d808aa9fe995abe49e6cafc62e11ba8976235db29413e62ead65"
+        },
+        {
+          "id": "1/6-5",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/6-5.png",
+          "origin": [
+            0.375,
+            0.5555555555555556
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "dc9ec2b80ff5422b2e86028f31fc4b869f77d770f8166c4b949b6a4442606446"
+        },
+        {
+          "id": "1/7-5",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/7-5.png",
+          "origin": [
+            0.4375,
+            0.5555555555555556
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "c66c8888e3b16e93f13cd350f6e479bfbbbbb2910088d8a0c1b9e4b3372b60a8"
+        },
+        {
+          "id": "1/8-5",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/8-5.png",
+          "origin": [
+            0.5,
+            0.5555555555555556
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "b00523a5aa0ec11102285ec66bd73cfb56b6bc4c146b3fe4e671e8f1cfe3f89c"
+        },
+        {
+          "id": "1/9-5",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/9-5.png",
+          "origin": [
+            0.5625,
+            0.5555555555555556
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "b79cf79cb71120be648776393f930ebc619e7bac680b0c3100ce3f12622e3704"
+        },
+        {
+          "id": "1/1-6",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/1-6.png",
+          "origin": [
+            0.0625,
+            0.6666666666666666
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "7ab3c759aef37fbe7f35fd08d2bcff3f507c55663d6ba81e24e5089ea65de5bc"
+        },
+        {
+          "id": "1/2-6",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/2-6.png",
+          "origin": [
+            0.125,
+            0.6666666666666666
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "d74514c54ca4bef04c6a51a0a542fcf4ee3d840a6556474cc01b17a1e6c25a42"
+        },
+        {
+          "id": "1/3-6",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/3-6.png",
+          "origin": [
+            0.1875,
+            0.6666666666666666
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "18b5549816ba4abe17e250709b4008e6de60fc34d9c1d9d69207acd9652a878a"
+        },
+        {
+          "id": "1/4-6",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/4-6.png",
+          "origin": [
+            0.25,
+            0.6666666666666666
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "822aa761ec4dd75212426bdb146e68ae6001cd2bb9cb5444c05bf50ca8c374a5"
+        },
+        {
+          "id": "1/5-6",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/5-6.png",
+          "origin": [
+            0.3125,
+            0.6666666666666666
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "ec03dbcca012998ed7d0fa68aaf5ceb41b5651b972130d4dd4d7e343baab1f35"
+        },
+        {
+          "id": "1/6-6",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/6-6.png",
+          "origin": [
+            0.375,
+            0.6666666666666666
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "52e235ade1aa70f659c159af2217aa3803e63b2e069c2c23ae7e158a9d6978c7"
+        },
+        {
+          "id": "1/7-6",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/7-6.png",
+          "origin": [
+            0.4375,
+            0.6666666666666666
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "128f4ecdb502f0cfdf1af51d8bf1f3d85b8cf7670898c3b6aa89f7505bc22a54"
+        },
+        {
+          "id": "1/8-6",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/8-6.png",
+          "origin": [
+            0.5,
+            0.6666666666666666
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "77ff18ae850cce3eec9d9f086813aee67750553e442fde6100e379059e99eaa2"
+        },
+        {
+          "id": "1/9-6",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/9-6.png",
+          "origin": [
+            0.5625,
+            0.6666666666666666
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "3d4bc018290e1d538e2706e1525481ad83d2f537ed6c98962d5d2495881950eb"
+        },
+        {
+          "id": "1/1-7",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/1-7.png",
+          "origin": [
+            0.0625,
+            0.7777777777777778
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "1da430ac80f6a7404330d2214b18d2dbb3e1ca5a8d83e1fc17e4184e9a496272"
+        },
+        {
+          "id": "1/2-7",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/2-7.png",
+          "origin": [
+            0.125,
+            0.7777777777777778
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "490bdb20eb50cadbe2810ed461b90f1a13aea232d349377c60f796427f3c0887"
+        },
+        {
+          "id": "1/3-7",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/3-7.png",
+          "origin": [
+            0.1875,
+            0.7777777777777778
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "126a04ecd6b5129d68b273156d8db1db6e29956b061fdfcce0bf8365527046dd"
+        },
+        {
+          "id": "1/4-7",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/4-7.png",
+          "origin": [
+            0.25,
+            0.7777777777777778
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "73d0d96be429be7c667a4ba6efc179c4b005d2f468783853d1d8856f665919a0"
+        },
+        {
+          "id": "1/5-7",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/5-7.png",
+          "origin": [
+            0.3125,
+            0.7777777777777778
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "40f229951e87c8332de6835b094ff0cb33bc877bc84fbee1ae731eeb018cd653"
+        },
+        {
+          "id": "1/6-7",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/6-7.png",
+          "origin": [
+            0.375,
+            0.7777777777777778
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "c7e522fa80afbe7a235c53d449e3df5f7671ed0de8a0d4058bd8ddb89b2823ee"
+        },
+        {
+          "id": "1/7-7",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/7-7.png",
+          "origin": [
+            0.4375,
+            0.7777777777777778
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "a70b11421c1c19e7340fd571e5d6bdf26f5e13bc0b3b76bf861545675ee875c7"
+        },
+        {
+          "id": "1/8-7",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/8-7.png",
+          "origin": [
+            0.5,
+            0.7777777777777778
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "87d9c7cab0f5f61a2356c18c40b22676d03355ee20b130bccd9ffcf081fb979a"
+        },
+        {
+          "id": "1/9-7",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/9-7.png",
+          "origin": [
+            0.5625,
+            0.7777777777777778
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "21d29597660725f2e7eed26a350d1813bc84dbd81f6e3fef9e66f6f523f315f4"
+        },
+        {
+          "id": "1/2-8",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/2-8.png",
+          "origin": [
+            0.125,
+            0.8888888888888888
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "f1a91a88f9a4b40c2d0c083f85a5da5a811984cae2dddfce69cc79f8b9f45941"
+        },
+        {
+          "id": "1/3-8",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/3-8.png",
+          "origin": [
+            0.1875,
+            0.8888888888888888
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "b60ca54cb0dff7e1c394e7c85e3d18d5d656a50938950296a323a23a104aa3af"
+        },
+        {
+          "id": "1/4-8",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/4-8.png",
+          "origin": [
+            0.25,
+            0.8888888888888888
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "90ba9adc991b8cb6515dbb23f3d8ea87c9186ccf5d0ae13f9a3e6e9b1760bd38"
+        },
+        {
+          "id": "1/5-8",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/5-8.png",
+          "origin": [
+            0.3125,
+            0.8888888888888888
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "91e0d0cbb1bfdbbe5040ac5a5eea9ffb4ccd61abf18bbd50bd7c160bfcc827ec"
+        },
+        {
+          "id": "1/6-8",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/6-8.png",
+          "origin": [
+            0.375,
+            0.8888888888888888
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "287f8a155e23f243912f4d55bc5d42628bec0165e072c7abd92e7dcad306b0b5"
+        },
+        {
+          "id": "1/7-8",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/7-8.png",
+          "origin": [
+            0.4375,
+            0.8888888888888888
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "ce24b51451235b73839e3d88fb6d9234749306f093ed909c56366a32fc13116c"
+        },
+        {
+          "id": "1/8-8",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/8-8.png",
+          "origin": [
+            0.5,
+            0.8888888888888888
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "952aae3c95dedc6691380c2a3a1333acf5628958c8ae6694884e2c6bf98d3ec0"
+        },
+        {
+          "id": "1/9-8",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L1/9-8.png",
+          "origin": [
+            0.5625,
+            0.8888888888888888
+          ],
+          "span": [
+            0.0625,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "6d509e0e8a5f4b1d4daf23917b9f9fe1748d492a34c45f73ab060fd42e8dc00a"
+        }
+      ]
+    },
+    {
+      "level": 2,
+      "dimensions": [
+        2048,
+        1152
+      ],
+      "tiles": [
+        {
+          "id": "2/1-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L2/1-0.png",
+          "origin": [
+            0.125,
+            0
+          ],
+          "span": [
+            0.125,
+            0.2222222222222222
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "05e52c4cc49b754644ff65ac0ffb9e6fe355c45e921626866236ba61c5dd6db9"
+        },
+        {
+          "id": "2/2-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L2/2-0.png",
+          "origin": [
+            0.25,
+            0
+          ],
+          "span": [
+            0.125,
+            0.2222222222222222
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "7a9797ed334b13dc9549fdae6e2e8e48ca4fb15427d374828bb9da2b36ab3b60"
+        },
+        {
+          "id": "2/3-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L2/3-0.png",
+          "origin": [
+            0.375,
+            0
+          ],
+          "span": [
+            0.125,
+            0.2222222222222222
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "499fb3dfb16f6bbf575bd37cdde4011cf41f9c2f016ddceeb18594975d849f4e"
+        },
+        {
+          "id": "2/4-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L2/4-0.png",
+          "origin": [
+            0.5,
+            0
+          ],
+          "span": [
+            0.125,
+            0.2222222222222222
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "867bc69ce503291329103e2e482a0807d761034db12a7e9e28159245928c5c04"
+        },
+        {
+          "id": "2/1-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L2/1-1.png",
+          "origin": [
+            0.125,
+            0.2222222222222222
+          ],
+          "span": [
+            0.125,
+            0.2222222222222222
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "2df7b02e69a60caf4942897b0cd4f25993fc34178eaea6d5ef5738919f40c66d"
+        },
+        {
+          "id": "2/2-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L2/2-1.png",
+          "origin": [
+            0.25,
+            0.2222222222222222
+          ],
+          "span": [
+            0.125,
+            0.2222222222222222
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "99eb40157b99902b49fe4d979ef6d3fbb5a447cf53b96ce9206aa58f64739dde"
+        },
+        {
+          "id": "2/3-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L2/3-1.png",
+          "origin": [
+            0.375,
+            0.2222222222222222
+          ],
+          "span": [
+            0.125,
+            0.2222222222222222
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "af1a585008c6d747735d5fbaf761c48860c67d12d50ac154e28e18bb8fc4e92a"
+        },
+        {
+          "id": "2/4-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L2/4-1.png",
+          "origin": [
+            0.5,
+            0.2222222222222222
+          ],
+          "span": [
+            0.125,
+            0.2222222222222222
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "cb9d9f6d9f5c2cba9dbc3a33ec5774188c353913d371f655baaa02408b7f6c32"
+        },
+        {
+          "id": "2/0-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L2/0-2.png",
+          "origin": [
+            0,
+            0.4444444444444444
+          ],
+          "span": [
+            0.125,
+            0.2222222222222222
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "1abd852197906621b83ac0fba0dd08407ea79b5d8cc451b6c86cd3a176e516f5"
+        },
+        {
+          "id": "2/1-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L2/1-2.png",
+          "origin": [
+            0.125,
+            0.4444444444444444
+          ],
+          "span": [
+            0.125,
+            0.2222222222222222
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "201de7111c7638a180096aa16c607459e2884deb59d42f8faef2d3a92d3c18dc"
+        },
+        {
+          "id": "2/2-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L2/2-2.png",
+          "origin": [
+            0.25,
+            0.4444444444444444
+          ],
+          "span": [
+            0.125,
+            0.2222222222222222
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "7b3f67c4720c3de21a555943071a724e360a04d33614207a9e5b9039f5052219"
+        },
+        {
+          "id": "2/3-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L2/3-2.png",
+          "origin": [
+            0.375,
+            0.4444444444444444
+          ],
+          "span": [
+            0.125,
+            0.2222222222222222
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "e879df4d7c4c573b9577464b4f927502f5801a4e7b4d4578e5172d01826ea7ca"
+        },
+        {
+          "id": "2/4-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L2/4-2.png",
+          "origin": [
+            0.5,
+            0.4444444444444444
+          ],
+          "span": [
+            0.125,
+            0.2222222222222222
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "198727960aaa9f502254416102d4a5938b2733a5bb801e83adf4494b519424f9"
+        },
+        {
+          "id": "2/0-3",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L2/0-3.png",
+          "origin": [
+            0,
+            0.6666666666666666
+          ],
+          "span": [
+            0.125,
+            0.2222222222222222
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "de684c4a6c93bcabd626f36b1d245292bed80b4bd36be9e444eabbbbb92f46d4"
+        },
+        {
+          "id": "2/1-3",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L2/1-3.png",
+          "origin": [
+            0.125,
+            0.6666666666666666
+          ],
+          "span": [
+            0.125,
+            0.2222222222222222
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "9c5f529da927e1a05c70a2aba4ef3b1192d8b2b1f172094471cdfd0783f88cfe"
+        },
+        {
+          "id": "2/2-3",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L2/2-3.png",
+          "origin": [
+            0.25,
+            0.6666666666666666
+          ],
+          "span": [
+            0.125,
+            0.2222222222222222
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "6aee6ce307bfeae22ae0c93b9bcccd041e66126ee757a78100a06a745d5f8f0b"
+        },
+        {
+          "id": "2/3-3",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L2/3-3.png",
+          "origin": [
+            0.375,
+            0.6666666666666666
+          ],
+          "span": [
+            0.125,
+            0.2222222222222222
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "717a47a2ad87d6ac5854b0db29d55aa71bf3372585472d7a9ea3b3a793920d98"
+        },
+        {
+          "id": "2/4-3",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L2/4-3.png",
+          "origin": [
+            0.5,
+            0.6666666666666666
+          ],
+          "span": [
+            0.125,
+            0.2222222222222222
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "4711d6cbb2e267b213af3685c4e7c3f3c1cc44f914f1fbe071efa866ffa9ae2b"
+        },
+        {
+          "id": "2/1-4",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L2/1-4.png",
+          "origin": [
+            0.125,
+            0.8888888888888888
+          ],
+          "span": [
+            0.125,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            128
+          ],
+          "sha256": "dc8b744408d12cb9e3e32e10405cf26ba1f053ecd4e4c524292222299d06fa47"
+        },
+        {
+          "id": "2/2-4",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L2/2-4.png",
+          "origin": [
+            0.25,
+            0.8888888888888888
+          ],
+          "span": [
+            0.125,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            128
+          ],
+          "sha256": "36eaf71eaab25ca50601682fe47be2020f88aedd4032088769f1bb3a1b71eb7b"
+        },
+        {
+          "id": "2/3-4",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L2/3-4.png",
+          "origin": [
+            0.375,
+            0.8888888888888888
+          ],
+          "span": [
+            0.125,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            128
+          ],
+          "sha256": "8a060f49031654bae2955d821256531b493fe1eec32c7a02b3d4e2489641977b"
+        },
+        {
+          "id": "2/4-4",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L2/4-4.png",
+          "origin": [
+            0.5,
+            0.8888888888888888
+          ],
+          "span": [
+            0.125,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            128
+          ],
+          "sha256": "e16adce91e8751e94a8467fed7873ead5ed70223c9f9ae9f9d3552fae64bc771"
+        }
+      ]
+    },
+    {
+      "level": 3,
+      "dimensions": [
+        1024,
+        576
+      ],
+      "tiles": [
+        {
+          "id": "3/0-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L3/0-0.png",
+          "origin": [
+            0,
+            0
+          ],
+          "span": [
+            0.25,
+            0.4444444444444444
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "75c2508516f25e436692a840a718e381245561be7ccd33fc60503dc203e483f3"
+        },
+        {
+          "id": "3/1-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L3/1-0.png",
+          "origin": [
+            0.25,
+            0
+          ],
+          "span": [
+            0.25,
+            0.4444444444444444
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "6156304968aa4c0458386ab51086916fbafa67f299a854922c15ccbd492948a0"
+        },
+        {
+          "id": "3/2-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L3/2-0.png",
+          "origin": [
+            0.5,
+            0
+          ],
+          "span": [
+            0.25,
+            0.4444444444444444
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "106e9b694034c2d48a345218ef1285220c9cf38151858825a019b8d0264eac0e"
+        },
+        {
+          "id": "3/0-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L3/0-1.png",
+          "origin": [
+            0,
+            0.4444444444444444
+          ],
+          "span": [
+            0.25,
+            0.4444444444444444
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "f561cf6b35c369488db4abb8e98cebca436a1bb2335422de24c7e1805df9c13f"
+        },
+        {
+          "id": "3/1-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L3/1-1.png",
+          "origin": [
+            0.25,
+            0.4444444444444444
+          ],
+          "span": [
+            0.25,
+            0.4444444444444444
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "01d3217ffadcb900c690e17639f193c3f8c9384402b54f818102163fdb0f451b"
+        },
+        {
+          "id": "3/2-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L3/2-1.png",
+          "origin": [
+            0.5,
+            0.4444444444444444
+          ],
+          "span": [
+            0.25,
+            0.4444444444444444
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "7ea22ec7acd4126c882d2cd8632a286a7d6c1b81584778b37a10c680761b743e"
+        },
+        {
+          "id": "3/0-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L3/0-2.png",
+          "origin": [
+            0,
+            0.8888888888888888
+          ],
+          "span": [
+            0.25,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            64
+          ],
+          "sha256": "b9ec4d78130d82fc02d670aad94f2030ae2fe49c2e8d69aae363f874731a51cb"
+        },
+        {
+          "id": "3/1-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L3/1-2.png",
+          "origin": [
+            0.25,
+            0.8888888888888888
+          ],
+          "span": [
+            0.25,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            64
+          ],
+          "sha256": "3c21499200acc407e1607f60245eae7faab0a07f1d18f6cae378bf7bb3050ee8"
+        },
+        {
+          "id": "3/2-2",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L3/2-2.png",
+          "origin": [
+            0.5,
+            0.8888888888888888
+          ],
+          "span": [
+            0.25,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            64
+          ],
+          "sha256": "1c7b5183c1da11edb077fda4bfeff5c1661f99897489e3cbe9ae37bc012ae267"
+        }
+      ]
+    },
+    {
+      "level": 4,
+      "dimensions": [
+        512,
+        288
+      ],
+      "tiles": [
+        {
+          "id": "4/0-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L4/0-0.png",
+          "origin": [
+            0,
+            0
+          ],
+          "span": [
+            0.5,
+            0.8888888888888888
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "2356e61bcadb2017d4d7e7b2534d14ea12efe0bf7c8d3a72feeb65f62b4d2810"
+        },
+        {
+          "id": "4/1-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L4/1-0.png",
+          "origin": [
+            0.5,
+            0
+          ],
+          "span": [
+            0.5,
+            0.8888888888888888
+          ],
+          "dimensions": [
+            256,
+            256
+          ],
+          "sha256": "9349e57fe0d0c60a23b8c1f950a104221a31e992c8ae659f29b40e7ea96f3252"
+        },
+        {
+          "id": "4/0-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L4/0-1.png",
+          "origin": [
+            0,
+            0.8888888888888888
+          ],
+          "span": [
+            0.5,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            32
+          ],
+          "sha256": "24b2b2a0f9da8f71df4a4371d76eb295f8f59a7706a7a7283a44afdbb44756b5"
+        },
+        {
+          "id": "4/1-1",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L4/1-1.png",
+          "origin": [
+            0.5,
+            0.8888888888888888
+          ],
+          "span": [
+            0.5,
+            0.1111111111111111
+          ],
+          "dimensions": [
+            256,
+            32
+          ],
+          "sha256": "92406100c2dc7b2720cfa64506ff33db4ea867825447fc440ad609464df9679c"
+        }
+      ]
+    },
+    {
+      "level": 5,
+      "dimensions": [
+        256,
+        144
+      ],
+      "tiles": [
+        {
+          "id": "5/0-0",
+          "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/L5/0-0.png",
+          "origin": [
+            0,
+            0
+          ],
+          "span": [
+            1,
+            1
+          ],
+          "dimensions": [
+            256,
+            144
+          ],
+          "sha256": "6eb19559cbdd556e245e1b9d9ac21fe3add40e3399c4310902c62aa902417edb"
+        }
+      ]
+    }
+  ],
+  "seabedGeometry": {
+    "path": "/career-world/layers/water/fields-r1/0a1446435d8d2b86/seabed-geography.png",
+    "dimensions": [
+      2048,
+      1152
+    ],
+    "rangeMetres": 192,
+    "sha256": "549b27633025850ad07be8650f52399de05d5dff8a8790058f0497a4d24ffb66",
+    "channels": "R coast distance 0..192m; G marine coverage; B natural coast confidence"
+  },
+  "channels": {
+    "r": "signed shore distance, -range..+range metres",
+    "gb": "flow vector; length 0 ocean, .2 closed pool, .6 estuary channel, 1 authored fall; ocean G=123 suppresses surf at provisional tile cuts"
+  },
+  "geometry": "Current served land alpha only. Water remains beneath land; this field does not erase terrain.",
+  "flow": "Sea-connected channels follow a broad-water outlet potential. Closed water has no inferred direction.",
+  "stats": {
+    "pools": 182186,
+    "streams": 116255,
+    "seaPixels": 27299619,
+    "provisionalCoastPixels": 1072962
+  }
+}

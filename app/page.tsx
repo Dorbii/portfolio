@@ -19,6 +19,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const view = primaryView(resolvedSearchParams?.view);
 
   switch (view) {
+    case "water":
+      return <CareerWorld enableDevelopmentTools enablePerformanceProbe layerInspector initialView="ninjaone-capital" />;
     case "ninjaone-capital-city-layer":
       return (
         <CareerWorld
