@@ -76,3 +76,4 @@ They are kept because a rejected cell nobody sees cannot be ruled on.
 - `c4-2` mixed-bench — rejected on **rock lighting 0.215**
 - `c1-2` dark-forest — rejected on **a gate **
 - `c1-2` dark-forest — rejected on **a gate **
+- `c1-1` dark-forest — rejected on **a gate **
