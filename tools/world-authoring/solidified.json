@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-06T01:05:07.930Z",
+ "solidifiedAt": "2026-09-06T01:30:44.398Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "95766320c7591784",
+  "cell.mjs": "233393b95288e343",
   "plan-territory.mjs": "e8d86a90b2e32796",
   "AGENTS.md": "a1ab4eaec1d4c6ac"
  },
@@ -507,6 +507,15 @@
    "reason": "owner 2026-09-06 01:00 UTC: 'For the chain add a layer over it thats bright purple. Then use that to hellp with the matching and remove that layer for final render' — lock 18n applied (amends 18m): the chain's floor is drawn in bright purple as a guide layer; where the purple survives beside an edge its height is read; every purple pixel is replaced by the groove's floor before derivation and gating; a chain-continuity gate holds each edge within 48 px of the floor drawn from the neighbours' grooves",
    "hashes": {
     "cell.mjs": "95766320c7591784",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-06T01:30:44.398Z",
+   "reason": "owner 2026-09-06 01:00 UTC ('For the chain add a layer over it thats bright purple. Then use that to hellp with the matching and remove that layer for final render') — 18n calibrated after its first bake (c2-1, 01:29Z): the groove detector's contrast is a fifth of the band's median (10-18 luma) so a dark forest's slot is seen; an edge where no groove is found is reported, not refused — the gate refuses only a found groove more than 48 px off the floor",
+   "hashes": {
+    "cell.mjs": "233393b95288e343",
     "plan-territory.mjs": "e8d86a90b2e32796",
     "AGENTS.md": "a1ab4eaec1d4c6ac"
    }

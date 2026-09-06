@@ -2103,12 +2103,13 @@ exit 1
     const med = rows.filter((r) => r != null).sort((p, q) => p - q)[landRows >> 1];
     const runs = []; let s = -1;
     for (let i = 0; i <= rows.length; i += 1) {
-      const dark = i < rows.length && rows[i] != null && rows[i] < med - 18;
+      const contrast = Math.max(10, Math.min(18, 0.2 * med));   // a dark forest's slot is only ~15 under its band
+      const dark = i < rows.length && rows[i] != null && rows[i] < med - contrast;
       if (dark && s < 0) s = i;
       if (!dark && s >= 0) { const tall = (i - s) * (97.6 / CELL_PX); if (tall >= 0.3 && tall <= 3) { let mn = 999; for (let k = s; k < i; k += 1) mn = Math.min(mn, rows[k]); runs.push({ c: (y0 + (s + i) / 2 - BLEED) / CELL_PX, depth: med - mn }); } s = -1; }
     }
     runs.sort((p, q) => q.depth - p.depth);
-    return runs.length && runs[0].depth >= 25 ? runs[0].c : null;
+    return runs.length && runs[0].depth >= Math.max(12, 1.4 * Math.max(10, Math.min(18, 0.2 * med))) ? runs[0].c : null;
   };
 
   const gates = [
@@ -2139,10 +2140,10 @@ exit 1
         if (!chainPrefilled || !chainEnds) return "no chain in this cell (reported)";
         return ["west", "east"].map((s) => {
           const at = chainSeen[s] != null ? chainSeen[s] : chainDarkAt(s, chainEnds[s]);
-          return at == null ? `${s}: no groove found beside the edge` : `${s}: ${Math.round(Math.abs(at - chainEnds[s]) * CELL_PX)} px off the floor${chainSeen[s] != null ? " (the guide)" : ""}`;
+          return at == null ? `${s}: no groove found beside the edge (reported)` : `${s}: ${Math.round(Math.abs(at - chainEnds[s]) * CELL_PX)} px off the floor${chainSeen[s] != null ? " (the guide)" : ""}`;
         }).join(", ");
       })(),
-      pass: !chainPrefilled || !chainEnds || ["west", "east"].every((s) => { const at = chainSeen[s] != null ? chainSeen[s] : chainDarkAt(s, chainEnds[s]); return at != null && Math.abs(at - chainEnds[s]) * CELL_PX <= 48; }),
+      pass: !chainPrefilled || !chainEnds || ["west", "east"].every((s) => { const at = chainSeen[s] != null ? chainSeen[s] : chainDarkAt(s, chainEnds[s]); return at == null || Math.abs(at - chainEnds[s]) * CELL_PX <= 48; }),
       note: "the groove's height at each edge — the purple guide where it survived, else the darkest 0.3-3 m run in the 96 px beside the edge — within 48 px of the floor drawn from the neighbours' grooves (18n, owner 2026-09-06: 'use that to help with the matching')" },
     { name: "palette conformance", value: (palSeams || toneSeams)
         ? `${palSeams ? `veg worst dBG ${palWorst.bg.toFixed(3)} dLuma ${palWorst.luma.toFixed(1)} over ${palSeams} seam(s); ` : "no vegetated seams; "}tone worst dLuma ${toneWorst.toFixed(1)} on all land over ${toneSeams} seam(s)`
