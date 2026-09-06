@@ -1360,31 +1360,40 @@
    }
   },
   "c0-1": {
-   "authoredAt": "2026-09-05T01:25:35.478Z",
+   "authoredAt": "2026-09-06T17:40:42.507Z",
+   "ownerOverride": {
+    "at": "2026-09-06T17:40:42.508Z",
+    "reason": "owner 2026-09-06 17:25, on the served world: 'the center tiles that had the old attempt at the chain still need regen cause now it just has conflicting chains with the overlay' — the plain regen goes in; the chain is the layer",
+    "failedGates": [
+     "rock lighting 0.223",
+     "water continuity 1 unmet crossing(s)",
+     "palette conformance veg worst dBG 0.127 dLuma 26.0 over 3 seam(s); tone worst dLuma 13.0 on all land over 4 seam(s)"
+    ]
+   },
    "describe": "The CABLE-CAR shelf — a settlement shelf on the west coast, and the richest\nground in its neighbourhood.\n\nThe shelf itself: a broad level terrace about 45 m across occupying the middle\nof the cell, meadow green warmed with gold, open glades between orchard-like\nconifer stands, flowers permitted here and nowhere near it. Low natural\noutcrops and small rock terraces around its edge that a settlement",
    "sourcePx": 1254,
    "gates": [
     {
      "name": "key-light asymmetry",
-     "value": 0.0021,
+     "value": 0.0026,
      "pass": true,
-     "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004"
+     "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004; report-only under 5% land (18j, 2026-09-05: a 98%-sea shore cell read 0.0116 on noise)"
     },
     {
      "name": "gradient ratio",
-     "value": "1.473 (reported)",
+     "value": "1.62 (reported)",
      "pass": true,
      "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
     },
     {
      "name": "rock lighting",
-     "value": 0.04,
-     "pass": true,
+     "value": 0.223,
+     "pass": false,
      "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.14; limit 0.16 on the owner's eye (2026-09-02, the dark-forest gorge at 0.153)"
     },
     {
      "name": "land coverage",
-     "value": "89.4%",
+     "value": "87.3%",
      "pass": true
     },
     {
@@ -1395,37 +1404,43 @@
     },
     {
      "name": "mask completion",
-     "value": "+9 px grown, 42 px holes filled (reported)",
+     "value": "+1978 px grown, 150 px holes filled (reported)",
      "pass": true,
      "note": "the delivered mask grown into contiguous painted water within 48 px and speckle holes <=64 px filled before the cut (owner 2026-09-02); dry paint stops the growth, so a polyline mask still fails the rings"
     },
     {
      "name": "water fringe",
-     "value": "0.01%",
+     "value": "0%",
      "pass": true,
      "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
     },
     {
      "name": "water fringe (48px)",
-     "value": "0.01%",
+     "value": "0%",
      "pass": true,
      "note": "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)"
     },
     {
      "name": "water continuity",
-     "value": "ok (2 crossings checked, 1 bridged)",
-     "pass": true,
+     "value": "1 unmet crossing(s)",
+     "pass": false,
      "note": "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint"
     },
     {
-     "name": "palette conformance",
-     "value": "veg worst dBG 0.094 dLuma 9.1 over 1 seam(s); tone worst dLuma 9.3 on all land over 2 seam(s)",
+     "name": "chain continuity",
+     "value": "no chain in this cell (reported)",
      "pass": true,
+     "note": "the groove's height at each edge — the purple guide where it survived, else the darkest 0.3-3 m run in the 96 px beside the edge — within 48 px of the floor drawn from the neighbours' grooves (18n, owner 2026-09-06: 'use that to help with the matching')"
+    },
+    {
+     "name": "palette conformance",
+     "value": "veg worst dBG 0.127 dLuma 26.0 over 3 seam(s); tone worst dLuma 13.0 on all land over 4 seam(s)",
+     "pass": false,
      "note": "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13"
     },
     {
      "name": "crown scale",
-     "value": "2.352 m over 146 crowns (accepted range 1.7-5.2 m)",
+     "value": "2.352 m over 188 crowns (accepted range 1.7-5.2 m)",
      "pass": true,
      "note": "the worker's own median crown from c0-1-report.json, against the 1.7-5.2 m range the accepted cells measured (NOT the plan's written 4-7 m — see CROWN_MIN_M); crown.excludedElements must be empty, so an out-of-scale element cannot be measured around"
     }
@@ -1438,12 +1453,9 @@
     "lake",
     "fall"
    ],
-   "bridged": [
-    "c0-2 edge: rerouted my crossing 221 -> 277 (56px)"
-   ],
    "maskCompletion": {
-    "grownPx": 9,
-    "holePx": 42
+    "grownPx": 1978,
+    "holePx": 150
    },
    "biome": "lush-shelf",
    "source": "art-source/career-world/l2-land/tanium/c0-1",

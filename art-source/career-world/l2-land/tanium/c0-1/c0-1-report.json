@@ -4,40 +4,54 @@
     "width": 1254,
     "height": 1254,
     "rawUntouched": true,
-    "sha256": "75FE26078637999231435F02C7A21764CC8587B5773E4F3CB2C5CFC4DC523A3C"
+    "editCallCount": 1,
+    "sha256": "DE0AB6BFC94A0652ECDA147995A4C913BC396AD78232AF4AAB472C20E61E39C6"
   },
   "lightingIsotropy": {
-    "peakVsUniformOverLand": 1.468763,
-    "directionalKeyFirstMoment": 0.001844,
-    "gradientSamples": 1195141,
+    "peakVsUniformOverLand": 1.398738,
+    "directionalKeyFirstMoment": 0.0109,
+    "gradientSamples": 1397417,
     "method": "Thirty-six-bin land luminance-gradient orientation test after excluding the water mask; 1.0 peak-vs-uniform is perfectly uniform."
   },
   "terrainFractions": {
     "basis": "Visual area estimate over non-water land at native source scale.",
-    "buildable": 0.54,
-    "steep": 0.24,
-    "transitionalOrOther": 0.22
+    "buildable": 0.55,
+    "steep": 0.21,
+    "transitionalOrOther": 0.24,
+    "method": "The coherent broad central meadow shelf and open glades count as buildable; exposed gorge and sea-cliff faces count as steep; talus, broken rock margins, watercourse banks, and dense transition stands make up the remainder. Approximate uncertainty is plus or minus 0.07 per fraction."
   },
-  "waterFootprintFraction": 0.08629928,
+  "waterFootprintFraction": 0.10256175,
   "waterMask": {
     "width": 1254,
     "height": 1254,
-    "opaqueWhitePixels": 135707,
+    "opaqueWhitePixels": 161280,
     "intermediateAlphaPixels": 0,
     "nonWhiteOpaquePixels": 0,
-    "method": "Source-specific connected cool-water segmentation seeded across the sea, stream, pool, fall, surf, and wash; dry rune footprint removed."
+    "sha256": "522635D9448EEFC6B08DBA0FC2E8E07BA7709FF27AD0A03D02A24B4537D77341",
+    "method": "Source-specific edge-connected cool-water segmentation across sea, south-edge water, shelf stream, pool, fall, surf, wash, highlights, and reflections; narrow stream continuity was traced against the source image and small paint gaps were closed without filling dry shoreline rocks."
   },
   "crown": {
     "medianMetres": 2.352,
     "medianPx": 48.995,
-    "sampleCount": 146,
-    "method": "Full-frame manual outer-foliage-width census at native 1254 px, including saplings and every visually distinct crown in overlapping stands; median native width 24 px scaled by 2560/1254.",
+    "sampleCount": 188,
+    "method": "Full-frame manual outer-foliage-width census at native 1254 px, including every visually distinct crown and sapling in open and overlapping stands; median native width 24 px scaled by 2560/1254, then converted at 0.048 m per final pixel.",
     "excludedElements": []
   },
+  "seamEvidence": {
+    "southWaterMaskRunsPx": [
+      "0-168",
+      "682-695",
+      "724-793",
+      "814-820"
+    ],
+    "eastWaterMaskRunPx": "245-267",
+    "note": "The primary south-edge water handoff is centered 84 px from the west corner and spans 169 source pixels. The east stream handoff is centered at 256 px from the north corner and spans 23 source pixels."
+  },
   "reviewNotes": [
-    "The raw generation is square and meets the 1254 px minimum, but is below the preferred 2048 px size.",
-    "Visual inspection finds the rune slot meeting the west edge at about 39% down and the east edge at about 52% down rather than the required 50% and 47%; this is a registration defect in the one-call output.",
-    "No content retry was made because the packet permits only one edit call unless the result is non-square.",
+    "The raw one-call edit is square and meets the 1254 px minimum, but is below the preferred 2048 px size.",
+    "No content retry was made because the first output was square and the packet permits a retry only for a non-square result.",
+    "No new rune-chain groove, slot, kerb, wall, path, carved panel, or mark is visible in the regenerated cell interior.",
+    "The east stream meets the authored edge at the required position, but its visible and masked edge width is narrower than the stated approximately 3 m handoff; this is an open seam-width risk in the one-call output.",
     "Mechanical lighting and mask checks do not establish visual acceptance."
   ]
 }
