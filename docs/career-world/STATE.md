@@ -4,7 +4,35 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-06 17:15 UTC, LATEST (current):** **BRANCHES ON THE CHAIN LAYER;
+**2026-09-06 17:05 UTC, LATEST (current):** **SERVED 17:02Z (commit 2e53f695)
+— THE WORLD IS CURRENT FOR THE OCEAN THREAD; THE WATER-CUT PASS IS COMMITTED
+(c2f27814).** Owner 17:40-17:50 (his clock): "fix this spot [c7-8's shore]
+and do a full pass to make sure all the water of the land tiles is cut
+properly then commit … it needs those areas cleared"; "I think im looking
+at stale land" (nothing had been served since 06:14Z: the serve was gated
+behind the regen). → A HOLD (a file inside `.codex-tmp/authoring/cell.lock`
+so cell.mjs cannot remove the dir) stopped chain6 after c1-1 (c6-1, c0-1
+died on the lock without a bake; hold-release.sh cleared it), chain7 ran:
+c1-2 and c7-8 re-cut with `conform-band --open 6` (a morphological opening:
+spikes and slivers under 6 m go; c7-8 also saw the now-authored c6-8 as sea
+on its west — 53.5% trimmed) and stitched on his words; **water-cut-pass.mjs
+--fix** cut painted water left opaque (regions >= 300 px that touch cut
+water) from the recorded layers of C c7-2 (49 m²), C c5-0, C c7-0, T c6-1,
+N c3-1 (a pool margin; its 10,703 px of blue haze left alone) and restitched
+them (no gates); committed; served (tone + feather + the chain layer). The
+chain regen (chain6): c4-1 landed plain; c3-1, c5-1, c2-1, c1-1 refused
+(tone / veg / crossings) → candidates, previewed WITH the chain layer;
+**chain8.sh** (waiter after "chain7 done") regenerates c6-1 and c0-1 plain,
+then serves. **The chain layer as served:** the carved groove (r4) bedded
+over the seven chain cells; the rune panels at the nodes; the TRIAL hub
+north of the capital in T c3-0 with spokes to leaders at 2.2 / 3.5 / 4.8
+(owner's Tanium diagram: "the branches should be far off the chain"; loops
+dropped); discs bedded (ground hue at the rim, the land's grain on the
+face, feathered, occlusion ring); strokes fade where the land's texture
+says cliff. His word wanted: keep/move/drop the hub; accept the plain
+chain candidates; the four bay cells. Coast 22 of 27 authored.
+
+**2026-09-06 17:15 UTC:** **BRANCHES ON THE CHAIN LAYER;
 c1-2 AND c7-8 RE-CUTS QUEUED BEHIND THE REGEN.** Owner 16:50: *"we need some
 branches from the chain to portray how endpoints cluster to a leader and
 feed back to the chain … not in this tile [c3-1] but since its an overlay I
