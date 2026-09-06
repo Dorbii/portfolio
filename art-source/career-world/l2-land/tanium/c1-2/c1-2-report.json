@@ -1,112 +1,113 @@
 {
   "cell": "c1-2",
   "territory": "tanium",
-  "status": "quarantine candidate; mechanical deliverables complete; visual and west-seam self-checks fail",
+  "status": "refused; mechanical deliverables complete; visual self-check fails hard terrain constraints",
+  "readyForBake": false,
   "generation": {
     "filename": "c1-2-source.png",
     "exactSizePx": [1254, 1254],
     "format": "PNG RGB",
-    "sha256": "1E6A68D65166EA30764D905F21E927448F284957759C19D6819CB1BCA3B5683D",
-    "mode": "single built-in ImageGen whole-canvas edit with the edit target and canon attached",
+    "sha256": "E684A68F349CC67B51534123B4AD66310652F8AF31A79E934806191343F97A52",
+    "tool": "built-in image_gen",
+    "mode": "single whole-canvas edit",
     "imageGenCallsUsed": 1,
     "retryUsed": false,
-    "wholeCanvasSinglePass": true,
+    "bothRequiredImagesAttachedToSameCall": true,
+    "secondImageReferenceOnly": true,
     "rawOutputPreserved": true,
+    "rawCopyHashIdentical": true,
     "resizedCroppedRetouchedOrTiled": false,
-    "promptRecord": "c1-2-imagegen-prompt-attempt2.txt"
+    "promptRecord": "c1-2-imagegen-prompt-used-2026-09-05-codex.txt"
   },
   "generationSizePx": [1254, 1254],
   "shippedCanvasPx": [2560, 2560],
   "groundExtentMetres": [97.6, 97.6],
   "finalResolutionCmPerPx": 4.8,
   "lightingIsotropy": {
-    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean on the delivered source; water-mask pixels and gradients below 12 luminance units excluded",
-    "peakVsUniformOverLand": 1.350485,
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean; delivered water-mask pixels and gradients below 12 luminance units excluded",
+    "peakVsUniformOverLand": 1.361997,
     "uniformReference": 1.0,
-    "directionalKeyFirstMoment": 0.001339,
-    "gradientSamples": 1053093,
+    "directionalKeyFirstMoment": 0.002203,
+    "gradientSamples": 1006179,
     "aggregateDirectionalityNumericPass": true,
     "strictEqualValueOnAllFormSidesVisualCheck": false,
-    "visualCheck": "No coherent whole-cell sun direction or cast-shadow field is visible, but basalt caps and some conifer branch tiers remain brighter than adjacent faces. The aggregate metric does not prove the literal equal-value rule."
+    "visualCheck": "No coherent cast-shadow field is visible, but basalt top planes remain lighter than adjacent cliff faces and conifer branch tiers contain internal light-dark modelling. The aggregate orientation statistic does not override the literal equal-value rule."
   },
   "buildableVsSteepFraction": {
     "basis": "manual estimated fraction of non-water land area at native source resolution",
-    "buildable": 0.46,
-    "steep": 0.21,
-    "otherTalusBrokenRockOrDenseVegetation": 0.33,
-    "method": "Broad forest plateau and the two natural bank shelves count as buildable ground; inlet and coastal column faces count as steep; talus, broken shoreline rock, and uncertain densely vegetated margins make up the remainder."
+    "buildable": 0.31,
+    "steep": 0.17,
+    "otherTalusBrokenRockOrDenseVegetation": 0.52,
+    "method": "The broad west and east transition ground and the two exposed crossing shoulders count as buildable; exposed coastal and inlet cliff faces count as steep; dense forest, talus, shingle and broken rim rock make up the remainder. Approximate uncertainty is plus or minus 0.08 per land-relative fraction."
   },
-  "waterFootprintFraction": 0.18189767,
-  "finalDerivedLandCoverageFraction": 0.81810233,
+  "waterFootprintFraction": 0.20613018,
+  "finalDerivedLandCoverageFraction": 0.79386982,
   "crown": {
-    "medianMetres": 2.156,
-    "medianPx": 44.912,
-    "sampleCount": 118,
-    "method": "Full-cell census of all 118 visually separable conifer crowns located by the diagnostic component survey, including saplings and edge crowns; outer-foliage widths were checked at 2x and the median 22 source px was scaled by 2560/1254 at 0.048 m per final pixel.",
+    "medianMetres": 2.842,
+    "medianPx": 59.203,
+    "sampleCount": 385,
+    "method": "Manual full-frame census at native resolution and in all four 2x quadrant crops; every visually distinguishable conifer crown, including saplings, overlaps and edge-clipped crowns, was included, with a 29 source-pixel median scaled by 2560/1254 and converted at 0.048 m per final pixel.",
     "excludedElements": []
   },
   "waterMask": {
     "filename": "c1-2-water-source.png",
     "exactSizePx": [1254, 1254],
     "format": "PNG RGBA",
-    "sha256": "13C7165F70239498BEBA63446EFD660EB757E737A8FF544567790D38A91084C7",
+    "sha256": "14AAE6B6AD759BF40B59D3E91F46BC1E3ADF478C3BFF0B29444D508BF5352A53",
     "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
-    "opaqueWaterPixels": 286037,
-    "transparentNonWaterPixels": 1286479,
-    "intermediateAlphaPixels": 0,
-    "nonWhiteOpaquePixels": 0,
-    "connectedComponents8": 70,
-    "componentNote": "The sea and inlet are one connected system; the remaining components are visible stream, fall, foam, and ripple fragments separated in the painted source by crowns, rock, or unpainted gaps.",
-    "interiorTransparentHolesAfterFill": 0,
+    "opaqueWaterPixels": 324143,
+    "transparentNonWaterPixels": 1248373,
+    "connectedComponents8": 55,
     "edgeWaterPixels": {
       "north": 0,
-      "east": 227,
+      "east": 259,
       "south": 1254,
-      "west": 263
+      "west": 222
     },
-    "method": "Native-resolution cool-water classification constrained to the hand-traced stream and inlet envelope, expanded through adjacent shallows and neutral foam, with the south edge forced to water corner to corner; the complete result was inspected as a magenta overlay."
-  },
-  "seamSelfCheck": {
-    "method": "Local reproduction of the pipeline 16-176 final-pixel median bands after applying the delivered water mask; System.Drawing high-quality bicubic resampling was used because the sandbox permits node --version but denies node script execution.",
-    "westAgainstC0_2": {
-      "allLandDLuma": 9.9382,
-      "vegetationDLuma": 36.801,
-      "vegetationDBG": 0.289448,
-      "limits": { "allLandDLuma": 21, "vegetationDLuma": 13, "vegetationDBG": 0.2 },
-      "pass": false
-    },
-    "eastAgainstC2_2": {
-      "allLandDLuma": 17.9864,
-      "vegetationDLuma": 5.3582,
-      "vegetationDBG": 0.001854,
-      "limits": { "allLandDLuma": 21, "vegetationDLuma": 13, "vegetationDBG": 0.2 },
-      "pass": true
-    }
+    "method": "Native-resolution colour-constrained trace inside inspected water envelopes, explicit seeds for disconnected visible reaches, short edge and foam growth, and enclosed-hole fill; inspected against a full-resolution magenta overlay.",
+    "limitation": "The narrow east-side channels are broken into many exposed painted reaches by stones and ground occlusion, so the binary mask has multiple connected components. Exact wet-edge placement remains a human visual gate."
   },
   "constraintChecks": {
     "squareAtLeast1254Px": true,
-    "singleWholeCanvasEdit": true,
+    "singleWholeCanvasEditCall": true,
+    "secondReferenceAttached": true,
     "rawGenerationUntouched": true,
     "terrainOnly": true,
     "highOblique2_5D": true,
-    "landContinuesNorthEastAndWest": true,
-    "southEdgeEntirelySea": true,
-    "waterMaskSameDimensionsBinaryAndHoleFree": true,
+    "northForestContinuesToEdge": true,
+    "eastAndWestTransitionsBroadAndBrightAtSeams": true,
+    "southernSeaAndWanderingCliffPresent": true,
+    "inletAndNorthernStreamPresent": true,
+    "twoFacingBareRockShouldersPresent": true,
+    "waterMaskSameDimensionsBinaryAndHoleFilled": true,
+    "crownObjectComplete": true,
     "crownMedianInsideAcceptedTerritoryBand": true,
-    "eastSeamPaletteGateProxy": true,
-    "westSeamPaletteGateProxy": false,
     "strictEqualValueOnAllFormSides": false,
     "oneFlatValuePerCrown": false,
-    "clearThirtyMetreCrossingShoulders": false
+    "greyBlueHazeClearlyVisibleOverEveryStand": false
   },
-  "selfCheckFailures": [
-    "The west vegetation band misses c0-2 materially: dLuma 36.801 exceeds 13 and dBG 0.289448 exceeds 0.20, although the all-land west tone passes.",
-    "Basalt caps and conifer branch tiers retain visible intra-form value changes, so the literal neutral-face and one-flat-value-per-crown rules are not met by eye.",
-    "The inlet is broad at the sea but narrows early, and the facing rock shoulders are not both clearly level and tree-free across an approximately 30 m crossing."
+  "refusalReasons": [
+    "The literal neutral-lighting rule fails by eye: basalt upper planes and many crown branch tiers are visibly lighter than adjacent vertical or lower faces.",
+    "Conifer crowns contain internal light-dark branch modelling rather than one flat value from tip to skirt.",
+    "Grey-blue haze is too weak to visibly soften every crown edge across the dense stands."
   ],
-  "verificationLimits": [
-    "The mutating stitch command was not run because this task is quarantine-only and a passing gate would write outside the permitted directory.",
-    "The seam proxy uses bicubic rather than the pipeline's Lanczos resampling; the west miss is too large to be plausibly explained by that kernel difference.",
-    "Seam invisibility, shoreline-mask judgment, geological naturalism, and overall visual quality remain director and owner visual judgments."
-  ]
+  "openRisks": [
+    "The two bare crossing shoulders are present, but their requested world-space separation and usable level area are not mechanically established from the raster and appear narrower than the brief's target.",
+    "The water mask is mechanically same-size and binary, but exact inclusion of every shallow east-channel wash pixel remains a human visual judgment.",
+    "Nothing was promoted outside quarantine."
+  ],
+  "verified": [
+    "Exactly one built-in whole-canvas edit call used both required images.",
+    "The 1254 x 1254 source copy is hash-identical to the raw generated PNG.",
+    "No buildings, walls, roads, bridges, docks, boats, fences, figures, track, sleepers or tunnel mouths were observed.",
+    "The water mask dimensions match the source and its opaque pixels are white.",
+    "The crown object is complete, includes saplings, and reports no exclusions.",
+    "All project deliverables remain under .codex-tmp/authoring/cells/tanium/c1-2/."
+  ],
+  "unverified": [
+    "Owner visual review.",
+    "Pipeline stitch, shipped-canvas upscale and runtime appearance.",
+    "World-space cliff height, inlet width and crossing-shoulder separation."
+  ],
+  "outputScope": ".codex-tmp/authoring/cells/tanium/c1-2/ only; public/ and art-source/ were not modified."
 }
