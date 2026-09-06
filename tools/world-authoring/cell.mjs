@@ -933,7 +933,21 @@ if (authoredNeighbours.length) {
             const w = nRaw.data[((y - 1) * N + (x - 1)) * 4 + 3] < 128 ? 1 : 0;
             sat[y * (N + 1) + x] = w + sat[(y - 1) * (N + 1) + x] + sat[y * (N + 1) + (x - 1)] - sat[(y - 1) * (N + 1) + (x - 1)];
           }
-          const full = (x, y, s) => sat[(y + s) * (N + 1) + (x + s)] - sat[y * (N + 1) + (x + s)] - sat[(y + s) * (N + 1) + x] + sat[y * (N + 1) + x] === s * s;
+          const full = (x, y, s) => sat[(y + s) * (N + 1) + (x + s)] - sat[y * (N + 1) + (x + s)] - sat[(y + s) * (N + 1) + x] + sat[y * (N + 1) + x] === s * s
+            && seaPaint(x, y, s);
+          // 18i-c (2026-09-06): the paint must be sea too — a square the mask
+          // calls water can hold a stack (T c0-2 → c1-8's grid of eight)
+          const seaPaint = (x, y, s) => {
+            let bad = 0, n = 0;
+            for (let yy = y; yy < y + s; yy += 4) for (let xx = x; xx < x + s; xx += 4) {
+              const o = (yy * N + xx) * 4, r = nCon.data[o], g = nCon.data[o + 1], b = nCon.data[o + 2];
+              const mx = Math.max(r, g, b), mn = Math.min(r, g, b), luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+              const satv = mx ? (mx - mn) / mx : 0;
+              n += 1;
+              if (luma > 130 || satv < 0.25) bad += 1;
+            }
+            return n > 0 && bad / n < 0.005;
+          };
           for (const s of [512, 384, 256, 128]) {
             if (seaPatch && seaPatch.size >= s) break;
             let found = null;

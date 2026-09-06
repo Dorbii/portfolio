@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-06T01:30:44.398Z",
+ "solidifiedAt": "2026-09-06T05:30:03.131Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "233393b95288e343",
+  "cell.mjs": "2cf8aa3172a27c83",
   "plan-territory.mjs": "e8d86a90b2e32796",
   "AGENTS.md": "a1ab4eaec1d4c6ac"
  },
@@ -516,6 +516,15 @@
    "reason": "owner 2026-09-06 01:00 UTC ('For the chain add a layer over it thats bright purple. Then use that to hellp with the matching and remove that layer for final render') — 18n calibrated after its first bake (c2-1, 01:29Z): the groove detector's contrast is a fifth of the band's median (10-18 luma) so a dark forest's slot is seen; an edge where no groove is found is reported, not refused — the gate refuses only a found groove more than 48 px off the floor",
    "hashes": {
     "cell.mjs": "233393b95288e343",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-06T05:30:03.132Z",
+   "reason": "owner 2026-09-06 05:30 UTC: 'go ahead with regen' — in reply to the ask 'Still held on your 18i-c yes or no: the regens of c0-5, c1-3 and c4-8'; lock 18i-c applied: the tiled sea patch must be sea in the paint (under 0.5% bright or grey pixels), not only in the mask",
+   "hashes": {
+    "cell.mjs": "2cf8aa3172a27c83",
     "plan-territory.mjs": "e8d86a90b2e32796",
     "AGENTS.md": "a1ab4eaec1d4c6ac"
    }
