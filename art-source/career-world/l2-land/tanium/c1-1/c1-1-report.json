@@ -1,74 +1,94 @@
 {
   "cell": "c1-1",
   "territory": "tanium",
-  "status": "refused; mechanical deliverables complete; visual self-check fails binding terrain constraints",
+  "layer": "L2-land",
+  "status": "refused",
+  "readyForBake": false,
   "generation": {
     "filename": "c1-1-source.png",
-    "exactSizePx": [1254, 1254],
+    "exactGenerationSizeProduced": [1254, 1254],
     "format": "PNG RGB",
-    "sha256": "336328361105B9CC19EA389BD2AAFE41A2A586FBAA42F0E9C1781D4A28A6C3A4",
-    "mode": "single built-in ImageGen whole-canvas edit with edit target and canon attached",
+    "sha256": "E1AB22BDCF04D035FBC8141347479A984E3A73CAE660094CD83DD6DAB195FAC5",
+    "mode": "single built-in image_gen whole-canvas edit with edit-target.jpg first and the NinjaOne seed canon second as reference only",
     "imageGenCallsUsed": 1,
     "retryUsed": false,
-    "bothImagesAttachedToSameCall": true,
+    "bothRequiredImagesAccepted": true,
     "wholeCanvasSinglePass": true,
     "rawOutputPreserved": true,
     "rawCopyHashIdentical": true,
     "resizedCroppedRetouchedOrTiled": false,
-    "promptRecord": "c1-1-imagegen-prompt-used-2026-09-05-codex.txt"
+    "promptFile": "c1-1-imagegen-prompt-used-2026-09-06-codex.txt"
+  },
+  "generationSize": {
+    "width": 1254,
+    "height": 1254
   },
   "generationSizePx": [1254, 1254],
   "shippedCanvasPx": [2560, 2560],
   "groundExtentMetres": [97.6, 97.6],
   "finalResolutionCmPerPx": 4.8,
   "lightingIsotropy": {
-    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean; delivered water-mask pixels and gradients below 12 luminance units excluded",
-    "peakVsUniformOverLand": 1.570343,
-    "uniformReference": 1.0,
-    "directionalKeyFirstMoment": 0.001929,
-    "gradientSamples": 1174498,
-    "aggregateDirectionalityNumericPass": true,
+    "peakVsUniformOverLand": 1.616021,
+    "uniformBaseline": 1.0,
+    "firstMomentOverLand": 0.003557,
+    "sampleCount": 1252694,
+    "method": "Rec.709 luminance central-difference gradients on nonwater source pixels, magnitude at least 12; 36 directed angle bins; peak bin divided by the uniform-bin mean.",
+    "limitation": "The aggregate orientation statistic is not proof of flat lighting because terrain geometry and brush texture also affect it.",
     "strictEqualValueOnAllFormSidesVisualCheck": false,
-    "visualCheck": "No coherent cast-shadow field or whole-cell sun direction is visible, but basalt tops and conifer branch tiers remain lighter than adjacent vertical or lower faces. The aggregate metric does not override the literal equal-value rule."
+    "visualCheck": "FAIL: basalt caps and upper rock planes are repeatedly paler than vertical faces, and conifer crowns retain internal light-dark modelling instead of one flat value. No coherent cast-shadow field is visible, but that does not satisfy the literal equal-value rule."
   },
   "buildableVsSteepFraction": {
-    "basis": "manual estimated fraction of non-water land area at native source resolution",
-    "buildable": 0.36,
-    "steep": 0.16,
-    "otherTalusBrokenRockOrDenseVegetation": 0.48,
-    "method": "The pale northern ground, western glades, viaduct shoulders, and fallen-tree clearing count as buildable; exposed gorge faces count as steep; dense forest, talus, and broken mossy rock make up the remainder."
+    "basis": "manual full-frame screen-space estimate as fractions of nonwater land at native source resolution",
+    "buildable": 0.29,
+    "steep": 0.18,
+    "otherDenseForestTalusBrokenRockOrTransitionGround": 0.53,
+    "method": "The pale north shelf, west glades, two level gorge shoulders and fallen-tree clearing count as buildable; exposed gorge walls and sharp talus banks count as steep; dense stands and rough non-steep ground make up the remainder.",
+    "limitation": "Screen-space visual estimate with approximate uncertainty of plus or minus 0.08 per fraction, not an elevation-derived slope measurement."
   },
-  "waterFootprintFraction": 0.02171933,
-  "finalDerivedLandCoverageFraction": 0.97828067,
-  "crown": {
-    "medianMetres": 2.499,
-    "medianPx": 52.057,
-    "sampleCount": 38,
-    "method": "Full-frame native-resolution dark-conifer connected-component census of all 38 distinct crown components found, including saplings and edge crowns; median source width 25.5 px scaled by 2560/1254 and converted at 0.048 m per final pixel.",
-    "excludedElements": []
-  },
+  "buildableFraction": 0.29,
+  "steepFraction": 0.18,
+  "waterFootprintFraction": 0.01981093,
+  "finalDerivedLandCoverageFraction": 0.98018907,
   "waterMask": {
     "filename": "c1-1-water-source.png",
+    "classificationFile": "c1-1-water.json",
     "exactSizePx": [1254, 1254],
     "format": "PNG RGBA",
-    "sha256": "178B250C435010AD0676506B4ABB7A4D89718CDAC1ACCA2FF796379C05EBBAE9",
+    "sha256": "2F88E03F406A1E796FFAD61ADC98FD5BEA5CC5F571BA24D95FEAE4EBDC7B27B5",
     "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
-    "opaqueWaterPixels": 34154,
-    "transparentNonWaterPixels": 1538362,
+    "opaqueWaterPixels": 31153,
+    "transparentNonWaterPixels": 1541363,
     "intermediateAlphaPixels": 0,
     "nonWhiteOpaquePixels": 0,
-    "connectedComponents8": 3,
-    "componentNote": "The west-edge beck is visually detached from the two gorge-stream reaches; the gorge reaches are separated by the required dry rune slot.",
-    "interiorHolePixelsFilled": 100,
-    "interiorTransparentPixelsAfterFill": 0,
-    "boundsSourcePx": [0, 239, 815, 1253],
+    "connectedComponents8": 2,
+    "interiorHolePixels": 0,
+    "boundsSourcePx": [0, 233, 799, 1253],
     "edgeWaterPixels": {
       "north": 0,
       "east": 0,
       "south": 23,
-      "west": 15
+      "west": 26
     },
-    "method": "Native-resolution manual trace of every visible beck, pool, fall, wash, and gorge-stream surface, with a dry gap at the rune slot; enclosed holes were filled and the result inspected as a magenta overlay."
+    "method": "Native-resolution bank-to-bank trace over the complete visible beck and gorge-water surfaces, including both falls, foam, shaded pools, wash, ripples and reflections; binary outline and tint overlay inspected against the raw source."
+  },
+  "crown": {
+    "medianMetres": 2.156,
+    "medianPx": 44.912,
+    "sampleCount": 54,
+    "method": "Connected-component census of all 54 separable dark-green conifer crowns, including saplings and edge or overlap cases; median outer source width 22 px scaled by 2560/1254 and converted at 0.048 m per final pixel.",
+    "excludedElements": []
+  },
+  "siteChecks": {
+    "gorgeRunsNorthEastToSouthWest": true,
+    "twoFallsAndShadedPoolsVisible": true,
+    "twoFacingLevelRockShouldersPresent": true,
+    "fallenGiantAndUprightRootPlatePresent": true,
+    "darkestStandLocalizedAroundDeepStandAndGorge": true,
+    "northEdgeRemainsPaleOpenGround": true,
+    "westTransitionBreaksIntoGlades": true,
+    "terrainOnlyInAuthoredArea": true,
+    "newRuneChainOrRailStructurePresent": false,
+    "visibleGreyBlueHazeAcrossAllCrownEdges": false
   },
   "constraintChecks": {
     "squareAtLeast1254Px": true,
@@ -77,35 +97,34 @@
     "rawGenerationUntouched": true,
     "terrainOnly": true,
     "highOblique2_5D": true,
-    "northEdgePaleAndTreeFree": true,
-    "westTransitionBroadAndGradual": true,
-    "southLandContinues": true,
-    "deepStandClearingAndFallenGiantPresent": true,
-    "twoGorgeFallsAndPoolsPresent": true,
-    "waterMaskSameDimensionsBinaryAndHoleFree": true,
-    "crownObjectComplete": true,
+    "landContinuesToAllFourEdges": true,
+    "waterMaskSameDimensionsBinaryWhiteTransparent": true,
+    "waterMaskNoInteriorHoles": true,
+    "allMeasuredCrownsIncluded": true,
     "crownMedianInsideAcceptedTerritoryBand": true,
-    "strictEqualValueOnAllFormSides": false,
-    "oneFlatValuePerCrown": false,
-    "runeReadsAsDarkBedrockSlot": false,
-    "westBeckConnectsContinuouslyToGorge": false,
-    "hazeClearlyVisibleOverAllCanopy": false
+    "strictNeutralLighting": false,
+    "everyCrownOneFlatValue": false,
+    "hazeSoftensEveryCrownEdge": false
   },
   "refusalReasons": [
-    "The literal neutral-lighting rule fails by eye: basalt top planes and many crown branch tiers remain lighter than adjacent sides even though there is no coherent cast-shadow field.",
-    "Conifer crowns contain internal light-dark branch modelling rather than one flat value from tip to skirt.",
-    "The rune-chain cut reads as a raised stone-lined kerb or wall across much of the cell, and it appears to span the gorge instead of stopping at one lip and resuming on the far lip.",
-    "The west-edge beck remains visibly detached under the canopy before the main gorge stream, so the hydrology is not demonstrably continuous.",
-    "The requested grey-blue haze is too weak to soften every crown edge."
+    "The highest-priority lighting rule fails visually: repeated pale basalt caps and upper planes over darker vertical faces encode directional form shading despite the absence of cast shadows.",
+    "Conifer crowns retain internal lighter and darker modelling instead of one flat value from tip to skirt.",
+    "The required grey-blue haze is too weak to soften every crown edge; many stand silhouettes remain hard."
   ],
-  "openRisks": [
-    "The dense east-side canopy reaches the edge through several broad runs and may reproduce the dark square seam the owner rejected.",
-    "The facing gorge shoulders exist as exposed rock, but their usable level area and separation are not mechanically established from this raster.",
-    "The water mask is mechanically binary, same-size, and hole-free, but exact wet-edge placement remains a human visual gate.",
-    "Nothing was promoted outside quarantine."
+  "verified": [
+    "Exactly one whole-canvas built-in edit call with both required images attached",
+    "1254 x 1254 square PNG, byte-identical to the raw tool output",
+    "No new buildings, walls, roads, bridges, docks, boats, fences, figures, rail, track, tunnel mouths, rune marks or paths observed in the authored area",
+    "Water mask dimensions match source; opaque pixels are white, alpha is binary, and no interior holes remain",
+    "Water overlay covers the west beck, gorge stream, two falls, foam, shaded pools, wash, ripples and reflections",
+    "All 54 separable measured conifer crowns were retained in the census; median is within the 1.7-5.2 m band",
+    "All task writes remained under .codex-tmp/authoring/cells/tanium/c1-1/"
   ],
-  "verificationLimits": [
-    "No content retry was made because the first result was square and the packet permits a retry only for a non-square output.",
-    "No stitch, bake, mount, public asset, art-source asset, or runtime command was run."
-  ]
+  "unverified": [
+    "Owner visual review",
+    "Pipeline stitch and shipped-canvas runtime appearance",
+    "World-space gorge depth, shoulder separation and clearing diameter",
+    "Exact water-to-bank boundary placement beyond the inspected native-resolution overlay"
+  ],
+  "outputScope": ".codex-tmp/authoring/cells/tanium/c1-1/ only; no task write was made to public/ or art-source/."
 }

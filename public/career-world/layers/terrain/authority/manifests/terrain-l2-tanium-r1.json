@@ -1995,10 +1995,10 @@
    }
   },
   "c1-1": {
-   "authoredAt": "2026-09-06T05:04:52.639Z",
+   "authoredAt": "2026-09-06T17:39:28.897Z",
    "ownerOverride": {
-    "at": "2026-09-06T05:04:52.640Z",
-    "reason": "owner 2026-09-06 02:50, on the candidates sheet: 'C1-1, 2-1, 1-2 are all good'",
+    "at": "2026-09-06T17:39:28.897Z",
+    "reason": "owner 2026-09-06 17:25, on the served world: 'the center tiles that had the old attempt at the chain still need regen cause now it just has conflicting chains with the overlay' — the plain regen goes in; the chain is the layer",
     "failedGates": [
      "water continuity 1 unmet crossing(s)"
     ]
@@ -2008,25 +2008,25 @@
    "gates": [
     {
      "name": "key-light asymmetry",
-     "value": 0.0075,
+     "value": 0.0031,
      "pass": true,
      "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004; report-only under 5% land (18j, 2026-09-05: a 98%-sea shore cell read 0.0116 on noise)"
     },
     {
      "name": "gradient ratio",
-     "value": "1.501 (reported)",
+     "value": "1.511 (reported)",
      "pass": true,
      "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
     },
     {
      "name": "rock lighting",
-     "value": "0.213 (n 770, report-only)",
+     "value": "0.048 (n 2526, report-only)",
      "pass": true,
      "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.14; limit 0.16 on the owner's eye (2026-09-02, the dark-forest gorge at 0.153)"
     },
     {
      "name": "land coverage",
-     "value": "97.1%",
+     "value": "97.5%",
      "pass": true
     },
     {
@@ -2037,19 +2037,19 @@
     },
     {
      "name": "mask completion",
-     "value": "+3511 px grown, 58 px holes filled (reported)",
+     "value": "+53 px grown, 2 px holes filled (reported)",
      "pass": true,
      "note": "the delivered mask grown into contiguous painted water within 48 px and speckle holes <=64 px filled before the cut (owner 2026-09-02); dry paint stops the growth, so a polyline mask still fails the rings"
     },
     {
      "name": "water fringe",
-     "value": "0.39%",
+     "value": "0.05%",
      "pass": true,
      "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
     },
     {
      "name": "water fringe (48px)",
-     "value": "0.19%",
+     "value": "0%",
      "pass": true,
      "note": "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)"
     },
@@ -2061,19 +2061,19 @@
     },
     {
      "name": "chain continuity",
-     "value": "west: 6 px off the floor, east: no groove found beside the edge (reported)",
+     "value": "no chain in this cell (reported)",
      "pass": true,
      "note": "the groove's height at each edge — the purple guide where it survived, else the darkest 0.3-3 m run in the 96 px beside the edge — within 48 px of the floor drawn from the neighbours' grooves (18n, owner 2026-09-06: 'use that to help with the matching')"
     },
     {
      "name": "palette conformance",
-     "value": "veg worst dBG 0.056 dLuma 4.6 over 2 seam(s); tone worst dLuma 14.3 on all land over 3 seam(s)",
+     "value": "veg worst dBG 0.146 dLuma 4.7 over 3 seam(s); tone worst dLuma 20.8 on all land over 4 seam(s)",
      "pass": true,
      "note": "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13"
     },
     {
      "name": "crown scale",
-     "value": "2.499 m over 38 crowns (accepted range 1.7-5.2 m)",
+     "value": "2.156 m over 54 crowns (accepted range 1.7-5.2 m)",
      "pass": true,
      "note": "the worker's own median crown from c1-1-report.json, against the 1.7-5.2 m range the accepted cells measured (NOT the plan's written 4-7 m — see CROWN_MIN_M); crown.excludedElements must be empty, so an out-of-scale element cannot be measured around"
     }
@@ -2086,12 +2086,9 @@
     "stream",
     "fall"
    ],
-   "bridged": [
-    "c0-1 edge: rerouted my crossing 664 -> 714 (50px)"
-   ],
    "maskCompletion": {
-    "grownPx": 3511,
-    "holePx": 58
+    "grownPx": 53,
+    "holePx": 2
    },
    "biome": "dark-forest",
    "source": "art-source/career-world/l2-land/tanium/c1-1",
