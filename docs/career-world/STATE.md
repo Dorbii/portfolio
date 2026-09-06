@@ -4,7 +4,28 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-06 16:10 UTC, LATEST (current):** **THE CHAIN LAYER WORKS — SHOWN
+**2026-09-06 16:40 UTC, LATEST (current):** **THE CHAIN IS THE CARVED SLOT,
+BEDDED INTO THE GROUND; SHOWN ON THE PLAIN c3-1.** Owner 16:20: *"wasnt it
+supposed to be carved out of the ground and then we were gonna add light to
+it?"* and *"also that looks stickered on ngl"*. → The kerb was the old
+c3-1's rendering copied as a style reference — wrong object; the canon is
+"a slot cut DOWN into the bedrock … the ground is REMOVED along it", the
+light an effect layer later. **kerb-element.png = r4** (chain-element.mjs
+with KERB_VARIANT=groove: the far cut wall, the rubble floor, the near lip
+with scrub; delivered on black, keyed; 374x49, anchor row 20 = the floor).
+**Bedding in build-chain-layer.mjs:** per column the land's colour beside
+the slot is sampled; the element's outer rows (the lips) take that hue
+strongly (0.7), the walls and floor keep their own (0.15); the outer 5 rows
+feathered; an occlusion band (10 px, 0.45 → 0) on the ground beside the
+cut; ±1.3 px jitter on the line. Proof sent 16:40:
+`island/chain-c3-1-groove.jpg` (+ -full). r1 (blocks) and r3 (rounded
+kerb) kept as files, unused. The regen: c4-1 (2/7) still baking since
+15:52Z (the plateau takes long). At the run's end serve.sh lays the groove
+over all seven (candidates included in the preview) → the picture → his
+accepts / the palette recalibration. The light on the groove: the effect
+layer's job, after the city.
+
+**2026-09-06 16:10 UTC:** **THE CHAIN LAYER WORKS — SHOWN
 TO THE OWNER ON THE PLAIN c3-1; THE REGEN IS ON c4-1 (2/7).** Elements
 (`art-source/career-world/chain/`): **kerb-element.png = r3** (the second
 generation, KERB_VARIANT=low: one course of rounded stones with the dark
