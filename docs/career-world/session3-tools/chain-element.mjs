@@ -125,6 +125,38 @@ Your prompt says, in words:
 Then write \`${ROOT}/${WORK}/kerb${WORKTAG}/report.json\`:
 \`{ "element": "kerb", "file": "kerb-source.png", "size": [w, h], "calls": 1, "notes": "..." }\`.
 Do not resize, crop, recolour or key anything yourself. One call only.`,
+  cluster: `# The rune chain's CLUSTER element — one generation, magenta key
+
+You are the worker of an image pipeline. Deliver files into
+\`${ROOT}/${WORK}/cluster${WORKTAG}/\` (create it). Work only there.
+
+Load \`${ROOT}/${REF}\` with the built-in \`view_image\` tool: a strip of the
+world's authored art with the RUNE PANELS of a settlement — round and square
+cut slabs of pale weathered basalt, each carved with a mark, lying flat on the
+ground. Also load \`${ROOT}/${CANON}\` (the style canon: brush, palette family,
+the high-oblique view, flat lighting).
+
+This world's rune chain is a metaphor for a network: endpoints cluster to a
+LEADER and feed back to the chain. Then make ONE \`image_gen\` call in GENERATE
+mode for a SQUARE image, and deliver its raw output untouched as
+\`cluster-source.png\`. Your prompt says:
+
+- The whole image is a FLAT, PURE MAGENTA background (red 255, green 0, blue 255)
+  with exactly one group on it, centred: a LEADER — one carved rune panel like
+  the reference's, a round slab of pale basalt about a fifth of the image
+  wide, one weathered mark on it — and SIX to NINE ENDPOINTS around it in a
+  loose ring at about one and a half leader-widths' distance: each endpoint a
+  small plain standing stone of the same pale basalt, knee-high, a third of
+  the leader's width, no two alike, each joined to the leader by a shallow
+  scratch cut into the ground (a thin dark line, not raised).
+- Same high-oblique view, same pale basalt, same scale as the reference.
+- Flat ambient light only: no sun, no cast shadows. No grass, no ground,
+  nothing else — magenta everywhere the stones and scratches are not, with
+  hard edges and no magenta halo.
+
+Then write \`${ROOT}/${WORK}/cluster${WORKTAG}/report.json\`:
+\`{ "element": "cluster", "file": "cluster-source.png", "size": [w, h], "calls": 1, "notes": "..." }\`.
+Do not resize, crop, recolour or key anything yourself. One call only.`,
   node: `# The rune chain's NODE element — one generation, magenta key
 
 You are the worker of an image pipeline. Deliver files into
@@ -242,6 +274,12 @@ async function key(src, which) {
     scale = KERB_PX / Math.max(1, sBottom - sTop + 1);
     out = await sharp(kd, { raw: { width: KW, height: KH, channels: 4 } }).resize(Math.round(KW * scale), Math.round(KH * scale), { kernel: "lanczos3" }).png().toBuffer();
     console.log(`  kerb: ${sBottom - sTop + 1} solid rows → scaled x${scale.toFixed(3)} to the world's kerb (${KERB_PX} px at L0)`);
+  } else if (which === "cluster") {
+    // the cluster: the leader panel is a fifth of the delivery's width and PANEL_PX in the world
+    const k = await sharp(out).metadata();
+    scale = PANEL_PX / Math.max(1, W / 5);
+    out = await sharp(out).resize(Math.round(k.width * scale), Math.round(k.height * scale), { kernel: "lanczos3" }).png().toBuffer();
+    console.log(`  cluster: scaled x${scale.toFixed(3)} (the leader ~${PANEL_PX} px at L0)`);
   } else {
     // panels: the group is about three panels tall; a panel is PANEL_PX
     const k = await sharp(out).metadata();

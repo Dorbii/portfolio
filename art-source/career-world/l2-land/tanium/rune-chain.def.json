@@ -110,5 +110,29 @@
  ],
  "groove": "a SLOT CUT DOWN INTO THE BEDROCK, not a line drawn on top of it — 2-3 m wide and about 2 m deep, deep enough that a person could stand in it with their head at ground level. It has two cut walls and a floor, and it reads dark inside because the depth shades it, NOT because anything glows. ANCIENT AND WEATHERED: the cut edges rounded and softened, lichen in the joints, grass and low scrub overhanging the lip in places, a little scree and fallen rubble on the floor, and the odd stretch where the wall has slumped. Nobody has maintained this in a very long time. But it never wanders and it is never lost: the line stays true across the whole cell and you can follow it by eye from one edge to the other. Do not draw it as a path, a road, a kerb, a wall or a low ridge — the ground is REMOVED along it.",
  "rune": "large panels of cut rock set into the level ground FLANKING the groove, each 6-8 m across, deeply incised, all the same size and depth, each a DIFFERENT mark — a sentence, not a repeated stamp. Weathered like the groove: edges rounded, lichen in the cuts, some marks part-lost to time. None larger than the others, and nothing standing at the middle of the cluster: every node equal. Six to ten of them at a node, close enough to read as one utterance.",
- "water": "NO WATER ON THE CHAIN. A beck may pass beneath the groove or stop short of it, but no pool, tarn, stream or wet ground may sit ON the line or cross it in the open — water there is cut out of this layer and leaves a hole, which severs the chain. The first attempt at this cell put two pools directly on the line and broke it inside a single cell."
+ "water": "NO WATER ON THE CHAIN. A beck may pass beneath the groove or stop short of it, but no pool, tarn, stream or wet ground may sit ON the line or cross it in the open — water there is cut out of this layer and leaves a hole, which severs the chain. The first attempt at this cell put two pools directly on the line and broke it inside a single cell.",
+ "branchesNote": "owner 2026-09-06: 'branches from the chain to portray how endpoints cluster to a leader and feed back to the chain' — each branch is a loop leaving the trunk at grid x = at, bulging depth m to one side (side -1 north, +1 south), rejoining length m along; a cluster (a leader and its endpoints) at the apex. Placed by data; trial placements below, not in c3-1 (his word).",
+ "branches": [
+  {
+   "at": 2.18,
+   "side": -1,
+   "length": 22,
+   "depth": 14,
+   "note": "c2-1, the open east of the forest edge, north of the chain"
+  },
+  {
+   "at": 2.55,
+   "side": 1,
+   "length": 24,
+   "depth": 15,
+   "note": "c2-1, south"
+  },
+  {
+   "at": 0.72,
+   "side": 1,
+   "length": 20,
+   "depth": 13,
+   "note": "c0-1, the heath south of the cablecar node"
+  }
+ ]
 }

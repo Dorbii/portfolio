@@ -28,6 +28,7 @@ sharp.cache(false);
 const arg = (f, d) => { const i = process.argv.indexOf(f); return i >= 0 ? process.argv[i + 1] : d; };
 const ART = "art-source/career-world";
 const KERB = arg("--kerb", `${ART}/chain/kerb-element.png`), NODE = arg("--node", `${ART}/chain/node-element.png`);   // the chosen elements (copies of a revision)
+const CLUSTER = arg("--cluster", `${ART}/chain/cluster-element.png`);   // a leader and its endpoints, at a branch's apex
 const OUT = arg("--out", `${ART}/chain/cells`), PREVIEW = arg("--preview");
 const CELL = 2048, BLEED = 256;
 const route = JSON.parse(fs.readFileSync(`${ART}/l2-land/tanium/rune-chain.def.json`, "utf8"));
@@ -131,6 +132,81 @@ for (const col of cols) {
         out[o] = 12; out[o + 1] = 10; out[o + 2] = 8; out[o + 3] = Math.round(255 * w);
       }
     }
+  }
+  // BRANCHES (owner 2026-09-06: "branches from the chain to portray how
+  // endpoints cluster to a leader and feed back to the chain"): each entry of
+  // route.branches is a loop that leaves the chain at grid x = at, bulges
+  // `depth` metres to one side (side -1 = north, +1 = south) and rejoins it
+  // `length` metres along; the slot runs along the loop at 0.6 of its width,
+  // bedded like the trunk; the cluster element (a leader and its endpoints)
+  // sits at the loop's apex. Placed by data, never by the model.
+  const M_PX = CELL / 97.6;                            // px per metre at L0
+  const BR_SCALE = 0.6, bkw = Math.round(KW * BR_SCALE), bkh = Math.round(KH * BR_SCALE), bka = Math.round(KA * BR_SCALE);
+  const cluster = fs.existsSync(CLUSTER) ? await sharp(CLUSTER).ensureAlpha().raw().toBuffer({ resolveWithObject: true }) : null;
+  const bedPixel = (x, y, er, eg, eb, a0, ky, kh) => {     // the trunk's bedding, for a branch pixel
+    if (x < 0 || y < 0 || x >= CELL || y >= CELL) return;
+    const lp = landPx(x, y); if (lp[3] < 128) return;
+    const edge = Math.min(ky + 1, kh - ky), fade = edge <= FEATHER ? edge / (FEATHER + 1) : 1;
+    const a = Math.round(a0 * fade); if (a === 0) return;
+    let gr = 0, gg = 0, gb = 0, gn = 0;
+    for (let d = -20; d <= 20; d += 8) for (let e = -20; e <= 20; e += 8) { const p = landPx(x + d, y + e); if (p && p[3] >= 128 && (x + d) >= 0 && (y + e) >= 0 && (x + d) < CELL && (y + e) < CELL) { gr += p[0]; gg += p[1]; gb += p[2]; gn += 1; } }
+    if (gn) {
+      const ground = [gr / gn, gg / gn, gb / gn], groundL = Math.max(1, lumaOf(...ground));
+      const el = lumaOf(er, eg, eb), k = el / groundL;
+      const tr = Math.min(255, ground[0] * k), tg = Math.min(255, ground[1] * k), tb = Math.min(255, ground[2] * k);
+      const depthIn = Math.min(ky, kh - 1 - ky) / (kh / 2), t = 0.7 - 0.55 * Math.min(1, depthIn * 2);
+      er = Math.round(er * (1 - t) + tr * t); eg = Math.round(eg * (1 - t) + tg * t); eb = Math.round(eb * (1 - t) + tb * t);
+    }
+    const o = (y * CELL + x) * 4;
+    if (out[o + 3] >= a && out[o + 3] > 0) return;      // the trunk and earlier strokes win
+    out[o] = er; out[o + 1] = eg; out[o + 2] = eb; out[o + 3] = a;
+  };
+  for (const br of route.branches || []) {
+    if (Math.floor(br.at) !== col) continue;
+    const L = br.length * M_PX, D = br.depth * M_PX, side = br.side || -1;
+    const x0 = (br.at - col) * CELL, y0r = (yAt(br.at) - row) * CELL;
+    const x1 = x0 + L, y1r = (yAt(Math.min(col + 1 - 1e-6, br.at + br.length / 97.6)) - row) * CELL;
+    // the loop: a half-ellipse in the frame of the chord from (x0,y0r) to (x1,y1r)
+    const steps = Math.ceil(Math.PI * (L / 2 + D)), pts = [];
+    for (let i = 0; i <= steps; i += 1) {
+      const t = i / steps, ang = Math.PI * (1 - t);              // from the start (ang = PI) round to the end (0)
+      const cx = (x0 + x1) / 2 + (L / 2) * Math.cos(ang), yy = (y0r + y1r) / 2 + (y1r - y0r) * (t - 0.5) + side * D * Math.sin(ang);
+      pts.push([cx, yy]);
+    }
+    // the branch slot along the loop, its cross-section along the normal
+    let s = 0;
+    for (let i = 1; i < pts.length; i += 1) {
+      const [ax, ay] = pts[i - 1], [bx, by] = pts[i], len = Math.hypot(bx - ax, by - ay);
+      if (len === 0) continue;
+      const tx = (bx - ax) / len, ty = (by - ay) / len, nx = -ty, ny = tx;
+      for (let u = 0; u < len; u += 0.7) {
+        const px = ax + tx * u, py = ay + ty * u, ss = Math.round((s + u) / BR_SCALE);
+        const rep = Math.floor(ss / KW); let kx = ss % KW; if (rep % 2 === 1) kx = KW - 1 - kx;
+        for (let ky = 0; ky < bkh; ky += 1) {
+          const sky = Math.min(KH - 1, Math.round(ky / BR_SCALE));
+          const ko = (sky * KW + kx) * 4, a0 = kerb.data[ko + 3]; if (a0 === 0) continue;
+          const x = Math.round(px + nx * (ky - bka)), y = Math.round(py + ny * (ky - bka));
+          bedPixel(x, y, kerb.data[ko], kerb.data[ko + 1], kerb.data[ko + 2], a0, ky, bkh);
+        }
+      }
+      s += len;
+    }
+    // the cluster at the apex
+    if (cluster) {
+      const CW = cluster.info.width, CH = cluster.info.height;
+      const apex = pts[Math.floor(pts.length / 2)];
+      const ox = Math.round(apex[0]) - Math.round(CW / 2), oy = Math.round(apex[1]) - Math.round(CH / 2);
+      for (let cy2 = 0; cy2 < CH; cy2 += 1) for (let cx2 = 0; cx2 < CW; cx2 += 1) {
+        const x = ox + cx2, y = oy + cy2;
+        if (x < 0 || y < 0 || x >= CELL || y >= CELL) continue;
+        const co = (cy2 * CW + cx2) * 4, a = cluster.data[co + 3]; if (a === 0) continue;
+        const lp = landPx(x, y); if (lp[3] < 128) continue;
+        const o = (y * CELL + x) * 4, k = a / 255;
+        for (let c = 0; c < 3; c += 1) out[o + c] = Math.round(cluster.data[co + c] * k + out[o + c] * (1 - k));
+        out[o + 3] = Math.max(out[o + 3], a);
+      }
+    }
+    console.log(`  ${id}: branch at ${br.at} (${side < 0 ? "north" : "south"}, ${br.length} m along, ${br.depth} m out)${cluster ? " with its cluster" : " — no cluster element yet"}`);
   }
   // the nodes: the panel element centred on the node, over the kerb, masked by land
   for (const n of route.nodes || []) {
