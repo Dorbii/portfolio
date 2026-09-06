@@ -4,7 +4,31 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-06 02:25 UTC, LATEST (current):** **SERVED AGAIN AT 02:22Z (60
+**2026-09-06 02:45 UTC, LATEST (current):** **THE NIGHT'S RUNS ARE DONE
+AND SERVED (02:38Z, 60 TILES); THE LOCK IS FREE; NOTHING DISPATCHES UNTIL
+THE OWNER RULES.** chain3.sh: c1-8 conformed and stitched on his word (open
+sea — the stack grid is gone), c0-5 re-conformed and refused on veg 15.7
+(candidate), **T c4-1's second attempt LANDED** (02:35Z; the groove visible
+edge to edge, 20 / 5 px off the neighbours' grooves — `island/c4-1-served.jpg`),
+served. **The world now:** N 20, T 18 (c4-0, c4-1, c6-1 new since his
+picture), coast 22 of 28 (c1-1 c2-0 c3-0 c4-0 c5-0 c6-0 c8-5 c7-2 c8-6 c1-0
+c1-8 c7-1 c1-2 c7-3 c7-4 c8-7 c7-8 c0-6 c0-7 c7-0 …); the coast audit is
+clean (no land into unplanned sea; c8-4 stays sea). **Candidates for his
+eye (every one previewed live):** T c1-1 (chain 6 px, 1 crossing, tone and
+crowns clean), T c2-1, T c1-2 (the forest's palette/crowns), C c0-5 (veg
+15.7), C c1-3 (tone 21), C c2-8 (veg 18), C c4-8 (rock 0.162, 1 crossing),
+C c6-8 (rock, 3 crossings), C c1-4 (fringe 8%, 2 crossings). **Pending his
+word:** 18i-c (the sea patch must be sea in the paint). **Standing
+problem:** the dark-forest cells (T c1-1, c1-2, c2-1) refuse on the palette
+gate's vegetation contrast against bright neighbours (calibrated 0.20/13 on
+his eye) — either his accept on the picture or a calibration; the crowns
+(1.2-1.5 m) too. **Next:** picture + views (in progress), his rulings, then
+the land animation layer and the city. Tools this session (all tracked):
+conform-band/seam-water/pass, tone feather in world-register +
+tone-harmonise, chain guide 18m/18n, view.mjs/region.mjs, chainN.sh +
+waiters, proposals/*.apply.mjs (18i-c pending).
+
+**2026-09-06 02:25 UTC:** **SERVED AGAIN AT 02:22Z (60
 TILES); chain3.sh (THE CLEANUP + c4-1's SECOND ATTEMPT) IS RUNNING.**
 chain2.sh with the purple guide (18n): **T c6-1 LANDED** (01:58Z — the
 chain's end cell, guide 57% → 70%, gate "3 px off the floor"); c2-1 (1
