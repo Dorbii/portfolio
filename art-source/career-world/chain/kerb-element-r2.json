@@ -1,0 +1,8 @@
+{
+ "element": "kerb",
+ "width": 1000,
+ "height": 35,
+ "anchorRow": 23,
+ "source": ".codex-tmp/session4/chain/c3-1-old-l2.png x 130-1130",
+ "note": "the world's own kerb (old c3-1, commit f9b0a37e), keyed out of its meadow, straightened, tileable"
+}

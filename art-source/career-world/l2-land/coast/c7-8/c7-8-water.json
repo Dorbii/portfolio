@@ -1,0 +1,14 @@
+[
+  {
+    "class": "coast",
+    "note": "The complete visible open sea, shallow coastal shelves, surf, foam, wash between shore rocks, ripple highlights, and reflections; the main landmass, dry talus, and three visibly dry stacks remain transparent."
+  },
+  {
+    "class": "stream",
+    "note": "The narrow watercourse crossing the quarry floor and its connected teal channel through the shore are included in the mask."
+  },
+  {
+    "class": "fall",
+    "note": "Both short pale drops in the watercourse and their foaming plunge water are included through the sea connection."
+  }
+]

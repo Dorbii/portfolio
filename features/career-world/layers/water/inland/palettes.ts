@@ -28,8 +28,8 @@ export const INLAND_REGION_PALETTES: Readonly<Record<string, keyof typeof INLAND
   "l2-tanium-c4-1": "limestone",
   "l2-tanium-c6-2": "limestone",
   "l2-tanium-c1-2": "forest",
-  "l2-review-tanium-c1-1": "forest",
-  "l2-review-tanium-c2-1": "forest",
+  "l2-tanium-c1-1": "forest",
+  "l2-tanium-c2-1": "forest",
 };
 
 export const INLAND_REGIONS = terrain.tiles.filter(tile => tile.id in INLAND_REGION_PALETTES)

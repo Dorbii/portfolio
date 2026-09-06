@@ -1,0 +1,123 @@
+{
+  "cell": "c0-7",
+  "territory": "coast",
+  "biome": "shore",
+  "status": "quarantine_candidate_failed_hard_constraints",
+  "generationSizePx": [1254, 1254],
+  "generation": {
+    "filename": "c0-7-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "8AB798E87F48386EF08385502E6F13AB45568B0F9E278E68CDA322A022862DFE",
+    "mode": "single built-in ImageGen edit with the edit target as Image 1 and the style canon as reference-only Image 2",
+    "imageGenCallsUsed": 1,
+    "retryUsed": false,
+    "secondReferenceAccepted": true,
+    "bothImagesAttachedToSameCall": true,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "byteIdenticalToGeneratedOutput": true,
+    "resizedCroppedRetouchedOrTiled": false
+  },
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by the uniform-bin mean on the delivered source; water-mask pixels and their four immediate neighbours are excluded, as are gradients below 12 luminance units.",
+    "peakVsUniformOverLand": 1.379584,
+    "uniformReference": 1.0,
+    "peakBinDegrees": [230, 240],
+    "directionalKeyFirstMoment": 0.006398,
+    "gradientSamples": 450780,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No whole-cell sun gradient or cast-shadow field is visible, but basalt top planes are repeatedly paler than adjacent vertical faces. The literal same-value-on-every-side lighting rule is not met."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "Manual estimated fractions of non-water terrain at native source resolution.",
+    "buildable": 0.47,
+    "steep": 0.30,
+    "otherTalusShingleScrubOrStacks": 0.23,
+    "canvasFractions": {
+      "buildable": 0.164684830,
+      "steep": 0.105117976,
+      "otherTerrain": 0.080590449
+    },
+    "method": "Broad coherent upper and lower benches count as buildable; exposed column faces count as steep; talus, broken margins, sparse scrub, and stack bodies make up the remainder. Approximate uncertainty is plus or minus 0.08 per land-relative fraction."
+  },
+  "waterFootprintFraction": 0.649606745,
+  "finalDerivedLandCoverageFraction": 0.350393255,
+  "shoreLandReachMetres": {
+    "requiredRange": [15, 40],
+    "estimatedRange": [25, 44],
+    "method": "Manual native-resolution samples from the north edge to the main shoreline foot, converted by 97.6/1254 metres per source pixel; offshore stacks were excluded.",
+    "pass": false
+  },
+  "crown": {
+    "medianMetres": 3.822,
+    "medianPx": 79.617,
+    "sampleCount": 3,
+    "method": "Complete visual census of the three overlapping but distinct conifer crowns arriving on the north-edge ground; pixel-ruler widths of 42, 39, and 36 source pixels were scaled by 2560/1254 and converted at 4.8 cm per final pixel.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c0-7-water-source.png",
+    "classification": "c0-7-water.json",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "43465093482A5B375B67A0A5A7D193F76AF523904CFDF503902479134BE6A116",
+    "encoding": "Opaque white water pixels on fully transparent non-water pixels; binary alpha.",
+    "opaqueWaterPixels": 1021517,
+    "transparentTerrainPixels": 550999,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedWaterComponents8Connected": 1,
+    "filledEnclosedPinholeComponents": 400,
+    "removedDisconnectedWaterSpeckComponents": 0,
+    "edgeWaterPixels": {
+      "north": 666,
+      "east": 785,
+      "south": 734,
+      "west": 525
+    },
+    "method": "Classified edge-connected teal and blue source pixels, expanded through adjacent pale surf, wash, reflections, ripple highlights, and water gaps between shore rocks, protected neutral and warm dry basalt plus vegetation, closed tiny enclosed classifier pinholes, retained dry stacks and shoreline rocks, and inspected the full-source overlay."
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasEdit": true,
+    "secondReferenceAttached": true,
+    "rawGenerationUntouched": true,
+    "terrainOnlyNoStructures": true,
+    "highOblique2_5D": true,
+    "waterMaskSameDimensionsBinaryAndOverlayInspected": true,
+    "waterMaskOneConnectedCoastalComponent": true,
+    "crownObjectComplete": true,
+    "crownCensusIncludesAllFoundCrowns": true,
+    "crownMedianInsideAcceptedTerritoryBand": true,
+    "strictEqualValueOnAllRockFaces": false,
+    "weatheredIrregularColumnsWithoutDefaultRegularity": false,
+    "rawNorthEdgeMapMatchesRequiredSeaGroundSeaPattern": false,
+    "rawSouthEastWestEdgesSeaOnly": false,
+    "landContinuationWithin15To40Metres": false
+  },
+  "refusalReasons": [
+    "Repeated pale basalt caps and bench tops over distinctly darker vertical faces violate the literal flat-lighting rule even though no whole-cell sun gradient or cast-shadow field is visible.",
+    "The principal south-facing cliff contains long runs of upright columns with repeated widths, spacing, and cap rhythm rather than consistently broken, split, leaning, irregular coastal basalt.",
+    "The deepest visible main-shore reach is estimated at about 44 m from the north edge, beyond the stated 40 m maximum.",
+    "The raw edit contains about 53.1 percent water on the north edge instead of the specified sea-ground-sea split totaling 61 percent water, and the raw south, east, and west edges retain existing clipped stack paint rather than reading as uninterrupted sea."
+  ],
+  "openRisks": [
+    "The mandatory whole-canvas edit returned a 1254 px rendition of the 2560 px edit target, so finalized surrounding paint is not byte-identical in the raw generation; the downstream neighbour-preserving stitch was not run in this quarantine-only task.",
+    "The water mask tracks the delivered raw source and does not correct source topology or lighting defects.",
+    "Buildable, steep, shore-reach, and crown measurements are screen-space image measurements rather than surveyed geometry.",
+    "The square result did not qualify for the framing-only retry, so no second ImageGen call was made.",
+    "No artifact was promoted outside quarantine; visual judgment remains with the owner and director."
+  ],
+  "evidence": [
+    "diagnostics/c0-7-measurements.json",
+    "diagnostics/c0-7-water-overlay.png",
+    "diagnostics/c0-7-arriving-ground-2x.png",
+    "diagnostics/c0-7-south-shore-2x.png",
+    "diagnostics/c0-7-crowns-4x.png",
+    "diagnostics/c0-7-conifer-components.png"
+  ]
+}

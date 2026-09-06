@@ -1,0 +1,156 @@
+{
+  "cell": "c5-8",
+  "territory": "coast",
+  "biome": "shore",
+  "status": "quarantine_candidate_failed_hard_constraints",
+  "generationSizePx": [1254, 1254],
+  "generation": {
+    "filename": "c5-8-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "993277B9D5832849141D75361522F49DB50E2DF088F7AE2D647A69BC3869CF42",
+    "mode": "single built-in ImageGen edit with the edit target as Image 1 and the style canon as reference-only Image 2",
+    "imageGenCallsUsed": 1,
+    "retryUsed": false,
+    "secondReferenceAccepted": true,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "byteIdenticalToGeneratedOutput": true,
+    "resizedCroppedRetouchedOrTiled": false
+  },
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by the uniform-bin mean on the delivered source; water-mask pixels and their four immediate neighbours are excluded, as are gradients below 12 luminance units.",
+    "peakVsUniformOverLand": 1.493087,
+    "uniformReference": 1.0,
+    "directionalKeyFirstMoment": 0.0042,
+    "peakBinDegrees": [230, 240],
+    "gradientSamples": 445916,
+    "aggregateDirectionalityNumericPass": true,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No whole-cell sun gradient or long cast-shadow field is visible, but repeated basalt columns have pale top caps over darker vertical faces. The aggregate isotropy result does not satisfy the literal same-value-on-every-side rule."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "Manual estimated fractions of non-water terrain at native source resolution.",
+    "buildable": 0.34,
+    "steep": 0.44,
+    "otherTalusShingleScrubOrStacks": 0.22,
+    "canvasFractions": {
+      "buildable": 0.112533,
+      "steep": 0.145631,
+      "otherTerrain": 0.072815
+    },
+    "method": "Coherent upper bench and terrace tops count as buildable; exposed column faces and the incised fall cut count as steep; talus, shingle, broken rim rock, sparse scrub, and stack tops make up the remainder. Approximate uncertainty is plus or minus 0.08 per land-relative fraction."
+  },
+  "waterFootprintFraction": 0.669020856,
+  "finalDerivedLandCoverageFraction": 0.330979144,
+  "shoreLandReachMetres": {
+    "requiredRange": [15, 40],
+    "estimatedRange": [20, 43],
+    "estimatedMedian": 37,
+    "method": "Manual native-resolution samples from the north edge to the main shoreline rim, converted by 97.6/1254 metres per source pixel; offshore stacks were excluded from the main-shore reach.",
+    "pass": false
+  },
+  "crown": {
+    "medianMetres": 2.842,
+    "medianPx": 59.203,
+    "sampleCount": 14,
+    "method": "Complete visual census at native resolution and in three-times nearest-neighbour northern strips; every identifiable conifer crown, including saplings, overlaps, and top-clipped arrivals, was measured, with a 29 source-pixel median scaled by 2560/1254 and converted at 0.048 m per final pixel.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c5-8-water-source.png",
+    "classification": "c5-8-water.json",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "A8B4CAECD3FD2ABB996B601248C3A2E03D7F5AD8FC5772CD448F03515D325F60",
+    "encoding": "Opaque white water pixels on fully transparent non-water pixels; binary alpha.",
+    "opaqueWaterPixels": 1052046,
+    "transparentTerrainPixels": 520470,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedWaterComponents8Connected": 1,
+    "connectedWaterComponentSizesPx": [1052046],
+    "edgeWaterPixels": {
+      "north": 114,
+      "east": 1254,
+      "south": 1254,
+      "west": 961
+    },
+    "method": "Flooded source-raster teal and blue from all sea edges, retained the connected incoming stream and falls, grew through adjacent pale surf, foam, reflected wash, ripple highlights, and water between shore rocks, rejected warm dry basalt and vegetation, and filled only small enclosed wet-colour gaps.",
+    "visualInspection": "Native overlay inspection found the open sea, stream, falls, shore-adjacent surf and wash, ripple highlights, reflections, and water around both stack groups included; dry columns, main talus, shingle, and stack bodies remain transparent terrain."
+  },
+  "edgeTopology": {
+    "north": {
+      "required": "Two ground arrivals separated by a watercourse, followed by a broad open-sea arrival at the east end.",
+      "waterPixels": 114,
+      "waterFraction": 0.090909,
+      "pass": false
+    },
+    "east": {
+      "required": "sea",
+      "waterPixels": 1254,
+      "pass": true
+    },
+    "south": {
+      "required": "sea",
+      "waterPixels": 1254,
+      "pass": true
+    },
+    "west": {
+      "required": "sea except the unavoidable north-corner continuation already present in the edit target",
+      "waterPixels": 961,
+      "terrainPixels": 293,
+      "waterFraction": 0.766348,
+      "pass": false
+    }
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasEdit": true,
+    "secondReferenceAttached": true,
+    "rawGenerationUntouched": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "openSeaDominatesCell": true,
+    "eastAndSouthEdgesSea": true,
+    "northEdgeMapPreserved": false,
+    "westEdgeSeaBeyondCornerArrival": false,
+    "landContinuationLimitedTo15To40Metres": false,
+    "oneOrTwoCloseInStackGroupsOnly": true,
+    "noMeadowFlowersStructuresOrNewTreeFields": true,
+    "weatheredIrregularColumnsWithoutDefaultRegularity": false,
+    "strictEqualValueOnAllRockFaces": false,
+    "waterMaskSameDimensions": true,
+    "waterMaskBinaryWhiteOnTransparent": true,
+    "waterMaskCoversAllSourceVisibleWaterByOverlayInspection": true,
+    "crownObjectComplete": true,
+    "crownCensusIncludesAllFoundCrowns": true,
+    "crownMedianInsideAcceptedTerritoryBand": true
+  },
+  "refusalReasons": [
+    "The north edge contains only 114 masked water pixels, about 9.09 percent of the edge, because the edit repainted land across most of the required watercourse and broad eastern open-sea arrivals.",
+    "The west edge retains 293 terrain pixels below the north corner instead of remaining sea; this follows the preserved input paint but does not satisfy the written edge topology.",
+    "The deepest main-shore samples reach about 43 m from the north seam, slightly beyond the required 15-40 m continuation range.",
+    "Repeated pale basalt caps over darker vertical faces violate the literal neutral-lighting rule despite the absence of a whole-cell sun gradient or cast-shadow field.",
+    "Several cliff runs retain repeated upright capped columns rather than consistently broken, split, leaning, irregular coastal basalt."
+  ],
+  "openRisks": [
+    "The mandatory edit-target preservation rule conflicts with the all-sea west-edge instruction at the north-west corner; the generated source follows the visible input arrival and reports the topology failure.",
+    "The water mask was traced and overlay-inspected at source resolution, but no pipeline cut or bake was run because the task is quarantine-only.",
+    "Buildable and steep fractions are manual screen-space estimates rather than surveyed terrain geometry.",
+    "The crown census includes every identified sapling, overlap, and clipped crown with no exclusions, but boundaries inside the northern overlap remain approximate.",
+    "No second ImageGen call was made because the returned source was square and the task permits a retry only for non-square framing.",
+    "Seam continuity, exact wet-pixel boundary judgment, and overall visual quality remain director and owner decisions; this report makes no visual acceptance claim."
+  ],
+  "evidence": [
+    "diagnostics/c5-8-measurements.json",
+    "diagnostics/c5-8-water-overlay.png",
+    "diagnostics/c5-8-grid.png",
+    "diagnostics/c5-8-north-west-3x.png",
+    "diagnostics/c5-8-north-centre-3x.png",
+    "diagnostics/c5-8-north-east-3x.png"
+  ]
+}

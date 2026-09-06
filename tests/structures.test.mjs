@@ -17,37 +17,18 @@ async function readJson(relativePath) {
   return JSON.parse(await readFile(path.join(root, relativePath), "utf8"));
 }
 
-test("capital registry omits NinjaOne while retaining other territory capitals", async () => {
+test("the legacy capital registry is empty until the city layer rebuilds capitals on L2 land", async () => {
+  // Owner 2026-09-05: "can you make sure old art is all gone?" — the pre-L2
+  // capitals of Tanium, Independent, Column Technologies and ACE Hardware sat on
+  // old world positions (now the new land or open water) and were retired with
+  // their textures. NinjaOne's capital is the Kaizen city, registered elsewhere.
   const structures = await readJson(
     "public/career-world/layers/structures/manifests/capital-structures-r1.json",
   );
-  const territories = await readJson(
-    "public/career-world/layers/terrain/authority/manifests/world-territories-r4.json",
-  );
-  const expectedTerritoryIds = territories.territories
-    .map(({ id }) => id)
-    .filter((id) => id !== "ninjaone")
-    .sort();
-  const capitalTerritoryIds = structures.nodes
-    .map(({ territoryId }) => territoryId)
-    .sort();
-
   assert.equal(structures.status, "phase-6-checkpoint");
   assert.equal(structures.minimumTier, "territory");
-  assert.equal(structures.nodes.length, 4);
-  assert.deepEqual(capitalTerritoryIds, expectedTerritoryIds);
-  assert.equal(
-    structures.nodes.some(({ territoryId }) => territoryId === "ninjaone"),
-    false,
-  );
-  assert.equal(
-    new Set(structures.nodes.map(({ id }) => id)).size,
-    structures.nodes.length,
-  );
-  assert.equal(
-    new Set(structures.nodes.map(({ archetype }) => archetype)).size,
-    structures.nodes.length,
-  );
+  assert.deepEqual(structures.nodes, []);
+  assert.match(structures.note ?? "", /retired/);
   assert.equal(structures.projection.type, "orthographic-high-oblique");
   assert.equal(
     structures.projection.lightSource,
@@ -126,74 +107,30 @@ test("every capital uses a distinct authored texture asset", async () => {
   }
 });
 
-test("every capital ground integration is territory-owned and bounded", async () => {
+test("no legacy capital ground tile is served; the Kaizen project site is the only site tile", async () => {
   const structures = await readJson(
     "public/career-world/layers/structures/manifests/capital-structures-r1.json",
   );
   const siteManifest = await readJson(
     "public/career-world/layers/terrain/authority/manifests/terrain-site-tiles-r2.json",
   );
-  const territories = await readJson(
-    "public/career-world/layers/terrain/authority/manifests/world-territories-r4.json",
-  );
-  const territoryIds = territories.territories
-    .map(({ id }) => id)
-    .filter((id) => id !== "ninjaone")
-    .sort();
+  assert.equal(siteManifest.status, "phase-6-structure-sites");
   const capitalTiles = siteManifest.tiles.filter(
     ({ ownerKind }) => ownerKind === "capital",
   );
-  const siteTerritoryIds = capitalTiles
-    .map(({ territoryId }) => territoryId)
-    .sort();
-
-  assert.equal(siteManifest.status, "phase-6-structure-sites");
   assert.equal(capitalTiles.length, structures.nodes.length);
-  assert.deepEqual(siteTerritoryIds, territoryIds);
-  assert.equal(
-    structures.nodes.some((capital) => (
-      "groundAssetPath" in capital
-      || "roadAssetPath" in capital
-      || "plazaAssetPath" in capital
-      || "circulationAssetPath" in capital
-    )),
-    false,
+  assert.deepEqual(capitalTiles, []);
+  assert.deepEqual(
+    siteManifest.tiles.map(({ id, ownerKind, territoryId }) => [id, ownerKind, territoryId]),
+    [["project-kaizen-agent-site", "project", "ninjaone"]],
   );
-  assert.equal(
-    structures.nodes.some((capital) => "assetScale" in capital),
-    false,
-  );
-
-  for (const capital of structures.nodes) {
-    const tile = capitalTiles.find(
-      ({ ownerId }) => ownerId === capital.id,
-    );
-    const territory = territories.territories.find(
-      ({ id }) => id === capital.territoryId,
-    );
-    assert.ok(tile, `${capital.id} terrain site must be registered`);
-    assert.ok(territory, `${capital.id} territory must be registered`);
-    assert.equal(tile.ownerKind, "capital");
-    assert.equal(tile.ownerId, capital.id);
-    assert.equal(tile.minimumTier, "site");
-    assert.equal(tile.sourceAlphaPolicy, "bounded-subset");
+  for (const tile of siteManifest.tiles) {
     assert.match(
       tile.path,
       /^\/career-world\/layers\/terrain\/authority\/tiles\/.+\.png$/,
     );
     const siteAsset = await stat(path.join(root, "public", tile.path));
     assert.ok(siteAsset.size > 100_000);
-
-    const [tileOriginX, tileOriginY] = tile.worldBounds.origin;
-    const [tileSpanX, tileSpanY] = tile.worldBounds.span;
-    const [anchorX, anchorY] = territory.development.capitalAnchor;
-    const envelope = territory.development.capitalEnvelope;
-    assert.ok(tileOriginX >= envelope.origin[0]);
-    assert.ok(tileOriginY >= envelope.origin[1]);
-    assert.ok(tileOriginX + tileSpanX <= envelope.origin[0] + envelope.span[0]);
-    assert.ok(tileOriginY + tileSpanY <= envelope.origin[1] + envelope.span[1]);
-    assert.ok(anchorX >= tileOriginX && anchorX <= tileOriginX + tileSpanX);
-    assert.ok(anchorY >= tileOriginY && anchorY <= tileOriginY + tileSpanY);
   }
 });
 

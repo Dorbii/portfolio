@@ -1,7 +1,7 @@
 {
   "version": 1,
   "status": "visual-review-candidate",
-  "policy": "Complete mounted-cell inventory. Paths are visual art interpretation, not surveyed hydrology. Original land/water alpha is immutable; occluded gaps and candidate geography remain. Existing gorge and purple-brook annotations have priority.",
+  "policy": "Every mounted cell is inventoried. Active annotations retain unchanged water masks within their bounds; changed annotations remain in pendingReview and are not rendered. New coastal cells use alpha-derived coverage pending inland review. Paths are visual art interpretation, not surveyed hydrology. Original land alpha is immutable; gorge and purple-brook annotations have priority.",
   "cells": [
     {
       "tileId": "l2-c0-0",
@@ -55,7 +55,8 @@
         }
       ],
       "falls": [],
-      "sha256": "4d35a7f217d5e90125e9e43376f5b6da078d1a020411b5c69f43cbec391b1fe0"
+      "sha256": "b44365ed3f09ab7e685360e645dc5ec002f8cd5107875016cb7f37d04d1b2097",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-c0-1",
@@ -139,7 +140,8 @@
           ]
         }
       ],
-      "sha256": "54a51f934a9f909f3f4f330d9061d6a60acde18ebd47d460deb7c2ff6c7f8e41"
+      "sha256": "1ac86581bca0ee93dd39c5206a2d871f8a75662c2811529d6c6e8d3b01dd5fca",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-c0-2",
@@ -181,7 +183,8 @@
         }
       ],
       "falls": [],
-      "sha256": "e40f91a525f819d704a9f358c4ce615438b98ec323aae72aca6caac1ae42caba"
+      "sha256": "42ffb9110adfc9c9f76850f98654a5b0cd74c28ac5d8672560f0d1ca7e47686d",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-c0-3",
@@ -244,7 +247,8 @@
           ]
         }
       ],
-      "sha256": "31205f3618dd2320adbfb073354de12cfff6a0aad7cd9c141460f399285c3acc"
+      "sha256": "dfdc7bd39c32ae8fc309df807679aebd137993fa1974dbd711685049e9a4f87b",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-c1-0",
@@ -263,7 +267,8 @@
         }
       ],
       "falls": [],
-      "sha256": "b9861cc6ca675e75df13bbebd5a682b746ab44e3ef03a162bd11e40ef9073f7b"
+      "sha256": "f9bbbf2fd2228bbd77c3214245af5327e3d3a61c9a8a49458ad56589594a2d11",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-c1-1",
@@ -273,7 +278,8 @@
       "streams": [],
       "pools": [],
       "falls": [],
-      "sha256": "d4509fdd27666b2637999d4ee5319a5e5a4d2b7ccba79521c96cb80156ec0d11"
+      "sha256": "161ddd15af541254ba26f24a52b475d7b82b20da974f14ee7a5c96afcc517cc0",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-c1-2",
@@ -371,7 +377,8 @@
         }
       ],
       "falls": [],
-      "sha256": "eac4d8bf2e9035f75f975f9107a55192558820e3faf0f8d96347d62f3496a3a1"
+      "sha256": "c2d77ed04fbba7a9bb4ce47648d2ac43380f557fdfc42155dde476c288e649f6",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-c1-3",
@@ -442,7 +449,8 @@
           ]
         }
       ],
-      "sha256": "e9d5a5bdf1cf0d6692bfbf4a7308997510a3d7eb44f5fccaa774c5c73d596c64"
+      "sha256": "4931eec213e2ec61f4381b849da3d18f56981d5ce75611775932bf84e00ec3fe",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-c2-0",
@@ -567,7 +575,8 @@
           ]
         }
       ],
-      "sha256": "03f90863322655cc7465f0f330d161f52d07031a39c2716de1d059fbd208ae64"
+      "sha256": "aca7296b69f465c0381ee965c8d5904bd80017ee89836f8b27e13890f110695d",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-c2-1",
@@ -659,7 +668,8 @@
           ]
         }
       ],
-      "sha256": "9ea59d62fcbac0c27d83c3bb48c99ce078ac3d8c207fa2eddaa3c653ab86babe"
+      "sha256": "3899b80d3b772414fd282747c780f8ce993d4f0f4d216cad2f9c493e27c8098a",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-c2-2",
@@ -747,7 +757,8 @@
           ]
         }
       ],
-      "sha256": "14bf6b12c948da501deb0ea6b55a48ba620e41175f5dfc6cc86a2f287f566862"
+      "sha256": "4527eb5656d166f1d6ff17e20c837e3b14066b9df52f3cfe38bc3dcdd04bc961",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-c2-3",
@@ -804,7 +815,8 @@
       ],
       "pools": [],
       "falls": [],
-      "sha256": "b88a20c7228c9cf24dfd812c4c461ccbdc27e9dbc11961c62919094a5846b13c"
+      "sha256": "a1febf7fa75ab56a7621002deeb75a973bbf4c174f23d1eb99a2c27744d6abac",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-c3-0",
@@ -917,7 +929,8 @@
           ]
         }
       ],
-      "sha256": "247bce9ecab7751703799fe3bf841cd89a072bb25ceb8387d03c663b93d6a39d"
+      "sha256": "ca0244b43c31627478f7ec1446e9efdf19694dbe9fe592330d4b0a469159f40d",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-c3-1",
@@ -927,7 +940,8 @@
       "streams": [],
       "pools": [],
       "falls": [],
-      "sha256": "854d009d628f8f047c64bf2b9fc5cf90af7dd5985c507818c388a20c366d1df1"
+      "sha256": "7aa8dfd62620c4d4b4ccf7f23cbe79e994189b4f608978f74255812a2568dc33",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-c3-2",
@@ -1048,7 +1062,8 @@
           ]
         }
       ],
-      "sha256": "203ed02df813414097e5a06dff87191afbed5a114fa69f21036a37e1fd17d17c"
+      "sha256": "136b7bb4ae85f0776602b07e751f7d219aeaec44cf3a1f4451210e67f41fbe3f",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-c3-3",
@@ -1119,7 +1134,8 @@
           ]
         }
       ],
-      "sha256": "8f2aadcb1a0e51cbca2572f63d09d770d9e1be97a1c5afa0d3ea2a252e98725f"
+      "sha256": "2deed0182f73e9d567ab5638a48e52f75aca4e5e72aa6137b84daf51dbc2098b",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-c4-0",
@@ -1211,7 +1227,8 @@
           ]
         }
       ],
-      "sha256": "7cac8560d26b5f39d0ba9df198511ae2468f2a8703a80c8912d88b23b3ba1005"
+      "sha256": "e7485c45bff87325516b6081a5873848776c5d4a617a2ea2746696e1b94c0acd",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-c4-1",
@@ -1248,7 +1265,8 @@
       ],
       "pools": [],
       "falls": [],
-      "sha256": "d50951024a5ecd257dfc5f5650083aebfdf1c22c84f52130bf37205e01cce69a"
+      "sha256": "d0593aa948aad32b8a2bdcede1d83df8f1014c6cb890c052c45b2e78373f659b",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-c4-2",
@@ -1335,7 +1353,8 @@
           ]
         }
       ],
-      "sha256": "b805dff99730129de80d184ab986071d992bf51d7f791fd07d1593585374dac0"
+      "sha256": "e57d255dc23feb78d9102988ce377e00cf6474584f8aa0ca3af924b72f3b207d",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-c4-3",
@@ -1419,7 +1438,8 @@
           ]
         }
       ],
-      "sha256": "dd1c4a30fcd950f8341b731c992c856367692d64b54b6b9c7798d412d6978975"
+      "sha256": "3e790fbd5f0fa22e9416c2a3b659091ae8f048bb3ecdfc9682ac8527fc012e90",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-tanium-c0-0",
@@ -1429,103 +1449,114 @@
       "streams": [],
       "pools": [],
       "falls": [],
-      "sha256": "db0c975952db9bcda779389a0387d2aa4305b432ea07bcbf5b30813f4762613f"
+      "sha256": "4b52c11955111b3a2838798e1e52a29902b0964fc570b9f36caac522936b838d",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-tanium-c0-1",
       "note": "East-fed stream and shelf pool discharge over the basalt edge.",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c0-1-site.webp",
       "coordinateSpace": "served-normalized",
-      "streams": [
-        {
-          "id": "tanium-west-shelf-stream",
-          "path": [
-            [
-              1,
-              0.19
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "1b607877bcd151a1f517955506223d2f23fa6dbad05812b7b225563a7c163734",
+      "pendingReview": {
+        "reason": "Water mask changed inside annotation bounds; remap against the current art before activation.",
+        "previousTileId": "l2-tanium-c0-1",
+        "previousSource": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c0-1-site.webp",
+        "previousSha256": "d76d9b6eb32a9fd2f0404b60de9f302da069297b01c8ca27f4b2d254f90328e1",
+        "streams": [
+          {
+            "id": "tanium-west-shelf-stream",
+            "path": [
+              [
+                1,
+                0.19
+              ],
+              [
+                0.91,
+                0.28
+              ],
+              [
+                0.8,
+                0.325
+              ],
+              [
+                0.73,
+                0.38
+              ],
+              [
+                0.65,
+                0.42
+              ],
+              [
+                0.54,
+                0.43
+              ],
+              [
+                0.435,
+                0.46
+              ],
+              [
+                0.415,
+                0.56
+              ],
+              [
+                0.41,
+                0.65
+              ],
+              [
+                0.32,
+                0.7
+              ],
+              [
+                0.18,
+                0.74
+              ],
+              [
+                0.02,
+                0.75
+              ]
             ],
-            [
-              0.91,
-              0.28
+            "radius": 0.055
+          }
+        ],
+        "pools": [
+          {
+            "id": "tanium-west-lip-pool",
+            "point": [
+              0.4513922813873962,
+              0.47288715192965314
             ],
-            [
-              0.8,
-              0.325
+            "radius": 0.055
+          }
+        ],
+        "falls": [
+          {
+            "id": "tanium-west-shelf-fall",
+            "lip": [
+              0.41817293600390815,
+              0.4865657059110894
             ],
-            [
-              0.73,
-              0.38
-            ],
-            [
-              0.65,
-              0.42
-            ],
-            [
-              0.54,
-              0.43
-            ],
-            [
-              0.435,
-              0.46
-            ],
-            [
-              0.415,
-              0.56
-            ],
-            [
-              0.41,
+            "foot": [
+              0.405,
               0.65
             ],
-            [
-              0.32,
-              0.7
+            "upstream": [
+              0.4513922813873962,
+              0.47288715192965314
             ],
-            [
-              0.18,
-              0.74
-            ],
-            [
-              0.02,
-              0.75
+            "radius": 0.05,
+            "hasLanding": true,
+            "backingOffset": [
+              0.05,
+              0
             ]
-          ],
-          "radius": 0.055
-        }
-      ],
-      "pools": [
-        {
-          "id": "tanium-west-lip-pool",
-          "point": [
-            0.4513922813873962,
-            0.47288715192965314
-          ],
-          "radius": 0.055
-        }
-      ],
-      "falls": [
-        {
-          "id": "tanium-west-shelf-fall",
-          "lip": [
-            0.41817293600390815,
-            0.4865657059110894
-          ],
-          "foot": [
-            0.405,
-            0.65
-          ],
-          "upstream": [
-            0.4513922813873962,
-            0.47288715192965314
-          ],
-          "radius": 0.05,
-          "hasLanding": true,
-          "backingOffset": [
-            0.05,
-            0
-          ]
-        }
-      ],
-      "sha256": "d76d9b6eb32a9fd2f0404b60de9f302da069297b01c8ca27f4b2d254f90328e1"
+          }
+        ]
+      },
+      "reconciliation": "partially-pending"
     },
     {
       "tileId": "l2-tanium-c0-2",
@@ -1535,7 +1566,8 @@
       "streams": [],
       "pools": [],
       "falls": [],
-      "sha256": "72d441a729b66f729d37460e8b9dbd108b400298c98980d382b27b64183c60a6"
+      "sha256": "cdcdc5f667fab92f39e0ddf9d50302141788dfbcfd76b428c636c66ac10b24ed",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-tanium-c1-0",
@@ -1545,82 +1577,93 @@
       "streams": [],
       "pools": [],
       "falls": [],
-      "sha256": "49ad65442fef3318a334607da77da97bd582d487dcdefad7a60c25c25e3c7dd6"
+      "sha256": "a922822363bc181beb2b21391fbb69a3825990b75c6081421d34fd82c11f6652",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-tanium-c1-2",
       "note": "Forest channel descends into the inlet; canopy gaps remain occluded.",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c1-2-site.webp",
       "coordinateSpace": "served-normalized",
-      "streams": [
-        {
-          "id": "tanium-forest-outlet",
-          "path": [
-            [
-              0.6,
-              0.13
-            ],
-            [
-              0.54,
-              0.22
-            ],
-            [
-              0.485,
-              0.34
-            ],
-            [
-              0.44,
-              0.445
-            ],
-            [
-              0.425,
-              0.54
-            ],
-            [
-              0.44,
-              0.63
-            ],
-            [
-              0.47,
-              0.71
-            ],
-            [
-              0.49,
-              0.78
-            ],
-            [
-              0.5,
-              0.87
-            ]
-          ],
-          "radius": 0.045
-        }
-      ],
+      "streams": [],
       "pools": [],
-      "falls": [
-        {
-          "id": "tanium-forest-inlet-fall",
-          "lip": [
-            0.441133365901319,
-            0.6272594040058622
-          ],
-          "foot": [
-            0.4846116267708842,
-            0.7469467513434294
-          ],
-          "upstream": [
-            0.4333170493404983,
-            0.5930630190522717
-          ],
-          "radius": 0.045,
-          "hasLanding": true,
-          "backingOffset": [
-            0.035,
-            0
-          ]
-        }
-      ],
-      "sha256": "02f3bbf60c8ae7af057329e2cac3a56c163a5f6631d28b7bdd443455706761e1"
+      "falls": [],
+      "sha256": "d6f069ab5f1d756fb43492a9c9a7778cc2c207a8dd91e0948f54a5b872881cb8",
+      "pendingReview": {
+        "reason": "Water mask changed inside annotation bounds; remap against the current art before activation.",
+        "previousTileId": "l2-tanium-c1-2",
+        "previousSource": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c1-2-site.webp",
+        "previousSha256": "02f3bbf60c8ae7af057329e2cac3a56c163a5f6631d28b7bdd443455706761e1",
+        "streams": [
+          {
+            "id": "tanium-forest-outlet",
+            "path": [
+              [
+                0.6,
+                0.13
+              ],
+              [
+                0.54,
+                0.22
+              ],
+              [
+                0.485,
+                0.34
+              ],
+              [
+                0.44,
+                0.445
+              ],
+              [
+                0.425,
+                0.54
+              ],
+              [
+                0.44,
+                0.63
+              ],
+              [
+                0.47,
+                0.71
+              ],
+              [
+                0.49,
+                0.78
+              ],
+              [
+                0.5,
+                0.87
+              ]
+            ],
+            "radius": 0.045
+          }
+        ],
+        "pools": [],
+        "falls": [
+          {
+            "id": "tanium-forest-inlet-fall",
+            "lip": [
+              0.441133365901319,
+              0.6272594040058622
+            ],
+            "foot": [
+              0.4846116267708842,
+              0.7469467513434294
+            ],
+            "upstream": [
+              0.4333170493404983,
+              0.5930630190522717
+            ],
+            "radius": 0.045,
+            "hasLanding": true,
+            "backingOffset": [
+              0.035,
+              0
+            ]
+          }
+        ]
+      },
+      "reconciliation": "partially-pending"
     },
     {
       "tileId": "l2-tanium-c2-0",
@@ -1630,65 +1673,15 @@
       "streams": [],
       "pools": [],
       "falls": [],
-      "sha256": "22dd7f9c360c98e9636dac588bcc7d63690f3a272844d62a324319efffd1f1a2"
+      "sha256": "eeeb8f7880d5cfdfbc563d30060bc1fb998f8682a5ac24c59fc1bd763f17f942",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-tanium-c2-2",
       "note": "Pool-fed descent over successive benches to the southern coast.",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c2-2-site.webp",
       "coordinateSpace": "served-normalized",
-      "streams": [
-        {
-          "id": "tanium-gold-beck",
-          "path": [
-            [
-              0.88,
-              0
-            ],
-            [
-              0.86,
-              0.12
-            ],
-            [
-              0.85,
-              0.24
-            ],
-            [
-              0.8,
-              0.36
-            ],
-            [
-              0.735,
-              0.46
-            ],
-            [
-              0.7,
-              0.53
-            ],
-            [
-              0.69,
-              0.64
-            ],
-            [
-              0.61,
-              0.72
-            ],
-            [
-              0.53,
-              0.79
-            ],
-            [
-              0.49,
-              0.87
-            ],
-            [
-              0.42,
-              0.965
-            ]
-          ],
-          "radius": 0.045
-        }
-      ],
+      "streams": [],
       "pools": [
         {
           "id": "tanium-gold-shelf-pool",
@@ -1764,69 +1757,75 @@
           ]
         }
       ],
-      "sha256": "7c12ba938f272164eb45e4ce0bf1bbf7fabb058500dc76edff5dfff8e417065d"
+      "sha256": "55ee98575b4818f9e4854ecabc0392316a9703fe620ef3b8308d7928dad777d2",
+      "pendingReview": {
+        "reason": "Water mask changed inside annotation bounds; remap against the current art before activation.",
+        "previousTileId": "l2-tanium-c2-2",
+        "previousSource": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c2-2-site.webp",
+        "previousSha256": "7c12ba938f272164eb45e4ce0bf1bbf7fabb058500dc76edff5dfff8e417065d",
+        "streams": [
+          {
+            "id": "tanium-gold-beck",
+            "path": [
+              [
+                0.88,
+                0
+              ],
+              [
+                0.86,
+                0.12
+              ],
+              [
+                0.85,
+                0.24
+              ],
+              [
+                0.8,
+                0.36
+              ],
+              [
+                0.735,
+                0.46
+              ],
+              [
+                0.7,
+                0.53
+              ],
+              [
+                0.69,
+                0.64
+              ],
+              [
+                0.61,
+                0.72
+              ],
+              [
+                0.53,
+                0.79
+              ],
+              [
+                0.49,
+                0.87
+              ],
+              [
+                0.42,
+                0.965
+              ]
+            ],
+            "radius": 0.045
+          }
+        ],
+        "pools": [],
+        "falls": []
+      },
+      "reconciliation": "partially-pending"
     },
     {
       "tileId": "l2-tanium-c3-0",
       "note": "North-southeast beck drops through three terrace risers.",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-0-site.webp",
       "coordinateSpace": "served-normalized",
-      "streams": [
-        {
-          "id": "tanium-north-step-beck",
-          "path": [
-            [
-              0.245,
-              0
-            ],
-            [
-              0.24,
-              0.11
-            ],
-            [
-              0.26,
-              0.18
-            ],
-            [
-              0.29,
-              0.27
-            ],
-            [
-              0.335,
-              0.37
-            ],
-            [
-              0.325,
-              0.47
-            ],
-            [
-              0.345,
-              0.545
-            ],
-            [
-              0.43,
-              0.63
-            ],
-            [
-              0.49,
-              0.75
-            ],
-            [
-              0.64,
-              0.86
-            ],
-            [
-              0.74,
-              0.945
-            ],
-            [
-              0.75,
-              1
-            ]
-          ],
-          "radius": 0.04
-        }
-      ],
+      "streams": [],
       "pools": [],
       "falls": [
         {
@@ -1893,7 +1892,72 @@
           ]
         }
       ],
-      "sha256": "7cd0227984246cb5ca4384c34a85bd4b36bd800f0dfa8faee500e5e298dd3440"
+      "sha256": "2ef74b6911119f20614feea5fac4e5e64b596d2a406e301b58db9ea9a10ad6eb",
+      "pendingReview": {
+        "reason": "Water mask changed inside annotation bounds; remap against the current art before activation.",
+        "previousTileId": "l2-tanium-c3-0",
+        "previousSource": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-0-site.webp",
+        "previousSha256": "7cd0227984246cb5ca4384c34a85bd4b36bd800f0dfa8faee500e5e298dd3440",
+        "streams": [
+          {
+            "id": "tanium-north-step-beck",
+            "path": [
+              [
+                0.245,
+                0
+              ],
+              [
+                0.24,
+                0.11
+              ],
+              [
+                0.26,
+                0.18
+              ],
+              [
+                0.29,
+                0.27
+              ],
+              [
+                0.335,
+                0.37
+              ],
+              [
+                0.325,
+                0.47
+              ],
+              [
+                0.345,
+                0.545
+              ],
+              [
+                0.43,
+                0.63
+              ],
+              [
+                0.49,
+                0.75
+              ],
+              [
+                0.64,
+                0.86
+              ],
+              [
+                0.74,
+                0.945
+              ],
+              [
+                0.75,
+                1
+              ]
+            ],
+            "radius": 0.04
+          }
+        ],
+        "pools": [],
+        "falls": []
+      },
+      "reconciliation": "partially-pending"
     },
     {
       "tileId": "l2-tanium-c3-2",
@@ -1901,80 +1965,6 @@
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-2-site.webp",
       "coordinateSpace": "served-normalized",
       "streams": [
-        {
-          "id": "tanium-central-bench-beck",
-          "path": [
-            [
-              0.61,
-              0
-            ],
-            [
-              0.59,
-              0.08
-            ],
-            [
-              0.568,
-              0.16
-            ],
-            [
-              0.56,
-              0.22
-            ],
-            [
-              0.51,
-              0.3
-            ],
-            [
-              0.49,
-              0.35
-            ],
-            [
-              0.48,
-              0.42
-            ],
-            [
-              0.45,
-              0.48
-            ],
-            [
-              0.42,
-              0.52
-            ],
-            [
-              0.37,
-              0.565
-            ],
-            [
-              0.365,
-              0.62
-            ],
-            [
-              0.335,
-              0.67
-            ],
-            [
-              0.265,
-              0.74
-            ],
-            [
-              0.241,
-              0.803
-            ],
-            [
-              0.229,
-              0.856
-            ],
-            [
-              0.175,
-              0.915
-            ],
-            [
-              0.05,
-              0.98
-            ]
-          ],
-          "radius": 0.03
-        },
         {
           "id": "tanium-eastern-bench-beck",
           "path": [
@@ -2190,7 +2180,92 @@
           ]
         }
       ],
-      "sha256": "33d118b5649b8fa37cfb9422887ffe780ca6411caea4cfb16aa64dcec1b3ec82"
+      "sha256": "bc945ea6ec9199dbbc422647b54a5c8ab1b6e624fe53af76e6de6a8aa4be8a11",
+      "pendingReview": {
+        "reason": "Water mask changed inside annotation bounds; remap against the current art before activation.",
+        "previousTileId": "l2-tanium-c3-2",
+        "previousSource": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-2-site.webp",
+        "previousSha256": "33d118b5649b8fa37cfb9422887ffe780ca6411caea4cfb16aa64dcec1b3ec82",
+        "streams": [
+          {
+            "id": "tanium-central-bench-beck",
+            "path": [
+              [
+                0.61,
+                0
+              ],
+              [
+                0.59,
+                0.08
+              ],
+              [
+                0.568,
+                0.16
+              ],
+              [
+                0.56,
+                0.22
+              ],
+              [
+                0.51,
+                0.3
+              ],
+              [
+                0.49,
+                0.35
+              ],
+              [
+                0.48,
+                0.42
+              ],
+              [
+                0.45,
+                0.48
+              ],
+              [
+                0.42,
+                0.52
+              ],
+              [
+                0.37,
+                0.565
+              ],
+              [
+                0.365,
+                0.62
+              ],
+              [
+                0.335,
+                0.67
+              ],
+              [
+                0.265,
+                0.74
+              ],
+              [
+                0.241,
+                0.803
+              ],
+              [
+                0.229,
+                0.856
+              ],
+              [
+                0.175,
+                0.915
+              ],
+              [
+                0.05,
+                0.98
+              ]
+            ],
+            "radius": 0.03
+          }
+        ],
+        "pools": [],
+        "falls": []
+      },
+      "reconciliation": "partially-pending"
     },
     {
       "tileId": "l2-tanium-c4-1",
@@ -2198,40 +2273,50 @@
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c4-1-site.webp",
       "coordinateSpace": "served-normalized",
       "streams": [],
-      "pools": [
-        {
-          "id": "tanium-limestone-tarn",
-          "point": [
-            0.57,
-            0.315
-          ],
-          "radius": 0.15
-        }
-      ],
-      "falls": [
-        {
-          "id": "tanium-western-seep",
-          "lip": [
-            0.15486077186126038,
-            0.5583781143136297
-          ],
-          "foot": [
-            0.15,
-            0.685
-          ],
-          "upstream": [
-            0.15486077186126038,
-            0.5583781143136297
-          ],
-          "radius": 0.028,
-          "hasLanding": true,
-          "backingOffset": [
-            0.035,
-            0
-          ]
-        }
-      ],
-      "sha256": "3fbfd0731dd2a16f7d99c6331da0968eaf93e27d4cb20d9b7786275fc52d64c4"
+      "pools": [],
+      "falls": [],
+      "sha256": "69f5c6dfbc6b920aaf1121ef4965441ab3c568f4a058a6ca93f401ad6c2daa3a",
+      "pendingReview": {
+        "reason": "Water mask changed inside annotation bounds; remap against the current art before activation.",
+        "previousTileId": "l2-tanium-c4-1",
+        "previousSource": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c4-1-site.webp",
+        "previousSha256": "3fbfd0731dd2a16f7d99c6331da0968eaf93e27d4cb20d9b7786275fc52d64c4",
+        "streams": [],
+        "pools": [
+          {
+            "id": "tanium-limestone-tarn",
+            "point": [
+              0.57,
+              0.315
+            ],
+            "radius": 0.15
+          }
+        ],
+        "falls": [
+          {
+            "id": "tanium-western-seep",
+            "lip": [
+              0.15486077186126038,
+              0.5583781143136297
+            ],
+            "foot": [
+              0.15,
+              0.685
+            ],
+            "upstream": [
+              0.15486077186126038,
+              0.5583781143136297
+            ],
+            "radius": 0.028,
+            "hasLanding": true,
+            "backingOffset": [
+              0.035,
+              0
+            ]
+          }
+        ]
+      },
+      "reconciliation": "partially-pending"
     },
     {
       "tileId": "l2-tanium-c4-2",
@@ -2239,52 +2324,6 @@
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c4-2-site.webp",
       "coordinateSpace": "served-normalized",
       "streams": [
-        {
-          "id": "tanium-western-steps",
-          "path": [
-            [
-              0.315,
-              0
-            ],
-            [
-              0.395,
-              0.105
-            ],
-            [
-              0.42,
-              0.19
-            ],
-            [
-              0.39,
-              0.29
-            ],
-            [
-              0.31,
-              0.41
-            ],
-            [
-              0.25,
-              0.52
-            ],
-            [
-              0.2,
-              0.65
-            ],
-            [
-              0.18,
-              0.77
-            ],
-            [
-              0.19,
-              0.89
-            ],
-            [
-              0.25,
-              1
-            ]
-          ],
-          "radius": 0.035
-        },
         {
           "id": "tanium-fern-outlet",
           "path": [
@@ -2437,7 +2476,64 @@
           ]
         }
       ],
-      "sha256": "459dbfc50de1da9a6af004c1511ed7df2bb362aadaec83d5a96a38e7aa4b1bf7"
+      "sha256": "ff8c24cddb1d7b41a8dc813301183e2f1bbab2105b4a776462a8e496bfe7f494",
+      "pendingReview": {
+        "reason": "Water mask changed inside annotation bounds; remap against the current art before activation.",
+        "previousTileId": "l2-tanium-c4-2",
+        "previousSource": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c4-2-site.webp",
+        "previousSha256": "459dbfc50de1da9a6af004c1511ed7df2bb362aadaec83d5a96a38e7aa4b1bf7",
+        "streams": [
+          {
+            "id": "tanium-western-steps",
+            "path": [
+              [
+                0.315,
+                0
+              ],
+              [
+                0.395,
+                0.105
+              ],
+              [
+                0.42,
+                0.19
+              ],
+              [
+                0.39,
+                0.29
+              ],
+              [
+                0.31,
+                0.41
+              ],
+              [
+                0.25,
+                0.52
+              ],
+              [
+                0.2,
+                0.65
+              ],
+              [
+                0.18,
+                0.77
+              ],
+              [
+                0.19,
+                0.89
+              ],
+              [
+                0.25,
+                1
+              ]
+            ],
+            "radius": 0.035
+          }
+        ],
+        "pools": [],
+        "falls": []
+      },
+      "reconciliation": "partially-pending"
     },
     {
       "tileId": "l2-tanium-c5-0",
@@ -2447,132 +2543,153 @@
       "streams": [],
       "pools": [],
       "falls": [],
-      "sha256": "37a3a12826491b2ccc170567a1d69ff3123740cfe334e3f4aeeac7de3aad0f20"
+      "sha256": "7dc3d6e6c1277577cbe986d24790d71d9b42d3dfef1ae2e251d9a0cee7c1e2b7",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-tanium-c5-1",
       "note": "East-to-west ridge-fed shallow stream with broad connected shelf pool.",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c5-1-site.webp",
       "coordinateSpace": "served-normalized",
-      "streams": [
-        {
-          "id": "tanium-ridge-stream",
-          "path": [
-            [
-              0.935,
-              0.25
-            ],
-            [
-              0.81,
-              0.235
-            ],
-            [
-              0.67,
-              0.205
-            ],
-            [
-              0.53,
-              0.17
-            ],
-            [
-              0.385,
-              0.15
-            ],
-            [
-              0.245,
-              0.15
-            ],
-            [
-              0.065,
-              0.135
-            ]
-          ],
-          "radius": 0.05
-        }
-      ],
-      "pools": [
-        {
-          "id": "tanium-ridge-pool",
-          "point": [
-            0.335,
-            0.2
-          ],
-          "radius": 0.11
-        }
-      ],
+      "streams": [],
+      "pools": [],
       "falls": [],
-      "sha256": "a9649c830d88d19c0121b28ad2898431091ae4ddad78c06ef1dbd0ebdd19181c"
+      "sha256": "5da34bfa3154672a13393b6839a3a94095da21e4b14742487432f02e31fdf67c",
+      "pendingReview": {
+        "reason": "Water mask changed inside annotation bounds; remap against the current art before activation.",
+        "previousTileId": "l2-tanium-c5-1",
+        "previousSource": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c5-1-site.webp",
+        "previousSha256": "a9649c830d88d19c0121b28ad2898431091ae4ddad78c06ef1dbd0ebdd19181c",
+        "streams": [
+          {
+            "id": "tanium-ridge-stream",
+            "path": [
+              [
+                0.935,
+                0.25
+              ],
+              [
+                0.81,
+                0.235
+              ],
+              [
+                0.67,
+                0.205
+              ],
+              [
+                0.53,
+                0.17
+              ],
+              [
+                0.385,
+                0.15
+              ],
+              [
+                0.245,
+                0.15
+              ],
+              [
+                0.065,
+                0.135
+              ]
+            ],
+            "radius": 0.05
+          }
+        ],
+        "pools": [
+          {
+            "id": "tanium-ridge-pool",
+            "point": [
+              0.335,
+              0.2
+            ],
+            "radius": 0.11
+          }
+        ],
+        "falls": []
+      },
+      "reconciliation": "partially-pending"
     },
     {
       "tileId": "l2-tanium-c5-2",
       "note": "Two distinct narrow becks drain to coastal water.",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c5-2-site.webp",
       "coordinateSpace": "served-normalized",
-      "streams": [
-        {
-          "id": "tanium-west-coast-beck",
-          "path": [
-            [
-              0.065,
-              0
-            ],
-            [
-              0.1,
-              0.15
-            ],
-            [
-              0.11,
-              0.3
-            ],
-            [
-              0.1,
-              0.4
-            ],
-            [
-              0.14,
-              0.5
-            ],
-            [
-              0.18,
-              0.6
-            ],
-            [
-              0.25,
-              0.71
-            ]
-          ],
-          "radius": 0.025
-        },
-        {
-          "id": "tanium-east-coast-beck",
-          "path": [
-            [
-              1,
-              0.39
-            ],
-            [
-              0.955,
-              0.48
-            ],
-            [
-              0.94,
-              0.58
-            ],
-            [
-              0.92,
-              0.7
-            ],
-            [
-              0.9,
-              0.795
-            ]
-          ],
-          "radius": 0.025
-        }
-      ],
+      "streams": [],
       "pools": [],
       "falls": [],
-      "sha256": "e32caad739aa73edc11a5c20096d047d2f1ff45108a5958abd459045afdd373f"
+      "sha256": "e63e2d64598f59559bfc6619405d06169a05f4f83a24f42b4902f7f780fc8709",
+      "pendingReview": {
+        "reason": "Water mask changed inside annotation bounds; remap against the current art before activation.",
+        "previousTileId": "l2-tanium-c5-2",
+        "previousSource": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c5-2-site.webp",
+        "previousSha256": "e32caad739aa73edc11a5c20096d047d2f1ff45108a5958abd459045afdd373f",
+        "streams": [
+          {
+            "id": "tanium-west-coast-beck",
+            "path": [
+              [
+                0.065,
+                0
+              ],
+              [
+                0.1,
+                0.15
+              ],
+              [
+                0.11,
+                0.3
+              ],
+              [
+                0.1,
+                0.4
+              ],
+              [
+                0.14,
+                0.5
+              ],
+              [
+                0.18,
+                0.6
+              ],
+              [
+                0.25,
+                0.71
+              ]
+            ],
+            "radius": 0.025
+          },
+          {
+            "id": "tanium-east-coast-beck",
+            "path": [
+              [
+                1,
+                0.39
+              ],
+              [
+                0.955,
+                0.48
+              ],
+              [
+                0.94,
+                0.58
+              ],
+              [
+                0.92,
+                0.7
+              ],
+              [
+                0.9,
+                0.795
+              ]
+            ],
+            "radius": 0.025
+          }
+        ],
+        "pools": [],
+        "falls": []
+      },
+      "reconciliation": "partially-pending"
     },
     {
       "tileId": "l2-tanium-c6-0",
@@ -2582,7 +2699,8 @@
       "streams": [],
       "pools": [],
       "falls": [],
-      "sha256": "c52d5a78e387eba0257945d4ffefa98e1c846129508fc78414ffee274ba37a96"
+      "sha256": "db1f83b94ba7b35ec62a6df33c3f07478a9cc3f6eae13e42bc7a20c5a33694bc",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-tanium-c6-1",
@@ -2592,418 +2710,469 @@
       "streams": [],
       "pools": [],
       "falls": [],
-      "sha256": "b92ce5acfb32676fe435b026f2d7fdce4fab35fba9fdb75bea94cb8277b2be5d"
+      "sha256": "0a6ba0e623f0d8c4598a75a37b73b74e3981ad660c1077e3d4002f11e3905a5a",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-tanium-c6-2",
       "note": "Quarry streams and pit; source edge handoffs are visibly misregistered and are not repaired here.",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c6-2-site.webp",
       "coordinateSpace": "served-normalized",
-      "streams": [
-        {
-          "id": "tanium-quarry-rim",
-          "path": [
-            [
-              0,
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "ff04e5e2565f1e2633237be1fe208e8c678ee30928e0d223f273573d069b440e",
+      "pendingReview": {
+        "reason": "Water mask changed inside annotation bounds; remap against the current art before activation.",
+        "previousTileId": "l2-tanium-c6-2",
+        "previousSource": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c6-2-site.webp",
+        "previousSha256": "c93f36364ff3bd22eb6dd95c5a975469c3119a22268dd3a362466f7ce429c249",
+        "streams": [
+          {
+            "id": "tanium-quarry-rim",
+            "path": [
+              [
+                0,
+                0.34
+              ],
+              [
+                0.035,
+                0.25
+              ],
+              [
+                0.08,
+                0.195
+              ],
+              [
+                0.16,
+                0.16
+              ],
+              [
+                0.27,
+                0.145
+              ],
+              [
+                0.38,
+                0.17
+              ],
+              [
+                0.48,
+                0.236
+              ],
+              [
+                0.67,
+                0.32
+              ],
+              [
+                0.883,
+                0.391
+              ],
+              [
+                0.94,
+                0.425
+              ]
+            ],
+            "radius": 0.03
+          },
+          {
+            "id": "tanium-quarry-outlet",
+            "path": [
+              [
+                0.46,
+                0.25
+              ],
+              [
+                0.43,
+                0.29
+              ],
+              [
+                0.4,
+                0.36
+              ],
+              [
+                0.4,
+                0.405
+              ],
+              [
+                0.44,
+                0.46
+              ],
+              [
+                0.455,
+                0.49
+              ],
+              [
+                0.53,
+                0.547
+              ],
+              [
+                0.544,
+                0.6
+              ],
+              [
+                0.54,
+                0.635
+              ],
+              [
+                0.56,
+                0.68
+              ],
+              [
+                0.562,
+                0.754
+              ],
+              [
+                0.63,
+                0.83
+              ],
+              [
+                0.66,
+                0.89
+              ],
+              [
+                0.68,
+                0.93
+              ],
+              [
+                0.69,
+                0.973
+              ]
+            ],
+            "radius": 0.03
+          }
+        ],
+        "pools": [
+          {
+            "id": "tanium-quarry-pit",
+            "point": [
+              0.3,
               0.34
             ],
-            [
-              0.035,
-              0.25
+            "radius": 0.105
+          }
+        ],
+        "falls": [
+          {
+            "id": "tanium-quarry-inlet",
+            "lip": [
+              0.45,
+              0.255
             ],
-            [
-              0.08,
-              0.195
+            "foot": [
+              0.419,
+              0.31
             ],
-            [
-              0.16,
-              0.16
-            ],
-            [
-              0.27,
-              0.145
-            ],
-            [
-              0.38,
-              0.17
-            ],
-            [
+            "upstream": [
               0.48,
               0.236
             ],
-            [
-              0.67,
-              0.32
-            ],
-            [
-              0.883,
-              0.391
-            ],
-            [
-              0.94,
-              0.425
+            "radius": 0.03,
+            "hasLanding": true,
+            "backingOffset": [
+              0.035,
+              0
             ]
-          ],
-          "radius": 0.03
-        },
-        {
-          "id": "tanium-quarry-outlet",
-          "path": [
-            [
-              0.46,
-              0.25
+          },
+          {
+            "id": "tanium-quarry-upper-cut",
+            "lip": [
+              0.529066927210552,
+              0.5696140693698095
             ],
-            [
-              0.43,
-              0.29
+            "foot": [
+              0.5461651196873474,
+              0.6340986809965804
             ],
-            [
-              0.4,
-              0.36
+            "upstream": [
+              0.5192965315095261,
+              0.5398143624816805
             ],
-            [
-              0.4,
-              0.405
-            ],
-            [
-              0.44,
-              0.46
-            ],
-            [
-              0.455,
-              0.49
-            ],
-            [
-              0.53,
-              0.547
-            ],
-            [
-              0.544,
-              0.6
-            ],
-            [
-              0.54,
-              0.635
-            ],
-            [
-              0.56,
-              0.68
-            ],
-            [
-              0.562,
-              0.754
-            ],
-            [
-              0.63,
-              0.83
-            ],
-            [
-              0.66,
-              0.89
-            ],
-            [
-              0.68,
-              0.93
-            ],
-            [
-              0.69,
-              0.973
+            "radius": 0.035,
+            "hasLanding": true,
+            "backingOffset": [
+              0.035,
+              0
             ]
-          ],
-          "radius": 0.03
-        }
-      ],
-      "pools": [
-        {
-          "id": "tanium-quarry-pit",
-          "point": [
-            0.3,
-            0.34
-          ],
-          "radius": 0.105
-        }
-      ],
-      "falls": [
-        {
-          "id": "tanium-quarry-inlet",
-          "lip": [
-            0.45,
-            0.255
-          ],
-          "foot": [
-            0.419,
-            0.31
-          ],
-          "upstream": [
-            0.48,
-            0.236
-          ],
-          "radius": 0.03,
-          "hasLanding": true,
-          "backingOffset": [
-            0.035,
-            0
-          ]
-        },
-        {
-          "id": "tanium-quarry-upper-cut",
-          "lip": [
-            0.529066927210552,
-            0.5696140693698095
-          ],
-          "foot": [
-            0.5461651196873474,
-            0.6340986809965804
-          ],
-          "upstream": [
-            0.5192965315095261,
-            0.5398143624816805
-          ],
-          "radius": 0.035,
-          "hasLanding": true,
-          "backingOffset": [
-            0.035,
-            0
-          ]
-        },
-        {
-          "id": "tanium-quarry-lower-cut",
-          "lip": [
-            0.570591108939912,
-            0.6829506595017099
-          ],
-          "foot": [
-            0.563751831949194,
-            0.7537860283341475
-          ],
-          "upstream": [
-            0.5603321934538349,
-            0.651685393258427
-          ],
-          "radius": 0.035,
-          "hasLanding": true,
-          "backingOffset": [
-            0.035,
-            0
-          ]
-        }
-      ],
-      "sha256": "c93f36364ff3bd22eb6dd95c5a975469c3119a22268dd3a362466f7ce429c249"
+          },
+          {
+            "id": "tanium-quarry-lower-cut",
+            "lip": [
+              0.570591108939912,
+              0.6829506595017099
+            ],
+            "foot": [
+              0.563751831949194,
+              0.7537860283341475
+            ],
+            "upstream": [
+              0.5603321934538349,
+              0.651685393258427
+            ],
+            "radius": 0.035,
+            "hasLanding": true,
+            "backingOffset": [
+              0.035,
+              0
+            ]
+          }
+        ]
+      },
+      "reconciliation": "partially-pending"
     },
     {
-      "tileId": "l2-review-tanium-c1-1",
+      "tileId": "l2-tanium-c1-1",
       "note": "Candidate forest river; source-bound snapshot, north-to-south flow.",
-      "source": "public/career-world/layers/terrain/authority/tiles/l2-review/tanium-c1-1-site.webp",
-      "coordinateSpace": "served-normalized",
-      "streams": [
-        {
-          "id": "tanium-candidate-forest-river",
-          "path": [
-            [
-              0.605,
-              0.11
-            ],
-            [
-              0.6,
-              0.22
-            ],
-            [
-              0.54,
-              0.31
-            ],
-            [
-              0.485,
-              0.39
-            ],
-            [
-              0.45,
-              0.45
-            ],
-            [
-              0.455,
-              0.53
-            ],
-            [
-              0.495,
-              0.605
-            ],
-            [
-              0.485,
-              0.67
-            ],
-            [
-              0.42,
-              0.78
-            ],
-            [
-              0.355,
-              0.9
-            ],
-            [
-              0.265,
-              1
-            ]
-          ],
-          "radius": 0.05
-        }
-      ],
-      "pools": [],
-      "falls": [],
-      "sha256": "460a71cbd796f9f805a582cda5ea689648023836e575ecbb5ad6203b0f181344"
-    },
-    {
-      "tileId": "l2-review-tanium-c2-1",
-      "note": "Candidate narrow forest beck with rock-occluded continuation.",
-      "source": "public/career-world/layers/terrain/authority/tiles/l2-review/tanium-c2-1-site.webp",
-      "coordinateSpace": "served-normalized",
-      "streams": [
-        {
-          "id": "tanium-candidate-narrow-beck",
-          "path": [
-            [
-              0.21,
-              0
-            ],
-            [
-              0.22,
-              0.15
-            ],
-            [
-              0.28,
-              0.215
-            ],
-            [
-              0.27,
-              0.27
-            ],
-            [
-              0.3,
-              0.37
-            ],
-            [
-              0.325,
-              0.47
-            ],
-            [
-              0.38,
-              0.6
-            ],
-            [
-              0.42,
-              0.675
-            ],
-            [
-              0.455,
-              0.76
-            ],
-            [
-              0.43,
-              0.85
-            ],
-            [
-              0.4,
-              0.92
-            ],
-            [
-              0.45,
-              1
-            ]
-          ],
-          "radius": 0.028
-        }
-      ],
-      "pools": [],
-      "falls": [],
-      "sha256": "da91c296809eb8319cdd579331772ed7d343eac9b6e392333488887e59119771"
-    },
-    {
-      "tileId": "l2-review-tanium-c3-1",
-      "note": "Candidate central river and shelf pool.",
-      "source": "public/career-world/layers/terrain/authority/tiles/l2-review/tanium-c3-1-site.webp",
-      "coordinateSpace": "served-normalized",
-      "streams": [
-        {
-          "id": "tanium-candidate-central-river",
-          "path": [
-            [
-              0.75,
-              0
-            ],
-            [
-              0.9,
-              0.13
-            ],
-            [
-              0.925,
-              0.195
-            ],
-            [
-              0.88,
-              0.25
-            ],
-            [
-              0.84,
-              0.3
-            ],
-            [
-              0.82,
-              0.43
-            ],
-            [
-              0.8,
-              0.52
-            ],
-            [
-              0.775,
-              0.625
-            ],
-            [
-              0.81,
-              0.72
-            ],
-            [
-              0.75,
-              0.85
-            ],
-            [
-              0.64,
-              1
-            ]
-          ],
-          "radius": 0.05
-        }
-      ],
-      "pools": [
-        {
-          "id": "tanium-candidate-shelf-pool",
-          "point": [
-            0.85,
-            0.295
-          ],
-          "radius": 0.07
-        }
-      ],
-      "falls": [],
-      "sha256": "bf5263e799d01edbdbab3ad9fb2cb425b09f4f2e2908b2467e78b8313d4d6021"
-    },
-    {
-      "tileId": "l2-review-tanium-c4-0",
-      "note": "Candidate closed lower-step pool; no source-visible river connection.",
-      "source": "public/career-world/layers/terrain/authority/tiles/l2-review/tanium-c4-0-site.webp",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c1-1-site.webp",
       "coordinateSpace": "served-normalized",
       "streams": [],
-      "pools": [
-        {
-          "id": "tanium-candidate-closed-pool",
-          "point": [
-            0.28,
-            0.8
-          ],
-          "radius": 0.095
-        }
-      ],
+      "pools": [],
       "falls": [],
-      "sha256": "a9ae622b60a3853b6032c4381465d8c0c0840ae82ba00a4dc34c1e4604063071"
+      "sha256": "c7d531c35a1c7aebd27bc651f2ddb644a870cff9d345c1a8a6c6ceb7a0f7aafd",
+      "pendingReview": {
+        "reason": "Water mask changed inside annotation bounds; remap against the current art before activation.",
+        "previousTileId": "l2-review-tanium-c1-1",
+        "previousSource": "public/career-world/layers/terrain/authority/tiles/l2-review/tanium-c1-1-site.webp",
+        "previousSha256": "460a71cbd796f9f805a582cda5ea689648023836e575ecbb5ad6203b0f181344",
+        "streams": [
+          {
+            "id": "tanium-candidate-forest-river",
+            "path": [
+              [
+                0.605,
+                0.11
+              ],
+              [
+                0.6,
+                0.22
+              ],
+              [
+                0.54,
+                0.31
+              ],
+              [
+                0.485,
+                0.39
+              ],
+              [
+                0.45,
+                0.45
+              ],
+              [
+                0.455,
+                0.53
+              ],
+              [
+                0.495,
+                0.605
+              ],
+              [
+                0.485,
+                0.67
+              ],
+              [
+                0.42,
+                0.78
+              ],
+              [
+                0.355,
+                0.9
+              ],
+              [
+                0.265,
+                1
+              ]
+            ],
+            "radius": 0.05
+          }
+        ],
+        "pools": [],
+        "falls": []
+      },
+      "reconciliation": "partially-pending"
+    },
+    {
+      "tileId": "l2-tanium-c2-1",
+      "note": "Candidate narrow forest beck with rock-occluded continuation.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c2-1-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "a4b3d3e365fa45a16e6efcbcccc45bde21dc768fc1ac6354b33516c5d621022e",
+      "pendingReview": {
+        "reason": "Water mask changed inside annotation bounds; remap against the current art before activation.",
+        "previousTileId": "l2-review-tanium-c2-1",
+        "previousSource": "public/career-world/layers/terrain/authority/tiles/l2-review/tanium-c2-1-site.webp",
+        "previousSha256": "da91c296809eb8319cdd579331772ed7d343eac9b6e392333488887e59119771",
+        "streams": [
+          {
+            "id": "tanium-candidate-narrow-beck",
+            "path": [
+              [
+                0.21,
+                0
+              ],
+              [
+                0.22,
+                0.15
+              ],
+              [
+                0.28,
+                0.215
+              ],
+              [
+                0.27,
+                0.27
+              ],
+              [
+                0.3,
+                0.37
+              ],
+              [
+                0.325,
+                0.47
+              ],
+              [
+                0.38,
+                0.6
+              ],
+              [
+                0.42,
+                0.675
+              ],
+              [
+                0.455,
+                0.76
+              ],
+              [
+                0.43,
+                0.85
+              ],
+              [
+                0.4,
+                0.92
+              ],
+              [
+                0.45,
+                1
+              ]
+            ],
+            "radius": 0.028
+          }
+        ],
+        "pools": [],
+        "falls": []
+      },
+      "reconciliation": "partially-pending"
+    },
+    {
+      "tileId": "l2-tanium-c3-1",
+      "note": "Candidate central river and shelf pool.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-1-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "0d96391edee66476e0479efbcf2ff33caad3211f6c5606aa316bc4dfca22bd60",
+      "pendingReview": {
+        "reason": "Water mask changed inside annotation bounds; remap against the current art before activation.",
+        "previousTileId": "l2-review-tanium-c3-1",
+        "previousSource": "public/career-world/layers/terrain/authority/tiles/l2-review/tanium-c3-1-site.webp",
+        "previousSha256": "bf5263e799d01edbdbab3ad9fb2cb425b09f4f2e2908b2467e78b8313d4d6021",
+        "streams": [
+          {
+            "id": "tanium-candidate-central-river",
+            "path": [
+              [
+                0.75,
+                0
+              ],
+              [
+                0.9,
+                0.13
+              ],
+              [
+                0.925,
+                0.195
+              ],
+              [
+                0.88,
+                0.25
+              ],
+              [
+                0.84,
+                0.3
+              ],
+              [
+                0.82,
+                0.43
+              ],
+              [
+                0.8,
+                0.52
+              ],
+              [
+                0.775,
+                0.625
+              ],
+              [
+                0.81,
+                0.72
+              ],
+              [
+                0.75,
+                0.85
+              ],
+              [
+                0.64,
+                1
+              ]
+            ],
+            "radius": 0.05
+          }
+        ],
+        "pools": [
+          {
+            "id": "tanium-candidate-shelf-pool",
+            "point": [
+              0.85,
+              0.295
+            ],
+            "radius": 0.07
+          }
+        ],
+        "falls": []
+      },
+      "reconciliation": "partially-pending"
+    },
+    {
+      "tileId": "l2-tanium-c4-0",
+      "note": "Candidate closed lower-step pool; no source-visible river connection.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c4-0-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "3f0a8081d12ee87993f5723630c8aa3fbb19f88763381fa766c1c7191cbec3ae",
+      "pendingReview": {
+        "reason": "Water mask changed inside annotation bounds; remap against the current art before activation.",
+        "previousTileId": "l2-review-tanium-c4-0",
+        "previousSource": "public/career-world/layers/terrain/authority/tiles/l2-review/tanium-c4-0-site.webp",
+        "previousSha256": "a9ae622b60a3853b6032c4381465d8c0c0840ae82ba00a4dc34c1e4604063071",
+        "streams": [],
+        "pools": [
+          {
+            "id": "tanium-candidate-closed-pool",
+            "point": [
+              0.28,
+              0.8
+            ],
+            "radius": 0.095
+          }
+        ],
+        "falls": []
+      },
+      "reconciliation": "partially-pending"
     },
     {
       "tileId": "l2-coast-c2-0",
@@ -3013,7 +3182,8 @@
       "streams": [],
       "pools": [],
       "falls": [],
-      "sha256": "feca052485672c736da5d1804254abc1fc5398cf4a5b201e985a2443030cb3a7"
+      "sha256": "d7b331951bfa7236d9d2cbbed0057eccd8558c2854cdd2df17e120da25df47b5",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-coast-c4-0",
@@ -3083,7 +3253,8 @@
         }
       ],
       "falls": [],
-      "sha256": "02f0282ac0b8d793777c55276e0f661b7d5d25e47d91c10bb927f5b5eadeb04d"
+      "sha256": "2bb5589458270ecfd3f31cb2dca70d0d80640fdfa710f51395872d9c96395487",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-coast-c5-0",
@@ -3093,7 +3264,8 @@
       "streams": [],
       "pools": [],
       "falls": [],
-      "sha256": "d5b67f6d195a26c44157601e7768ec6184ef198404ca4d147fbaa4b16b4edf71"
+      "sha256": "8444ef8efdce0d5add373ba65eeea76d8f911cf8e4f66bfdd3f8a9411304ba32",
+      "reconciliation": "annotation-water-mask-unchanged"
     },
     {
       "tileId": "l2-coast-c6-0",
@@ -3103,7 +3275,250 @@
       "streams": [],
       "pools": [],
       "falls": [],
-      "sha256": "104d6f0602382f6067ffbce7aef8b4c6195fd6886e22ae4f92362c9f044012b6"
+      "sha256": "5cf56552b6aeb4ca067a7dd9586856ae5e75177990c9393ab2468085fd22dac8",
+      "reconciliation": "annotation-water-mask-unchanged"
+    },
+    {
+      "tileId": "l2-coast-c0-6",
+      "note": "New coastal cell; inland paths have not been reviewed. Water coverage derives from current land alpha.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c0-6-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "e299d8fea5cf5e2cbdbca64608be0e10bd3e9739e6f60e97f41a106aa9a21853",
+      "reconciliation": "new-cell-pending"
+    },
+    {
+      "tileId": "l2-coast-c0-7",
+      "note": "New coastal cell; inland paths have not been reviewed. Water coverage derives from current land alpha.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c0-7-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "c7be007b059b9fb25333227da0b20114fe584abe8065edec12b7edd8b688bb0f",
+      "reconciliation": "new-cell-pending"
+    },
+    {
+      "tileId": "l2-coast-c1-0",
+      "note": "New coastal cell; inland paths have not been reviewed. Water coverage derives from current land alpha.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c1-0-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "2798f3b5e8bb2ecb5e23acde3c0444015540832292c0d85423e7d47afcb700f6",
+      "reconciliation": "new-cell-pending"
+    },
+    {
+      "tileId": "l2-coast-c1-1",
+      "note": "New coastal cell; inland paths have not been reviewed. Water coverage derives from current land alpha.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c1-1-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "7dc954fd2f864dfbb261e75fcc4a0f7fbf8beac3880d8e7e5658a1ef1bedf223",
+      "reconciliation": "new-cell-pending"
+    },
+    {
+      "tileId": "l2-coast-c1-2",
+      "note": "New coastal cell; inland paths have not been reviewed. Water coverage derives from current land alpha.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c1-2-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "bd2f9bbc6b0d9d1281f305500e71c7d1c99d13f1d6fed17c385ac4884830948e",
+      "reconciliation": "new-cell-pending"
+    },
+    {
+      "tileId": "l2-coast-c1-8",
+      "note": "New coastal cell; inland paths have not been reviewed. Water coverage derives from current land alpha.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c1-8-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "1aa4cef1696d8eedf678c347c98ea1fc92c7b993de76c317377a1605b516a5c6",
+      "reconciliation": "new-cell-pending"
+    },
+    {
+      "tileId": "l2-coast-c3-0",
+      "note": "New coastal cell; inland paths have not been reviewed. Water coverage derives from current land alpha.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c3-0-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "be91fcc862cf62461a965f095425ee6aad7bc4122631452eec494de3b0b50bfc",
+      "reconciliation": "new-cell-pending"
+    },
+    {
+      "tileId": "l2-coast-c5-8",
+      "note": "New coastal cell; inland paths have not been reviewed. Water coverage derives from current land alpha.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c5-8-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "4c71eff72bc1e0bcc8b8698cd329dc65d07266befe9b5d6c08f5168220b4785d",
+      "reconciliation": "new-cell-pending"
+    },
+    {
+      "tileId": "l2-coast-c6-8",
+      "note": "New coastal cell; inland paths have not been reviewed. Water coverage derives from current land alpha.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c6-8-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "24ecd30af179f37c7339aa64da9e0b14ca3012e9947ee5a1664f9d39c7238b4f",
+      "reconciliation": "new-cell-pending"
+    },
+    {
+      "tileId": "l2-coast-c7-0",
+      "note": "New coastal cell; inland paths have not been reviewed. Water coverage derives from current land alpha.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c7-0-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "858f4379479fe6d665625b9f61a2a849237a9ac81ff970b18a8df4ddc15e26f3",
+      "reconciliation": "new-cell-pending"
+    },
+    {
+      "tileId": "l2-coast-c7-1",
+      "note": "New coastal cell; inland paths have not been reviewed. Water coverage derives from current land alpha.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c7-1-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "87e971fa138181b46e8b9a19061d3348b50dd9c739907a5200bf2b60f64a0e68",
+      "reconciliation": "new-cell-pending"
+    },
+    {
+      "tileId": "l2-coast-c7-2",
+      "note": "New coastal cell; inland paths have not been reviewed. Water coverage derives from current land alpha.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c7-2-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "abdbf418a0a5f66ee222110053ba035f7d9553f8ef543a078cf4c1efafa608c6",
+      "reconciliation": "new-cell-pending"
+    },
+    {
+      "tileId": "l2-coast-c7-3",
+      "note": "New coastal cell; inland paths have not been reviewed. Water coverage derives from current land alpha.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c7-3-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "402559f413c0cfb086874d0f6eafc491c423393f74869261646d7a1470f13697",
+      "reconciliation": "new-cell-pending"
+    },
+    {
+      "tileId": "l2-coast-c7-4",
+      "note": "New coastal cell; inland paths have not been reviewed. Water coverage derives from current land alpha.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c7-4-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "5919086e8c66efffded6fc4b93c103328559d158ca824a640a0a288d89907a71",
+      "reconciliation": "new-cell-pending"
+    },
+    {
+      "tileId": "l2-coast-c7-8",
+      "note": "New coastal cell; inland paths have not been reviewed. Water coverage derives from current land alpha.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c7-8-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "6e5190b3ff45ba9da8a19a4fa871de0a24d25fd7e1ea9dabf792c2d450ccc5f6",
+      "reconciliation": "new-cell-pending"
+    },
+    {
+      "tileId": "l2-coast-c8-5",
+      "note": "New coastal cell; inland paths have not been reviewed. Water coverage derives from current land alpha.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c8-5-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "7508ebd910fc0fa85399965c78a264c0b1741f3d32a3a0681f60fc941090331e",
+      "reconciliation": "new-cell-pending"
+    },
+    {
+      "tileId": "l2-coast-c8-6",
+      "note": "New coastal cell; inland paths have not been reviewed. Water coverage derives from current land alpha.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c8-6-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "cee957f28261633181b39a4543a63991611d2af1f25411ffa0403def2bf0f4a1",
+      "reconciliation": "new-cell-pending"
+    },
+    {
+      "tileId": "l2-coast-c8-7",
+      "note": "New coastal cell; inland paths have not been reviewed. Water coverage derives from current land alpha.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c8-7-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "897150641ee96c94ee084157ec571984e2ffebfac3abf3fef6565d6b53ce63d4",
+      "reconciliation": "new-cell-pending"
+    },
+    {
+      "tileId": "l2-review-coast-c1-4",
+      "note": "New coastal cell; inland paths have not been reviewed. Water coverage derives from current land alpha.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-review/coast-c1-4-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "b3ef9ce7a5bdbc8bf7ca0bc911897d49932baf2298497068abb33b7da823a98e",
+      "reconciliation": "new-cell-pending"
+    },
+    {
+      "tileId": "l2-review-coast-c1-3",
+      "note": "New coastal cell; inland paths have not been reviewed. Water coverage derives from current land alpha.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-review/coast-c1-3-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "878c2a67a3f7f4153da451493954348b0b5eb79921de0bf51bacc09d908540a8",
+      "reconciliation": "new-cell-pending"
+    },
+    {
+      "tileId": "l2-review-coast-c4-8",
+      "note": "New coastal cell; inland paths have not been reviewed. Water coverage derives from current land alpha.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-review/coast-c4-8-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "3b99344ed46d8b8bf3f626e7f5892b730d2df6249d01fde925d3843cc6cdbc93",
+      "reconciliation": "new-cell-pending"
+    },
+    {
+      "tileId": "l2-review-coast-c0-5",
+      "note": "New coastal cell; inland paths have not been reviewed. Water coverage derives from current land alpha.",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-review/coast-c0-5-site.webp",
+      "coordinateSpace": "served-normalized",
+      "streams": [],
+      "pools": [],
+      "falls": [],
+      "sha256": "8e05df3187e4b09aa10348335150f63e575be3f501f0bcabe59f82bd780e1b9e",
+      "reconciliation": "new-cell-pending"
     }
   ]
 }

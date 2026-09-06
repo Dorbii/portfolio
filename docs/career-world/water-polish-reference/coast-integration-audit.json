@@ -1,0 +1,1156 @@
+{
+  "previousCells": 45,
+  "currentCells": 67,
+  "rows": [
+    {
+      "oldId": "l2-c0-0",
+      "newId": "l2-c0-0",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-0-site.webp",
+      "sha256": "b44365ed3f09ab7e685360e645dc5ec002f8cd5107875016cb7f37d04d1b2097",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 3,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-c0-1",
+      "newId": "l2-c0-1",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-1-site.webp",
+      "sha256": "1ac86581bca0ee93dd39c5206a2d871f8a75662c2811529d6c6e8d3b01dd5fca",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 3,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-c0-2",
+      "newId": "l2-c0-2",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-2-site.webp",
+      "sha256": "42ffb9110adfc9c9f76850f98654a5b0cd74c28ac5d8672560f0d1ca7e47686d",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 2,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-c0-3",
+      "newId": "l2-c0-3",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-3-site.webp",
+      "sha256": "dfdc7bd39c32ae8fc309df807679aebd137993fa1974dbd711685049e9a4f87b",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 2,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-c1-0",
+      "newId": "l2-c1-0",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c1-0-site.webp",
+      "sha256": "f9bbbf2fd2228bbd77c3214245af5327e3d3a61c9a8a49458ad56589594a2d11",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 1,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-c1-1",
+      "newId": "l2-c1-1",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c1-1-site.webp",
+      "sha256": "161ddd15af541254ba26f24a52b475d7b82b20da974f14ee7a5c96afcc517cc0",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 0,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-c1-2",
+      "newId": "l2-c1-2",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c1-2-site.webp",
+      "sha256": "c2d77ed04fbba7a9bb4ce47648d2ac43380f557fdfc42155dde476c288e649f6",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 5,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-c1-3",
+      "newId": "l2-c1-3",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c1-3-site.webp",
+      "sha256": "4931eec213e2ec61f4381b849da3d18f56981d5ce75611775932bf84e00ec3fe",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 2,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-c2-0",
+      "newId": "l2-c2-0",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-0-site.webp",
+      "sha256": "aca7296b69f465c0381ee965c8d5904bd80017ee89836f8b27e13890f110695d",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 5,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-c2-1",
+      "newId": "l2-c2-1",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-1-site.webp",
+      "sha256": "3899b80d3b772414fd282747c780f8ce993d4f0f4d216cad2f9c493e27c8098a",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 4,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-c2-2",
+      "newId": "l2-c2-2",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-2-site.webp",
+      "sha256": "4527eb5656d166f1d6ff17e20c837e3b14066b9df52f3cfe38bc3dcdd04bc961",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 5,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-c2-3",
+      "newId": "l2-c2-3",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-3-site.webp",
+      "sha256": "a1febf7fa75ab56a7621002deeb75a973bbf4c174f23d1eb99a2c27744d6abac",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 1,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-c3-0",
+      "newId": "l2-c3-0",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-0-site.webp",
+      "sha256": "ca0244b43c31627478f7ec1446e9efdf19694dbe9fe592330d4b0a469159f40d",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 5,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-c3-1",
+      "newId": "l2-c3-1",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-1-site.webp",
+      "sha256": "7aa8dfd62620c4d4b4ccf7f23cbe79e994189b4f608978f74255812a2568dc33",
+      "alphaChanged": 2791,
+      "binaryChanged": 2019,
+      "waterToLand": 0,
+      "landToWater": 2019,
+      "features": 0,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-c3-2",
+      "newId": "l2-c3-2",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-2-site.webp",
+      "sha256": "136b7bb4ae85f0776602b07e751f7d219aeaec44cf3a1f4451210e67f41fbe3f",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 4,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-c3-3",
+      "newId": "l2-c3-3",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-3-site.webp",
+      "sha256": "2deed0182f73e9d567ab5638a48e52f75aca4e5e72aa6137b84daf51dbc2098b",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 2,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-c4-0",
+      "newId": "l2-c4-0",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-0-site.webp",
+      "sha256": "e7485c45bff87325516b6081a5873848776c5d4a617a2ea2746696e1b94c0acd",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 3,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-c4-1",
+      "newId": "l2-c4-1",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-1-site.webp",
+      "sha256": "d0593aa948aad32b8a2bdcede1d83df8f1014c6cb890c052c45b2e78373f659b",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 1,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-c4-2",
+      "newId": "l2-c4-2",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-2-site.webp",
+      "sha256": "e57d255dc23feb78d9102988ce377e00cf6474584f8aa0ca3af924b72f3b207d",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 2,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-c4-3",
+      "newId": "l2-c4-3",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-3-site.webp",
+      "sha256": "3e790fbd5f0fa22e9416c2a3b659091ae8f048bb3ecdfc9682ac8527fc012e90",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 3,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-tanium-c0-0",
+      "newId": "l2-tanium-c0-0",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c0-0-site.webp",
+      "sha256": "4b52c11955111b3a2838798e1e52a29902b0964fc570b9f36caac522936b838d",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 0,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-tanium-c0-1",
+      "newId": "l2-tanium-c0-1",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c0-1-site.webp",
+      "sha256": "1b607877bcd151a1f517955506223d2f23fa6dbad05812b7b225563a7c163734",
+      "alphaChanged": 426084,
+      "binaryChanged": 331032,
+      "waterToLand": 149476,
+      "landToWater": 181556,
+      "features": 3,
+      "featureChanges": [
+        {
+          "id": "tanium-west-shelf-stream",
+          "kind": "stream",
+          "changed": 270238,
+          "bounds": [
+            0,
+            276,
+            2048,
+            1649
+          ]
+        },
+        {
+          "id": "tanium-west-lip-pool",
+          "kind": "pool",
+          "changed": 28060,
+          "bounds": [
+            811,
+            855,
+            1038,
+            1082
+          ]
+        },
+        {
+          "id": "tanium-west-shelf-fall",
+          "kind": "fall",
+          "changed": 88001,
+          "bounds": [
+            624,
+            804,
+            1130,
+            1496
+          ]
+        }
+      ]
+    },
+    {
+      "oldId": "l2-tanium-c0-2",
+      "newId": "l2-tanium-c0-2",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c0-2-site.webp",
+      "sha256": "cdcdc5f667fab92f39e0ddf9d50302141788dfbcfd76b428c636c66ac10b24ed",
+      "alphaChanged": 1534,
+      "binaryChanged": 300,
+      "waterToLand": 0,
+      "landToWater": 300,
+      "features": 0,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-tanium-c1-0",
+      "newId": "l2-tanium-c1-0",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c1-0-site.webp",
+      "sha256": "a922822363bc181beb2b21391fbb69a3825990b75c6081421d34fd82c11f6652",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 0,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-tanium-c1-2",
+      "newId": "l2-tanium-c1-2",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c1-2-site.webp",
+      "sha256": "d6f069ab5f1d756fb43492a9c9a7778cc2c207a8dd91e0948f54a5b872881cb8",
+      "alphaChanged": 599632,
+      "binaryChanged": 502275,
+      "waterToLand": 224621,
+      "landToWater": 277654,
+      "features": 2,
+      "featureChanges": [
+        {
+          "id": "tanium-forest-outlet",
+          "kind": "stream",
+          "changed": 295195,
+          "bounds": [
+            778,
+            174,
+            1321,
+            1874
+          ]
+        },
+        {
+          "id": "tanium-forest-inlet-fall",
+          "kind": "fall",
+          "changed": 117096,
+          "bounds": [
+            682,
+            1050,
+            1198,
+            1694
+          ]
+        }
+      ]
+    },
+    {
+      "oldId": "l2-tanium-c2-0",
+      "newId": "l2-tanium-c2-0",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c2-0-site.webp",
+      "sha256": "eeeb8f7880d5cfdfbc563d30060bc1fb998f8682a5ac24c59fc1bd763f17f942",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 0,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-tanium-c2-2",
+      "newId": "l2-tanium-c2-2",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c2-2-site.webp",
+      "sha256": "55ee98575b4818f9e4854ecabc0392316a9703fe620ef3b8308d7928dad777d2",
+      "alphaChanged": 1541,
+      "binaryChanged": 130,
+      "waterToLand": 53,
+      "landToWater": 77,
+      "features": 5,
+      "featureChanges": [
+        {
+          "id": "tanium-gold-beck",
+          "kind": "stream",
+          "changed": 125,
+          "bounds": [
+            768,
+            0,
+            1895,
+            2048
+          ]
+        }
+      ]
+    },
+    {
+      "oldId": "l2-tanium-c3-0",
+      "newId": "l2-tanium-c3-0",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-0-site.webp",
+      "sha256": "2ef74b6911119f20614feea5fac4e5e64b596d2a406e301b58db9ea9a10ad6eb",
+      "alphaChanged": 7946,
+      "binaryChanged": 3379,
+      "waterToLand": 37,
+      "landToWater": 3342,
+      "features": 4,
+      "featureChanges": [
+        {
+          "id": "tanium-north-step-beck",
+          "kind": "stream",
+          "changed": 3379,
+          "bounds": [
+            409,
+            0,
+            1618,
+            2048
+          ]
+        }
+      ]
+    },
+    {
+      "oldId": "l2-tanium-c3-2",
+      "newId": "l2-tanium-c3-2",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-2-site.webp",
+      "sha256": "bc945ea6ec9199dbbc422647b54a5c8ab1b6e624fe53af76e6de6a8aa4be8a11",
+      "alphaChanged": 1618,
+      "binaryChanged": 635,
+      "waterToLand": 0,
+      "landToWater": 635,
+      "features": 10,
+      "featureChanges": [
+        {
+          "id": "tanium-central-bench-beck",
+          "kind": "stream",
+          "changed": 490,
+          "bounds": [
+            40,
+            0,
+            1311,
+            2048
+          ]
+        }
+      ]
+    },
+    {
+      "oldId": "l2-tanium-c4-1",
+      "newId": "l2-tanium-c4-1",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c4-1-site.webp",
+      "sha256": "69f5c6dfbc6b920aaf1121ef4965441ab3c568f4a058a6ca93f401ad6c2daa3a",
+      "alphaChanged": 196775,
+      "binaryChanged": 171880,
+      "waterToLand": 105734,
+      "landToWater": 66146,
+      "features": 2,
+      "featureChanges": [
+        {
+          "id": "tanium-limestone-tarn",
+          "kind": "pool",
+          "changed": 125289,
+          "bounds": [
+            860,
+            337,
+            1475,
+            953
+          ]
+        },
+        {
+          "id": "tanium-western-seep",
+          "kind": "fall",
+          "changed": 20189,
+          "bounds": [
+            102,
+            979,
+            522,
+            1567
+          ]
+        }
+      ]
+    },
+    {
+      "oldId": "l2-tanium-c4-2",
+      "newId": "l2-tanium-c4-2",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c4-2-site.webp",
+      "sha256": "ff8c24cddb1d7b41a8dc813301183e2f1bbab2105b4a776462a8e496bfe7f494",
+      "alphaChanged": 6343,
+      "binaryChanged": 3696,
+      "waterToLand": 754,
+      "landToWater": 2942,
+      "features": 8,
+      "featureChanges": [
+        {
+          "id": "tanium-western-steps",
+          "kind": "stream",
+          "changed": 3696,
+          "bounds": [
+            296,
+            0,
+            932,
+            2048
+          ]
+        }
+      ]
+    },
+    {
+      "oldId": "l2-tanium-c5-0",
+      "newId": "l2-tanium-c5-0",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c5-0-site.webp",
+      "sha256": "7dc3d6e6c1277577cbe986d24790d71d9b42d3dfef1ae2e251d9a0cee7c1e2b7",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 0,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-tanium-c5-1",
+      "newId": "l2-tanium-c5-1",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c5-1-site.webp",
+      "sha256": "5da34bfa3154672a13393b6839a3a94095da21e4b14742487432f02e31fdf67c",
+      "alphaChanged": 183449,
+      "binaryChanged": 150254,
+      "waterToLand": 101790,
+      "landToWater": 48464,
+      "features": 2,
+      "featureChanges": [
+        {
+          "id": "tanium-ridge-stream",
+          "kind": "stream",
+          "changed": 139171,
+          "bounds": [
+            30,
+            174,
+            2018,
+            615
+          ]
+        },
+        {
+          "id": "tanium-ridge-pool",
+          "kind": "pool",
+          "changed": 54782,
+          "bounds": [
+            460,
+            184,
+            912,
+            635
+          ]
+        }
+      ]
+    },
+    {
+      "oldId": "l2-tanium-c5-2",
+      "newId": "l2-tanium-c5-2",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c5-2-site.webp",
+      "sha256": "e63e2d64598f59559bfc6619405d06169a05f4f83a24f42b4902f7f780fc8709",
+      "alphaChanged": 8653,
+      "binaryChanged": 3136,
+      "waterToLand": 3094,
+      "landToWater": 42,
+      "features": 2,
+      "featureChanges": [
+        {
+          "id": "tanium-west-coast-beck",
+          "kind": "stream",
+          "changed": 8,
+          "bounds": [
+            81,
+            0,
+            564,
+            1506
+          ]
+        },
+        {
+          "id": "tanium-east-coast-beck",
+          "kind": "stream",
+          "changed": 2078,
+          "bounds": [
+            1792,
+            747,
+            2048,
+            1680
+          ]
+        }
+      ]
+    },
+    {
+      "oldId": "l2-tanium-c6-0",
+      "newId": "l2-tanium-c6-0",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c6-0-site.webp",
+      "sha256": "db1f83b94ba7b35ec62a6df33c3f07478a9cc3f6eae13e42bc7a20c5a33694bc",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 0,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-tanium-c6-1",
+      "newId": "l2-tanium-c6-1",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c6-1-site.webp",
+      "sha256": "0a6ba0e623f0d8c4598a75a37b73b74e3981ad660c1077e3d4002f11e3905a5a",
+      "alphaChanged": 312619,
+      "binaryChanged": 255481,
+      "waterToLand": 252623,
+      "landToWater": 2858,
+      "features": 0,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-tanium-c6-2",
+      "newId": "l2-tanium-c6-2",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c6-2-site.webp",
+      "sha256": "ff04e5e2565f1e2633237be1fe208e8c678ee30928e0d223f273573d069b440e",
+      "alphaChanged": 832430,
+      "binaryChanged": 706917,
+      "waterToLand": 664112,
+      "landToWater": 42805,
+      "features": 6,
+      "featureChanges": [
+        {
+          "id": "tanium-quarry-rim",
+          "kind": "stream",
+          "changed": 324027,
+          "bounds": [
+            0,
+            235,
+            1987,
+            932
+          ]
+        },
+        {
+          "id": "tanium-quarry-outlet",
+          "kind": "stream",
+          "changed": 117294,
+          "bounds": [
+            757,
+            450,
+            1475,
+            2048
+          ]
+        },
+        {
+          "id": "tanium-quarry-pit",
+          "kind": "pool",
+          "changed": 91767,
+          "bounds": [
+            399,
+            481,
+            830,
+            912
+          ]
+        },
+        {
+          "id": "tanium-quarry-inlet",
+          "kind": "fall",
+          "changed": 58761,
+          "bounds": [
+            653,
+            319,
+            1188,
+            799
+          ]
+        },
+        {
+          "id": "tanium-quarry-upper-cut",
+          "kind": "fall",
+          "changed": 16203,
+          "bounds": [
+            858,
+            941,
+            1324,
+            1463
+          ]
+        },
+        {
+          "id": "tanium-quarry-lower-cut",
+          "kind": "fall",
+          "changed": 19335,
+          "bounds": [
+            942,
+            1170,
+            1374,
+            1708
+          ]
+        }
+      ]
+    },
+    {
+      "oldId": "l2-review-tanium-c1-1",
+      "newId": "l2-tanium-c1-1",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c1-1-site.webp",
+      "sha256": "c7d531c35a1c7aebd27bc651f2ddb644a870cff9d345c1a8a6c6ceb7a0f7aafd",
+      "alphaChanged": 175453,
+      "binaryChanged": 126408,
+      "waterToLand": 80708,
+      "landToWater": 45700,
+      "features": 1,
+      "featureChanges": [
+        {
+          "id": "tanium-candidate-forest-river",
+          "kind": "stream",
+          "changed": 120853,
+          "bounds": [
+            440,
+            122,
+            1342,
+            2048
+          ]
+        }
+      ]
+    },
+    {
+      "oldId": "l2-review-tanium-c2-1",
+      "newId": "l2-tanium-c2-1",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c2-1-site.webp",
+      "sha256": "a4b3d3e365fa45a16e6efcbcccc45bde21dc768fc1ac6354b33516c5d621022e",
+      "alphaChanged": 77714,
+      "binaryChanged": 50435,
+      "waterToLand": 49077,
+      "landToWater": 1358,
+      "features": 1,
+      "featureChanges": [
+        {
+          "id": "tanium-candidate-narrow-beck",
+          "kind": "stream",
+          "changed": 34381,
+          "bounds": [
+            372,
+            0,
+            990,
+            2048
+          ]
+        }
+      ]
+    },
+    {
+      "oldId": "l2-review-tanium-c3-1",
+      "newId": "l2-tanium-c3-1",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-1-site.webp",
+      "sha256": "0d96391edee66476e0479efbcf2ff33caad3211f6c5606aa316bc4dfca22bd60",
+      "alphaChanged": 220820,
+      "binaryChanged": 169414,
+      "waterToLand": 55668,
+      "landToWater": 113746,
+      "features": 2,
+      "featureChanges": [
+        {
+          "id": "tanium-candidate-central-river",
+          "kind": "stream",
+          "changed": 168316,
+          "bounds": [
+            1208,
+            0,
+            1997,
+            2048
+          ]
+        },
+        {
+          "id": "tanium-candidate-shelf-pool",
+          "kind": "pool",
+          "changed": 9802,
+          "bounds": [
+            1597,
+            460,
+            1885,
+            748
+          ]
+        }
+      ]
+    },
+    {
+      "oldId": "l2-review-tanium-c4-0",
+      "newId": "l2-tanium-c4-0",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c4-0-site.webp",
+      "sha256": "3f0a8081d12ee87993f5723630c8aa3fbb19f88763381fa766c1c7191cbec3ae",
+      "alphaChanged": 301867,
+      "binaryChanged": 278260,
+      "waterToLand": 74743,
+      "landToWater": 203517,
+      "features": 1,
+      "featureChanges": [
+        {
+          "id": "tanium-candidate-closed-pool",
+          "kind": "pool",
+          "changed": 87274,
+          "bounds": [
+            378,
+            1443,
+            768,
+            1833
+          ]
+        }
+      ]
+    },
+    {
+      "oldId": "l2-coast-c2-0",
+      "newId": "l2-coast-c2-0",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c2-0-site.webp",
+      "sha256": "d7b331951bfa7236d9d2cbbed0057eccd8558c2854cdd2df17e120da25df47b5",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 0,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-coast-c4-0",
+      "newId": "l2-coast-c4-0",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c4-0-site.webp",
+      "sha256": "2bb5589458270ecfd3f31cb2dca70d0d80640fdfa710f51395872d9c96395487",
+      "alphaChanged": 0,
+      "binaryChanged": 0,
+      "waterToLand": 0,
+      "landToWater": 0,
+      "features": 2,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-coast-c5-0",
+      "newId": "l2-coast-c5-0",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c5-0-site.webp",
+      "sha256": "8444ef8efdce0d5add373ba65eeea76d8f911cf8e4f66bfdd3f8a9411304ba32",
+      "alphaChanged": 3222,
+      "binaryChanged": 2982,
+      "waterToLand": 0,
+      "landToWater": 2982,
+      "features": 0,
+      "featureChanges": []
+    },
+    {
+      "oldId": "l2-coast-c6-0",
+      "newId": "l2-coast-c6-0",
+      "source": "public/career-world/layers/terrain/authority/tiles/l2-coast/c6-0-site.webp",
+      "sha256": "5cf56552b6aeb4ca067a7dd9586856ae5e75177990c9393ab2468085fd22dac8",
+      "alphaChanged": 2124,
+      "binaryChanged": 136,
+      "waterToLand": 23,
+      "landToWater": 113,
+      "features": 0,
+      "featureChanges": []
+    }
+  ],
+  "additions": [
+    {
+      "id": "l2-coast-c0-6",
+      "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c0-6-site.webp",
+      "worldBounds": {
+        "origin": [
+          0.0625,
+          0.6666666666666666
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c0-7",
+      "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c0-7-site.webp",
+      "worldBounds": {
+        "origin": [
+          0.0625,
+          0.7777777777777778
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c1-0",
+      "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c1-0-site.webp",
+      "worldBounds": {
+        "origin": [
+          0.125,
+          0
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c1-1",
+      "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c1-1-site.webp",
+      "worldBounds": {
+        "origin": [
+          0.125,
+          0.1111111111111111
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c1-2",
+      "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c1-2-site.webp",
+      "worldBounds": {
+        "origin": [
+          0.125,
+          0.2222222222222222
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c1-8",
+      "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c1-8-site.webp",
+      "worldBounds": {
+        "origin": [
+          0.125,
+          0.8888888888888888
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c3-0",
+      "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c3-0-site.webp",
+      "worldBounds": {
+        "origin": [
+          0.25,
+          0
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c5-8",
+      "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c5-8-site.webp",
+      "worldBounds": {
+        "origin": [
+          0.375,
+          0.8888888888888888
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c6-8",
+      "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c6-8-site.webp",
+      "worldBounds": {
+        "origin": [
+          0.4375,
+          0.8888888888888888
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c7-0",
+      "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c7-0-site.webp",
+      "worldBounds": {
+        "origin": [
+          0.5,
+          0
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c7-1",
+      "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c7-1-site.webp",
+      "worldBounds": {
+        "origin": [
+          0.5,
+          0.1111111111111111
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c7-2",
+      "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c7-2-site.webp",
+      "worldBounds": {
+        "origin": [
+          0.5,
+          0.2222222222222222
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c7-3",
+      "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c7-3-site.webp",
+      "worldBounds": {
+        "origin": [
+          0.5,
+          0.3333333333333333
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c7-4",
+      "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c7-4-site.webp",
+      "worldBounds": {
+        "origin": [
+          0.5,
+          0.4444444444444444
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c7-8",
+      "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c7-8-site.webp",
+      "worldBounds": {
+        "origin": [
+          0.5,
+          0.8888888888888888
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c8-5",
+      "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c8-5-site.webp",
+      "worldBounds": {
+        "origin": [
+          0.5625,
+          0.5555555555555556
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c8-6",
+      "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c8-6-site.webp",
+      "worldBounds": {
+        "origin": [
+          0.5625,
+          0.6666666666666666
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c8-7",
+      "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c8-7-site.webp",
+      "worldBounds": {
+        "origin": [
+          0.5625,
+          0.7777777777777778
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-review-coast-c1-4",
+      "path": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c1-4-site.webp",
+      "worldBounds": {
+        "origin": [
+          0.125,
+          0.4444444444444444
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-review-coast-c1-3",
+      "path": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c1-3-site.webp",
+      "worldBounds": {
+        "origin": [
+          0.125,
+          0.3333333333333333
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-review-coast-c4-8",
+      "path": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c4-8-site.webp",
+      "worldBounds": {
+        "origin": [
+          0.3125,
+          0.8888888888888888
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-review-coast-c0-5",
+      "path": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c0-5-site.webp",
+      "worldBounds": {
+        "origin": [
+          0.0625,
+          0.5555555555555556
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    }
+  ]
+}

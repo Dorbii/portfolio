@@ -1,18 +1,18 @@
 [
   {
     "class": "coast",
-    "note": "Open west sea, gorge-mouth basin, surf, and visible wash between shoreline rocks."
+    "note": "Open west sea, gorge-mouth basin, surf, ripple highlights, reflections, and visible wash between shoreline rocks."
   },
   {
     "class": "stream",
-    "note": "Shelf stream entering from the east and feeding the pool at the gorge lip."
+    "note": "Dark-forest shelf stream entering from the east, crossing the meadow shelf, and feeding the pool; also includes the broad south-edge coastal water connection."
   },
   {
     "class": "lake",
-    "note": "Small top pool immediately before the stream drops into the gorge."
+    "note": "Small top pool immediately before the shelf stream drops into the gorge."
   },
   {
     "class": "fall",
-    "note": "Single falling sheet plus its visible spray and impact water in the gorge basin."
+    "note": "Single falling sheet, visible spray, and impact water connecting the top pool to the gorge-mouth basin."
   }
 ]

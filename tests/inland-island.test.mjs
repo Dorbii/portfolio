@@ -25,6 +25,23 @@ test('inland inventory covers every mounted cell and every declared water featur
   assert.ok(fields.features.every(f=>f.waterPixels>0));
 });
 
+test('deferred inland annotations retain their source and never enter active fields or fall draws',()=>{
+  const activeIds=new Set(fields.features.map(f=>f.id));
+  const fallIds=new Set(atlas.falls.map(f=>f.id));
+  const pendingIds=new Set();
+  for(const cell of inventory.cells){
+    const pending=cell.pendingReview;
+    if(!pending)continue;
+    assert.ok(pending.previousSource&&pending.previousSha256&&pending.reason);
+    for(const feature of [...pending.streams,...pending.pools,...pending.falls]){
+      assert.ok(!pendingIds.has(feature.id),'duplicate deferred feature');
+      assert.ok(!activeIds.has(feature.id),'deferred feature entered active fields');
+      assert.ok(!fallIds.has(feature.id),'deferred feature entered fall atlas');
+      pendingIds.add(feature.id);
+    }
+  }
+});
+
 test('mapped falls share a current atlas with bounded context coordinates and descending trajectories',async()=>{
   assert.equal(atlas.fieldInputHash,fields.inputHash);
   assert.equal(atlas.generatorHash,hash(await fs.readFile('scripts/build-inland-fall-atlas.mjs')));

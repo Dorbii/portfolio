@@ -1,25 +1,25 @@
 {
   "version": 1,
-  "fieldInputHash": "ffface49dc35d982c4f44e264eb298cd2488d8517d4277028275a392c8dfba9f",
+  "fieldInputHash": "d7a8989738199ef9a86484804ae1a747642542f6052455fe732a95f3d6ff5f15",
   "world": [
     1563.4415999999999,
     879.4359
   ],
   "generatorHash": "0dd95e547811f6d713334adbe4aff48a1988e503dd04edae2d95f3dc3c560bfb",
   "texture": {
-    "path": "/career-world/layers/water/inland/fall-context-6ed777bd135d6508.webp",
+    "path": "/career-world/layers/water/inland/fall-context-ab87ae67ec853112.webp",
     "dimensions": [
       2048,
       2560
     ],
-    "sha256": "6ed777bd135d6508e590b75ea7bee577358deace60a5ddeaa9a353e4e8ec3c0b"
+    "sha256": "ab87ae67ec8531127c0be2802bda6c7c912791a9d89b4911d4ff037365cb5178"
   },
   "falls": [
     {
       "id": "western-shore-drop",
       "tileId": "l2-c0-1",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-1-site.webp",
-      "sourceHash": "54a51f934a9f909f3f4f330d9061d6a60acde18ebd47d460deb7c2ff6c7f8e41",
+      "sourceHash": "1ac86581bca0ee93dd39c5206a2d871f8a75662c2811529d6c6e8d3b01dd5fca",
       "lip": [
         0.19440034196384953,
         0.27248548010638873
@@ -64,7 +64,7 @@
       "id": "western-inlet-low-drop",
       "tileId": "l2-c0-3",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c0-3-site.webp",
-      "sourceHash": "31205f3618dd2320adbfb073354de12cfff6a0aad7cd9c141460f399285c3acc",
+      "sourceHash": "dfdc7bd39c32ae8fc309df807679aebd137993fa1974dbd711685049e9a4f87b",
       "lip": [
         0.22905471421592574,
         0.45812299842588067
@@ -109,7 +109,7 @@
       "id": "broad-reach-low-drop",
       "tileId": "l2-c1-3",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c1-3-site.webp",
-      "sourceHash": "e9d5a5bdf1cf0d6692bfbf4a7308997510a3d7eb44f5fccaa774c5c73d596c64",
+      "sourceHash": "4931eec213e2ec61f4381b849da3d18f56981d5ce75611775932bf84e00ec3fe",
       "lip": [
         0.2778125,
         0.47333333333333333
@@ -154,7 +154,7 @@
       "id": "forest-upper-drop",
       "tileId": "l2-c2-0",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-0-site.webp",
-      "sourceHash": "03f90863322655cc7465f0f330d161f52d07031a39c2716de1d059fbd208ae64",
+      "sourceHash": "aca7296b69f465c0381ee965c8d5904bd80017ee89836f8b27e13890f110695d",
       "lip": [
         0.3390625,
         0.13555555555555554
@@ -199,7 +199,7 @@
       "id": "forest-lower-drop",
       "tileId": "l2-c2-0",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-0-site.webp",
-      "sourceHash": "03f90863322655cc7465f0f330d161f52d07031a39c2716de1d059fbd208ae64",
+      "sourceHash": "aca7296b69f465c0381ee965c8d5904bd80017ee89836f8b27e13890f110695d",
       "lip": [
         0.3446875,
         0.1883333333333333
@@ -244,7 +244,7 @@
       "id": "raised-shelf-drop",
       "tileId": "l2-c2-1",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-1-site.webp",
-      "sourceHash": "9ea59d62fcbac0c27d83c3bb48c99ce078ac3d8c207fa2eddaa3c653ab86babe",
+      "sourceHash": "3899b80d3b772414fd282747c780f8ce993d4f0f4d216cad2f9c493e27c8098a",
       "lip": [
         0.3475207620908647,
         0.2722140802258047
@@ -289,7 +289,7 @@
       "id": "hot-spring-step",
       "tileId": "l2-c2-2",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c2-2-site.webp",
-      "sourceHash": "14bf6b12c948da501deb0ea6b55a48ba620e41175f5dfc6cc86a2f287f566862",
+      "sourceHash": "4527eb5656d166f1d6ff17e20c837e3b14066b9df52f3cfe38bc3dcdd04bc961",
       "lip": [
         0.3363153395212506,
         0.4222982141887857
@@ -334,7 +334,7 @@
       "id": "rock-tarn-tall-fall",
       "tileId": "l2-c3-0",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-0-site.webp",
-      "sourceHash": "247bce9ecab7751703799fe3bf841cd89a072bb25ceb8387d03c663b93d6a39d",
+      "sourceHash": "ca0244b43c31627478f7ec1446e9efdf19694dbe9fe592330d4b0a469159f40d",
       "lip": [
         0.4001893014167074,
         0.13347446127123702
@@ -379,7 +379,7 @@
       "id": "rock-tarn-short-fall",
       "tileId": "l2-c3-0",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-0-site.webp",
-      "sourceHash": "247bce9ecab7751703799fe3bf841cd89a072bb25ceb8387d03c663b93d6a39d",
+      "sourceHash": "ca0244b43c31627478f7ec1446e9efdf19694dbe9fe592330d4b0a469159f40d",
       "lip": [
         0.3934375,
         0.16444444444444445
@@ -424,7 +424,7 @@
       "id": "eastern-forest-upper-drop",
       "tileId": "l2-c3-2",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-2-site.webp",
-      "sourceHash": "203ed02df813414097e5a06dff87191afbed5a114fa69f21036a37e1fd17d17c",
+      "sourceHash": "136b7bb4ae85f0776602b07e751f7d219aeaec44cf3a1f4451210e67f41fbe3f",
       "lip": [
         0.4104375,
         0.3611111111111111
@@ -469,7 +469,7 @@
       "id": "eastern-forest-lower-drop",
       "tileId": "l2-c3-2",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-2-site.webp",
-      "sourceHash": "203ed02df813414097e5a06dff87191afbed5a114fa69f21036a37e1fd17d17c",
+      "sourceHash": "136b7bb4ae85f0776602b07e751f7d219aeaec44cf3a1f4451210e67f41fbe3f",
       "lip": [
         0.4102650219833903,
         0.4062313412582098
@@ -514,7 +514,7 @@
       "id": "silver-upland-drop",
       "tileId": "l2-c3-3",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c3-3-site.webp",
-      "sourceHash": "8f2aadcb1a0e51cbca2572f63d09d770d9e1be97a1c5afa0d3ea2a252e98725f",
+      "sourceHash": "2deed0182f73e9d567ab5638a48e52f75aca4e5e72aa6137b84daf51dbc2098b",
       "lip": [
         0.4178981436248168,
         0.490962383976551
@@ -559,7 +559,7 @@
       "id": "east-sea-cliff-fall",
       "tileId": "l2-c4-0",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-0-site.webp",
-      "sourceHash": "7cac8560d26b5f39d0ba9df198511ae2468f2a8703a80c8912d88b23b3ba1005",
+      "sourceHash": "e7485c45bff87325516b6081a5873848776c5d4a617a2ea2746696e1b94c0acd",
       "lip": [
         0.4928125,
         0.15888888888888889
@@ -604,7 +604,7 @@
       "id": "eastern-plateau-lip",
       "tileId": "l2-c4-2",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-2-site.webp",
-      "sourceHash": "b805dff99730129de80d184ab986071d992bf51d7f791fd07d1593585374dac0",
+      "sourceHash": "e57d255dc23feb78d9102988ce377e00cf6474584f8aa0ca3af924b72f3b207d",
       "lip": [
         0.44501099169516367,
         0.350322965857895
@@ -649,7 +649,7 @@
       "id": "quarry-cut-drop",
       "tileId": "l2-c4-3",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-ninjaone/c4-3-site.webp",
-      "sourceHash": "dd1c4a30fcd950f8341b731c992c856367692d64b54b6b9c7798d412d6978975",
+      "sourceHash": "3e790fbd5f0fa22e9416c2a3b659091ae8f048bb3ecdfc9682ac8527fc012e90",
       "lip": [
         0.460338299951148,
         0.4775552298756988
@@ -691,100 +691,10 @@
       "effectScale": 0.705462996449491
     },
     {
-      "id": "tanium-west-shelf-fall",
-      "tileId": "l2-tanium-c0-1",
-      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c0-1-site.webp",
-      "sourceHash": "d76d9b6eb32a9fd2f0404b60de9f302da069297b01c8ca27f4b2d254f90328e1",
-      "lip": [
-        0.15113580850024427,
-        0.7207295228790099
-      ],
-      "foot": [
-        0.15031250000000002,
-        0.7388888888888888
-      ],
-      "upstream": [
-        0.15321201758671227,
-        0.7192096835477392
-      ],
-      "hasLanding": true,
-      "context": {
-        "origin": [
-          0.14434814453125,
-          0.71142578125
-        ],
-        "span": [
-          0.01483154296875,
-          0.03640407986111111
-        ]
-      },
-      "atlas": [
-        0.8759765625,
-        0.20078125,
-        0.123046875,
-        0.1984375
-      ],
-      "backingOffset": [
-        0.21069958847736628,
-        0
-      ],
-      "flight": [
-        1.776044757817275,
-        -0.7247535588559265
-      ],
-      "widthScale": 0.8796983184814452,
-      "effectScale": 0.7900057563681456
-    },
-    {
-      "id": "tanium-forest-inlet-fall",
-      "tileId": "l2-tanium-c1-2",
-      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c1-2-site.webp",
-      "sourceHash": "02f3bbf60c8ae7af057329e2cac3a56c163a5f6631d28b7bdd443455706761e1",
-      "lip": [
-        0.21507083536883242,
-        0.8474732671117625
-      ],
-      "foot": [
-        0.21778822667318026,
-        0.8607718612603811
-      ],
-      "upstream": [
-        0.21458231558378116,
-        0.8436736687835857
-      ],
-      "hasLanding": true,
-      "context": {
-        "origin": [
-          0.2086181640625,
-          0.8358832465277778
-        ],
-        "span": [
-          0.01513671875,
-          0.03379991319444444
-        ]
-      },
-      "atlas": [
-        0.0009765625,
-        0.40078125,
-        0.123046875,
-        0.1984375
-      ],
-      "backingOffset": [
-        0.14451612903225808,
-        0
-      ],
-      "flight": [
-        1.4967531840770778,
-        2.8384657229343753
-      ],
-      "widthScale": 1.25,
-      "effectScale": 0.8073560228743599
-    },
-    {
       "id": "tanium-gold-first-fall",
       "tileId": "l2-tanium-c2-2",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c2-2-site.webp",
-      "sourceHash": "7c12ba938f272164eb45e4ce0bf1bbf7fabb058500dc76edff5dfff8e417065d",
+      "sourceHash": "55ee98575b4818f9e4854ecabc0392316a9703fe620ef3b8308d7928dad777d2",
       "lip": [
         0.294852222765022,
         0.8297779948976822
@@ -809,8 +719,8 @@
         ]
       },
       "atlas": [
-        0.1259765625,
-        0.40078125,
+        0.8759765625,
+        0.20078125,
         0.123046875,
         0.1984375
       ],
@@ -829,7 +739,7 @@
       "id": "tanium-gold-second-fall",
       "tileId": "l2-tanium-c2-2",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c2-2-site.webp",
-      "sourceHash": "7c12ba938f272164eb45e4ce0bf1bbf7fabb058500dc76edff5dfff8e417065d",
+      "sourceHash": "55ee98575b4818f9e4854ecabc0392316a9703fe620ef3b8308d7928dad777d2",
       "lip": [
         0.29247068881289695,
         0.8428594691418336
@@ -854,7 +764,7 @@
         ]
       },
       "atlas": [
-        0.2509765625,
+        0.0009765625,
         0.40078125,
         0.123046875,
         0.1984375
@@ -874,7 +784,7 @@
       "id": "tanium-gold-coast-drop",
       "tileId": "l2-tanium-c2-2",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c2-2-site.webp",
-      "sourceHash": "7c12ba938f272164eb45e4ce0bf1bbf7fabb058500dc76edff5dfff8e417065d",
+      "sourceHash": "55ee98575b4818f9e4854ecabc0392316a9703fe620ef3b8308d7928dad777d2",
       "lip": [
         0.2809599413776258,
         0.8733105357433643
@@ -899,7 +809,7 @@
         ]
       },
       "atlas": [
-        0.3759765625,
+        0.1259765625,
         0.40078125,
         0.123046875,
         0.1984375
@@ -919,7 +829,7 @@
       "id": "tanium-north-upper-step",
       "tileId": "l2-tanium-c3-0",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-0-site.webp",
-      "sourceHash": "7cd0227984246cb5ca4384c34a85bd4b36bd800f0dfa8faee500e5e298dd3440",
+      "sourceHash": "2ef74b6911119f20614feea5fac4e5e64b596d2a406e301b58db9ea9a10ad6eb",
       "lip": [
         0.3299951148021495,
         0.5811214243065733
@@ -944,7 +854,7 @@
         ]
       },
       "atlas": [
-        0.5009765625,
+        0.2509765625,
         0.40078125,
         0.123046875,
         0.1984375
@@ -964,7 +874,7 @@
       "id": "tanium-north-middle-step",
       "tileId": "l2-tanium-c3-0",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-0-site.webp",
-      "sourceHash": "7cd0227984246cb5ca4384c34a85bd4b36bd800f0dfa8faee500e5e298dd3440",
+      "sourceHash": "2ef74b6911119f20614feea5fac4e5e64b596d2a406e301b58db9ea9a10ad6eb",
       "lip": [
         0.333125,
         0.6016666666666667
@@ -989,7 +899,7 @@
         ]
       },
       "atlas": [
-        0.6259765625,
+        0.3759765625,
         0.40078125,
         0.123046875,
         0.1984375
@@ -1009,7 +919,7 @@
       "id": "tanium-north-lower-step",
       "tileId": "l2-tanium-c3-0",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-0-site.webp",
-      "sourceHash": "7cd0227984246cb5ca4384c34a85bd4b36bd800f0dfa8faee500e5e298dd3440",
+      "sourceHash": "2ef74b6911119f20614feea5fac4e5e64b596d2a406e301b58db9ea9a10ad6eb",
       "lip": [
         0.343125,
         0.6361111111111111
@@ -1034,7 +944,7 @@
         ]
       },
       "atlas": [
-        0.7509765625,
+        0.5009765625,
         0.40078125,
         0.123046875,
         0.1984375
@@ -1054,7 +964,7 @@
       "id": "tanium-central-upper-drop",
       "tileId": "l2-tanium-c3-2",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-2-site.webp",
-      "sourceHash": "33d118b5649b8fa37cfb9422887ffe780ca6411caea4cfb16aa64dcec1b3ec82",
+      "sourceHash": "bc945ea6ec9199dbbc422647b54a5c8ab1b6e624fe53af76e6de6a8aa4be8a11",
       "lip": [
         0.348,
         0.7944444444444445
@@ -1079,7 +989,7 @@
         ]
       },
       "atlas": [
-        0.8759765625,
+        0.6259765625,
         0.40078125,
         0.123046875,
         0.1984375
@@ -1099,7 +1009,7 @@
       "id": "tanium-central-middle-drop",
       "tileId": "l2-tanium-c3-2",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-2-site.webp",
-      "sourceHash": "33d118b5649b8fa37cfb9422887ffe780ca6411caea4cfb16aa64dcec1b3ec82",
+      "sourceHash": "bc945ea6ec9199dbbc422647b54a5c8ab1b6e624fe53af76e6de6a8aa4be8a11",
       "lip": [
         0.343125,
         0.8166666666666667
@@ -1124,8 +1034,8 @@
         ]
       },
       "atlas": [
-        0.0009765625,
-        0.60078125,
+        0.7509765625,
+        0.40078125,
         0.123046875,
         0.1984375
       ],
@@ -1144,7 +1054,7 @@
       "id": "tanium-central-lower-drop",
       "tileId": "l2-tanium-c3-2",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-2-site.webp",
-      "sourceHash": "33d118b5649b8fa37cfb9422887ffe780ca6411caea4cfb16aa64dcec1b3ec82",
+      "sourceHash": "bc945ea6ec9199dbbc422647b54a5c8ab1b6e624fe53af76e6de6a8aa4be8a11",
       "lip": [
         0.3362237420615535,
         0.8403083102643435
@@ -1169,8 +1079,8 @@
         ]
       },
       "atlas": [
-        0.1259765625,
-        0.60078125,
+        0.8759765625,
+        0.40078125,
         0.123046875,
         0.1984375
       ],
@@ -1189,7 +1099,7 @@
       "id": "tanium-central-coast-drop",
       "tileId": "l2-tanium-c3-2",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-2-site.webp",
-      "sourceHash": "33d118b5649b8fa37cfb9422887ffe780ca6411caea4cfb16aa64dcec1b3ec82",
+      "sourceHash": "bc945ea6ec9199dbbc422647b54a5c8ab1b6e624fe53af76e6de6a8aa4be8a11",
       "lip": [
         0.3274609184171959,
         0.8669597785376975
@@ -1214,7 +1124,7 @@
         ]
       },
       "atlas": [
-        0.2509765625,
+        0.0009765625,
         0.60078125,
         0.123046875,
         0.1984375
@@ -1234,7 +1144,7 @@
       "id": "tanium-east-upper-drop",
       "tileId": "l2-tanium-c3-2",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-2-site.webp",
-      "sourceHash": "33d118b5649b8fa37cfb9422887ffe780ca6411caea4cfb16aa64dcec1b3ec82",
+      "sourceHash": "bc945ea6ec9199dbbc422647b54a5c8ab1b6e624fe53af76e6de6a8aa4be8a11",
       "lip": [
         0.3636419149975574,
         0.8261955164739727
@@ -1259,7 +1169,7 @@
         ]
       },
       "atlas": [
-        0.3759765625,
+        0.1259765625,
         0.60078125,
         0.123046875,
         0.1984375
@@ -1279,7 +1189,7 @@
       "id": "tanium-east-middle-drop",
       "tileId": "l2-tanium-c3-2",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-2-site.webp",
-      "sourceHash": "33d118b5649b8fa37cfb9422887ffe780ca6411caea4cfb16aa64dcec1b3ec82",
+      "sourceHash": "bc945ea6ec9199dbbc422647b54a5c8ab1b6e624fe53af76e6de6a8aa4be8a11",
       "lip": [
         0.3606497313141182,
         0.8486674265863323
@@ -1304,7 +1214,7 @@
         ]
       },
       "atlas": [
-        0.5009765625,
+        0.2509765625,
         0.60078125,
         0.123046875,
         0.1984375
@@ -1324,7 +1234,7 @@
       "id": "tanium-east-coast-drop",
       "tileId": "l2-tanium-c3-2",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-2-site.webp",
-      "sourceHash": "33d118b5649b8fa37cfb9422887ffe780ca6411caea4cfb16aa64dcec1b3ec82",
+      "sourceHash": "bc945ea6ec9199dbbc422647b54a5c8ab1b6e624fe53af76e6de6a8aa4be8a11",
       "lip": [
         0.35625,
         0.8711111111111112
@@ -1349,7 +1259,7 @@
         ]
       },
       "atlas": [
-        0.6259765625,
+        0.3759765625,
         0.60078125,
         0.123046875,
         0.1984375
@@ -1366,55 +1276,10 @@
       "effectScale": 0.47066632848336687
     },
     {
-      "id": "tanium-western-seep",
-      "tileId": "l2-tanium-c4-1",
-      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c4-1-site.webp",
-      "sourceHash": "3fbfd0731dd2a16f7d99c6331da0968eaf93e27d4cb20d9b7786275fc52d64c4",
-      "lip": [
-        0.3846787982413288,
-        0.7287086793681811
-      ],
-      "foot": [
-        0.384375,
-        0.7427777777777778
-      ],
-      "upstream": [
-        0.3846787982413288,
-        0.7287086793681811
-      ],
-      "hasLanding": true,
-      "context": {
-        "origin": [
-          0.37841796875,
-          0.7209201388888888
-        ],
-        "span": [
-          0.01220703125,
-          0.03076171875
-        ]
-      },
-      "atlas": [
-        0.7509765625,
-        0.60078125,
-        0.123046875,
-        0.1984375
-      ],
-      "backingOffset": [
-        0.17920000000000003,
-        0
-      ],
-      "flight": [
-        1.5440490828618385,
-        -0.3076138017710397
-      ],
-      "widthScale": 0.5814954986572265,
-      "effectScale": 0.6269980602966327
-    },
-    {
       "id": "tanium-west-first-drop",
       "tileId": "l2-tanium-c4-2",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c4-2-site.webp",
-      "sourceHash": "459dbfc50de1da9a6af004c1511ed7df2bb362aadaec83d5a96a38e7aa4b1bf7",
+      "sourceHash": "ff8c24cddb1d7b41a8dc813301183e2f1bbab2105b4a776462a8e496bfe7f494",
       "lip": [
         0.3940625,
         0.8227777777777778
@@ -1439,7 +1304,7 @@
         ]
       },
       "atlas": [
-        0.8759765625,
+        0.5009765625,
         0.60078125,
         0.123046875,
         0.1984375
@@ -1459,7 +1324,7 @@
       "id": "tanium-west-second-drop",
       "tileId": "l2-tanium-c4-2",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c4-2-site.webp",
-      "sourceHash": "459dbfc50de1da9a6af004c1511ed7df2bb362aadaec83d5a96a38e7aa4b1bf7",
+      "sourceHash": "ff8c24cddb1d7b41a8dc813301183e2f1bbab2105b4a776462a8e496bfe7f494",
       "lip": [
         0.3879152418172936,
         0.8455734679476741
@@ -1484,8 +1349,8 @@
         ]
       },
       "atlas": [
-        0.0009765625,
-        0.80078125,
+        0.6259765625,
+        0.60078125,
         0.123046875,
         0.1984375
       ],
@@ -1504,7 +1369,7 @@
       "id": "tanium-west-coast-fall",
       "tileId": "l2-tanium-c4-2",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c4-2-site.webp",
-      "sourceHash": "459dbfc50de1da9a6af004c1511ed7df2bb362aadaec83d5a96a38e7aa4b1bf7",
+      "sourceHash": "ff8c24cddb1d7b41a8dc813301183e2f1bbab2105b4a776462a8e496bfe7f494",
       "lip": [
         0.3864375,
         0.87
@@ -1529,8 +1394,8 @@
         ]
       },
       "atlas": [
-        0.1259765625,
-        0.80078125,
+        0.7509765625,
+        0.60078125,
         0.123046875,
         0.1984375
       ],
@@ -1549,7 +1414,7 @@
       "id": "tanium-fern-bench-fall",
       "tileId": "l2-tanium-c4-2",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c4-2-site.webp",
-      "sourceHash": "459dbfc50de1da9a6af004c1511ed7df2bb362aadaec83d5a96a38e7aa4b1bf7",
+      "sourceHash": "ff8c24cddb1d7b41a8dc813301183e2f1bbab2105b4a776462a8e496bfe7f494",
       "lip": [
         0.41716536394723985,
         0.8327633935841068
@@ -1574,8 +1439,8 @@
         ]
       },
       "atlas": [
-        0.2509765625,
-        0.80078125,
+        0.8759765625,
+        0.60078125,
         0.123046875,
         0.1984375
       ],
@@ -1594,7 +1459,7 @@
       "id": "tanium-fern-coast-fall",
       "tileId": "l2-tanium-c4-2",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c4-2-site.webp",
-      "sourceHash": "459dbfc50de1da9a6af004c1511ed7df2bb362aadaec83d5a96a38e7aa4b1bf7",
+      "sourceHash": "ff8c24cddb1d7b41a8dc813301183e2f1bbab2105b4a776462a8e496bfe7f494",
       "lip": [
         0.428676111382511,
         0.8638115399229225
@@ -1619,7 +1484,7 @@
         ]
       },
       "atlas": [
-        0.3759765625,
+        0.0009765625,
         0.80078125,
         0.123046875,
         0.1984375
@@ -1634,141 +1499,6 @@
       ],
       "widthScale": 0.2982028198242187,
       "effectScale": 0.5691505764078194
-    },
-    {
-      "id": "tanium-quarry-inlet",
-      "tileId": "l2-tanium-c6-2",
-      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c6-2-site.webp",
-      "sourceHash": "c93f36364ff3bd22eb6dd95c5a975469c3119a22268dd3a362466f7ce429c249",
-      "lip": [
-        0.528125,
-        0.8061111111111111
-      ],
-      "foot": [
-        0.5261875,
-        0.8122222222222222
-      ],
-      "upstream": [
-        0.53,
-        0.804
-      ],
-      "hasLanding": true,
-      "context": {
-        "origin": [
-          0.520233154296875,
-          0.7961697048611112
-        ],
-        "span": [
-          0.015716552734375,
-          0.02495659722222222
-        ]
-      },
-      "atlas": [
-        0.5009765625,
-        0.80078125,
-        0.123046875,
-        0.1984375
-      ],
-      "backingOffset": [
-        0.1391844660194175,
-        0
-      ],
-      "flight": [
-        0.9648593552456871,
-        -3.1394918684584354
-      ],
-      "widthScale": 0.5218549346923828,
-      "effectScale": 0.40220180281536433
-    },
-    {
-      "id": "tanium-quarry-upper-cut",
-      "tileId": "l2-tanium-c6-2",
-      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c6-2-site.webp",
-      "sourceHash": "c93f36364ff3bd22eb6dd95c5a975469c3119a22268dd3a362466f7ce429c249",
-      "lip": [
-        0.5330666829506595,
-        0.8410682299299789
-      ],
-      "foot": [
-        0.5341353199804593,
-        0.8482331867773978
-      ],
-      "upstream": [
-        0.5324560332193454,
-        0.8377571513868534
-      ],
-      "hasLanding": true,
-      "context": {
-        "origin": [
-          0.5264892578125,
-          0.8299696180555556
-        ],
-        "span": [
-          0.01361083984375,
-          0.027180989583333332
-        ]
-      },
-      "atlas": [
-        0.6259765625,
-        0.80078125,
-        0.123046875,
-        0.1984375
-      ],
-      "backingOffset": [
-        0.1607174887892377,
-        0
-      ],
-      "flight": [
-        1.0572619180326994,
-        1.5802627137069607
-      ],
-      "widthScale": 0.4323940887451171,
-      "effectScale": 0.41550207870181133
-    },
-    {
-      "id": "tanium-quarry-lower-cut",
-      "tileId": "l2-tanium-c6-2",
-      "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c6-2-site.webp",
-      "sourceHash": "c93f36364ff3bd22eb6dd95c5a975469c3119a22268dd3a362466f7ce429c249",
-      "lip": [
-        0.5356619443087445,
-        0.8536611843890789
-      ],
-      "foot": [
-        0.5352344894968246,
-        0.8615317809260163
-      ],
-      "upstream": [
-        0.5350207620908647,
-        0.850187265917603
-      ],
-      "hasLanding": true,
-      "context": {
-        "origin": [
-          0.529083251953125,
-          0.8423936631944444
-        ],
-        "span": [
-          0.012542724609375,
-          0.028049045138888888
-        ]
-      },
-      "atlas": [
-        0.7509765625,
-        0.80078125,
-        0.123046875,
-        0.1984375
-      ],
-      "backingOffset": [
-        0.17440389294403894,
-        0
-      ],
-      "flight": [
-        1.1154481864644257,
-        -0.5991319392377678
-      ],
-      "widthScale": 0.5964056396484374,
-      "effectScale": 0.4719388551991511
     }
   ]
 }

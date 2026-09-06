@@ -1,0 +1,9 @@
+{
+ "element": "kerb",
+ "width": 763,
+ "height": 52,
+ "anchorRow": 47,
+ "source": ".codex-tmp/chain/kerb-r3/kerb-source.png",
+ "keyed": "2026-09-06T15:49:16.809Z",
+ "note": "anchorRow = the groove (the darkest row): build-chain-layer.mjs puts it on the route"
+}

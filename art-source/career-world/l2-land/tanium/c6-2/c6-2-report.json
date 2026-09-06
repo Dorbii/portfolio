@@ -1,7 +1,7 @@
 {
     "cell":  "c6-2",
     "territory":  "tanium",
-    "status":  "quarantined-defects-found",
+    "status":  "quarantined-needs-owner-review",
     "readyForBake":  false,
     "generationSize":  {
                            "width":  1254,
@@ -14,381 +14,286 @@
     "generation":  {
                        "tool":  "built-in image_gen",
                        "mode":  "edit",
-                       "callsThisRun":  1,
+                       "calls":  1,
                        "attachedImages":  2,
                        "secondImageReferenceOnly":  true,
-                       "requestedSizePx":  [
-                                               2048,
-                                               2048
-                                           ],
-                       "actualSizePx":  [
-                                            1254,
-                                            1254
-                                        ],
                        "rawOutputUnchanged":  true,
-                       "sourceSha256":  "2626D7C616610CED6F3CD156F57A98305BCC2FBB9B5F006E9FE7F2CDACA7F2E4",
-                       "prompt":  "c6-2-prompt-this-run.txt",
-                       "rawPath":  "C:/Users/Steve/.codex/generated_images/01a06ed8-7d5d-76c3-a07c-e85948fb4fe8/exec-93ccdab5-0ce7-4872-9ac6-007ad2317129.png"
+                       "sourceSha256":  "EC6350DA3A1A4A1C5286A59E77372C4FC968988EC77CCA9CD15C271B2F7EC999",
+                       "rawPath":  "C:/Users/Steve/.codex/generated_images/01a0727e-3ea2-7d41-af52-13f6c3b44bb9/exec-d35ac7fb-8766-4b1d-b3cd-c8a94971c0bb.png"
                    },
-    "lighting_isotropy":  {
-                              "peak_vs_uniform_over_land":  1.591586,
-                              "sampleCount":  778577,
-                              "metric":  "Rec.709 RGB luminance central differences on source land with four nonwater neighbours; magnitude \u003e=12; 36 directed angle bins weighted by magnitude; peak bin divided by uniform mean.",
-                              "limitation":  "An orientation statistic is not a lighting proof. Terrain geometry and brush texture also influence it.",
-                              "visualCheck":  "Repeated bright upper surfaces and dark vertical faces remain on columns and tree crowns. Strict equal-value face lighting fails visual inspection."
-                          },
-    "lighting":  {
-                     "peakVsUniform":  1.591586,
-                     "strictNeutralLightingPass":  false
-                 },
-    "buildableFraction":  0.168977,
-    "steepFraction":  0.200313,
-    "landform":  {
-                     "denominator":  "nonwater source pixels",
-                     "buildableFractionOfLand":  0.168977,
-                     "steepFractionOfLand":  0.200313,
-                     "otherRoughOrUnclassifiedFractionOfLand":  0.630710,
-                     "buildableFractionOfCanvas":  0.101602,
-                     "steepFractionOfCanvas":  0.120443,
-                     "method":  "Manually traced polygons for coherent visibly flat occupiable shelves and exposed steep faces; water subtracted before pixel counting. Green=flat shelf; red=steep face.",
-                     "limitation":  "Screen-space classification, not elevation-derived slope or world-space surface area. Unclassified moor is not counted as either buildable or steep. Shelf width and cliff heights have not been physically validated.",
-                     "evidence":  "evidence-this-run/landform.png"
-                 },
-    "waterFootprintFraction":  0.398727,
+    "lightingIsotropy":  {
+                             "peakVsUniformOverLand":  1.649189,
+                             "uniformBaseline":  1,
+                             "firstMomentOverLand":  0.002866,
+                             "sampleCount":  1062623,
+                             "method":  "Rec.709 luminance central-difference gradients on nonwater source pixels, magnitude at least 12; 36 directed angle bins; peak bin divided by a uniform-bin mean.",
+                             "limitation":  "This orientation statistic is not a lighting proof because terrain geometry and brush texture also affect it.",
+                             "visualVerdict":  "FAIL: terrace tops are consistently brighter than vertical rock faces, so the strict equal-value flat-lighting rule is not met."
+                         },
+    "buildableFraction":  0.2001,
+    "steepFraction":  0.180849,
+    "landformMeasurement":  {
+                                "denominator":  "nonwater source pixels",
+                                "buildable":  0.2001,
+                                "steep":  0.180849,
+                                "method":  "Manual screen-space polygons over coherent visibly level quarry shelves and visible cliff or bench faces; water excluded.",
+                                "limitation":  "Screen-space classification, not a surveyed elevation model or world-space surface area.",
+                                "evidence":  "evidence-current/landform.png"
+                            },
+    "waterFootprintFraction":  0.20613,
     "water":  {
-                  "footprintFraction":  0.398727,
+                  "footprintFraction":  0.20613,
                   "mask":  "c6-2-water-source.png",
                   "classification":  "c6-2-water.json",
-                  "method":  "Connected teal/cool-foam segmentation, 3-pixel contour closing, manual polygons for dusty pit banks and narrow creek gaps, interior texture-hole fill, then source/overlay inspection.",
+                  "method":  "Connected cool-water segmentation, three-pixel morphological closing, removal of isolated chromatic specks, and fill of small enclosed texture gaps; verified against a full-resolution tint overlay.",
                   "validation":  {
                                      "width":  1254,
                                      "height":  1254,
-                                     "opaqueWhitePixels":  627005,
+                                     "opaqueWhitePixels":  324142,
                                      "binaryAlpha":  true,
-                                     "waterComponents":  5,
+                                     "waterComponents":  2,
                                      "componentPixels":  [
-                                                             609509,
-                                                             14347,
-                                                             2001,
-                                                             908,
-                                                             240
+                                                             296115,
+                                                             28027
                                                          ],
-                                     "interiorLandRegionsPixels":  [
-                                                                       9972
-                                                                   ]
+                                     "interiorTransparentRegionsPixels":  [
+                                                                              10535
+                                                                          ]
                                  },
-                  "noInteriorHolesPass":  false,
-                  "limitation":  "One 9972-pixel dry offshore stack remains as an interior land region. Literal zero interior holes conflicts with a faithful mask of this generated source; filling that region would erase visibly dry rock. All small water texture/reflection holes were filled. This exception is reported as a failed hard constraint, not silently waived.",
-                  "evidence":  "evidence-this-run/water-overlay.png"
+                  "evidence":  "evidence-current/water-overlay.png",
+                  "limitation":  "The source contains visibly dry offshore stacks and shoreline rocks inside surrounding water. They remain transparent in the water mask because they are land, not missing water texture."
               },
     "crown":  {
-                  "medianMetres":  3.527656,
-                  "medianPx":  73.492823,
-                  "sampleCount":  41,
-                  "method":  "Manual visible-conifer census including saplings and clipped/overlapping crowns; median horizontal width 36 source px, multiplied by 2560/1254 and 0.048 metres per final pixel.",
+                  "medianMetres":  3.723636,
+                  "medianPx":  77.575758,
+                  "sampleCount":  29,
+                  "method":  "Manual census of all 29 visible conifer crowns, including saplings, overlaps, and edge-clipped crowns; median horizontal source width 38 px scaled by 2560/1254, then multiplied by 0.048 m per final pixel.",
                   "excludedElements":  [
 
                                        ]
               },
     "crownEvidence":  {
-                          "sourceMedianPx":  36,
-                          "sourceBoxesXYWH":  [
-                                                  [
-                                                      61,
-                                                      105,
-                                                      35,
-                                                      46
-                                                  ],
-                                                  [
-                                                      12,
-                                                      155,
-                                                      27,
-                                                      48
-                                                  ],
-                                                  [
-                                                      59,
-                                                      183,
-                                                      47,
-                                                      73
-                                                  ],
-                                                  [
-                                                      80,
-                                                      279,
-                                                      40,
-                                                      53
-                                                  ],
-                                                  [
-                                                      166,
-                                                      270,
-                                                      29,
-                                                      54
-                                                  ],
-                                                  [
-                                                      0,
-                                                      316,
-                                                      42,
-                                                      89
-                                                  ],
-                                                  [
-                                                      93,
-                                                      315,
-                                                      43,
-                                                      92
-                                                  ],
-                                                  [
-                                                      59,
-                                                      389,
-                                                      38,
-                                                      69
-                                                  ],
-                                                  [
-                                                      164,
-                                                      429,
-                                                      49,
-                                                      74
-                                                  ],
-                                                  [
-                                                      0,
-                                                      489,
-                                                      24,
-                                                      69
-                                                  ],
-                                                  [
-                                                      12,
-                                                      473,
-                                                      33,
-                                                      90
-                                                  ],
-                                                  [
-                                                      34,
-                                                      485,
-                                                      34,
-                                                      82
-                                                  ],
-                                                  [
-                                                      53,
-                                                      644,
-                                                      36,
-                                                      56
-                                                  ],
-                                                  [
-                                                      159,
-                                                      650,
-                                                      37,
-                                                      58
-                                                  ],
-                                                  [
-                                                      155,
-                                                      688,
-                                                      42,
-                                                      64
-                                                  ],
-                                                  [
-                                                      277,
-                                                      610,
-                                                      43,
-                                                      66
-                                                  ],
-                                                  [
-                                                      310,
-                                                      652,
-                                                      45,
-                                                      52
-                                                  ],
-                                                  [
-                                                      344,
-                                                      721,
-                                                      51,
-                                                      64
-                                                  ],
-                                                  [
-                                                      382,
-                                                      708,
-                                                      30,
-                                                      52
-                                                  ],
-                                                  [
-                                                      52,
-                                                      804,
-                                                      34,
-                                                      64
-                                                  ],
-                                                  [
-                                                      109,
-                                                      781,
-                                                      39,
-                                                      53
-                                                  ],
-                                                  [
-                                                      303,
-                                                      914,
-                                                      49,
-                                                      53
-                                                  ],
-                                                  [
-                                                      394,
-                                                      929,
-                                                      41,
-                                                      57
-                                                  ],
-                                                  [
-                                                      269,
-                                                      995,
-                                                      31,
-                                                      40
-                                                  ],
-                                                  [
-                                                      414,
-                                                      858,
-                                                      34,
-                                                      49
-                                                  ],
-                                                  [
-                                                      503,
-                                                      690,
-                                                      32,
-                                                      53
-                                                  ],
-                                                  [
-                                                      402,
-                                                      606,
-                                                      37,
-                                                      42
-                                                  ],
-                                                  [
-                                                      667,
-                                                      299,
-                                                      31,
-                                                      47
-                                                  ],
-                                                  [
-                                                      692,
-                                                      294,
-                                                      43,
-                                                      59
-                                                  ],
-                                                  [
-                                                      824,
-                                                      355,
-                                                      38,
-                                                      64
-                                                  ],
-                                                  [
-                                                      308,
-                                                      311,
-                                                      21,
-                                                      35
-                                                  ],
-                                                  [
-                                                      694,
-                                                      915,
-                                                      32,
-                                                      42
-                                                  ],
-                                                  [
-                                                      922,
-                                                      589,
-                                                      37,
-                                                      48
-                                                  ],
-                                                  [
-                                                      933,
-                                                      670,
-                                                      38,
-                                                      52
-                                                  ],
-                                                  [
-                                                      772,
-                                                      750,
-                                                      22,
-                                                      33
-                                                  ],
-                                                  [
-                                                      619,
-                                                      286,
-                                                      38,
-                                                      50
-                                                  ],
-                                                  [
-                                                      44,
-                                                      339,
-                                                      34,
-                                                      60
-                                                  ],
-                                                  [
-                                                      119,
-                                                      510,
-                                                      33,
-                                                      56
-                                                  ],
-                                                  [
-                                                      57,
-                                                      236,
-                                                      32,
-                                                      44
-                                                  ],
-                                                  [
-                                                      214,
-                                                      996,
-                                                      28,
-                                                      40
-                                                  ],
-                                                  [
-                                                      915,
-                                                      475,
-                                                      36,
-                                                      43
-                                                  ]
-                                              ],
-                          "overlay":  "evidence-this-run/crown-census.png",
+                          "sourceMedianPx":  38,
+                          "boxesXYWH":  [
+                                            [
+                                                74,
+                                                99,
+                                                24,
+                                                45
+                                            ],
+                                            [
+                                                65,
+                                                194,
+                                                46,
+                                                63
+                                            ],
+                                            [
+                                                48,
+                                                234,
+                                                32,
+                                                42
+                                            ],
+                                            [
+                                                72,
+                                                272,
+                                                31,
+                                                53
+                                            ],
+                                            [
+                                                96,
+                                                286,
+                                                32,
+                                                48
+                                            ],
+                                            [
+                                                8,
+                                                328,
+                                                33,
+                                                58
+                                            ],
+                                            [
+                                                0,
+                                                352,
+                                                24,
+                                                73
+                                            ],
+                                            [
+                                                20,
+                                                377,
+                                                30,
+                                                59
+                                            ],
+                                            [
+                                                44,
+                                                377,
+                                                32,
+                                                62
+                                            ],
+                                            [
+                                                61,
+                                                357,
+                                                38,
+                                                69
+                                            ],
+                                            [
+                                                90,
+                                                342,
+                                                44,
+                                                65
+                                            ],
+                                            [
+                                                64,
+                                                410,
+                                                38,
+                                                69
+                                            ],
+                                            [
+                                                175,
+                                                420,
+                                                43,
+                                                75
+                                            ],
+                                            [
+                                                2,
+                                                492,
+                                                29,
+                                                64
+                                            ],
+                                            [
+                                                12,
+                                                509,
+                                                36,
+                                                67
+                                            ],
+                                            [
+                                                38,
+                                                516,
+                                                29,
+                                                53
+                                            ],
+                                            [
+                                                120,
+                                                529,
+                                                29,
+                                                46
+                                            ],
+                                            [
+                                                236,
+                                                245,
+                                                58,
+                                                92
+                                            ],
+                                            [
+                                                165,
+                                                275,
+                                                38,
+                                                50
+                                            ],
+                                            [
+                                                169,
+                                                440,
+                                                46,
+                                                56
+                                            ],
+                                            [
+                                                49,
+                                                625,
+                                                36,
+                                                48
+                                            ],
+                                            [
+                                                140,
+                                                652,
+                                                68,
+                                                104
+                                            ],
+                                            [
+                                                440,
+                                                672,
+                                                49,
+                                                72
+                                            ],
+                                            [
+                                                38,
+                                                810,
+                                                48,
+                                                69
+                                            ],
+                                            [
+                                                304,
+                                                893,
+                                                52,
+                                                70
+                                            ],
+                                            [
+                                                342,
+                                                930,
+                                                52,
+                                                72
+                                            ],
+                                            [
+                                                947,
+                                                295,
+                                                58,
+                                                84
+                                            ],
+                                            [
+                                                1076,
+                                                475,
+                                                52,
+                                                75
+                                            ],
+                                            [
+                                                678,
+                                                842,
+                                                30,
+                                                42
+                                            ]
+                                        ],
+                          "overlay":  "evidence-current/crown-census.png",
                           "medianWithinRequiredBand":  true,
-                          "limitation":  "Manual visible crown widths, approximately +/-4 source pixels. Every identified conifer is included; bare branching scrub is not a conifer. Occluded and edge-clipped widths use visible extents. Census corrections removed duplicate boxes and non-conifer rock/scrub identifications, not small conifers."
+                          "limitation":  "Manual visible crown bounds, approximately plus or minus 4 source pixels. Every identified conifer is included; no element was excluded."
                       },
+    "authorityConflict":  {
+                              "conflict":  "The prose says only the western third of the north edge is land, while the binding edit target visibly carries land across about two-thirds before the bay.",
+                              "ruling":  "The live instruction that painted terrain stays exactly where it is is the more specific edit invariant, so the binding pixels were preserved and not repainted to force the prose ratio.",
+                              "implication":  "The delivered north-edge shoreline follows the authored neighbour context and does not satisfy the western-third wording literally. The packet should be reconciled before bake."
+                          },
     "findings":  [
                      {
                          "severity":  "blocker",
-                         "issue":  "Strict flat lighting is not met: bright tops and dark vertical column facets remain."
+                         "issue":  "Strict neutral lighting is not met: pale upper surfaces and darker vertical faces create a consistent directional-value cue."
                      },
                      {
                          "severity":  "blocker",
-                         "issue":  "The quarry faces are dominated by repeating regular column palisades. Irregular worked cuts, saw-cut planar faces and spoil fans are weaker than requested."
+                         "issue":  "Quarry and coast faces are dominated by repeated, regular column palisades rather than sufficiently irregular worked cuts, broken tops, and spoil fans."
                      },
                      {
                          "severity":  "blocker",
-                         "issue":  "The northern narrow beck starts inside the frame instead of crossing the northern land edge. The western beck reaches the west frame much lower than the required upper-quarter handoff. Exact neighbour seam registration is not established."
+                         "issue":  "North-edge prose and binding neighbour pixels disagree; the output follows the required binding pixels and therefore not the stated western-third land ratio."
                      },
                      {
                          "severity":  "blocker",
-                         "issue":  "The water mask retains a real dry offshore stack, so it fails the literal zero-interior-holes constraint."
+                         "issue":  "Mask validation finds one 10,535-pixel enclosed transparent region corresponding to a visibly dry offshore stack. It is correctly land, but a gate that interprets no interior holes literally will reject this source."
                      },
                      {
                          "severity":  "risk",
-                         "issue":  "The large pale working floor is visibly flat but is split by the drainage channel. A settlement-scale occupiable footprint and true world-space dimensions remain unverified."
+                         "issue":  "The central shelf is coherent and occupiable in screen space, but its claimed 50 m world width and the 10-15 m bench heights are not physically surveyed from this image."
                      }
                  ],
     "verified":  [
-                     "One whole-canvas edit call this run with both required images attached",
-                     "1254 x 1254 square PNG, byte-identical to raw tool output",
-                     "Mask dimensions match source; all opaque mask pixels white and alpha binary",
-                     "All identified conifers included and measured median within 1.7-5.2 m",
-                     "Water mask includes dusty pit margins, narrow channels, surf and coastal wash on overlay inspection",
-                     "No buildings, machinery, roads or other structures observed",
-                     "Southern and eastern sea remain open to frame edges"
+                     "Exactly one whole-canvas built-in edit call with both required images attached",
+                     "1254 x 1254 square PNG, byte-identical to the raw tool output",
+                     "No buildings, machinery, roads, bridges, docks, boats, fences, figures, or track observed",
+                     "Water mask dimensions match source; opaque pixels are white and alpha is binary",
+                     "Water overlay covers the pit, both channels, cascades, sea, surf, and painted coastal wash",
+                     "All 29 identified conifer crowns are included; median is within the 1.7-5.2 m band",
+                     "All deliverables remain under .codex-tmp/authoring/cells/tanium/c6-2/"
                  ],
     "unverified":  [
                        "Owner visual review",
                        "Pipeline stitch and runtime appearance",
-                       "Exact stream handoffs at registered cell seams",
-                       "Physical bench heights and shelf dimensions"
+                       "World-space bench heights and shelf dimensions"
                    ],
-    "outputScope":  ".codex-tmp/authoring/cells/tanium/c6-2/ only; no writes to public/ or art-source/",
-    "evidence":  [
-                     "evidence-this-run/measurements.json",
-                     "evidence-this-run/water-overlay.png",
-                     "evidence-this-run/crown-census.png",
-                     "evidence-this-run/landform.png",
-                     "measure-this-run.ps1",
-                     "finalize-this-run.ps1"
-                 ],
-    "environment":  "Node is unavailable in the shell. Measurements and PNG mask generation used Windows PowerShell, C# and System.Drawing."
+    "outputScope":  ".codex-tmp/authoring/cells/tanium/c6-2/ only; public/ and art-source/ were not modified."
 }

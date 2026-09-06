@@ -1,152 +1,44 @@
 {
   "cell": "c6-1",
   "territory": "tanium",
-  "status": "refused_quarantine_only",
-  "generation": {
-    "filename": "c6-1-source.png",
-    "exactGenerationSizeProduced": [1254, 1254],
-    "format": "PNG RGB",
-    "sha256": "39D070FB9BD8FEA135446E4AF2DB2CA1137A45CDF6E1392519BBD84974B2E2D5",
-    "mode": "single built-in ImageGen whole-canvas edit with edit-target.jpg first and the NinjaOne seed canon second as reference only",
-    "imageGenCallsUsed": 1,
-    "retryUsed": false,
-    "secondReferenceAccepted": true,
-    "bothImagesAttachedToSameCall": true,
-    "wholeCanvasSinglePass": true,
-    "rawOutputPreserved": true,
-    "rawCopyHashIdentical": true,
-    "resizedCroppedRetouchedOrTiled": false,
-    "promptFile": "c6-1-imagegen-prompt-used-r2.txt"
+  "generationSize": {
+    "width": 1254,
+    "height": 1254
   },
-  "generationSizePx": [1254, 1254],
-  "shippedCanvasPx": [2560, 2560],
-  "groundExtentMetres": [97.6, 97.6],
-  "finalResolutionCmPerPx": 4.8,
   "lightingIsotropy": {
-    "metric": "36-bin full-angle land-luminance-gradient magnitude peak divided by the uniform-bin mean on the delivered source; final water-mask pixels and immediate neighbours excluded and gradients below 12 luminance units excluded",
-    "peakVsUniformOverLand": 1.671026,
-    "uniformReference": 1.0,
-    "directionalKeyFirstMoment": 0.002311,
-    "rockStrongEdgeFirstMoment": 0.046992,
-    "gradientSamples": 1076770,
-    "rockStrongEdgeSamples": 77624,
-    "aggregateDirectionalityNumericPass": true,
-    "strictEqualValueOnAllFormSidesVisualCheck": false,
-    "visualCheck": "No whole-cell cast-shadow field or sun gradient is visible, but repeated pale column caps above darker vertical faces violate the literal equal-value-on-all-sides rule. The aggregate directionality statistic cannot override that visible form-lighting defect."
+    "peakVsUniformOverLand": 1.595554,
+    "directionalKeyFirstMoment": 0.00078,
+    "gradientSampleCount": 1132298,
+    "method": "Native-resolution luminance-gradient orientation histogram over non-water land; uniform is the 36-bin baseline."
   },
   "buildableVsSteepFraction": {
-    "basis": "manual full-frame estimate as fractions of non-water land at native source resolution",
-    "buildable": 0.80,
-    "steep": 0.15,
-    "otherTalusVegetationCarvingsOrBrokenMargin": 0.05,
-    "method": "The broad coherent upper bench counts as buildable; exposed sea-cliff faces count as steep; talus, the north-west conifer gully, the rune feature, panels, and broken coastal margins make up the remainder."
+    "basis": "Visual area estimate over non-water land, separating level bench and shelf tops from cliff faces, talus, and broken gullies.",
+    "buildable": 0.78,
+    "steep": 0.22
   },
-  "waterFootprintFraction": 0.213352,
-  "finalDerivedLandCoverageFraction": 0.786648,
-  "crown": {
-    "medianMetres": 3.136,
-    "medianPx": 65.327,
-    "sampleCount": 24,
-    "method": "Manual full-frame outer-foliage census of all 24 visually distinguishable crowns, including every sapling, clipped top-edge crown, and readable overlapping north-west-gully crown; median native width 32 px scaled by 2560/1254 and converted at 0.048 m per final pixel.",
-    "excludedElements": []
-  },
+  "waterFootprintFraction": 0.16406892,
   "waterMask": {
-    "filename": "c6-1-water-source.png",
-    "exactSizePx": [1254, 1254],
-    "format": "PNG RGBA",
-    "sha256": "683B838ADA1078C5887F4D2A395ECF205F06A41F4DCF76DE202B55D4148C72EA",
-    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
-    "opaqueWaterPixels": 335500,
-    "transparentNonWaterPixels": 1237016,
+    "opaqueWhitePixels": 258001,
     "intermediateAlphaPixels": 0,
     "nonWhiteOpaquePixels": 0,
     "connectedComponents8": 1,
-    "smallInteriorHolePixelsFilled": 651,
-    "accidentalInteriorHoles": 0,
-    "intentionalEnclosedDryStackComponents": 1,
-    "intentionalEnclosedDryStackPixels": 9076,
-    "edgeWaterPixels": {
-      "north": 117,
-      "east": 1254,
-      "south": 412,
-      "west": 0
-    },
-    "method": "Native-resolution east-edge flood of the connected teal sea, expanded through adjacent pale surf, foam, wash, ripple highlights, and reflections; pixel-scale gaps were closed while the fully enclosed offshore stack remains transparent as dry basalt. The full binary overlay was inspected at native resolution."
+    "intentionalDryTerrainIslandPixels": 9203,
+    "note": "Connected east-sea classification includes surf, wash, ripples, reflections, and the southern inflow; enclosed transparent pixels are dry stacks and dry built neighbour pixels, not omitted water."
   },
-  "edgeTopology": {
-    "northLandContinuesWithoutSea": false,
-    "eastOpenSeaAcrossEdge": true,
-    "southLandContinuesWithoutSea": false,
-    "westLandContinuesWithoutSea": true,
-    "note": "The truthful all-painted-water mask reaches 117 north-edge pixels and 412 south-edge pixels. It was not altered to conceal source-art topology drift."
+  "crown": {
+    "medianMetres": 3.332,
+    "medianPx": 69.41,
+    "sampleCount": 35,
+    "method": "Full-frame manual outer-foliage-width census at native 1254 px of all visible crowns, including every sapling, overlapping north-west-gully crown, isolated crown, and clipped edge crown; median scaled to 2560 px.",
+    "excludedElements": []
   },
-  "runeChain": {
-    "requiredWestEdgeFractionDown": 0.50,
-    "requiredEastEdgeFractionDown": 0.70,
-    "requiredWestCentreYSourcePx": 627.0,
-    "requiredEastCentreYSourcePx": 877.8,
-    "measuredWestCentreYSourcePxApprox": 347,
-    "measuredEastCentreYSourcePxApprox": 803,
-    "westErrorSourcePxApprox": -280.0,
-    "eastErrorSourcePxApprox": -74.8,
-    "exactEdgeHandoffsPass": false,
-    "fullWidthContinuous": true,
-    "dryBedrockSlotRead": false,
-    "offshoreContinuationReadsAsRaisedCauseway": true,
-    "waterMasksPartOfEastHandoff": true,
-    "panelCount": 8,
-    "panelCountPass": true,
-    "visualRead": "The inland feature has a narrow dark centre, but its regular raised stone lips read as a kerb or lined channel rather than removed bedrock. Offshore it becomes a raised stone bar or bridge through the nearer stack instead of a carved slot."
+  "visualReview": {
+    "authority": "Owner review required; mechanical checks do not establish visual acceptance.",
+    "knownRisks": [
+      "The edit introduced scattered conifers beyond the sheltered western gullies.",
+      "Several long east-cliff column groups remain more regular than the weathered-irregular coast rule calls for.",
+      "The existing built span visible at the east edge came from the edit target; the generated fill did not deliberately author rail infrastructure."
+    ]
   },
-  "siteChecks": {
-    "quietLevelChainEndBenchPresent": true,
-    "eightDistinctWeatheredPanelsPresent": true,
-    "nothingAtChainMiddle": true,
-    "twoSeaStacksPresent": true,
-    "wanderingCoastWithBaysAndButtressPresent": true,
-    "weatheredIrregularColumnRulePass": false,
-    "naturalPartwayCliffRailLedgeClearlyPresent": false,
-    "terrainOnlyLiteralObjectCensus": true,
-    "raisedCausewayStructuralRead": true,
-    "highOblique2_5D": true,
-    "seaContinuesEast": true,
-    "landContinuesNorthSouthWest": false
-  },
-  "authorityConflictResolution": {
-    "conflict": "The opening biome-transition instruction asks for a coast-to-quarry transition through the south third, while the later Transitions table states that the south quarry neighbour is not yet authored and instructs this cell to paint Wild coast to that edge.",
-    "winner": "The later cell-specific Transitions table and its explicit not-yet-authored fallback rule.",
-    "implemented": "Wild coast continues to the south edge; no speculative quarry paint was introduced."
-  },
-  "constraintChecks": {
-    "squareAtLeast1254Px": true,
-    "singleWholeCanvasEditCall": true,
-    "secondReferenceAccepted": true,
-    "rawGenerationUntouched": true,
-    "waterMaskSameDimensionsBinaryWhiteTransparent": true,
-    "waterMaskCoversCompletePaintedWater": true,
-    "waterMaskNoAccidentalInteriorHoles": true,
-    "crownObjectComplete": true,
-    "allMeasuredCrownsIncluded": true,
-    "crownMedianInsideAcceptedTerritoryBand": true,
-    "strictNeutralLighting": false,
-    "runeChainExactEdgeHandoffs": false,
-    "runeChainUnambiguouslyExcavatedSlot": false,
-    "noBridgeOrCausewayRead": false,
-    "weatheredIrregularCliffs": false,
-    "requiredDryNorthSouthWestEdges": false
-  },
-  "refusalReasons": [
-    "The rune chain misses both exact seam handoffs: its traced centre reaches the west edge near source y=347 instead of 627 and the east edge near y=803 instead of 877.8.",
-    "The rune feature reads as a regular stone-lined kerb inland and as a raised causeway or bridge across the sea, not as bedrock removed into a dry slot.",
-    "The highest-priority lighting rule fails visually: pale basalt caps sit over materially darker vertical faces despite the absence of a cast-shadow field.",
-    "Much of the coastal cliff repeats upright, similarly sized columns with regular caps; it does not meet the ordinary-coast requirement for broken, split, leaning, irregularly weathered columnar geology.",
-    "Painted sea reaches the north and south source edges even though this cell requires land continuation through those borders."
-  ],
-  "openRisks": [
-    "The estimated buildable share is about 0.80 of non-water land, materially above the territory-wide roughly one-third target and broader than the requested quiet coastal bench appears to require.",
-    "The crown census includes all 24 visually distinguishable crowns and no exclusions, but overlapping north-west-gully foliage makes individual outer widths a manual visual judgment.",
-    "The water mask is same-size, binary, edge-connected, hole-checked, and overlay-inspected; exact surf/talus boundary placement remains a human visual gate.",
-    "No shipped-canvas bake or runtime validation was run because the task is quarantine-only, and no file was written to public or art-source."
-  ],
-  "recommendedReframe": "Do not spend another call on this candidate. A future attempt needs deterministic seam guides for the two chain handoffs and an authoring method that can enforce a true excavated slot, remove the offshore causeway read, break the accidental column rhythm, and keep rock-face values isotropic."
+  "sourceSha256": "C3B6A2F52456695B964F0310AD0B65D048FDB393B1347B9682010F7882F9E00E"
 }

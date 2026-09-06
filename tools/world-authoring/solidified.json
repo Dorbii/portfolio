@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-05T00:53:57.256Z",
+ "solidifiedAt": "2026-09-06T05:30:03.131Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "b1d67d2f6f4d26b4",
+  "cell.mjs": "2cf8aa3172a27c83",
   "plan-territory.mjs": "e8d86a90b2e32796",
   "AGENTS.md": "a1ab4eaec1d4c6ac"
  },
@@ -471,6 +471,60 @@
    "reason": "owner approved 2026-09-04 (in chat, on the picture of c4-2's refused candidate in place and its east seam: 'yeah its fine'): CELL_OWNER_ACCEPT carries the owner's words and lets a run stitch past failed gates, printed loudly and recorded in the manifest entry with the gates overridden; never set by the runner; nothing else changes",
    "hashes": {
     "cell.mjs": "b1d67d2f6f4d26b4",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-05T16:59:08.599Z",
+   "reason": "owner 2026-09-05 17:10, after the plain description of both: 'sure go for it' — lock 18h (a cell sees the authored cell across a territory border: its paint in the edit target, its seam judged by the gates, the stitch untouched) and lock 18i (a shore cell's edit target carries the island's sea on into the cell from its own sea pixels, grey only within 40 m of arriving ground; the packet calls the painted sea final; stitch, gates and mask untouched)",
+   "hashes": {
+    "cell.mjs": "f8307db6fe8241d6",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-05T19:30:43.530Z",
+   "reason": "owner 2026-09-05 19:20 UTC: 'sorry proceed' — in reply to the ask 'Say yes to all three or name the ones you want' on proposals 18i-b (sea texture: the pre-fill tiles a real sea patch), 18j (key-light report-only under 5% land), 18k (wet runs split by a gap under 30 px are one run); all three applied",
+   "hashes": {
+    "cell.mjs": "9fa45296c5e99d43",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-05T21:35:57.941Z",
+   "reason": "owner 2026-09-05 21:40 UTC, on the 18m preview (T c4-1's edit target with the groove's floor drawn from c3-1's groove to c5-1's): '18m is fine the line sjust need to connect' — lock 18m applied: a cell the rune chain crosses carries the groove's floor in its edit target, its ends read off the authored neighbours' own grooves, the canon between them shifted; FINAL and exact in the packet",
+   "hashes": {
+    "cell.mjs": "616ef7059d95f3cf",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-06T01:05:07.930Z",
+   "reason": "owner 2026-09-06 01:00 UTC: 'For the chain add a layer over it thats bright purple. Then use that to hellp with the matching and remove that layer for final render' — lock 18n applied (amends 18m): the chain's floor is drawn in bright purple as a guide layer; where the purple survives beside an edge its height is read; every purple pixel is replaced by the groove's floor before derivation and gating; a chain-continuity gate holds each edge within 48 px of the floor drawn from the neighbours' grooves",
+   "hashes": {
+    "cell.mjs": "95766320c7591784",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-06T01:30:44.398Z",
+   "reason": "owner 2026-09-06 01:00 UTC ('For the chain add a layer over it thats bright purple. Then use that to hellp with the matching and remove that layer for final render') — 18n calibrated after its first bake (c2-1, 01:29Z): the groove detector's contrast is a fifth of the band's median (10-18 luma) so a dark forest's slot is seen; an edge where no groove is found is reported, not refused — the gate refuses only a found groove more than 48 px off the floor",
+   "hashes": {
+    "cell.mjs": "233393b95288e343",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-06T05:30:03.132Z",
+   "reason": "owner 2026-09-06 05:30 UTC: 'go ahead with regen' — in reply to the ask 'Still held on your 18i-c yes or no: the regens of c0-5, c1-3 and c4-8'; lock 18i-c applied: the tiled sea patch must be sea in the paint (under 0.5% bright or grey pixels), not only in the mask",
+   "hashes": {
+    "cell.mjs": "2cf8aa3172a27c83",
     "plan-territory.mjs": "e8d86a90b2e32796",
     "AGENTS.md": "a1ab4eaec1d4c6ac"
    }

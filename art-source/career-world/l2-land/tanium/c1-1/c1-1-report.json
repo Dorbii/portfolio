@@ -1,0 +1,130 @@
+{
+  "cell": "c1-1",
+  "territory": "tanium",
+  "layer": "L2-land",
+  "status": "refused",
+  "readyForBake": false,
+  "generation": {
+    "filename": "c1-1-source.png",
+    "exactGenerationSizeProduced": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "E1AB22BDCF04D035FBC8141347479A984E3A73CAE660094CD83DD6DAB195FAC5",
+    "mode": "single built-in image_gen whole-canvas edit with edit-target.jpg first and the NinjaOne seed canon second as reference only",
+    "imageGenCallsUsed": 1,
+    "retryUsed": false,
+    "bothRequiredImagesAccepted": true,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "rawCopyHashIdentical": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "promptFile": "c1-1-imagegen-prompt-used-2026-09-06-codex.txt"
+  },
+  "generationSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "generationSizePx": [1254, 1254],
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "peakVsUniformOverLand": 1.616021,
+    "uniformBaseline": 1.0,
+    "firstMomentOverLand": 0.003557,
+    "sampleCount": 1252694,
+    "method": "Rec.709 luminance central-difference gradients on nonwater source pixels, magnitude at least 12; 36 directed angle bins; peak bin divided by the uniform-bin mean.",
+    "limitation": "The aggregate orientation statistic is not proof of flat lighting because terrain geometry and brush texture also affect it.",
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "FAIL: basalt caps and upper rock planes are repeatedly paler than vertical faces, and conifer crowns retain internal light-dark modelling instead of one flat value. No coherent cast-shadow field is visible, but that does not satisfy the literal equal-value rule."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "manual full-frame screen-space estimate as fractions of nonwater land at native source resolution",
+    "buildable": 0.29,
+    "steep": 0.18,
+    "otherDenseForestTalusBrokenRockOrTransitionGround": 0.53,
+    "method": "The pale north shelf, west glades, two level gorge shoulders and fallen-tree clearing count as buildable; exposed gorge walls and sharp talus banks count as steep; dense stands and rough non-steep ground make up the remainder.",
+    "limitation": "Screen-space visual estimate with approximate uncertainty of plus or minus 0.08 per fraction, not an elevation-derived slope measurement."
+  },
+  "buildableFraction": 0.29,
+  "steepFraction": 0.18,
+  "waterFootprintFraction": 0.01981093,
+  "finalDerivedLandCoverageFraction": 0.98018907,
+  "waterMask": {
+    "filename": "c1-1-water-source.png",
+    "classificationFile": "c1-1-water.json",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "2F88E03F406A1E796FFAD61ADC98FD5BEA5CC5F571BA24D95FEAE4EBDC7B27B5",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "opaqueWaterPixels": 31153,
+    "transparentNonWaterPixels": 1541363,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedComponents8": 2,
+    "interiorHolePixels": 0,
+    "boundsSourcePx": [0, 233, 799, 1253],
+    "edgeWaterPixels": {
+      "north": 0,
+      "east": 0,
+      "south": 23,
+      "west": 26
+    },
+    "method": "Native-resolution bank-to-bank trace over the complete visible beck and gorge-water surfaces, including both falls, foam, shaded pools, wash, ripples and reflections; binary outline and tint overlay inspected against the raw source."
+  },
+  "crown": {
+    "medianMetres": 2.156,
+    "medianPx": 44.912,
+    "sampleCount": 54,
+    "method": "Connected-component census of all 54 separable dark-green conifer crowns, including saplings and edge or overlap cases; median outer source width 22 px scaled by 2560/1254 and converted at 0.048 m per final pixel.",
+    "excludedElements": []
+  },
+  "siteChecks": {
+    "gorgeRunsNorthEastToSouthWest": true,
+    "twoFallsAndShadedPoolsVisible": true,
+    "twoFacingLevelRockShouldersPresent": true,
+    "fallenGiantAndUprightRootPlatePresent": true,
+    "darkestStandLocalizedAroundDeepStandAndGorge": true,
+    "northEdgeRemainsPaleOpenGround": true,
+    "westTransitionBreaksIntoGlades": true,
+    "terrainOnlyInAuthoredArea": true,
+    "newRuneChainOrRailStructurePresent": false,
+    "visibleGreyBlueHazeAcrossAllCrownEdges": false
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasEditCall": true,
+    "secondReferenceAttached": true,
+    "rawGenerationUntouched": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "landContinuesToAllFourEdges": true,
+    "waterMaskSameDimensionsBinaryWhiteTransparent": true,
+    "waterMaskNoInteriorHoles": true,
+    "allMeasuredCrownsIncluded": true,
+    "crownMedianInsideAcceptedTerritoryBand": true,
+    "strictNeutralLighting": false,
+    "everyCrownOneFlatValue": false,
+    "hazeSoftensEveryCrownEdge": false
+  },
+  "refusalReasons": [
+    "The highest-priority lighting rule fails visually: repeated pale basalt caps and upper planes over darker vertical faces encode directional form shading despite the absence of cast shadows.",
+    "Conifer crowns retain internal lighter and darker modelling instead of one flat value from tip to skirt.",
+    "The required grey-blue haze is too weak to soften every crown edge; many stand silhouettes remain hard."
+  ],
+  "verified": [
+    "Exactly one whole-canvas built-in edit call with both required images attached",
+    "1254 x 1254 square PNG, byte-identical to the raw tool output",
+    "No new buildings, walls, roads, bridges, docks, boats, fences, figures, rail, track, tunnel mouths, rune marks or paths observed in the authored area",
+    "Water mask dimensions match source; opaque pixels are white, alpha is binary, and no interior holes remain",
+    "Water overlay covers the west beck, gorge stream, two falls, foam, shaded pools, wash, ripples and reflections",
+    "All 54 separable measured conifer crowns were retained in the census; median is within the 1.7-5.2 m band",
+    "All task writes remained under .codex-tmp/authoring/cells/tanium/c1-1/"
+  ],
+  "unverified": [
+    "Owner visual review",
+    "Pipeline stitch and shipped-canvas runtime appearance",
+    "World-space gorge depth, shoulder separation and clearing diameter",
+    "Exact water-to-bank boundary placement beyond the inspected native-resolution overlay"
+  ],
+  "outputScope": ".codex-tmp/authoring/cells/tanium/c1-1/ only; no task write was made to public/ or art-source/."
+}

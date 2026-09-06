@@ -193,10 +193,10 @@
   "8,6": "shore",
   "8,7": "shore",
   "1,8": "shore",
-  "2,8": "shore",
   "5,8": "shore",
   "6,8": "shore",
-  "7,8": "shore"
+  "7,8": "shore",
+  "0,7": "shore"
  },
  "sites": [],
  "rules": {

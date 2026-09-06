@@ -33,8 +33,61 @@ const listArg = (flag) => {
   return i >= 0 && process.argv[i + 1] && !process.argv[i + 1].startsWith("--")
     ? process.argv[i + 1].split(",").map((s) => s.trim()).filter(Boolean) : [];
 };
+const arg1 = (flag) => listArg(flag)[0] || null;
 const WANTED = listArg("--territory");
 const ALL = ["ninjaone", "tanium", "coast"];      // feed order: NinjaOne first (its ids are the old ones)
+// --tone <gains.json>: exposure equalisation at SERVE time (tone-harmonise.mjs
+// writes the table; owner 2026-09-05: "lets fix all the patchy non-uniformed
+// look"). Each cell's luma gain is applied as a smooth field — bilinear between
+// cell centres, missing neighbours take the cell's own gain — to the sliced
+// tiles only; the authored pyramids are untouched. With --tone, every cell is
+// re-sliced (a gain change is not visible to the mtime check).
+const TONE = arg1("--tone");
+// --chain <dir>: overlays from build-chain-layer.mjs (<territory>-<id>-chain.png,
+// 2048 px RGBA) composited onto the served tiles; with --chain every cell is re-sliced
+const CHAIN = arg1("--chain");
+let chained = 0;
+const gains = new Map(), edges = new Map();
+if (TONE) {
+  const table = JSON.parse(fs.readFileSync(TONE, "utf8"));
+  for (const c of table.cells) { gains.set(c.world.join(","), c.gain); if (c.edges) edges.set(c.world.join(","), c.edges); }
+  console.log(`tone: ${gains.size} cell gains from ${TONE} (strength ${table.strength}, cap ±${table.cap}); seam feather on ${[...edges.values()].reduce((s, e) => s + Object.keys(e).length, 0)} edges`);
+}
+// the seam feather (2026-09-05): beside an authored edge whose band means
+// the table carries, each channel is scaled so this side's band meets the
+// two bands' mean at the line, fading to unchanged 12 m in; colour as well
+// as luma, land pixels only. The other side does the same, so the step at
+// the line closes from both sides.
+const FEATHER_M = 12, CELL_M = 97.6;
+function applyTone(raw, size, wx, wy) {
+  const own = gains.get(`${wx},${wy}`) ?? 1;
+  const at = (x, y) => gains.get(`${x},${y}`) ?? own;
+  const e = edges.get(`${wx},${wy}`) || {};
+  const D = Math.round(size * FEATHER_M / CELL_M);
+  // each channel's move is capped at ±20%: a blue-poor yellow heath beside a
+  // grey moor would otherwise take a +49% blue multiplier and turn mauve
+  const factor = (band) => band ? band.mine.map((m, k) => (m > 0 ? Math.max(-0.2, Math.min(0.2, ((m + band.theirs[k]) / 2) / m - 1)) : 0)) : null;
+  const fN = factor(e.N), fS = factor(e.S), fE = factor(e.E), fW = factor(e.W);
+  // a smooth ramp (no visible edge where the feather starts): full at the line, nothing at D
+  const ramp = (d) => { const t = d / D; return t >= 1 ? 0 : 1 - t * t * (3 - 2 * t); };
+  for (let y = 0; y < size; y += 1) {
+    const fy = (y + 0.5) / size - 0.5, sy = fy < 0 ? -1 : 1, ty = Math.abs(fy);
+    const wN = fN ? ramp(y) : 0, wS = fS ? ramp(size - 1 - y) : 0;
+    for (let x = 0; x < size; x += 1) {
+      const fx = (x + 0.5) / size - 0.5, sx = fx < 0 ? -1 : 1, tx = Math.abs(fx);
+      const g = own * (1 - tx) * (1 - ty) + at(wx + sx, wy) * tx * (1 - ty) + at(wx, wy + sy) * (1 - tx) * ty + at(wx + sx, wy + sy) * tx * ty;
+      const o = (y * size + x) * 4;
+      const wW = fW ? ramp(x) : 0, wE = fE ? ramp(size - 1 - x) : 0;
+      const land = raw[o + 3] >= 250 && (wN || wS || wE || wW);
+      for (let k = 0; k < 3; k += 1) {
+        let f = g;
+        if (land) f *= (1 + (wN ? fN[k] * wN : 0)) * (1 + (wS ? fS[k] * wS : 0)) * (1 + (wE ? fE[k] * wE : 0)) * (1 + (wW ? fW[k] * wW : 0));
+        raw[o + k] = Math.min(255, Math.round(raw[o + k] * f));
+      }
+    }
+  }
+  return raw;
+}
 
 const A = "public/career-world/layers/terrain/authority/";
 const ART = "art-source/career-world/l2-land/";
@@ -92,12 +145,33 @@ for (const t of ALL) {
     const cap = `${id}-capital.webp`, site = `${id}-site.webp`;
     const capFile = path.join(outDir, cap), siteFile = path.join(outDir, site);
     const l1 = await cellImage(pyr, 1, col, row), l0 = await cellImage(pyr, 0, col, row);
-    const stale = FORCE || !fs.existsSync(capFile) || !fs.existsSync(siteFile)
+    const stale = FORCE || TONE || CHAIN || !fs.existsSync(capFile) || !fs.existsSync(siteFile)
       || fs.statSync(capFile).mtimeMs < l1.newest || fs.statSync(siteFile).mtimeMs < l0.newest;
     if (stale) {
       if (!DRY) {
-        await l1.image.webp({ quality: 90, alphaQuality: 100 }).toFile(capFile);
-        await l0.image.webp({ quality: 90, alphaQuality: 100 }).toFile(siteFile);
+        for (const [lvl, file, size] of [[l1, capFile, 1024], [l0, siteFile, 2048]]) {
+          // the chain layer (owner 2026-09-06): one overlay per chain cell,
+          // composited onto the served tile after the tone; the pyramid stays clean
+          const chainFile = CHAIN ? path.join(CHAIN, `${t}-${id}-chain.png`) : null;
+          const overlay = chainFile && fs.existsSync(chainFile)
+            ? await sharp(chainFile).resize(size, size, { kernel: "lanczos3" }).ensureAlpha().raw().toBuffer() : null;
+          if (TONE || overlay) {
+            const raw = TONE ? applyTone(await lvl.image.raw().toBuffer(), size, world[0], world[1]) : await lvl.image.ensureAlpha().raw().toBuffer();
+            if (overlay) {
+              for (let p = 0; p < size * size; p += 1) {
+                const o = p * 4, a = overlay[o + 3] / 255;
+                if (a === 0) continue;
+                for (let k = 0; k < 3; k += 1) raw[o + k] = Math.round(overlay[o + k] * a + raw[o + k] * (1 - a));
+                raw[o + 3] = Math.max(raw[o + 3], overlay[o + 3]);
+              }
+              chained += 1;
+            }
+            await sharp(raw, { raw: { width: size, height: size, channels: 4 } })
+              .webp({ quality: 90, alphaQuality: 100 }).toFile(file);
+          } else {
+            await lvl.image.webp({ quality: 90, alphaQuality: 100 }).toFile(file);
+          }
+        }
       }
       sliced += 1;
     } else kept += 1;

@@ -1,0 +1,10 @@
+[
+  {
+    "class": "coast",
+    "note": "The single connected open-sea surface, including shoreline surf, pale wash between rocks, ripple highlights, and reflections."
+  },
+  {
+    "class": "stream",
+    "note": "The narrow arriving watercourse and inlet are connected directly to the coastal sea and are included in the same continuous mask component."
+  }
+]

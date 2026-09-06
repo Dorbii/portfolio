@@ -1,76 +1,133 @@
 {
   "cell": "c4-1",
   "territory": "tanium",
-  "layer": "L2 land terrain",
+  "status": "quarantine_candidate_failed_hard_visual_constraints",
   "generation": {
-    "mode": "single whole-canvas edit",
-    "callCount": 1,
-    "widthPx": 1254,
-    "heightPx": 1254,
-    "square": true,
-    "resized": false,
-    "cropped": false,
-    "sourceSha256": "F54E834031F66A4A65C3E585C186240B9612D9F4F2C87ACA16E8DF54DF716C4A"
+    "filename": "c4-1-source.png",
+    "exactGenerationSizeProduced": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "38CF60B42CFA215116449AA8242A89E465383587EEE874AEB9BF140F2C13D11E",
+    "mode": "single built-in image_gen whole-canvas edit with edit-target.jpg first and the NinjaOne seed canon second as reference only",
+    "imageGenCallsUsedThisWorkBlock": 1,
+    "retryUsed": false,
+    "secondReferenceAccepted": true,
+    "bothImagesAttachedToSameCall": true,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "rawCopyHashIdentical": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "promptFile": "c4-1-imagegen-prompt-used-2026-09-06-no-chain.txt"
   },
+  "generationSizePx": [1254, 1254],
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
   "lightingIsotropy": {
-    "peakVsUniformOverLand": 1.644645,
-    "firstMomentOverLand": 0.000240,
-    "sampleCount": 1321300,
-    "method": "36-bin luminance-gradient orientation census over non-water pixels; this is a mechanical isotropy measure, not visual acceptance."
+    "metric": "36-bin full-angle land-luminance-gradient magnitude peak divided by the uniform-bin mean on the delivered source; final water-mask pixels and immediate neighbours excluded and gradients below 12 luminance units excluded",
+    "peakVsUniformOverLand": 1.729023,
+    "uniformReference": 1.0,
+    "directionalKeyFirstMoment": 0.001151,
+    "gradientSamples": 1366833,
+    "canonicalNodeGateAvailable": false,
+    "canonicalNodeGateEnvironmentLimitation": "The repository keylight-map.mjs could not run because this sandbox has no node executable and no local sharp installation; the numerically reported fields come from the quarantined System.Drawing implementation using the same central-difference threshold concept.",
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No whole-cell cast-shadow field is visible, but repeated basalt caps and bench tops are materially paler than vertical column faces. The low signed first moment does not override this literal violation of the equal-value lighting rule."
   },
-  "surfaceFractions": {
-    "basis": "whole source canvas",
-    "buildable": 0.538000,
-    "steep": 0.440019,
-    "water": 0.021981,
-    "buildableWithinLand": 0.550092,
-    "steepWithinLand": 0.449908,
-    "method": "Water is the traced alpha-mask footprint; coherent level bench tops and approach shelves count as buildable, while exposed bench faces, arch faces, talus, scree fans, and broken transition slopes count as steep."
+  "buildableVsSteepFraction": {
+    "basis": "manual full-frame screen-space estimate as fractions of non-water land at native source resolution",
+    "buildable": 0.58,
+    "steep": 0.16,
+    "otherBrokenRockTalusVegetationOrTransitionGround": 0.26,
+    "method": "Broad top, middle, and lower bench surfaces and the northern approach count as buildable; exposed column faces and the sharpest talus drops count as steep; scree, broken edge ground, vegetation, and biome transitions make up the remainder.",
+    "limitation": "Screen-space visual estimate with approximate uncertainty of plus or minus 0.08 per fraction, not an elevation-derived slope measurement."
   },
-  "waterFootprintFraction": 0.021981,
-  "waterMask": {
-    "widthPx": 1254,
-    "heightPx": 1254,
-    "opaqueWaterPixels": 34565,
-    "connectedComponents": 2,
-    "interiorHolePixels": 0,
-    "edgeWaterPixels": {
-      "north": 0,
-      "east": 0,
-      "south": 0,
-      "west": 0
-    },
-    "sha256": "76276399758994C51504438535DEBCD971E4B5F6AF460F9C3E4A92B73F3F01B7"
-  },
+  "waterFootprintFraction": 0.024863,
+  "finalDerivedLandCoverageFraction": 0.975137,
   "crown": {
-    "medianMetres": 2.352,
-    "medianPx": 49.0,
-    "sampleCount": 22,
-    "method": "Full-frame grid census of every discernible outer-foliage conifer crown, including saplings and clipped edge crowns; source widths were scaled by 2560/1254 and converted at 0.048 m per final pixel.",
+    "medianMetres": 1.96,
+    "medianPx": 40.829,
+    "sampleCount": 31,
+    "method": "Full-frame native-resolution dark-conifer component census of all 31 discernible crowns, including saplings and clipped edge crowns; median outer foliage-envelope width 20 source pixels scaled by 2560/1254 and converted at 0.048 m per final pixel.",
     "excludedElements": []
   },
-  "content": {
-    "terrainOnly": true,
-    "plateauTarnPresent": true,
-    "windArchAndLevelShelfPresent": true,
-    "northRockFaceAndApproachPresent": true,
-    "westernFallPresent": true,
-    "builtStructuresPresent": false
+  "crownEvidence": {
+    "medianSourcePx": 20,
+    "sourceWidthsPx": [10, 11, 12, 12, 13, 13, 13, 14, 14, 16, 17, 17, 17, 18, 18, 20, 20, 22, 24, 26, 28, 29, 31, 32, 33, 34, 43, 46, 47, 55, 58],
+    "overlayFile": "diagnostics/c4-1-crown-overlay.png",
+    "allDetectedCrownsIncluded": true,
+    "scaleInsideAcceptedBand": true,
+    "limitation": "The median is inside the binding 1.7-to-5.2-metre band but below the requested three-to-four-metre target; dense or overlapping painted foliage remains a visual census judgment."
   },
-  "visualReview": {
-    "status": "quarantine candidate; hard-constraint failure observed; pending director and owner inspection",
-    "claims": [
-      "Three pale basalt benches, their exposed column faces, and talus feet dominate the cell while the outer ground grades into the painted neighbour families.",
-      "The round middle-bench tarn has a complete shingle rim with no vegetation touching its masked water surface.",
-      "The eastern upper bench provides a natural arch and adjacent level rock shelf; the northern bench provides an unbuilt rock face and approach ground."
-    ],
-    "hardConstraintFindings": [
-      "The visible groove reaches the west edge near source y=260 and the east edge near source y=390, not the required approximately y=602 and y=564 seam handoffs.",
-      "The western fall visibly begins at the same cut line at the bench lip, so the image does not establish the required dry rune slot."
-    ],
-    "openRisks": [
-      "The carved slot appears shallower and more kerbed than the specified two-metre-deep bedrock excavation in parts of the image.",
-      "Mechanical isotropy does not prove the strict no-key-light visual rule; exposed column faces still need human inspection for orientation-dependent value."
-    ]
+  "waterMask": {
+    "filename": "c4-1-water-source.png",
+    "classificationFile": "c4-1-water.json",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "8DE33D5BD63F432BD2694182E2B7DF696D591D52F00FA3480E82FBCE93D275A9",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "opaqueWaterPixels": 39097,
+    "transparentNonWaterPixels": 1533419,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedComponents8": 5,
+    "interiorHolePixelsFilled": 0,
+    "accidentalInteriorHoles": 0,
+    "edgeWaterPixels": {
+      "north": 0,
+      "east": 39,
+      "south": 27,
+      "west": 151
+    },
+    "method": "Native-resolution bank-to-bank span traces of the tarn, required southern stream, and all inherited west/east bleed water, including complete wash, ripple highlights, reflections, and water between stones; the binary overlay was inspected over the raw source."
+  },
+  "siteChecks": {
+    "barePaleThreeBenchPlateauPresent": true,
+    "roundShingleRimmedTarnPresent": true,
+    "tarnOpenWaterApproximateDiameterMetres": 22.2,
+    "tarnRequestedThirtyMetreScalePass": false,
+    "windArchAndLevelShelfPresent": true,
+    "solidNorthernTunnelFaceAndApproachPresent": true,
+    "southernWatercourseContinuousThroughBleed": true,
+    "noRuneChainGrooveSlotKerbPathOrMarks": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "landContinuesToAllFourEdges": true
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasEditCall": true,
+    "secondReferenceAttached": true,
+    "rawGenerationUntouched": true,
+    "terrainOnly": true,
+    "waterMaskSameDimensionsBinaryWhiteTransparent": true,
+    "waterMaskCoversCompletePaintedWater": true,
+    "waterMaskNoAccidentalInteriorHoles": true,
+    "allMeasuredCrownsIncluded": true,
+    "crownExcludedElementsEmpty": true,
+    "crownMedianInsideAcceptedTerritoryBand": true,
+    "strictNeutralLighting": false,
+    "weatheredIrregularColumns": false,
+    "plateauTarnApproximatelyThirtyMetresAcross": false
+  },
+  "refusalReasons": [
+    "The binding flat-lighting rule fails visually: many pale bench tops and basalt caps sit over substantially darker vertical faces.",
+    "Several long bench walls read as regular, repeating column palisades rather than consistently weathered irregular geology.",
+    "The tarn open-water diameter measures about 22.2 metres at the declared final scale, materially short of the requested roughly 30 metres."
+  ],
+  "openRisks": [
+    "The northern solid rise and level approach are visually present, but a 15-to-20-metre true vertical height cannot be proven from this single high-oblique raster.",
+    "The wind arch reads as natural geology with a level shelf, but its exact twelve-metre span is a visual estimate rather than surveyed geometry.",
+    "The water mask is same-size, binary, five-component, and overlay-inspected; exact water-to-stone boundary placement remains a human visual gate.",
+    "The generated source is square, so the packet does not authorize a quality retry; no second image generation call was made.",
+    "No shipped-canvas bake, runtime mount, public write, art-source write, or owner visual acceptance was attempted because the result remains quarantine-only."
+  ],
+  "inspection": {
+    "sourceInspected": true,
+    "waterMaskInspected": true,
+    "waterOverlayInspected": true,
+    "crownOverlayInspected": true,
+    "visualAcceptance": "not claimed; director and owner review required",
+    "writesConfinedToCellFolder": true,
+    "publicAndArtSourceModified": false
   }
 }

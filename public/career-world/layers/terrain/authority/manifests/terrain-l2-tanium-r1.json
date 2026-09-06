@@ -375,31 +375,31 @@
       }
     },
     "c4-1": {
-      "authoredAt": "2026-09-04T21:47:29.215Z",
+      "authoredAt": "2026-09-06T16:07:56.933Z",
       "describe": "Bare plateau: pale basalt benches with hexagonal-jointed tops, scree fans, thin\nwind-scoured grass only in the cracks. No meadow anywhere in this cell. Pale\nwarm greys and creams, cool teal water, sparse grey-green — the brightest,\nbarest ground in the territory.\n\nStepped benches rise from west to east, three of them, each 8–12 m above the\nlast, with low column walls and talus at every foot.\n\nThe ",
       "sourcePx": 1254,
       "gates": [
         {
           "name": "key-light asymmetry",
-          "value": 0.0008,
+          "value": 0.0011,
           "pass": true,
-          "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004"
+          "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004; report-only under 5% land (18j, 2026-09-05: a 98%-sea shore cell read 0.0116 on noise)"
         },
         {
           "name": "gradient ratio",
-          "value": "1.58 (reported)",
+          "value": "1.598 (reported)",
           "pass": true,
           "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
         },
         {
           "name": "rock lighting",
-          "value": 0.093,
+          "value": 0.081,
           "pass": true,
           "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.14; limit 0.16 on the owner's eye (2026-09-02, the dark-forest gorge at 0.153)"
         },
         {
           "name": "land coverage",
-          "value": "97.5%",
+          "value": "97%",
           "pass": true
         },
         {
@@ -410,13 +410,13 @@
         },
         {
           "name": "mask completion",
-          "value": "+0 px grown, 0 px holes filled (reported)",
+          "value": "+336 px grown, 4 px holes filled (reported)",
           "pass": true,
           "note": "the delivered mask grown into contiguous painted water within 48 px and speckle holes <=64 px filled before the cut (owner 2026-09-02); dry paint stops the growth, so a polyline mask still fails the rings"
         },
         {
           "name": "water fringe",
-          "value": "0%",
+          "value": "0.02%",
           "pass": true,
           "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
         },
@@ -428,19 +428,25 @@
         },
         {
           "name": "water continuity",
-          "value": "ok (0 crossings checked)",
+          "value": "ok (2 crossings checked)",
           "pass": true,
           "note": "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint"
         },
         {
+          "name": "chain continuity",
+          "value": "no chain in this cell (reported)",
+          "pass": true,
+          "note": "the groove's height at each edge — the purple guide where it survived, else the darkest 0.3-3 m run in the 96 px beside the edge — within 48 px of the floor drawn from the neighbours' grooves (18n, owner 2026-09-06: 'use that to help with the matching')"
+        },
+        {
           "name": "palette conformance",
-          "value": "no vegetated seams; tone worst dLuma 1.7 on all land over 1 seam(s)",
+          "value": "veg worst dBG 0.107 dLuma 2.5 over 2 seam(s); tone worst dLuma 4.0 on all land over 4 seam(s)",
           "pass": true,
           "note": "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13"
         },
         {
           "name": "crown scale",
-          "value": "2.352 m over 22 crowns (accepted range 1.7-5.2 m)",
+          "value": "1.96 m over 31 crowns (accepted range 1.7-5.2 m)",
           "pass": true,
           "note": "the worker's own median crown from c4-1-report.json, against the 1.7-5.2 m range the accepted cells measured (NOT the plan's written 4-7 m — see CROWN_MIN_M); crown.excludedElements must be empty, so an out-of-scale element cannot be measured around"
         }
@@ -451,8 +457,12 @@
       ],
       "waterZones": [
         "lake",
-        "fall"
+        "stream"
       ],
+      "maskCompletion": {
+        "grownPx": 336,
+        "holePx": 4
+      },
       "biome": "bare-plateau",
       "source": "art-source/career-world/l2-land/tanium/c4-1",
       "stitch": {
@@ -854,12 +864,13 @@
       }
     },
     "c5-1": {
-      "authoredAt": "2026-09-05T06:49:31.228Z",
+      "authoredAt": "2026-09-06T17:38:10.141Z",
       "ownerOverride": {
-        "at": "2026-09-05T06:49:31.228Z",
-        "reason": "owner 2026-09-04 marked the wet patch below c5-1's tarn spillway as painted water the mask missed (punch list A, his crop); this re-derive changes only that water cut; the one failing gate is the vegetation arm on the c5-0 seam, untouched by the change and already in the world as accepted at 12:28",
+        "at": "2026-09-06T17:38:10.142Z",
+        "reason": "owner 2026-09-06 17:25, on the served world: 'the center tiles that had the old attempt at the chain still need regen cause now it just has conflicting chains with the overlay' — the plain regen goes in; the chain is the layer",
         "failedGates": [
-          "palette conformance veg worst dBG 0.048 dLuma 68.0 over 3 seam(s); tone worst dLuma 18.4 on all land over 4 seam(s)"
+          "water continuity 2 unmet crossing(s)",
+          "palette conformance veg worst dBG 0.226 dLuma 40.1 over 3 seam(s); tone worst dLuma 14.7 on all land over 4 seam(s)"
         ]
       },
       "describe": "The RISK-ASSESSMENT shelf — a settlement shelf, the richest ground in its\nneighbourhood, and the last one before the coast to the east.\n\nThe shelf: a level terrace about 45 m across in the centre-west of the cell,\nmeadow green warmed with gold, glades among orchard-like conifer stands,\nflowers permitted here. Low outcrops and natural rock terraces around its\nedge that a settlement could sit on. No",
@@ -867,25 +878,25 @@
       "gates": [
         {
           "name": "key-light asymmetry",
-          "value": 0.0004,
+          "value": 0.0016,
           "pass": true,
-          "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004"
+          "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004; report-only under 5% land (18j, 2026-09-05: a 98%-sea shore cell read 0.0116 on noise)"
         },
         {
           "name": "gradient ratio",
-          "value": "1.469 (reported)",
+          "value": "1.53 (reported)",
           "pass": true,
           "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
         },
         {
           "name": "rock lighting",
-          "value": 0.065,
+          "value": 0.089,
           "pass": true,
           "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.14; limit 0.16 on the owner's eye (2026-09-02, the dark-forest gorge at 0.153)"
         },
         {
           "name": "land coverage",
-          "value": "96.9%",
+          "value": "97.4%",
           "pass": true
         },
         {
@@ -896,37 +907,43 @@
         },
         {
           "name": "mask completion",
-          "value": "+6 px grown, 0 px holes filled (reported)",
+          "value": "+12 px grown, 3 px holes filled (reported)",
           "pass": true,
           "note": "the delivered mask grown into contiguous painted water within 48 px and speckle holes <=64 px filled before the cut (owner 2026-09-02); dry paint stops the growth, so a polyline mask still fails the rings"
         },
         {
           "name": "water fringe",
-          "value": "0.11%",
+          "value": "0.12%",
           "pass": true,
           "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
         },
         {
           "name": "water fringe (48px)",
-          "value": "0.06%",
+          "value": "0.01%",
           "pass": true,
           "note": "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)"
         },
         {
           "name": "water continuity",
-          "value": "ok (0 crossings checked)",
-          "pass": true,
+          "value": "2 unmet crossing(s)",
+          "pass": false,
           "note": "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint"
         },
         {
+          "name": "chain continuity",
+          "value": "no chain in this cell (reported)",
+          "pass": true,
+          "note": "the groove's height at each edge — the purple guide where it survived, else the darkest 0.3-3 m run in the 96 px beside the edge — within 48 px of the floor drawn from the neighbours' grooves (18n, owner 2026-09-06: 'use that to help with the matching')"
+        },
+        {
           "name": "palette conformance",
-          "value": "veg worst dBG 0.048 dLuma 68.0 over 3 seam(s); tone worst dLuma 18.4 on all land over 4 seam(s)",
+          "value": "veg worst dBG 0.226 dLuma 40.1 over 3 seam(s); tone worst dLuma 14.7 on all land over 4 seam(s)",
           "pass": false,
           "note": "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13"
         },
         {
           "name": "crown scale",
-          "value": "2.009 m over 42 crowns (accepted range 1.7-5.2 m)",
+          "value": "3.038 m over 64 crowns (accepted range 1.7-5.2 m)",
           "pass": true,
           "note": "the worker's own median crown from c5-1-report.json, against the 1.7-5.2 m range the accepted cells measured (NOT the plan's written 4-7 m — see CROWN_MIN_M); crown.excludedElements must be empty, so an out-of-scale element cannot be measured around"
         }
@@ -934,12 +951,12 @@
       "shelf": "risk-assessment",
       "features": [],
       "waterZones": [
-        "stream",
-        "lake"
+        "lake",
+        "stream"
       ],
       "maskCompletion": {
-        "grownPx": 6,
-        "holePx": 0
+        "grownPx": 12,
+        "holePx": 3
       },
       "biome": "lush-shelf",
       "source": "art-source/career-world/l2-land/tanium/c5-1",
@@ -1256,31 +1273,38 @@
       }
     },
     "c6-1": {
-      "authoredAt": "2026-09-05T01:39:49.263Z",
-      "describe": "THE CHAIN'S SEAWARD END — the east coast, where the rune chain leaves the\nworld. Wild coast: the EAST edge is sea.\n\nA cliff-top bench of thin grass and bare rock runs the height of the cell,\n30-50 m wide, quiet and plain: nothing on it competes with the chain. Below\nit, weathered columnar sea-cliffs 25-40 m tall — columns of uneven height and\nwidth, tops broken at different levels, split and leani",
+      "authoredAt": "2026-09-06T17:40:03.794Z",
+      "ownerOverride": {
+        "at": "2026-09-06T17:40:03.794Z",
+        "reason": "owner 2026-09-06 17:25, on the served world: 'the center tiles that had the old attempt at the chain still need regen cause now it just has conflicting chains with the overlay' — the plain regen goes in; the chain is the layer",
+        "failedGates": [
+          "palette conformance veg worst dBG 0.336 dLuma 7.5 over 2 seam(s); tone worst dLuma 13.5 on all land over 4 seam(s)"
+        ]
+      },
+      "describe": "**Perspective.** This is the island's east shore seen from the south-south-east:\nthe cliff faces that look south, into the bays, show their columns; faces that\nlook north are hidden behind their own rim. Draw it that way.\n\nDark conifers only in the gullies at the west edge; no meadow, no flowers.\nSurf and wash at the cliff foot and around the stacks. Carry land to the\nNORTH, SOUTH and WEST; the EA",
       "sourcePx": 1254,
       "gates": [
         {
           "name": "key-light asymmetry",
-          "value": 0.0014,
+          "value": 0.0006,
           "pass": true,
-          "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004"
+          "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004; report-only under 5% land (18j, 2026-09-05: a 98%-sea shore cell read 0.0116 on noise)"
         },
         {
           "name": "gradient ratio",
-          "value": "1.586 (reported)",
+          "value": "1.52 (reported)",
           "pass": true,
           "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
         },
         {
           "name": "rock lighting",
-          "value": 0.097,
+          "value": 0.139,
           "pass": true,
           "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.14; limit 0.16 on the owner's eye (2026-09-02, the dark-forest gorge at 0.153)"
         },
         {
           "name": "land coverage",
-          "value": "78%",
+          "value": "83.2%",
           "pass": true
         },
         {
@@ -1291,13 +1315,13 @@
         },
         {
           "name": "mask completion",
-          "value": "+62 px grown, 1 px holes filled (reported)",
+          "value": "+79 px grown, 3 px holes filled (reported)",
           "pass": true,
           "note": "the delivered mask grown into contiguous painted water within 48 px and speckle holes <=64 px filled before the cut (owner 2026-09-02); dry paint stops the growth, so a polyline mask still fails the rings"
         },
         {
           "name": "water fringe",
-          "value": "0.08%",
+          "value": "0%",
           "pass": true,
           "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
         },
@@ -1309,19 +1333,25 @@
         },
         {
           "name": "water continuity",
-          "value": "ok (0 crossings checked)",
+          "value": "ok (4 crossings checked, 1 bridged)",
           "pass": true,
           "note": "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint"
         },
         {
-          "name": "palette conformance",
-          "value": "veg worst dBG 0.142 dLuma 9.2 over 2 seam(s); tone worst dLuma 6.2 on all land over 2 seam(s)",
+          "name": "chain continuity",
+          "value": "no chain in this cell (reported)",
           "pass": true,
+          "note": "the groove's height at each edge — the purple guide where it survived, else the darkest 0.3-3 m run in the 96 px beside the edge — within 48 px of the floor drawn from the neighbours' grooves (18n, owner 2026-09-06: 'use that to help with the matching')"
+        },
+        {
+          "name": "palette conformance",
+          "value": "veg worst dBG 0.336 dLuma 7.5 over 2 seam(s); tone worst dLuma 13.5 on all land over 4 seam(s)",
+          "pass": false,
           "note": "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13"
         },
         {
           "name": "crown scale",
-          "value": "3.136 m over 24 crowns (accepted range 1.7-5.2 m)",
+          "value": "3.332 m over 35 crowns (accepted range 1.7-5.2 m)",
           "pass": true,
           "note": "the worker's own median crown from c6-1-report.json, against the 1.7-5.2 m range the accepted cells measured (NOT the plan's written 4-7 m — see CROWN_MIN_M); crown.excludedElements must be empty, so an out-of-scale element cannot be measured around"
         }
@@ -1331,11 +1361,15 @@
         "cliff run"
       ],
       "waterZones": [
-        "coast"
+        "coast",
+        "stream"
+      ],
+      "bridged": [
+        "c6-2 edge: rerouted my crossing 2266 -> 2205 (61px)"
       ],
       "maskCompletion": {
-        "grownPx": 62,
-        "holePx": 1
+        "grownPx": 79,
+        "holePx": 3
       },
       "biome": "coast-cliff",
       "source": "art-source/career-world/l2-land/tanium/c6-1",
@@ -1353,31 +1387,40 @@
       }
     },
     "c0-1": {
-      "authoredAt": "2026-09-05T01:25:35.478Z",
+      "authoredAt": "2026-09-06T17:40:42.507Z",
+      "ownerOverride": {
+        "at": "2026-09-06T17:40:42.508Z",
+        "reason": "owner 2026-09-06 17:25, on the served world: 'the center tiles that had the old attempt at the chain still need regen cause now it just has conflicting chains with the overlay' — the plain regen goes in; the chain is the layer",
+        "failedGates": [
+          "rock lighting 0.223",
+          "water continuity 1 unmet crossing(s)",
+          "palette conformance veg worst dBG 0.127 dLuma 26.0 over 3 seam(s); tone worst dLuma 13.0 on all land over 4 seam(s)"
+        ]
+      },
       "describe": "The CABLE-CAR shelf — a settlement shelf on the west coast, and the richest\nground in its neighbourhood.\n\nThe shelf itself: a broad level terrace about 45 m across occupying the middle\nof the cell, meadow green warmed with gold, open glades between orchard-like\nconifer stands, flowers permitted here and nowhere near it. Low natural\noutcrops and small rock terraces around its edge that a settlement",
       "sourcePx": 1254,
       "gates": [
         {
           "name": "key-light asymmetry",
-          "value": 0.0021,
+          "value": 0.0026,
           "pass": true,
-          "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004"
+          "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004; report-only under 5% land (18j, 2026-09-05: a 98%-sea shore cell read 0.0116 on noise)"
         },
         {
           "name": "gradient ratio",
-          "value": "1.473 (reported)",
+          "value": "1.62 (reported)",
           "pass": true,
           "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
         },
         {
           "name": "rock lighting",
-          "value": 0.04,
-          "pass": true,
+          "value": 0.223,
+          "pass": false,
           "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.14; limit 0.16 on the owner's eye (2026-09-02, the dark-forest gorge at 0.153)"
         },
         {
           "name": "land coverage",
-          "value": "89.4%",
+          "value": "87.3%",
           "pass": true
         },
         {
@@ -1388,37 +1431,43 @@
         },
         {
           "name": "mask completion",
-          "value": "+9 px grown, 42 px holes filled (reported)",
+          "value": "+1978 px grown, 150 px holes filled (reported)",
           "pass": true,
           "note": "the delivered mask grown into contiguous painted water within 48 px and speckle holes <=64 px filled before the cut (owner 2026-09-02); dry paint stops the growth, so a polyline mask still fails the rings"
         },
         {
           "name": "water fringe",
-          "value": "0.01%",
+          "value": "0%",
           "pass": true,
           "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
         },
         {
           "name": "water fringe (48px)",
-          "value": "0.01%",
+          "value": "0%",
           "pass": true,
           "note": "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)"
         },
         {
           "name": "water continuity",
-          "value": "ok (2 crossings checked, 1 bridged)",
-          "pass": true,
+          "value": "1 unmet crossing(s)",
+          "pass": false,
           "note": "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint"
         },
         {
-          "name": "palette conformance",
-          "value": "veg worst dBG 0.094 dLuma 9.1 over 1 seam(s); tone worst dLuma 9.3 on all land over 2 seam(s)",
+          "name": "chain continuity",
+          "value": "no chain in this cell (reported)",
           "pass": true,
+          "note": "the groove's height at each edge — the purple guide where it survived, else the darkest 0.3-3 m run in the 96 px beside the edge — within 48 px of the floor drawn from the neighbours' grooves (18n, owner 2026-09-06: 'use that to help with the matching')"
+        },
+        {
+          "name": "palette conformance",
+          "value": "veg worst dBG 0.127 dLuma 26.0 over 3 seam(s); tone worst dLuma 13.0 on all land over 4 seam(s)",
+          "pass": false,
           "note": "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13"
         },
         {
           "name": "crown scale",
-          "value": "2.352 m over 146 crowns (accepted range 1.7-5.2 m)",
+          "value": "2.352 m over 188 crowns (accepted range 1.7-5.2 m)",
           "pass": true,
           "note": "the worker's own median crown from c0-1-report.json, against the 1.7-5.2 m range the accepted cells measured (NOT the plan's written 4-7 m — see CROWN_MIN_M); crown.excludedElements must be empty, so an out-of-scale element cannot be measured around"
         }
@@ -1431,12 +1480,9 @@
         "lake",
         "fall"
       ],
-      "bridged": [
-        "c0-2 edge: rerouted my crossing 221 -> 277 (56px)"
-      ],
       "maskCompletion": {
-        "grownPx": 9,
-        "holePx": 42
+        "grownPx": 1978,
+        "holePx": 150
       },
       "biome": "lush-shelf",
       "source": "art-source/career-world/l2-land/tanium/c0-1",
@@ -1564,12 +1610,13 @@
       }
     },
     "c1-2": {
-      "authoredAt": "2026-09-05T04:30:11.139Z",
+      "authoredAt": "2026-09-06T05:06:14.184Z",
       "ownerOverride": {
-        "at": "2026-09-05T04:30:11.139Z",
-        "reason": "owner 2026-09-05, on the seven-cell picture with the candidate drawn in place: 'the bottom row looks fine I think'",
+        "at": "2026-09-06T05:06:14.185Z",
+        "reason": "owner 2026-09-06 02:50, on the candidates sheet: 'C1-1, 2-1, 1-2 are all good'",
         "failedGates": [
-          "palette conformance veg worst dBG 0.289 dLuma 36.8 over 2 seam(s); tone worst dLuma 17.9 on all land over 2 seam(s)"
+          "water continuity 1 unmet crossing(s)",
+          "palette conformance veg worst dBG 0.361 dLuma 35.3 over 3 seam(s); tone worst dLuma 18.2 on all land over 3 seam(s)"
         ]
       },
       "describe": "THE FOREST COMING DOWN TO THE SEA. The cell NORTH of this one (1,1) is dense\ndark forest and its canopy continues into this cell unbroken; the SOUTH edge is\nopen sea, the world's southern coast.\n\nSo: forest over most of the cell, thinning only in the last 30-40 m before the\ncliff edge where the wind gets at it — the outermost conifers low, wind-shaped\nand leaning inland, with bare rock and thin gr",
@@ -1577,25 +1624,25 @@
       "gates": [
         {
           "name": "key-light asymmetry",
-          "value": 0.0026,
+          "value": 0.0019,
           "pass": true,
-          "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004"
+          "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004; report-only under 5% land (18j, 2026-09-05: a 98%-sea shore cell read 0.0116 on noise)"
         },
         {
           "name": "gradient ratio",
-          "value": "1.247 (reported)",
+          "value": "1.34 (reported)",
           "pass": true,
           "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
         },
         {
           "name": "rock lighting",
-          "value": 0.115,
+          "value": "0.178 (n 4330, report-only)",
           "pass": true,
           "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.14; limit 0.16 on the owner's eye (2026-09-02, the dark-forest gorge at 0.153)"
         },
         {
           "name": "land coverage",
-          "value": "81.1%",
+          "value": "78.3%",
           "pass": true
         },
         {
@@ -1606,37 +1653,43 @@
         },
         {
           "name": "mask completion",
-          "value": "+132 px grown, 9 px holes filled (reported)",
+          "value": "+913 px grown, 85 px holes filled (reported)",
           "pass": true,
           "note": "the delivered mask grown into contiguous painted water within 48 px and speckle holes <=64 px filled before the cut (owner 2026-09-02); dry paint stops the growth, so a polyline mask still fails the rings"
         },
         {
           "name": "water fringe",
-          "value": "0.22%",
+          "value": "0.06%",
           "pass": true,
           "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
         },
         {
           "name": "water fringe (48px)",
-          "value": "0.1%",
+          "value": "0.07%",
           "pass": true,
           "note": "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)"
         },
         {
           "name": "water continuity",
-          "value": "ok (2 crossings checked, 1 bridged)",
-          "pass": true,
+          "value": "1 unmet crossing(s)",
+          "pass": false,
           "note": "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint"
         },
         {
+          "name": "chain continuity",
+          "value": "no chain in this cell (reported)",
+          "pass": true,
+          "note": "the groove's height at each edge — the purple guide where it survived, else the darkest 0.3-3 m run in the 96 px beside the edge — within 48 px of the floor drawn from the neighbours' grooves (18n, owner 2026-09-06: 'use that to help with the matching')"
+        },
+        {
           "name": "palette conformance",
-          "value": "veg worst dBG 0.289 dLuma 36.8 over 2 seam(s); tone worst dLuma 17.9 on all land over 2 seam(s)",
+          "value": "veg worst dBG 0.361 dLuma 35.3 over 3 seam(s); tone worst dLuma 18.2 on all land over 3 seam(s)",
           "pass": false,
           "note": "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13"
         },
         {
           "name": "crown scale",
-          "value": "2.156 m over 118 crowns (accepted range 1.7-5.2 m)",
+          "value": "2.842 m over 385 crowns (accepted range 1.7-5.2 m)",
           "pass": true,
           "note": "the worker's own median crown from c1-2-report.json, against the 1.7-5.2 m range the accepted cells measured (NOT the plan's written 4-7 m — see CROWN_MIN_M); crown.excludedElements must be empty, so an out-of-scale element cannot be measured around"
         }
@@ -1650,12 +1703,9 @@
         "stream",
         "fall"
       ],
-      "bridged": [
-        "c0-2 edge: rerouted my crossing 2380 -> 2449 (69px)"
-      ],
       "maskCompletion": {
-        "grownPx": 132,
-        "holePx": 9
+        "grownPx": 913,
+        "holePx": 85
       },
       "biome": "dark-forest",
       "source": "art-source/career-world/l2-land/tanium/c1-2",
@@ -1673,13 +1723,13 @@
       }
     },
     "c6-2": {
-      "authoredAt": "2026-09-05T04:30:34.469Z",
+      "authoredAt": "2026-09-05T18:08:59.116Z",
       "ownerOverride": {
-        "at": "2026-09-05T04:30:34.470Z",
-        "reason": "owner 2026-09-05, on the seven-cell picture with the candidate drawn in place: 'the bottom row looks fine I think'",
+        "at": "2026-09-05T18:08:59.116Z",
+        "reason": "owner 2026-09-05 16:55, a crop of c6-2's bay cut by a straight line against the new c6-1 among 'these area needs to be fixed'; this rebake against the new c6-1 matches that seam to 5 px; refused only on c5-2's beck (unmet by the served c6-2 as well) and vegetation colour 0.254",
         "failedGates": [
-          "rock lighting 0.203",
-          "water continuity 5 unmet crossing(s)"
+          "water continuity 1 unmet crossing(s)",
+          "palette conformance veg worst dBG 0.254 dLuma 4.0 over 2 seam(s); tone worst dLuma 3.7 on all land over 2 seam(s)"
         ]
       },
       "describe": "The CONSTRUCTION ZONE — south-east corner. Open sea on the SOUTH and the EAST.\n\nAn active quarry read from LANDFORM ONLY: no structures, no machinery, no\nbuildings anywhere. Cut benches stepping down toward the sea, three of them,\neach 10–15 m, with fresh pale cut faces that are visibly worked — straighter\nand cleaner than natural rock, saw-cut in places, but stepped and irregular in\nplan. Spoil f",
@@ -1687,25 +1737,242 @@
       "gates": [
         {
           "name": "key-light asymmetry",
-          "value": 0.0014,
+          "value": 0.0009,
           "pass": true,
           "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004"
         },
         {
           "name": "gradient ratio",
-          "value": "1.482 (reported)",
+          "value": "1.553 (reported)",
           "pass": true,
           "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
         },
         {
           "name": "rock lighting",
-          "value": 0.203,
-          "pass": false,
+          "value": 0.142,
+          "pass": true,
           "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.14; limit 0.16 on the owner's eye (2026-09-02, the dark-forest gorge at 0.153)"
         },
         {
           "name": "land coverage",
-          "value": "58.6%",
+          "value": "78.6%",
+          "pass": true
+        },
+        {
+          "name": "water cut clear",
+          "value": "0 px",
+          "pass": true,
+          "note": "paint surviving where the mask is fully water; exact zero by construction for pipeline-derived cells"
+        },
+        {
+          "name": "mask completion",
+          "value": "+2099 px grown, 11 px holes filled (reported)",
+          "pass": true,
+          "note": "the delivered mask grown into contiguous painted water within 48 px and speckle holes <=64 px filled before the cut (owner 2026-09-02); dry paint stops the growth, so a polyline mask still fails the rings"
+        },
+        {
+          "name": "water fringe",
+          "value": "0.15%",
+          "pass": true,
+          "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
+        },
+        {
+          "name": "water fringe (48px)",
+          "value": "0.05%",
+          "pass": true,
+          "note": "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)"
+        },
+        {
+          "name": "water continuity",
+          "value": "1 unmet crossing(s)",
+          "pass": false,
+          "note": "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint"
+        },
+        {
+          "name": "palette conformance",
+          "value": "veg worst dBG 0.254 dLuma 4.0 over 2 seam(s); tone worst dLuma 3.7 on all land over 2 seam(s)",
+          "pass": false,
+          "note": "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13"
+        },
+        {
+          "name": "crown scale",
+          "value": "3.723636 m over 29 crowns (accepted range 1.7-5.2 m)",
+          "pass": true,
+          "note": "the worker's own median crown from c6-2-report.json, against the 1.7-5.2 m range the accepted cells measured (NOT the plan's written 4-7 m — see CROWN_MIN_M); crown.excludedElements must be empty, so an out-of-scale element cannot be measured around"
+        }
+      ],
+      "shelf": "construction",
+      "features": [],
+      "waterZones": [
+        "coast",
+        "lake",
+        "stream",
+        "fall"
+      ],
+      "bridged": [
+        "c6-1 edge: rerouted my crossing 2259 -> 2205 (55px)"
+      ],
+      "maskCompletion": {
+        "grownPx": 2099,
+        "holePx": 11
+      },
+      "biome": "quarry",
+      "source": "art-source/career-world/l2-land/tanium/c6-2",
+      "stitch": {
+        "order": 17,
+        "tiles": [
+          81,
+          25,
+          9,
+          4,
+          4,
+          1,
+          1
+        ]
+      }
+    },
+    "c3-1": {
+      "authoredAt": "2026-09-06T17:37:30.354Z",
+      "ownerOverride": {
+        "at": "2026-09-06T17:37:30.355Z",
+        "reason": "owner 2026-09-06 17:25, on the served world: 'the center tiles that had the old attempt at the chain still need regen cause now it just has conflicting chains with the overlay' — the plain regen goes in; the chain is the layer",
+        "failedGates": [
+          "palette conformance veg worst dBG 0.166 dLuma 1.9 over 3 seam(s); tone worst dLuma 23.7 on all land over 4 seam(s)"
+        ]
+      },
+      "describe": "THE CAPITAL SHELF. The most important ground in the territory, and the richest\nin its neighbourhood.\n\nA broad level shelf occupying the centre of the cell, 55–65 m across, meadow\ngreen warmed with gold, open and generous. Orchard-like conifer stands with\nglades between them around its edges, flowers permitted on the shelf itself.\nThe shelf stands 12–18 m above the ground to the north and west on l",
+      "sourcePx": 1254,
+      "gates": [
+        {
+          "name": "key-light asymmetry",
+          "value": 0.0012,
+          "pass": true,
+          "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004; report-only under 5% land (18j, 2026-09-05: a 98%-sea shore cell read 0.0116 on noise)"
+        },
+        {
+          "name": "gradient ratio",
+          "value": "1.456 (reported)",
+          "pass": true,
+          "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
+        },
+        {
+          "name": "rock lighting",
+          "value": 0.061,
+          "pass": true,
+          "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.14; limit 0.16 on the owner's eye (2026-09-02, the dark-forest gorge at 0.153)"
+        },
+        {
+          "name": "land coverage",
+          "value": "95.8%",
+          "pass": true
+        },
+        {
+          "name": "water cut clear",
+          "value": "0 px",
+          "pass": true,
+          "note": "paint surviving where the mask is fully water; exact zero by construction for pipeline-derived cells"
+        },
+        {
+          "name": "mask completion",
+          "value": "+296 px grown, 37 px holes filled (reported)",
+          "pass": true,
+          "note": "the delivered mask grown into contiguous painted water within 48 px and speckle holes <=64 px filled before the cut (owner 2026-09-02); dry paint stops the growth, so a polyline mask still fails the rings"
+        },
+        {
+          "name": "water fringe",
+          "value": "0.12%",
+          "pass": true,
+          "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
+        },
+        {
+          "name": "water fringe (48px)",
+          "value": "0.19%",
+          "pass": true,
+          "note": "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)"
+        },
+        {
+          "name": "water continuity",
+          "value": "ok (6 crossings checked)",
+          "pass": true,
+          "note": "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint"
+        },
+        {
+          "name": "chain continuity",
+          "value": "no chain in this cell (reported)",
+          "pass": true,
+          "note": "the groove's height at each edge — the purple guide where it survived, else the darkest 0.3-3 m run in the 96 px beside the edge — within 48 px of the floor drawn from the neighbours' grooves (18n, owner 2026-09-06: 'use that to help with the matching')"
+        },
+        {
+          "name": "palette conformance",
+          "value": "veg worst dBG 0.166 dLuma 1.9 over 3 seam(s); tone worst dLuma 23.7 on all land over 4 seam(s)",
+          "pass": false,
+          "note": "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13"
+        },
+        {
+          "name": "crown scale",
+          "value": "3.136 m over 63 crowns (accepted range 1.7-5.2 m)",
+          "pass": true,
+          "note": "the worker's own median crown from c3-1-report.json, against the 1.7-5.2 m range the accepted cells measured (NOT the plan's written 4-7 m — see CROWN_MIN_M); crown.excludedElements must be empty, so an out-of-scale element cannot be measured around"
+        }
+      ],
+      "shelf": "capital",
+      "features": [],
+      "waterZones": [
+        "lake",
+        "stream"
+      ],
+      "maskCompletion": {
+        "grownPx": 296,
+        "holePx": 37
+      },
+      "biome": "lush-shelf",
+      "source": "art-source/career-world/l2-land/tanium/c3-1",
+      "stitch": {
+        "order": 18,
+        "tiles": [
+          100,
+          36,
+          16,
+          9,
+          4,
+          2,
+          1
+        ]
+      }
+    },
+    "c4-0": {
+      "authoredAt": "2026-09-05T23:11:12.801Z",
+      "ownerOverride": {
+        "at": "2026-09-05T23:11:12.802Z",
+        "reason": "owner 2026-09-05 21:40, on the candidate's 3x3 view: 'Tc4-0 looks fine' (refused only on vegetation colour across the territory border; the border river met)",
+        "failedGates": [
+          "palette conformance veg worst dBG 0.503 dLuma 40.9 over 2 seam(s); tone worst dLuma 14.1 on all land over 4 seam(s)"
+        ]
+      },
+      "describe": "CONNECTING GROUND, the eastern half of the isthmus. The entire NORTH edge is\nland continuing into NinjaOne — no coast on that edge.\n\nOpen heather-and-grass moor, wind-scoured, rolling rather than terraced:\nshallow rises and hollows a few metres deep, boulder fields, low basalt\noutcrops breaking the surface, an occasional short column wall no more than 5 m\nhigh. Heather sparse and subdued, never a ",
+      "sourcePx": 1254,
+      "gates": [
+        {
+          "name": "key-light asymmetry",
+          "value": 0.0004,
+          "pass": true,
+          "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004; report-only under 5% land (18j, 2026-09-05: a 98%-sea shore cell read 0.0116 on noise)"
+        },
+        {
+          "name": "gradient ratio",
+          "value": "1.54 (reported)",
+          "pass": true,
+          "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
+        },
+        {
+          "name": "rock lighting",
+          "value": 0.086,
+          "pass": true,
+          "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.14; limit 0.16 on the owner's eye (2026-09-02, the dark-forest gorge at 0.153)"
+        },
+        {
+          "name": "land coverage",
+          "value": "96.2%",
           "pass": true
         },
         {
@@ -1734,40 +2001,260 @@
         },
         {
           "name": "water continuity",
-          "value": "5 unmet crossing(s)",
-          "pass": false,
+          "value": "ok (2 crossings checked)",
+          "pass": true,
           "note": "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint"
         },
         {
           "name": "palette conformance",
-          "value": "veg worst dBG 0.014 dLuma 8.6 over 1 seam(s); tone worst dLuma 4.2 on all land over 2 seam(s)",
+          "value": "veg worst dBG 0.503 dLuma 40.9 over 2 seam(s); tone worst dLuma 14.1 on all land over 4 seam(s)",
+          "pass": false,
+          "note": "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13"
+        },
+        {
+          "name": "crown scale",
+          "value": "2.94 m over 31 crowns (accepted range 1.7-5.2 m)",
+          "pass": true,
+          "note": "the worker's own median crown from c4-0-report.json, against the 1.7-5.2 m range the accepted cells measured (NOT the plan's written 4-7 m — see CROWN_MIN_M); crown.excludedElements must be empty, so an out-of-scale element cannot be measured around"
+        }
+      ],
+      "shelf": null,
+      "features": [],
+      "waterZones": [
+        "stream",
+        "lake"
+      ],
+      "biome": "moor",
+      "source": "art-source/career-world/l2-land/tanium/c4-0",
+      "stitch": {
+        "order": 19,
+        "tiles": [
+          90,
+          30,
+          12,
+          6,
+          2,
+          2,
+          1
+        ]
+      }
+    },
+    "c1-1": {
+      "authoredAt": "2026-09-06T17:39:28.897Z",
+      "ownerOverride": {
+        "at": "2026-09-06T17:39:28.897Z",
+        "reason": "owner 2026-09-06 17:25, on the served world: 'the center tiles that had the old attempt at the chain still need regen cause now it just has conflicting chains with the overlay' — the plain regen goes in; the chain is the layer",
+        "failedGates": [
+          "water continuity 1 unmet crossing(s)"
+        ]
+      },
+      "describe": "The darkest cell in the territory. Dense dark conifer stands on mossy ground,\nlittle open ground anywhere, flat haze lying between the trunks.\n\nA gorge runs north-east to south-west across the cell, 20–30 m deep, its walls\nmossy basalt with wet talus at the foot. A stream in the bottom with two falls\nand pools lying in shade. The canopy nearly closes over the gorge in places.\nThis is the deepest g",
+      "sourcePx": 1254,
+      "gates": [
+        {
+          "name": "key-light asymmetry",
+          "value": 0.0031,
+          "pass": true,
+          "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004; report-only under 5% land (18j, 2026-09-05: a 98%-sea shore cell read 0.0116 on noise)"
+        },
+        {
+          "name": "gradient ratio",
+          "value": "1.511 (reported)",
+          "pass": true,
+          "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
+        },
+        {
+          "name": "rock lighting",
+          "value": "0.048 (n 2526, report-only)",
+          "pass": true,
+          "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.14; limit 0.16 on the owner's eye (2026-09-02, the dark-forest gorge at 0.153)"
+        },
+        {
+          "name": "land coverage",
+          "value": "97.5%",
+          "pass": true
+        },
+        {
+          "name": "water cut clear",
+          "value": "0 px",
+          "pass": true,
+          "note": "paint surviving where the mask is fully water; exact zero by construction for pipeline-derived cells"
+        },
+        {
+          "name": "mask completion",
+          "value": "+53 px grown, 2 px holes filled (reported)",
+          "pass": true,
+          "note": "the delivered mask grown into contiguous painted water within 48 px and speckle holes <=64 px filled before the cut (owner 2026-09-02); dry paint stops the growth, so a polyline mask still fails the rings"
+        },
+        {
+          "name": "water fringe",
+          "value": "0.05%",
+          "pass": true,
+          "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
+        },
+        {
+          "name": "water fringe (48px)",
+          "value": "0%",
+          "pass": true,
+          "note": "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)"
+        },
+        {
+          "name": "water continuity",
+          "value": "1 unmet crossing(s)",
+          "pass": false,
+          "note": "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint"
+        },
+        {
+          "name": "chain continuity",
+          "value": "no chain in this cell (reported)",
+          "pass": true,
+          "note": "the groove's height at each edge — the purple guide where it survived, else the darkest 0.3-3 m run in the 96 px beside the edge — within 48 px of the floor drawn from the neighbours' grooves (18n, owner 2026-09-06: 'use that to help with the matching')"
+        },
+        {
+          "name": "palette conformance",
+          "value": "veg worst dBG 0.146 dLuma 4.7 over 3 seam(s); tone worst dLuma 20.8 on all land over 4 seam(s)",
           "pass": true,
           "note": "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13"
         },
         {
           "name": "crown scale",
-          "value": "3.527656 m over 41 crowns (accepted range 1.7-5.2 m)",
+          "value": "2.156 m over 54 crowns (accepted range 1.7-5.2 m)",
           "pass": true,
-          "note": "the worker's own median crown from c6-2-report.json, against the 1.7-5.2 m range the accepted cells measured (NOT the plan's written 4-7 m — see CROWN_MIN_M); crown.excludedElements must be empty, so an out-of-scale element cannot be measured around"
+          "note": "the worker's own median crown from c1-1-report.json, against the 1.7-5.2 m range the accepted cells measured (NOT the plan's written 4-7 m — see CROWN_MIN_M); crown.excludedElements must be empty, so an out-of-scale element cannot be measured around"
         }
       ],
-      "shelf": "construction",
-      "features": [],
+      "shelf": null,
+      "features": [
+        "gorge span"
+      ],
       "waterZones": [
-        "coast",
-        "lake",
         "stream",
         "fall"
       ],
-      "biome": "quarry",
-      "source": "art-source/career-world/l2-land/tanium/c6-2",
+      "maskCompletion": {
+        "grownPx": 53,
+        "holePx": 2
+      },
+      "biome": "dark-forest",
+      "source": "art-source/career-world/l2-land/tanium/c1-1",
       "stitch": {
-        "order": 17,
+        "order": 20,
         "tiles": [
-          81,
-          25,
+          100,
+          36,
+          16,
           9,
           4,
+          1,
+          1
+        ]
+      }
+    },
+    "c2-1": {
+      "authoredAt": "2026-09-06T17:38:49.539Z",
+      "ownerOverride": {
+        "at": "2026-09-06T17:38:49.540Z",
+        "reason": "owner 2026-09-06 17:25, on the served world: 'the center tiles that had the old attempt at the chain still need regen cause now it just has conflicting chains with the overlay' — the plain regen goes in; the chain is the layer",
+        "failedGates": [
+          "water fringe 4.05%",
+          "water fringe (48px) 3.64%",
+          "palette conformance veg worst dBG 0.108 dLuma 23.5 over 3 seam(s); tone worst dLuma 39.3 on all land over 4 seam(s)"
+        ]
+      },
+      "describe": "THE EASTERN EDGE OF THE FOREST, and the cell that has to make the forest read\nas a forest rather than as one dark square. The cell WEST of this one (1,1) is\ndense dark forest; the cell EAST (3,1) is the capital's meadow shelf.\n\nSo the canopy is unbroken along the WEST edge and THINS EASTWARD across this\ncell: dense stands for the western third, then stands breaking into glades and\nscattered groups",
+      "sourcePx": 1254,
+      "gates": [
+        {
+          "name": "key-light asymmetry",
+          "value": 0.0026,
+          "pass": true,
+          "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004; report-only under 5% land (18j, 2026-09-05: a 98%-sea shore cell read 0.0116 on noise)"
+        },
+        {
+          "name": "gradient ratio",
+          "value": "1.473 (reported)",
+          "pass": true,
+          "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
+        },
+        {
+          "name": "rock lighting",
+          "value": 0.099,
+          "pass": true,
+          "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.14; limit 0.16 on the owner's eye (2026-09-02, the dark-forest gorge at 0.153)"
+        },
+        {
+          "name": "land coverage",
+          "value": "93.5%",
+          "pass": true
+        },
+        {
+          "name": "water cut clear",
+          "value": "0 px",
+          "pass": true,
+          "note": "paint surviving where the mask is fully water; exact zero by construction for pipeline-derived cells"
+        },
+        {
+          "name": "mask completion",
+          "value": "+11603 px grown, 1106 px holes filled (reported)",
+          "pass": true,
+          "note": "the delivered mask grown into contiguous painted water within 48 px and speckle holes <=64 px filled before the cut (owner 2026-09-02); dry paint stops the growth, so a polyline mask still fails the rings"
+        },
+        {
+          "name": "water fringe",
+          "value": "4.05%",
+          "pass": false,
+          "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
+        },
+        {
+          "name": "water fringe (48px)",
+          "value": "3.64%",
+          "pass": false,
+          "note": "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)"
+        },
+        {
+          "name": "water continuity",
+          "value": "ok (4 crossings checked)",
+          "pass": true,
+          "note": "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint"
+        },
+        {
+          "name": "chain continuity",
+          "value": "no chain in this cell (reported)",
+          "pass": true,
+          "note": "the groove's height at each edge — the purple guide where it survived, else the darkest 0.3-3 m run in the 96 px beside the edge — within 48 px of the floor drawn from the neighbours' grooves (18n, owner 2026-09-06: 'use that to help with the matching')"
+        },
+        {
+          "name": "palette conformance",
+          "value": "veg worst dBG 0.108 dLuma 23.5 over 3 seam(s); tone worst dLuma 39.3 on all land over 4 seam(s)",
+          "pass": false,
+          "note": "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13"
+        },
+        {
+          "name": "crown scale",
+          "value": "2.548 m over 546 crowns (accepted range 1.7-5.2 m)",
+          "pass": true,
+          "note": "the worker's own median crown from c2-1-report.json, against the 1.7-5.2 m range the accepted cells measured (NOT the plan's written 4-7 m — see CROWN_MIN_M); crown.excludedElements must be empty, so an out-of-scale element cannot be measured around"
+        }
+      ],
+      "shelf": null,
+      "features": [],
+      "waterZones": [
+        "coast",
+        "stream"
+      ],
+      "maskCompletion": {
+        "grownPx": 11603,
+        "holePx": 1106
+      },
+      "biome": "dark-forest",
+      "source": "art-source/career-world/l2-land/tanium/c2-1",
+      "stitch": {
+        "order": 21,
+        "tiles": [
+          100,
+          36,
+          16,
+          9,
           4,
           1,
           1

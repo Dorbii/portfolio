@@ -1,0 +1,53 @@
+{
+  "cell": "c2-1",
+  "territory": "tanium",
+  "layer": "L2-land",
+  "status": "quarantine-only",
+  "generationMode": "single built-in edit call with both required images",
+  "generationSize": {
+    "widthPx": 1254,
+    "heightPx": 1254
+  },
+  "shippedCanvasSize": {
+    "widthPx": 2560,
+    "heightPx": 2560
+  },
+  "sourceSha256": "70C541E1BE6BF5DC7E0EE61A0056A56E978EEA380C997AB3B7B8E006CB404AF1",
+  "lightingIsotropy": {
+    "peakVsUniformOverLand": 1.514802,
+    "uniformReference": 1.0,
+    "firstAngularMoment": 0.00022,
+    "sampleCount": 1243036,
+    "method": "Thirty-six full-angle luminance-gradient bins over non-water pixels; gradients below 12 were omitted."
+  },
+  "terrainFractions": {
+    "buildable": 0.41,
+    "steep": 0.14,
+    "method": "Native-resolution plan-area estimate: open and gently broken shelf counted as buildable; crag faces, coastal rock and cliff bands counted as steep; forest and rough non-steep ground remain in neither class."
+  },
+  "waterFootprintFraction": 0.05807127,
+  "waterMask": {
+    "opaqueWhitePixels": 91318,
+    "transparentPixels": 1481198,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedComponents": 2,
+    "interiorHolePixels": 0
+  },
+  "crown": {
+    "medianMetres": 2.548,
+    "medianPx": 53.078,
+    "sampleCount": 546,
+    "method": "Full-frame dark-green local-apex census with one response per crown; horizontal skirt span measured at native resolution and converted to the 2560 px canvas, retaining saplings.",
+    "excludedElements": []
+  },
+  "reviewNotes": [
+    "Visual acceptance is not claimed.",
+    "The raw square edit result is preserved byte-for-byte; the source was not resized, cropped or retouched.",
+    "The northern coast water lies in the generated context margin and is included in the complete source-space water mask.",
+    "The model repainted portions of the authored context margin; the pipeline binding is expected to restore those neighbour pixels, so the stitched grey-boundary seam still requires review.",
+    "Several conifer crowns visibly retain internal light-dark modelling instead of a strictly single flat value; this is a visual contract risk, not cleared by the aggregate isotropy metric.",
+    "The beacon crag is present and bare, but its apparent flat top should be checked by the owner against the requested site scale.",
+    "Right-side stepped basalt bands are inherited or continued natural terrain; no rune marks, buildings, roads, bridges, figures or rail were added."
+  ]
+}

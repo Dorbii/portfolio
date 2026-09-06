@@ -39,6 +39,72 @@ async function arrivals(x) {
   return runs.filter(([a, b]) => b - a + 1 >= 30).map(([a, b]) => ({ pct: Math.round((a + b) / 2 / KEPT * 100), m: Math.round((b - a) / KEPT * 97.6) }));
 }
 
+// The shared edge as the island's art delivers it, in order along the edge:
+// segments of GROUND and SEA (runs under 30 px merged into their neighbour).
+// Five shores tonight laid land along a whole edge that was mostly the
+// island's sea (c1-2, c1-3, c4-8, c7-0, c7-4): "its ground arrives across your
+// edge" read as "the edge is land", with the water listed after as streams to
+// meet. So the brief now says, stretch by stretch, what is sea and what is
+// ground — the sea stays open sea, the ground is continued.
+async function edgeMap(x) {
+  const f = `${root}/${x.extends.territory}/${x.extends.id}/${x.extends.id}-l2.png`;
+  if (!fs.existsSync(f)) return null;
+  return segmentsOf(f, { S: "top", N: "bottom", E: "left", W: "right" }[x.island]);
+}
+async function segmentsOf(f, edge) {
+  const { data, info } = await sharp(f).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const W = info.width, bleed = Math.round((W - KEPT) / 2);
+  const along = edge === "top" || edge === "bottom";
+  const line = edge === "bottom" || edge === "right" ? bleed + KEPT : bleed;
+  const wet = new Array(KEPT);
+  for (let i = 0; i < KEPT; i += 1) {
+    let mn = 255;
+    for (let d = -8; d <= 8; d += 1) {
+      const [px, py] = along ? [bleed + i, line + d] : [line + d, bleed + i];
+      if (px < 0 || py < 0 || px >= W || py >= W) continue;
+      mn = Math.min(mn, data[(py * W + px) * 4 + 3]);
+    }
+    wet[i] = mn < 128;
+  }
+  const raw = []; let s = 0;
+  for (let i = 1; i <= KEPT; i += 1) if (i === KEPT || wet[i] !== wet[s]) { raw.push({ wet: wet[s], a: s, b: i - 1 }); s = i; }
+  const segs = [];
+  for (const r of raw) {
+    const last = segs[segs.length - 1];
+    if (last && (r.b - r.a + 1 < 30 || last.wet === r.wet)) { last.b = r.b; continue; }
+    segs.push({ ...r });
+  }
+  return segs.map((g) => ({ wet: g.wet, from: Math.round(g.a / KEPT * 100), to: Math.round((g.b + 1) / KEPT * 100), m: (g.b - g.a + 1) / KEPT * 97.6 }));
+}
+
+// What the cell's LAST candidate did at that seam, measured: where it put
+// land over the island's sea or water over the island's ground, in % along
+// the edge. The candidate's land layer survives in its working folder until
+// the next dispatch, which is when this runs. A retry then carries the exact
+// correction instead of the same words again (c8-7's land began at 37% where
+// the island's begins at 54%; prose without a number drifted 10-20 m).
+async function lastAttemptNote(x, id) {
+  const f = `.codex-tmp/authoring/cells/coast/${id}/${id}-l2.png`;
+  const island = `${root}/${x.extends.territory}/${x.extends.id}/${x.extends.id}-l2.png`;
+  if (!fs.existsSync(f) || !fs.existsSync(island)) return "";
+  const mine = await segmentsOf(f, { E: "right", W: "left", N: "top", S: "bottom" }[x.island]);
+  const theirs = await segmentsOf(island, { S: "top", N: "bottom", E: "left", W: "right" }[x.island]);
+  const stateAt = (segs, p) => segs.find((g) => p >= g.from && p < g.to)?.wet;
+  const faults = [];
+  let cur = null;
+  for (let p = 0; p <= 100; p += 1) {
+    const kind = p === 100 ? null : (stateAt(theirs, p) === true && stateAt(mine, p) === false ? "land-over-sea" : stateAt(theirs, p) === false && stateAt(mine, p) === true ? "water-over-ground" : null);
+    if (cur && kind !== cur.kind) { if (cur.to - cur.from >= 2) faults.push(cur); cur = null; }
+    if (kind && !cur) cur = { kind, from: p, to: p };
+    if (cur) cur.to = p;
+  }
+  if (!faults.length) return "";
+  const sideName = { S: "SOUTH", N: "NORTH", E: "EAST", W: "WEST" }[x.island];
+  return `\n\n**Your previous candidate missed this edge — measured, not an opinion:**\n${faults.map((v) => v.kind === "land-over-sea"
+    ? `- from ${v.from}% to ${v.to}% of the ${sideName} edge it painted LAND where the island's SEA arrives — that stretch must be open water at the seam.`
+    : `- from ${v.from}% to ${v.to}% of the ${sideName} edge it painted WATER where the island's GROUND arrives — that stretch must be land at the seam, continuing the island's.`).join("\n")}\nThe edge map above is exact; match it to the percent this time.`;
+}
+
 const PERSPECTIVE = {
   north: `**Perspective.** This is the island's NORTH shore, and the world is seen from
 the south-south-east, so this shore is seen from BEHIND: no cliff face shows.
@@ -104,7 +170,9 @@ Each inlet is OPEN WATER at the seam and continues into this cell as a cove
 that opens to the sea; the land between the inlets continues 15-40 m as low
 headlands and ends. The first candidate met only the sea and walled off the
 inlets; that is wrong. Your south edge meets the shore cell below (c7-1):
-carry the shoreline down to it, not across it.`,
+carry the shoreline down to it, not across it. The second candidate (owner
+2026-09-05 19:20, on the live world: "coast issues") ended c6-0's land in a
+straight cut at the seam and ran its own land to the south edge; both wrong.`,
   // owner 2026-09-05 07:30, crop 1: the fill line from c0-6's corner up to
   // T c0-0's west edge
   "c0-5": `**A headland down to c0-6.** T c0-0's cliffs arrive across the bottom 15% of
@@ -131,12 +199,104 @@ c6-0's edge, swelling 15-40 m east into this cell, and coming back to T
 c6-1's cliff at the top of the cell below (c8-6). So: a rounded headland,
 widest at your south edge, its rim of broken column tops facing east and
 south; open sea north of it and east of it.`,
+  // owner 2026-09-05 19:20, on the live world: c6-8's candidate is "not a
+  // coastline, the seam just cuts off" — a whole plateau to the south edge,
+  // its cliff wall cut by the world's edge
+  "c6-8": `**A shore, not a plateau — hard.** T c5-2's ground reaches your NORTH edge
+only in the last 7% of it, at the east end, with a watercourse beside it; the
+other 89% of that edge is the island's SEA and it stays sea. Carry that one
+strip of ground 15-40 m south as a low headland and END IT at broken column
+tops with talus and surf; everything south, west and east of that headland is
+open sea to every edge of this cell. The previous candidate filled the whole
+cell with a plateau whose cliff wall ran straight to the south edge and was
+cut off there (owner: "this is not a coastline, the seam just cuts off"); that
+is wrong. No land may touch your SOUTH, EAST or WEST edge.`,
+  // owner 2026-09-05 19:20: N c4-0's bay and cliff are cut off by a straight
+  // vertical line at this cell's west edge — the candidate had only skerries
+  "c7-1": `**Continue N c4-0's shore — hard.** N c4-0's ground arrives across the lower
+part of your WEST edge with a bay in it: the bay's water is OPEN WATER at the
+seam and opens out east into the sea; the ground on either side of it continues
+15-40 m east as low headlands of broken columns and ends. The previous
+candidate painted only skerries and left N c4-0's cliff and bay cut off by a
+straight line at the seam (owner: "the seam just cuts off"); that is wrong. The
+shore cells above (c7-0) and below (c7-2) carry the same coast: meet their land
+at your north and south edges where the map says ground.`,
+  // owner 2026-09-05 19:20: N c4-1's peninsula ends in a vertical cut at the
+  // seam; the candidate's sea and skerries started right at the line
+  "c7-2": `**Continue the peninsula — hard.** N c4-1's ground reaches your WEST edge in
+three stretches; the northern one is a peninsula with cliffs on both sides.
+Every stretch continues east 15-40 m at exactly the width it arrives and ends
+in broken column tops; the sea between them is open water at the seam. The
+previous candidate started its sea and skerries at the seam over the last of
+those stretches, so N c4-1's land ends in a straight vertical cut; that is
+wrong. Your north edge meets c7-1 and your south edge meets c7-3: carry the
+shoreline to both, not across them.`,
+  // owner 2026-09-05 19:20: a straight strip of dark water along the seam —
+  // the candidate put land where N c4-2's sea arrives and sea where its ground does
+  "c7-3": `**The sea at the seam is the island's own sea — hard.** N c4-2's edge is sea
+for almost its whole length, with one short stretch of ground near the middle.
+Where the sea arrives it stays OPEN SEA right at the seam: no shore, no rock,
+no strip of land along the line. The one stretch of ground continues 15-40 m
+east and ends. The previous candidate painted a coast along the whole seam and
+left a straight channel of dark water between it and N c4-2's cliffs (owner:
+"alignment issues and coast issues"); that is wrong.`,
+  // owner 2026-09-05 21:40, on the candidate's 3x3 view: "C1-4 almost but
+  // needs to finish the coast or expand to do so"
+  "c1-4": `**Finish the coast — hard.** N c0-3's ground arrives across your EAST edge
+and the shore cell c1-3 above you carries the same coast to your NORTH edge;
+T c0-0's cliffs stand at your SOUTH edge. The shoreline runs CONTINUOUSLY
+from c1-3's land at the north edge, down the west side of N c0-3's ground,
+to T c0-0's cliffs at the south edge — one coast, no land ending in a
+straight cut and no gap of open water between two pieces of coast. Expand
+the land where that is needed to join them. The previous candidate left the
+coast unfinished at both ends and a rectangle of painted water at the
+south-east corner; both wrong.`,
+  // owner 2026-09-05 21:40: c0-6 "needs to finish the coast in the cells
+  // above and below it" — c0-7 is the cell below, new in the plan
+  "c0-7": `**End c0-6's coast.** c0-6's land arrives across your NORTH edge; carry it
+15-40 m south as the same cliffed shore, wandering, and END it — every edge
+of this cell but the north is open sea, and nothing stands in it beyond a
+stack or two close in.`,
+  // owner 2026-09-06 02:50: "C1-3 shoulda just been a bit of land to finish
+  // the neighbor coast" — the candidate put a headland at the bottom and
+  // nothing where N c0-2's two headlands arrive
+  "c1-3": `**A bit of land to finish the neighbour's coast — nothing more.** N c0-2's
+two headlands arrive across your EAST edge; each continues 8-20 m into this
+cell at the width it arrives and ENDS in broken column tops. That is all the
+land in this cell: the bay between them and everything west is open sea.
+No headland anywhere the island's ground does not arrive.`,
+  // owner 2026-09-06 02:50: "c4-8 needs to fix the coast" — two candidates,
+  // a plateau and a cut plateau, neither a coast
+  "c4-8": `**A coast, not a plateau — hard.** T c3-2's ground arrives across your NORTH
+edge between its bay at the west end and the five falls; continue it 15-40 m
+south as a cliffed shore that WANDERS, the falls reaching the sea as short
+inlets, the bay staying open water at the seam and opening west into the
+sea. The shore ends inside this cell; the west edge, the south edge and the
+sea below the shore are open water with nothing in them. Two previous
+candidates carried a plateau across the cell; both wrong.`,
+  // owner 2026-09-06 02:50: "c0-5 needs regen"
+  "c0-5": `**Regenerated on the owner's word.** T c0-0's cliffs arrive across the bottom
+of your EAST edge and c0-6's coast arrives across your SOUTH edge: one
+continuous cliffed shore joins them through this cell's south-east corner,
+15-40 m from each edge, wandering, ending in broken column tops. Everything
+north and west of that shore is open sea. No bars, no slivers, no straight
+edges.`,
   "c8-6": `**The bulge closes; then the chain's end.** The rounded headland from c8-5
 above comes down across your NORTH edge and closes back onto T c6-1's cliff,
 which arrives across the top 19% of your WEST edge. Below that, T c6-1's
 cliff face runs down the seam: continue it as a sea cliff with talus at its
 foot and, 20-40 m out, the stack the rune chain's last line cuts across —
 c6-1 is the chain's seaward end. Open sea east and south.`,
+  // owner 2026-09-05 17:20, on c7-8's candidate: "this kinda looks like an
+  // unnatural transition to the ocean" — the seam matched; the shore read as
+  // a wall dropping into deep water
+  "c7-8": `**The transition to the sea must read natural — hard.** No wall of columns
+dropping straight into deep water. The plateau steps DOWN to the sea: broken
+column tops at different heights, then collapsed drums and talus at the foot,
+then a shingle beach or a shallow shelf, then skerries and half-drowned rock
+just offshore, and only then open sea. The shoreline wanders in and out; a
+cove or two where the ground comes low. The previous candidate was a cliff
+wall on the sea; that is wrong.`,
   "c8-4": `**The corner north-east of T c6-0.** The shore cell c7-4 lies to your WEST
 and c8-5 to your SOUTH; T c6-0's north-east corner touches your south-west
 corner. Carry their shorelines round this corner as one line — a low rim of
@@ -158,26 +318,40 @@ for (const x of def.coastCells) {
   const sideName = { S: "SOUTH", N: "NORTH", E: "EAST", W: "WEST" }[x.island];
   const seaSides = ["NORTH", "SOUTH", "EAST", "WEST"].filter((s) => s !== sideName);
   const water = await arrivals(x);
-  const waterText = water.length
-    ? `\n\n**Water arriving across the ${sideName} edge**, measured off the island's art:\n${water.map((w) => `- at **${w.pct}% along that edge**, about ${w.m} m wide — meet it and let it reach the sea`).join("\n")}`
-    : "";
+  const map = await edgeMap(x);
+  const fromEnd = x.island === "N" || x.island === "S" ? "west" : "north";
+  const seaShare = map ? Math.round(map.filter((g) => g.wet).reduce((a, g) => a + g.to - g.from, 0)) : 0;
+  const mapText = map
+    ? `\n\n**Your ${sideName} edge, from its ${fromEnd} end, exactly as the island's art delivers it** (${seaShare}% of it is the island's sea):\n${map.map((g) => g.wet
+      ? (g.m >= 15
+        ? `- **${g.from}-${g.to}%: the island's SEA** — ${g.m.toFixed(0)} m of open water at the seam. It stays OPEN SEA in this cell: no rock, no beach, no stack across it.`
+        : `- **${g.from}-${g.to}%: a watercourse** about ${g.m.toFixed(0)} m wide — meet it at the seam and let it reach the sea.`)
+      : `- **${g.from}-${g.to}%: the island's GROUND** — continue it exactly as it arrives for 15-40 m and end it at the shore.`).join("\n")}`
+    : (water.length
+      ? `\n\n**Water arriving across the ${sideName} edge**, measured off the island's art:\n${water.map((w) => `- at **${w.pct}% along that edge**, about ${w.m} m wide — meet it and let it reach the sea`).join("\n")}`
+      : "");
   const owner = x.extends.territory === "ninjaone" ? "NinjaOne's" : x.extends.territory === "tanium" ? "Tanium's" : "the coast's own";
   const brief = `THE ${x.shore.toUpperCase()} SHORE beside ${owner} ${x.extends.id} (${islandBiome}).
 
-The island lies to the ${sideName}. Its ground — ${canon[islandBiomeId]?.ground || islandBiomeId} —
-arrives across your ${sideName} edge as real paint. **Continue it exactly as it
-arrives** for 15-40 m into this cell, the distance varying along the edge so
-the shoreline wanders, and end it at the shore: weathered columnar basalt,
-columns of uneven height, tops broken at different levels, collapsed drums in
-talus at the foot, a shingle cove or two where the ground comes down low. Beyond
-the shore, the rest of this cell is OPEN SEA: surf and wash at the rock, one or
-two small stacks or skerries close in, nothing else.
+The island lies to the ${sideName}. Along your ${sideName} edge its art arrives as real
+paint — its ground (${canon[islandBiomeId]?.ground || islandBiomeId}) in some
+stretches and its SEA in others; the edge map below says which is which.
+**Where its ground arrives, continue it exactly as it arrives** for 15-40 m
+into this cell, the distance varying along the edge so the shoreline wanders,
+and end it at the shore: weathered columnar basalt, columns of uneven height,
+tops broken at different levels, collapsed drums in talus at the foot, a
+shingle cove or two where the ground comes down low. **Where its sea arrives,
+the sea continues**: open water at the seam and on into this cell, with no
+land across it. Beyond the shore, the rest of this cell is OPEN SEA: surf and
+wash at the rock, one or two small stacks or skerries close in, nothing else.
+Do not put land along the whole ${sideName} edge; only where the map says ground.
 
 ${PERSPECTIVE[x.shore]}
 
 No meadow, no flowers, no structures. Dark conifers only where they arrive
-from the island. Carry land only across the ${sideName} edge; the ${seaSides.join(", ")} edges are sea.${waterText}`;
-  fs.writeFileSync(`${root}/coast/briefs/${id}.md`, brief + (NOTES[id] ? `\n\n${NOTES[id]}` : "") + LIGHTING + "\n");
+from the island. Carry land only across the ${sideName} edge; the ${seaSides.join(", ")} edges are sea.${mapText}`;
+  const lastNote = await lastAttemptNote(x, id);
+  fs.writeFileSync(`${root}/coast/briefs/${id}.md`, brief + (NOTES[id] ? `\n\n${NOTES[id]}` : "") + lastNote + LIGHTING + "\n");
   n += 1;
   console.log(`  ${id}: ${x.shore} shore beside ${x.extends.territory} ${x.extends.id} (${islandBiomeId}), ${water.length} water arrival(s)`);
 }

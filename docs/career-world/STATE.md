@@ -4,7 +4,608 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-05 07:00 UTC, LATEST (current):** **THE ISLAND IS SERVED END TO
+**2026-09-06 17:05 UTC, LATEST (current):** **SERVED 17:02Z (commit 2e53f695)
+— THE WORLD IS CURRENT FOR THE OCEAN THREAD; THE WATER-CUT PASS IS COMMITTED
+(c2f27814).** Owner 17:40-17:50 (his clock): "fix this spot [c7-8's shore]
+and do a full pass to make sure all the water of the land tiles is cut
+properly then commit … it needs those areas cleared"; "I think im looking
+at stale land" (nothing had been served since 06:14Z: the serve was gated
+behind the regen). → A HOLD (a file inside `.codex-tmp/authoring/cell.lock`
+so cell.mjs cannot remove the dir) stopped chain6 after c1-1 (c6-1, c0-1
+died on the lock without a bake; hold-release.sh cleared it), chain7 ran:
+c1-2 and c7-8 re-cut with `conform-band --open 6` (a morphological opening:
+spikes and slivers under 6 m go; c7-8 also saw the now-authored c6-8 as sea
+on its west — 53.5% trimmed) and stitched on his words; **water-cut-pass.mjs
+--fix** cut painted water left opaque (regions >= 300 px that touch cut
+water) from the recorded layers of C c7-2 (49 m²), C c5-0, C c7-0, T c6-1,
+N c3-1 (a pool margin; its 10,703 px of blue haze left alone) and restitched
+them (no gates); committed; served (tone + feather + the chain layer). The
+chain regen (chain6): c4-1 landed plain; c3-1, c5-1, c2-1, c1-1 refused
+(tone / veg / crossings) → candidates, previewed WITH the chain layer;
+**chain8.sh** (waiter after "chain7 done") regenerates c6-1 and c0-1 plain,
+then serves. **The chain layer as served:** the carved groove (r4) bedded
+over the seven chain cells; the rune panels at the nodes; the TRIAL hub
+north of the capital in T c3-0 with spokes to leaders at 2.2 / 3.5 / 4.8
+(owner's Tanium diagram: "the branches should be far off the chain"; loops
+dropped); discs bedded (ground hue at the rim, the land's grain on the
+face, feathered, occlusion ring); strokes fade where the land's texture
+says cliff. His word wanted: keep/move/drop the hub; accept the plain
+chain candidates; the four bay cells. Coast 22 of 27 authored.
+
+**2026-09-06 17:15 UTC:** **BRANCHES ON THE CHAIN LAYER;
+c1-2 AND c7-8 RE-CUTS QUEUED BEHIND THE REGEN.** Owner 16:50: *"we need some
+branches from the chain to portray how endpoints cluster to a leader and
+feed back to the chain … not in this tile [c3-1] but since its an overlay I
+figured branches are now easy to add"*; 17:00: *"is the coast now done so I
+can have another ocean agent polish the water up?"* → told yes (22 of 27
+authored, audit clean, four bay cells are previewed candidates, the water
+fields re-derive on every serve); 17:05: c1-2's spike *"was this spot fixed
+and just not mounted?"* and c7-8's straight column wall on the c6-8 seam +
+rubble shore *"same for these 2 spots"* → c1-2's re-cut was stitched at
+15:28Z but NOT served (the serve is at chain6's end); the spike is the
+model's own headland, kept whole by the limit; c7-8's wall stood because
+c6-8 was a candidate when c7-8 was conformed. **conform-band --open <m>**:
+a morphological opening (erode+dilate) removes protrusions/slivers thinner
+than m; dry runs: c1-2's spike and column go, c7-8's west third (no ground
+arrives from the now-authored c6-8) and the rubble go. **chain7.sh** (waiter
+started 17:12Z, after "chain6 done"): both re-cut with --open 6 and stitched
+on his words, then serve. **Branches (build-chain-layer.mjs):** route.branches
+= loops {at, side, length, depth}: the slot at 0.6 width along a half-ellipse
+off the trunk, bedded, and the CLUSTER element (chain-element.mjs "cluster":
+a leader disc + eight endpoint stones on scratches, black-keyed, red specks
+removed, leader 100 px) at the apex; trial loops at c2-1 (north 2.18, south
+2.55) and c0-1 (south 0.72) — none in c3-1 on his word. Preview
+`island/branches-c2-1.jpg` sent 17:15. **Running:** chain6 on c5-1 (3/7)
+since 16:08Z; then serve (the groove + branches over all seven); then chain7.
+
+**2026-09-06 16:40 UTC:** **THE CHAIN IS THE CARVED SLOT,
+BEDDED INTO THE GROUND; SHOWN ON THE PLAIN c3-1.** Owner 16:20: *"wasnt it
+supposed to be carved out of the ground and then we were gonna add light to
+it?"* and *"also that looks stickered on ngl"*. → The kerb was the old
+c3-1's rendering copied as a style reference — wrong object; the canon is
+"a slot cut DOWN into the bedrock … the ground is REMOVED along it", the
+light an effect layer later. **kerb-element.png = r4** (chain-element.mjs
+with KERB_VARIANT=groove: the far cut wall, the rubble floor, the near lip
+with scrub; delivered on black, keyed; 374x49, anchor row 20 = the floor).
+**Bedding in build-chain-layer.mjs:** per column the land's colour beside
+the slot is sampled; the element's outer rows (the lips) take that hue
+strongly (0.7), the walls and floor keep their own (0.15); the outer 5 rows
+feathered; an occlusion band (10 px, 0.45 → 0) on the ground beside the
+cut; ±1.3 px jitter on the line. Proof sent 16:40:
+`island/chain-c3-1-groove.jpg` (+ -full). r1 (blocks) and r3 (rounded
+kerb) kept as files, unused. The regen: c4-1 (2/7) still baking since
+15:52Z (the plateau takes long). At the run's end serve.sh lays the groove
+over all seven (candidates included in the preview) → the picture → his
+accepts / the palette recalibration. The light on the groove: the effect
+layer's job, after the city.
+
+**2026-09-06 16:10 UTC:** **THE CHAIN LAYER WORKS — SHOWN
+TO THE OWNER ON THE PLAIN c3-1; THE REGEN IS ON c4-1 (2/7).** Elements
+(`art-source/career-world/chain/`): **kerb-element.png = r3** (the second
+generation, KERB_VARIANT=low: one course of rounded stones with the dark
+groove, delivered on BLACK — chain-element.mjs keys on whatever background
+the corners show, magenta or black, no despill for black), r1 (fitted
+blocks, magenta) kept as the alternative — the owner was sent the swatch
+(`island/kerb-swatch.jpg`) and may say "top" for r1; **node-element.png =
+r1** (seven rune panels; the green fringe was moss the model painted, keyed
+out; --keep-green/--no-despill exist). Sidecar .json files carry anchorRow
+(the groove row) — build-chain-layer.mjs puts it on the route. Bugs found
+and fixed: the node element's half-pixel origin scrambled channels into
+green blobs (integer origin now); the overlay's land mask prefers a newer
+candidate over the authored layer, so the preview the owner sees is masked
+by the plain regen; mount-candidates.mjs composites the overlay onto
+candidate previews (the plain cells are judged WITH the chain on). serve.sh
+builds the overlays (step 1b) before the register (--chain). **Proof:**
+`island/chain-c3-1-plain.jpg` (sent 16:10). **The regen (chain6.sh):**
+c3-1's plain attempt REFUSED on tone alone (23.7 over 4 seams; veg 0.166) →
+a candidate — expected for every one of the seven (the palette gate's
+calibration; his eye rules); c4-1 baking since 15:52Z. **At its end**
+serve.sh runs with the layer; then the picture + the seven candidates for
+his accepts (each previewed with the chain on). Open: the kerb's tiny white
+highlights on some stones (a luma cap if he minds); the palette
+recalibration ask; the four coast candidates (c0-5, c1-3, c1-4, c4-8).
+
+**2026-09-06 15:45 UTC:** **THE CHAIN LAYER IS BUILT AS
+TOOLS; ITS ELEMENTS ARE GENERATING; THE SEVEN CHAIN CELLS ARE REGENERATING
+PLAIN.** (The background runs sat for hours — chain6.sh launched 06:55Z
+started baking 15:28Z; the app suspends background bash while idle. Clocks:
+the runner's [HH:MM:SS] is UTC.) **The layer:** `docs/career-world/session3-tools/chain-element.mjs`
+runs two worker jobs in the pipeline's conventions (Codex exec + image_gen,
+generate mode, flat magenta key, one call each) for the KERB (a tileable
+strip of the pale kerb with the dark groove, style reference = the old
+c3-1's chain band from commit f9b0a37e, `.codex-tmp/chain/kerb-reference.jpg`)
+and the NODE (six to eight rune panels), keys the magenta, crossfades the
+kerb's ends, scales to the world's kerb → `art-source/career-world/chain/{kerb,node}-element-r1.png`;
+`build-chain-layer.mjs` lays the kerb along `tanium/rune-chain.def.json`
+per cell (per-column height from the route, flipped every other repeat,
+per-cell phase), the node element at each node, masked by the land's alpha
+→ `art-source/career-world/chain/cells/tanium-<id>-chain.png`; `world-register.mjs
+--chain <dir>` composites the overlays onto the served tiles after the tone
+(the pyramids never carry the chain); serve.sh passes --chain. Running now:
+the element jobs (`.codex-tmp/chain/element.log`) and chain6.sh (c1-2 re-cut
+stitched on his word first; then c3-1 … c0-1 forced). **Then:** build the
+overlays (`node build-chain-layer.mjs --preview .codex-tmp/session4/island/chain-preview.jpg`),
+serve, picture to the owner. If an element job delivers nothing, fall back
+to cutting the element from the reference band (keyed on "not grass").
+
+**2026-09-06 06:55 UTC:** **THE RUNE CHAIN LEAVES THE LAND
+AND BECOMES A LAYER; THE SEVEN CHAIN CELLS ARE REGENERATING WITHOUT IT.**
+Owner 06:40, asked "why is it so difficult to connect the chain?" and told
+that seven separately generated cells will never draw one line the same
+way: *"lets do it that way then but youll need to regen the cells with the
+chain first"*; and on c1-2's spike: *"besides this cell the coast tiles are
+good"*. → **Data, not the solidified tool:** `runeChain` moved out of
+`tanium/territory.def.json` into `tanium/rune-chain.def.json` (the chain
+layer's route; same waypoints/nodes), so cell.mjs draws no guide (rc null)
+and write-briefs' crossing text is gone ("the rune chain crosses 0 cells");
+the seven row-1 briefs lost every paragraph about the groove/kerb/panels and
+end with "THE RUNE CHAIN IS NOT IN THIS CELL … paint the ground plain";
+c6-1 keeps the CHAIN-END site as bare level ground (the plan's site
+validator). **chain6.sh running (log `chain6.log`):** c1-2 re-cut with the
+current shore shapes and stitched on his word; then c3-1, c4-1, c5-1, c2-1,
+c1-1, c6-1, c0-1 forced, one attempt each (~13 min each; the forest cells
+will likely refuse on the vegetation palette gate again → his eye or the
+recalibration he has not answered); serve. **THE CHAIN LAYER (next, serving
+side, no lock change):** one continuous drawing along rune-chain.def.json's
+route composited over the land at serve time — plan: a tileable chain
+element (pale kerb + dark groove) and a node element (the rune panels)
+generated ONCE, laid along the route with the canon slope, rendered into a
+`chain` tile set at L0/L1 like the land tiles, registered in the feed as a
+layer above terrain (streamTiles / the runtime need a layer slot — coordinate
+with the ocean session which owns WorldScene/layers.ts), the land's own
+attempts masked under it (none after this regen). **Open with the owner:**
+whether "the coast tiles are good" includes the four previewed candidates
+(c0-5, c1-3, c1-4, c4-8) — not stitched until he says so; T c4-1's third
+attempt is moot (regenerating without the chain); the palette recalibration.
+
+**2026-09-06 06:20 UTC:** **LOCK 18i-c IN ON "go ahead
+with regen"; THE THREE REGENS RAN, NONE LANDED OUTRIGHT; SERVED 06:14Z (63
+TILES).** chain5.sh: c0-5 refused on vegetation colour alone (14.7 vs 13;
+water and tone clean) → his eye; c1-3 refused on 4 crossings → the conform
+pass cut it (69.7% beyond the limit) → refused on tone 23 alone → his eye;
+c4-8 refused (rock 0.433, 6 crossings, tone) → conformed → still rock 0.243,
+fringe 24.7%, 1 crossing → a send-back; c1-4 still refused (fringe 8.6%, 1
+crossing). The sea patch under 18i-c picked 384/512 px squares of plain
+sea (no stack grids). **The picture and a sheet of the four coast
+candidates go to him (06:25)** with: accept c0-5? accept c1-3? c4-8 and
+c1-4 send-back or accept? and **T c4-1's third attempt: accept?** (its
+chain matches both neighbours' kerbs, refused on veg 14.1 alone).
+**Pattern to raise with him:** eight of the last ten refusals were the
+vegetation-palette gate alone (thresholds 0.20 / 13 luma, calibrated
+2026-09-02 on four samples) on cells he then accepted by eye — a
+recalibration (say 0.30 / 20) is a lock change for his word. Coast 22 of
+27 authored (c0-5, c1-3, c1-4, c4-8 open); Tanium 21 of 21; N 20 of 20.
+The lock is free. Next after his rulings: the land animation layer, the city.
+
+**2026-09-06 05:25 UTC:** **THE OWNER'S EIGHT RULINGS
+(02:50) ARE IN; SERVED; TWO THINGS WAIT ON HIM.** Owner 02:50 on the sheet:
+*"remove c2-8s gen no need for it / c4-8 needs to fix the coast / C1-3
+shoulda just been a bit of land to finish the neighbor coast / C7-0 is good
+/ C6-1 is good / C4-1 still not lining up the chain / C6-8 remove the right
+land mass the left is good / C1-1, 2-1, 1-2 are all good / c0-5 needs
+regen"*. chain4.sh (ran 05:04-05:2xZ — the background task sat two hours
+before starting): **T c1-1, c2-1, c1-2 stitched on his eye** (Tanium 21 of
+21 authored); **c6-8** (everything east of 45% made wet in the mask)
+stitched on his eye; **c2-8 removed** from the plan (27 shore cells) and
+its candidate moved to `.codex-tmp/rejected/coast/c2-8-removed-2026-09-06`;
+**T c4-1's third attempt** (brief: "render the chain exactly as the
+neighbours do — the pale kerb, the groove at its foot") REFUSED on
+vegetation colour alone (dLuma 14.1 vs 13; chain gate 23 / 10 px, style
+matched — `island/c4-1-third-seams.jpg`) → **his accept asked**; served.
+**Held (chain5.sh): the regens of c0-5, c1-3, c4-8** with his words in
+their briefs — after his word on **18i-c** (the tiled sea patch must be sea
+in the paint; `proposals/sea-patch-uniform.apply.mjs`, --check passes):
+apply, approve with his words, `bash .codex-tmp/session4/chain5.sh`. On
+"accept c4-1": `CELL_OWNER_ACCEPT="<his words>" node tools/world-authoring/cell.mjs
+--territory tanium --cell 4,1 --redo --force --describe-file
+art-source/career-world/l2-land/tanium/briefs/c4-1.md` then serve.sh.
+Coast: 23 of 27 authored (c0-5, c1-3, c1-4, c4-8 open; c1-4 is a send-back
+he has not ruled on beyond "re-cut"). Then: the land animation layer, the city.
+
+**2026-09-06 02:45 UTC:** **THE NIGHT'S RUNS ARE DONE
+AND SERVED (02:38Z, 60 TILES); THE LOCK IS FREE; NOTHING DISPATCHES UNTIL
+THE OWNER RULES.** chain3.sh: c1-8 conformed and stitched on his word (open
+sea — the stack grid is gone), c0-5 re-conformed and refused on veg 15.7
+(candidate), **T c4-1's second attempt LANDED** (02:35Z; the groove visible
+edge to edge, 20 / 5 px off the neighbours' grooves — `island/c4-1-served.jpg`),
+served. **The world now:** N 20, T 18 (c4-0, c4-1, c6-1 new since his
+picture), coast 22 of 28 (c1-1 c2-0 c3-0 c4-0 c5-0 c6-0 c8-5 c7-2 c8-6 c1-0
+c1-8 c7-1 c1-2 c7-3 c7-4 c8-7 c7-8 c0-6 c0-7 c7-0 …); the coast audit is
+clean (no land into unplanned sea; c8-4 stays sea). **Candidates for his
+eye (every one previewed live):** T c1-1 (chain 6 px, 1 crossing, tone and
+crowns clean), T c2-1, T c1-2 (the forest's palette/crowns), C c0-5 (veg
+15.7), C c1-3 (tone 21), C c2-8 (veg 18), C c4-8 (rock 0.162, 1 crossing),
+C c6-8 (rock, 3 crossings), C c1-4 (fringe 8%, 2 crossings). **Pending his
+word:** 18i-c (the sea patch must be sea in the paint). **Standing
+problem:** the dark-forest cells (T c1-1, c1-2, c2-1) refuse on the palette
+gate's vegetation contrast against bright neighbours (calibrated 0.20/13 on
+his eye) — either his accept on the picture or a calibration; the crowns
+(1.2-1.5 m) too. **Next:** picture + views (in progress), his rulings, then
+the land animation layer and the city. Tools this session (all tracked):
+conform-band/seam-water/pass, tone feather in world-register +
+tone-harmonise, chain guide 18m/18n, view.mjs/region.mjs, chainN.sh +
+waiters, proposals/*.apply.mjs (18i-c pending).
+
+**2026-09-06 02:25 UTC:** **SERVED AGAIN AT 02:22Z (60
+TILES); chain3.sh (THE CLEANUP + c4-1's SECOND ATTEMPT) IS RUNNING.**
+chain2.sh with the purple guide (18n): **T c6-1 LANDED** (01:58Z — the
+chain's end cell, guide 57% → 70%, gate "3 px off the floor"); c2-1 (1
+crossing, tone, crowns 1.47), c1-1 (1 crossing; chain 6 px at the west; tone
+and crowns CLEAN), c1-2 (veg 35 vs the meadow) refused → candidates; every
+model output repainted all the purple as the groove (0 px replaced) — the
+guide works as position, the removal is a safety net. 18n was calibrated
+after c2-1 (commit 8b5b9d54): the gate's contrast scales with the band's
+median (a dark forest's slot is 15 under it); "no groove found" is reported,
+not refused. chain2's conform pass (the shapes below) landed **c7-0**; c1-4
+(fringe 8%, 2 crossings), c4-8 (rock 0.162, 1 crossing), c0-5 (veg 15), c2-8
+(veg 18), c6-8 (rock, 3 crossings) still refused → his eye. **Owner 02:00,
+five crops of the served picture:** c0-5 "delete the extra, fix the red
+circle" (a ruler-straight limit); c1-8/c2-8 "Not sure what this is but it
+shouldnt be here" (the mirrored stack grid — 18i-b's patch held a stack:
+proposal 18i-c awaits his word); c4-8 "needs that fix cleaned up"; c4-1
+"needs those to match" (the groove hid under the top bench's wall, the
+wall's diagonal foot read as the chain); c7-0 "needs similar work". →
+**conform-band.mjs:** coastline-scale irregularity (sd ~1.2 m over 6 m) on
+the limit; a wet run touching a cell corner is sea; a stretch ending at a
+corner with no authored neighbour beyond rounds off; the width cap only for
+isolated headlands and slivers under 5 m (the banks between coves keep
+their depth — a 10 m sea threshold and a general cap both cut coves into
+channels, reverted); **conform-seam-water.mjs:** cove ends wander ±20%.
+**chain3.sh** (started by chain3-waiter.sh after "chain2 done"; log
+`chain3.log`): c1-8 conformed and stitched ON HIS WORD (the cut leaves no
+land, which the coverage gate refuses); c0-5 re-conformed (will refuse on
+veg 15 again — his accept needed); **T c4-1 forced** with "the groove
+visible edge to edge, a wall crossed only through a short arch" in its
+brief; serve. **Then:** the picture (world-mosaic ×3 --level 2 →
+island-grid --mark) + views; asks: accepts for c1-1, c0-5, c1-3, c2-8,
+c4-8, c6-8, c1-4, c2-1, c1-2 (the forest cells refuse on the palette gate's
+0.20/13 calibration — a lever, or his eye); 18i-c yes/no. Coast 22 of 28
+authored (c0-5, c1-3, c1-4, c2-8, c4-8, c6-8 open; c8-4 unplanned-need).
+
+**2026-09-06 01:35 UTC:** **SERVED AT 01:15Z — 59 TILES,
+14 NEW; chain2.sh IS BAKING WITH THE PURPLE GUIDE.** chain.sh finished:
+c1-4 refused (1 crossing, veg 42); its conform pass landed **c0-7** (band,
+68% trimmed) and left c1-4 (fringe 22.9% after the cut + 2 crossings), c4-8,
+c7-0, c0-5, c2-8, c6-8 refused on tone/crossings, c1-3 on tone alone;
+serve.sh ran clean (tone gains + seam feather on 59 edges, register,
+previews, mount, water; commit 45f69dd2). **Live now:** N 20, T 18 (c4-1
+rebaked on the chain, c4-0 stitched), coast 15 of 28 (c1-1, c2-0, c4-0,
+c5-0, c5-8, c6-0, c8-5 + c7-2, c8-6, c1-0, c1-8, c7-1 + c1-2, c7-3, c7-4,
+c8-7, c7-8 + c3-0, c0-6, c0-7 — 20? count: 7 + 5 + 5 + 3 = 20 of 28; the
+runtime feed says 59 = 20 + 18 + 20 + 1 for the ninjaone/tanium/coast sums
+— verify with `node -e` on terrain-l2-coast-r1.json when it matters).
+**Picture sent 01:35** (`island/island-grid-L2.jpg`): T c4-1 "the overpass
+OK?"; coast for his eye — c7-0 (tone 22 alone), c1-3 (tone 21 alone, bay
+met), c0-5 (veg 15), c1-4, c4-8, c2-8, c6-8; the chain cells "purple guide:
+baking now/next". **chain2.sh** started 01:15:17Z (log `chain2.log`): c2-1,
+c1-1, c6-1 forced, c1-2 forced, one attempt each with 18n; then conform
+pass; serve. Each cell's log should carry "chain guide … px" at dispatch
+and "guide layer N purple px replaced" after delivery, and the gates a
+"chain continuity" line. **Then:** views of the landings/candidates for
+the owner (view.mjs on a fresh L1 composite: world-mosaic ×3 --level 1 →
+island-grid --level 1); his accepts; the remaining coast (c8-4 only if land
+arrives); the forest cells' tone/crowns are the standing problem — a brief
+lever, not a lock.
+
+**2026-09-06 01:20 UTC:** **LOCK 18n — THE PURPLE GUIDE —
+IS IN ON THE OWNER'S WORDS; chain2.sh WAITS BEHIND chain.sh.** The first
+chain run: T c4-1 LANDED at 23:25Z with the drawn floor (its groove leaves
+the east edge at 49.9% against the floor's 49.6%; both seams continue —
+`.codex-tmp/session4/island/chain-c4-1-seams.jpg`); c2-1 (1 crossing, tone,
+crowns 1.47 m), c1-1 (rock lighting, 1 crossing), c6-1 (1 crossing,
+vegetation colour 13), c1-2 (palette/tone) refused → candidates; coast c0-5
+(4 crossings), c0-7 (6 crossings) refused → the conform pass; c1-4 baking
+at 01:20Z, then conform, then serve.sh (chain.sh's own line, correct).
+**Owner 01:00:** *"For the chain add a layer over it thats bright purple.
+Then use that to hellp with the matching and remove that layer for final
+render"* → **cell.mjs lock 18n** (commit 2160f5fc, recorded with his
+words; `proposals/chain-guide.apply.mjs`): the chain's floor is drawn in
+bright purple (200,0,255) as a GUIDE LAYER; the packet says cut the groove
+along it and leave no purple; after the generation, before derivation,
+where the purple survived within 100 px of the west/east kept edge its
+height is read (`chainSeen`), then every purple pixel becomes the groove's
+floor (38,36,33); a new gate **"chain continuity"**: at each edge the groove
+(the guide where it survived, else the darkest 0.3-3 m run beside the edge)
+within 48 px of the floor drawn from the neighbours' grooves. Dry-run on
+c2-1: "chain guide 55336 px … 45% down the west edge (the canon) to 49%
+down the east (c3-1's groove)"; `island/18n-guide-c2-1.jpg`. Coast cells:
+no chain → untouched. **chain2.sh** (started by chain2-waiter.sh, a
+background bash, once chain.log says "chain run done" and the lock is
+free): c2-1, c1-1, c6-1 forced, c1-2 forced with the guide, one attempt
+each; conform pass; serve. **Then:** the island picture (world-mosaic ×3
+→ island-grid) + candidate views to the owner; his eye on c7-0, c1-3, the
+forest cells, c6-1, c0-5, c0-7, c4-8, c2-8, c6-8. A known small thing: the
+guide follows the canon's local slope into the bleed, so at a paste
+boundary it can sit 2-3 m off the neighbour's groove and converge to it at
+the seam (c2-1 east); the model bridges that.
+
+**2026-09-05 23:15 UTC:** **THE COAST RUN IS DONE — 10
+NEW SHORE CELLS IN THE PYRAMID, NOT YET SERVED; THE CHAIN RUN STARTED
+ITSELF AT 23:10Z.** misses.sh (waves on locks 18i-b/18j/18k): wave 1
+landed c7-2, c8-6, c1-0, c1-8; wave 2 landed c7-1; every other candidate
+painted its coast over the pre-filled sea. **The conform pass (mask only)
+then landed c1-2, c7-3, c7-4, c8-7, c7-8** — band-conformed at 22-24 m seam
+drift, every crossing opened, land beyond the wandering limit trimmed;
+previews in `session3-tools/coast-rejects/<id>-conform.jpg`. Still
+candidates: c7-0 (band-conformed, refused on tone 22.7 alone → the owner's
+eye), c1-3 (tone 21 alone, its bay met — his eye), c4-8, c2-8, c6-8
+(seam-conformed, still refused: the pass now band-conforms an overflow and
+falls back to the band when a seam conform leaves a crossing unmet — they
+get that in the chain run's pass), c0-6 and c1-4 (chain.sh: c0-6 stitched on
+his eye, c1-4 rebaked). **Coast: 12 of 28 authored** (7 + 5 conformed) plus
+c3-0, c0-6 stitching now = 14, and c0-5, c0-7, c1-4 to come. **THE SERVE DID
+NOT RUN:** misses.sh piped serve.sh into a grep whose backslash was lost
+(`"^[|committed"` → "Unmatched ["), grep died, serve.sh took SIGPIPE at its
+first line — the runtime feed is still 18:42Z's 45 tiles. It cannot run now
+(chain.sh holds the lock for ~2.5 h; registration must not race a stitch);
+**chain.sh ends with its own serve** (its grep is correct; misses.sh's line
+is fixed for the record). If chain.sh's serve fails too: `bash
+.codex-tmp/session4/serve.sh` by hand once the lock is free. **chain.sh
+(log `.codex-tmp/session4/chain.log`)**: T c4-0 stitched on his eye at
+23:11Z (override past vegetation colour dBG 0.503 / dLuma 40.9 at the
+border); then C c3-0, C c0-6; then c4-1 forced, c2-1, c1-1, c6-1 forced,
+c1-2 forced with the floor drawn (18m dry-run verified on c4-1: 54% → 50%,
+"chain pre-fill 41475 px"); then coast c0-5, c0-7, c1-4; conform pass;
+serve. **Then:** island picture (world-mosaic ×3 → island-grid) and the
+candidate views to the owner; his eye on c7-0, c1-3, and the chain cells.
+
+**2026-09-05 21:50 UTC:** **LOCK 18m IS IN ON THE OWNER'S
+WORD; HIS RULINGS ARE QUEUED BEHIND THE COAST RUN; c0-7 JOINS THE PLAN.**
+Owner 21:40, on the 18m preview and the four 3x3 views: *"Tc4-0 looks fine,
+c3-0 fine, c0-6 needs work and or needs to finish the coast in the cells
+above and below it, C1-4 almost but needs to finish the coast or expand to
+do so. 18m is fine the line sjust need to connect."* → **cell.mjs lock 18m**
+applied and recorded (commit 2e5f8c7a): a cell the rune chain crosses
+carries the groove's floor in its edit target, 1.2 m wide, FINAL; its ends
+are the AUTHORED neighbours' own grooves read off their layers (the darkest
+0.3-3 m run in the 96 px beside the shared line within 12% of the canon —
+measured c0-1 E 51%, c3-1 W 49% / E 54%, c5-1 W 50% / E 57%, canon 47 / 52 /
+48 / 45 / 50), the canon shape between them shifted linearly; where no
+authored neighbour has a chain, the canon. NOT yet exercised in a real bake
+(the coast run holds the lock; a dry run of cell.mjs takes it too) — the
+first real test is c4-1 at the head of the chain run; if its log lacks
+"chain pre-fill … px" or the run dies, read `.codex-tmp/session4/chain.log`.
+**Queued (`.codex-tmp/session4/chain.sh`, started by `chain-waiter.sh` — a
+background bash — the moment misses.log says "misses done" and the lock is
+free):** 1. his accepts stitched — T c4-0 ("looks fine"), C c3-0 ("fine"),
+C c0-6 (his "needs work and or needs to finish the coast in the cells above
+and below it", taken as keep-and-finish); 2. the chain with the floor drawn:
+c4-1 forced, c2-1, c1-1, c6-1 forced (no chain), c1-2 forced (the dark
+seam); 3. coast c0-5 (above c0-6), **c0-7 (NEW in coast-plan.mjs, 28 shore
+cells, extends c0-6, ends its coast)**, c1-4 again (his "almost but needs to
+finish the coast or expand to do so" → NOTES: one continuous shore from
+c1-3 to T c0-0's cliffs); 4. conform pass, serve. **The coast run so far:**
+c7-2, c8-6, c1-0 landed; c7-0, c7-4, c6-8, c4-8, c1-2 refused on continuity
+(+ rock lighting / tone) → the end-of-run conform pass (conform-band, any
+refusal that includes continuity); c1-8 baking, then wave 2 (c7-1, c7-3,
+c8-7, c7-8, c1-3, c2-8). Every candidate the model made painted its coast
+over the pre-filled sea; 18i-b's tiled patch did not change that — the
+cohesion now comes from the mask cut, not the model.
+
+**2026-09-05 20:35 UTC:** **c7-2 LANDED ON THE NEW LOCKS
+(20:18Z); c7-0 REFUSED AND THE FIX IS A MASK; THE REVIEWER'S 55 ROWS ARE IN;
+THE CHAIN RUN IS WRITTEN AND WAITS ON 18m.** The coast run (misses.sh) is in
+wave 1: c7-0 refused at 20:04Z on water continuity alone (5 unmet crossings —
+its target-vs-result picture `.codex-tmp/session4/island/c7-0-target-vs-result.jpg`
+shows the model kept its land inside the 40 m strip but painted over the sea
+at the strip's ends and closed c6-0's crossings, which the pre-fill never
+painted: c6-0's east coast weaves across the seam, so its "inlets" are
+crossings narrower than 15 m); **c7-2 ACCEPTED at 20:18Z** (13.4 min; N
+c4-1's peninsula continued). **New tool, mask only (the class the owner
+approved 2026-09-04): `docs/career-world/session3-tools/conform-band.mjs coast <id>
+[--preview x.jpg] [--write]`** — opens every wet run on every authored
+neighbour's edge (conform-seam-water.mjs, whose cuts now round their ends: a
+narrow run is a 12 m cove, a sea run is cut to the candidate's own water),
+keeps the candidate's coast whole where it lies within 46 m of the seam, and
+trims land carried further (a plateau across the cell) at a limit wandering
+24-40 m that rounds off against sea; over an inlet the limit runs on so the
+cove ENDS. conform-pass.mjs now band-conforms any continuity refusal whose
+seam drift exceeds --max and keeps a preview at
+`session3-tools/coast-rejects/<id>-conform.jpg` for the owner's eye; the run's
+end-of-run pass will apply it to c7-0 (preview of the result:
+`.codex-tmp/session4/island/c7-0-band.jpg` — the coast with four coves).
+**The reviewer's report** `.codex-tmp/session4/review/drifts.md` (55 rows,
+crops under `review/drifts/`, numbers in `seams.txt`, tools `seams.mjs`,
+`chain.mjs`, `colour.mjs`, `cuts.mjs`): rows 1-4, 8, 13-17, 22-30 are the
+coast candidates already in the run or its conform pass; **authored cells it
+faults, for the owner's eye:** T c6-1 has NO rune chain (row 9: the groove
+stops dead at T c5-1's edge — the new c6-1 is in chain.sh, forced); T c1-0's
+plateau ends flush on the N/T border under N c0-3's open sea (row 11); T
+c5-0's cliff top flush under N c4-3's sea (row 20); T c5-2's beck dead-ends at
+T c6-2 (row 18, known — c6-2 stitched on his crop); the T c3-2|T c4-2 and T
+c2-1|T c2-2 tone lines (21, 31); the N/T palette borders read as colour, not
+luma (32, 33); T c4-1's stone block face on the T c5-1 seam (24 — the chain
+run); a ruler-straight lake shore in T c5-1; a rectangle of painted water at
+C c1-4's south-east corner. Its rows 5-6 ("bleed slabs" in empty c1-0 and
+c8-6) are the PYRAMID, not the runtime: the runtime serves per-cell webps
+(l2-coast has 14 files for 7 cells), so those cells' cuts are the authored
+neighbours' land ending at their own edges, fixed by baking c1-0 and c8-6
+(wave 1). Cells never attempted: **c0-5** (T c0-0's cliffs into the sea — in
+chain.sh), c8-4 (nothing arrives; leave). **chain.sh** (`.codex-tmp/session4/chain.sh`,
+tracked under session4-chain/): refuses to start without 18m applied or with
+the lock held; bakes c4-1 (forced), c2-1, c1-1, c6-1 (forced), c1-2 (forced),
+then coast c0-5, then conform-pass and serve. Asked of the owner (19:55
+picture): 18m yes/no; accepts for T c4-0, C c3-0, C c0-6, C c1-4. **Also in
+since 20:35 (serve-time, my tools):** a seam feather — tone-harmonise.mjs
+writes each authored edge's 64-px band means under the field's gain into
+the table; world-register.mjs moves each side toward the two bands' mean
+within 12 m of the line (smooth ramp, per channel capped ±20%, land only);
+the residual steps it targets are the N/T colour borders (34, 32, 16) and
+T c4-1|c5-1 (17) — the forest seams are already flat under the field, their
+visible edge is the canopy (the rebake). serve.sh needs no change. The
+stitch test file now expects edit-target.jpg with ±6 tolerance (lock 18d,
+2026-09-04) — NOT yet run: the suite takes the real cell lock, run it when
+no bake holds it (tests 17/18's causes still unknown).
+
+**2026-09-05 19:55 UTC:** **THE OWNER'S ELEVEN CROPS OF
+THE LIVE WORLD; LOCKS 18i-b, 18j, 18k IN; THE COAST RUN IS BAKING; THE CHAIN
+WAITS ON 18m.** Owner 19:20, eleven crops of the live server with five notes,
+then *"sorry proceed"* (in reply to "yes to all three releases the held coast
+run") → cell.mjs locks **18i-b** (the sea pre-fill tiles a real sea patch from
+a neighbour's concept, mirror repeats), **18j** (key-light report-only under
+5% land), **18k** (wet runs split by a gap under 30 px are one run), recorded
+with his words; commit 4f7b1f81. **His crops, located on the L1 composite
+(`.codex-tmp/session4/view.mjs c,r` and `region.mjs` draw labelled views):**
+*"natural stone overpass … as it is a nogo"* = **T c4-1** (the bare-plateau
+canon cell: its groove leaves the west edge 25% down where c3-1's wall arrives
+52% down, its east 40% where c5-1's begins 50% — the chain steps at both
+seams); *"not a coastline, the seam just cuts off"* = **C c6-8**'s candidate
+(a plateau to the south edge, cliff wall cut by the world's edge) and the
+**C c6-8/c7-8** channel; *"too dark and obvious seam"* = **T c1-2** (its east
+seam against c2-2's meadow, and c1-1 the same); *"slight misalignments"* =
+the chain at c2-1's candidate vs c3-1 (~5%); *"more alignment issues and
+coast issues"* = **N c4-0's bay cut by a straight line at c7-1** (the
+candidate had skerries only), **N c4-1's peninsula cut at c7-2**, **the strip
+of dark water along the N c4-2/c7-3 seam** (the candidate painted a coast
+over the island's sea), **c7-1(sea)/c7-2(land)** cut, **c1-0's empty slot**
+over c1-1, **c8-5/c8-6**. **Running now (`.codex-tmp/session4/misses.sh`, log
+`misses.log`, released 19:43Z):** the coast in two waves on the new locks with
+the owner's notes in the briefs (coast-briefs.mjs NOTES: c6-8 a shore not a
+plateau, c7-1 continues N c4-0's bay, c7-2 the peninsula, c7-3 the sea at the
+seam, c7-0's cut) — wave 1 c7-0, c7-2, c7-4, c8-6, c6-8, c4-8, c1-0, c1-2,
+c1-8; wave 2 c7-1, c7-3, c8-7, c7-8, c1-3, c2-8; then conform-pass, then
+serve.sh (which commits). **T c1-2's attempt at the head of the run was
+SKIPPED** — the runner skips an authored cell without `--force c1-2`; it
+joins the chain run. **Proposed, not applied — needs his word: 18m** (the
+rune chain's floor drawn into the edit target along the def's runeChain
+waypoints, 1.2 m wide, FINAL; `.codex-tmp/session4/proposals/chain-prefill.apply.mjs`,
+tracked copy under session3-tools/proposals/); on his yes: apply, approve,
+then `bake-tanium.mjs --only c4-1,c2-1,c1-1,c1-2 --force c4-1,c1-2` after
+the coast run releases the lock, then serve. **Briefs:** T c1-2 and c1-1
+carry "the seams must not show" (his words); c4-1's stays the canon plateau
+(the wind-arch is the "overpass" he likes) — rewrite it before the chain run
+so its benches do not end at a cell edge. **A reviewer agent** (Claude,
+background) is auditing every seam of the composite numerically and by eye →
+`.codex-tmp/session4/review/drifts.md`; the owner's "astra reviewer on high"
+is the pipeline's own model (bake-tanium `--model astra --effort high`,
+REVIEW_MODEL) — run one Codex review job if the agent's list is thin. **The
+stitch tests are stale since 18d** (edit-target.jpg; `tests/world-authoring-stitch.test.mjs`
+still expects .png; 4-5 failures, none from today's locks) — fix the test file
+when no bake holds the lock. **Asked of the owner (picture sent 19:55):** 18m
+yes/no; accepts for T c4-0, C c3-0, C c0-6, C c1-4. Tanium 18 of 21 (open
+c1-1, c2-1, c4-0), coast 7 of 27 (+15 baking), N 20 of 20. **RESUME:** read
+`misses.log`; if the run has finished, view every landing and candidate
+with view.mjs/crops.mjs and send the owner the views; then the chain run on
+his 18m word.
+
+**2026-09-05 18:45 UTC:** **LOCKS 18h AND 18i ARE IN AND
+BOTH WORK; THREE SMALL REFINEMENTS WAIT ON THE OWNER; THE COAST RUN IS HELD
+FOR THEM.** Owner 17:10: *"sure go for it"* → cell.mjs locks **18h** (the
+cell across a territory border in the edit target and the seam gates) and
+**18i** (a shore cell's target carries the island's sea; grey only within
+40 m of arriving ground), recorded with his words. First results: **c4-0 met
+the border river** (N c3-3's beck at 57%, within 10 px; refused only on the
+two territories' vegetation colour across that border — 18l, not proposed
+yet: no vegetation arm across a border); **c7-2 met two of three sea runs**
+within 24 px; c1-8 matched its seam (refused on key-light noise on 2% land);
+c6-8 matched its seam (a sliver split the run for the gate) but painted a
+land mass into the pre-filled sea; **c7-3 painted a coast over the flat
+pre-filled sea along the whole seam** — the worker's prompt had said the
+sea was locked; the flat averaged fill reads as a placeholder. Proposals,
+checked, not applied (`session3-tools/proposals/`): **18i-b** real sea
+texture tiled into the fill; **18j** key-light report-only under 5% land;
+**18k** the continuity gate merges wet runs across dry gaps under 30 px.
+**Stitched on his words today:** Tanium c3-1, c4-1's rebake, c6-2's rebake
+(the bay meets the new c6-1); coast c1-1, c5-8, c8-5. Coast 7 of 27, Tanium
+18 of 21. **His eye:** Tanium c1-1 (eighth), c4-0, c2-1's rebake (chain as a
+groove? crowns 1.2 m again), c7-2, c1-8, c6-8; c7-3 a send-back. The held
+run (`.codex-tmp/session4/misses.sh`, its prelude done, marker
+`misses-prelude.done`; the waiter starts the coast part when
+`misses.go` exists): c1-0, c7-4, c8-7, c1-2, c4-8, c7-0, c1-3, c7-8, c8-6,
+then the conform pass, then serve. Resume from `SESSION 11`.
+
+**2026-09-05 17:00 UTC, superseded:** **THE LIVE SERVER IS THE REVIEW
+SURFACE; THE WORLD IS EQUALISED; THE OLD ART IS GONE; THE CHAIN WAITS ON
+ONE ACCEPT AND TWO APPROVALS.** The owner, on the live server: *"seeing it
+in full like this helps my eyes spot defects more and we gotta do something
+about it"*, *"for the chain now we say this cell is good and then do it in
+proper order"* (c3-1 → Tanium 18), *"lets fix all the patchy non-uniformed
+look"* → **exposure equalisation at serve time** (`tone-harmonise.mjs` solves
+one luma gain per cell across every seam; `world-register.mjs --tone` slices
+the served tiles through the smooth gain field; the pyramids untouched;
+strength 0.6, cap ±30% — his choice of "Both. Equalise now, then rebake only
+what still reads wrong": T c1-2 and c2-2 still read >15 off, and c1-2 is a
+dark forest), *"if the mount has stale land please update it as you are land
+authority"* → `mount-candidates.mjs` previews EVERY current candidate in the
+mount (18: Tanium c1-1, c2-1, c4-0 + 15 coast), previews taking their
+neighbours' gain; `serve.sh` is the sequence after any landing (tone →
+register --tone → candidates → build:land-mount → build:water → commit).
+*"can you make sure old art is all gone?"* → the pre-L2 capitals of Tanium,
+Independent, Column Technologies and ACE Hardware retired (structures +
+ground tiles + textures; the Kaizen site stays; the capital registry is
+empty until the city layer). **The chain in order:** c3-1 in; c4-1 rebaked
+against it (refused on vegetation colour 0.230 only); c2-1 against c3-1 —
+the dark-forest signature again (1.2 m crowns, tone 31.7); **c1-1's eighth,
+with every neighbour real, passes everything but the forest-edge tone (26.3
+vs c0-1)** — an accept. His six crops (*"these area needs to be fixed"*) →
+`fix-areas.sh` running: c4-1's rebake stitched on his crop, c6-2 forced
+against the new c6-1, coast c7-2, c7-3, c1-8, c6-8 baked, then serve. The
+rest of his crops are coast misses and the border: **18h and 18i wait on his
+word; c1-1's accept; the coast candidates' accepts.** Resume from `SESSION 11`.
+
+**2026-09-05 11:40 UTC, superseded:** **THE BLUR WAS THE LOD POLICY;
+THE PATCHES ARE THE PREVIEWS AND THE UNSERVED COAST.** The owner walked the
+live server (five screenshots: rough coast, chain not lined up, patchy
+colour, blur). Measured: the regenerated overview plates match the served
+tiles to 0.5 units in every cell, and the four review tiles match their
+candidates exactly — nothing served is off-colour. What he saw: (1) **blur**
+— `shared/lod/policy.ts` faded each tier in by camera span AFTER the coarser
+tier was magnified (capital → site over span 0.075-0.05, while the capital
+tile is 1:1 at 0.13 and the camera's minimum span is 0.052, so the site tier
+could never fully arrive); now capital is in by 0.22 and site by 0.10, and
+the pane reads site 100% at span 0.085 with the residency estimate under
+budget. (2) **patchy colour and the chain** — the Codex mount previews the
+four unaccepted Tanium candidates in place (c1-1's greyer fine canopy reads
+as a dark veil beside the authored forest; c2-1 blind of c3-1; c4-0), and the
+water layer marks ocean beside cut land edges as provisional coast, so every
+unserved coast slot (c3-0's notch) reads as a lighter rectangle. Both go away
+as cells are accepted; nothing to fix in the data. (3) **rough coast** — 4 of
+27 shore cells served. The rulings listed at 10:00 are still the whole path.
+
+**2026-09-05 10:50 UTC, superseded:** **THE WATER REFACTOR IS IN THE
+LANE.** Owner: *"could you merge in the water work from the codex layer."*
+The Codex session's refactor (`codex/water-pyramid-refactor`, its record
+`docs/career-world/WATER-REFACTOR.md`) replaces the old `layers/ocean` and
+`layers/inland-water` with one `layers/water` owner and adds `layers/lighting`;
+its water fields are derived from the SERVED land, and the runtime now reads
+`terrain-local-mount-r1.json` — the release feed plus four review candidates
+snapshotted from this worktree's `.codex-tmp` (Tanium c1-1, c2-1, c3-1, c4-0;
+"preview snapshots, not authoring acceptance"). It came in as a binary patch
+of that worktree's uncommitted tree (committing there was not permitted);
+that branch stays uncommitted. **After every `world-register.mjs` run, two
+more steps keep the runtime honest: `npm run build:land-mount` then
+`npm run build:water`** (25 s) — the mount records the feed's bytes and the
+fields record the mount's. Typecheck clean; suite 106 pass / 4 fail (the four
+pre-existing) / 1 skipped. The two runtime files the ocean session owns
+(`WorldScene.tsx`, `layers.ts`) changed by that patch, not by this lane.
+Everything below about the coast still stands.
+
+**2026-09-05 10:00 UTC, superseded:** **THE WHOLE COAST IS PLANNED;
+THE MODEL PLACES SHORELINES BY PIXELS, NOT WORDS; TWO PROPOSALS WAIT.** The
+owner at 07:30: *"we need it so the coast is cohesive not constantly have
+this edge issue"* with five outlined crops. `coast-audit.mjs` (new) then
+found every authored edge and corner where land still runs into unplanned
+sea — 14 cells beyond his five — and the coast plan holds **27 shore cells**:
+4 in the world (c2-0, c4-0, c5-0, c6-0), 15 candidates in their working
+folders for his eye, 8 unbaked. A wave of six new cells and four retries
+(07:51-09:55) accepted none by the gates, but taught the thing that matters:
+**the worker is told to rewrite briefs "never as coordinates or
+percentages"**, so the edge map and the measured-fault notes the brief
+writer now produces reach the image model only as prose — enough for the
+south shores (c2-8, c5-8, c7-8 and the c8-5 retry matched their seams and
+were refused on shore readings alone), not for the east shores whose island
+edge is mostly sea (c7-4, c8-7 drifted 16 m twice). The fix is pixels:
+**proposal 18i** paints the island's sea on into a shore cell's edit target
+and leaves grey only within 40 m of arriving ground
+(`session3-tools/proposals/sea-prefill.apply.mjs`, applies on his word,
+after 18h). A mask-only conform tool exists for drifts of a few metres and
+carves arcs for larger ones — not used. Tanium 17 of 21, served; suite 98/6;
+pipeline intact. The picture (10:00) boxes 22 cells. **His rulings unblock
+everything: the accepts (c1-1, c1-4, c7-1, c0-6, c3-0, and now c2-8, c5-8,
+c8-5, c7-8), the shore rock-lighting limit, 18h, 18i, c3-1.** Resume from
+`SESSION 11` below, its first section.
+
+**2026-09-05 07:00 UTC, superseded:** **THE ISLAND IS SERVED END TO
 END, AND FIFTEEN CELLS WAIT ON THE OWNER'S PICTURE.** Tanium is 17 of 21
 (c1-2, c6-2 and c4-2 by his accept; c6-1 rebaked as the chain's seaward end;
 c0-1, c2-2, c3-2, c5-1 carry his mask fixes; open: c1-1, c2-1, c3-1, c4-0,
@@ -730,7 +1331,81 @@ adjacency: `brief-c2-3-r2.md` (moor, land border, border knoll),
 `brief-c3-1-r2.md` (magical gorge, rail gorge span), `brief-c2-2-r2.md`
 (bench country, waystation bench, hot spring).
 
-**SESSION 11 (2026-09-04 evening → 2026-09-05 07:00 UTC) — RESUME HERE, ANY MODEL.** **THE NIGHT'S BAKES ARE DONE; THE LOCK IS FREE; NOTHING DISPATCHES UNTIL THE OWNER RULES ON THE PICTURE.**
+**SESSION 11 (2026-09-04 evening → 2026-09-05 10:00 UTC) — RESUME HERE, ANY MODEL.** **THE LOCK IS FREE; NOTHING DISPATCHES UNTIL THE OWNER RULES (accepts, shore limit, 18h, 18i, c3-1).**
+
+## 10:00 — THE COAST PROGRAMME: 27 CELLS, WHAT THE NIGHT TAUGHT, WHAT WAITS
+
+**The owner, 07:10 and 07:30:** *"this spot needs to be coastal"* (N c0-2's
+west edge → coast c1-3), then five crops with red outlines: *"we need it so
+the coast is cohesive not constantly have this edge issue. Tried to outline
+the fill areas. C7-0 thought needs a regen."* Read as: the coast must be
+continuous round the whole island; his outlines are fill areas (land) and
+open-bay areas (water) — carried into the briefs' NOTES (c0-5, c1-0, c1-2,
+c1-3, c7-0, c8-4, c8-5, c8-6 in `coast-briefs.mjs`).
+
+**`coast-audit.mjs`** reads every authored cell's four kept edges and
+corners (alpha ≥ 128 within 8 px, runs ≥ 30 px) and names each sea cell
+that land runs into and is neither authored nor planned. It found his five
+and nine more: NinjaOne's east (c7-2, c7-3, c7-4), the corner north-east of
+T c6-0 (c8-4), east of T c6-2 (c8-7), and row 8 (c1-8, c2-8, c5-8, c6-8,
+c7-8 — his c4-8 exception generalised by "cohesive"; say so if row 8 must
+stay sea). `coast-plan.mjs` now plans **27 shore cells**; the audit is
+empty against the plan; the sparse-territory tests pass.
+
+**The coast at 10:00:** in the world c2-0, c4-0 (his accepts), c5-0, c6-0.
+Candidates in `.codex-tmp/authoring/cells/coast/<id>/` (copies under
+`.codex-tmp/rejected/coast/`), all in the picture:
+- **seam matched, refused on shore readings only** — c2-8 (rock 0.201, four
+  crowns at 6 m), c5-8 (rock 0.392), c8-5 retry (five crowns at 5.6 m; his
+  bulge), c7-8 retry (veg colour 19.6), c3-0 (a skerry splits its sea for
+  the gate; rock 0.305);
+- **close** — c1-1 (rock 0.247), c1-4 (water 6 m off), c7-1 (key-light
+  0.0118, one thread), c0-6 (one thread 3.6 m off, rock 0.293);
+- **misses, land over the island's sea** — c1-2 (N c0-1's bay), c1-3
+  (headlands close N c0-2's bay), c4-8 (T c3-2's five falls), c7-0 (c6-0's
+  four inlets), c7-4 (N c4-3's sea, twice), c8-7 (16 m drift, twice).
+- **unbaked** — c0-5, c1-0 (his crops; they border c0-6 and c1-1, his
+  call), c7-2 (borders c7-1), c7-3, c8-4, c8-6, c1-8, c6-8 (the between-cells
+  of wave 2, after their neighbours are in).
+
+**What the night taught (the workflow for every island):**
+1. **Pixels place shorelines; prose does not.** cell.mjs tells the worker to
+   rewrite the brief for the image model "never as coordinates or
+   percentages" (packet text, by design: the generator cannot hit spatial
+   pegs). So the brief writer's new edge map ("0-24%: the island's SEA …
+   24-57%: GROUND …") and its measured-fault note ("your previous candidate
+   painted LAND over the island's SEA from 38% to 56%") arrive as prose.
+   That was enough where the island's ground spans most of the seam (south
+   shores, the north row) and not where its sea does (east shores: c7-4 65%
+   sea, c8-7 92% sea — both drifted the same way twice).
+2. **Proposal 18i** (`session3-tools/proposals/sea-prefill.apply.mjs`,
+   `--check` passes): for a shore cell, the island's sea arriving at every
+   authored seam is painted on into the edit target from its own sea pixels,
+   and grey is left only in strips at most 40 m deep beside arriving ground
+   (6 m margin); the packet calls the painted sea FINAL. Stitch, gates and
+   mask untouched. Apply after 18h; then the misses get their real attempt.
+3. **Alternate order** still holds: a cell between two authored shores
+   matches (c5-0, c3-0); a cell beside a candidate bakes blind of it.
+4. **Mask conform** (`conform-seam-water.mjs`, mask only): cuts the
+   candidate's land wet where the island's water arrives, to its own water
+   or a capped cove. Fit for drifts of a few metres only; on c8-7's 16 m it
+   carves an arc through the headland (preview kept). Not applied.
+5. **The rock-lighting gate refuses shores that are otherwise clean** (0.20-
+   0.39 on cells whose seams match) — the shore limit is the ruling that
+   turns five candidates into accepts.
+6. **Ops:** a background bash waiter stopped with TaskStop keeps running on
+   Windows (two follow-ups fired at once at 09:05; the second died on the
+   lock, no harm). Change a waiter by making its trigger impossible.
+
+**When the owner rules — in this order:** (a) stitch his accepts by
+override (coast: `CELL_OWNER_ACCEPT="<his words>" cell.mjs --territory coast
+--cell C,R --redo --force --describe-file art-source/career-world/l2-land/coast/briefs/cC-R.md`,
+briefs from `coast-briefs.mjs` first); (b) apply 18h and 18i on his words
+(`check-solidified.mjs --approve`), dry-run c4-0 and c7-4; (c) the misses,
+one attempt each, in alternate order between accepted neighbours (c1-2
+between c1-1 and c1-3's slot; c1-3 after c1-2 and c1-4; c7-0 after c7-1;
+c7-4 after c7-3's slot… corners last: c1-0, c8-4); (d) wave 2's
+between-cells; (e) `world-register.mjs`, the picture, the walk.
 
 ## 07:00 — THE NIGHT'S END: WHAT LANDED, WHAT NEEDS THE OWNER, WHAT COMES NEXT
 

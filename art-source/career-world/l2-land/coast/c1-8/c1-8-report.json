@@ -1,0 +1,138 @@
+{
+  "cell": "c1-8",
+  "territory": "coast",
+  "biome": "shore",
+  "status": "quarantine_candidate_failed_hard_constraints",
+  "generationSizePx": [1254, 1254],
+  "generation": {
+    "filename": "c1-8-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "ECF36906A8BA38D7786DBC9AB27C5E6833FEFA7F46E8295087E3CD4B64C01C9B",
+    "mode": "single built-in ImageGen edit with the edit target as Image 1 and the style canon as reference-only Image 2",
+    "imageGenCallsUsed": 1,
+    "retryUsed": false,
+    "secondReferenceAccepted": true,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "byteIdenticalToGeneratedOutput": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "promptFile": "c1-8-imagegen-prompt-used.txt"
+  },
+  "authorityConflict": {
+    "conflict": "The generic context paragraph says grey areas are arriving island ground, while this cell's exact north-edge map says the island supplies sea across the complete seam and explicitly forbids rock, beach, or stacks across it.",
+    "ruling": "The exact cell edge map and explicit final-sea rule are more specific and therefore govern. The grey placeholder was prompted as open sea; no new land was requested."
+  },
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin undirected land-luminance-gradient magnitude peak divided by the uniform-bin mean on the delivered source; water-mask pixels and their four immediate neighbours are excluded, as are gradients below 12 luminance units.",
+    "peakVsUniformOverLand": 1.328057,
+    "uniformReference": 1.0,
+    "peakBinDegrees": [130, 135],
+    "directionalKeyFirstMoment": 0.072046,
+    "gradientSamples": 196742,
+    "aggregateDirectionalityNumericPass": true,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No whole-cell sun gradient or long cast-shadow field is visible, but exposed rock motifs repeatedly have pale top caps and darker vertical faces. The literal same-value-on-every-side rule is not met."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "Manual estimated fractions of the non-water footprint at native source resolution.",
+    "buildable": 0.0,
+    "steep": 0.82,
+    "otherTalusOrBrokenStackTop": 0.18,
+    "canvasFractions": {
+      "buildable": 0.0,
+      "steep": 0.136056562,
+      "otherTerrain": 0.029866074
+    },
+    "method": "The non-water footprint consists of exposed offshore stack bodies. Their vertical faces count as steep; broken caps and talus count as other terrain. None forms a credible occupiable shelf. Approximate uncertainty is plus or minus 0.08 per land-relative fraction."
+  },
+  "waterFootprintFraction": 0.834077364,
+  "finalDerivedLandCoverageFraction": 0.165922636,
+  "crown": {
+    "medianMetres": 0,
+    "medianPx": 0,
+    "sampleCount": 0,
+    "method": "Full visual census of the native source found no conifer crowns or other trees.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c1-8-water-source.png",
+    "classification": "c1-8-water.json",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "BDB9AECF536D63BCC5F34FB36FF4ED1519B145EB1AB3CCB9F7839AACC703C3E0",
+    "encoding": "Opaque white water pixels on fully transparent non-water pixels; binary alpha.",
+    "opaqueWaterPixels": 1311600,
+    "transparentTerrainPixels": 260916,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedWaterComponents8Connected": 1,
+    "method": "Flooded edge-connected teal and blue source pixels, grew through adjacent pale wash, reflections, ripple highlights, and submerged-rock strokes, retained talus beside substantial dry stack bodies, removed stranded classifier specks, and kept the single connected coastal water body.",
+    "visualInspection": "Native overlay inspection found the open sea, submerged reef texture, pale strokes, reflections, wash between exposed rocks, and water around every stack included; dry stack solids remain outside the mask."
+  },
+  "edgeTopology": {
+    "north": {
+      "required": "sea only",
+      "waterPixels": 1254,
+      "terrainPixels": 0,
+      "pass": true
+    },
+    "east": {
+      "required": "sea only",
+      "waterPixels": 709,
+      "terrainPixels": 545,
+      "pass": false
+    },
+    "south": {
+      "required": "sea only",
+      "waterPixels": 644,
+      "terrainPixels": 610,
+      "pass": false
+    },
+    "west": {
+      "required": "sea only",
+      "waterPixels": 670,
+      "terrainPixels": 584,
+      "pass": false
+    }
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasEdit": true,
+    "secondReferenceAttached": true,
+    "rawGenerationUntouched": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "greyPlaceholderRemoved": true,
+    "northEdgeSeaOnly": true,
+    "eastSouthAndWestEdgesSeaOnly": false,
+    "oneOrTwoCloseInStackGroupsOnly": false,
+    "noRepeatedTextureLineOrTiledMotifs": false,
+    "noMeadowFlowersStructuresOrTrees": true,
+    "strictEqualValueOnAllRockFaces": false,
+    "waterMaskSameDimensions": true,
+    "waterMaskBinaryWhiteOnTransparent": true,
+    "waterMaskSingleConnectedCoastComponent": true,
+    "waterMaskCoversSourceVisibleWaterByOverlayInspection": true,
+    "crownObjectComplete": true,
+    "crownCensusIncludesAllFoundCrowns": true
+  },
+  "refusalReasons": [
+    "The exact edge map requires sea on all four edges. The raw source retains 545 dry-rock pixels on the east edge, 610 on the south edge, and 584 on the west edge.",
+    "The source contains many repeated mirrored stack groups in regular rows, not the permitted one or two close-in skerries; the repeated horizontal motif bands also violate the no line or texture-character shift rule.",
+    "Repeated pale rock caps over darker vertical faces violate the literal neutral-lighting rule despite the absence of a whole-cell sun gradient or long cast shadows."
+  ],
+  "openRisks": [
+    "The result was square, so it did not qualify for the framing-only retry; a second edit would violate the one-call limit.",
+    "The water mask follows the refused raw source and deliberately does not relabel incorrect dry edge rocks as water.",
+    "Buildable and steep fractions are manual screen-space estimates rather than surveyed terrain geometry.",
+    "Seam continuity, exact wet-pixel boundary judgment, and overall visual quality remain director and owner decisions; this report makes no visual acceptance claim."
+  ],
+  "evidence": [
+    "diagnostics/c1-8-measurements.json",
+    "diagnostics/c1-8-water-overlay.png"
+  ]
+}

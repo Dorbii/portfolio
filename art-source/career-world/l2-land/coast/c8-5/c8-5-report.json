@@ -1,0 +1,124 @@
+{
+  "cell": "c8-5",
+  "territory": "coast",
+  "biome": "shore",
+  "status": "refused",
+  "generation": {
+    "filename": "c8-5-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "8923F019A325E4655B2154151F30A404E83AEEBBD2392729D159A29D3F723121",
+    "mode": "built-in ImageGen edit with edit-target as Image 1 and style canon as reference-only Image 2",
+    "imageGenCallsUsed": 1,
+    "retryUsed": false,
+    "bothImagesAttachedToSameCall": true,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "promptRecord": "c8-5-imagegen-prompt-used.txt"
+  },
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by the uniform-bin mean on the delivered source; final water-mask pixels and gradients below 12 luminance units excluded",
+    "peakVsUniformOverLand": 1.575686,
+    "uniformReference": 1.0,
+    "directionalKeyFirstMoment": 0.006397,
+    "gradientSamples": 442648,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No whole-cell sun gradient or cast-shadow field is visible, but basalt top planes are repeatedly paler than vertical faces and the conifers retain bright-left/dark-right modelling. The literal equal-value lighting rule is not met."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "manual estimated fraction of non-water land area at native source resolution",
+    "buildable": 0.58,
+    "steep": 0.24,
+    "otherBrokenRockTalusOrVegetation": 0.18,
+    "method": "Broad coherent cliff-top bench counts as buildable; exposed column faces and steep cliff-base talus count as steep; broken margins, loose rock, scrub, and conifers make up the remainder. Approximate uncertainty is plus or minus 0.08 per fraction."
+  },
+  "waterFootprintFraction": 0.646070,
+  "finalDerivedLandCoverageFraction": 0.353930,
+  "edgeTopology": {
+    "north": {
+      "required": "open sea",
+      "waterPixels": 1254,
+      "landPixels": 0,
+      "observedRuns": ["water 0-1253"],
+      "pass": true
+    },
+    "east": {
+      "required": "open sea",
+      "waterPixels": 1254,
+      "landPixels": 0,
+      "observedRuns": ["water 0-1253"],
+      "pass": true
+    },
+    "south": {
+      "required": "open sea",
+      "waterPixels": 350,
+      "landPixels": 904,
+      "observedRuns": ["terrain 0-903", "water 904-1253"],
+      "pass": false
+    },
+    "west": {
+      "required": "the northern 64 percent is open sea and only the lower remainder carries ground",
+      "waterPixels": 450,
+      "landPixels": 804,
+      "observedRuns": ["water 0-187", "terrain 188-276", "water 277-288", "terrain 289-294", "water 295-544", "terrain 545-1253"],
+      "pass": false
+    }
+  },
+  "crown": {
+    "medianMetres": 5.585,
+    "medianPx": 116.364,
+    "sampleCount": 5,
+    "method": "Full-frame dark-green connected-component census visually confirmed all five conifers, including both south-edge crowns; source widths 49, 50, 57, 81, and 86 px give a 57 px median scaled by 2560/1254.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c8-5-water-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "94A3C3807776249E12D7F4040013A04DF556410AB5EB1BF88673A02BCB74509C",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "opaqueWaterPixels": 1015956,
+    "transparentNonWaterPixels": 556560,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedWaterComponents8Connected": 1,
+    "method": "Classified source-raster teal and blue from canvas-edge connectivity, grew the selection through adjacent painted foam, surf, wash, reflections, and water gaps between shore rocks, removed a 21-pixel false wet speck, and inspected the full-source overlay. Dry cliffs, talus, stacks, and skerries remain transparent terrain."
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasEdit": true,
+    "secondReferenceAttached": true,
+    "rawGenerationUntouched": true,
+    "terrainOnlyNoStructures": true,
+    "highOblique2_5D": true,
+    "northEdgeOpenSea": true,
+    "eastEdgeOpenSea": true,
+    "southEdgeOpenSea": false,
+    "westEdgeNorthernOpenSeaRunExact": false,
+    "landContinuationWithin15To40Metres": false,
+    "treesOnlyWhereNeighbourPaintArrives": false,
+    "weatheredIrregularColumnarBasalt": false,
+    "strictEqualValueOnAllFormSides": false,
+    "waterMaskSameDimensionsBinaryAndOverlayInspected": true,
+    "allMeasuredCrownsIncluded": true,
+    "crownMedianInsideAcceptedTerritoryBand": false
+  },
+  "refusalReasons": [
+    "The continuous west-edge ground begins at source row 545, about 43.5 percent down, instead of at the required 64 percent boundary near row 803; roughly 258 rows of the protected open-sea run are land.",
+    "Land occupies 904 of 1254 south-edge pixels although that edge is required to be sea.",
+    "The delivered dry footprint reaches source x=1008, about 78.5 m from the west edge, rather than ending within the required 15-40 m coastal continuation.",
+    "Five conifers were introduced on the new headland even though none visibly arrive with the neighbour's ground, and their measured 5.585 m median exceeds the accepted 1.7-5.2 m territory band.",
+    "Repeated pale column caps over darker vertical faces violate the literal neutral-lighting rule.",
+    "Several cliff runs read as clean repeated upright columns with level cap rhythms rather than consistently weathered, split, leaning, irregular coast geology."
+  ],
+  "openRisks": [
+    "The water mask is mechanically binary, connected, same-size, and overlay-inspected, but it faithfully classifies the noncompliant source topology rather than correcting it.",
+    "Buildable and steep fractions and crown outer-foliage widths are image measurements, not surveyed geometry.",
+    "The square result made the framing-only retry unavailable, so no second ImageGen call was made.",
+    "No artifact was promoted outside quarantine; visual quality remains owner and director judgment."
+  ]
+}

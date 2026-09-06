@@ -1,41 +1,43 @@
 {
-  "purpose": "Owner-requested local mounting of existing land work; does not mark these candidates accepted or modify authoring ledgers.",
+  "purpose": "Local mounting of every current candidate as a review preview (the land lane owns what the mount shows — owner 2026-09-05: 'if the mount has stale land please update it as you are land authority'); does not mark these candidates accepted or modify authoring ledgers.",
+  "writtenBy": "docs/career-world/session3-tools/mount-candidates.mjs",
+  "at": "2026-09-06T17:42:51.408Z",
   "cells": [
     {
-      "territory": "tanium",
-      "id": "c1-1",
+      "territory": "coast",
+      "id": "c1-4",
       "status": "review-candidate",
-      "sourceSnapshot": "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/.codex-tmp/authoring/cells/tanium/c1-1/c1-1-l2.png",
-      "sourceSha256": "ea43c2f16bf117dbf3a958a97a3f533c3f15a89f62b9edc26149ea700e76e317",
-      "canonicalPath": "/career-world/layers/terrain/authority/tiles/l2-review/tanium-c1-1-site.webp",
-      "canonicalSha256": "460a71cbd796f9f805a582cda5ea689648023836e575ecbb5ad6203b0f181344"
+      "sourceSnapshot": "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/.codex-tmp/authoring/cells/coast/c1-4/c1-4-l2.png",
+      "sourceSha256": "62c1a60c59ec5182df097fe2741bb71523dc6b787c49edf47a4e4a804602a642",
+      "canonicalPath": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c1-4-site.webp",
+      "canonicalSha256": "b3ef9ce7a5bdbc8bf7ca0bc911897d49932baf2298497068abb33b7da823a98e"
     },
     {
-      "territory": "tanium",
-      "id": "c2-1",
+      "territory": "coast",
+      "id": "c1-3",
       "status": "review-candidate",
-      "sourceSnapshot": "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/.codex-tmp/authoring/cells/tanium/c2-1/c2-1-l2.png",
-      "sourceSha256": "952889d088d5d6fb80f4b13d30a581dbf412aa306bcf54050c2c7b9e86cb9735",
-      "canonicalPath": "/career-world/layers/terrain/authority/tiles/l2-review/tanium-c2-1-site.webp",
-      "canonicalSha256": "da91c296809eb8319cdd579331772ed7d343eac9b6e392333488887e59119771"
+      "sourceSnapshot": "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/.codex-tmp/authoring/cells/coast/c1-3/c1-3-l2.png",
+      "sourceSha256": "6d69afd3345313d9b73212d595b98a04d51f5eb3bd8c249bcfb0a3ce232f8f4d",
+      "canonicalPath": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c1-3-site.webp",
+      "canonicalSha256": "878c2a67a3f7f4153da451493954348b0b5eb79921de0bf51bacc09d908540a8"
     },
     {
-      "territory": "tanium",
-      "id": "c3-1",
+      "territory": "coast",
+      "id": "c4-8",
       "status": "review-candidate",
-      "sourceSnapshot": "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/.codex-tmp/authoring/cells/tanium/c3-1/c3-1-l2.png",
-      "sourceSha256": "f1bb97c6f5cd10fa5684fc987de976cb92de1cdff2c3dbfb05f70320ccec1d78",
-      "canonicalPath": "/career-world/layers/terrain/authority/tiles/l2-review/tanium-c3-1-site.webp",
-      "canonicalSha256": "bf5263e799d01edbdbab3ad9fb2cb425b09f4f2e2908b2467e78b8313d4d6021"
+      "sourceSnapshot": "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/.codex-tmp/authoring/cells/coast/c4-8/c4-8-l2.png",
+      "sourceSha256": "e2d55a67b9f12ecfd4f407a587542010a88b8fc6b54b85da0f52b683463569cf",
+      "canonicalPath": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c4-8-site.webp",
+      "canonicalSha256": "3b99344ed46d8b8bf3f626e7f5892b730d2df6249d01fde925d3843cc6cdbc93"
     },
     {
-      "territory": "tanium",
-      "id": "c4-0",
+      "territory": "coast",
+      "id": "c0-5",
       "status": "review-candidate",
-      "sourceSnapshot": "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/.codex-tmp/authoring/cells/tanium/c4-0/c4-0-l2.png",
-      "sourceSha256": "5fa2e7fc6cbbf8565ff32b4f5f1bdacdb16971b3557bdb872bba65de49da104e",
-      "canonicalPath": "/career-world/layers/terrain/authority/tiles/l2-review/tanium-c4-0-site.webp",
-      "canonicalSha256": "a9ae622b60a3853b6032c4381465d8c0c0840ae82ba00a4dc34c1e4604063071"
+      "sourceSnapshot": "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/.codex-tmp/authoring/cells/coast/c0-5/c0-5-l2.png",
+      "sourceSha256": "8013737cf2e34e77ccba6a29bb76c45d4cc5dbfb59d1871fdef3b6cc0d6af1fc",
+      "canonicalPath": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c0-5-site.webp",
+      "canonicalSha256": "8e05df3187e4b09aa10348335150f63e575be3f501f0bcabe59f82bd780e1b9e"
     }
   ]
 }

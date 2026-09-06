@@ -1,100 +1,82 @@
 {
   "cell": "c5-1",
   "territory": "tanium",
-  "status": "refused_quarantine_only",
+  "status": "refused; mechanical deliverables complete; visual self-check fails the binding neutral-lighting rule",
+  "readyForBake": false,
   "generation": {
     "filename": "c5-1-source.png",
-    "exactGenerationSizeProduced": [1254, 1254],
+    "exactSizePx": [1254, 1254],
     "format": "PNG RGB",
-    "sha256": "6491EDC0F1C9A50DDD02B70666AB2A382D54D8631F8C2E202CFD72A2C2831B13",
-    "mode": "single built-in ImageGen whole-canvas edit with edit-target.png first and the NinjaOne seed canon second as reference only",
-    "imageGenCallsUsedThisWorkBlock": 1,
+    "sha256": "ACE37DEF42C7C492473F865F12E0B703D0E9811C6D0E26432F4F28C4D9DFE1DB",
+    "tool": "built-in image_gen",
+    "mode": "single whole-canvas edit",
+    "imageGenCallsUsed": 1,
     "retryUsed": false,
-    "secondReferenceAccepted": true,
-    "bothImagesAttachedToSameCall": true,
-    "wholeCanvasSinglePass": true,
+    "bothRequiredImagesAttachedToSameCall": true,
+    "secondImageReferenceOnly": true,
     "rawOutputPreserved": true,
     "rawCopyHashIdentical": true,
     "resizedCroppedRetouchedOrTiled": false,
-    "promptFile": "c5-1-imagegen-prompt-used.txt"
+    "promptRecord": "c5-1-imagegen-prompt-used.txt"
   },
   "generationSizePx": [1254, 1254],
   "shippedCanvasPx": [2560, 2560],
   "groundExtentMetres": [97.6, 97.6],
   "finalResolutionCmPerPx": 4.8,
   "lightingIsotropy": {
-    "metric": "36-bin full-angle land-luminance-gradient magnitude peak divided by the uniform-bin mean on the delivered source; final water-mask pixels and immediate neighbours excluded and gradients below 12 luminance units excluded",
-    "peakVsUniformOverLand": 1.574672,
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean; delivered water-mask pixels and gradients below 12 luminance units excluded",
+    "peakVsUniformOverLand": 1.598874,
     "uniformReference": 1.0,
-    "directionalKeyFirstMoment": 0.000669,
-    "gradientSamples": 1357803,
+    "directionalKeyFirstMoment": 0.00143,
+    "gradientSamples": 1290066,
     "aggregateDirectionalityNumericPass": true,
     "strictEqualValueOnAllFormSidesVisualCheck": false,
-    "visualCheck": "No cast-shadow field or whole-cell sun gradient is obvious, but basalt and boulders repeatedly use pale upper planes over darker vertical faces. The low aggregate directional moment cannot override the literal equal-value rule."
+    "visualCheck": "No coherent whole-cell cast-shadow field or explicit sun direction is visible, but repeated basalt caps and upper rock planes are materially paler than adjacent vertical faces, and several conifer branch tiers retain internal light-dark modelling. The low aggregate directional first moment does not override the literal equal-value rule."
   },
   "buildableVsSteepFraction": {
-    "basis": "manual full-frame estimate as fractions of non-water land at native source resolution",
-    "buildable": 0.44,
-    "steep": 0.13,
-    "otherBrokenRockTalusVegetationCarvingsOrTransitionGround": 0.43,
-    "method": "The coherent gold-green central shelf and broad even northern run count as buildable; exposed basalt risers and incised banks count as steep; rocky biome transitions, talus, vegetation, the rune cut and panel footprints make up the remainder."
+    "basis": "manual estimated fraction of non-water land area at native source resolution",
+    "buildable": 0.5,
+    "steep": 0.14,
+    "otherTalusBrokenRockOrVegetation": 0.36,
+    "method": "The coherent centre-west meadow shelf and broad even northern run count as buildable; exposed terrace and ridge faces count as steep; talus, broken transition ground, outcrops, stream margins, and conifer stands make up the remainder. Approximate uncertainty is plus or minus 0.08 per land-relative fraction."
   },
-  "waterFootprintFraction": 0.026902,
-  "finalDerivedLandCoverageFraction": 0.973098,
+  "waterFootprintFraction": 0.022164,
+  "finalDerivedLandCoverageFraction": 0.977836,
   "crown": {
-    "medianMetres": 2.009,
-    "medianPx": 41.85,
-    "sampleCount": 42,
-    "method": "Full-frame native-resolution dark-conifer connected-component census of all 42 detected crown components, including saplings and clipped edge crowns; median source width 20.5 px was scaled by 2560/1254 and converted at 0.048 m per final pixel.",
+    "medianMetres": 3.038,
+    "medianPx": 63.286,
+    "sampleCount": 64,
+    "method": "Manual full-frame census at native resolution and in all four 2x quadrant crops; every visually distinguishable conifer crown, including saplings, overlapping crowns, and edge-clipped crowns, was included, with a 31 source-pixel median scaled by 2560/1254 and converted at 0.048 m per final pixel.",
     "excludedElements": []
   },
   "waterMask": {
     "filename": "c5-1-water-source.png",
     "exactSizePx": [1254, 1254],
     "format": "PNG RGBA",
-    "sha256": "C3EB54A9AF983CD5952C2D1E4FC9A40BE0934CC8199F4F77ED76FF207DF439E8",
+    "sha256": "8D0B56E6DEB690A285C4E6DF6900B5B1CAA57F7D0AE0131E111B3D4723869D11",
     "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
-    "opaqueWaterPixels": 42304,
-    "transparentNonWaterPixels": 1530212,
+    "opaqueWaterPixels": 34853,
+    "transparentNonWaterPixels": 1537663,
     "intermediateAlphaPixels": 0,
     "nonWhiteOpaquePixels": 0,
-    "connectedComponents8": 1,
-    "interiorHolePixelsFilled": 1,
-    "accidentalInteriorHoles": 0,
+    "connectedComponents8": 2,
+    "componentNote": "The main ridge-stream, pool, and upper west outlet are one component; the same stream's visible west-edge reach is a second component because an intervening rock shelf occludes the surface.",
+    "interiorHolePixels": 0,
     "edgeWaterPixels": {
       "north": 0,
       "east": 0,
       "south": 0,
-      "west": 0
+      "west": 23
     },
-    "method": "Native-resolution bank-to-bank traces of the connected shallow stream and pool, including their full painted shallow margins, wash, ripple highlights, reflections and water between stones; the binary overlay was inspected at native resolution."
-  },
-  "runeChain": {
-    "requiredWestEdgeFractionDown": 0.45,
-    "requiredEastEdgeFractionDown": 0.50,
-    "requiredWestCentreYSourcePx": 564.3,
-    "requiredEastCentreYSourcePx": 627.0,
-    "measuredWestCentreYSourcePx": 624,
-    "measuredEastCentreYSourcePx": 692,
-    "westErrorSourcePx": 59.7,
-    "eastErrorSourcePx": 65.0,
-    "exactEdgeHandoffsPass": false,
-    "fullWidthContinuous": true,
-    "waterOnGroove": false,
-    "panelCount": 8,
-    "panelCountPass": true,
-    "visualRead": "The feature has a dark recessed centre between stone lips, but the lips are regular enough to risk reading as a stone-lined channel or kerb instead of an eroded bedrock slot."
+    "method": "Native-resolution hand trace against 3x and 4x review crops, filled as smooth binary envelopes over the full painted pool and stream surfaces, including shallows, wash between stones, ripples, highlights, and reflections; inspected against a full-resolution magenta overlay."
   },
   "siteChecks": {
-    "coherentOccupiableSettlementShelfPresent": true,
-    "goldGreenMeadowAndOpenGladesPresent": true,
-    "northSouthWeatheredRidgePresent": true,
-    "shallowStreamAndSinglePoolPresent": true,
-    "broadEvenNorthernRunPresent": true,
-    "eightDistinctWeatheredPanelsPresent": true,
-    "terrainOnly": true,
-    "highOblique2_5D": true,
-    "landContinuesToAllFourEdges": true
+    "coherentOccupiableShelf": "A broad, level gold-green centre-west terrace has multiple open glades and low natural rock edges; it can physically hold a settlement.",
+    "easternRidge": "Moor, broken outcrop, short weathered column groups, and talus form the rising eastern band; no ordered arcade was added inside the editable land.",
+    "levelNorthernRailRun": "A broad band of even natural ground remains north of the main shelf with no rail, road, path, or constructed edge; exact world-space width is not surveyed from the raster.",
+    "streamAndPool": "One ridge-fed stream crosses the shelf's northern edge, fills one pool, and exits west through visible reaches separated by rock occlusion.",
+    "runeLayerAbsent": "The editable land contains plain continuous terrain with no rune groove, slot, kerb, carved panel, marks, or linear replacement feature.",
+    "terrainOnly": "No building, wall, road, bridge, dock, boat, fence, figure, rail, track, text, or marker is visible."
   },
   "constraintChecks": {
     "squareAtLeast1254Px": true,
@@ -102,25 +84,40 @@
     "secondReferenceAttached": true,
     "rawGenerationUntouched": true,
     "terrainOnly": true,
-    "waterMaskSameDimensionsBinaryWhiteTransparent": true,
-    "waterMaskCoversCompletePaintedWater": true,
-    "waterMaskNoAccidentalInteriorHoles": true,
+    "highOblique2_5D": true,
+    "terrainContinuesToAllEdges": true,
+    "coherentBuildableShelfPresent": true,
+    "northernEvenGroundRunPresent": true,
+    "runeChainAbsentFromEditableLand": true,
+    "waterMaskSameDimensionsBinaryAndHoleFree": true,
+    "allPaintedWaterIncluded": true,
     "crownObjectComplete": true,
-    "allDetectedCrownsIncluded": true,
     "crownMedianInsideAcceptedTerritoryBand": true,
-    "strictNeutralLighting": false,
-    "runeChainExactEdgeHandoffs": false,
-    "runeChainUnambiguouslyExcavatedSlot": false
+    "strictEqualValueOnAllFormSides": false
   },
   "refusalReasons": [
-    "The highest-priority lighting rule fails visually: repeated pale rock top planes and darker vertical faces retain orientation-dependent form lighting even though no cast-shadow field is present.",
-    "The rune-chain groove misses both exact seam handoffs: its traced centre reaches the west edge near source y=624 instead of 564.3 and the east edge near y=692 instead of 627.0.",
-    "The rune-chain stone lips are too regular to be unambiguously read as a weathered slot removed from bedrock; they risk reading as a stone-lined channel or kerb."
+    "The highest-priority lighting rule fails by eye: repeated pale rock caps and upper planes remain over darker side faces, and several conifer crowns retain brighter upper branch tiers.",
+    "The packet permits a second ImageGen call only for a non-square result. This result is square, so no visual-quality retry is authorized."
   ],
   "openRisks": [
-    "The crown census includes every detected component and no exclusions, but overlapping painted crowns can merge into one connected component; final scale judgment remains visual.",
-    "The water mask is same-size, binary, connected and overlay-inspected; exact bank placement remains a human visual gate.",
-    "The cell remains quarantine-only. No shipped-canvas bake, runtime validation, public asset write or art-source write was performed."
+    "The broad eastern rise reads as broken terrace and ridge ground, but its north-south continuity and the northern even-ground width remain human visual judgments rather than surveyed geometry.",
+    "Some inherited edge geology remains more regular than the intended ordinary weathered ridge; the editable interior avoids a continuous palisade, but owner review is required.",
+    "The water mask is mechanically same-size, binary, and hole-free and was inspected by overlay; exact wet-edge placement remains a human visual gate.",
+    "No artifact was promoted outside quarantine."
   ],
-  "recommendedReframe": "Do not spend a prompt-only quality retry on this square result. A future attempt needs deterministic seam guides for the rune-chain handoffs and an authoring path that can enforce flat-value rock faces."
+  "verified": [
+    "Exactly one built-in whole-canvas edit call used both required images.",
+    "The 1254 x 1254 source copy is hash-identical to the raw generated PNG.",
+    "No rune slot or carved panels were generated inside the editable land.",
+    "No buildings, walls, roads, bridges, docks, boats, fences, figures, track, sleepers, or tunnel mouths were observed.",
+    "The water mask dimensions match the source; opaque pixels are white, non-water pixels are transparent, and no intermediate alpha or interior holes are present.",
+    "The crown object includes saplings and reports no exclusions.",
+    "All project deliverables remain under .codex-tmp/authoring/cells/tanium/c5-1/."
+  ],
+  "unverified": [
+    "Owner visual review.",
+    "Pipeline stitch, shipped-canvas upscale, and runtime appearance.",
+    "World-space terrace, ridge, pool, and northern even-ground dimensions from the raster."
+  ],
+  "outputScope": ".codex-tmp/authoring/cells/tanium/c5-1/ only; public/ and art-source/ were not modified."
 }

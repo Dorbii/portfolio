@@ -291,18 +291,6 @@
   },
   {
    "at": [
-    2,
-    8
-   ],
-   "island": "N",
-   "extends": {
-    "territory": "tanium",
-    "id": "c1-2"
-   },
-   "shore": "south"
-  },
-  {
-   "at": [
     5,
     8
    ],
@@ -334,6 +322,18 @@
    "extends": {
     "territory": "tanium",
     "id": "c6-2"
+   },
+   "shore": "south"
+  },
+  {
+   "at": [
+    0,
+    7
+   ],
+   "island": "N",
+   "extends": {
+    "territory": "coast",
+    "id": "c0-6"
    },
    "shore": "south"
   }
@@ -407,10 +407,10 @@
   "8,6": "shore",
   "8,7": "shore",
   "1,8": "shore",
-  "2,8": "shore",
   "5,8": "shore",
   "6,8": "shore",
-  "7,8": "shore"
+  "7,8": "shore",
+  "0,7": "shore"
  },
  "runeChain": null,
  "rules": {

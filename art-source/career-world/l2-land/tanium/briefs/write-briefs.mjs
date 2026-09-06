@@ -236,7 +236,13 @@ around inside this cell.
 A stream crosses the shelf from the east and falls into the gorge in one clear
 drop, with a pool at the top.
 
-Carry land to the NORTH, EAST and SOUTH edges; only the west is sea.`;
+Carry land to the NORTH, EAST and SOUTH edges; only the west is sea.
+
+**THE RUNE CHAIN IS NOT IN THIS CELL (owner 2026-09-06: the chain is a
+separate layer drawn over the land afterwards).** Paint the ground plain and
+continuous where it will run: no groove, no slot, no kerb, no wall, no path,
+no line of any kind, no carved panels, no marks. Ground, rock, water and
+vegetation only, exactly as the cell's own description above.`;
 
 B["1,1"] = `The darkest cell in the territory. Dense dark conifer stands on mossy ground,
 little open ground anywhere, flat haze lying between the trunks.
@@ -270,14 +276,23 @@ brightness — and no dark stand touches the north edge anywhere, the east corne
 included. The first trees stand beyond that band as scattered groups, and the
 stands close into the dense forest a third of the way down the cell.
 
-**The groove is a dark slot, never a pale path** — its floor in shade, its rims
-rounded and paler, darker than the ground either side. Where it meets the gorge
-it is cut into the rock of both lips at the same height and resumes on the far
-side; nothing spans the air. East of the gorge it runs on between the trunks,
-over the forest floor, all the way to the east edge. No rune panels and no
-marks anywhere in this cell.
+**The seams must not show (owner 2026-09-05, on the live world: "needs a
+cleaner transition, its too dark and obvious seam").** Seen from above, this
+cell must not read as one dark square set into brighter ground: the darkest
+stand is the DEEP-STAND site and the gorge's shade, not the whole cell. Toward
+the WEST edge the stands break into glades and scattered groups over the last
+third of the cell, so the heath of (0,1) runs in between the trees before the
+seam; toward the EAST edge the same, into the thinning forest of (2,1). The
+canopy's value where it meets any neighbour is that neighbour's own value: the
+change is gradual across the outer third, never at a line.
 
-Land to all four edges.`;
+Land to all four edges.
+
+**THE RUNE CHAIN IS NOT IN THIS CELL (owner 2026-09-06: the chain is a
+separate layer drawn over the land afterwards).** Paint the ground plain and
+continuous where it will run: no groove, no slot, no kerb, no wall, no path,
+no line of any kind, no carved panels, no marks. Ground, rock, water and
+vegetation only, exactly as the cell's own description above.`;
 
 B["2,1"] = `THE EASTERN EDGE OF THE FOREST, and the cell that has to make the forest read
 as a forest rather than as one dark square. The cell WEST of this one (1,1) is
@@ -289,11 +304,6 @@ scattered groups through the middle, then open ground with only a few isolated
 conifers by the eastern third. **The change happens gradually across the whole
 cell, not at a line.** Mossy ground and deep shade under the western stands;
 grass and low scrub in the open east.
-
-Ground gently rolling and falling to the south. Low basalt outcrops break
-through in the open eastern part; one column wall about 6 m high runs east-west
-across the north with talus at its foot. A beck runs south through the trees in
-a shallow gully and out into the open ground.
 
 The BEACON-CRAG site: a bare crag toward the south-east where the trees have
 already thinned, rising 18-25 m with a flat top about 20 m across and a clear
@@ -311,12 +321,13 @@ stand is a few hundred proper trees, never a carpet of saplings.
 corner to corner, for the first 10 m inside the seam — the western stands stop
 short of it, and the forest closes only north of that band.
 
-**The groove is a dark slot, never a pale path** — its floor in shade, its rims
-rounded and paler, darker than the ground either side. It runs between the
-trunks over the forest floor in the west and across the open ground in the
-east, one true line from edge to edge.
+Land to all four edges.
 
-Land to all four edges.`;
+**THE RUNE CHAIN IS NOT IN THIS CELL (owner 2026-09-06: the chain is a
+separate layer drawn over the land afterwards).** Paint the ground plain and
+continuous where it will run: no groove, no slot, no kerb, no wall, no path,
+no line of any kind, no carved panels, no marks. Ground, rock, water and
+vegetation only, exactly as the cell's own description above.`;
 
 B["3,1"] = `THE CAPITAL SHELF. The most important ground in the territory, and the richest
 in its neighbourhood.
@@ -329,15 +340,6 @@ terraces of warm rock — two or three steps, each broad enough to build on, so
 the settlement has levels to occupy. To the south and east it runs out more
 gently.
 
-A stream enters at the north edge, 5 m wide at the seam, tapers to 2-3 m and
-runs in a shallow channel down to ONE pool about 15 m across in the north-east
-quarter of the shelf, north of the groove. The pool’s outlet leaves its south
-side as a beck 2-3 m wide and runs south to the SOUTH edge, where it meets the
-stream arriving there — the only place water leaves this cell. Nothing wet
-reaches the east or west edge. Where the beck meets the groove it passes
-BENEATH it: the groove’s floor runs unbroken over the beck on a natural rock
-bridge, and no water sits on the line.
-
 **The south edge is as bright as the ground arriving from the south**, corner
 to corner: that gold-green meadow with its pale column outcrops continues at
 its own brightness for the first 10 m inside the seam, and the shelf's own
@@ -345,15 +347,18 @@ meadow is the same bright gold-green — not olive, not khaki. The north edge
 continues the darker olive bench ground arriving from the north, and the
 change from olive to gold happens across the north third.
 
-The rune panels stand within 15 m of the groove, on both sides of it, as one
-cluster near the middle of the shelf — not scattered over the cell.
-
 This is where the rail loop begins and ends, so the shelf needs a level
 approach from the east and from the west: two clear runs of even ground at the
 shelf's own height, each about 30 m wide, unobstructed by outcrop or stand.
 Draw no structures and no track — the ground only.
 
-Land to all four edges.`;
+Land to all four edges.
+
+**THE RUNE CHAIN IS NOT IN THIS CELL (owner 2026-09-06: the chain is a
+separate layer drawn over the land afterwards).** Paint the ground plain and
+continuous where it will run: no groove, no slot, no kerb, no wall, no path,
+no line of any kind, no carved panels, no marks. Ground, rock, water and
+vegetation only, exactly as the cell's own description above.`;
 
 B["4,1"] = `Bare plateau: pale basalt benches with hexagonal-jointed tops, scree fans, thin
 wind-scoured grass only in the cracks. No meadow anywhere in this cell. Pale
@@ -376,15 +381,13 @@ under the north bench. Give it a face to enter: a clean vertical rise of solid
 rock, 15–20 m tall, at the north bench's edge, with level approach ground in
 front of it. Draw no portal, no track — only the rock and the ground.
 
-A thin tall fall drops off the west bench edge well SOUTH of the groove — at
-least 15 m from it — and the two never meet.
+Land to all four edges.
 
-**The groove leaves the WEST edge 48% down it**, cut across the plateau rim as
-the same slot it is everywhere else, and it never turns into a watercourse.
-The previous candidate ran the groove down into the fall, so the chain ended
-in a waterfall; the line must cross the whole cell edge to edge on its own.
-
-Land to all four edges.`;
+**THE RUNE CHAIN IS NOT IN THIS CELL (owner 2026-09-06: the chain is a
+separate layer drawn over the land afterwards).** Paint the ground plain and
+continuous where it will run: no groove, no slot, no kerb, no wall, no path,
+no line of any kind, no carved panels, no marks. Ground, rock, water and
+vegetation only, exactly as the cell's own description above.`;
 
 B["5,1"] = `The RISK-ASSESSMENT shelf — a settlement shelf, the richest ground in its
 neighbourhood, and the last one before the coast to the east.
@@ -408,34 +411,32 @@ The rail loop runs through here between the plateau and the coast, so leave a
 level run of even ground about 25 m wide across the cell from west to east,
 passing north of the shelf.
 
-Land to all four edges.`;
+Land to all four edges.
 
-B["6,1"] = `THE CHAIN'S SEAWARD END — the east coast, where the rune chain leaves the
-world. Wild coast: the EAST edge is sea.
+**THE RUNE CHAIN IS NOT IN THIS CELL (owner 2026-09-06: the chain is a
+separate layer drawn over the land afterwards).** Paint the ground plain and
+continuous where it will run: no groove, no slot, no kerb, no wall, no path,
+no line of any kind, no carved panels, no marks. Ground, rock, water and
+vegetation only, exactly as the cell's own description above.`;
 
-A cliff-top bench of thin grass and bare rock runs the height of the cell,
-30-50 m wide, quiet and plain: nothing on it competes with the chain. Below
-it, weathered columnar sea-cliffs 25-40 m tall — columns of uneven height and
-width, tops broken at different levels, split and leaning, collapsed drums in
-talus at the foot, lichen in the joints — and the cliff line wanders in plan
-with two bays and a buttress, never a straight run. A natural ledge partway
-up the face. Two sea stacks offshore, the nearer one 20 m out.
-
-**Perspective.** This is the island's east shore seen from the south-south-east:
+B["6,1"] = `**Perspective.** This is the island's east shore seen from the south-south-east:
 the cliff faces that look south, into the bays, show their columns; faces that
 look north are hidden behind their own rim. Draw it that way.
 
-**The CHAIN-END.** The groove arrives from the west and runs east across the
-bench to the cliff lip, where it is cut clean through the rim — the slot
-visible in the cliff face as a notch — and continues as the same cut across
-the top of the nearer sea stack, and out of the world at the east edge. The
-last panels stand on the bench beside the notch, weathered and part-lost,
-with level ground to stand on and look along the line out to sea. No column
-leans, no arch, no colonnade: that idea is withdrawn.
-
 Dark conifers only in the gullies at the west edge; no meadow, no flowers.
 Surf and wash at the cliff foot and around the stacks. Carry land to the
-NORTH, SOUTH and WEST; the EAST edge is sea.`;
+NORTH, SOUTH and WEST; the EAST edge is sea.
+
+**The CHAIN-END site** — on the bench at the cliff rim: a level shelf of bare
+rock about 20 m across, the cliff face cut clean below it, level ground to stand
+on and look out to sea. Nothing carved on it and no line leading to it: the
+chain itself is a separate layer.
+
+**THE RUNE CHAIN IS NOT IN THIS CELL (owner 2026-09-06: the chain is a
+separate layer drawn over the land afterwards).** Paint the ground plain and
+continuous where it will run: no groove, no slot, no kerb, no wall, no path,
+no line of any kind, no carved panels, no marks. Ground, rock, water and
+vegetation only, exactly as the cell's own description above.`;
 
 // ---------------------------------------------------------------- row 2 ----
 B["0,2"] = `South-west corner of the territory. Open sea on the SOUTH and the WEST — this
@@ -490,6 +491,17 @@ the shelf's gold meadow from the east and the sound coast's pale grey-green
 grass from the west continue at their own brightness and colour for the first
 10 m inside each seam. The dark stands begin beyond those bands and close to
 the full forest through the middle of the cell.
+
+**The seams must not show (owner 2026-09-05, on the live world: "needs a
+cleaner transition, its too dark and obvious seam").** Seen from above, this
+cell must not read as one dark square set into brighter ground. The canopy is
+NO DARKER than the forest of the cell to the NORTH-EAST (2,1): dark green with
+the haze over it, never near-black. Toward the EAST edge the stands break into
+glades and scattered groups over the last third of the cell, so the meadow
+shelf's grass runs in between the trees before the seam — the change is
+gradual across that third, never at a line. The same toward the WEST edge with
+the sound coast's pale grass. The dense dark heart of the forest is the middle
+of the cell, around the inlet.
 
 Carry land to the NORTH, EAST and WEST edges; the south is sea.`;
 

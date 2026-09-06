@@ -1,0 +1,98 @@
+{
+  "cell": "c7-1",
+  "territory": "ninjaone",
+  "biome": "shore",
+  "status": "quarantine_candidate_failed_hard_constraints",
+  "generation": {
+    "filename": "c7-1-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "9ADE8A15B9ABDA2364CB149777145B06A552E634654319477D97146E5882B439",
+    "mode": "built-in ImageGen edit with edit-target as Image 1 and canon as reference-only Image 2",
+    "imageGenCallsUsed": 1,
+    "retryUsed": false,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "secondReferenceAccepted": true,
+    "promptRecord": "c7-1-imagegen-prompt-used.txt"
+  },
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by the uniform-bin mean on the delivered source; water-mask pixels and adjacent pixels excluded, and gradients below 12 luminance units excluded",
+    "peakVsUniformOverLand": 1.596825,
+    "uniformReference": 1.0,
+    "peakBinDegrees": [220, 230],
+    "directionalKeyFirstMoment": 0.006129,
+    "gradientSamples": 461392,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No cast-shadow field or explicit sun is visible, but basalt caps are repeatedly paler than cliff faces and conifers retain directional form modelling. The literal same-value-on-every-side constraint is not met."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "Manual screen-space estimate over non-water land at native source resolution.",
+    "buildable": 0.61,
+    "steep": 0.23,
+    "otherBrokenRockTalusShingleScrubOrVegetation": 0.16,
+    "wholeCellBuildableEstimate": 0.2053,
+    "wholeCellSteepEstimate": 0.0774,
+    "method": "Broad coherent bench and shelf tops count as buildable; exposed column faces count as steep; talus, shingle, detached rock, scrub, and conifer footprints make up the remainder.",
+    "limitation": "Visual estimate rather than elevation-derived slope or world-space surface area."
+  },
+  "waterFootprintFraction": 0.66350422,
+  "crown": {
+    "medianMetres": 3.479,
+    "medianPx": 72.472,
+    "sampleCount": 8,
+    "method": "Complete visual census of all eight distinguishable conifer crowns, including the edge-clipped arrival; measured crown-width bounding boxes at native 1254 px, median 35.5 px, then scaled by 2560/1254 and converted at 4.8 cm per final pixel.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c7-1-water-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "E9BAC6ACB6AEBB25F2BB3AD463FCBAFB3775928638737AC15AD692AA3B41BC88",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "opaqueWaterPixels": 1043371,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedWaterComponents8Connected": 1,
+    "smallClassifierHolePixelsFilled": 573,
+    "edgeWaterPixels": {
+      "north": 978,
+      "east": 1254,
+      "south": 798,
+      "west": 149
+    },
+    "derivation": "The edge-connected cyan and blue source surface was expanded through adjacent wet neutral, pale surf, wash, ripple, and reflection pixels; enclosed classifier gaps of at most 64 pixels were filled. The traced mask follows the full connected source-visible sea and fall rather than stopping at an open-water polygon.",
+    "interiorTransparentTerrainNote": "Transparent islands enclosed by sea are visibly dry stacks, columns, talus, or shore rocks, not omitted water texture."
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasEdit": true,
+    "secondReferenceAttached": true,
+    "rawGenerationUntouched": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "noStructuresFiguresOrTrack": true,
+    "waterMaskSameDimensionsBinaryWhiteTransparent": true,
+    "waterMaskCoversSurfWashRippleHighlightsReflectionsAndFall": true,
+    "crownCensusComplete": true,
+    "crownMedianInsideAcceptedTerritoryBand": true,
+    "strictEqualValueOnAllFormSides": false,
+    "shoreAddsNoTreesOfItsOwn": false,
+    "weatheredIrregularColumnsThroughout": false
+  },
+  "refusalReasons": [
+    "The edit added seven full conifers in the newly painted shore regions even though the shore biome permits no trees of its own; the eighth census crown is an edge-clipped arrival.",
+    "Repeated pale column caps over darker vertical faces and modelled conifer shading violate the literal neutral-lighting requirement despite the absence of a cast-shadow field or explicit sun.",
+    "Several long cliff sections read as repeated upright columns with clean pale caps rather than consistently weathered, split, leaning, irregular ordinary coast."
+  ],
+  "openRisks": [
+    "The source cannot be corrected without violating the one-edit-call limit; its square result does not authorize a framing retry.",
+    "The edit target and prose edge map are not visually identical at the north and south boundaries; the required edit-target authority was followed and its painted pixels were supplied to ImageGen.",
+    "Buildable and steep fractions and the crown census are image measurements, not surveyed geometry.",
+    "Exact seam continuity, exact water-mask edge judgment, landform naturalism, and visual quality remain director and owner judgments; this report does not claim visual acceptance."
+  ]
+}

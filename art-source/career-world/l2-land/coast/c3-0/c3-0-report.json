@@ -1,0 +1,124 @@
+{
+  "cell": "c3-0",
+  "territory": "ninjaone",
+  "biome": "shore",
+  "status": "refused",
+  "generation": {
+    "filename": "c3-0-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "E62B554859544E10BC20568BF31EFDCBE075C92082489A6FC9C9CDFFAAE60E98",
+    "mode": "single built-in ImageGen edit with edit-target as Image 1 and style canon as reference-only Image 2",
+    "imageGenCallsUsed": 1,
+    "retryUsed": false,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "secondReferenceAccepted": true,
+    "promptFile": "c3-0-imagegen-prompt.txt"
+  },
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean on the delivered source; water and its four immediate neighbours are excluded, as are gradients below 12 luminance units.",
+    "peakVsUniformOverLand": 1.692479,
+    "uniformReference": 1.0,
+    "directionalKeyFirstMoment": 0.005325,
+    "gradientSamples": 721171,
+    "aggregateDirectionalityNumericPass": true,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No whole-cell sun gradient or cast-shadow field is obvious, but basalt repeatedly has pale upper facets and darker side faces, and conifers retain light-dark form modelling. The aggregate statistic does not establish the literal equal-value rule."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "Manual estimated fraction of non-water land area at native source resolution.",
+    "buildable": 0.58,
+    "steep": 0.10,
+    "otherBrokenRockTalusOrVegetation": 0.32,
+    "method": "Broad coherent pale plateau benches count as buildable; the immediate broken shore rim and short exposed column faces count as steep; talus, shingle, scattered boulders, scrub, and conifer groups make up the remainder. Approximate uncertainty is plus or minus 0.08 per fraction."
+  },
+  "waterFootprintFraction": 0.469480,
+  "finalDerivedLandCoverageFraction": 0.530520,
+  "landDepthFromSouthEdge": {
+    "requiredMetres": [15, 40],
+    "measuredMetres": {
+      "minimum": 40.47,
+      "p10": 43.66,
+      "median": 49.34,
+      "p90": 57.91,
+      "maximum": 62.11
+    },
+    "method": "For each source column, measure from the south edge to the deepest connected masked sea pixel and convert source pixels across the 97.6 m cell extent.",
+    "pass": false
+  },
+  "edgeTopology": {
+    "north": {"required": "open sea across the edge", "waterPixels": 1254, "landPixels": 0, "pass": true},
+    "east": {"required": "open sea across the edge", "waterPixels": 414, "landPixels": 840, "pass": false},
+    "south": {"required": "island ground across the edge", "waterPixels": 0, "landPixels": 1254, "pass": true},
+    "west": {"required": "open sea across the edge", "waterPixels": 426, "landPixels": 828, "pass": false},
+    "authorityConflict": "The hard topology rule requires sea on the complete east and west edges, but the supplied edit target already contains neighbour-authored land on those edge segments and separately requires painted neighbour pixels to remain in place. The preserve-neighbour-paint rule governed the edit; the resulting topology failure is reported rather than silently repainting authoritative context."
+  },
+  "crown": {
+    "medianMetres": 3.038,
+    "medianPx": 63.285,
+    "sampleCount": 33,
+    "method": "Manual outer-foliage-width census of every visually distinguishable conifer, including saplings, overlapping crowns, and edge-clipped crowns; native median 31 px scaled by 2560/1254 and converted at 4.8 cm per final pixel.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c3-0-water-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "BC5F2A58DB4C68D204908616691DC63E5A0917F56272F7AA9FEE36E86665644B",
+    "encoding": "Opaque white water pixels on fully transparent non-water pixels; binary alpha.",
+    "opaqueWaterPixels": 738265,
+    "transparentLandPixels": 834251,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedWaterComponents8": 1,
+    "edgeWaterPixels": {"north": 1254, "east": 414, "south": 0, "west": 426},
+    "method": "Flooded edge-connected source-raster teal and blue, grew through adjacent source-painted pale surf and wash, filled only classifier pinholes, retained the largest connected coastal component, and preserved visible dry shoreline rock, stacks, and skerries as terrain.",
+    "visualInspection": "Native overlay inspection found open sea, shoreline surf, wash between shore rocks, reflections, and ripple highlights included; source-visible dry columns, stacks, skerries, and talus remain outside the mask."
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasEdit": true,
+    "secondReferenceAttached": true,
+    "rawGenerationUntouched": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "northEdgeOpenSea": true,
+    "eastEdgeOpenSea": false,
+    "westEdgeOpenSea": false,
+    "southEdgeLand": true,
+    "landContinuationBetween15And40Metres": false,
+    "noMeadowFlowersOrStructures": true,
+    "northShoreCliffFaceHiddenBehindRim": false,
+    "weatheredIrregularColumnarBasalt": false,
+    "strictEqualValueOnAllFormSides": false,
+    "waterMaskSameDimensions": true,
+    "waterMaskBinaryWhiteOnTransparent": true,
+    "waterMaskCoversSourceVisibleWater": true,
+    "allMeasuredCrownsIncluded": true,
+    "crownMedianInsideAcceptedTerritoryBand": true
+  },
+  "refusalReasons": [
+    "The plateau continuation is too deep: 40.47-62.11 m with a 49.34 m median, while the hard requirement is 15-40 m and never more.",
+    "Land reaches both east and west edges. Those pixels are already present in the supplied neighbour paint and were preserved under the edit-target authority, but the delivered cell still fails the stated all-sea side-edge topology.",
+    "Repeated pale basalt caps over darker side faces and modelled conifer sides violate the literal neutral-lighting rule.",
+    "The central shoreline exposes substantial viewer-facing column sides instead of reducing the north shore to ground ending at a thin broken rim seen from behind.",
+    "Several column runs remain similarly sized, upright, and clean-capped rather than consistently broken, split, leaning, and weathered."
+  ],
+  "openRisks": [
+    "The water mask is mechanically complete against the source, but it faithfully preserves the source candidate's noncompliant land extent and side-edge topology.",
+    "Buildable and steep fractions and the crown census are manual image measurements rather than surveyed geometry.",
+    "No second ImageGen call was made because the returned source was square and the task authorizes a retry only for non-square framing.",
+    "Seam continuity and overall visual quality remain director and owner judgments; this report makes no visual acceptance claim."
+  ],
+  "evidence": [
+    "diagnostics/c3-0-water-overlay.png",
+    "diagnostics/c3-0-crown-census.png",
+    "diagnostics/c3-0-crown-census.json",
+    "diagnostics/c3-0-measurements.json"
+  ]
+}
