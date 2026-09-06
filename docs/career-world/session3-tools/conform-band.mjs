@@ -241,6 +241,32 @@ for (let y = 0; y < H; y += 1) for (let x = 0; x < W; x += 1) {
   if (inside(Math.round(x / sc), Math.round(y / sc))) { kept += 1; continue; }
   out[o] = out[o + 1] = out[o + 2] = 255; out[o + 3] = 255; cut += 1;
 }
+// --open <metres> (2026-09-06 16:55, c1-2: a spike of land with a column at
+// its tip, the model's own headland, kept whole by the limit): a
+// morphological OPENING of the land — erode then dilate by half the width —
+// removes every protrusion and sliver thinner than that width and leaves
+// the rounded coast as it is. Land only; the water stays.
+const OPEN = Number(arg("--open", 0));
+let opened = 0;
+if (OPEN > 0) {
+  const r = Math.max(1, Math.round(OPEN / 2 / M * sc));           // radius in mask px
+  const land0 = new Uint8Array(W * H);
+  for (let p = 0; p < W * H; p += 1) land0[p] = (out[p * 4 + 3] > 128 && out[p * 4] > 128) ? 0 : 1;
+  const disc = []; for (let dy = -r; dy <= r; dy += 1) for (let dx = -r; dx <= r; dx += 1) if (dx * dx + dy * dy <= r * r) disc.push([dx, dy]);
+  const eroded = new Uint8Array(W * H), dilated = new Uint8Array(W * H);
+  for (let y = 0; y < H; y += 1) for (let x = 0; x < W; x += 1) {
+    if (!land0[y * W + x]) continue;
+    let all = true;
+    for (const [dx, dy] of disc) { const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= W || yy >= H || !land0[yy * W + xx]) { all = false; break; } }
+    if (all) eroded[y * W + x] = 1;
+  }
+  for (let y = 0; y < H; y += 1) for (let x = 0; x < W; x += 1) {
+    if (!eroded[y * W + x]) continue;
+    for (const [dx, dy] of disc) { const xx = x + dx, yy = y + dy; if (xx >= 0 && yy >= 0 && xx < W && yy < H) dilated[yy * W + xx] = 1; }
+  }
+  for (let p = 0; p < W * H; p += 1) if (land0[p] && !dilated[p]) { const o = p * 4; out[o] = out[o + 1] = out[o + 2] = 255; out[o + 3] = 255; opened += 1; }
+  console.log(`  opening ${OPEN} m: ${opened} mask px of slivers and spikes made wet (radius ${r} mask px)`);
+}
 console.log(`${T} ${ID}: band conform`);
 for (const r of report) console.log(r);
 for (const l of seamLog) console.log(l);

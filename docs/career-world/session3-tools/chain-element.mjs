@@ -236,6 +236,8 @@ async function key(src, which) {
     const mx = Math.max(r, g, b), mn = Math.min(r, g, b), sat = mx ? (mx - mn) / mx : 0;
     const green = !KEEP_GREEN && g >= r && g >= b && sat > 0.28;
     if (green) a = 0;
+    // red or magenta specks (the key's colour family bleeding at an edge, seen on the cluster's stones) are not stone either
+    if (r > 150 && g < 90 && sat > 0.5) a = 0;
     if (a > 0 && a < 255 && !black && !NO_DESPILL) {   // despill: take the key's share out of a blended edge pixel (a black key needs none — a dark edge reads as occlusion)
       const k = a / 255;
       for (let c = 0; c < 3; c += 1) d[o + c] = Math.max(0, Math.min(255, Math.round((d[o + c] - KEYC[c] * (1 - k)) / k)));
