@@ -784,6 +784,38 @@
       }
     },
     {
+      "id": "l2-tanium-c1-1",
+      "minimumTier": "capital",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-tanium/c1-1-capital.webp",
+          "dimensions": [
+            1024,
+            1024
+          ],
+          "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-tanium/c1-1-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
+        }
+      },
+      "worldBounds": {
+        "origin": [
+          0.1875,
+          0.6666666666666666
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
       "id": "l2-tanium-c1-2",
       "minimumTier": "capital",
       "sources": {
@@ -840,6 +872,38 @@
         "origin": [
           0.25,
           0.5555555555555556
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-tanium-c2-1",
+      "minimumTier": "capital",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-tanium/c2-1-capital.webp",
+          "dimensions": [
+            1024,
+            1024
+          ],
+          "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-tanium/c2-1-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
+        }
+      },
+      "worldBounds": {
+        "origin": [
+          0.25,
+          0.6666666666666666
         ],
         "span": [
           0.0625,
@@ -1648,6 +1712,38 @@
       }
     },
     {
+      "id": "l2-coast-c6-8",
+      "minimumTier": "capital",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c6-8-capital.webp",
+          "dimensions": [
+            1024,
+            1024
+          ],
+          "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c6-8-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
+        }
+      },
+      "worldBounds": {
+        "origin": [
+          0.4375,
+          0.8888888888888888
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
       "id": "l2-coast-c7-0",
       "minimumTier": "capital",
       "sources": {
@@ -1936,72 +2032,6 @@
       }
     },
     {
-      "id": "l2-review-tanium-c1-1",
-      "minimumTier": "capital",
-      "status": "review-candidate",
-      "sources": {
-        "capital": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-review/tanium-c1-1-capital.webp",
-          "dimensions": [
-            1024,
-            1024
-          ],
-          "decodedBytes": 4194304
-        },
-        "site": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-review/tanium-c1-1-site.webp",
-          "dimensions": [
-            2048,
-            2048
-          ],
-          "decodedBytes": 16777216
-        }
-      },
-      "worldBounds": {
-        "origin": [
-          0.1875,
-          0.6666666666666666
-        ],
-        "span": [
-          0.0625,
-          0.1111111111111111
-        ]
-      }
-    },
-    {
-      "id": "l2-review-tanium-c2-1",
-      "minimumTier": "capital",
-      "status": "review-candidate",
-      "sources": {
-        "capital": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-review/tanium-c2-1-capital.webp",
-          "dimensions": [
-            1024,
-            1024
-          ],
-          "decodedBytes": 4194304
-        },
-        "site": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-review/tanium-c2-1-site.webp",
-          "dimensions": [
-            2048,
-            2048
-          ],
-          "decodedBytes": 16777216
-        }
-      },
-      "worldBounds": {
-        "origin": [
-          0.25,
-          0.6666666666666666
-        ],
-        "span": [
-          0.0625,
-          0.1111111111111111
-        ]
-      }
-    },
-    {
       "id": "l2-review-coast-c1-4",
       "minimumTier": "capital",
       "status": "review-candidate",
@@ -2132,116 +2162,30 @@
           0.1111111111111111
         ]
       }
-    },
-    {
-      "id": "l2-review-coast-c2-8",
-      "minimumTier": "capital",
-      "status": "review-candidate",
-      "sources": {
-        "capital": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c2-8-capital.webp",
-          "dimensions": [
-            1024,
-            1024
-          ],
-          "decodedBytes": 4194304
-        },
-        "site": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c2-8-site.webp",
-          "dimensions": [
-            2048,
-            2048
-          ],
-          "decodedBytes": 16777216
-        }
-      },
-      "worldBounds": {
-        "origin": [
-          0.1875,
-          0.8888888888888888
-        ],
-        "span": [
-          0.0625,
-          0.1111111111111111
-        ]
-      }
-    },
-    {
-      "id": "l2-review-coast-c6-8",
-      "minimumTier": "capital",
-      "status": "review-candidate",
-      "sources": {
-        "capital": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c6-8-capital.webp",
-          "dimensions": [
-            1024,
-            1024
-          ],
-          "decodedBytes": 4194304
-        },
-        "site": {
-          "path": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c6-8-site.webp",
-          "dimensions": [
-            2048,
-            2048
-          ],
-          "decodedBytes": 16777216
-        }
-      },
-      "worldBounds": {
-        "origin": [
-          0.4375,
-          0.8888888888888888
-        ],
-        "span": [
-          0.0625,
-          0.1111111111111111
-        ]
-      }
     }
   ],
-  "baseReleaseHash": "4d98e17d39694430643758bc45c384f86becb80bb0b643ea7fd45a386bf9a5d3",
-  "inputHash": "13e728033b1ca855dc7015bf8b8bf75eae2d2d64dd58b880a8fa24e1cf94c61d",
+  "baseReleaseHash": "287ccdf78bd5ff3756230bb93356173d012d10b800d56735082fbcfe11ec2e70",
+  "inputHash": "0f82c030b3d0a47f85c650b83889dc6fb3265d1e91b1c4d8fe79425f6b9e354b",
   "candidates": [
-    {
-      "id": "l2-review-tanium-c1-1",
-      "sourceSha256": "231f2c01265a6ae7eba622c650324dd0762af034dae5dda118c0252858f76804",
-      "canonicalSha256": "dc4c64aa69c9f8365fc8a016c7565dcdf42634f0c1debc4a2b511d4f70c92ae8"
-    },
-    {
-      "id": "l2-review-tanium-c2-1",
-      "sourceSha256": "bf6998f926a4bcd24d9e45fae2ed9327723ad881b3b0fd8e8411ed5d975d0d2e",
-      "canonicalSha256": "d54c6c9c7b7f385c01e5fe7b9d2630e85b63e75cf4400ccf5d39a3d91136b3b0"
-    },
     {
       "id": "l2-review-coast-c1-4",
       "sourceSha256": "ed9e0fb0fe1728036f53422ae9a8beb7ea5b0cbd56c5eb68cd4dc382dd782e36",
-      "canonicalSha256": "1b4553412a2fd1c2b1025d69a84f056533e21a5f17ae5d78c3cf8b1e53bfae04"
+      "canonicalSha256": "e1cad6f5c6a36ea3ab0148a8194661b42e80ca693e309ef422fe6e5c460f8216"
     },
     {
       "id": "l2-review-coast-c1-3",
       "sourceSha256": "861d32640798679cc3d4e461227fbc4ccfe11eefc4eff42867c9b40c1b59fdba",
-      "canonicalSha256": "33ac945e7c2c7570016e4cd9ab3117ad3f59aac2427101167d22d26b9ecd2ac6"
+      "canonicalSha256": "d7260a425da8c73e2a11a45d57262add07d013522387c2a888ee74f2609d30ce"
     },
     {
       "id": "l2-review-coast-c4-8",
       "sourceSha256": "9d79e457d2802adcf649d602024211ea7b4f3a0f70c9c27fd4e37488e2e90eab",
-      "canonicalSha256": "5ea64c1b0ec8265aba301ce1f1223f928fbf6b216d46a6a9be6c8b230efeb23f"
+      "canonicalSha256": "faed1c6e4514a66a6c50ef4496fca1975d02f4fa1a0878a26a689e29728751ee"
     },
     {
       "id": "l2-review-coast-c0-5",
       "sourceSha256": "b667157547c3fcfa6a8858c0323c7bdfacf0d12adda16b18d9b537d99c7df178",
-      "canonicalSha256": "6d0169a9248de593ba2d43acd1378e4dd3a438b614bfd67836df133c2bb8b529"
-    },
-    {
-      "id": "l2-review-coast-c2-8",
-      "sourceSha256": "5876b46279f93bc564f898e3a6204d67cd3ea2b6b3639cc7a9dd4c7394b329e6",
-      "canonicalSha256": "b4ef7d6fab9750860fc1050f94723bb031d2c27e7ad6fe883d97721ce2da84a7"
-    },
-    {
-      "id": "l2-review-coast-c6-8",
-      "sourceSha256": "bab57308b8de5d28716736735b61ac31638ef6c5265936526e573a64585c352a",
-      "canonicalSha256": "15016e4d64e63b324202ed82630fb02929b15d225f6f963b37116512d0732b48"
+      "canonicalSha256": "9948b1cd0858ea1cf6f1f9808a8949166080a41bf4444375cc3a83905484face"
     }
   ]
 }

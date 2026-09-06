@@ -1,24 +1,24 @@
 {
   "source": "terrain-local-mount-r1.json",
-  "inputHash": "13e728033b1ca855dc7015bf8b8bf75eae2d2d64dd58b880a8fa24e1cf94c61d",
+  "inputHash": "0f82c030b3d0a47f85c650b83889dc6fb3265d1e91b1c4d8fe79425f6b9e354b",
   "world": {
-    "path": "/career-world/layers/terrain/authority/textures/world-land-r1.png?v=13e728033b1ca855",
+    "path": "/career-world/layers/terrain/authority/textures/world-land-r1.png?v=0f82c030b3d0a47f",
     "dimensions": [
       1664,
       936
     ],
-    "sha256": "c397453ba5c98f6fca9e2ccd24da4045a9fdd1c8f86d04ab0fdf2529b4557d8c"
+    "sha256": "ed716a6b5b1d8e6cd8786380e7693c094ec3bcbca35c0d3d973bf0d85b93cc31"
   },
   "territory": {
-    "path": "/career-world/layers/terrain/authority/textures/world-land-detail-4x-r1.png?v=13e728033b1ca855",
+    "path": "/career-world/layers/terrain/authority/textures/world-land-detail-4x-r1.png?v=0f82c030b3d0a47f",
     "dimensions": [
       6656,
       3744
     ],
-    "sha256": "1156cbf0a62b17c8aa7fa8ee2fa41470511157f863b9e38281ce67685fc70728"
+    "sha256": "7d38bec5a5e510d0c230dc8c1caebdd235e5a6dcd2a207067d66e21e719801a3"
   },
   "mask": {
     "path": "/career-world/layers/terrain/authority/masks/world-land-mask-r5.png",
-    "sha256": "e91025ec6c28d09aafdcfdf7fe05f6b533d557bc56c824f5aca8abd165f8f341"
+    "sha256": "3127a593e7b8f9a15cd8c964a7c0aec954adb01b0e4eb60e21789e6f8e566e99"
   }
 }
