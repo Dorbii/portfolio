@@ -1,18 +1,14 @@
 [
   {
-    "class": "stream",
-    "note": "Existing narrow north-west neighbour stream and its full west-edge wash, traced bank to bank."
+    "class": "lake",
+    "note": "Round middle-bench tarn south of the rune groove; mask includes the complete painted surface, shallow edge wash, ripples, and water visible between rim stones."
   },
   {
-    "class": "lake",
-    "note": "Round cool-teal plateau tarn on the middle pale-rock bench, including its complete ripple and reflection extent inside the shingle rim."
+    "class": "stream",
+    "note": "South-edge stream plus the separate inherited west-edge water continuation; neither is classified as rune-groove water."
   },
   {
     "class": "fall",
-    "note": "Thin west-bench fall, including the full falling-water ribbon, pale spray, splash and pool."
-  },
-  {
-    "class": "stream",
-    "note": "South-going outlet below the fall, traced as a continuous full-width wet ribbon through the rocks to the south edge."
+    "note": "Thin west-bench fall including its full falling sheet, spray, splash footprint, and short runoff."
   }
 ]

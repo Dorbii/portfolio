@@ -1,106 +1,125 @@
 {
   "cell": "c4-1",
   "territory": "tanium",
-  "status": "quarantine-gate-failed",
+  "layer": "L2 land terrain",
+  "status": "refused_quarantine_only",
   "generation": {
     "filename": "c4-1-source.png",
     "exactGenerationSizeProduced": [1254, 1254],
     "format": "PNG RGB",
-    "sha256": "A7550636395DA93CE6546753A73F4122723754B6C627B9C8FE96F093FE3146B4",
+    "sha256": "1F9F2BF1A0474F258E4B74757BB83F5F98E5A7E320E4417448C3CAEC635DBF2B",
     "mode": "single built-in image_gen whole-canvas edit with edit-target.jpg first and the NinjaOne seed canon second as reference only",
-    "imageGenCallsUsed": 1,
+    "imageGenCallsUsedThisWorkBlock": 1,
     "retryUsed": false,
     "secondReferenceAccepted": true,
     "bothImagesAttachedToSameCall": true,
+    "wholeCanvasSinglePass": true,
     "rawOutputPreserved": true,
     "rawCopyHashIdentical": true,
     "resizedCroppedRetouchedOrTiled": false,
-    "promptFile": "c4-1-imagegen-prompt-used-2026-09-05-final.txt"
+    "promptFile": "c4-1-imagegen-prompt-used-2026-09-06.txt"
   },
   "generationSizePx": [1254, 1254],
   "shippedCanvasPx": [2560, 2560],
   "groundExtentMetres": [97.6, 97.6],
   "finalResolutionCmPerPx": 4.8,
   "lightingIsotropy": {
-    "metric": "36-bin land-luminance-gradient magnitude peak divided by the uniform-bin mean on the delivered source; water-mask pixels and their immediate neighbours excluded and gradients below 12 luminance units excluded",
-    "peakVsUniformOverLand": 1.581746,
+    "metric": "36-bin full-angle land-luminance-gradient magnitude peak divided by the uniform-bin mean; final water-mask pixels and immediate neighbours excluded and gradients below 12 luminance units excluded",
+    "peakVsUniformOverLand": 1.757213,
     "uniformReference": 1.0,
-    "directionalKeyFirstMoment": 0.001174,
-    "gradientSamples": 1360099,
+    "directionalKeyFirstMoment": 0.000525,
+    "gradientSamples": 1369596,
     "aggregateDirectionalityNumericPass": true,
     "strictEqualValueOnAllFormSidesVisualCheck": false,
-    "visualCheck": "No whole-cell cast-shadow field is visible, but pale terrace and column caps are consistently lighter than darker vertical faces. The literal equal-value flat-lighting rule therefore fails even though aggregate gradient directions are balanced."
+    "visualCheck": "No whole-cell cast-shadow field is obvious, but pale bench tops and consistently darker column faces violate the literal equal-value-on-every-side rule."
   },
   "buildableVsSteepFraction": {
     "basis": "manual full-frame screen-space estimate as fractions of non-water land at native source resolution",
-    "buildable": 0.58,
-    "steep": 0.14,
-    "otherTalusScreeVegetationCarvingsOrBrokenMargin": 0.28,
-    "method": "Broad coherent bench tops and the level shelves beside the rock rises count as buildable; exposed bench and column faces count as steep; talus, scree, broken edges, streams, rune carving and vegetation make up the remainder.",
-    "limitation": "This is a screen-space visual estimate with approximate uncertainty of plus or minus 0.08 per fraction, not an elevation-derived slope measurement."
+    "buildable": 0.49,
+    "steep": 0.20,
+    "otherBrokenRockTalusVegetationCarvingsOrTransitionGround": 0.31,
+    "method": "Broad coherent bench treads and level shelves count as buildable; exposed column faces and sharp scarps count as steep; talus, rubble, vegetation, carvings and transition margins make up the remainder.",
+    "limitation": "Screen-space visual estimate with approximate uncertainty of plus or minus 0.08 per fraction, not an elevation-derived slope measurement."
   },
-  "waterFootprintFraction": 0.02153555,
-  "finalDerivedLandCoverageFraction": 0.97846445,
+  "waterFootprintFraction": 0.022955,
+  "finalDerivedLandCoverageFraction": 0.977045,
   "crown": {
-    "medianMetres": 2.548,
-    "medianPx": 53.078,
-    "sampleCount": 33,
-    "method": "Full-frame manual outer-foliage census at native 1254 px of all 33 visually distinguishable conifer crowns, including saplings, clipped edge crowns and readable individuals in overlaps; median source width 26 px scaled by 2560/1254 and converted at 0.048 m per final pixel.",
+    "medianMetres": 2.401,
+    "medianPx": 50.016,
+    "sampleCount": 24,
+    "method": "Full-frame native-resolution census of all 24 discernible conifer crowns, including saplings and clipped edge crowns, corroborated with a dark-foliage component overlay; median outer foliage-envelope width 24.5 source pixels scaled by 2560/1254 and converted at 0.048 m per final pixel.",
     "excludedElements": []
   },
   "waterMask": {
     "filename": "c4-1-water-source.png",
-    "classificationFilename": "c4-1-water.json",
+    "classificationFile": "c4-1-water.json",
     "exactSizePx": [1254, 1254],
     "format": "PNG RGBA",
-    "sha256": "989AA14DE9FEC7C373E854105E5C1B2C40215FD3006D0401113709DE0DDF5A56",
+    "sha256": "15E638F66BB73775F55B86F62F155FBE8A1A4461CB894EDE73D355CDB2611FDE",
     "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
-    "opaqueWaterPixels": 33865,
-    "transparentNonWaterPixels": 1538651,
+    "opaqueWaterPixels": 36097,
+    "transparentNonWaterPixels": 1536419,
     "intermediateAlphaPixels": 0,
     "nonWhiteOpaquePixels": 0,
-    "connectedComponents8": 3,
-    "accidentalInteriorHolePixels": 0,
+    "connectedComponents8": 4,
+    "accidentalInteriorHoles": 0,
     "edgeWaterPixels": {
       "north": 0,
       "east": 0,
-      "south": 18,
-      "west": 128
+      "south": 32,
+      "west": 101
     },
-    "method": "Native-resolution bank-to-bank polygon and rounded-channel trace of every visible teal surface, ripple, reflection, pale fall, spray, splash and edge wash; the full mask overlay was inspected over the raw source."
+    "method": "Native-resolution bank-to-bank span traces of all four visible water components: inherited west-edge water, the fall and runoff, the tarn, and the south-edge stream. Traces include pale wash, ripple highlights, reflections, spray and water between shore stones; the binary overlay was inspected over the raw source."
+  },
+  "runeChain": {
+    "requiredWestEdgeFractionDown": 0.48,
+    "requiredEastEdgeFractionDown": 0.45,
+    "requiredWestCentreYSourcePx": 601.92,
+    "requiredEastCentreYSourcePx": 564.3,
+    "nearestDryIncisionWestCentreYSourcePxApprox": 650,
+    "nearestDryIncisionEastCentreYSourcePxApprox": 622,
+    "exactEdgeHandoffsPass": false,
+    "fullWidthContinuousDistinctSlot": false,
+    "shortArchCrossingsOnly": false,
+    "waterOnRequiredGuideLine": false,
+    "visualRead": "The nearest dark incision remains displaced at both outer handoffs, merges visually with bench-foot and wall lines, and meets the west fall system instead of reading as one independent edge-to-edge slot."
+  },
+  "waterHandoffs": {
+    "requiredSouthFractionAlong": 0.29,
+    "requiredSouthCentreXSourcePx": 363.66,
+    "actualSouthMaskedRangeXSourcePx": [519, 550],
+    "actualSouthCentreFractionAlongApprox": 0.426,
+    "southHandoffPass": false,
+    "westInheritedWaterMaskedRangeYSourcePx": [320, 420]
   },
   "siteChecks": {
     "plateauTarnPresent": true,
     "plateauTarnClassifiedAsLake": true,
-    "plateauTarnApproxDiameterMetres": 13.2,
-    "plateauTarnRequestedDiameterMetres": 30,
-    "plateauTarnScalePass": false,
+    "plateauTarnApproximateDiameterMetres": 13.5,
+    "plateauTarnThirtyMetreScalePass": false,
+    "completeBareShingleRim": true,
+    "vegetationAbsentAtTarnEdge": true,
     "windArchPresent": true,
-    "windArchAtEasternTopBench": true,
-    "windArchOpeningApproxMetres": 8.4,
-    "windArchRequestedApproxMetres": 12,
-    "windArchCarriesRuneGroove": false,
-    "separateNaturalRuneOverpassPresent": true,
-    "northRockRiseAndLevelApproachPresent": true,
+    "windArchApproximateOpeningWidthMetres": 6.5,
+    "windArchTwelveMetreScalePass": false,
+    "windArchIsRuneGrooveCrossing": false,
+    "levelShelfBesideWindArch": true,
+    "northRockFaceAndLevelApproachPresent": true,
+    "northRockFaceFifteenToTwentyMetreScalePass": false,
+    "threeSteppedBenchesPresent": true,
+    "thinWestFallPresent": true,
+    "fallSeparatedFromRuneGrooveByFifteenMetres": false,
     "terrainOnly": true,
     "highOblique2_5D": true,
-    "landContinuesAllEdges": true
-  },
-  "runeChain": {
-    "inputFloorPreservedAsCompositionAuthority": true,
-    "fullWidthContinuous": true,
-    "dry": true,
-    "separateFromFall": true,
-    "wallsAndPaleRimsAdded": true,
-    "naturalRockOverpassCrossingPresent": true,
-    "windArchIsThatCrossing": false,
-    "visualRead": "The dark floor remains continuous and dry with stone rims, but the regular rim treatment can still read as a lined trench or kerb rather than an unequivocal slot removed two metres into bedrock."
+    "landContinuesToAllFourEdges": true,
+    "noMeadowOnCentralBarePlateau": true
   },
   "constraintChecks": {
     "squareAtLeast1254Px": true,
     "singleWholeCanvasEditCall": true,
-    "secondReferenceAccepted": true,
+    "secondReferenceAttached": true,
     "rawGenerationUntouched": true,
+    "terrainOnly": true,
     "waterMaskSameDimensionsBinaryWhiteTransparent": true,
     "waterMaskCoversCompletePaintedWater": true,
     "waterMaskNoAccidentalInteriorHoles": true,
@@ -108,41 +127,24 @@
     "allMeasuredCrownsIncluded": true,
     "crownMedianInsideAcceptedTerritoryBand": true,
     "strictNeutralLighting": false,
+    "runeChainExactEdgeHandoffs": false,
+    "runeChainContinuousAndIndependentOfFall": false,
+    "southWaterHandoffAtRequiredPosition": false,
     "plateauTarnScale": false,
-    "windArchRuneCrossing": false
+    "windArchScaleAndGrooveCrossing": false
   },
-  "reviewFindings": [
-    {
-      "severity": "blocker",
-      "finding": "The strict neutral-lighting gate fails: pale rock caps and upper planes remain visibly lighter than vertical faces."
-    },
-    {
-      "severity": "blocker",
-      "finding": "The eastern top-bench wind arch does not carry the rune groove; a different smaller arch farther west carries it."
-    },
-    {
-      "severity": "blocker",
-      "finding": "The plateau tarn is approximately 13.2 metres across at the stated cell scale, materially below the requested approximately 30 metres."
-    },
-    {
-      "severity": "material",
-      "finding": "The wind-arch opening is approximately 8.4 metres across rather than approximately 12 metres."
-    },
-    {
-      "severity": "material",
-      "finding": "Several bench walls remain regular repeated column rows, and the rune rims can read as constructed stone edging rather than an ancient excavated slot."
-    }
-  ],
-  "positiveObservations": [
-    "The result is one square whole-canvas edit with no remaining grey authoring area, crop, resize, tiling or patch ring.",
-    "Neighbour ground continues through all four edges and transitions inward before the pale bare plateau dominates.",
-    "The thin fall is south of and separate from the rune groove, and no classified water occupies the rune line.",
-    "The measured conifer crown median is inside the required 1.7-to-5.2-metre band."
+  "refusalReasons": [
+    "The generated south stream exits at approximately 42.6 percent along the edge instead of the measured 29 percent handoff, so it would break the neighboring stream.",
+    "The rune chain is not a distinct continuous dry slot at the registered west and east handoffs; it is displaced, follows or merges with bench geometry, and meets the west fall system.",
+    "The plateau tarn is approximately 13.5 metres across rather than about 30 metres.",
+    "The wind arch is approximately 6.5 metres across rather than about 12 metres and is not one of the rune groove crossings.",
+    "Repeated pale rock tops and darker vertical column faces violate the strict equal-value neutral-lighting rule.",
+    "The fall is not separated from the rune-like incision by the required 15 metres."
   ],
   "inspection": {
     "sourceInspected": true,
     "waterOverlayInspected": true,
-    "crownCensusInspected": true,
+    "crownOverlayInspected": true,
     "visualAcceptance": "not claimed; owner review required",
     "writesConfinedToCellFolder": true,
     "publicAndArtSourceModified": false
