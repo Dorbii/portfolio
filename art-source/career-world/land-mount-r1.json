@@ -1,34 +1,34 @@
 {
   "purpose": "Local mounting of every current candidate as a review preview (the land lane owns what the mount shows — owner 2026-09-05: 'if the mount has stale land please update it as you are land authority'); does not mark these candidates accepted or modify authoring ledgers.",
   "writtenBy": "docs/career-world/session3-tools/mount-candidates.mjs",
-  "at": "2026-09-06T01:14:15.214Z",
+  "at": "2026-09-06T02:21:19.254Z",
   "cells": [
     {
       "territory": "tanium",
       "id": "c1-1",
       "status": "review-candidate",
       "sourceSnapshot": "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/.codex-tmp/authoring/cells/tanium/c1-1/c1-1-l2.png",
-      "sourceSha256": "43f9367819eda76d5704b04937385952c734c4acd2146a5e333b3acd83b9623b",
+      "sourceSha256": "231f2c01265a6ae7eba622c650324dd0762af034dae5dda118c0252858f76804",
       "canonicalPath": "/career-world/layers/terrain/authority/tiles/l2-review/tanium-c1-1-site.webp",
-      "canonicalSha256": "fd7a1f159dc96b8bf696b56de033a62c9ec07b79b7e3b8689f29bc5b972833c5"
+      "canonicalSha256": "93a1a1dcf1315187a65c0378aef984185ef9dba1aca88f49c88d030ed4f3210e"
     },
     {
       "territory": "tanium",
       "id": "c2-1",
       "status": "review-candidate",
       "sourceSnapshot": "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/.codex-tmp/authoring/cells/tanium/c2-1/c2-1-l2.png",
-      "sourceSha256": "d36eb048af73ae0398d9a8d0f47c5336040c92920a889f195ed4b8f9f4e0ed72",
+      "sourceSha256": "bf6998f926a4bcd24d9e45fae2ed9327723ad881b3b0fd8e8411ed5d975d0d2e",
       "canonicalPath": "/career-world/layers/terrain/authority/tiles/l2-review/tanium-c2-1-site.webp",
-      "canonicalSha256": "f4b60d4296a4be6be865e8100c5d7c41ca5c4bf798606090b03431ef027ee833"
+      "canonicalSha256": "bdd8e379b039d41d29137b90617c8ddc0d7295a3f40772f904b9e115cce9c913"
     },
     {
       "territory": "coast",
       "id": "c1-4",
       "status": "review-candidate",
       "sourceSnapshot": "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/.codex-tmp/authoring/cells/coast/c1-4/c1-4-l2.png",
-      "sourceSha256": "7130255dd210525d4e4ba77bcd943153957e1a8e6d1414278c9ed4cc4a4c67ae",
+      "sourceSha256": "ed9e0fb0fe1728036f53422ae9a8beb7ea5b0cbd56c5eb68cd4dc382dd782e36",
       "canonicalPath": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c1-4-site.webp",
-      "canonicalSha256": "a5d8d4c06c1e7d65f348ea02dfb33e2a80cc4807ec3b7e3e228e9506b149e568"
+      "canonicalSha256": "dc7f2c93add685cf226eb435d5b4d6c2b387ffc61b30fbfee7b778ed5585befc"
     },
     {
       "territory": "coast",
@@ -37,52 +37,43 @@
       "sourceSnapshot": "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/.codex-tmp/authoring/cells/coast/c1-3/c1-3-l2.png",
       "sourceSha256": "861d32640798679cc3d4e461227fbc4ccfe11eefc4eff42867c9b40c1b59fdba",
       "canonicalPath": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c1-3-site.webp",
-      "canonicalSha256": "1177bf27f31ea0efa1ebb3a11face9e06ea857325a758072bef4e013a65b41ad"
+      "canonicalSha256": "ace7abb478a059d650a47cbd32b0a23422fd077b014e0dde643e7da696341119"
     },
     {
       "territory": "coast",
       "id": "c4-8",
       "status": "review-candidate",
       "sourceSnapshot": "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/.codex-tmp/authoring/cells/coast/c4-8/c4-8-l2.png",
-      "sourceSha256": "d34decf2b7f2a0ee749d3ecba2abec49b8faedd3eadaba867e8f252aa5530388",
+      "sourceSha256": "9d79e457d2802adcf649d602024211ea7b4f3a0f70c9c27fd4e37488e2e90eab",
       "canonicalPath": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c4-8-site.webp",
-      "canonicalSha256": "6d99bc835fa268bc01500898c5c91009503c0c57230ce33f7bd5a2fb659b746c"
-    },
-    {
-      "territory": "coast",
-      "id": "c7-0",
-      "status": "review-candidate",
-      "sourceSnapshot": "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/.codex-tmp/authoring/cells/coast/c7-0/c7-0-l2.png",
-      "sourceSha256": "07d0c43ee801ff86b7011485c430f77865f7d37a654594d9914158e154eecace",
-      "canonicalPath": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c7-0-site.webp",
-      "canonicalSha256": "9cd33e90e20cc768e63b279183a3e9df179feb3700625fc24d8a33950123db4f"
+      "canonicalSha256": "549a9114d03aa468ca1e030660ad329f3ad66da61f0df351bd608773c22a9dc6"
     },
     {
       "territory": "coast",
       "id": "c0-5",
       "status": "review-candidate",
       "sourceSnapshot": "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/.codex-tmp/authoring/cells/coast/c0-5/c0-5-l2.png",
-      "sourceSha256": "b798c29ec69203d70a4e10791cb1f3126625967bb55e04c7d9bb97d6ecf6dbe5",
+      "sourceSha256": "d0f8c587d88fa56fec7f52511b44733737e8e7deeede9867f37141a44ef994ff",
       "canonicalPath": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c0-5-site.webp",
-      "canonicalSha256": "b5f8651ebbe5104da406931ca0d948065cd8b7e1b59670a85a1ad904a9a57f88"
+      "canonicalSha256": "75e002e1eaeaa8f5242be3a44a84b6c32f506fc056dc2ad9cf436f5099e17e92"
     },
     {
       "territory": "coast",
       "id": "c2-8",
       "status": "review-candidate",
       "sourceSnapshot": "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/.codex-tmp/authoring/cells/coast/c2-8/c2-8-l2.png",
-      "sourceSha256": "101ef325c16b709b58d81cdaaeac5fc0a76882c1a936ca2cc8e4b141aabf5c6a",
+      "sourceSha256": "5876b46279f93bc564f898e3a6204d67cd3ea2b6b3639cc7a9dd4c7394b329e6",
       "canonicalPath": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c2-8-site.webp",
-      "canonicalSha256": "b3c6dcd13c9e3f4f33a382beabfa0d5985d3ad89d51f7c08c0a1f031a60f3f43"
+      "canonicalSha256": "b450027d322e1374aa95ad8300b8db4a27f8ada804df277b2014fcd95bffe476"
     },
     {
       "territory": "coast",
       "id": "c6-8",
       "status": "review-candidate",
       "sourceSnapshot": "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/.codex-tmp/authoring/cells/coast/c6-8/c6-8-l2.png",
-      "sourceSha256": "1219b636d110bca0c8a48dae9eeeb3d5d4cd0b493af538b6df8b3cd02fbf885b",
+      "sourceSha256": "bab57308b8de5d28716736735b61ac31638ef6c5265936526e573a64585c352a",
       "canonicalPath": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c6-8-site.webp",
-      "canonicalSha256": "326b9e6e58082c6b8586eb6581355afcc787f83b7761bacf2b72da2434d3fb24"
+      "canonicalSha256": "d6193837cba9492d263e8d38e871b5309d93573a7dfce9b652fc540927e7ec3c"
     }
   ]
 }
