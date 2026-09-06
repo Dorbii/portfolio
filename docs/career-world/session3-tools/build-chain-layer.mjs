@@ -151,7 +151,7 @@ for (const [col, row] of cellsToDo) {
     if (x < 0 || y < 0 || x >= CELL || y >= CELL) return;
     const lp = landPx(x, y); if (lp[3] < 128) return;
     const edge = Math.min(ky + 1, kh - ky), fade = edge <= FEATHER ? edge / (FEATHER + 1) : 1;
-    const a = Math.round(a0 * fade); if (a === 0) return;
+    const a = Math.round(a0 * fade * cliffFade(x, y)); if (a === 0) return;   // a stroke passes under a cliff, not across it
     let gr = 0, gg = 0, gb = 0, gn = 0;
     for (let d = -20; d <= 20; d += 8) for (let e = -20; e <= 20; e += 8) { const p = landPx(x + d, y + e); if (p && p[3] >= 128 && (x + d) >= 0 && (y + e) >= 0 && (x + d) < CELL && (y + e) < CELL) { gr += p[0]; gg += p[1]; gb += p[2]; gn += 1; } }
     if (gn) {
@@ -219,17 +219,78 @@ for (const [col, row] of cellsToDo) {
   // Each leader gets a disc on the trunk; a straight spoke slot runs from it
   // to the hub, crossing cells (drawn per cell, clipped), bedded like the
   // trunk; the hub disc sits at the hub. All by data.
-  const stamp = (el, cxCell, cyCell) => {       // an element centred on a cell-local point, masked by land, over what is there
+  // the land's texture: its local mean luma and its local contrast (a cliff
+  // face of columns is high contrast; meadow and heath are low), read on a
+  // coarse grid and interpolated — used to fade a stroke out over a cliff
+  // ("the groove passes under the wall") and to put the ground's grain on a
+  // disc's face so it sits IN the ground (owner 2026-09-06 17:45: "even
+  // though this chain is on its own layer it must blend into the land still")
+  const TX = 16, TN = Math.ceil(CELL / TX);
+  const texMean = new Float32Array(TN * TN), texStd = new Float32Array(TN * TN);
+  for (let ty = 0; ty < TN; ty += 1) for (let tx = 0; tx < TN; tx += 1) {
+    let s = 0, s2 = 0, n = 0;
+    for (let y = ty * TX; y < Math.min(CELL, ty * TX + TX); y += 2) for (let x = tx * TX; x < Math.min(CELL, tx * TX + TX); x += 2) {
+      const p = landPx(x, y); if (p[3] < 128) continue;
+      const l = lumaOf(p[0], p[1], p[2]); s += l; s2 += l * l; n += 1;
+    }
+    texMean[ty * TN + tx] = n ? s / n : 0; texStd[ty * TN + tx] = n ? Math.sqrt(Math.max(0, s2 / n - (s / n) ** 2)) : 0;
+  }
+  const texAt = (arr, x, y) => arr[Math.min(TN - 1, Math.floor(y / TX)) * TN + Math.min(TN - 1, Math.floor(x / TX))];
+  const CLIFF_LO = 34, CLIFF_HI = 52;                      // luma sd: below = ground, above = a cliff face
+  const cliffFade = (x, y) => { const sd = texAt(texStd, x, y); return sd <= CLIFF_LO ? 1 : sd >= CLIFF_HI ? 0 : 1 - (sd - CLIFF_LO) / (CLIFF_HI - CLIFF_LO); };
+  const grain = (x, y) => { const p = landPx(x, y), m = texAt(texMean, x, y); return m > 0 ? (lumaOf(p[0], p[1], p[2]) - m) / m : 0; };   // the land's high-frequency, about ±0.3
+  const stamp = (el, cxCell, cyCell) => {       // a disc BEDDED into the land: its rim takes the ground's hue, its face the ground's grain, feathered, with an occlusion ring
     if (!el) return;
     const EW = el.info.width, EH = el.info.height, x0 = Math.round(cxCell) - Math.round(EW / 2), y0 = Math.round(cyCell) - Math.round(EH / 2);
+    // distance to the element's edge (up to 16 px) by erosion passes
+    const alpha = new Uint8Array(EW * EH); for (let p = 0; p < EW * EH; p += 1) alpha[p] = el.data[p * 4 + 3] > 64 ? 1 : 0;
+    const dist = new Uint8Array(EW * EH); let cur = alpha;
+    for (let k = 1; k <= 16; k += 1) {
+      const nxt = new Uint8Array(EW * EH);
+      for (let y = 1; y < EH - 1; y += 1) for (let x = 1; x < EW - 1; x += 1) { const p = y * EW + x; if (cur[p] && cur[p - 1] && cur[p + 1] && cur[p - EW] && cur[p + EW]) { nxt[p] = 1; dist[p] = k; } }
+      cur = nxt;
+    }
+    // the ground's colour around the disc
+    let gr = 0, gg = 0, gb = 0, gn = 0;
+    for (let ey = -12; ey < EH + 12; ey += 6) for (let ex = -12; ex < EW + 12; ex += 6) {
+      const x = x0 + ex, y = y0 + ey; if (x < 0 || y < 0 || x >= CELL || y >= CELL) continue;
+      const inside = ex >= 0 && ey >= 0 && ex < EW && ey < EH && alpha[ey * EW + ex];
+      if (inside) continue;
+      const p = landPx(x, y); if (p[3] < 128) continue; gr += p[0]; gg += p[1]; gb += p[2]; gn += 1;
+    }
+    const ground = gn ? [gr / gn, gg / gn, gb / gn] : null, groundL = ground ? Math.max(1, lumaOf(...ground)) : 1;
     for (let ey = 0; ey < EH; ey += 1) for (let ex = 0; ex < EW; ex += 1) {
       const x = x0 + ex, y = y0 + ey;
       if (x < 0 || y < 0 || x >= CELL || y >= CELL) continue;
-      const eo = (ey * EW + ex) * 4, a = el.data[eo + 3]; if (a === 0) continue;
+      const eo = (ey * EW + ex) * 4, a0 = el.data[eo + 3]; if (a0 === 0) continue;
       const lp = landPx(x, y); if (lp[3] < 128) continue;
+      const dd = dist[ey * EW + ex];
+      const fade = dd <= 3 ? (dd + 1) / 4 : 1;                       // a feathered rim
+      const a = Math.round(a0 * fade * Math.max(0.35, cliffFade(x, y)));
+      if (a === 0) continue;
+      let er = el.data[eo], eg = el.data[eo + 1], eb = el.data[eo + 2];
+      if (ground) {
+        const t = dd <= 12 ? 0.55 - 0.4 * (dd / 12) : 0.15;              // the rim takes the ground's hue, the face a little
+        const el2 = lumaOf(er, eg, eb), k = el2 / groundL;
+        er = Math.round(er * (1 - t) + Math.min(255, ground[0] * k) * t); eg = Math.round(eg * (1 - t) + Math.min(255, ground[1] * k) * t); eb = Math.round(eb * (1 - t) + Math.min(255, ground[2] * k) * t);
+      }
+      const gn2 = 1 + 0.35 * grain(x, y);                             // the ground's grain on the face
+      er = Math.max(0, Math.min(255, Math.round(er * gn2))); eg = Math.max(0, Math.min(255, Math.round(eg * gn2))); eb = Math.max(0, Math.min(255, Math.round(eb * gn2)));
       const o = (y * CELL + x) * 4, k = a / 255;
-      for (let c = 0; c < 3; c += 1) out[o + c] = Math.round(el.data[eo + c] * k + out[o + c] * (1 - k));
+      for (let c = 0; c < 3; c += 1) out[o + c] = Math.round([er, eg, eb][c] * k + out[o + c] * (1 - k));
       out[o + 3] = Math.max(out[o + 3], a);
+    }
+    // the occlusion ring outside the disc
+    for (let ey = -AO; ey < EH + AO; ey += 1) for (let ex = -AO; ex < EW + AO; ex += 1) {
+      const x = x0 + ex, y = y0 + ey; if (x < 0 || y < 0 || x >= CELL || y >= CELL) continue;
+      if (ex >= 0 && ey >= 0 && ex < EW && ey < EH && alpha[ey * EW + ex]) continue;
+      let dmin = AO + 1;
+      for (let j = -AO; j <= AO; j += 2) for (let i = -AO; i <= AO; i += 2) { const qx = ex + i, qy = ey + j; if (qx < 0 || qy < 0 || qx >= EW || qy >= EH || !alpha[qy * EW + qx]) continue; const dq = Math.hypot(i, j); if (dq < dmin) dmin = dq; }
+      if (dmin > AO) continue;
+      const lp = landPx(x, y); if (lp[3] < 128) continue;
+      const o = (y * CELL + x) * 4; if (out[o + 3] > 0) continue;
+      const w = AO_STRENGTH * (1 - dmin / (AO + 1));
+      out[o] = 12; out[o + 1] = 10; out[o + 2] = 8; out[o + 3] = Math.round(255 * w);
     }
   };
   const strokeSlot = (ax, ay, bx, by, scale) => {   // the slot from (ax,ay) to (bx,by), cell-local px, bedded; clipped to the cell

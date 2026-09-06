@@ -20,6 +20,16 @@ for spec in "1,2 c1-2 'was this spot fixed and just not mounted?' — the spike 
   git add -A -- art-source/career-world/l2-land/coast "$AUTH" docs/career-world/session3-tools/coast-rejects >/dev/null 2>&1
   git commit -q -m "Coast $id: re-cut with a 6 m opening and stitched on the owner's word ($words)" -m "Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>" >/dev/null 2>&1 && say "$id committed"
 done
+# owner 2026-09-06 17:40: "do a full pass to make sure all the water of the
+# land tiles is cut properly then commit … it needs those areas cleared to
+# start the [ocean] work" — painted water left opaque in the authored layers
+# (regions >= 300 px that touch cut water) is cut from the recorded layer and
+# added to the recorded water mask, and the cell is restitched from its
+# recorded sources (no dispatch, no gates); then committed before the serve
+say "the water-cut pass over every authored land tile"
+node docs/career-world/session3-tools/water-cut-pass.mjs --fix --min 1500 2>&1 | tail -12
+git add -A -- art-source/career-world/l2-land "$AUTH/tiles/l2-ninjaone-r1" "$AUTH/tiles/l2-tanium-r1" "$AUTH/tiles/l2-coast-r1" "$AUTH/manifests" >/dev/null 2>&1
+git commit -q -m "Water-cut pass: painted water left opaque in the authored land layers cut and restitched (owner 2026-09-06: 'make sure all the water of the land tiles is cut properly')" -m "Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>" >/dev/null 2>&1 && say "water pass committed"
 say "serve"
 bash .codex-tmp/session4/serve.sh 2>&1 | tee -a .codex-tmp/session4/serve.log | grep -E "^\[|committed"
 say "chain7 done"
