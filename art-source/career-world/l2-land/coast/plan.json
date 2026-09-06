@@ -3,7 +3,7 @@
  "grid": {
   "cols": 9,
   "rows": 9,
-  "cells": 28
+  "cells": 27
  },
  "cell": {
   "keptPx": 2048,
@@ -193,7 +193,6 @@
   "8,6": "shore",
   "8,7": "shore",
   "1,8": "shore",
-  "2,8": "shore",
   "5,8": "shore",
   "6,8": "shore",
   "7,8": "shore",
