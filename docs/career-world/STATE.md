@@ -4,7 +4,39 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-05 23:15 UTC, LATEST (current):** **THE COAST RUN IS DONE — 10
+**2026-09-06 01:20 UTC, LATEST (current):** **LOCK 18n — THE PURPLE GUIDE —
+IS IN ON THE OWNER'S WORDS; chain2.sh WAITS BEHIND chain.sh.** The first
+chain run: T c4-1 LANDED at 23:25Z with the drawn floor (its groove leaves
+the east edge at 49.9% against the floor's 49.6%; both seams continue —
+`.codex-tmp/session4/island/chain-c4-1-seams.jpg`); c2-1 (1 crossing, tone,
+crowns 1.47 m), c1-1 (rock lighting, 1 crossing), c6-1 (1 crossing,
+vegetation colour 13), c1-2 (palette/tone) refused → candidates; coast c0-5
+(4 crossings), c0-7 (6 crossings) refused → the conform pass; c1-4 baking
+at 01:20Z, then conform, then serve.sh (chain.sh's own line, correct).
+**Owner 01:00:** *"For the chain add a layer over it thats bright purple.
+Then use that to hellp with the matching and remove that layer for final
+render"* → **cell.mjs lock 18n** (commit 2160f5fc, recorded with his
+words; `proposals/chain-guide.apply.mjs`): the chain's floor is drawn in
+bright purple (200,0,255) as a GUIDE LAYER; the packet says cut the groove
+along it and leave no purple; after the generation, before derivation,
+where the purple survived within 100 px of the west/east kept edge its
+height is read (`chainSeen`), then every purple pixel becomes the groove's
+floor (38,36,33); a new gate **"chain continuity"**: at each edge the groove
+(the guide where it survived, else the darkest 0.3-3 m run beside the edge)
+within 48 px of the floor drawn from the neighbours' grooves. Dry-run on
+c2-1: "chain guide 55336 px … 45% down the west edge (the canon) to 49%
+down the east (c3-1's groove)"; `island/18n-guide-c2-1.jpg`. Coast cells:
+no chain → untouched. **chain2.sh** (started by chain2-waiter.sh, a
+background bash, once chain.log says "chain run done" and the lock is
+free): c2-1, c1-1, c6-1 forced, c1-2 forced with the guide, one attempt
+each; conform pass; serve. **Then:** the island picture (world-mosaic ×3
+→ island-grid) + candidate views to the owner; his eye on c7-0, c1-3, the
+forest cells, c6-1, c0-5, c0-7, c4-8, c2-8, c6-8. A known small thing: the
+guide follows the canon's local slope into the bleed, so at a paste
+boundary it can sit 2-3 m off the neighbour's groove and converge to it at
+the seam (c2-1 east); the model bridges that.
+
+**2026-09-05 23:15 UTC:** **THE COAST RUN IS DONE — 10
 NEW SHORE CELLS IN THE PYRAMID, NOT YET SERVED; THE CHAIN RUN STARTED
 ITSELF AT 23:10Z.** misses.sh (waves on locks 18i-b/18j/18k): wave 1
 landed c7-2, c8-6, c1-0, c1-8; wave 2 landed c7-1; every other candidate
