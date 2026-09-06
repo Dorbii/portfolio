@@ -19,6 +19,7 @@ sharp.cache(false);
 const WHICH = process.argv[2] && !process.argv[2].startsWith("--") ? process.argv[2] : "both";
 const DRY = process.argv.includes("--dry");
 const REKEY = process.argv.includes("--rekey");      // key the delivered source again, no generation
+const arg = (f, d) => { const i = process.argv.indexOf(f); return i >= 0 ? process.argv[i + 1] : d; };
 const argNum = (f, d) => { const i = process.argv.indexOf(f); return i >= 0 ? Number(process.argv[i + 1]) : d; };
 // the world's own kerb, measured on the old c3-1 at L0 (2048 px = 97.6 m): the
 // stones with their groove stand about 45 px tall; a rune panel is 6-8 m, ~140 px
@@ -45,7 +46,7 @@ const packets = {
   kerb: `# The rune chain's KERB element — one generation, magenta key
 
 You are the worker of an image pipeline. Deliver files into
-\`${ROOT}/${WORK}/kerb/\` (create it). Work only there.
+\`${ROOT}/${WORK}/kerb${WORKTAG}/\` (create it). Work only there.
 
 Load \`${ROOT}/${REF}\` with the built-in \`view_image\` tool: it is a strip of
 the world's authored art showing the RUNE CHAIN as it must look — a low kerb of
@@ -77,13 +78,13 @@ Your prompt says, in words:
   chain is not. No soft magenta halo around the stones: hard edges.
 - Nothing carved on it (no panels, no runes): this is the plain chain.
 
-Then write \`${ROOT}/${WORK}/kerb/report.json\`:
+Then write \`${ROOT}/${WORK}/kerb${WORKTAG}/report.json\`:
 \`{ "element": "kerb", "file": "kerb-source.png", "size": [w, h], "calls": 1, "notes": "..." }\`.
 Do not resize, crop, recolour or key anything yourself. One call only.`,
   node: `# The rune chain's NODE element — one generation, magenta key
 
 You are the worker of an image pipeline. Deliver files into
-\`${ROOT}/${WORK}/node/\` (create it). Work only there.
+\`${ROOT}/${WORK}/node${WORKTAG}/\` (create it). Work only there.
 
 Load \`${ROOT}/${REF}\` with the built-in \`view_image\` tool: a strip of the
 world's authored art showing the RUNE CHAIN — a low kerb of pale fitted basalt
@@ -107,7 +108,7 @@ deliver its raw output untouched as \`node-source.png\`. Your prompt says:
 - Flat ambient light only: no sun, no cast shadows. No grass, no ground, no
   kerb, nothing else — magenta everywhere a panel is not, with hard edges.
 
-Then write \`${ROOT}/${WORK}/node/report.json\`:
+Then write \`${ROOT}/${WORK}/node${WORKTAG}/report.json\`:
 \`{ "element": "node", "file": "node-source.png", "size": [w, h], "calls": 1, "notes": "..." }\`.
 Do not resize, crop, recolour or key anything yourself. One call only.`,
 };
@@ -115,7 +116,7 @@ Do not resize, crop, recolour or key anything yourself. One call only.`,
 const codex = (process.env.CODEX_BIN || "codex").replace(/\\/g, "/");
 const model = process.env.CELL_MODEL || "gpt-5.6-sol", effort = process.env.CELL_EFFORT || "high";
 async function generate(which) {
-  const dir = `${WORK}/${which}`;
+  const dir = `${WORK}/${which}${WORKTAG}`;
   fs.mkdirSync(dir, { recursive: true });
   const packet = `${dir}/packet.md`;
   fs.writeFileSync(packet, packets[which]);
@@ -198,16 +199,16 @@ async function key(src, which) {
     out = await sharp(out).resize(Math.round(k.width * scale), Math.round(k.height * scale), { kernel: "lanczos3" }).png().toBuffer();
     console.log(`  node: scaled x${scale.toFixed(3)} (a panel ~${PANEL_PX} px at L0)`);
   }
-  const file = `${OUT}/${which}-element-r1.png`;
+  const file = `${OUT}/${which}-element-${TAG}.png`;
   fs.writeFileSync(file, out);
   const m = await sharp(file).metadata();
-  fs.writeFileSync(`${OUT}/${which}-element-r1.json`, JSON.stringify({ element: which, width: m.width, height: m.height, anchorRow: Math.round((grooveRow - y0 + 0.5) * scale), source: src, keyed: new Date().toISOString(), note: which === "kerb" ? "anchorRow = the groove (the darkest row): build-chain-layer.mjs puts it on the route" : "anchorRow = the darkest row; the panels' band is centred on the route" }, null, 1));
+  fs.writeFileSync(`${OUT}/${which}-element-${TAG}.json`, JSON.stringify({ element: which, width: m.width, height: m.height, anchorRow: Math.round((grooveRow - y0 + 0.5) * scale), source: src, keyed: new Date().toISOString(), note: which === "kerb" ? "anchorRow = the groove (the darkest row): build-chain-layer.mjs puts it on the route" : "anchorRow = the darkest row; the panels' band is centred on the route" }, null, 1));
   console.log(`  ${which}: ${file} ${m.width}x${m.height}, anchor row ${Math.round((grooveRow - y0 + 0.5) * scale)}`);
   return file;
 }
 
 for (const which of WHICH === "both" ? ["kerb", "node"] : [WHICH]) {
-  const src = REKEY ? `${WORK}/${which}/${which}-source.png` : await generate(which);
+  const src = REKEY ? `${WORK}/${which}${WORKTAG}/${which}-source.png` : await generate(which);
   if (src && fs.existsSync(src)) await key(src, which);
   else if (REKEY) console.log(`  ${which}: no delivered source to re-key`);
 }
