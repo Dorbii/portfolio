@@ -60,7 +60,7 @@ const COAST = [
   { at: local(tan, 7, 1), island: "W", extends: { territory: "tanium", id: "c6-1" }, shore: "east" },       // c8-6 — his crop 4: T c6-1's cliff, the chain's end beyond
   { at: local(tan, 7, 2), island: "W", extends: { territory: "tanium", id: "c6-2" }, shore: "east" },       // c8-7 — T c6-2's east edge
   { at: local(tan, 0, 3), island: "N", extends: { territory: "tanium", id: "c0-2" }, shore: "south" },      // c1-8 — T c0-2's south-east corner
-  { at: local(tan, 1, 3), island: "N", extends: { territory: "tanium", id: "c1-2" }, shore: "south" },      // c2-8 — the forest's south edge, 32% land
+  // c2-8 removed (owner 2026-09-06 02:50: "remove c2-8s gen no need for it") — T c1-2's cliff coast ends at its own edge
   { at: local(tan, 4, 3), island: "N", extends: { territory: "tanium", id: "c4-2" }, shore: "south" },      // c5-8 — T c4-2's south edge, 71% land
   { at: local(tan, 5, 3), island: "N", extends: { territory: "tanium", id: "c5-2" }, shore: "south" },      // c6-8 — T c5-2's south edge
   { at: local(tan, 6, 3), island: "N", extends: { territory: "tanium", id: "c6-2" }, shore: "south" },      // c7-8 — T c6-2's south edge, 49% land

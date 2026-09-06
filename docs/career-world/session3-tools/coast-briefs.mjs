@@ -257,6 +257,30 @@ south-east corner; both wrong.`,
 15-40 m south as the same cliffed shore, wandering, and END it — every edge
 of this cell but the north is open sea, and nothing stands in it beyond a
 stack or two close in.`,
+  // owner 2026-09-06 02:50: "C1-3 shoulda just been a bit of land to finish
+  // the neighbor coast" — the candidate put a headland at the bottom and
+  // nothing where N c0-2's two headlands arrive
+  "c1-3": `**A bit of land to finish the neighbour's coast — nothing more.** N c0-2's
+two headlands arrive across your EAST edge; each continues 8-20 m into this
+cell at the width it arrives and ENDS in broken column tops. That is all the
+land in this cell: the bay between them and everything west is open sea.
+No headland anywhere the island's ground does not arrive.`,
+  // owner 2026-09-06 02:50: "c4-8 needs to fix the coast" — two candidates,
+  // a plateau and a cut plateau, neither a coast
+  "c4-8": `**A coast, not a plateau — hard.** T c3-2's ground arrives across your NORTH
+edge between its bay at the west end and the five falls; continue it 15-40 m
+south as a cliffed shore that WANDERS, the falls reaching the sea as short
+inlets, the bay staying open water at the seam and opening west into the
+sea. The shore ends inside this cell; the west edge, the south edge and the
+sea below the shore are open water with nothing in them. Two previous
+candidates carried a plateau across the cell; both wrong.`,
+  // owner 2026-09-06 02:50: "c0-5 needs regen"
+  "c0-5": `**Regenerated on the owner's word.** T c0-0's cliffs arrive across the bottom
+of your EAST edge and c0-6's coast arrives across your SOUTH edge: one
+continuous cliffed shore joins them through this cell's south-east corner,
+15-40 m from each edge, wandering, ending in broken column tops. Everything
+north and west of that shore is open sea. No bars, no slivers, no straight
+edges.`,
   "c8-6": `**The bulge closes; then the chain's end.** The rounded headland from c8-5
 above comes down across your NORTH edge and closes back onto T c6-1's cliff,
 which arrives across the top 19% of your WEST edge. Below that, T c6-1's
