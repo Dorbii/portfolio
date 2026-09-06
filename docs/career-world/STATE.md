@@ -4,7 +4,43 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-06 01:35 UTC, LATEST (current):** **SERVED AT 01:15Z — 59 TILES,
+**2026-09-06 02:25 UTC, LATEST (current):** **SERVED AGAIN AT 02:22Z (60
+TILES); chain3.sh (THE CLEANUP + c4-1's SECOND ATTEMPT) IS RUNNING.**
+chain2.sh with the purple guide (18n): **T c6-1 LANDED** (01:58Z — the
+chain's end cell, guide 57% → 70%, gate "3 px off the floor"); c2-1 (1
+crossing, tone, crowns 1.47), c1-1 (1 crossing; chain 6 px at the west; tone
+and crowns CLEAN), c1-2 (veg 35 vs the meadow) refused → candidates; every
+model output repainted all the purple as the groove (0 px replaced) — the
+guide works as position, the removal is a safety net. 18n was calibrated
+after c2-1 (commit 8b5b9d54): the gate's contrast scales with the band's
+median (a dark forest's slot is 15 under it); "no groove found" is reported,
+not refused. chain2's conform pass (the shapes below) landed **c7-0**; c1-4
+(fringe 8%, 2 crossings), c4-8 (rock 0.162, 1 crossing), c0-5 (veg 15), c2-8
+(veg 18), c6-8 (rock, 3 crossings) still refused → his eye. **Owner 02:00,
+five crops of the served picture:** c0-5 "delete the extra, fix the red
+circle" (a ruler-straight limit); c1-8/c2-8 "Not sure what this is but it
+shouldnt be here" (the mirrored stack grid — 18i-b's patch held a stack:
+proposal 18i-c awaits his word); c4-8 "needs that fix cleaned up"; c4-1
+"needs those to match" (the groove hid under the top bench's wall, the
+wall's diagonal foot read as the chain); c7-0 "needs similar work". →
+**conform-band.mjs:** coastline-scale irregularity (sd ~1.2 m over 6 m) on
+the limit; a wet run touching a cell corner is sea; a stretch ending at a
+corner with no authored neighbour beyond rounds off; the width cap only for
+isolated headlands and slivers under 5 m (the banks between coves keep
+their depth — a 10 m sea threshold and a general cap both cut coves into
+channels, reverted); **conform-seam-water.mjs:** cove ends wander ±20%.
+**chain3.sh** (started by chain3-waiter.sh after "chain2 done"; log
+`chain3.log`): c1-8 conformed and stitched ON HIS WORD (the cut leaves no
+land, which the coverage gate refuses); c0-5 re-conformed (will refuse on
+veg 15 again — his accept needed); **T c4-1 forced** with "the groove
+visible edge to edge, a wall crossed only through a short arch" in its
+brief; serve. **Then:** the picture (world-mosaic ×3 --level 2 →
+island-grid --mark) + views; asks: accepts for c1-1, c0-5, c1-3, c2-8,
+c4-8, c6-8, c1-4, c2-1, c1-2 (the forest cells refuse on the palette gate's
+0.20/13 calibration — a lever, or his eye); 18i-c yes/no. Coast 22 of 28
+authored (c0-5, c1-3, c1-4, c2-8, c4-8, c6-8 open; c8-4 unplanned-need).
+
+**2026-09-06 01:35 UTC:** **SERVED AT 01:15Z — 59 TILES,
 14 NEW; chain2.sh IS BAKING WITH THE PURPLE GUIDE.** chain.sh finished:
 c1-4 refused (1 crossing, veg 42); its conform pass landed **c0-7** (band,
 68% trimmed) and left c1-4 (fringe 22.9% after the cut + 2 crossings), c4-8,
