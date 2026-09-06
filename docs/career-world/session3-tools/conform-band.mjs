@@ -148,8 +148,11 @@ for (const [edge, dx, dy] of EDGES) {
     // an isolated headland (sea at both ends) is no deeper than four fifths
     // of its width, and its two roundings may meet in the middle; a stretch
     // that runs on past a cove keeps its depth and rounds only a third
+    // ... and NO stretch is deeper than four fifths of its width: a 2 m sliver
+    // of the neighbour's ground beside a cove got a 30 m bar of land on c0-5
+    // (2026-09-06 01:40) — it gets a nub now
     const isolated = taperA && taperB, width = b - a + 1;
-    const widthCap = isolated ? Math.round(0.8 * width) : Infinity;
+    const widthCap = Math.max(px(3), Math.round(0.8 * width));   // never under 3 m: a cell keeps some land (the coverage gate) at a 1 m corner stretch (c1-8)
     const base = [];
     for (let i = a; i <= b; i += 1) {
       const last = extent(i);
