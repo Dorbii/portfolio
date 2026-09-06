@@ -43,6 +43,10 @@ const ALL = ["ninjaone", "tanium", "coast"];      // feed order: NinjaOne first 
 // tiles only; the authored pyramids are untouched. With --tone, every cell is
 // re-sliced (a gain change is not visible to the mtime check).
 const TONE = arg1("--tone");
+// --chain <dir>: overlays from build-chain-layer.mjs (<territory>-<id>-chain.png,
+// 2048 px RGBA) composited onto the served tiles; with --chain every cell is re-sliced
+const CHAIN = arg1("--chain");
+let chained = 0;
 const gains = new Map(), edges = new Map();
 if (TONE) {
   const table = JSON.parse(fs.readFileSync(TONE, "utf8"));
@@ -141,14 +145,28 @@ for (const t of ALL) {
     const cap = `${id}-capital.webp`, site = `${id}-site.webp`;
     const capFile = path.join(outDir, cap), siteFile = path.join(outDir, site);
     const l1 = await cellImage(pyr, 1, col, row), l0 = await cellImage(pyr, 0, col, row);
-    const stale = FORCE || TONE || !fs.existsSync(capFile) || !fs.existsSync(siteFile)
+    const stale = FORCE || TONE || CHAIN || !fs.existsSync(capFile) || !fs.existsSync(siteFile)
       || fs.statSync(capFile).mtimeMs < l1.newest || fs.statSync(siteFile).mtimeMs < l0.newest;
     if (stale) {
       if (!DRY) {
         for (const [lvl, file, size] of [[l1, capFile, 1024], [l0, siteFile, 2048]]) {
-          if (TONE) {
-            const raw = await lvl.image.raw().toBuffer();
-            await sharp(applyTone(raw, size, world[0], world[1]), { raw: { width: size, height: size, channels: 4 } })
+          // the chain layer (owner 2026-09-06): one overlay per chain cell,
+          // composited onto the served tile after the tone; the pyramid stays clean
+          const chainFile = CHAIN ? path.join(CHAIN, `${t}-${id}-chain.png`) : null;
+          const overlay = chainFile && fs.existsSync(chainFile)
+            ? await sharp(chainFile).resize(size, size, { kernel: "lanczos3" }).ensureAlpha().raw().toBuffer() : null;
+          if (TONE || overlay) {
+            const raw = TONE ? applyTone(await lvl.image.raw().toBuffer(), size, world[0], world[1]) : await lvl.image.ensureAlpha().raw().toBuffer();
+            if (overlay) {
+              for (let p = 0; p < size * size; p += 1) {
+                const o = p * 4, a = overlay[o + 3] / 255;
+                if (a === 0) continue;
+                for (let k = 0; k < 3; k += 1) raw[o + k] = Math.round(overlay[o + k] * a + raw[o + k] * (1 - a));
+                raw[o + 3] = Math.max(raw[o + 3], overlay[o + 3]);
+              }
+              chained += 1;
+            }
+            await sharp(raw, { raw: { width: size, height: size, channels: 4 } })
               .webp({ quality: 90, alphaQuality: 100 }).toFile(file);
           } else {
             await lvl.image.webp({ quality: 90, alphaQuality: 100 }).toFile(file);
