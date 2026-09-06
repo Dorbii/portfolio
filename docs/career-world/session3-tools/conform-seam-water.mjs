@@ -93,6 +93,21 @@ for (const [a, b] of runs) {
     depth[i] = found >= 0 ? found : cap;
   }
 }
+// a cove's far end is not flat: a smoothed ±20% wander on the capped depth,
+// changing every few metres (owner 2026-09-06 02:00 on c7-0: "needs similar
+// work" — the coves read as slots)
+{
+  let seed = 7; for (const ch of `${T}${ID}${EDGE}`) seed = (seed * 31 + ch.charCodeAt(0)) >>> 0;
+  const rnd = () => { seed ^= seed << 13; seed >>>= 0; seed ^= seed >>> 17; seed ^= seed << 5; seed >>>= 0; return seed / 4294967296; };
+  const raw = depth.map(() => rnd() - 0.5), k = Math.round(2 / M_PER_PX);
+  for (const [a, b] of runs) {
+    for (let i = a; i <= b; i += 1) {
+      let s = 0, c = 0; for (let j = -k; j <= k; j += 1) { const q = i + j; if (q >= a && q <= b) { s += raw[q]; c += 1; } }
+      const w = (s / c) * Math.sqrt(2 * k + 1) * 0.4;   // about ±0.2 after normalising the smoothed noise
+      depth[i] = Math.max(0, Math.round(depth[i] * (1 + w)));
+    }
+  }
+}
 // the cut's ends along the seam round off (a quarter-circle over the shorter
 // of 6 m and half the run) where the run ends inside the edge, so a notch is
 // a cove and a bay has a curved corner, not a box (2026-09-05 20:20, c7-0:

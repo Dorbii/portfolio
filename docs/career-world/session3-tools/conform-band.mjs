@@ -94,6 +94,16 @@ const wander = (n) => {
   const f1 = px(35 + 25 * rnd()), f2 = px(12 + 10 * rnd()), p1 = rnd() * 6.283, p2 = rnd() * 6.283;
   return Array.from({ length: n }, (_, i) => 0.5 + 0.35 * Math.sin(i / f1 * 6.283 + p1) + 0.15 * Math.sin(i / f2 * 6.283 + p2));
 };
+// coastline-scale irregularity on top of the wander: smoothed noise, about
+// ±2 m, changing every 2-6 m — a cut edge must not read as a ruler line or a
+// smooth curve (owner 2026-09-06 02:00 on c0-5: "fix the red circle")
+const jagged = (n) => {
+  const raw = Array.from({ length: n }, () => rnd() - 0.5);
+  const k = px(3), out = new Array(n).fill(0);   // smoothed over 6 m: bumps, not teeth
+  for (let i = 0; i < n; i += 1) { let s = 0, c = 0; for (let j = -k; j <= k; j += 1) { const q = i + j; if (q >= 0 && q < n) { s += raw[q]; c += 1; } } out[i] = s / c; }
+  const amp = px(1.2) * Math.sqrt(2 * k + 1) / 0.29;   // the smoothed noise has sd 0.29/sqrt(2k+1): scale to sd ~1.2 m
+  return out.map((v) => v * amp);
+};
 
 // per edge: depth of allowed land per kept position (0 = no land)
 const bands = {}, report = [];
@@ -109,15 +119,26 @@ for (const [edge, dx, dy] of EDGES) {
   // ground stretches and wet runs along the edge; a wet run 15 m or wider is
   // the sea (no land beside it at all), a narrower one an inlet or a beck,
   // which the seam cut opens as a cove that ENDS — the land beyond it stays
+  // a wet run is the SEA when it is 15 m or wider, or when it touches a cell
+  // corner (a bay opening past the corner into the next cell's water — c4-8's
+  // 13 m bay at T c3-2's west end was read as a cove and the plateau beside it
+  // was cut straight, 2026-09-06 02:00); narrower and enclosed, it is a cove
+  // (a 10 m threshold turned T c3-2's falls into "sea" and cut through the
+  // plateau beside each — 15 m stays)
   const stretches = [], seaRuns = [], narrowRuns = []; let s = null, w0 = null;
   for (let i = 0; i <= KEPT; i += 1) {
     const g = i < KEPT && !wet[i], ww = i < KEPT && wet[i];
     if (g && s === null) s = i;
     if (!g && s !== null) { stretches.push([s, i - 1]); s = null; }
     if (ww && w0 === null) w0 = i;
-    if (!ww && w0 !== null) { (i - w0 >= px(15) ? seaRuns : narrowRuns).push([w0, i - 1]); w0 = null; }
+    if (!ww && w0 !== null) { (i - w0 >= px(15) || w0 === 0 || i === KEPT ? seaRuns : narrowRuns).push([w0, i - 1]); w0 = null; }
   }
   const seaAt = (i) => seaRuns.some(([a, b]) => i >= a && i <= b);
+  // the sides this edge's two corners turn onto: with no authored neighbour
+  // there, the coast turns and the limit rounds off before the corner
+  const [sideA, sideB] = alongIsY ? [[0, -1], [0, 1]] : [[-1, 0], [1, 0]];   // along = y: the corners are north/south; along = x: west/east
+  const openA = !authoredAt(col + sideA[0], row + sideA[1]), openB = !authoredAt(col + sideB[0], row + sideB[1]);
+  const jag = jagged(KEPT);
   // the candidate's own land extent inward from the seam, per position
   const extent = (i) => {
     let last = -1;
@@ -139,8 +160,8 @@ for (const [edge, dx, dy] of EDGES) {
     // open sea: the land beyond the cove is a headland too)
     const solid = stretches.filter(([p, q]) => q - p + 1 >= px(5));   // a sliver under 5 m is not ground to run on to
     const nextGround = solid.find(([p]) => p > b), prevGround = [...solid].reverse().find(([, q]) => q < a);
-    const taperA = a > 0 && (seaAt(a - 1) || !prevGround || a - prevGround[1] > px(15));
-    const taperB = b < KEPT - 1 && (seaAt(b + 1) || !nextGround || nextGround[0] - b > px(15));
+    const taperA = a > 0 ? (seaAt(a - 1) || !prevGround || a - prevGround[1] > px(15)) : openA;
+    const taperB = b < KEPT - 1 ? (seaAt(b + 1) || !nextGround || nextGround[0] - b > px(15)) : openB;
     // the limit before rounding: the candidate's own coast is kept whole when
     // it lies within 46 m of the seam (a coast drawn at 40 m must not lose
     // its cliff faces to the limit); only land carried further than that — a
@@ -152,7 +173,10 @@ for (const [edge, dx, dy] of EDGES) {
     // of the neighbour's ground beside a cove got a 30 m bar of land on c0-5
     // (2026-09-06 01:40) — it gets a nub now
     const isolated = taperA && taperB, width = b - a + 1;
-    const widthCap = Math.max(px(3), Math.round(0.8 * width));   // never under 3 m: a cell keeps some land (the coverage gate) at a 1 m corner stretch (c1-8)
+    // ... but a bank between two coves keeps its depth (the coast runs on past
+    // the coves — c7-0's 5-14 m banks were cut back to 4-11 m and the coves
+    // became channels, 02:15); the cap is for headlands and for slivers
+    const widthCap = (isolated || width < px(5)) ? Math.max(px(3), Math.round(0.8 * width)) : Infinity;   // never under 3 m: a cell keeps some land (the coverage gate) at a 1 m corner stretch (c1-8)
     const base = [];
     for (let i = a; i <= b; i += 1) {
       const last = extent(i);
@@ -168,6 +192,8 @@ for (const [edge, dx, dy] of EDGES) {
       let d = base[i - a];
       if (rA > 0 && i - a < rA) { const u = (rA - (i - a) - 1) / rA; d *= Math.sqrt(Math.max(0, 1 - u * u)); }
       if (rB > 0 && b - i < rB) { const u = (rB - (b - i) - 1) / rB; d *= Math.sqrt(Math.max(0, 1 - u * u)); }
+      // the irregularity, scaled down where the limit is already small
+      d += jag[i] * Math.min(1, d / px(6));
       depth[i] = Math.max(0, Math.round(d));
     }
   }

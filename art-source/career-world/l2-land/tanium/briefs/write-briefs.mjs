@@ -414,7 +414,18 @@ thin dark line from edge to edge: it is exact; cut the slot's walls and rims
 along it and nothing else about it changes. Where the groove meets a bench
 wall it passes UNDER the wall through a natural arch — a stone overpass, the
 concept the owner liked — and the WIND-ARCH is one of those crossings: the
-groove runs beneath it.`;
+groove runs beneath it.
+
+**Second ruling (owner 2026-09-06 02:00, on the served cell: "c4-1 needs
+those to match").** The groove must be VISIBLE from edge to edge as one dark
+slot at the height the purple guide marks — the same height the neighbours'
+grooves arrive at. Where it meets a bench wall it passes through a SHORT
+natural arch, an opening no wider than 3-4 m, and comes out the other side
+on the same line; it is never hidden beneath a wall for longer than that,
+and it never runs along the foot of a wall. The bench walls therefore cross
+the groove's line, they do not follow it: the previous version let the top
+bench's wall run diagonally over the chain's path and the eye took the wall
+for the chain.`;
 
 B["5,1"] = `The RISK-ASSESSMENT shelf — a settlement shelf, the richest ground in its
 neighbourhood, and the last one before the coast to the east.
