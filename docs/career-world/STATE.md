@@ -4,7 +4,33 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-06 15:45 UTC, LATEST (current):** **THE CHAIN LAYER IS BUILT AS
+**2026-09-06 16:10 UTC, LATEST (current):** **THE CHAIN LAYER WORKS — SHOWN
+TO THE OWNER ON THE PLAIN c3-1; THE REGEN IS ON c4-1 (2/7).** Elements
+(`art-source/career-world/chain/`): **kerb-element.png = r3** (the second
+generation, KERB_VARIANT=low: one course of rounded stones with the dark
+groove, delivered on BLACK — chain-element.mjs keys on whatever background
+the corners show, magenta or black, no despill for black), r1 (fitted
+blocks, magenta) kept as the alternative — the owner was sent the swatch
+(`island/kerb-swatch.jpg`) and may say "top" for r1; **node-element.png =
+r1** (seven rune panels; the green fringe was moss the model painted, keyed
+out; --keep-green/--no-despill exist). Sidecar .json files carry anchorRow
+(the groove row) — build-chain-layer.mjs puts it on the route. Bugs found
+and fixed: the node element's half-pixel origin scrambled channels into
+green blobs (integer origin now); the overlay's land mask prefers a newer
+candidate over the authored layer, so the preview the owner sees is masked
+by the plain regen; mount-candidates.mjs composites the overlay onto
+candidate previews (the plain cells are judged WITH the chain on). serve.sh
+builds the overlays (step 1b) before the register (--chain). **Proof:**
+`island/chain-c3-1-plain.jpg` (sent 16:10). **The regen (chain6.sh):**
+c3-1's plain attempt REFUSED on tone alone (23.7 over 4 seams; veg 0.166) →
+a candidate — expected for every one of the seven (the palette gate's
+calibration; his eye rules); c4-1 baking since 15:52Z. **At its end**
+serve.sh runs with the layer; then the picture + the seven candidates for
+his accepts (each previewed with the chain on). Open: the kerb's tiny white
+highlights on some stones (a luma cap if he minds); the palette
+recalibration ask; the four coast candidates (c0-5, c1-3, c1-4, c4-8).
+
+**2026-09-06 15:45 UTC:** **THE CHAIN LAYER IS BUILT AS
 TOOLS; ITS ELEMENTS ARE GENERATING; THE SEVEN CHAIN CELLS ARE REGENERATING
 PLAIN.** (The background runs sat for hours — chain6.sh launched 06:55Z
 started baking 15:28Z; the app suspends background bash while idle. Clocks:
