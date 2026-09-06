@@ -29,6 +29,7 @@ const arg = (f, d) => { const i = process.argv.indexOf(f); return i >= 0 ? proce
 const ART = "art-source/career-world";
 const KERB = arg("--kerb", `${ART}/chain/kerb-element.png`), NODE = arg("--node", `${ART}/chain/node-element.png`);   // the chosen elements (copies of a revision)
 const CLUSTER = arg("--cluster", `${ART}/chain/cluster-element.png`);   // a leader and its endpoints, at a branch's apex
+const HUB = arg("--hub", `${ART}/chain/hub-element.png`), LEADER = arg("--leader", `${ART}/chain/leader-element.png`);   // the server far off the chain, the leaders on it
 const OUT = arg("--out", `${ART}/chain/cells`), PREVIEW = arg("--preview");
 const CELL = 2048, BLEED = 256;
 const route = JSON.parse(fs.readFileSync(`${ART}/l2-land/tanium/rune-chain.def.json`, "utf8"));
@@ -50,10 +51,13 @@ const sidecar = (f) => { const j = f.replace(/\.png$/, ".json"); return fs.exist
 const KA = sidecar(KERB)?.anchorRow ?? Math.round(KH / 2);   // the groove's row in the element: it sits on the route
 const node = fs.existsSync(NODE) ? await sharp(NODE).ensureAlpha().raw().toBuffer({ resolveWithObject: true }) : null;
 fs.mkdirSync(OUT, { recursive: true });
-const cols = [...new Set(W.map((w) => Math.floor(Math.min(w[0], W[W.length - 1][0] - 1e-6))))];
+// every Tanium cell gets a pass: the trunk's row, and any cell a hub or a spoke
+// falls in (the per-cell drawing clips itself; an empty overlay is not written)
+const grid = JSON.parse(fs.readFileSync(`${ART}/l2-land/tanium/territory.def.json`, "utf8")).grid;
+const cellsToDo = [];
+for (let r = 0; r < grid.rows; r += 1) for (let c = 0; c < grid.cols; c += 1) cellsToDo.push([c, r]);
 const previews = [];
-for (const col of cols) {
-  const row = Math.floor(yAt(col + 0.5));
+for (const [col, row] of cellsToDo) {
   const id = `c${col}-${row}`;
   // the land that masks the chain: the working folder's candidate when it is
   // newer than the authored layer (the preview the owner sees), else the
@@ -208,6 +212,63 @@ for (const col of cols) {
     }
     console.log(`  ${id}: branch at ${br.at} (${side < 0 ? "north" : "south"}, ${br.length} m along, ${br.depth} m out)${cluster ? " with its cluster" : " — no cluster element yet"}`);
   }
+  // HUBS AND SPOKES (owner 2026-09-06, Tanium's architecture diagram: the
+  // chain is the ring of endpoints, leaders are points on it, the server sits
+  // far off with long lines to the leaders; "the branches should be far off
+  // the chain"): route.hubs = [{ at: [x, y] in grid units, leaders: [x...] }].
+  // Each leader gets a disc on the trunk; a straight spoke slot runs from it
+  // to the hub, crossing cells (drawn per cell, clipped), bedded like the
+  // trunk; the hub disc sits at the hub. All by data.
+  const stamp = (el, cxCell, cyCell) => {       // an element centred on a cell-local point, masked by land, over what is there
+    if (!el) return;
+    const EW = el.info.width, EH = el.info.height, x0 = Math.round(cxCell) - Math.round(EW / 2), y0 = Math.round(cyCell) - Math.round(EH / 2);
+    for (let ey = 0; ey < EH; ey += 1) for (let ex = 0; ex < EW; ex += 1) {
+      const x = x0 + ex, y = y0 + ey;
+      if (x < 0 || y < 0 || x >= CELL || y >= CELL) continue;
+      const eo = (ey * EW + ex) * 4, a = el.data[eo + 3]; if (a === 0) continue;
+      const lp = landPx(x, y); if (lp[3] < 128) continue;
+      const o = (y * CELL + x) * 4, k = a / 255;
+      for (let c = 0; c < 3; c += 1) out[o + c] = Math.round(el.data[eo + c] * k + out[o + c] * (1 - k));
+      out[o + 3] = Math.max(out[o + 3], a);
+    }
+  };
+  const strokeSlot = (ax, ay, bx, by, scale) => {   // the slot from (ax,ay) to (bx,by), cell-local px, bedded; clipped to the cell
+    const len = Math.hypot(bx - ax, by - ay); if (len === 0) return;
+    const tx = (bx - ax) / len, ty = (by - ay) / len, nx = -ty, ny = tx;
+    const skw = Math.round(KW * scale), skh = Math.round(KH * scale), ska = Math.round(KA * scale);
+    for (let u = 0; u < len; u += 0.7) {
+      const px = ax + tx * u, py = ay + ty * u;
+      if (px < -skh || py < -skh || px > CELL + skh || py > CELL + skh) continue;
+      const ss = Math.round(u / scale), rep = Math.floor(ss / KW); let kx = ss % KW; if (rep % 2 === 1) kx = KW - 1 - kx;
+      for (let ky = 0; ky < skh; ky += 1) {
+        const sky = Math.min(KH - 1, Math.round(ky / scale));
+        const ko = (sky * KW + kx) * 4, a0 = kerb.data[ko + 3]; if (a0 === 0) continue;
+        const x = Math.round(px + nx * (ky - ska)), y = Math.round(py + ny * (ky - ska));
+        bedPixel(x, y, kerb.data[ko], kerb.data[ko + 1], kerb.data[ko + 2], a0, ky, skh);
+      }
+    }
+  };
+  const hubEl = fs.existsSync(HUB) ? await sharp(HUB).ensureAlpha().raw().toBuffer({ resolveWithObject: true }) : null;
+  const leaderEl = fs.existsSync(LEADER) ? await sharp(LEADER).ensureAlpha().raw().toBuffer({ resolveWithObject: true }) : null;
+  const toLocal = (gx, gy) => [(gx - col) * CELL, (gy - row) * CELL];
+  for (const hub of route.hubs || []) {
+    const [hx, hy] = toLocal(hub.at[0], hub.at[1]);
+    const hubR = hubEl ? hubEl.info.width / 2 : 0;
+    for (const lx of hub.leaders || []) {
+      const ly = yAt(lx); if (ly == null) continue;
+      const [ax, ay] = toLocal(lx, ly);
+      // the spoke: from the trunk (a little past the leader disc) to the hub's rim
+      const dx = hx - ax, dy = hy - ay, len = Math.hypot(dx, dy); if (len === 0) continue;
+      const ux = dx / len, uy = dy / len;
+      const leaderR = leaderEl ? leaderEl.info.width / 2 : 0;
+      const sx = ax + ux * (leaderR * 0.6), sy = ay + uy * (leaderR * 0.6), ex = hx - ux * (hubR * 0.85), ey = hy - uy * (hubR * 0.85);
+      const inThisCell = (x, y) => x >= -CELL && y >= -CELL && x <= 2 * CELL && y <= 2 * CELL;
+      if (inThisCell(sx, sy) || inThisCell(ex, ey) || inThisCell((sx + ex) / 2, (sy + ey) / 2)) strokeSlot(sx, sy, ex, ey, 0.6);
+      if (Math.floor(lx) === col && Math.floor(ly) === row) stamp(leaderEl, ax, ay);
+    }
+    if (Math.floor(hub.at[0]) === col && Math.floor(hub.at[1]) === row) stamp(hubEl, hx, hy);
+    if ((hub.leaders || []).some((lx) => Math.floor(lx) === col) || (Math.floor(hub.at[0]) === col && Math.floor(hub.at[1]) === row)) console.log(`  ${id}: hub at [${hub.at}] with ${hub.leaders.length} leader(s) — spokes drawn where they cross this cell`);
+  }
   // the nodes: the panel element centred on the node, over the kerb, masked by land
   for (const n of route.nodes || []) {
     if (!node || n.cell[0] !== col || n.cell[1] !== row) continue;
@@ -227,9 +288,11 @@ for (const col of cols) {
     }
   }
   const file = path.join(OUT, `tanium-${id}-chain.png`);
-  await sharp(out, { raw: { width: CELL, height: CELL, channels: 4 } }).png().toFile(file);
   let n = 0; for (let i = 3; i < out.length; i += 4) if (out[i] > 0) n += 1;
-  console.log(`  ${id}: ${n} px of chain, ${Math.round((yAt(col) - row) * 100)}% down the west edge to ${Math.round((yAt(col + 1) - row) * 100)}% down the east${(route.nodes || []).some((q) => q.cell[0] === col && q.cell[1] === row) ? ", a node" : ""} → ${file}`);
+  if (n === 0) { if (fs.existsSync(file)) fs.unlinkSync(file); continue; }
+  await sharp(out, { raw: { width: CELL, height: CELL, channels: 4 } }).png().toFile(file);
+  const onTrunk = Math.floor(yAt(col + 0.5) ?? -1) === row;
+  console.log(`  ${id}: ${n} px of chain${onTrunk ? `, ${Math.round((yAt(col) - row) * 100)}% down the west edge to ${Math.round((yAt(col + 1) - row) * 100)}% down the east` : " (off the trunk)"}${(route.nodes || []).some((q) => q.cell[0] === col && q.cell[1] === row) ? ", a node" : ""} → ${file}`);
   if (PREVIEW) {
     const landPng = await sharp(landFile).extract({ left: lb, top: lb, width: CELL, height: CELL }).flatten({ background: { r: 31, g: 96, b: 108 } }).png().toBuffer();
     const full = await sharp(landPng).composite([{ input: file, left: 0, top: 0 }]).png().toBuffer();   // composite at full size, then resize
