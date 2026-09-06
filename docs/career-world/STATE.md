@@ -4,7 +4,30 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-06 06:55 UTC, LATEST (current):** **THE RUNE CHAIN LEAVES THE LAND
+**2026-09-06 15:45 UTC, LATEST (current):** **THE CHAIN LAYER IS BUILT AS
+TOOLS; ITS ELEMENTS ARE GENERATING; THE SEVEN CHAIN CELLS ARE REGENERATING
+PLAIN.** (The background runs sat for hours — chain6.sh launched 06:55Z
+started baking 15:28Z; the app suspends background bash while idle. Clocks:
+the runner's [HH:MM:SS] is UTC.) **The layer:** `docs/career-world/session3-tools/chain-element.mjs`
+runs two worker jobs in the pipeline's conventions (Codex exec + image_gen,
+generate mode, flat magenta key, one call each) for the KERB (a tileable
+strip of the pale kerb with the dark groove, style reference = the old
+c3-1's chain band from commit f9b0a37e, `.codex-tmp/chain/kerb-reference.jpg`)
+and the NODE (six to eight rune panels), keys the magenta, crossfades the
+kerb's ends, scales to the world's kerb → `art-source/career-world/chain/{kerb,node}-element-r1.png`;
+`build-chain-layer.mjs` lays the kerb along `tanium/rune-chain.def.json`
+per cell (per-column height from the route, flipped every other repeat,
+per-cell phase), the node element at each node, masked by the land's alpha
+→ `art-source/career-world/chain/cells/tanium-<id>-chain.png`; `world-register.mjs
+--chain <dir>` composites the overlays onto the served tiles after the tone
+(the pyramids never carry the chain); serve.sh passes --chain. Running now:
+the element jobs (`.codex-tmp/chain/element.log`) and chain6.sh (c1-2 re-cut
+stitched on his word first; then c3-1 … c0-1 forced). **Then:** build the
+overlays (`node build-chain-layer.mjs --preview .codex-tmp/session4/island/chain-preview.jpg`),
+serve, picture to the owner. If an element job delivers nothing, fall back
+to cutting the element from the reference band (keyed on "not grass").
+
+**2026-09-06 06:55 UTC:** **THE RUNE CHAIN LEAVES THE LAND
 AND BECOMES A LAYER; THE SEVEN CHAIN CELLS ARE REGENERATING WITHOUT IT.**
 Owner 06:40, asked "why is it so difficult to connect the chain?" and told
 that seven separately generated cells will never draw one line the same
