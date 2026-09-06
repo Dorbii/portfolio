@@ -18,6 +18,13 @@ import sharp from "sharp";
 sharp.cache(false);
 const WHICH = process.argv[2] && !process.argv[2].startsWith("--") ? process.argv[2] : "both";
 const DRY = process.argv.includes("--dry");
+const REKEY = process.argv.includes("--rekey");      // key the delivered source again, no generation
+const argNum = (f, d) => { const i = process.argv.indexOf(f); return i >= 0 ? Number(process.argv[i + 1]) : d; };
+// the world's own kerb, measured on the old c3-1 at L0 (2048 px = 97.6 m): the
+// stones with their groove stand about 45 px tall; a rune panel is 6-8 m, ~140 px
+const KERB_PX = argNum("--kerb-px", 45), PANEL_PX = argNum("--panel-px", 140);
+const TAG = arg("--tag", "r1");                      // the element files' revision: <which>-element-<tag>.png
+const WORKTAG = TAG === "r1" ? "" : `-${TAG}`;       // a second generation keeps its own working folder
 const ROOT = process.cwd().replace(/\\/g, "/");
 const OUT = "art-source/career-world/chain";
 const WORK = ".codex-tmp/chain";
@@ -56,7 +63,12 @@ Your prompt says, in words:
   the image — the same kerb of pale fitted basalt stones and the same dark
   groove along its foot as in the reference, at the same scale relative to the
   stones, seen from the same high-oblique view, weathered, lichen in the
-  joints, no two stones alike.
+  joints, no two stones alike.${process.env.KERB_VARIANT === "low" ? `
+- LOW, like the reference and unlike a wall: ONE course of small rounded
+  stones, each about as tall as it is wide and no taller, seen from above and
+  a little in front so the TOPS of the stones show more than their faces; the
+  whole strip, groove included, is about one twentieth of the image's height.
+  Not a block wall, not two courses, not large square blocks.` : ""}
 - The strip must TILE: where it leaves the right edge it must match exactly
   where it enters the left edge (same height, same stones cut at the edge), so
   the strip can be repeated end to end without a visible join.
@@ -132,14 +144,42 @@ async function key(src, which) {
     const o = (y * W + x) * 4, r = d[o], g = d[o + 1], b = d[o + 2];
     // magenta: red and blue high, green low; a soft halo is keyed by its distance from magenta
     const dist = Math.hypot(255 - r, g, 255 - b);
-    const a = dist < 40 ? 0 : dist < 90 ? Math.round(255 * (dist - 40) / 50) : 255;
+    let a = dist < 40 ? 0 : dist < 90 ? Math.round(255 * (dist - 40) / 50) : 255;
+    // the model paints moss and grass tufts round stone whatever the packet
+    // says: green-hued, saturated pixels are not the element (the stone is
+    // pale and grey, the groove dark) — they go, and so does the key's spill
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b), sat = mx ? (mx - mn) / mx : 0;
+    const green = g >= r && g >= b && sat > 0.28;
+    if (green) a = 0;
+    if (a > 0 && a < 255) {   // despill: take the key's share out of a blended edge pixel
+      const k = a / 255;
+      d[o] = Math.max(0, Math.min(255, Math.round((r - 255 * (1 - k)) / k)));
+      d[o + 2] = Math.max(0, Math.min(255, Math.round((b - 255 * (1 - k)) / k)));
+      d[o + 1] = Math.max(0, Math.min(255, Math.round(g / k)));
+    }
     d[o + 3] = a;
     if (a > 0) { n += 1; if (y < top) top = y; if (y > bottom) bottom = y; }
   }
   if (n === 0) throw new Error(`${which}: nothing but magenta`);
-  const pad = 8, y0 = Math.max(0, top - pad), y1 = Math.min(H - 1, bottom + pad);
+  // one pass of erosion: a pixel keeps its alpha only if its four neighbours are not empty
+  {
+    const a0 = new Uint8Array(W * H); for (let p = 0; p < W * H; p += 1) a0[p] = d[p * 4 + 3];
+    for (let y = 1; y < H - 1; y += 1) for (let x = 1; x < W - 1; x += 1) {
+      const p = y * W + x;
+      if (a0[p] && (!a0[p - 1] || !a0[p + 1] || !a0[p - W] || !a0[p + W])) d[p * 4 + 3] = Math.min(d[p * 4 + 3], 96);
+    }
+  }
+  // the content's rows, counted where the alpha is solid (a faint keyed halo
+  // reached the bottom edge of the first delivery and put 385 empty rows under
+  // the kerb); the groove row = the darkest solid row, the layer's anchor
+  const rowSolid = new Array(H).fill(0), rowLuma = new Array(H).fill(0);
+  for (let y = 0; y < H; y += 1) { let c = 0, l = 0; for (let x = 0; x < W; x += 2) { const o = (y * W + x) * 4; if (d[o + 3] > 64) { c += 1; l += 0.2126 * d[o] + 0.7152 * d[o + 1] + 0.0722 * d[o + 2]; } } rowSolid[y] = c; rowLuma[y] = c ? l / c : 999; }
+  let sTop = H, sBottom = -1; for (let y = 0; y < H; y += 1) if (rowSolid[y] > W / 40) { if (y < sTop) sTop = y; sBottom = y; }
+  const pad = 6, y0 = Math.max(0, sTop - pad), y1 = Math.min(H - 1, sBottom + pad);
+  let grooveRow = sTop; for (let y = sTop; y <= sBottom; y += 1) if (rowLuma[y] < rowLuma[grooveRow]) grooveRow = y;
   let out = await sharp(d, { raw: { width: W, height: H, channels: 4 } }).extract({ left: 0, top: y0, width: W, height: y1 - y0 + 1 }).png().toBuffer();
-  console.log(`  ${which}: keyed, ${n} px of element, rows ${y0}-${y1} of ${H}`);
+  console.log(`  ${which}: keyed, ${n} px of element, solid rows ${sTop}-${sBottom} of ${H}, darkest row ${grooveRow}`);
+  let scale = 1;
   if (which === "kerb") {
     // tileable: crossfade the last 64 columns into the first 64
     const k = await sharp(out).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
@@ -148,26 +188,26 @@ async function key(src, which) {
       const t = x / F, a = (y * KW + x) * 4, b = (y * KW + KW - F + x) * 4;
       for (let c = 0; c < 4; c += 1) { const v = Math.round(kd[b + c] * (1 - t) + kd[a + c] * t); kd[a + c] = v; kd[b + c] = v; }
     }
-    // scale so the kerb's opaque height matches the reference's (the band the world already shows)
-    let rows = 0; for (let y = 0; y < KH; y += 1) { let any = false; for (let x = 0; x < KW; x += 8) if (kd[(y * KW + x) * 4 + 3] > 128) { any = true; break; } if (any) rows += 1; }
-    const refKerb = Math.round(refMeta.height * 0.45);   // the kerb with its groove is about 45% of the reference band's height
-    const scale = refKerb / Math.max(1, rows);
+    scale = KERB_PX / Math.max(1, sBottom - sTop + 1);
     out = await sharp(kd, { raw: { width: KW, height: KH, channels: 4 } }).resize(Math.round(KW * scale), Math.round(KH * scale), { kernel: "lanczos3" }).png().toBuffer();
-    console.log(`  kerb: ${rows} opaque rows → scaled x${scale.toFixed(3)} to match the world's kerb (${refKerb} px)`);
+    console.log(`  kerb: ${sBottom - sTop + 1} solid rows → scaled x${scale.toFixed(3)} to the world's kerb (${KERB_PX} px at L0)`);
   } else {
+    // panels: the group is about three panels tall; a panel is PANEL_PX
     const k = await sharp(out).metadata();
-    const scale = (refMeta.height * 0.6) / Math.max(1, k.height / 3);   // panels: the band is about three panels tall
+    scale = (3 * PANEL_PX) / Math.max(1, k.height);
     out = await sharp(out).resize(Math.round(k.width * scale), Math.round(k.height * scale), { kernel: "lanczos3" }).png().toBuffer();
-    console.log(`  node: scaled x${scale.toFixed(3)}`);
+    console.log(`  node: scaled x${scale.toFixed(3)} (a panel ~${PANEL_PX} px at L0)`);
   }
   const file = `${OUT}/${which}-element-r1.png`;
   fs.writeFileSync(file, out);
   const m = await sharp(file).metadata();
-  console.log(`  ${which}: ${file} ${m.width}x${m.height}`);
+  fs.writeFileSync(`${OUT}/${which}-element-r1.json`, JSON.stringify({ element: which, width: m.width, height: m.height, anchorRow: Math.round((grooveRow - y0 + 0.5) * scale), source: src, keyed: new Date().toISOString(), note: which === "kerb" ? "anchorRow = the groove (the darkest row): build-chain-layer.mjs puts it on the route" : "anchorRow = the darkest row; the panels' band is centred on the route" }, null, 1));
+  console.log(`  ${which}: ${file} ${m.width}x${m.height}, anchor row ${Math.round((grooveRow - y0 + 0.5) * scale)}`);
   return file;
 }
 
 for (const which of WHICH === "both" ? ["kerb", "node"] : [WHICH]) {
-  const src = await generate(which);
-  if (src) await key(src, which);
+  const src = REKEY ? `${WORK}/${which}/${which}-source.png` : await generate(which);
+  if (src && fs.existsSync(src)) await key(src, which);
+  else if (REKEY) console.log(`  ${which}: no delivered source to re-key`);
 }

@@ -45,6 +45,8 @@ const yAt = (x) => {
 if (!fs.existsSync(KERB)) throw new Error(`no kerb element at ${KERB} — generate it first (chain-element.mjs)`);
 const kerb = await sharp(KERB).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
 const KW = kerb.info.width, KH = kerb.info.height;
+const sidecar = (f) => { const j = f.replace(/\.png$/, ".json"); return fs.existsSync(j) ? JSON.parse(fs.readFileSync(j, "utf8")) : null; };
+const KA = sidecar(KERB)?.anchorRow ?? Math.round(KH / 2);   // the groove's row in the element: it sits on the route
 const node = fs.existsSync(NODE) ? await sharp(NODE).ensureAlpha().raw().toBuffer({ resolveWithObject: true }) : null;
 fs.mkdirSync(OUT, { recursive: true });
 const cols = [...new Set(W.map((w) => Math.floor(Math.min(w[0], W[W.length - 1][0] - 1e-6))))];
@@ -66,7 +68,7 @@ for (const col of cols) {
     const gx = col * CELL + x + phase, r = Math.floor(gx / KW);
     let kx = gx % KW; if (r % 2 === 1) kx = KW - 1 - kx;
     for (let ky = 0; ky < KH; ky += 1) {
-      const y = Math.round(cy - KH / 2 + ky);
+      const y = Math.round(cy - KA + ky);
       if (y < 0 || y >= CELL) continue;
       const ko = (ky * KW + kx) * 4, a = kerb.data[ko + 3];
       if (a === 0) continue;
@@ -99,7 +101,8 @@ for (const col of cols) {
   console.log(`  ${id}: ${n} px of chain, ${Math.round((yAt(col) - row) * 100)}% down the west edge to ${Math.round((yAt(col + 1) - row) * 100)}% down the east${(route.nodes || []).some((q) => q.cell[0] === col && q.cell[1] === row) ? ", a node" : ""} → ${file}`);
   if (PREVIEW) {
     const landPng = await sharp(landFile).extract({ left: lb, top: lb, width: CELL, height: CELL }).flatten({ background: { r: 31, g: 96, b: 108 } }).png().toBuffer();
-    previews.push(await sharp(landPng).composite([{ input: file, left: 0, top: 0 }]).resize(700, 700).png().toBuffer());
+    const full = await sharp(landPng).composite([{ input: file, left: 0, top: 0 }]).png().toBuffer();   // composite at full size, then resize
+    previews.push(await sharp(full).resize(700, 700).png().toBuffer());
   }
 }
 if (PREVIEW && previews.length) {
