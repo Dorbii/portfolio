@@ -1,107 +1,44 @@
 {
   "cell": "c6-1",
   "territory": "tanium",
-  "biome": "coast-cliff",
-  "status": "quarantine_candidate_failed_hard_constraints",
-  "generation": {
-    "filename": "c6-1-source.png",
-    "exactSizePx": [1254, 1254],
-    "format": "PNG RGB",
-    "sha256": "1C77F6C637DD5B8F804A16ABFF0B97A5B9A091F03D1C86F8F864568C6C9B3EA6",
-    "mode": "built-in ImageGen edit with edit-target as Image 1 and canon as reference-only Image 2",
-    "imageGenCallsUsed": 1,
-    "retryUsed": false,
-    "wholeCanvasSinglePass": true,
-    "rawOutputPreserved": true,
-    "resizedCroppedRetouchedOrTiled": false,
-    "secondReferenceAccepted": true,
-    "promptRecord": "c6-1-imagegen-prompt-used-r4.txt"
+  "generationSize": {
+    "width": 1254,
+    "height": 1254
   },
-  "shippedCanvasPx": [2560, 2560],
-  "groundExtentMetres": [97.6, 97.6],
-  "finalResolutionCmPerPx": 4.8,
   "lightingIsotropy": {
-    "metric": "36-bin land-luminance-gradient magnitude peak divided by the uniform-bin mean on the delivered source; water-mask pixels and adjacent pixels excluded, and gradients below 12 luminance units excluded",
-    "peakVsUniformOverLand": 1.634693,
-    "uniformReference": 1.0,
-    "directionalKeyFirstMoment": 0.000796,
-    "rockStrongEdgeFirstMoment": 0.066813,
-    "gradientSamples": 1131817,
-    "strictEqualValueOnAllFormSidesVisualCheck": false,
-    "visualCheck": "No cast-shadow field or explicit sun is visible, but pale column caps, darker cliff faces, and modelled panel faces violate the literal same-value-on-every-side rule; the aggregate metric cannot override that visual failure."
+    "peakVsUniformOverLand": 1.595554,
+    "directionalKeyFirstMoment": 0.00078,
+    "gradientSampleCount": 1132298,
+    "method": "Native-resolution luminance-gradient orientation histogram over non-water land; uniform is the 36-bin baseline."
   },
   "buildableVsSteepFraction": {
-    "basis": "Manual screen-space estimate over non-water land at native source resolution.",
-    "buildable": 0.68,
-    "steep": 0.14,
-    "otherBrokenRockTalusScrubOrVegetation": 0.18,
-    "wholeCellBuildableEstimate": 0.555482,
-    "wholeCellSteepEstimate": 0.114364,
-    "method": "The broad coherent cliff-top bench and western level shelf count as buildable; exposed sea-cliff and stack faces count as steep; talus, broken rims, rune cuts, panels, scrub, and conifer footprints make up the remainder.",
-    "limitation": "Visual estimate rather than elevation-derived slope or world-space surface area; approximate uncertainty is plus or minus 0.08 per land-relative fraction."
+    "basis": "Visual area estimate over non-water land, separating level bench and shelf tops from cliff faces, talus, and broken gullies.",
+    "buildable": 0.78,
+    "steep": 0.22
   },
-  "waterFootprintFraction": 0.18311419,
+  "waterFootprintFraction": 0.16406892,
+  "waterMask": {
+    "opaqueWhitePixels": 258001,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedComponents8": 1,
+    "intentionalDryTerrainIslandPixels": 9203,
+    "note": "Connected east-sea classification includes surf, wash, ripples, reflections, and the southern inflow; enclosed transparent pixels are dry stacks and dry built neighbour pixels, not omitted water."
+  },
   "crown": {
     "medianMetres": 3.332,
     "medianPx": 69.41,
-    "sampleCount": 25,
-    "method": "Full-frame manual outer-foliage-width census at native 1254 px of all 25 visually distinguishable conifer crowns, including saplings, overlapping crowns, and north- and south-clipped arrivals; median source width 34 px scaled by 2560/1254 and converted at 0.048 m per final pixel.",
+    "sampleCount": 35,
+    "method": "Full-frame manual outer-foliage-width census at native 1254 px of all visible crowns, including every sapling, overlapping north-west-gully crown, isolated crown, and clipped edge crown; median scaled to 2560 px.",
     "excludedElements": []
   },
-  "waterMask": {
-    "filename": "c6-1-water-source.png",
-    "exactSizePx": [1254, 1254],
-    "format": "PNG RGBA",
-    "sha256": "3363C8C5268420A619A575C2152658F0E8F4C08D9C4ADCAB978879056167A754",
-    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
-    "opaqueWaterPixels": 287950,
-    "transparentPixels": 1284566,
-    "intermediateAlphaPixels": 0,
-    "nonWhiteOpaquePixels": 0,
-    "connectedWaterComponents8Connected": 1,
-    "smallClassifierHolePixelsFilled": 2735,
-    "intentionalDrySeaStackIslandPixels": 9296,
-    "edgeWaterPixels": {
-      "north": 0,
-      "east": 901,
-      "south": 417,
-      "west": 0
-    },
-    "derivation": "Flooded the edge-connected teal source surface from the east edge, expanded through adjacent wet neutral, pale surf, wash, ripple, and reflection pixels, and filled enclosed classifier gaps of at most 64 pixels.",
-    "interiorTransparentTerrainNote": "The remaining enclosed transparent island is visibly dry sea-stack rock and talus, not omitted water texture; the rune line through the sea is also deliberately unmasked so no water occupies it."
+  "visualReview": {
+    "authority": "Owner review required; mechanical checks do not establish visual acceptance.",
+    "knownRisks": [
+      "The edit introduced scattered conifers beyond the sheltered western gullies.",
+      "Several long east-cliff column groups remain more regular than the weathered-irregular coast rule calls for.",
+      "The existing built span visible at the east edge came from the edit target; the generated fill did not deliberately author rail infrastructure."
+    ]
   },
-  "constraintChecks": {
-    "squareAtLeast1254Px": true,
-    "singleWholeCanvasEdit": true,
-    "secondReferenceAttached": true,
-    "rawGenerationUntouched": true,
-    "terrainOnly": true,
-    "highOblique2_5D": true,
-    "noStructuresFiguresTrackOrPurpleGuide": true,
-    "waterMaskSameDimensionsBinaryWhiteTransparent": true,
-    "waterMaskCoversSurfWashRippleHighlightsAndReflections": true,
-    "crownCensusIncludesAllFoundCrowns": true,
-    "crownMedianInsideAcceptedTerritoryBand": true,
-    "sixToTenPanelsBesideGroove": true,
-    "panelsSetBackFromCellEdges": true,
-    "noWaterOnRuneLine": true,
-    "strictEqualValueOnAllFormSides": false,
-    "runeGuidePositionPreservedEndToEnd": false,
-    "runeReadsAsRecessedSlotRatherThanRaisedKerb": false,
-    "southWatercourseHandoverVisiblyDistinctAndVerified": false,
-    "weatheredIrregularColumnsWithoutPalisadeRhythm": false
-  },
-  "refusalReasons": [
-    "The rune line does not preserve the full purple guide trajectory: it begins near the supplied western position but straightens substantially and exits the eastern edge above the guide's supplied endpoint.",
-    "The rune feature reads mainly as a raised, kerbed strip across land and water rather than a slot cut down into bedrock with two visible cut walls and a recessed floor.",
-    "Repeated pale column caps over darker vertical faces, plus modelled panel faces, violate the literal neutral-lighting rule even though no cast shadows or explicit sun are visible.",
-    "Several long cliff sections retain regular upright, similarly capped column rhythms rather than the required uneven, split, leaning, broken ordinary coast.",
-    "The south-edge water handover merges into a broad coastal surface; the required arriving watercourse is not visually distinct enough to verify its width or exact seam meeting from the authored result."
-  ],
-  "openRisks": [
-    "The source is square, so the framing-only retry exception does not authorize another ImageGen call; the visual defects cannot be corrected within this task's one-call contract.",
-    "The water-mask overlay was inspected at source resolution and covers the connected sea, foam, wash, ripples, and reflections, but no shipped-canvas bake was run because this task is quarantine-only.",
-    "Buildable and steep fractions and crown widths are image measurements rather than surveyed geometry.",
-    "Exact seam continuity, coastline naturalism, and visual quality remain director and owner judgments; this report does not claim visual acceptance."
-  ]
+  "sourceSha256": "C3B6A2F52456695B964F0310AD0B65D048FDB393B1347B9682010F7882F9E00E"
 }

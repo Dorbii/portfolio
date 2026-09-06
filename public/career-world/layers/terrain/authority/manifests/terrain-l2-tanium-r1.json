@@ -1246,31 +1246,38 @@
    }
   },
   "c6-1": {
-   "authoredAt": "2026-09-06T01:58:17.579Z",
-   "describe": "THE CHAIN'S SEAWARD END — the east coast, where the rune chain leaves the\nworld. Wild coast: the EAST edge is sea.\n\nA cliff-top bench of thin grass and bare rock runs the height of the cell,\n30-50 m wide, quiet and plain: nothing on it competes with the chain. Below\nit, weathered columnar sea-cliffs 25-40 m tall — columns of uneven height and\nwidth, tops broken at different levels, split and leani",
+   "authoredAt": "2026-09-06T17:40:03.794Z",
+   "ownerOverride": {
+    "at": "2026-09-06T17:40:03.794Z",
+    "reason": "owner 2026-09-06 17:25, on the served world: 'the center tiles that had the old attempt at the chain still need regen cause now it just has conflicting chains with the overlay' — the plain regen goes in; the chain is the layer",
+    "failedGates": [
+     "palette conformance veg worst dBG 0.336 dLuma 7.5 over 2 seam(s); tone worst dLuma 13.5 on all land over 4 seam(s)"
+    ]
+   },
+   "describe": "**Perspective.** This is the island's east shore seen from the south-south-east:\nthe cliff faces that look south, into the bays, show their columns; faces that\nlook north are hidden behind their own rim. Draw it that way.\n\nDark conifers only in the gullies at the west edge; no meadow, no flowers.\nSurf and wash at the cliff foot and around the stacks. Carry land to the\nNORTH, SOUTH and WEST; the EA",
    "sourcePx": 1254,
    "gates": [
     {
      "name": "key-light asymmetry",
-     "value": 0.001,
+     "value": 0.0006,
      "pass": true,
      "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004; report-only under 5% land (18j, 2026-09-05: a 98%-sea shore cell read 0.0116 on noise)"
     },
     {
      "name": "gradient ratio",
-     "value": "1.526 (reported)",
+     "value": "1.52 (reported)",
      "pass": true,
      "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
     },
     {
      "name": "rock lighting",
-     "value": 0.138,
+     "value": 0.139,
      "pass": true,
      "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.14; limit 0.16 on the owner's eye (2026-09-02, the dark-forest gorge at 0.153)"
     },
     {
      "name": "land coverage",
-     "value": "81.1%",
+     "value": "83.2%",
      "pass": true
     },
     {
@@ -1281,19 +1288,19 @@
     },
     {
      "name": "mask completion",
-     "value": "+124 px grown, 12 px holes filled (reported)",
+     "value": "+79 px grown, 3 px holes filled (reported)",
      "pass": true,
      "note": "the delivered mask grown into contiguous painted water within 48 px and speckle holes <=64 px filled before the cut (owner 2026-09-02); dry paint stops the growth, so a polyline mask still fails the rings"
     },
     {
      "name": "water fringe",
-     "value": "0.04%",
+     "value": "0%",
      "pass": true,
      "note": "blue-leaning opaque pixels in the 6px ring outside water zones; threshold calibrated on the first two accepted cells (0.0%, 0.22%)"
     },
     {
      "name": "water fringe (48px)",
-     "value": "0.07%",
+     "value": "0.01%",
      "pass": true,
      "note": "same classifier within 48px of water zones; catches painted water a polyline mask left beside the cut (accepted 0.18% / 0.01%, rejected candidate 6.27%)"
     },
@@ -1305,19 +1312,19 @@
     },
     {
      "name": "chain continuity",
-     "value": "west: 3 px off the floor, east: no groove found beside the edge (reported)",
+     "value": "no chain in this cell (reported)",
      "pass": true,
      "note": "the groove's height at each edge — the purple guide where it survived, else the darkest 0.3-3 m run in the 96 px beside the edge — within 48 px of the floor drawn from the neighbours' grooves (18n, owner 2026-09-06: 'use that to help with the matching')"
     },
     {
      "name": "palette conformance",
-     "value": "veg worst dBG 0.194 dLuma 8.8 over 3 seam(s); tone worst dLuma 12.5 on all land over 4 seam(s)",
-     "pass": true,
+     "value": "veg worst dBG 0.336 dLuma 7.5 over 2 seam(s); tone worst dLuma 13.5 on all land over 4 seam(s)",
+     "pass": false,
      "note": "vegetation medians of the bands beside each authored seam; calibrated on the owner's eye: fine 0.109 and 0.189, clash 0.218 and 0.294; thresholds 0.20/13"
     },
     {
      "name": "crown scale",
-     "value": "3.332 m over 25 crowns (accepted range 1.7-5.2 m)",
+     "value": "3.332 m over 35 crowns (accepted range 1.7-5.2 m)",
      "pass": true,
      "note": "the worker's own median crown from c6-1-report.json, against the 1.7-5.2 m range the accepted cells measured (NOT the plan's written 4-7 m — see CROWN_MIN_M); crown.excludedElements must be empty, so an out-of-scale element cannot be measured around"
     }
@@ -1331,11 +1338,11 @@
     "stream"
    ],
    "bridged": [
-    "c6-2 edge: rerouted my crossing 2269 -> 2205 (64px)"
+    "c6-2 edge: rerouted my crossing 2266 -> 2205 (61px)"
    ],
    "maskCompletion": {
-    "grownPx": 124,
-    "holePx": 12
+    "grownPx": 79,
+    "holePx": 3
    },
    "biome": "coast-cliff",
    "source": "art-source/career-world/l2-land/tanium/c6-1",
@@ -1349,8 +1356,7 @@
      4,
      1,
      1
-    ],
-    "restitchedAt": "2026-09-06T16:58:44.046Z"
+    ]
    }
   },
   "c0-1": {
