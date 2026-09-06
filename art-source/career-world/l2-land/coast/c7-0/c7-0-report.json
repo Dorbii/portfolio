@@ -1,0 +1,44 @@
+{
+  "status": "failed",
+  "quarantineOnly": true,
+  "generationMode": "single built-in image edit call",
+  "generationSizePx": [1254, 1254],
+  "sourceSha256": "B100207B3CB9D8E2D93CBC1B20D668371CB57197155943EF4099892B85499FE1",
+  "lightingIsotropy": {
+    "peakVsUniformOverLand": 1.53544,
+    "uniformReference": 1.0,
+    "directionalKeyFirstMoment": 0.0054,
+    "gradientSamples": 424997,
+    "method": "16-bin land-interior luma-gradient histogram; coastline pixels excluded by a two-pixel water clearance."
+  },
+  "terrainFractions": {
+    "buildableOfLand": 0.38,
+    "steepOfLand": 0.62,
+    "method": "Manual area estimate separating broad bench tops from cliff faces, talus, and broken shoreline ground."
+  },
+  "waterFootprintFraction": 0.71604,
+  "waterMask": {
+    "dimensionsPx": [1254, 1254],
+    "waterPixels": 1125984,
+    "connectedComponents": 1,
+    "alphaValues": [0, 255],
+    "opaqueRgb": [255, 255, 255],
+    "method": "Border-connected blue-teal classification on the raw source, including pale water highlights and one-pixel enclosed highlight closure; visually checked with the diagnostic overlay."
+  },
+  "crown": {
+    "medianMetres": 3.234,
+    "medianPx": 67.369,
+    "sampleCount": 8,
+    "method": "Manual native-source bounding-box census of all discernible conifer crowns, including saplings and edge-clipped crowns, then scaled by 2560/1254 and converted at 0.048 m/px.",
+    "excludedElements": []
+  },
+  "failureReasons": [
+    "The raw edit repainted fixed western context instead of limiting changes to the grey authoring area.",
+    "The raw source closes required western open-water intervals: the kept west edge at x=125 contains only 145/1254 water pixels (0.11563), far below the specified mixed edge with 49% sea.",
+    "The raw source therefore repeats the straight-cut/walled-inlet defect class and is not promotable even though the source-traced water mask itself is internally consistent."
+  ],
+  "verificationLimits": [
+    "Visual quality and neighbour registration were not accepted; owner/director review remains authoritative.",
+    "The buildable/steep split is an area estimate rather than a semantic terrain classifier."
+  ]
+}
