@@ -772,6 +772,8 @@ fs.mkdirSync(cellDir, { recursive: true });
 // which pixels are binding (the stitch preserves them regardless of the draw)
 let seaPrefilled = 0;   // px of the island's sea painted on into the target (18i)
 let chainPrefilled = 0; // px of the rune chain's floor drawn into the target (18m)
+let chainEnds = null;   // the floor's ends as fractions down the west/east edge (18n: the chain gate)
+const chainSeen = { west: null, east: null };   // where the purple guide survived at each edge (18n)
 if (authoredNeighbours.length) {
   const win = windowOf(col, row, gridW, gridH);
   const ctxDir = path.join(cellDir, "context");
@@ -1037,10 +1039,11 @@ if (authoredNeighbours.length) {
           const dIn = wIn != null ? wIn + row - yIn : 0, dOut = wOut != null ? wOut + row - yOut : 0;
           if (wIn != null) yIn = wIn + row;
           if (wOut != null) yOut = wOut + row;
+          chainEnds = { west: yIn - row, east: yOut - row };
           const shift = (wx) => dIn + (dOut - dIn) * Math.max(0, Math.min(1, wx - col));   // the canon shape, shifted linearly between the two ends
           const isGreyPx = (o) => target[o] === EDIT_GREY[0] && target[o + 1] === EDIT_GREY[1] && target[o + 2] === EDIT_GREY[2];
           const HALF = Math.round(0.6 / (97.6 / CELL_PX));   // half of a 1.2 m floor
-          const FLOOR = [38, 36, 33];                          // the slot's floor in shade
+          const FLOOR = [200, 0, 255];                         // the GUIDE LAYER: bright purple, replaced by the floor after generation (18n)
           const toX = (wx) => BLEED + (wx - col) * CELL_PX, toY = (wy) => BLEED + (wy - row) * CELL_PX;
           // the route through this cell's window, the bleed included
           const pts = [];
@@ -1065,7 +1068,7 @@ if (authoredNeighbours.length) {
               }
             }
           }
-          if (chainPrefilled) console.log(`  chain pre-fill ${chainPrefilled} px: the groove's floor drawn along the route, ${Math.round((yIn - row) * 100)}% down the west edge to ${Math.round((yOut - row) * 100)}% down the east`);
+          if (chainPrefilled) console.log(`  chain guide   ${chainPrefilled} px: the groove's floor drawn in bright purple, ${Math.round((yIn - row) * 100)}% down the west edge (${wIn != null ? `${west.id}'s groove` : "the canon"}) to ${Math.round((yOut - row) * 100)}% down the east (${wOut != null ? `${east.id}'s groove` : "the canon"})`);
         }
       }
     }
@@ -1265,11 +1268,14 @@ grey wherever this cell is still unpainted.${seaPrefilled ? ` THE SEA ALREADY PA
 most of this canvas is the island's own sea, continued into this cell: it is
 FINAL. Do not paint land, rock, beach or stacks on it. Paint ONLY the flat
 grey strips — they are where the island's ground continues into this cell and
-ends at its shore — and keep every painted sea pixel as sea.` : ""}${chainPrefilled ? ` THE RUNE CHAIN'S FLOOR is
-already drawn: the thin dark line crossing the canvas from edge to edge is the
-groove's floor, FINAL and exact. Cut the slot's two walls and its rounded,
-paler rims along that line, on both sides of it; never move it, bend it, break
-it, widen it into a path, or paint ground, water or trees over it.` : ""} \`${canonPath}\` is the
+ends at its shore — and keep every painted sea pixel as sea.` : ""}${chainPrefilled ? ` THE BRIGHT PURPLE LINE
+crossing the canvas from edge to edge is a GUIDE LAYER: it marks the rune
+chain's floor, and its POSITION is final and exact. Cut the groove along it —
+the slot's floor exactly under the purple, its two walls and rounded, paler
+rims on either side; never move it, bend it, break it, widen it into a path,
+or paint ground, water or trees over it. The purple itself is not paint:
+leave none of it in your output. Whatever purple remains will be replaced by
+the groove's dark floor, so keep the line where it is.` : ""} \`${canonPath}\` is the
 style canon of this world. Load both with the built-in \`view_image\` tool,
 then make ONE \`image_gen\` call in EDIT mode with BOTH images attached — the
 edit target as the image to edit, the canon as a second input that is a
@@ -1491,6 +1497,24 @@ exit 1
     sourcePx = sm.width;
     const concept = await sharp(srcFile).ensureAlpha()
       .resize(GEN_PX, GEN_PX, { kernel: "lanczos3" }).raw().toBuffer();
+    // THE GUIDE LAYER COMES OFF (18n): where the bright purple survived beside
+    // the west/east kept edge its height is read for the chain gate; then every
+    // purple pixel becomes the groove's floor — the final render has no purple
+    if (chainPrefilled) {
+      const isPurple = (o) => concept[o] > 120 && concept[o + 2] > 180 && concept[o + 1] < 100 && concept[o + 2] - concept[o + 1] > 120;
+      const acc = { west: [0, 0], east: [0, 0] };
+      let removed = 0;
+      for (let y = 0; y < GEN_PX; y += 1) for (let x = 0; x < GEN_PX; x += 1) {
+        const o = (y * GEN_PX + x) * 4;
+        if (!isPurple(o)) continue;
+        if (x >= BLEED && x < BLEED + 100) { acc.west[0] += y; acc.west[1] += 1; }
+        if (x >= BLEED + CELL_PX - 100 && x < BLEED + CELL_PX) { acc.east[0] += y; acc.east[1] += 1; }
+        concept[o] = 38; concept[o + 1] = 36; concept[o + 2] = 33;
+        removed += 1;
+      }
+      for (const s of ["west", "east"]) if (acc[s][1] >= 20) chainSeen[s] = (acc[s][0] / acc[s][1] - BLEED) / CELL_PX;
+      console.log(`  guide layer   ${removed} purple px replaced by the groove's floor; the guide survived at ${["west", "east"].filter((s) => chainSeen[s] != null).join(" and ") || "neither"} edge`);
+    }
     const maskUp = await sharp(wsrcFile).ensureAlpha()
       .resize(GEN_PX, GEN_PX, { kernel: "lanczos3" }).raw().toBuffer();
     // the worker's mask is intent, not geometry: binarize so a soft or
@@ -2064,6 +2088,29 @@ exit 1
     return { value: `${c.medianMetres} m over ${c.sampleCount ?? "?"} crowns (accepted range ${CROWN_MIN_M}-${CROWN_MAX_M} m)`, pass: inBand };
   })();
 
+  // the candidate's own groove beside an edge (18n): the darkest 0.3-3 m run of
+  // rows in the 96 px inside the kept edge, within 12% of the drawn floor
+  const chainDarkAt = (side, frac) => {
+    const xs = side === "west" ? [BLEED + 4, BLEED + 100] : [BLEED + CELL_PX - 100, BLEED + CELL_PX - 4];
+    const y0 = Math.round(BLEED + (frac - 0.12) * CELL_PX), y1 = Math.round(BLEED + (frac + 0.12) * CELL_PX);
+    const rows = []; let landRows = 0;
+    for (let y = y0; y < y1; y += 1) {
+      const v = [];
+      for (let x = xs[0]; x < xs[1]; x += 2) { const o = (y * W + x) * 4; if (data[o + 3] < 200) continue; v.push(0.2126 * data[o] + 0.7152 * data[o + 1] + 0.0722 * data[o + 2]); }
+      v.sort((p, q) => p - q); if (v.length) landRows += 1; rows.push(v.length ? v[v.length >> 1] : null);
+    }
+    if (landRows < rows.length / 2) return null;
+    const med = rows.filter((r) => r != null).sort((p, q) => p - q)[landRows >> 1];
+    const runs = []; let s = -1;
+    for (let i = 0; i <= rows.length; i += 1) {
+      const dark = i < rows.length && rows[i] != null && rows[i] < med - 18;
+      if (dark && s < 0) s = i;
+      if (!dark && s >= 0) { const tall = (i - s) * (97.6 / CELL_PX); if (tall >= 0.3 && tall <= 3) { let mn = 999; for (let k = s; k < i; k += 1) mn = Math.min(mn, rows[k]); runs.push({ c: (y0 + (s + i) / 2 - BLEED) / CELL_PX, depth: med - mn }); } s = -1; }
+    }
+    runs.sort((p, q) => q.depth - p.depth);
+    return runs.length && runs[0].depth >= 25 ? runs[0].c : null;
+  };
+
   const gates = [
     { name: "key-light asymmetry",
       value: opaque < 0.05 * W * H ? `${keyLight.toFixed(4)} (${(100 * opaque / (W * H)).toFixed(1)}% land, report-only)` : +keyLight.toFixed(4),
@@ -2088,6 +2135,15 @@ exit 1
         ? `${contViolations.length} unmet crossing(s)` : `ok (${contChecked} crossings checked${bridgedInfo.length ? `, ${bridgedInfo.length} bridged` : ""})`,
       pass: contViolations.length === 0,
       note: "every watercourse crossing a shared authored edge must be met by the neighbour within 48px; 48..150px gaps are bridged in the footprint" },
+    { name: "chain continuity", value: (() => {
+        if (!chainPrefilled || !chainEnds) return "no chain in this cell (reported)";
+        return ["west", "east"].map((s) => {
+          const at = chainSeen[s] != null ? chainSeen[s] : chainDarkAt(s, chainEnds[s]);
+          return at == null ? `${s}: no groove found beside the edge` : `${s}: ${Math.round(Math.abs(at - chainEnds[s]) * CELL_PX)} px off the floor${chainSeen[s] != null ? " (the guide)" : ""}`;
+        }).join(", ");
+      })(),
+      pass: !chainPrefilled || !chainEnds || ["west", "east"].every((s) => { const at = chainSeen[s] != null ? chainSeen[s] : chainDarkAt(s, chainEnds[s]); return at != null && Math.abs(at - chainEnds[s]) * CELL_PX <= 48; }),
+      note: "the groove's height at each edge — the purple guide where it survived, else the darkest 0.3-3 m run in the 96 px beside the edge — within 48 px of the floor drawn from the neighbours' grooves (18n, owner 2026-09-06: 'use that to help with the matching')" },
     { name: "palette conformance", value: (palSeams || toneSeams)
         ? `${palSeams ? `veg worst dBG ${palWorst.bg.toFixed(3)} dLuma ${palWorst.luma.toFixed(1)} over ${palSeams} seam(s); ` : "no vegetated seams; "}tone worst dLuma ${toneWorst.toFixed(1)} on all land over ${toneSeams} seam(s)`
         : "no authored seams", pass: palViolations.length === 0,

@@ -1,8 +1,8 @@
 {
- "solidifiedAt": "2026-09-05T21:35:57.940Z",
+ "solidifiedAt": "2026-09-06T01:05:07.930Z",
  "note": "Changing these files requires owner approval BEFORE the change. See AGENTS.md.",
  "hashes": {
-  "cell.mjs": "616ef7059d95f3cf",
+  "cell.mjs": "95766320c7591784",
   "plan-territory.mjs": "e8d86a90b2e32796",
   "AGENTS.md": "a1ab4eaec1d4c6ac"
  },
@@ -498,6 +498,15 @@
    "reason": "owner 2026-09-05 21:40 UTC, on the 18m preview (T c4-1's edit target with the groove's floor drawn from c3-1's groove to c5-1's): '18m is fine the line sjust need to connect' — lock 18m applied: a cell the rune chain crosses carries the groove's floor in its edit target, its ends read off the authored neighbours' own grooves, the canon between them shifted; FINAL and exact in the packet",
    "hashes": {
     "cell.mjs": "616ef7059d95f3cf",
+    "plan-territory.mjs": "e8d86a90b2e32796",
+    "AGENTS.md": "a1ab4eaec1d4c6ac"
+   }
+  },
+  {
+   "at": "2026-09-06T01:05:07.930Z",
+   "reason": "owner 2026-09-06 01:00 UTC: 'For the chain add a layer over it thats bright purple. Then use that to hellp with the matching and remove that layer for final render' — lock 18n applied (amends 18m): the chain's floor is drawn in bright purple as a guide layer; where the purple survives beside an edge its height is read; every purple pixel is replaced by the groove's floor before derivation and gating; a chain-continuity gate holds each edge within 48 px of the floor drawn from the neighbours' grooves",
+   "hashes": {
+    "cell.mjs": "95766320c7591784",
     "plan-territory.mjs": "e8d86a90b2e32796",
     "AGENTS.md": "a1ab4eaec1d4c6ac"
    }
