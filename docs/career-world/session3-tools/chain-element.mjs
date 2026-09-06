@@ -45,6 +45,48 @@ if (!fs.existsSync(REF)) {
 const refMeta = await sharp(REF).metadata();
 
 const packets = {
+  groove: `# The rune chain's GROOVE element — one generation, magenta key
+
+You are the worker of an image pipeline. Deliver files into
+\`${ROOT}/${WORK}/kerb${WORKTAG}/\` (create it). Work only there.
+
+Load \`${ROOT}/${CANON}\` with the built-in \`view_image\` tool: the style canon of
+this world (brush, palette family, the high-oblique view, the FLAT lighting).
+The element you draw is the RUNE CHAIN as the canon describes it — owner's
+words: "a slot cut DOWN into the bedrock, two cut walls and a floor, dark
+inside because depth shades it, edges rounded, lichen in the joints, scrub
+over the lip, rubble on the floor. It never wanders. NOT a path, road, kerb,
+wall or ridge: the ground is REMOVED along it."
+
+Then make ONE \`image_gen\` call in GENERATE mode (no image to edit) for a
+SQUARE image, and deliver its raw output untouched as \`kerb-source.png\`.
+Your prompt says, in words:
+
+- The whole image is a FLAT, PURE MAGENTA background (red 255, green 0, blue 255)
+  with exactly one thing on it: a single horizontal GROOVE running from the
+  LEFT EDGE to the RIGHT EDGE across the vertical middle of the image, seen
+  from the canon's high-oblique view (from above and a little in front). It is
+  a slot cut down into pale weathered basalt: the FAR cut wall shows as a thin
+  band of pale rock face above the dark floor, the floor is in shadow (dark,
+  rubble and dust on it), the NEAR lip is a rounded edge of rock with lichen,
+  tufts of scrub and a few loose stones hanging over it. Ancient, worn, the
+  lips uneven and chipped, nothing straight-edged at the pixel level, but the
+  line itself holds dead straight. Nothing raised: no kerb, no wall, no stones
+  standing above the ground line.
+- Its total height, lips included, is about one twentieth of the image's
+  height; the dark floor is the widest part.
+- The strip must TILE: where it leaves the right edge it must match exactly
+  where it enters the left edge, so it can be repeated end to end without a
+  visible join.
+- Flat ambient light only: no sun, no cast shadow beyond the floor's own
+  depth shading, no lit side. No ground, no grass beyond the tufts on the
+  lip, nothing else anywhere — magenta everywhere the groove is not, with
+  hard edges and no magenta halo.
+- Nothing carved on it (no panels, no runes, no light): the plain slot.
+
+Then write \`${ROOT}/${WORK}/kerb${WORKTAG}/report.json\`:
+\`{ "element": "groove", "file": "kerb-source.png", "size": [w, h], "calls": 1, "notes": "..." }\`.
+Do not resize, crop, recolour or key anything yourself. One call only.`,
   kerb: `# The rune chain's KERB element — one generation, magenta key
 
 You are the worker of an image pipeline. Deliver files into
@@ -121,7 +163,7 @@ async function generate(which) {
   const dir = `${WORK}/${which}${WORKTAG}`;
   fs.mkdirSync(dir, { recursive: true });
   const packet = `${dir}/packet.md`;
-  fs.writeFileSync(packet, packets[which]);
+  fs.writeFileSync(packet, which === "kerb" && process.env.KERB_VARIANT === "groove" ? packets.groove : packets[which]);
   const runner = `${dir}/run.sh`;
   fs.writeFileSync(runner, `#!/usr/bin/env bash
 set -uo pipefail

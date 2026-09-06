@@ -64,23 +64,72 @@ for (const col of cols) {
   const land = await sharp(landFile).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const LW = land.info.width, lb = Math.round((LW - CELL) / 2);
   const out = Buffer.alloc(CELL * CELL * 4);
+  // BEDDING (owner 2026-09-06: "that looks stickered on"): the element is cut
+  // INTO this ground, not laid on it — per column the land's own colour just
+  // outside the slot is sampled, the element's pixels take that colour's hue
+  // and saturation while keeping their own light and dark (the floor stays
+  // dark, the far wall pale), the outer rows of the element are feathered so
+  // the ground's texture runs to the lip, a soft occlusion darkens the ground
+  // beside the cut, and the line jitters a pixel or two so the repeat is lost.
+  const FEATHER = 5, AO = 10, AO_STRENGTH = 0.45;
+  const lumaOf = (r, g, b) => 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  const landPx = (x, y) => { const lo = ((lb + y) * LW + lb + x) * 4; return [land.data[lo], land.data[lo + 1], land.data[lo + 2], land.data[lo + 3]]; };
+  let seed = (col * 7919 + row * 104729 + 17) >>> 0;
+  const rnd = () => { seed ^= seed << 13; seed >>>= 0; seed ^= seed >>> 17; seed ^= seed << 5; seed >>>= 0; return seed / 4294967296; };
+  const jitterRaw = Array.from({ length: CELL }, () => rnd() - 0.5), jitter = new Array(CELL).fill(0);
+  for (let x = 0; x < CELL; x += 1) { let s = 0, c = 0; for (let j = -24; j <= 24; j += 1) { const q = x + j; if (q >= 0 && q < CELL) { s += jitterRaw[q]; c += 1; } } jitter[x] = (s / c) * 12; }   // sd ~1.3 px
   // the kerb strip, per column: repeat index r = floor(worldX / KW); odd repeats flipped; per-cell phase
   const phase = (col * 977) % KW;
   for (let x = 0; x < CELL; x += 1) {
     const wx = col + x / CELL;                       // grid units
     const wy = yAt(wx); if (wy == null) continue;
-    const cy = (wy - row) * CELL;                    // the groove's centre in cell px
+    const cy = (wy - row) * CELL + jitter[x];        // the groove's centre in cell px
     const gx = col * CELL + x + phase, r = Math.floor(gx / KW);
     let kx = gx % KW; if (r % 2 === 1) kx = KW - 1 - kx;
+    // the ground's colour beside the slot in this column (a window above and below the element)
+    const yTop = Math.round(cy - KA), yBot = yTop + KH;
+    let gr = 0, gg = 0, gb = 0, gn = 0;
+    for (let y = yTop - 24; y < yBot + 24; y += 2) {
+      if (y < 0 || y >= CELL || (y >= yTop && y < yBot)) continue;
+      const p = landPx(x, y); if (p[3] < 128) continue;
+      gr += p[0]; gg += p[1]; gb += p[2]; gn += 1;
+    }
+    const ground = gn ? [gr / gn, gg / gn, gb / gn] : null, groundL = ground ? Math.max(1, lumaOf(...ground)) : 1;
     for (let ky = 0; ky < KH; ky += 1) {
-      const y = Math.round(cy - KA + ky);
+      const y = yTop + ky;
       if (y < 0 || y >= CELL) continue;
-      const ko = (ky * KW + kx) * 4, a = kerb.data[ko + 3];
+      const ko = (ky * KW + kx) * 4, a0 = kerb.data[ko + 3];
+      if (a0 === 0) continue;
+      const lp = landPx(x, y);
+      if (lp[3] < 128) continue;                     // no chain over water or past the shore
+      // feather the element's outer rows so the ground's texture runs to the lip
+      const edge = Math.min(ky + 1, KH - ky), fade = edge <= FEATHER ? edge / (FEATHER + 1) : 1;
+      const a = Math.round(a0 * fade);
       if (a === 0) continue;
-      const lo = ((lb + y) * LW + lb + x) * 4;
-      if (land.data[lo + 3] < 128) continue;         // no kerb over water or past the shore
+      // the element's light and dark, leaning toward the ground's own hue: the
+      // lips (the element's outer rows) are this ground and take it strongly,
+      // the cut walls and the floor are rock and keep most of their own colour
+      let er = kerb.data[ko], eg = kerb.data[ko + 1], eb = kerb.data[ko + 2];
+      if (ground) {
+        const el = lumaOf(er, eg, eb), k = el / groundL;
+        const tr = Math.min(255, ground[0] * k), tg = Math.min(255, ground[1] * k), tb = Math.min(255, ground[2] * k);
+        const depthIn = Math.min(ky, KH - 1 - ky) / (KH / 2);            // 0 at the lips, 1 at the centre
+        const t = 0.7 - 0.55 * Math.min(1, depthIn * 2);                 // 0.7 at the lip → 0.15 by a quarter of the way in
+        er = Math.round(er * (1 - t) + tr * t); eg = Math.round(eg * (1 - t) + tg * t); eb = Math.round(eb * (1 - t) + tb * t);
+      }
       const o = (y * CELL + x) * 4;
-      out[o] = kerb.data[ko]; out[o + 1] = kerb.data[ko + 1]; out[o + 2] = kerb.data[ko + 2]; out[o + 3] = a;
+      out[o] = er; out[o + 1] = eg; out[o + 2] = eb; out[o + 3] = a;
+    }
+    // the occlusion beside the cut: dark, fading over AO px above the top lip and below the bottom one
+    for (let d = 1; d <= AO; d += 1) {
+      const w = AO_STRENGTH * (1 - d / (AO + 1));
+      for (const y of [yTop - d, yBot - 1 + d]) {
+        if (y < 0 || y >= CELL) continue;
+        const lp = landPx(x, y); if (lp[3] < 128) continue;
+        const o = (y * CELL + x) * 4;
+        if (out[o + 3] > 0) continue;               // never over the element itself
+        out[o] = 12; out[o + 1] = 10; out[o + 2] = 8; out[o + 3] = Math.round(255 * w);
+      }
     }
   }
   // the nodes: the panel element centred on the node, over the kerb, masked by land
