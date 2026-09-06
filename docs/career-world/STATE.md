@@ -4,7 +4,33 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-06 16:40 UTC, LATEST (current):** **THE CHAIN IS THE CARVED SLOT,
+**2026-09-06 17:15 UTC, LATEST (current):** **BRANCHES ON THE CHAIN LAYER;
+c1-2 AND c7-8 RE-CUTS QUEUED BEHIND THE REGEN.** Owner 16:50: *"we need some
+branches from the chain to portray how endpoints cluster to a leader and
+feed back to the chain … not in this tile [c3-1] but since its an overlay I
+figured branches are now easy to add"*; 17:00: *"is the coast now done so I
+can have another ocean agent polish the water up?"* → told yes (22 of 27
+authored, audit clean, four bay cells are previewed candidates, the water
+fields re-derive on every serve); 17:05: c1-2's spike *"was this spot fixed
+and just not mounted?"* and c7-8's straight column wall on the c6-8 seam +
+rubble shore *"same for these 2 spots"* → c1-2's re-cut was stitched at
+15:28Z but NOT served (the serve is at chain6's end); the spike is the
+model's own headland, kept whole by the limit; c7-8's wall stood because
+c6-8 was a candidate when c7-8 was conformed. **conform-band --open <m>**:
+a morphological opening (erode+dilate) removes protrusions/slivers thinner
+than m; dry runs: c1-2's spike and column go, c7-8's west third (no ground
+arrives from the now-authored c6-8) and the rubble go. **chain7.sh** (waiter
+started 17:12Z, after "chain6 done"): both re-cut with --open 6 and stitched
+on his words, then serve. **Branches (build-chain-layer.mjs):** route.branches
+= loops {at, side, length, depth}: the slot at 0.6 width along a half-ellipse
+off the trunk, bedded, and the CLUSTER element (chain-element.mjs "cluster":
+a leader disc + eight endpoint stones on scratches, black-keyed, red specks
+removed, leader 100 px) at the apex; trial loops at c2-1 (north 2.18, south
+2.55) and c0-1 (south 0.72) — none in c3-1 on his word. Preview
+`island/branches-c2-1.jpg` sent 17:15. **Running:** chain6 on c5-1 (3/7)
+since 16:08Z; then serve (the groove + branches over all seven); then chain7.
+
+**2026-09-06 16:40 UTC:** **THE CHAIN IS THE CARVED SLOT,
 BEDDED INTO THE GROUND; SHOWN ON THE PLAIN c3-1.** Owner 16:20: *"wasnt it
 supposed to be carved out of the ground and then we were gonna add light to
 it?"* and *"also that looks stickered on ngl"*. → The kerb was the old
