@@ -29,10 +29,17 @@ void largeWaveSurface(vec2 p,out vec2 slope,out float height,out float foam) {
     float breaking=smoothstep(1.7,3.0,age)*(1.0-smoothstep(4.4,7.0,age));
     float crest=exp(-pow((across-0.5)/1.4,2.0))*ends*breaking*(1.0-impact);
     float wakeAge=max(0.0,age-mix(3.4,0.4,impact));
-    float wake=exp(-pow(across/(3.0+wakeAge*2.3),2.0)-pow(along*1.5,4.0));
-    wake*=smoothstep(0.0,0.8,wakeAge)*(1.0-smoothstep(1.2,mix(5.2,4.4,impact),wakeAge));
-    float breakup=smoothstep(0.24,0.68,noise2(p*1.7-direction*age*0.5));
-    foam=max(foam,(crest*0.88+wake*0.52)*breakup*strength);
+    // Foam disperses behind the crest and loses density as it widens. The old
+    // symmetric, linearly expanding high-frequency patch read as a texture trail.
+    float wakeWidth=2.2+sqrt(wakeAge)*1.4;
+    float behind=across+wakeAge*1.7*(1.0-impact);
+    float wake=exp(-pow(behind/wakeWidth,2.0)-pow(along*1.5,4.0));
+    wake*=smoothstep(0.0,0.55,wakeAge)*exp(-wakeAge*0.9)*(2.2/wakeWidth);
+    vec2 foamPosition=p-direction*age*0.30;
+    float cells=noise2(foamPosition*0.32+noise2(foamPosition*0.09)*1.7);
+    float breakup=smoothstep(0.24,0.70,cells);
+    float fine=mix(0.82,1.0,noise2(foamPosition*1.1));
+    foam=max(foam,(crest*0.88+wake*0.46)*breakup*fine*strength);
   }
 }
 `;

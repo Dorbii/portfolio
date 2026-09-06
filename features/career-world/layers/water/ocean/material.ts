@@ -93,13 +93,19 @@ vec3 oceanMaterial(vec2 p,float shore,vec2 shoreNormal,float time,float weather,
   float setEnvelope=smoothstep(0.33,0.68,noise2(p*0.075+vec2(time*0.04,-time*0.023)));
   float phase=distance*0.83+time*(1.6+weather*0.45)+noise2(p*0.032)*14.0;
   float surfRange=(2.0+weather*5.0)*mix(0.55,1.8,noise2(p*0.021+13.0));
-  float surfBand=smoothstep(0.0,0.6,distance)*(1.0-smoothstep(2.5,surfRange,distance));
+  float surfStart=min(2.5,surfRange*0.55);
+  float surfBand=smoothstep(0.0,0.6,distance)*(1.0-smoothstep(surfStart,surfRange,distance));
   float breaker=pow(max(0.0,sin(phase)),7.0)*setEnvelope;
   // Distance-based visual depth proxy, not surveyed bathymetry.
   vec3 geography=texture(uSeabedGeography,p/uWorldMetres).rgb;
   float shelfDistance=geography.r*uSeabedRange;
   SeabedSample substrate=sampleOceanSeabed(p,shelfDistance);
   float depth=substrate.depth;
+  // Local fantasy shoals are water-owned visual depth, using the same marine
+  // footprint. They do not alter the coast or displace the land artwork.
+  float garden=reefGarden(p/uWorldMetres)*smoothstep(0.98,1.0,geography.g);
+  float reefDepth=2.6+noise2(p*0.055+vec2(8,31))*1.1;
+  depth=mix(depth,min(depth,reefDepth),garden);
   vec2 slope=waves.gb*smoothstep(0.0,2.5,distance);
   vec3 normal=normalize(vec3(-vec2((slope.x-slope.y)*0.577350269,slope.x+slope.y)-eventSlope,1.0));
   normal=normalize(normal+vec3(shoreNormal*cos(phase)*surfBand*exposure*(0.12+weather*0.25)*coast,0));
@@ -115,6 +121,7 @@ vec3 oceanMaterial(vec2 p,float shore,vec2 shoreNormal,float time,float weather,
     life=aquaticLife(lifeRefracted,time,depth);
   }
   float clarity=mix(0.65,2.4,smoothstep(0.22,0.8,noise2(p*0.016+vec2(41,17))));
+  clarity=mix(clarity,0.72,garden);
   vec3 attenuation=exp(-vec3(0.38,0.12,0.075)*(1.0+weather*0.5)*depth*clarity);
   vec3 transmission=mix(deep,bed,attenuation);
   transmission+=vec3(0.055,0.11,0.10)*waterCaustic(refracted,time)*exp(-depth*0.45);
@@ -138,8 +145,12 @@ vec3 oceanMaterial(vec2 p,float shore,vec2 shoreNormal,float time,float weather,
   float foam=(breaker*surfBand*(0.7+weather*0.65)+wash*0.5*setEnvelope)*exposure*coast;
   float droplets=pow(noise2(p*7.0+shoreNormal*time*1.3),9.0)*8.0;
   foam+=droplets*breaker*surfBand*exposure*weather*coast;
-  float foamTexture=smoothstep(0.2,0.72,noise2(waterGround(p)*3.1-vec2(cos(uWindAngle),sin(uWindAngle))*time*0.12));
-  foam=max(foam,waves.a*foamTexture*smoothstep(0.06,0.7,weather));
+  // Preserve smooth crest coverage. Thresholded high-frequency noise punched
+  // a repeating mottled texture through each low-resolution foam-history blob.
+  vec2 foamDrift=vec2(cos(uWindAngle),sin(uWindAngle))*time*0.12;
+  float foamDensity=mix(0.82,1.0,noise2(waterGround(p)*0.45-foamDrift));
+  float whitecap=waves.a*waves.a*foamDensity;
+  foam=max(foam,whitecap*smoothstep(0.06,0.7,weather));
   foam=max(foam,eventFoam);
   oceanDetailAlpha*=1.0-clamp(foam,0.0,1.0);
   color=mix(color,illuminatedFoam(p/uWorldMetres),clamp(foam,0.0,0.96));

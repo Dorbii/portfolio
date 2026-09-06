@@ -77,7 +77,8 @@ void main() {
   float injection=1.0-smoothstep(0.10,uThreshold,jacobian);
   vec2 previousUv=(vec2(p)+0.5)/vec2(size)-uDrift*uDelta/uLength;
   float old=textureLod(uPrevious,previousUv,0.0).a*uHistory;
-  float foam=max(injection,old*exp(-uDelta*0.7));
+  // Brief residual aeration, not a long-lived patch carried behind every crest.
+  float foam=max(injection,old*exp(-uDelta*1.6));
   surface=vec4(displacement(p).x,clamp(slope,vec2(-2),vec2(2)),foam);
   offset=vec4(displacement(p).yz,0,0);
 }`;

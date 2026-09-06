@@ -8,3 +8,11 @@ public/career-world/capitals/ninjaone/environment/manifests/inland-water-r1.json
 # the solidified gate hashes raw bytes; line-ending conversion on checkout
 # would false-trip it, so these stay LF everywhere
 tools/world-authoring/* text eol=lf
+# Water derivation records raw input hashes; preserve their Git bytes on Windows.
+scripts/build-water-fields.mjs text eol=lf
+scripts/lib/water-fields.mjs text eol=lf
+scripts/build-inland-fall-atlas.mjs text eol=lf
+art-source/career-world/water/*.json text eol=lf
+art-source/career-world/l2-land/**/plan.json text eol=lf
+public/career-world/layers/terrain/authority/manifests/*.json text eol=lf
+public/career-world/layers/water/**/*.json text eol=lf
