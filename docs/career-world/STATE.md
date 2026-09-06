@@ -4,7 +4,26 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-06 05:25 UTC, LATEST (current):** **THE OWNER'S EIGHT RULINGS
+**2026-09-06 06:20 UTC, LATEST (current):** **LOCK 18i-c IN ON "go ahead
+with regen"; THE THREE REGENS RAN, NONE LANDED OUTRIGHT; SERVED 06:14Z (63
+TILES).** chain5.sh: c0-5 refused on vegetation colour alone (14.7 vs 13;
+water and tone clean) → his eye; c1-3 refused on 4 crossings → the conform
+pass cut it (69.7% beyond the limit) → refused on tone 23 alone → his eye;
+c4-8 refused (rock 0.433, 6 crossings, tone) → conformed → still rock 0.243,
+fringe 24.7%, 1 crossing → a send-back; c1-4 still refused (fringe 8.6%, 1
+crossing). The sea patch under 18i-c picked 384/512 px squares of plain
+sea (no stack grids). **The picture and a sheet of the four coast
+candidates go to him (06:25)** with: accept c0-5? accept c1-3? c4-8 and
+c1-4 send-back or accept? and **T c4-1's third attempt: accept?** (its
+chain matches both neighbours' kerbs, refused on veg 14.1 alone).
+**Pattern to raise with him:** eight of the last ten refusals were the
+vegetation-palette gate alone (thresholds 0.20 / 13 luma, calibrated
+2026-09-02 on four samples) on cells he then accepted by eye — a
+recalibration (say 0.30 / 20) is a lock change for his word. Coast 22 of
+27 authored (c0-5, c1-3, c1-4, c4-8 open); Tanium 21 of 21; N 20 of 20.
+The lock is free. Next after his rulings: the land animation layer, the city.
+
+**2026-09-06 05:25 UTC:** **THE OWNER'S EIGHT RULINGS
 (02:50) ARE IN; SERVED; TWO THINGS WAIT ON HIM.** Owner 02:50 on the sheet:
 *"remove c2-8s gen no need for it / c4-8 needs to fix the coast / C1-3
 shoulda just been a bit of land to finish the neighbor coast / C7-0 is good
