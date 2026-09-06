@@ -97,3 +97,5 @@ They are kept because a rejected cell nobody sees cannot be ruled on.
 - `c2-1` dark-forest — rejected on **water continuity 1**
 - `c1-1` dark-forest — rejected on **water continuity 1**
 - `c1-2` dark-forest — rejected on **a gate **
+- `c4-1` bare-plateau — rejected on **a gate **
+- `c3-1` lush-shelf — rejected on **a gate **
