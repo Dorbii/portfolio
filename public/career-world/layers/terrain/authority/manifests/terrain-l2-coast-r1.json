@@ -1266,31 +1266,31 @@
    }
   },
   "c1-2": {
-   "authoredAt": "2026-09-06T15:28:01.859Z",
+   "authoredAt": "2026-09-06T16:57:34.397Z",
    "describe": "THE WEST SHORE beside NinjaOne's c0-1 (Settlement shelf).\n\nThe island lies to the EAST. Along your EAST edge its art arrives as real\npaint — its ground (the richest ground in its neighbourhood: meadow green warmed with gold, glades, flowers allowed here) in some\nstretches and its SEA in others; the edge map below says which is which.\n**Where its ground arrives, continue it exactly as it arrives** ",
    "sourcePx": 1254,
    "gates": [
     {
      "name": "key-light asymmetry",
-     "value": 0.0029,
+     "value": 0.0027,
      "pass": true,
      "note": "first circular moment of luminance gradients; a baked sun measures ~0.03, canon terrain <=0.004; report-only under 5% land (18j, 2026-09-05: a 98%-sea shore cell read 0.0116 on noise)"
     },
     {
      "name": "gradient ratio",
-     "value": "1.501 (reported)",
+     "value": "1.496 (reported)",
      "pass": true,
      "note": "orientation concentration; the accepted seed itself measures 1.444, so this cannot gate"
     },
     {
      "name": "rock lighting",
-     "value": "0.381 (n 2767, report-only)",
+     "value": "0.375 (n 2664, report-only)",
      "pass": true,
      "note": "first circular moment of strong (>=80) luminance gradients inside rock only; a consistent lit side measures 0.18-0.27, accepted cells 0.04-0.14; limit 0.16 on the owner's eye (2026-09-02, the dark-forest gorge at 0.153)"
     },
     {
      "name": "land coverage",
-     "value": "23.1%",
+     "value": "22.8%",
      "pass": true
     },
     {
