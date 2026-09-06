@@ -19,6 +19,8 @@ sharp.cache(false);
 const WHICH = process.argv[2] && !process.argv[2].startsWith("--") ? process.argv[2] : "both";
 const DRY = process.argv.includes("--dry");
 const REKEY = process.argv.includes("--rekey");      // key the delivered source again, no generation
+const KEEP_GREEN = process.argv.includes("--keep-green");   // do not strip green-hued pixels (a panel's lichen is green too)
+const NO_DESPILL = process.argv.includes("--no-despill");   // leave blended edge pixels as delivered
 const arg = (f, d) => { const i = process.argv.indexOf(f); return i >= 0 ? process.argv[i + 1] : d; };
 const argNum = (f, d) => { const i = process.argv.indexOf(f); return i >= 0 ? Number(process.argv[i + 1]) : d; };
 // the world's own kerb, measured on the old c3-1 at L0 (2048 px = 97.6 m): the
@@ -158,9 +160,9 @@ async function key(src, which) {
     // says: green-hued, saturated pixels are not the element (the stone is
     // pale and grey, the groove dark) — they go, and so does the key's spill
     const mx = Math.max(r, g, b), mn = Math.min(r, g, b), sat = mx ? (mx - mn) / mx : 0;
-    const green = g >= r && g >= b && sat > 0.28;
+    const green = !KEEP_GREEN && g >= r && g >= b && sat > 0.28;
     if (green) a = 0;
-    if (a > 0 && a < 255 && !black) {   // despill: take the key's share out of a blended edge pixel (a black key needs none — a dark edge reads as occlusion)
+    if (a > 0 && a < 255 && !black && !NO_DESPILL) {   // despill: take the key's share out of a blended edge pixel (a black key needs none — a dark edge reads as occlusion)
       const k = a / 255;
       for (let c = 0; c < 3; c += 1) d[o + c] = Math.max(0, Math.min(255, Math.round((d[o + c] - KEYC[c] * (1 - k)) / k)));
     }

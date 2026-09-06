@@ -88,8 +88,9 @@ for (const col of cols) {
     if (!node || n.cell[0] !== col || n.cell[1] !== row) continue;
     const NW = node.info.width, NH = node.info.height;
     const cx = Math.round((n.at[0] - col) * CELL), cy = Math.round((n.at[1] - row) * CELL);
+    const x0 = cx - Math.round(NW / 2), y0 = cy - Math.round(NH / 2);   // integer origin: a fractional index writes nothing into a Buffer
     for (let ny = 0; ny < NH; ny += 1) for (let nx = 0; nx < NW; nx += 1) {
-      const x = cx - NW / 2 + nx, y = cy - NH / 2 + ny;
+      const x = x0 + nx, y = y0 + ny;
       if (x < 0 || y < 0 || x >= CELL || y >= CELL) continue;
       const no = (ny * NW + nx) * 4, a = node.data[no + 3];
       if (a === 0) continue;
