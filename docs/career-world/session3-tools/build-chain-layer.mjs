@@ -54,8 +54,13 @@ const previews = [];
 for (const col of cols) {
   const row = Math.floor(yAt(col + 0.5));
   const id = `c${col}-${row}`;
-  const landFile = `${ART}/l2-land/tanium/${id}/${id}-l2.png`;
-  if (!fs.existsSync(landFile)) { console.log(`  ${id}: no land layer yet — skipped`); continue; }
+  // the land that masks the chain: the working folder's candidate when it is
+  // newer than the authored layer (the preview the owner sees), else the
+  // authored layer; a cell with neither is skipped
+  const authored = `${ART}/l2-land/tanium/${id}/${id}-l2.png`, candidate = `.codex-tmp/authoring/cells/tanium/${id}/${id}-l2.png`;
+  const newer = (a, b) => fs.existsSync(a) && (!fs.existsSync(b) || fs.statSync(a).mtimeMs > fs.statSync(b).mtimeMs);
+  const landFile = newer(candidate, authored) ? candidate : fs.existsSync(authored) ? authored : null;
+  if (!landFile) { console.log(`  ${id}: no land layer yet — skipped`); continue; }
   const land = await sharp(landFile).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const LW = land.info.width, lb = Math.round((LW - CELL) / 2);
   const out = Buffer.alloc(CELL * CELL * 4);

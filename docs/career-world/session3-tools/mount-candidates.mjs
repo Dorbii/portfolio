@@ -75,9 +75,19 @@ for (const c of cells) {
   const name = `${c.territory}-${c.id}-site.webp`;
   let kept = sharp(source).extract({ left: BLEED, top: BLEED, width: KEPT, height: KEPT });
   let gain = 1;
-  if (gains.size) {
+  // the chain layer rides over a candidate's preview too (owner 2026-09-06:
+  // the chain is a layer; the plain chain cells are judged with it on)
+  const chainFile = `art-source/career-world/chain/cells/${c.territory}-${c.id}-chain.png`;
+  const overlay = fs.existsSync(chainFile) ? await sharp(chainFile).ensureAlpha().raw().toBuffer() : null;
+  if (gains.size || overlay) {
     const raw = await kept.raw().toBuffer();
-    gain = applyTone(raw, KEPT, c.wx, c.wy);
+    if (gains.size) gain = applyTone(raw, KEPT, c.wx, c.wy);
+    if (overlay) for (let p = 0; p < KEPT * KEPT; p += 1) {
+      const o = p * 4, a = overlay[o + 3] / 255;
+      if (a === 0) continue;
+      for (let k = 0; k < 3; k += 1) raw[o + k] = Math.round(overlay[o + k] * a + raw[o + k] * (1 - a));
+      raw[o + 3] = Math.max(raw[o + 3], overlay[o + 3]);
+    }
     kept = sharp(raw, { raw: { width: KEPT, height: KEPT, channels: 4 } });
   }
   const canonical = await kept.webp({ quality: 95, alphaQuality: 100 }).toBuffer();
