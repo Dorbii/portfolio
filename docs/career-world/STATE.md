@@ -4,7 +4,32 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-06 02:45 UTC, LATEST (current):** **THE NIGHT'S RUNS ARE DONE
+**2026-09-06 05:25 UTC, LATEST (current):** **THE OWNER'S EIGHT RULINGS
+(02:50) ARE IN; SERVED; TWO THINGS WAIT ON HIM.** Owner 02:50 on the sheet:
+*"remove c2-8s gen no need for it / c4-8 needs to fix the coast / C1-3
+shoulda just been a bit of land to finish the neighbor coast / C7-0 is good
+/ C6-1 is good / C4-1 still not lining up the chain / C6-8 remove the right
+land mass the left is good / C1-1, 2-1, 1-2 are all good / c0-5 needs
+regen"*. chain4.sh (ran 05:04-05:2xZ — the background task sat two hours
+before starting): **T c1-1, c2-1, c1-2 stitched on his eye** (Tanium 21 of
+21 authored); **c6-8** (everything east of 45% made wet in the mask)
+stitched on his eye; **c2-8 removed** from the plan (27 shore cells) and
+its candidate moved to `.codex-tmp/rejected/coast/c2-8-removed-2026-09-06`;
+**T c4-1's third attempt** (brief: "render the chain exactly as the
+neighbours do — the pale kerb, the groove at its foot") REFUSED on
+vegetation colour alone (dLuma 14.1 vs 13; chain gate 23 / 10 px, style
+matched — `island/c4-1-third-seams.jpg`) → **his accept asked**; served.
+**Held (chain5.sh): the regens of c0-5, c1-3, c4-8** with his words in
+their briefs — after his word on **18i-c** (the tiled sea patch must be sea
+in the paint; `proposals/sea-patch-uniform.apply.mjs`, --check passes):
+apply, approve with his words, `bash .codex-tmp/session4/chain5.sh`. On
+"accept c4-1": `CELL_OWNER_ACCEPT="<his words>" node tools/world-authoring/cell.mjs
+--territory tanium --cell 4,1 --redo --force --describe-file
+art-source/career-world/l2-land/tanium/briefs/c4-1.md` then serve.sh.
+Coast: 23 of 27 authored (c0-5, c1-3, c1-4, c4-8 open; c1-4 is a send-back
+he has not ruled on beyond "re-cut"). Then: the land animation layer, the city.
+
+**2026-09-06 02:45 UTC:** **THE NIGHT'S RUNS ARE DONE
 AND SERVED (02:38Z, 60 TILES); THE LOCK IS FREE; NOTHING DISPATCHES UNTIL
 THE OWNER RULES.** chain3.sh: c1-8 conformed and stitched on his word (open
 sea — the stack grid is gone), c0-5 re-conformed and refused on veg 15.7
