@@ -976,6 +976,38 @@
       }
     },
     {
+      "id": "l2-tanium-c4-0",
+      "minimumTier": "capital",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-tanium/c4-0-capital.webp",
+          "dimensions": [
+            1024,
+            1024
+          ],
+          "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-tanium/c4-0-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
+        }
+      },
+      "worldBounds": {
+        "origin": [
+          0.375,
+          0.5555555555555556
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
       "id": "l2-tanium-c4-1",
       "minimumTier": "capital",
       "sources": {
@@ -1232,6 +1264,102 @@
       }
     },
     {
+      "id": "l2-coast-c0-6",
+      "minimumTier": "capital",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c0-6-capital.webp",
+          "dimensions": [
+            1024,
+            1024
+          ],
+          "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c0-6-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
+        }
+      },
+      "worldBounds": {
+        "origin": [
+          0.0625,
+          0.6666666666666666
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c0-7",
+      "minimumTier": "capital",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c0-7-capital.webp",
+          "dimensions": [
+            1024,
+            1024
+          ],
+          "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c0-7-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
+        }
+      },
+      "worldBounds": {
+        "origin": [
+          0.0625,
+          0.7777777777777778
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c1-0",
+      "minimumTier": "capital",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c1-0-capital.webp",
+          "dimensions": [
+            1024,
+            1024
+          ],
+          "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c1-0-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
+        }
+      },
+      "worldBounds": {
+        "origin": [
+          0.125,
+          0
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
       "id": "l2-coast-c1-1",
       "minimumTier": "capital",
       "sources": {
@@ -1264,6 +1392,70 @@
       }
     },
     {
+      "id": "l2-coast-c1-2",
+      "minimumTier": "capital",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c1-2-capital.webp",
+          "dimensions": [
+            1024,
+            1024
+          ],
+          "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c1-2-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
+        }
+      },
+      "worldBounds": {
+        "origin": [
+          0.125,
+          0.2222222222222222
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c1-8",
+      "minimumTier": "capital",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c1-8-capital.webp",
+          "dimensions": [
+            1024,
+            1024
+          ],
+          "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c1-8-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
+        }
+      },
+      "worldBounds": {
+        "origin": [
+          0.125,
+          0.8888888888888888
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
       "id": "l2-coast-c2-0",
       "minimumTier": "capital",
       "sources": {
@@ -1287,6 +1479,38 @@
       "worldBounds": {
         "origin": [
           0.1875,
+          0
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c3-0",
+      "minimumTier": "capital",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c3-0-capital.webp",
+          "dimensions": [
+            1024,
+            1024
+          ],
+          "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c3-0-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
+        }
+      },
+      "worldBounds": {
+        "origin": [
+          0.25,
           0
         ],
         "span": [
@@ -1424,6 +1648,166 @@
       }
     },
     {
+      "id": "l2-coast-c7-1",
+      "minimumTier": "capital",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c7-1-capital.webp",
+          "dimensions": [
+            1024,
+            1024
+          ],
+          "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c7-1-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
+        }
+      },
+      "worldBounds": {
+        "origin": [
+          0.5,
+          0.1111111111111111
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c7-2",
+      "minimumTier": "capital",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c7-2-capital.webp",
+          "dimensions": [
+            1024,
+            1024
+          ],
+          "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c7-2-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
+        }
+      },
+      "worldBounds": {
+        "origin": [
+          0.5,
+          0.2222222222222222
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c7-3",
+      "minimumTier": "capital",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c7-3-capital.webp",
+          "dimensions": [
+            1024,
+            1024
+          ],
+          "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c7-3-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
+        }
+      },
+      "worldBounds": {
+        "origin": [
+          0.5,
+          0.3333333333333333
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c7-4",
+      "minimumTier": "capital",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c7-4-capital.webp",
+          "dimensions": [
+            1024,
+            1024
+          ],
+          "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c7-4-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
+        }
+      },
+      "worldBounds": {
+        "origin": [
+          0.5,
+          0.4444444444444444
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c7-8",
+      "minimumTier": "capital",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c7-8-capital.webp",
+          "dimensions": [
+            1024,
+            1024
+          ],
+          "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c7-8-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
+        }
+      },
+      "worldBounds": {
+        "origin": [
+          0.5,
+          0.8888888888888888
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
       "id": "l2-coast-c8-5",
       "minimumTier": "capital",
       "sources": {
@@ -1448,6 +1832,70 @@
         "origin": [
           0.5625,
           0.5555555555555556
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c8-6",
+      "minimumTier": "capital",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c8-6-capital.webp",
+          "dimensions": [
+            1024,
+            1024
+          ],
+          "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c8-6-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
+        }
+      },
+      "worldBounds": {
+        "origin": [
+          0.5625,
+          0.6666666666666666
+        ],
+        "span": [
+          0.0625,
+          0.1111111111111111
+        ]
+      }
+    },
+    {
+      "id": "l2-coast-c8-7",
+      "minimumTier": "capital",
+      "sources": {
+        "capital": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c8-7-capital.webp",
+          "dimensions": [
+            1024,
+            1024
+          ],
+          "decodedBytes": 4194304
+        },
+        "site": {
+          "path": "/career-world/layers/terrain/authority/tiles/l2-coast/c8-7-site.webp",
+          "dimensions": [
+            2048,
+            2048
+          ],
+          "decodedBytes": 16777216
+        }
+      },
+      "worldBounds": {
+        "origin": [
+          0.5625,
+          0.7777777777777778
         ],
         "span": [
           0.0625,
