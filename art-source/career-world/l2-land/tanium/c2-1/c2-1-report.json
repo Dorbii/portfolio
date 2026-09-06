@@ -1,128 +1,53 @@
 {
   "cell": "c2-1",
   "territory": "tanium",
-  "status": "refused_quarantine_only",
-  "generation": {
-    "filename": "c2-1-source.png",
-    "exactGenerationSizeProduced": [1254, 1254],
-    "format": "PNG RGB",
-    "sha256": "9A6F110E9567ADA350A31A61DBDC1FF22AAD2F3D3B1004081195307C38EF32B8",
-    "mode": "single built-in ImageGen whole-canvas edit with edit-target.jpg first and the NinjaOne seed canon second as reference only",
-    "imageGenCallsUsed": 1,
-    "retryUsed": false,
-    "secondReferenceAccepted": true,
-    "bothImagesAttachedToSameCall": true,
-    "wholeCanvasSinglePass": true,
-    "rawOutputPreserved": true,
-    "rawCopyHashIdentical": true,
-    "resizedCroppedRetouchedOrTiled": false,
-    "promptFile": "c2-1-imagegen-prompt-used-20260905-root.txt"
+  "layer": "L2-land",
+  "status": "quarantine-only",
+  "generationMode": "single built-in edit call with both required images",
+  "generationSize": {
+    "widthPx": 1254,
+    "heightPx": 1254
   },
-  "generationSizePx": [1254, 1254],
-  "shippedCanvasPx": [2560, 2560],
-  "groundExtentMetres": [97.6, 97.6],
-  "finalResolutionCmPerPx": 4.8,
+  "shippedCanvasSize": {
+    "widthPx": 2560,
+    "heightPx": 2560
+  },
+  "sourceSha256": "70C541E1BE6BF5DC7E0EE61A0056A56E978EEA380C997AB3B7B8E006CB404AF1",
   "lightingIsotropy": {
-    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean; delivered water-mask pixels and gradients below 12 luminance units excluded",
-    "peakVsUniformOverLand": 1.480127,
+    "peakVsUniformOverLand": 1.514802,
     "uniformReference": 1.0,
-    "directionalKeyFirstMoment": 0.00101,
-    "gradientSamples": 1302154,
-    "aggregateDirectionalityNumericPass": true,
-    "strictEqualValueOnAllFormSidesVisualCheck": false,
-    "visualCheck": "No coherent whole-cell cast-shadow direction is visible, but basalt caps and upper tree tiers are materially lighter than their vertical faces and lower foliage. The aggregate statistic does not prove literal equal-value lighting."
+    "firstAngularMoment": 0.00022,
+    "sampleCount": 1243036,
+    "method": "Thirty-six full-angle luminance-gradient bins over non-water pixels; gradients below 12 were omitted."
   },
-  "buildableVsSteepFraction": {
-    "basis": "manual full-frame screen-space estimate as fractions of non-water land at native source resolution",
-    "buildable": 0.44,
-    "steep": 0.09,
-    "otherDenseVegetationBrokenRockOrCarving": 0.47,
-    "method": "Open gently rolling meadow and accessible shelf ground count as buildable; exposed crag and inherited terrace faces count as steep; dense stands, scattered broken rock, talus, and the rune carving make up the remainder.",
-    "limitation": "This is a visual screen-space estimate with approximate uncertainty of plus or minus 0.08 per fraction, not an elevation-derived slope measurement."
+  "terrainFractions": {
+    "buildable": 0.41,
+    "steep": 0.14,
+    "method": "Native-resolution plan-area estimate: open and gently broken shelf counted as buildable; crag faces, coastal rock and cliff bands counted as steep; forest and rough non-steep ground remain in neither class."
   },
-  "waterFootprintFraction": 0.00377548,
-  "finalDerivedLandCoverageFraction": 0.99622452,
-  "crown": {
-    "medianMetres": 1.176,
-    "medianPx": 24.498,
-    "sampleCount": 844,
-    "method": "Full-frame multiscale local-apex census of 844 discernible dark-green conifer crowns, retaining the narrow saplings rather than filtering them out; median source width 12 px scaled by 2560/1254 and converted at 0.048 m per final pixel.",
-    "excludedElements": []
-  },
+  "waterFootprintFraction": 0.05807127,
   "waterMask": {
-    "filename": "c2-1-water-source.png",
-    "exactSizePx": [1254, 1254],
-    "format": "PNG RGBA",
-    "sha256": "8F79AC8E93AC60C45964336B3BB40B3ED19307754F7D6D049BA8FF5C6370F0DD",
-    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
-    "opaqueWaterPixels": 5937,
-    "transparentNonWaterPixels": 1566579,
+    "opaqueWhitePixels": 91318,
+    "transparentPixels": 1481198,
     "intermediateAlphaPixels": 0,
     "nonWhiteOpaquePixels": 0,
-    "connectedComponents8": 1,
-    "accidentalInteriorHolePixels": 0,
-    "boundsSourcePx": [979, 958, 1147, 1253],
-    "edgeWaterPixels": {
-      "north": 0,
-      "east": 0,
-      "south": 19,
-      "west": 0
-    },
-    "method": "Native-resolution variable-width centre trace following the visible bank-to-bank water surface, including turquoise paint, pale wash, ripple highlights, and reflections; reviewed as a three-times nearest-neighbour magenta overlay."
+    "connectedComponents": 2,
+    "interiorHolePixels": 0
   },
-  "runeChain": {
-    "requiredWestEdgeFractionDown": 0.45,
-    "requiredEastEdgeFractionDown": 0.52,
-    "requiredWestCentreYSourcePx": 564.3,
-    "requiredEastCentreYSourcePx": 652.08,
-    "measuredWestCentreYSourcePxApprox": 564,
-    "measuredEastCentreYSourcePxApprox": 628,
-    "exactEdgeHandoffsPass": false,
-    "fullWidthContinuous": true,
-    "dry": true,
-    "visualRead": "The feature has a dark recessed centre and no standing column wall, but its continuous regular stone lips still risk reading as a lined kerb; human visual judgment remains required."
+  "crown": {
+    "medianMetres": 2.548,
+    "medianPx": 53.078,
+    "sampleCount": 546,
+    "method": "Full-frame dark-green local-apex census with one response per crown; horizontal skirt span measured at native resolution and converted to the 2560 px canvas, retaining saplings.",
+    "excludedElements": []
   },
-  "constraintChecks": {
-    "squareAtLeast1254Px": true,
-    "singleWholeCanvasEditCall": true,
-    "secondReferenceAccepted": true,
-    "rawGenerationUntouched": true,
-    "terrainOnly": true,
-    "highOblique2_5D": true,
-    "landContinuesAllFourEdges": true,
-    "forestThinsGraduallyEastward": true,
-    "brightSouthShelfBandPresent": true,
-    "waterMaskSameDimensionsBinaryWhiteTransparent": true,
-    "waterMaskCoversCompletePaintedWater": true,
-    "waterMaskNoAccidentalInteriorHoles": true,
-    "crownObjectComplete": true,
-    "allDetectedCrownsIncluded": true,
-    "crownMedianInsideAcceptedTerritoryBand": false,
-    "strictNeutralLighting": false,
-    "oneFlatValuePerCrown": false,
-    "visibleGreyBlueCanopyHaze": false,
-    "southWaterHandoffAtRequiredPosition": false,
-    "beckRunsFromTreesIntoOpenGround": false,
-    "singleApproachableBeaconCrag": false,
-    "runeChainExactEdgeHandoffs": false
-  },
-  "refusalReasons": [
-    "The measured median crown is 1.176 m, below the required 1.7-5.2 m band; the dense western stand reads as a carpet of narrow saplings rather than proper mature crowns.",
-    "The literal flat-lighting rule fails visually because rock caps and crown tips are lighter than vertical faces and lower foliage.",
-    "The crowns retain internal light-dark tiering and the requested visible grey-blue haze is absent or too weak to soften their edges.",
-    "The generated beck reaches the south source edge near x=992 rather than the required handoff near the far eastern portion of that edge, and it begins in open ground instead of continuing through a wooded gully.",
-    "The rune groove reaches the east source edge near y=628 instead of the required y=652.08.",
-    "The south-east site reads as two detached flat-topped column stacks without a clear north approach ramp, not one coherent beacon crag."
-  ],
-  "openRisks": [
-    "The rune feature is recessed and dry, but the long regular stone lips may still read as a lined kerb rather than a naturally weathered bedrock cut.",
-    "The water mask is mechanically binary, same-size, connected, and hole-free; exact bank placement remains a human visual gate.",
-    "No stitch, upscale, shipped-canvas bake, runtime mount, public asset promotion, or owner visual acceptance was attempted because this package is quarantine-only."
-  ],
-  "verificationEvidence": {
-    "waterOverlay": "diagnostics/current/c2-1-water-mask-one-call-overlay.png",
-    "waterDetailOverlay": "diagnostics/current/c2-1-water-mask-one-call-detail-3x.png",
-    "crownOverlay": "diagnostics/current/c2-1-crown-census-final.png",
-    "measurementJson": "diagnostics/current/c2-1-measurements-final.json"
-  }
+  "reviewNotes": [
+    "Visual acceptance is not claimed.",
+    "The raw square edit result is preserved byte-for-byte; the source was not resized, cropped or retouched.",
+    "The northern coast water lies in the generated context margin and is included in the complete source-space water mask.",
+    "The model repainted portions of the authored context margin; the pipeline binding is expected to restore those neighbour pixels, so the stitched grey-boundary seam still requires review.",
+    "Several conifer crowns visibly retain internal light-dark modelling instead of a strictly single flat value; this is a visual contract risk, not cleared by the aggregate isotropy metric.",
+    "The beacon crag is present and bare, but its apparent flat top should be checked by the owner against the requested site scale.",
+    "Right-side stepped basalt bands are inherited or continued natural terrain; no rune marks, buildings, roads, bridges, figures or rail were added."
+  ]
 }
