@@ -20,6 +20,8 @@ TABLE=art-source/career-world/tone-gains-r1.json
 say "1. tone gains (strength $STRENGTH)"
 node docs/career-world/session3-tools/tone-harmonise.mjs --strength "$STRENGTH" --cap 0.3 --lambda 0.35 --out .codex-tmp/session4/island/tone-before-after.jpg 2>&1 | head -2
 cp .codex-tmp/session4/tone-gains.json "$TABLE"
+say "1b. the chain layer (the kerb and the nodes laid along the route, masked by the land)"
+node docs/career-world/session3-tools/build-chain-layer.mjs 2>&1 | tail -8
 say "2. register with the gain field"
 node docs/career-world/session3-tools/world-register.mjs --tone "$TABLE" --chain art-source/career-world/chain/cells 2>&1 | tail -4
 say "3. candidate previews"

@@ -27,7 +27,7 @@ import sharp from "sharp";
 sharp.cache(false);
 const arg = (f, d) => { const i = process.argv.indexOf(f); return i >= 0 ? process.argv[i + 1] : d; };
 const ART = "art-source/career-world";
-const KERB = arg("--kerb", `${ART}/chain/kerb-element-r1.png`), NODE = arg("--node", `${ART}/chain/node-element-r1.png`);
+const KERB = arg("--kerb", `${ART}/chain/kerb-element.png`), NODE = arg("--node", `${ART}/chain/node-element.png`);   // the chosen elements (copies of a revision)
 const OUT = arg("--out", `${ART}/chain/cells`), PREVIEW = arg("--preview");
 const CELL = 2048, BLEED = 256;
 const route = JSON.parse(fs.readFileSync(`${ART}/l2-land/tanium/rune-chain.def.json`, "utf8"));
