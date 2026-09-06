@@ -41,3 +41,6 @@
 - `c0-5` shore — rejected on **water fringe (48px) 1.19**
 - `c0-7` shore — rejected on **water continuity 6**
 - `c1-4` shore — rejected on **water continuity 1**
+- `c0-5` shore — rejected on **a gate **
+- `c1-3` shore — rejected on **water continuity 4**
+- `c4-8` shore — rejected on **rock lighting 0.433**
