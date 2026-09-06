@@ -4,7 +4,32 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-06 01:20 UTC, LATEST (current):** **LOCK 18n — THE PURPLE GUIDE —
+**2026-09-06 01:35 UTC, LATEST (current):** **SERVED AT 01:15Z — 59 TILES,
+14 NEW; chain2.sh IS BAKING WITH THE PURPLE GUIDE.** chain.sh finished:
+c1-4 refused (1 crossing, veg 42); its conform pass landed **c0-7** (band,
+68% trimmed) and left c1-4 (fringe 22.9% after the cut + 2 crossings), c4-8,
+c7-0, c0-5, c2-8, c6-8 refused on tone/crossings, c1-3 on tone alone;
+serve.sh ran clean (tone gains + seam feather on 59 edges, register,
+previews, mount, water; commit 45f69dd2). **Live now:** N 20, T 18 (c4-1
+rebaked on the chain, c4-0 stitched), coast 15 of 28 (c1-1, c2-0, c4-0,
+c5-0, c5-8, c6-0, c8-5 + c7-2, c8-6, c1-0, c1-8, c7-1 + c1-2, c7-3, c7-4,
+c8-7, c7-8 + c3-0, c0-6, c0-7 — 20? count: 7 + 5 + 5 + 3 = 20 of 28; the
+runtime feed says 59 = 20 + 18 + 20 + 1 for the ninjaone/tanium/coast sums
+— verify with `node -e` on terrain-l2-coast-r1.json when it matters).
+**Picture sent 01:35** (`island/island-grid-L2.jpg`): T c4-1 "the overpass
+OK?"; coast for his eye — c7-0 (tone 22 alone), c1-3 (tone 21 alone, bay
+met), c0-5 (veg 15), c1-4, c4-8, c2-8, c6-8; the chain cells "purple guide:
+baking now/next". **chain2.sh** started 01:15:17Z (log `chain2.log`): c2-1,
+c1-1, c6-1 forced, c1-2 forced, one attempt each with 18n; then conform
+pass; serve. Each cell's log should carry "chain guide … px" at dispatch
+and "guide layer N purple px replaced" after delivery, and the gates a
+"chain continuity" line. **Then:** views of the landings/candidates for
+the owner (view.mjs on a fresh L1 composite: world-mosaic ×3 --level 1 →
+island-grid --level 1); his accepts; the remaining coast (c8-4 only if land
+arrives); the forest cells' tone/crowns are the standing problem — a brief
+lever, not a lock.
+
+**2026-09-06 01:20 UTC:** **LOCK 18n — THE PURPLE GUIDE —
 IS IN ON THE OWNER'S WORDS; chain2.sh WAITS BEHIND chain.sh.** The first
 chain run: T c4-1 LANDED at 23:25Z with the drawn floor (its groove leaves
 the east edge at 49.9% against the floor's 49.6%; both seams continue —
