@@ -1,6 +1,6 @@
 {
  "territory": "tanium",
- "note": "Tanium, south half of the big island. 7 x 3 = 21 cells, exactly the budget (4 projects, capital weighted double). Placed at lattice [2,5] so row 8 stays sea BELOW it (owner 2026-09-03: 'there should be padding below it so it reads as an island') and cols 0-1 and 9-15 stay sea either side. Centred on col 5, the same centre as NinjaOne's block, so the island reads as one landmass narrow at the north and broad at the south.",
+ "note": "Tanium, south half of the big island. 7 x 3 = 21 cells, exactly the budget (4 projects, capital weighted double). Placed at lattice [2,5] so row 8 stays sea BELOW it (owner 2026-09-03: 'there should be padding below it so it reads as an island') and cols 0-1 and 9-15 stay sea either side. Centred on col 5, the same centre as NinjaOne's block, so the island reads as one landmass narrow at the north and broad at the south. The rune chain is a separate layer (rune-chain.def.json), not part of the land cells (owner 2026-09-06).",
  "grid": {
   "cols": 7,
   "rows": 3
@@ -287,119 +287,5 @@
  "rules": {
   "railAddendum": "The north-east leg spans the bay NinjaOne's ruling puts at that corner, so that coast must open into water wide enough for the line to leap it.",
   "northBorder": "OWNER RULING 2026-09-01, read from NinjaOne's side and mapped onto this block (NinjaOne is at lattice [3,1], this block at [2,5], so local col L is world col 2+L): NinjaOne and Tanium share BOTH a land and an ocean border — a SOUND to the west, solid connecting LAND in the middle, a BAY to the east, so the two territories are one island with a waist. Local cells 1,0 and 2,0 (world cols 3 and 4): the north edge opens into the SOUND, the same water NinjaOne's 0,3 and 1,3 open into, and the inlet crossing and submerged run live on the far side of it. Local cells 3,0 and 4,0 (world cols 5 and 6): the north edge is LAND continuing into NinjaOne — terrain must run to the north edge as solid connecting ground, no coast. Local cell 5,0 (world col 7): the north-east bay, sea as authored. Local cells 0,0 and 6,0 (world cols 2 and 8) have no NinjaOne above them: open sea to the north. MEASURED HANDOVER, from the authored NinjaOne art on the shared line rather than from the cell granularity of the ruling above — the art is more generous with land than the ruling, and this is what actually arrives: the sound's south shore ENDS at world col 4.38, land runs unbroken from world col 4.38 to 7.34 (283 m), and the bay's shore BEGINS at world col 7.34. Two becks cross that ground and must be met on this side: one 1.9 m wide at world col 5.30, one 3.8 m at world col 6.55. So local cell 2,0 is sound on its western 38% and land on its eastern 62%, and local cell 5,0 is land on its western 34% and bay beyond."
- },
- "runeChain": {
-  "note": "The rune chain. A route, like the rail loop — not a biome. It enters from the sea at the west edge, passes through every settlement in the territory as a node, and leaves east past the colonnade into the sea. RUNES appear only at the nodes; between them only the connecting groove crosses, so a cell the chain merely passes through carries a groove and nothing else. L2 carries the carving only: any light travelling along it belongs to an effect layer and must NOT be painted here (owner 2026-09-04: 'that would be on an effect layer').",
-  "waypoints": [
-   [
-    0,
-    1.5
-   ],
-   [
-    0.45,
-    1.5
-   ],
-   [
-    1,
-    1.47
-   ],
-   [
-    1.6,
-    1.42
-   ],
-   [
-    2,
-    1.45
-   ],
-   [
-    2.6,
-    1.58
-   ],
-   [
-    3,
-    1.52
-   ],
-   [
-    3.5,
-    1.5
-   ],
-   [
-    4,
-    1.48
-   ],
-   [
-    4.6,
-    1.42
-   ],
-   [
-    5,
-    1.45
-   ],
-   [
-    5.5,
-    1.45
-   ],
-   [
-    6,
-    1.5
-   ],
-   [
-    6.5,
-    1.6
-   ],
-   [
-    7,
-    1.7
-   ]
-  ],
-  "nodes": [
-   {
-    "cell": [
-     0,
-     1
-    ],
-    "at": [
-     0.45,
-     1.5
-    ],
-    "of": "cablecar"
-   },
-   {
-    "cell": [
-     3,
-     1
-    ],
-    "at": [
-     3.5,
-     1.5
-    ],
-    "of": "capital"
-   },
-   {
-    "cell": [
-     5,
-     1
-    ],
-    "at": [
-     5.5,
-     1.45
-    ],
-    "of": "risk-assessment"
-   },
-   {
-    "cell": [
-     6,
-     1
-    ],
-    "at": [
-     6.5,
-     1.6
-    ],
-    "of": "the seaward end, where the chain leaves the world"
-   }
-  ],
-  "groove": "a SLOT CUT DOWN INTO THE BEDROCK, not a line drawn on top of it — 2-3 m wide and about 2 m deep, deep enough that a person could stand in it with their head at ground level. It has two cut walls and a floor, and it reads dark inside because the depth shades it, NOT because anything glows. ANCIENT AND WEATHERED: the cut edges rounded and softened, lichen in the joints, grass and low scrub overhanging the lip in places, a little scree and fallen rubble on the floor, and the odd stretch where the wall has slumped. Nobody has maintained this in a very long time. But it never wanders and it is never lost: the line stays true across the whole cell and you can follow it by eye from one edge to the other. Do not draw it as a path, a road, a kerb, a wall or a low ridge — the ground is REMOVED along it.",
-  "rune": "large panels of cut rock set into the level ground FLANKING the groove, each 6-8 m across, deeply incised, all the same size and depth, each a DIFFERENT mark — a sentence, not a repeated stamp. Weathered like the groove: edges rounded, lichen in the cuts, some marks part-lost to time. None larger than the others, and nothing standing at the middle of the cluster: every node equal. Six to ten of them at a node, close enough to read as one utterance.",
-  "water": "NO WATER ON THE CHAIN. A beck may pass beneath the groove or stop short of it, but no pool, tarn, stream or wet ground may sit ON the line or cross it in the open — water there is cut out of this layer and leaves a hole, which severs the chain. The first attempt at this cell put two pools directly on the line and broke it inside a single cell."
  }
 }

@@ -4,7 +4,37 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-06 06:20 UTC, LATEST (current):** **LOCK 18i-c IN ON "go ahead
+**2026-09-06 06:55 UTC, LATEST (current):** **THE RUNE CHAIN LEAVES THE LAND
+AND BECOMES A LAYER; THE SEVEN CHAIN CELLS ARE REGENERATING WITHOUT IT.**
+Owner 06:40, asked "why is it so difficult to connect the chain?" and told
+that seven separately generated cells will never draw one line the same
+way: *"lets do it that way then but youll need to regen the cells with the
+chain first"*; and on c1-2's spike: *"besides this cell the coast tiles are
+good"*. → **Data, not the solidified tool:** `runeChain` moved out of
+`tanium/territory.def.json` into `tanium/rune-chain.def.json` (the chain
+layer's route; same waypoints/nodes), so cell.mjs draws no guide (rc null)
+and write-briefs' crossing text is gone ("the rune chain crosses 0 cells");
+the seven row-1 briefs lost every paragraph about the groove/kerb/panels and
+end with "THE RUNE CHAIN IS NOT IN THIS CELL … paint the ground plain";
+c6-1 keeps the CHAIN-END site as bare level ground (the plan's site
+validator). **chain6.sh running (log `chain6.log`):** c1-2 re-cut with the
+current shore shapes and stitched on his word; then c3-1, c4-1, c5-1, c2-1,
+c1-1, c6-1, c0-1 forced, one attempt each (~13 min each; the forest cells
+will likely refuse on the vegetation palette gate again → his eye or the
+recalibration he has not answered); serve. **THE CHAIN LAYER (next, serving
+side, no lock change):** one continuous drawing along rune-chain.def.json's
+route composited over the land at serve time — plan: a tileable chain
+element (pale kerb + dark groove) and a node element (the rune panels)
+generated ONCE, laid along the route with the canon slope, rendered into a
+`chain` tile set at L0/L1 like the land tiles, registered in the feed as a
+layer above terrain (streamTiles / the runtime need a layer slot — coordinate
+with the ocean session which owns WorldScene/layers.ts), the land's own
+attempts masked under it (none after this regen). **Open with the owner:**
+whether "the coast tiles are good" includes the four previewed candidates
+(c0-5, c1-3, c1-4, c4-8) — not stitched until he says so; T c4-1's third
+attempt is moot (regenerating without the chain); the palette recalibration.
+
+**2026-09-06 06:20 UTC:** **LOCK 18i-c IN ON "go ahead
 with regen"; THE THREE REGENS RAN, NONE LANDED OUTRIGHT; SERVED 06:14Z (63
 TILES).** chain5.sh: c0-5 refused on vegetation colour alone (14.7 vs 13;
 water and tone clean) → his eye; c1-3 refused on 4 crossings → the conform
