@@ -1,6 +1,10 @@
 [
   {
     "class": "coast",
-    "note": "Connected east-coast sea, including the full painted surf, wash between cliff-foot rocks and both stack margins, ripple highlights, and reflections; emergent basalt and the visibly dry chain continuation are not classified as water."
+    "note": "Eastern sea across both cliff bays, including all surf, foam, wash between shore rocks, ripples, reflections, and water around both sea stacks."
+  },
+  {
+    "class": "stream",
+    "note": "The water surface arriving through the south-edge handover merges directly into the connected southeast coastal water and has no separately bounded component in this edit."
   }
 ]

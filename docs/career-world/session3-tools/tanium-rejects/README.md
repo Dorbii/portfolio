@@ -90,3 +90,9 @@ They are kept because a rejected cell nobody sees cannot be ruled on.
 - `c6-2` quarry — rejected on **water continuity 1**
 - `c4-0` moor — rejected on **a gate **
 - `c2-1` dark-forest — rejected on **water continuity 1**
+- `c2-1` dark-forest — rejected on **water continuity 1**
+- `c1-1` dark-forest — rejected on **rock lighting 0.18**
+- `c6-1` coast-cliff — rejected on **water continuity 1**
+- `c1-2` dark-forest — rejected on **a gate **
+- `c2-1` dark-forest — rejected on **water continuity 1**
+- `c1-1` dark-forest — rejected on **water continuity 1**
