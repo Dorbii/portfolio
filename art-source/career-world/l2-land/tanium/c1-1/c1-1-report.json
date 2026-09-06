@@ -1,0 +1,111 @@
+{
+  "cell": "c1-1",
+  "territory": "tanium",
+  "status": "refused; mechanical deliverables complete; visual self-check fails binding terrain constraints",
+  "generation": {
+    "filename": "c1-1-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGB",
+    "sha256": "336328361105B9CC19EA389BD2AAFE41A2A586FBAA42F0E9C1781D4A28A6C3A4",
+    "mode": "single built-in ImageGen whole-canvas edit with edit target and canon attached",
+    "imageGenCallsUsed": 1,
+    "retryUsed": false,
+    "bothImagesAttachedToSameCall": true,
+    "wholeCanvasSinglePass": true,
+    "rawOutputPreserved": true,
+    "rawCopyHashIdentical": true,
+    "resizedCroppedRetouchedOrTiled": false,
+    "promptRecord": "c1-1-imagegen-prompt-used-2026-09-05-codex.txt"
+  },
+  "generationSizePx": [1254, 1254],
+  "shippedCanvasPx": [2560, 2560],
+  "groundExtentMetres": [97.6, 97.6],
+  "finalResolutionCmPerPx": 4.8,
+  "lightingIsotropy": {
+    "metric": "36-bin land-luminance-gradient magnitude peak divided by uniform-bin mean; delivered water-mask pixels and gradients below 12 luminance units excluded",
+    "peakVsUniformOverLand": 1.570343,
+    "uniformReference": 1.0,
+    "directionalKeyFirstMoment": 0.001929,
+    "gradientSamples": 1174498,
+    "aggregateDirectionalityNumericPass": true,
+    "strictEqualValueOnAllFormSidesVisualCheck": false,
+    "visualCheck": "No coherent cast-shadow field or whole-cell sun direction is visible, but basalt tops and conifer branch tiers remain lighter than adjacent vertical or lower faces. The aggregate metric does not override the literal equal-value rule."
+  },
+  "buildableVsSteepFraction": {
+    "basis": "manual estimated fraction of non-water land area at native source resolution",
+    "buildable": 0.36,
+    "steep": 0.16,
+    "otherTalusBrokenRockOrDenseVegetation": 0.48,
+    "method": "The pale northern ground, western glades, viaduct shoulders, and fallen-tree clearing count as buildable; exposed gorge faces count as steep; dense forest, talus, and broken mossy rock make up the remainder."
+  },
+  "waterFootprintFraction": 0.02171933,
+  "finalDerivedLandCoverageFraction": 0.97828067,
+  "crown": {
+    "medianMetres": 2.499,
+    "medianPx": 52.057,
+    "sampleCount": 38,
+    "method": "Full-frame native-resolution dark-conifer connected-component census of all 38 distinct crown components found, including saplings and edge crowns; median source width 25.5 px scaled by 2560/1254 and converted at 0.048 m per final pixel.",
+    "excludedElements": []
+  },
+  "waterMask": {
+    "filename": "c1-1-water-source.png",
+    "exactSizePx": [1254, 1254],
+    "format": "PNG RGBA",
+    "sha256": "178B250C435010AD0676506B4ABB7A4D89718CDAC1ACCA2FF796379C05EBBAE9",
+    "encoding": "opaque white water pixels on fully transparent non-water pixels; binary alpha",
+    "opaqueWaterPixels": 34154,
+    "transparentNonWaterPixels": 1538362,
+    "intermediateAlphaPixels": 0,
+    "nonWhiteOpaquePixels": 0,
+    "connectedComponents8": 3,
+    "componentNote": "The west-edge beck is visually detached from the two gorge-stream reaches; the gorge reaches are separated by the required dry rune slot.",
+    "interiorHolePixelsFilled": 100,
+    "interiorTransparentPixelsAfterFill": 0,
+    "boundsSourcePx": [0, 239, 815, 1253],
+    "edgeWaterPixels": {
+      "north": 0,
+      "east": 0,
+      "south": 23,
+      "west": 15
+    },
+    "method": "Native-resolution manual trace of every visible beck, pool, fall, wash, and gorge-stream surface, with a dry gap at the rune slot; enclosed holes were filled and the result inspected as a magenta overlay."
+  },
+  "constraintChecks": {
+    "squareAtLeast1254Px": true,
+    "singleWholeCanvasEditCall": true,
+    "secondReferenceAttached": true,
+    "rawGenerationUntouched": true,
+    "terrainOnly": true,
+    "highOblique2_5D": true,
+    "northEdgePaleAndTreeFree": true,
+    "westTransitionBroadAndGradual": true,
+    "southLandContinues": true,
+    "deepStandClearingAndFallenGiantPresent": true,
+    "twoGorgeFallsAndPoolsPresent": true,
+    "waterMaskSameDimensionsBinaryAndHoleFree": true,
+    "crownObjectComplete": true,
+    "crownMedianInsideAcceptedTerritoryBand": true,
+    "strictEqualValueOnAllFormSides": false,
+    "oneFlatValuePerCrown": false,
+    "runeReadsAsDarkBedrockSlot": false,
+    "westBeckConnectsContinuouslyToGorge": false,
+    "hazeClearlyVisibleOverAllCanopy": false
+  },
+  "refusalReasons": [
+    "The literal neutral-lighting rule fails by eye: basalt top planes and many crown branch tiers remain lighter than adjacent sides even though there is no coherent cast-shadow field.",
+    "Conifer crowns contain internal light-dark branch modelling rather than one flat value from tip to skirt.",
+    "The rune-chain cut reads as a raised stone-lined kerb or wall across much of the cell, and it appears to span the gorge instead of stopping at one lip and resuming on the far lip.",
+    "The west-edge beck remains visibly detached under the canopy before the main gorge stream, so the hydrology is not demonstrably continuous.",
+    "The requested grey-blue haze is too weak to soften every crown edge."
+  ],
+  "openRisks": [
+    "The dense east-side canopy reaches the edge through several broad runs and may reproduce the dark square seam the owner rejected.",
+    "The facing gorge shoulders exist as exposed rock, but their usable level area and separation are not mechanically established from this raster.",
+    "The water mask is mechanically binary, same-size, and hole-free, but exact wet-edge placement remains a human visual gate.",
+    "Nothing was promoted outside quarantine."
+  ],
+  "verificationLimits": [
+    "No content retry was made because the first result was square and the packet permits a retry only for a non-square output.",
+    "No stitch, bake, mount, public asset, art-source asset, or runtime command was run."
+  ]
+}
