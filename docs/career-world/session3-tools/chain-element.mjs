@@ -140,23 +140,29 @@ cd "${ROOT}"
 async function key(src, which) {
   const img = await sharp(src).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const W = img.info.width, H = img.info.height, d = img.data;
+  // the key colour is whatever the model actually used for the background —
+  // the corners say: magenta as asked, or black (the r3 kerb came on black)
+  const corner = (x, y) => { const o = (y * W + x) * 4; return [d[o], d[o + 1], d[o + 2]]; };
+  const cs = [corner(2, 2), corner(W - 3, 2), corner(2, H - 3), corner(W - 3, H - 3)];
+  const KEYC = cs.map((c) => c.join(",")).sort()[1].split(",").map(Number);   // a median-ish corner
+  const black = Math.max(...KEYC) < 30;
+  const near = black ? 14 : 40, far = black ? 40 : 90;
+  console.log(`  ${which}: key colour from the corners ${JSON.stringify(KEYC)} (${black ? "black" : "magenta"})`);
   let top = H, bottom = -1, n = 0;
   for (let y = 0; y < H; y += 1) for (let x = 0; x < W; x += 1) {
     const o = (y * W + x) * 4, r = d[o], g = d[o + 1], b = d[o + 2];
-    // magenta: red and blue high, green low; a soft halo is keyed by its distance from magenta
-    const dist = Math.hypot(255 - r, g, 255 - b);
-    let a = dist < 40 ? 0 : dist < 90 ? Math.round(255 * (dist - 40) / 50) : 255;
+    // a soft halo is keyed by its distance from the key colour
+    const dist = Math.hypot(KEYC[0] - r, KEYC[1] - g, KEYC[2] - b);
+    let a = dist < near ? 0 : dist < far ? Math.round(255 * (dist - near) / (far - near)) : 255;
     // the model paints moss and grass tufts round stone whatever the packet
     // says: green-hued, saturated pixels are not the element (the stone is
     // pale and grey, the groove dark) — they go, and so does the key's spill
     const mx = Math.max(r, g, b), mn = Math.min(r, g, b), sat = mx ? (mx - mn) / mx : 0;
     const green = g >= r && g >= b && sat > 0.28;
     if (green) a = 0;
-    if (a > 0 && a < 255) {   // despill: take the key's share out of a blended edge pixel
+    if (a > 0 && a < 255 && !black) {   // despill: take the key's share out of a blended edge pixel (a black key needs none — a dark edge reads as occlusion)
       const k = a / 255;
-      d[o] = Math.max(0, Math.min(255, Math.round((r - 255 * (1 - k)) / k)));
-      d[o + 2] = Math.max(0, Math.min(255, Math.round((b - 255 * (1 - k)) / k)));
-      d[o + 1] = Math.max(0, Math.min(255, Math.round(g / k)));
+      for (let c = 0; c < 3; c += 1) d[o + c] = Math.max(0, Math.min(255, Math.round((d[o + c] - KEYC[c] * (1 - k)) / k)));
     }
     d[o + 3] = a;
     if (a > 0) { n += 1; if (y < top) top = y; if (y > bottom) bottom = y; }
