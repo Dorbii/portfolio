@@ -4,7 +4,44 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-06 17:05 UTC, LATEST (current):** **SERVED 17:02Z (commit 2e53f695)
+**2026-09-07 02:45 UTC, LATEST (current):** **SERVED 17:43Z (commit
+9ebf0350) — THE SIX CHAIN CELLS ARE PLAIN LAND UNDER THE CHAIN LAYER;
+NOTHING IS RUNNING; HIS EYE IS THE NEXT STEP.** Owner 17:25 (his clock):
+*"the center tiles that had the old attempt at the chain still need regen
+cause now it just has conflicting chains with the overlay"*; 17:55: *"can I
+kick off the ocean work?"* → told yes, from 2e53f695 or the latest served
+commit (the later serves change no coast water). chain8 (c6-1 and c0-1
+plain regens: both refused, c0-1 on rock lighting 0.217 + 4 crossings) →
+**chain9** stitched the six plain regens on his words — c3-1, c5-1, c2-1,
+c1-1, c6-1, c0-1 (c0-1's crossings opened first with conform-seam-water
+against c0-6 / c1-1 / c0-0 / c0-2); the gates overridden (palette, tone,
+crossings, fringe, rock lighting) are recorded in each ledger entry's
+ownerOverride — and served 17:40-17:43Z: tone gains, the chain layer
+rebuilt over all 21 Tanium cells (the seven trunk cells; the trial hub's
+spokes through c4-1 and c2-2 / c3-2 / c4-2), 63 tiles registered, the 4
+candidate previews (c0-5, c1-3, c1-4, c4-8), mount + water fields, commit
+9ebf0350. The rebuilt overlays of c0-1 / c1-1 / c6-1 and chain9.sh's tracked
+copy: commit 948311e3 (02:40Z). The dev server on :3000 serves this
+worktree (c0-1's site webp hash matches the file). **Authored: NinjaOne
+20/20, Tanium 21/21, coast 22/27** (c8-4 stays sea by plan; the four bay
+cells are previewed candidates on the served world; c4-8's candidate keeps
+its painted lagoon opaque — the water-cut pass runs on authored cells only,
+so after an acceptance run `water-cut-pass.mjs --fix --only coast:c4-8`).
+Picture sent 02:45Z: `.codex-tmp/session4/island/island-grid-L2-chain.jpg`
+(mosaics rebuilt from the pyramid; `island-chain.mjs` lays the chain
+overlays on the Tanium mosaic before island-grid boxes it; marks: the four
+bay cells, T c3-0's trial hub). **His word wanted:** the four bay cells
+(refused on: c0-5 palette dBG 0.278; c1-3 4 crossings, band-conformed, tone
+23.1; c1-4 fringe 8.61% + 1 crossing + tone 24.7; c4-8 rock lighting 0.243,
+fringe 24.7%, 1 crossing) — accept on eye with CELL_OWNER_ACCEPT … `--redo
+--force`, or send back with a crop; the trial hub in T c3-0 (keep / move /
+drop) and where the spokes leave the trunk; the palette-gate recalibration
+(0.30 / 20) offered, unanswered; the kerb's leftover highlights if he minds.
+**Later:** the light on the groove (the effect layer), the land animation
+layer, the city, the stitch test (`tests/world-authoring-stitch.test.mjs`
+expects edit-target.jpg ±6 since lock 18d — not yet run with the lock free).
+
+**2026-09-06 17:05 UTC:** **SERVED 17:02Z (commit 2e53f695)
 — THE WORLD IS CURRENT FOR THE OCEAN THREAD; THE WATER-CUT PASS IS COMMITTED
 (c2f27814).** Owner 17:40-17:50 (his clock): "fix this spot [c7-8's shore]
 and do a full pass to make sure all the water of the land tiles is cut
