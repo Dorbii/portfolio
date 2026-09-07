@@ -1,0 +1,35 @@
+{
+  "baseCommit": "dd9cbe18",
+  "comparison": {
+    "waterTime": 45,
+    "afterOrigin": [
+      0.06429379924780901,
+      0.11464900431042029
+    ],
+    "beforeOrigin": [
+      0.07636644113891053,
+      0.11464900431042029
+    ],
+    "pixelShift": 107.99752270019748,
+    "overlap": [
+      802,
+      512
+    ],
+    "note": "Registered overlap; not a visual-quality score.",
+    "before": {
+      "visiblePixels": 255,
+      "coveredPixelArea": 108.05490196078448
+    },
+    "after": {
+      "visiblePixels": 702,
+      "coveredPixelArea": 284.61568627450976
+    }
+  },
+  "probe": {
+    "deepGateRemoved": true,
+    "glError": 0,
+    "pixelMetres": 0.16447921097278595,
+    "revision": "ocean-life-visibility-r7",
+    "time": "640.999,640.999"
+  }
+}

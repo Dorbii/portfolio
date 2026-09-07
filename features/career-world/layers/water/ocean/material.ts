@@ -114,7 +114,7 @@ vec3 oceanMaterial(vec2 p,float shore,vec2 shoreNormal,float time,float weather,
   substrate=sampleOceanSeabed(refracted,shelfDistance);
   vec3 bed=uBedShown>0.5?submergedRelief(substrate.albedo,substrate.normal,p/uWorldMetres):deep;
   bed=oceanDetailBottom(refracted,geography,depth,bed);
-  float swimmingDepth=min(depth*0.65,1.1+noise2(p*0.013+21.0)*1.6);
+  float swimmingDepth=min(depth*0.65,0.45+noise2(p*0.013+21.0)*0.70);
   vec4 life=vec4(0);
   if(uDetailPass>0.5&&geography.g>0.99) {
     vec2 lifeRefracted=p+(waterPaintVector(slope)+eventSlope)*swimmingDepth*0.5;

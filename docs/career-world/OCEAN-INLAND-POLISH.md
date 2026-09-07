@@ -1,6 +1,14 @@
 # Ocean / inland continuation — 2026-09-06
 
-## Latest owner revision — r6
+## Latest owner revision — r7
+
+Owner still rarely saw aquatic life after two density passes. The revision changes visibility, keeping the r6 population, size ranges and trajectories. Near-surface animals are no longer excluded over seabed deeper than 22 m. Swimming depth is now 0.45–1.15 m, capped by local depth; resolved small fish retain coverage sooner; flank/ray contrast is stronger and unresolved stripe detail is filtered. Land, water fields, reefs, wave behavior and shared camera/LoD are unchanged. Renderer revision: `ocean-life-visibility-r7`.
+
+Evidence is under `.codex-tmp/qa/life-readability-r7/`. At water time 45, the shared registered 802 x 512 overlap of isolated captures contains 255 -> 702 pixels with alpha >10; alpha-weighted coverage is 108.05 -> 284.62 pixels. This is mechanical visibility evidence, not visual acceptance. Viewport handling shifted the camera by about 108 px, so the comparison uses registered overlap rather than claiming identical full frames. The mis-scaled page captures from viewport setup are not visual proof. `aquatic-motion.webp` is a verified 20-frame, 633 x 356 lossless capture of normal motion; `motion.json` records identical cameras over 9.433 simulated seconds. The browser is restored to normal motion with temporary viewport overrides cleared.
+
+Live GPU readback confirms the deep-bottom gate is absent and GL error is zero. Typecheck/build and 41 focused tests pass; full suite remains 120 pass / 4 existing failures / 1 skipped. Current field provenance still passes. Review moving schools at normal coastal zoom before further density or size changes.
+
+## Previous owner revision — r6
 
 Owner requested remaining painted-water cutouts and more aquatic life. Eight source cells were repaired: six authored cells plus coast preview c1-4 and c4-8 (the first new screenshot). Candidate repairs are tracked under `art-source/career-world/water/cutout-sources/`; candidate status is unchanged. Source RGB is preserved; only alpha decreases. Gorge mist detected by the color heuristic was retained, with all NinjaOne land changes from that trial restored.
 

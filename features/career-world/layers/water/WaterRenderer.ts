@@ -89,7 +89,7 @@ export class WaterRenderer {
     canvas.dataset.floatTargets = String(Boolean(gl.getExtension("EXT_color_buffer_float")));
     this.scene = scene;
     delete canvas.dataset.gpuStageError;
-    canvas.dataset.surfaceRevision = "ocean-cutouts-life-r6";
+    canvas.dataset.surfaceRevision = "ocean-life-visibility-r7";
     let program: WebGLProgram | null = null;
     let vao: WebGLVertexArrayObject | null = null;
     let texture: WebGLTexture | null = null;

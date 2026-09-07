@@ -1588,3 +1588,15 @@ All program elements are shown; none was silently dropped. The diagram has `0` u
 - .codex-tmp/qa/water-cuts-r6/candidates-before.png and candidates-after.png: the two recorded previews before/after alpha repairs; all four retain candidate status.
 
 - .codex-tmp/qa/water-cuts-r6/life-0.png through life-4.png: isolated aquatic coverage changes over 0.781 simulated seconds at fixed 910 x 512 dimensions; all layer toggles restored.
+
+**Codex (r7 reframe, before implementation):** Owner still rarely sees aquatic life after two density passes. Increasing the count alone has not met the visual goal. At the current 910 px / 0.130923 span view, fish lengths resolve to about 1–3 pixels, the small-creature fade further suppresses them, and a seabed-depth >22 m condition removes even near-surface animals over deep water. Proposed visibility policy: separate surface-life eligibility from seabed depth, use a shallower optical swimming depth, preserve coverage for resolved silhouettes, and increase body/flank contrast. Keep population, world-space size ranges, trajectories, land/water coverage and shared camera/LoD unchanged. Verify with fixed-camera/time before/after captures plus normal-motion review.
+
+**Codex (r7 visibility delivery):** Removed the accidental deep-seabed exclusion for near-surface animals, reduced optical swimming depth to 0.45–1.15 m (local-depth capped), retained coverage for resolved small silhouettes, strengthened flanks/ray markings and filtered subpixel stripe detail. Population, size ranges and trajectories are unchanged. No land/field/reef/wave/shared-camera/LoD changes. Live GPU source contains the corrected policy, revision ocean-life-visibility-r7, GL error 0. Typecheck/build, field provenance and 41 focused tests pass; full suite 120 pass / 4 existing failures / 1 skipped. Visual acceptance remains with the owner.
+
+- .codex-tmp/qa/life-readability-r7/isolated-before.png and isolated-after.png: fixed water time 45; the shared 802 x 512 world overlap contains 255 -> 702 pixels with alpha >10. Cameras differ by approximately 108 pixels horizontally; registered-comparison.json accounts for that shift. This measures visibility, not artistic quality.
+
+- .codex-tmp/qa/life-readability-r7/motion-a.png and motion-b.png: the final surface-life policy in the normal browser view, with the land visible for scale.
+
+- .codex-tmp/qa/life-readability-r7/aquatic-motion.webp: 20 actual screenshots over 9.433 simulated seconds, exported losslessly at native crop resolution with measured timing. No interpolated movement. All layer toggles and normal time restored; temporary viewport overrides cleared.
+
+The mis-scaled page captures made during viewport setup are diagnostic artifacts, not visual evidence; use the normal-view frames and animated proof above.

@@ -7,7 +7,8 @@ float lifeOval(vec2 q,vec2 radii,float aa) {
   return 1.0-smoothstep(-aa/radii.y,aa/radii.y,d);
 }
 vec4 aquaticLife(vec2 p,float time,float depth) {
-  if(uAquaticLife<0.5||depth<1.0||depth>22.0||uPixelMetres>0.9)return vec4(0);
+  // These animals swim near the surface; deep seabed does not exclude them.
+  if(uAquaticLife<0.5||depth<1.0||uPixelMetres>0.9)return vec4(0);
   float alpha=0.0; vec3 color=vec3(0.025,0.065,0.07);
   vec2 cell=floor(p/19.0);
   for(int y=-1;y<=1;y++)for(int x=-1;x<=1;x++) {
@@ -39,7 +40,7 @@ vec4 aquaticLife(vec2 p,float time,float depth) {
       if(coverage>alpha) {
         alpha=coverage;
         float spots=pow(max(0.0,sin(q.x*31.0)*sin(q.y*27.0)),5.0);
-        color=mix(vec3(0.03,0.085,0.11),vec3(0.18,0.39,0.36),exp(-abs(q.y)*5.0)*0.5+spots*0.45);
+        color=mix(vec3(0.045,0.11,0.14),vec3(0.33,0.70,0.65),exp(-abs(q.y)*5.0)*0.5+spots*0.45);
       }
     } else {
       for(int i=0;i<10;i++) {
@@ -49,7 +50,7 @@ vec4 aquaticLife(vec2 p,float time,float depth) {
         float halfBody=lengthMetres*0.38;
         float girth=lengthMetres*(species<0.40?0.11:species<0.70?0.22:0.08);
         if(species>0.70)halfBody*=1.8;
-        float visible=smoothstep(0.65,2.3,lengthMetres/uPixelMetres);
+        float visible=smoothstep(0.5,1.5,lengthMetres/uPixelMetres);
         if(visible<0.01)continue;
         float stroke=time*(3.2+rate*35.0+individual*2.0)+f*1.7;
         vec2 offset=vec2((f-4.5)*0.62,sin(f*4.7+seed)*0.85);
@@ -67,9 +68,10 @@ vec4 aquaticLife(vec2 p,float time,float depth) {
         float coverage=max(max(silhouette,tail),fins)*0.9*visible;
         if(coverage>alpha) {
           alpha=coverage;
-          vec3 flank=species<0.40?vec3(0.35,0.55,0.56):species<0.70?vec3(0.42,0.30,0.63):vec3(0.13,0.45,0.38);
-          float stripe=species>0.40&&species<0.70?0.5+0.5*sin(fish.x/halfBody*9.0):1.0;
-          color=mix(vec3(0.025,0.085,0.095),flank,smoothstep(-girth,girth,fish.y)*mix(0.55,1.0,stripe));
+          vec3 flank=species<0.40?vec3(0.64,0.82,0.74):species<0.70?vec3(0.67,0.43,0.86):vec3(0.30,0.78,0.58);
+          float stripeDetail=smoothstep(3.0,7.0,lengthMetres/uPixelMetres);
+          float stripe=species>0.40&&species<0.70?mix(0.75,0.5+0.5*sin(fish.x/halfBody*9.0),stripeDetail):1.0;
+          color=mix(vec3(0.025,0.055,0.085),flank,smoothstep(-girth,girth,fish.y)*mix(0.55,1.0,stripe));
         }
       }
     }
