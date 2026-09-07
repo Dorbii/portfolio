@@ -41,7 +41,7 @@ clean (run with the main checkout's node_modules: `../../../node_modules/.bin/ts
 **Verified on the live server** (Browser pane, site detail over a Tanium
 beck with conifers): the sway canvas covered 3.75% of the viewport with
 crown pixels and 3,903 of them changed between two frames 450 ms apart
-(mean diff 2.8 at the first amplitude 0.05; raised to 0.085 after). **To
+(mean diff 2.8 at the first amplitude 0.05); after the raise to 0.085 and a fresh load: 84,960 covered, 9,920 moved, mean diff 5.6. Commits 3934c427, 832ac125, 9879eeb8 (the registry moved into the WebGL module so Vite fast-refreshes the component). **To
 review:** reload, zoom into any forest until the panel reads SITE DETAIL;
 the crowns move, the ground does not; OS reduced-motion turns it off.
 **Next in the phase** (his order, from the plan): fog over the gorge (N
