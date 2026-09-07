@@ -912,7 +912,10 @@ test("NinjaOne controls expose progressive map destinations without affecting la
     controls,
     /onClick=\{\(\) => onFocus\(destination\.id\)\}/,
   );
-  assert.match(
+  // the territory buttons are gone (owner 2026-09-07: "we dont use them
+  // anymore and its just noise on the screen now"); the camera is the wheel,
+  // the drag and the arrow keys
+  assert.doesNotMatch(
     controls,
     /territories\.map\([\s\S]*onClick=\{\(\) => onFocus\(territory\.id\)\}/,
   );
@@ -925,7 +928,7 @@ test("NinjaOne controls expose progressive map destinations without affecting la
   assert.match(controls, /<LandmarkLabels/);
   assert.match(controls, /data-landmark-label-count=/);
   assert.match(controls, /data-landmark-labels-visible=/);
-  assert.match(controls, /aria-pressed=\{showLandmarkLabels\}/);
-  assert.match(controls, /onClick=\{onToggleLandmarkLabels\}/);
-  assert.match(controls, />\s*Labels\s*</);
+  // and so is the Labels toggle (same ruling); the labels themselves stay
+  assert.doesNotMatch(controls, /aria-pressed=\{showLandmarkLabels\}/);
+  assert.doesNotMatch(controls, />\s*Labels\s*</);
 });
