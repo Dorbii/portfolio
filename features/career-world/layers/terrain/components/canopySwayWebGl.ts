@@ -192,14 +192,17 @@ export function createCanopySwayRenderer(gl: WebGL2RenderingContext): CanopySway
   if (attributes.position < 0 || attributes.uv < 0) {
     throw new Error("Canopy sway attributes are missing.");
   }
-  const uniform = (name: string) => {
+  // a uniform the shader stops using is optimised away and its location is
+  // null — that is not a fault (the light pass keeps u_texel for the warp's
+  // interface without reading it); only a missing sampler is
+  const uniform = (name: string, required = false) => {
     const location = gl.getUniformLocation(program, name);
-    if (!location) throw new Error(`Canopy sway uniform ${name} is missing.`);
+    if (!location && required) throw new Error(`Canopy sway uniform ${name} is missing.`);
     return location;
   };
   const uniforms = {
-    land: uniform("u_land"),
-    sway: uniform("u_sway"),
+    land: uniform("u_land", true),
+    sway: uniform("u_sway", true),
     texel: uniform("u_texel"),
     wind: uniform("u_wind"),
     motion: uniform("u_motion"),
@@ -340,7 +343,7 @@ export function createCanopySwayRenderer(gl: WebGL2RenderingContext): CanopySway
         ]);
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
         gl.bufferData(gl.ARRAY_BUFFER, quad, gl.DYNAMIC_DRAW);
-        gl.uniform2f(uniforms.texel, 1 / entry.land.width, 1 / entry.land.height);
+        if (uniforms.texel) gl.uniform2f(uniforms.texel, 1 / entry.land.width, 1 / entry.land.height);
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, entry.land.texture);
         gl.activeTexture(gl.TEXTURE1);

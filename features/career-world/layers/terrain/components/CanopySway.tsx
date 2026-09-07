@@ -69,7 +69,10 @@ export function CanopySway({ camera, registry }: CanopySwayProps) {
     let renderer: CanopySwayRenderer;
     try {
       renderer = createCanopySwayRenderer(gl);
-    } catch {
+    } catch (error) {
+      // never silent: a pass that fails to build reads as "no motion" to the owner
+      console.warn("Canopy sway pass disabled:", error);
+      canvas.dataset.motionMode = "failed";
       return;
     }
     const wind = windVectorFromDegrees(DEFAULT_WORLD_WIND_STATE.directionDegrees);

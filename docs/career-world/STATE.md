@@ -32,7 +32,7 @@ as a luminance gain (up to +16% at the tops, +5% flutter, −5% lee) with a
 touch of cool as the needles turn; weight = the tops catch more. The field
 (sway-field.mjs v2: R local-foot weight, G height/2, B phase, A coverage) is
 unchanged and still serves. Same pass, registry, camera mapping, health
-attributes. **The blur:** the site tiles are 2048 px per cell; the camera's
+attributes. (First served silent: the light shader stopped reading u_texel, the compiler dropped it, getUniformLocation returned null and the strict lookup threw inside a swallowed catch — no motion, no error. Now only the samplers are required, and a pass that fails to build warns on the console and sets data-motion-mode=failed.) Verified 23:20Z on a moor with conifers at site detail: 2 tiles, 101,096 crown pixels covered, 0 failures, a gust front changing 2.6% of them by >12 luma levels in a 500 ms sample. **The blur:** the site tiles are 2048 px per cell; the camera's
 minimum span 0.02 puts ~3 device px on one painted texel on his display
 (1004 css px at dpr 2); 1:1 is span ≈ 0.06. The change is two constants,
 `shared/camera.ts` CAMERA_MINIMUM_SPAN and its typed mirror in
