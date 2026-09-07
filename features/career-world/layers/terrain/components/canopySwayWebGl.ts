@@ -62,7 +62,8 @@ void main() {
     + 0.35 * sin(u_time * rate * 2.31 + phase * 1.7 + v_uv.y * 9.0);
   // gusts roll across the tile, so neighbours do not all lean at once
   float gust = 0.5 + 0.5 * sin(u_time * 0.29 + phase * 0.4 + (v_uv.x * u_wind.x + v_uv.y * u_wind.y) * 5.0);
-  float amplitude = clamp(0.05 * height, 0.8, 5.0) * u_motion;
+  // a crown's top travels about a twelfth of its height in the world's wind
+  float amplitude = clamp(0.085 * height, 1.0, 8.0) * u_motion;
   vec2 shift = u_wind * amplitude * weight * swing * (0.4 + 0.6 * gust);
   shift.y *= 0.35;
   vec4 land = texture(u_land, v_uv - shift * u_texel);

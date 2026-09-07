@@ -4,7 +4,54 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-07 16:00 UTC, LATEST (current):** **SERVED 15:56Z (commit
+**2026-09-07 16:45 UTC, LATEST (current):** **THE FOLIAGE PHASE HAS BEGUN:
+CANOPY SWAY IS LIVE ON THE DEV SERVER (commit 3934c427 + the amplitude
+commit after it).** Owner 15:58 (his clock), on the standing stones: *"that
+works go ahead and commit that then we can do the foliage animation and
+detail work before the city step"*. The plan's item 2 (canopy sway from the
+crown masks over the BAKED pixels, no sprites, no regeneration; reduced
+motion respected; above land, below structures) is built as two halves.
+**Data — `sway-field.mjs`** (tracked): per authored cell, the conifer
+crowns are found in the land layer (dark saturated green, hue 60-170, sat >
+0.28, luma < 95, needle texture = 9x9 luma sd > 9, closed by 2 px, blobs >=
+150 px) and written as a FIELD at 1024 px: R = the weight up the crown (0
+at its foot, 255 at its top), G = crown height / 2, B = a phase per crown,
+A = coverage (the crown + a 4-px soft ring so no static edge shows behind
+a moving one) → `art-source/…/<id>-sway.png` and
+`public/…/tiles/l2-<t>/<id>-sway.webp` (63 cells, 3,497 crowns, 4.1 MB;
+T c1-1 37% of the cell, T c2-1 293 crowns; shore cells 0-1). Probe sheet
+`.codex-tmp/session5/canopy-probe.jpg`. **Runtime — the terrain layer
+(land-owned):** `components/canopySwayWebGl.ts` (a WebGL2 pass: per
+resident site-tier tile a quad over its screen rect, the fragment reads the
+field and samples the land texture displaced downwind by weight × amplitude
+(0.085 × crown height, 1-8 texels, × wind motion 0.68) × a per-crown swing
+(rate 2.6/(1 + h/36) so pines swing slowly and saplings flutter) × a rolling
+gust; pixels outside the coverage are discarded; textures cached per tile
+and evicted 4 s after the camera leaves) and `components/CanopySway.tsx`
+(its own animation frame; draws nothing under prefers-reduced-motion, while
+the page is hidden, when the site tier is not showing, or when 8 texels
+would move under a quarter of a screen pixel; `data-motion-mode`
+idle/animating/reduced). **`TerritoryLandform.tsx`** publishes the site-tier
+tiles it drew this frame (key, image, world bounds, the `-sway.webp` path;
+l2-review candidates skipped) plus the site opacity and its backing-store
+size into a registry ref, and mounts `<CanopySway>` after its canvas (a
+fragment; same classes, so it sits over the land canvas at z-index 3, under
+the water). The two ocean-owned files are untouched. Typecheck and lint
+clean (run with the main checkout's node_modules: `../../../node_modules/.bin/tsc`).
+**Verified on the live server** (Browser pane, site detail over a Tanium
+beck with conifers): the sway canvas covered 3.75% of the viewport with
+crown pixels and 3,903 of them changed between two frames 450 ms apart
+(mean diff 2.8 at the first amplitude 0.05; raised to 0.085 after). **To
+review:** reload, zoom into any forest until the panel reads SITE DETAIL;
+the crowns move, the ground does not; OS reduced-motion turns it off.
+**Next in the phase** (his order, from the plan): fog over the gorge (N
+c3-1 first), the floating islands warped in place (masked bob and
+breathing), the rune chain's travelling light (the lighting layer, along
+rune-chain.def.json), foliage detail. **Still wanted from him:** the four
+bay cells; the henge's place and the spokes' long lines; the palette-gate
+recalibration.
+
+**2026-09-07 16:00 UTC:** **SERVED 15:56Z (commit
 bfecd0ab) — THE CHAIN'S RUNES ARE STANDING STONES ROOTED IN THE LAND.**
 Owner 03:20 (his clock), on the fitted discs: *"These runes need to look like
 they are part of the land not stones on top of it. Think like stonehedge"*.
