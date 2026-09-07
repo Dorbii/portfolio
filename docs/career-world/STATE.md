@@ -4,7 +4,34 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-07 02:45 UTC, LATEST (current):** **SERVED 17:43Z (commit
+**2026-09-07 03:15 UTC, LATEST (current):** **SERVED 03:12Z (commit
+e1f47311) — THE CHAIN LAYER FITTED TO THE WORLD'S VIEW AND SCALE.** Owner
+02:50 (his clock), on four crops of the served hub, leaders and panels: *"I
+think the main issue here is perspective and scale"*. Diagnosis: the canon is
+a high oblique (cell.mjs: "High oblique 2.5D … Not top-down") — the crater
+tarn in N c1-0 measures 455 x 330 px, so a ground circle is an ellipse 0.73
+as tall as wide — while the discs came from image_gen as top-down coins
+(true circles, a rim all round, spike stubs where the cluster's scratches
+were cut off; the hub = the leader x1.8) at 5-15 m, three times the world's
+boulders; the hub's face carried a 16-px checker from the per-block texture
+mean in the bedding. **build-chain-layer.mjs:** at load, prepDisc fits each
+disc to its own circle (radius = the 35th percentile of edge distances from
+the centroid; the stubs are the tail), crops, foreshortens to VIEW_ASPECT
+0.73 and sizes it to the groove (LEADER_PX 90, HUB_PX 170); prepNode splits
+the node element into its 7 panels, scales each x0.55 (x0.73 tall) about
+its own centre, spread x0.8; the panels are now bedded by stamp() like the
+discs (rim band 5 px; leader 8; hub 12 — `rim` parameter, or a small stone
+is all rim); texAt is bilinear (the checker is gone); spokes are the groove
+at 0.85 (0.6 read as a drawn line). Before/after pairs sent 03:10Z
+(`island/pair-c3-1-node.jpg`, `pair-c3-0-hub.jpg`, `pair-c4-1-plateau.jpg`).
+Not touched: the c4-1 leader at x 4.8 sits on the plateau's cliff edge and
+the trunk crosses the column face there (the cliff fade does not fire on
+column tops) — placement is his (route.hubs[0].leaders), or a stronger
+cliff test; the top-centre panel of a node straddles the spoke. Still
+wanted from him: the four bay cells; the hub keep/move/drop; the
+palette-gate recalibration.
+
+**2026-09-07 02:45 UTC:** **SERVED 17:43Z (commit
 9ebf0350) — THE SIX CHAIN CELLS ARE PLAIN LAND UNDER THE CHAIN LAYER;
 NOTHING IS RUNNING; HIS EYE IS THE NEXT STEP.** Owner 17:25 (his clock):
 *"the center tiles that had the old attempt at the chain still need regen

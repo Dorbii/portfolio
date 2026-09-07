@@ -49,7 +49,75 @@ const kerb = await sharp(KERB).ensureAlpha().raw().toBuffer({ resolveWithObject:
 const KW = kerb.info.width, KH = kerb.info.height;
 const sidecar = (f) => { const j = f.replace(/\.png$/, ".json"); return fs.existsSync(j) ? JSON.parse(fs.readFileSync(j, "utf8")) : null; };
 const KA = sidecar(KERB)?.anchorRow ?? Math.round(KH / 2);   // the groove's row in the element: it sits on the route
-const node = fs.existsSync(NODE) ? await sharp(NODE).ensureAlpha().raw().toBuffer({ resolveWithObject: true }) : null;
+// THE WORLD'S VIEW (owner 2026-09-07 02:50, on the served hub and leaders:
+// "the main issue here is perspective and scale"): the canon is a high
+// oblique — a circle on the ground is an ellipse about 0.73 as tall as it is
+// wide (the crater tarn in N c1-0 measures 455 x 330 px) — and the elements
+// came from image_gen as top-down coins: true circles, a rim all the way
+// round, spike stubs where the cluster's scratches were cut off. So every
+// disc is fitted to its own circle (the stubs go), foreshortened to the view
+// and sized to the groove: a panel a little wider than the groove is tall, a
+// leader two grooves, the hub four. The panels keep their spread (each
+// shrinks about its own centre; the arrangement tightens a little).
+const VIEW_ASPECT = 0.73;
+const LEADER_PX = 90, HUB_PX = 170, PANEL_SCALE = 0.55, PANEL_LAYOUT = 0.8, SPOKE_SCALE = 0.85;
+const rawOf = (img) => img.ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+async function prepDisc(file, targetW) {
+  if (!fs.existsSync(file)) return null;
+  const el = await rawOf(sharp(file));
+  const EW = el.info.width, EH = el.info.height, d = el.data;
+  const solid = (x, y) => x >= 0 && y >= 0 && x < EW && y < EH && d[(y * EW + x) * 4 + 3] > 64;
+  let sx = 0, sy = 0, n = 0;
+  for (let y = 0; y < EH; y += 1) for (let x = 0; x < EW; x += 1) if (solid(x, y)) { sx += x; sy += y; n += 1; }
+  const cx = sx / n, cy = sy / n, dists = [];
+  for (let y = 0; y < EH; y += 1) for (let x = 0; x < EW; x += 1) if (solid(x, y) && !(solid(x - 1, y) && solid(x + 1, y) && solid(x, y - 1) && solid(x, y + 1))) dists.push(Math.hypot(x - cx, y - cy));
+  dists.sort((a, b) => a - b);
+  const r = dists[Math.floor(dists.length * 0.35)];       // the disc's own radius: the stubs are the far tail of the edge distances
+  const cut = Buffer.from(d);
+  for (let y = 0; y < EH; y += 1) for (let x = 0; x < EW; x += 1) {
+    const dd = Math.hypot(x - cx, y - cy) - r, o = (y * EW + x) * 4;
+    if (dd > 1.5) cut[o + 3] = 0; else if (dd > -0.5) cut[o + 3] = Math.round(cut[o + 3] * (1.5 - dd) / 2);
+  }
+  const L = Math.max(0, Math.round(cx - r - 2)), T = Math.max(0, Math.round(cy - r - 2));
+  const S = Math.min(EW - L, EH - T, Math.round(2 * r + 4));
+  const w = targetW, h = Math.round(targetW * VIEW_ASPECT);
+  const res = await rawOf(sharp(cut, { raw: { width: EW, height: EH, channels: 4 } }).extract({ left: L, top: T, width: S, height: S }).resize(w, h, { kernel: "lanczos3" }));
+  console.log(`  ${path.basename(file)}: a disc of r ${r.toFixed(0)} px in ${EW} x ${EH} → ${w} x ${h} (view ${VIEW_ASPECT})`);
+  return res;
+}
+async function prepNode(file) {
+  if (!fs.existsSync(file)) return null;
+  const el = await rawOf(sharp(file));
+  const EW = el.info.width, EH = el.info.height, d = el.data;
+  const lab = new Int32Array(EW * EH), comps = [], stack = [];
+  for (let p = 0; p < EW * EH; p += 1) {
+    if (d[p * 4 + 3] <= 64 || lab[p]) continue;
+    const id = comps.length + 1; let minx = EW, maxx = 0, miny = EH, maxy = 0, n = 0;
+    stack.push(p); lab[p] = id;
+    while (stack.length) {
+      const q = stack.pop(); const x = q % EW, y = (q - x) / EW; n += 1;
+      if (x < minx) minx = x; if (x > maxx) maxx = x; if (y < miny) miny = y; if (y > maxy) maxy = y;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= EW || yy >= EH) continue; const r = yy * EW + xx; if (!lab[r] && d[r * 4 + 3] > 64) { lab[r] = id; stack.push(r); } }
+    }
+    comps.push({ id, minx, maxx, miny, maxy, n });
+  }
+  const panels = comps.filter((c) => c.n >= 400);          // the panels; crumbs go
+  const layers = [];
+  for (const c of panels) {
+    const bw = c.maxx - c.minx + 1, bh = c.maxy - c.miny + 1, buf = Buffer.alloc(bw * bh * 4);
+    for (let y = 0; y < bh; y += 1) for (let x = 0; x < bw; x += 1) { const p = (c.miny + y) * EW + c.minx + x; if (lab[p] === c.id) buf.set(d.subarray(p * 4, p * 4 + 4), (y * bw + x) * 4); }
+    const w = Math.max(1, Math.round(bw * PANEL_SCALE)), h = Math.max(1, Math.round(bh * PANEL_SCALE * VIEW_ASPECT));
+    const png = await sharp(buf, { raw: { width: bw, height: bh, channels: 4 } }).resize(w, h, { kernel: "lanczos3" }).png().toBuffer();
+    const ccx = (c.minx + c.maxx) / 2, ccy = (c.miny + c.maxy) / 2;
+    const nx = EW / 2 + (ccx - EW / 2) * PANEL_LAYOUT, ny = EH / 2 + (ccy - EH / 2) * PANEL_LAYOUT;
+    layers.push({ input: png, left: Math.max(0, Math.round(nx - w / 2)), top: Math.max(0, Math.round(ny - h / 2)) });
+  }
+  const res = await rawOf(sharp({ create: { width: EW, height: EH, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } }).composite(layers));
+  console.log(`  ${path.basename(file)}: ${panels.length} panels (of ${comps.length} parts) scaled x${PANEL_SCALE}, foreshortened ${VIEW_ASPECT}, spread x${PANEL_LAYOUT}`);
+  return res;
+}
+const node = await prepNode(NODE);
+const leaderPrepped = await prepDisc(LEADER, LEADER_PX), hubPrepped = await prepDisc(HUB, HUB_PX);
 fs.mkdirSync(OUT, { recursive: true });
 // every Tanium cell gets a pass: the trunk's row, and any cell a hub or a spoke
 // falls in (the per-cell drawing clips itself; an empty overlay is not written)
@@ -235,11 +303,15 @@ for (const [col, row] of cellsToDo) {
     }
     texMean[ty * TN + tx] = n ? s / n : 0; texStd[ty * TN + tx] = n ? Math.sqrt(Math.max(0, s2 / n - (s / n) ** 2)) : 0;
   }
-  const texAt = (arr, x, y) => arr[Math.min(TN - 1, Math.floor(y / TX)) * TN + Math.min(TN - 1, Math.floor(x / TX))];
+  const texAt = (arr, x, y) => {                           // bilinear: a per-block value printed a 16-px checker on the hub's face (owner's crop, 2026-09-07)
+    const fx = Math.min(TN - 1, Math.max(0, x / TX - 0.5)), fy = Math.min(TN - 1, Math.max(0, y / TX - 0.5));
+    const x0 = Math.floor(fx), y0 = Math.floor(fy), x1 = Math.min(TN - 1, x0 + 1), y1 = Math.min(TN - 1, y0 + 1), tx = fx - x0, ty = fy - y0;
+    return arr[y0 * TN + x0] * (1 - tx) * (1 - ty) + arr[y0 * TN + x1] * tx * (1 - ty) + arr[y1 * TN + x0] * (1 - tx) * ty + arr[y1 * TN + x1] * tx * ty;
+  };
   const CLIFF_LO = 34, CLIFF_HI = 52;                      // luma sd: below = ground, above = a cliff face
   const cliffFade = (x, y) => { const sd = texAt(texStd, x, y); return sd <= CLIFF_LO ? 1 : sd >= CLIFF_HI ? 0 : 1 - (sd - CLIFF_LO) / (CLIFF_HI - CLIFF_LO); };
   const grain = (x, y) => { const p = landPx(x, y), m = texAt(texMean, x, y); return m > 0 ? (lumaOf(p[0], p[1], p[2]) - m) / m : 0; };   // the land's high-frequency, about ±0.3
-  const stamp = (el, cxCell, cyCell) => {       // a disc BEDDED into the land: its rim takes the ground's hue, its face the ground's grain, feathered, with an occlusion ring
+  const stamp = (el, cxCell, cyCell, rim = 12) => {   // rim: the band (px) over which the ground's hue takes the edge — narrower for small stones, or a panel is all rim       // a disc BEDDED into the land: its rim takes the ground's hue, its face the ground's grain, feathered, with an occlusion ring
     if (!el) return;
     const EW = el.info.width, EH = el.info.height, x0 = Math.round(cxCell) - Math.round(EW / 2), y0 = Math.round(cyCell) - Math.round(EH / 2);
     // distance to the element's edge (up to 16 px) by erosion passes
@@ -270,7 +342,7 @@ for (const [col, row] of cellsToDo) {
       if (a === 0) continue;
       let er = el.data[eo], eg = el.data[eo + 1], eb = el.data[eo + 2];
       if (ground) {
-        const t = dd <= 12 ? 0.55 - 0.4 * (dd / 12) : 0.15;              // the rim takes the ground's hue, the face a little
+        const t = dd <= rim ? 0.55 - 0.4 * (dd / rim) : 0.15;              // the rim takes the ground's hue, the face a little
         const el2 = lumaOf(er, eg, eb), k = el2 / groundL;
         er = Math.round(er * (1 - t) + Math.min(255, ground[0] * k) * t); eg = Math.round(eg * (1 - t) + Math.min(255, ground[1] * k) * t); eb = Math.round(eb * (1 - t) + Math.min(255, ground[2] * k) * t);
       }
@@ -309,8 +381,7 @@ for (const [col, row] of cellsToDo) {
       }
     }
   };
-  const hubEl = fs.existsSync(HUB) ? await sharp(HUB).ensureAlpha().raw().toBuffer({ resolveWithObject: true }) : null;
-  const leaderEl = fs.existsSync(LEADER) ? await sharp(LEADER).ensureAlpha().raw().toBuffer({ resolveWithObject: true }) : null;
+  const hubEl = hubPrepped, leaderEl = leaderPrepped;      // fitted to the view once, at load
   const toLocal = (gx, gy) => [(gx - col) * CELL, (gy - row) * CELL];
   for (const hub of route.hubs || []) {
     const [hx, hy] = toLocal(hub.at[0], hub.at[1]);
@@ -324,8 +395,8 @@ for (const [col, row] of cellsToDo) {
       const leaderR = leaderEl ? leaderEl.info.width / 2 : 0;
       const sx = ax + ux * (leaderR * 0.6), sy = ay + uy * (leaderR * 0.6), ex = hx - ux * (hubR * 0.85), ey = hy - uy * (hubR * 0.85);
       const inThisCell = (x, y) => x >= -CELL && y >= -CELL && x <= 2 * CELL && y <= 2 * CELL;
-      if (inThisCell(sx, sy) || inThisCell(ex, ey) || inThisCell((sx + ex) / 2, (sy + ey) / 2)) strokeSlot(sx, sy, ex, ey, 0.6);
-      if (Math.floor(lx) === col && Math.floor(ly) === row) stamp(leaderEl, ax, ay);
+      if (inThisCell(sx, sy) || inThisCell(ex, ey) || inThisCell((sx + ex) / 2, (sy + ey) / 2)) strokeSlot(sx, sy, ex, ey, SPOKE_SCALE);
+      if (Math.floor(lx) === col && Math.floor(ly) === row) stamp(leaderEl, ax, ay, 8);
     }
     if (Math.floor(hub.at[0]) === col && Math.floor(hub.at[1]) === row) stamp(hubEl, hx, hy);
     if ((hub.leaders || []).some((lx) => Math.floor(lx) === col) || (Math.floor(hub.at[0]) === col && Math.floor(hub.at[1]) === row)) console.log(`  ${id}: hub at [${hub.at}] with ${hub.leaders.length} leader(s) — spokes drawn where they cross this cell`);
@@ -333,20 +404,7 @@ for (const [col, row] of cellsToDo) {
   // the nodes: the panel element centred on the node, over the kerb, masked by land
   for (const n of route.nodes || []) {
     if (!node || n.cell[0] !== col || n.cell[1] !== row) continue;
-    const NW = node.info.width, NH = node.info.height;
-    const cx = Math.round((n.at[0] - col) * CELL), cy = Math.round((n.at[1] - row) * CELL);
-    const x0 = cx - Math.round(NW / 2), y0 = cy - Math.round(NH / 2);   // integer origin: a fractional index writes nothing into a Buffer
-    for (let ny = 0; ny < NH; ny += 1) for (let nx = 0; nx < NW; nx += 1) {
-      const x = x0 + nx, y = y0 + ny;
-      if (x < 0 || y < 0 || x >= CELL || y >= CELL) continue;
-      const no = (ny * NW + nx) * 4, a = node.data[no + 3];
-      if (a === 0) continue;
-      const lo = ((lb + y) * LW + lb + x) * 4;
-      if (land.data[lo + 3] < 128) continue;
-      const o = (y * CELL + x) * 4, k = a / 255;
-      for (let c = 0; c < 3; c += 1) out[o + c] = Math.round(node.data[no + c] * k + out[o + c] * (1 - k));
-      out[o + 3] = Math.max(out[o + 3], a);
-    }
+    stamp(node, (n.at[0] - col) * CELL, (n.at[1] - row) * CELL, 5);   // bedded like the discs: the rim takes the ground's hue, the face its grain, an occlusion ring
   }
   const file = path.join(OUT, `tanium-${id}-chain.png`);
   let n = 0; for (let i = 3; i < out.length; i += 4) if (out[i] > 0) n += 1;
