@@ -9,11 +9,11 @@ float lifeOval(vec2 q,vec2 radii,float aa) {
 vec4 aquaticLife(vec2 p,float time,float depth) {
   if(uAquaticLife<0.5||depth<1.0||depth>22.0||uPixelMetres>0.9)return vec4(0);
   float alpha=0.0; vec3 color=vec3(0.025,0.065,0.07);
-  vec2 cell=floor(p/25.0);
+  vec2 cell=floor(p/19.0);
   for(int y=-1;y<=1;y++)for(int x=-1;x<=1;x++) {
     vec2 id=cell+vec2(float(x),float(y));
     float seed=hash21(id+vec2(71.0,13.0));
-    if(seed<0.36)continue;
+    if(seed<0.20)continue;
     float species=hash21(id+vec2(8.3,41.9));
     float rate=mix(0.025,0.145,hash21(id+9.7));
     float dart=species<0.40?0.90:0.22;
@@ -21,7 +21,7 @@ vec4 aquaticLife(vec2 p,float time,float depth) {
     float beat=time*0.85+seed*TAU;
     float angle=rate*(time+dart*sin(beat)/0.85)+seed*TAU;
     vec2 orbit=species>0.90?vec2(6.7,4.3):vec2(5.2,3.4);
-    vec2 center=(id+0.5)*25.0+vec2(cos(angle),sin(angle))*orbit;
+    vec2 center=(id+0.5)*19.0+vec2(cos(angle),sin(angle))*orbit;
     vec2 delta=p-center;
     if(dot(delta,delta)>42.0)continue;
     vec2 forward=normalize(vec2(-sin(angle)*orbit.x,cos(angle)*orbit.y));
@@ -42,7 +42,7 @@ vec4 aquaticLife(vec2 p,float time,float depth) {
         color=mix(vec3(0.03,0.085,0.11),vec3(0.18,0.39,0.36),exp(-abs(q.y)*5.0)*0.5+spots*0.45);
       }
     } else {
-      for(int i=0;i<7;i++) {
+      for(int i=0;i<10;i++) {
         float f=float(i),individual=hash21(id+vec2(f*4.7,31.0));
         if(species>0.70&&i>1)break;
         float lengthMetres=mix(0.26,0.72,individual*individual);
@@ -52,7 +52,7 @@ vec4 aquaticLife(vec2 p,float time,float depth) {
         float visible=smoothstep(0.65,2.3,lengthMetres/uPixelMetres);
         if(visible<0.01)continue;
         float stroke=time*(3.2+rate*35.0+individual*2.0)+f*1.7;
-        vec2 offset=vec2((f-3.0)*0.62,sin(f*4.7+seed)*0.85);
+        vec2 offset=vec2((f-4.5)*0.62,sin(f*4.7+seed)*0.85);
         offset+=vec2(sin(time*(0.5+individual)+f)*0.16,cos(time*0.8+f)*0.12);
         vec2 fish=q-offset;
         if(abs(fish.x)>halfBody*2.0+aa||abs(fish.y)>girth*2.5+aa)continue;

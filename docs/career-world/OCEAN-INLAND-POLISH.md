@@ -1,5 +1,15 @@
 # Ocean / inland continuation — 2026-09-06
 
+## Latest owner revision — r6
+
+Owner requested remaining painted-water cutouts and more aquatic life. Eight source cells were repaired: six authored cells plus coast preview c1-4 and c4-8 (the first new screenshot). Candidate repairs are tracked under `art-source/career-world/water/cutout-sources/`; candidate status is unchanged. Source RGB is preserved; only alpha decreases. Gorge mist detected by the color heuristic was retained, with all NinjaOne land changes from that trial restored.
+
+The large basin in the second screenshot was already a land cutout. A too-wide sea-clearance heuristic rendered it as a river. Rocky marine inlets now use a smaller clearance, while the established broad-sea handoff protects explicit river/fall annotations. Registered feature-point comparison finds no unintended inland-to-ocean changes. Increased aquatic school occupancy, density and group size; creature scale and motion profiles are unchanged. Current renderer revision: `ocean-cutouts-life-r6`.
+
+Final field input: `16b7fcde51419c352b66d2fd18e3c0994af215e5060bbf3296af80af77baf4e9`. All 67 mounted cells and 82 inland features remain represented, with 33 mapped falls and 26 deferred annotations. Source mechanics: `water-polish-reference/cutout-verification-r6.json`. Runtime proof: `.codex-tmp/qa/water-cuts-r6/`. Focused 41/41, typecheck/build, current-field and protected-tool checks pass; full suite 120 pass / 4 existing failures / 1 skipped.
+
+Cut repairs use `water-cut-pass.mjs --backup-dir` and the existing restitch pipeline. Preview repairs use `mount-candidates.mjs --recorded --tone art-source/career-world/tone-gains-r1.json`; this verifies recorded source hashes and preserves other review assets. Do not blindly run the land lane's serve shell script: it changes working directory and recalculates tone/chain data. This pass preserved the existing tone table and restored six unrelated Tanium served cells after the broad export. Below is the prior r5 checkpoint and its history.
+
 ## Objective
 
 Continue in `C:/Users/Steve/.codex/worktrees/ocean-inland-polish/portfolio`, branch `codex/ocean-inland-polish`: fit water to the completed coast, polish the ocean, then finish inland mapping and visuals. Owner's six reference crops are preserved in `water-polish-reference/owner-1.png` through `owner-6.png` (first three: unwanted wave texture; last three: coastal opportunities).

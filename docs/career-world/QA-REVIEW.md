@@ -1572,3 +1572,19 @@ All program elements are shown; none was silently dropped. The diagram has `0` u
 - `.codex-tmp/qa/ocean-inland-polish/world-final.png`: reverse zoom returns to the complete mounted island with current water fields.
 
 **Codex (final scope/gates):** Retained main's frozen camera/world/LoD files; excluded the land merge's unrelated LoD timing changes. Final review-final.png and refreshed world-final.png use that policy. Final gates: focused 39/39; typecheck and build pass; full suite 118 pass / 4 existing failures / 1 skip, lint 0 errors / 30 warnings. review-final.json reports ready, current field revision, no pending field loads. Worktree continuation and visual limitations are recorded in OCEAN-INLAND-POLISH.md.
+
+**Codex (water-cuts/life r6, 2026-09-06):** Owner directly requested cutting remaining land-painted water and more aquatic life. First screenshot is coast preview c4-8; c1-4 also retained painted water. Repaired both recorded candidate L2 sources without promotion and rebuilt their previews. Six authored source cells also had water-only remnants cut (T c4-2/c6-1/c6-2, C c1-8/c6-0/c7-8). Decoded source checks: RGB unchanged, alpha never increased. N c3-1 detector hits are gorge mist; its source and derived land were restored unchanged. Report: water-polish-reference/cutout-verification-r6.json.
+
+**Codex (r6 diagnosis/flow):** The second screenshot's basin was already transparent land: hiding L1 exposed the complete hole. The 8 m bank/rock clearance rule misclassified the narrow coastal basin as a river. The geometric sea seed now uses 3 m clearance, with the prior broad-sea handoff retained when applying explicit inland annotations. Tests reproduce the inlet failure and protect narrow streams, closed pools, explicit inland flow and geometry. Before/after registered feature-point comparison has no unintended inland-to-ocean changes. Shoal spacing/occupancy/group count increased; size, silhouettes and motion profiles retained.
+
+**Codex (r6 delivery):** Current 67-cell fields and 33-fall atlas rebuilt; 82 inland features retained and the 26 deferred annotations remain deferred. Protected authoring scripts unchanged. Unrelated re-serve outputs for six unchanged Tanium cells were restored to the checkpoint; the existing tone table was not recalculated. Candidate source repairs use the recorded-source mode of mount-candidates.mjs; it checks source hashes and leaves unrelated review assets alone. Native child execution replaces the cut helper's Bash/error-swallowing restitch call. Field provenance/protected-tool checks, typecheck/build, and 41 focused tests pass; full suite 120 pass / 4 existing failures / 1 skipped.
+
+- .codex-tmp/qa/water-cuts-r6/reported-basin-before.png and reported-basin-after.png: identical camera; the flat teal basin now has marine depth/surface response, with its land cutout unchanged.
+
+- .codex-tmp/qa/water-cuts-r6/water-off-diagnostic.png: disabling L1 exposes the existing basin openings; these large areas were not painted land.
+
+- .codex-tmp/qa/water-cuts-r6/reported-paint-after.png: runtime coast c4-8 after the actual painted-water cutout repair.
+
+- .codex-tmp/qa/water-cuts-r6/candidates-before.png and candidates-after.png: the two recorded previews before/after alpha repairs; all four retain candidate status.
+
+- .codex-tmp/qa/water-cuts-r6/life-0.png through life-4.png: isolated aquatic coverage changes over 0.781 simulated seconds at fixed 910 x 512 dimensions; all layer toggles restored.

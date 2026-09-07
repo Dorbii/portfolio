@@ -14,12 +14,14 @@
 //
 //   node docs/career-world/session3-tools/water-cut-pass.mjs [--fix] [--min 1500] [--only tanium:c0-0,...] [--sheet out.jpg]
 import fs from "node:fs";
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
+import path from "node:path";
 import sharp from "sharp";
 sharp.cache(false);
 const arg = (f, d) => { const i = process.argv.indexOf(f); return i >= 0 ? process.argv[i + 1] : d; };
 const FIX = process.argv.includes("--fix"), MIN = Number(arg("--min", 1500)), SHEET = arg("--sheet");
 const ONLY = (arg("--only", "") || "").split(",").filter(Boolean);
+const BACKUP_DIR = arg("--backup-dir");
 const ART = "art-source/career-world/l2-land", A = "public/career-world/layers/terrain/authority";
 const GEN = 2560, BLEED = 256, KEPT = 2048, M2 = (97.6 / KEPT) ** 2;   // m² per px
 const WATER_HUE = [150, 225];
@@ -37,6 +39,11 @@ for (const t of ["ninjaone", "tanium", "coast"]) {
   for (const id of Object.keys(ledger.cells).sort()) {
     if (ONLY.length && !ONLY.includes(`${t}:${id}`)) continue;
     const l2f = `${ART}/${t}/${id}/${id}-l2.png`, wf = `${ART}/${t}/${id}/${id}-water.png`;
+    const backup = (file) => {
+      const destination = BACKUP_DIR ? path.join(BACKUP_DIR, t, id, path.basename(file)) : file.replace(/\.png$/, "-before-water-pass.png");
+      fs.mkdirSync(path.dirname(destination), { recursive: true });
+      fs.copyFileSync(file, destination);
+    };
     if (!fs.existsSync(l2f)) { results.push({ t, id, note: "no layer" }); continue; }
     const img = await sharp(l2f).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
     const W = img.info.width, H = img.info.height, d = img.data, b = Math.round((W - KEPT) / 2);
@@ -91,18 +98,19 @@ for (const t of ["ninjaone", "tanium", "coast"]) {
         const p = y * W + x; if (big.has(label[p]) || out[p * 4 + 3] === 0) continue;
         if (big.has(label[p - 1]) || big.has(label[p + 1]) || big.has(label[p - W]) || big.has(label[p + W])) out[p * 4 + 3] = Math.min(out[p * 4 + 3], 128);
       }
-      fs.copyFileSync(l2f, l2f.replace(/\.png$/, "-before-water-pass.png"));
+      backup(l2f);
       await sharp(out, { raw: { width: W, height: H, channels: 4 } }).png().toFile(l2f);
       if (fs.existsSync(wf)) {
         const wm = await sharp(wf).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
         const wo = Buffer.from(wm.data);
         if (wm.info.width === W) { for (let p = 0; p < W * H; p += 1) if (big.has(label[p])) { wo[p * 4] = wo[p * 4 + 1] = wo[p * 4 + 2] = 255; wo[p * 4 + 3] = 255; } }
-        fs.copyFileSync(wf, wf.replace(/\.png$/, "-before-water-pass.png"));
+        backup(wf);
         await sharp(wo, { raw: { width: wm.info.width, height: wm.info.height, channels: 4 } }).png().toFile(wf);
       }
       const [c, r] = id.slice(1).split("-");
-      const outp = execSync(`node tools/world-authoring/cell.mjs --territory ${t} --cell ${c},${r} --restitch 2>&1 || true`, { encoding: "utf8", shell: "bash" });
-      rec.fixed = /restitch/.test(outp) && !/NOT accepted|Error/.test(outp);
+      const outp = execFileSync(process.execPath, ["tools/world-authoring/cell.mjs", "--territory", t, "--cell", `${c},${r}`, "--restitch"],
+        { encoding: "utf8", windowsHide: true, maxBuffer: 16 * 1024 * 1024 });
+      rec.fixed = true;
       rec.log = outp.split("\n").filter((l) => /restitch|tiles|Error/.test(l)).slice(0, 3).join(" | ");
     }
   }

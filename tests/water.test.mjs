@@ -105,6 +105,38 @@ test("closed pools have no invented outlet and connected channels flow toward br
   assert.deepEqual(land, before);
 });
 
+test("rocky sea-connected inlets retain marine water rather than acquiring a river direction", () => {
+  for (const inletWidth of [9, 12]) {
+    const width=96,height=64,land=new Uint8Array(width*height).fill(1);
+    for(let y=0;y<height;y++)for(let x=0;x<16;x++)land[y*width+x]=0;
+    for(let y=24;y<24+inletWidth;y++)for(let x=16;x<=74;x++)land[y*width+x]=0;
+    // Rock stacks interrupt the local width without changing the inlet's outlet.
+    land[26*width+35]=1; land[27*width+56]=1;
+    const before=land.slice(),{data}=encodeWaterField(land,width,height,1,24);
+    for(const x of [30,47,67]) {
+      const i=((24+Math.floor(inletWidth/2))*width+x)*3;
+      const flow=[data[i+1],data[i+2]].map(v=>v/255*2-1);
+      assert.ok(Math.hypot(...flow)<0.05,`inlet at ${x}m was assigned a river direction`);
+    }
+    assert.deepEqual(land,before);
+  }
+});
+
+test("explicit inland flow survives the inlet heuristic while retaining the broad-sea handoff",()=>{
+  const width=96,height=64,land=new Uint8Array(width*height).fill(1);
+  for(let y=0;y<height;y++)for(let x=0;x<16;x++)land[y*width+x]=0;
+  for(let y=24;y<34;y++)for(let x=16;x<75;x++)land[y*width+x]=0;
+  const data=encodeWaterField(land,width,height,1,24).data;
+  const handoff=marineFlowMarkers(encodeWaterField(land,width,height,1,24,8).data);
+  const before=Buffer.from(data);
+  applyFlowFeature(data,land,width,height,[[72,29],[1,29]],2,0.6);
+  restoreMarineFlow(data,handoff);
+  const flowAt=x=>Math.hypot(data[(29*width+x)*3+1]/255*2-1,data[(29*width+x)*3+2]/255*2-1);
+  assert.ok(flowAt(54)>0.4,'mapped inland channel lost its flow');
+  assert.ok(flowAt(4)<0.05,'inland annotation covered broad open sea');
+  for(let i=0;i<land.length;i++)assert.equal(data[i*3],before[i*3]);
+});
+
 test("flow annotations change motion only inside water and preserve every shoreline-distance value", () => {
   const width = 12, height = 12, land = new Uint8Array(width * height);
   for (let y = 0; y < height; y++) land[y * width + 6] = 1;

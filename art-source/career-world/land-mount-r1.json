@@ -1,16 +1,16 @@
 {
   "purpose": "Local mounting of every current candidate as a review preview (the land lane owns what the mount shows — owner 2026-09-05: 'if the mount has stale land please update it as you are land authority'); does not mark these candidates accepted or modify authoring ledgers.",
   "writtenBy": "docs/career-world/session3-tools/mount-candidates.mjs",
-  "at": "2026-09-06T17:42:51.408Z",
+  "at": "2026-09-07T02:21:57.382Z",
   "cells": [
     {
       "territory": "coast",
       "id": "c1-4",
       "status": "review-candidate",
-      "sourceSnapshot": "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/.codex-tmp/authoring/cells/coast/c1-4/c1-4-l2.png",
-      "sourceSha256": "62c1a60c59ec5182df097fe2741bb71523dc6b787c49edf47a4e4a804602a642",
+      "sourceSnapshot": "art-source/career-world/water/cutout-sources/coast-c1-4-l2.png",
+      "sourceSha256": "e49a80a0b90ca0c044f645452c028ef590c1149679ea9d0c11e64b229e02950d",
       "canonicalPath": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c1-4-site.webp",
-      "canonicalSha256": "b3ef9ce7a5bdbc8bf7ca0bc911897d49932baf2298497068abb33b7da823a98e"
+      "canonicalSha256": "83f56f510265985d97c07d97e14b15a9992959d7d1b8a81b3b6c32d50e12d518"
     },
     {
       "territory": "coast",
@@ -25,10 +25,10 @@
       "territory": "coast",
       "id": "c4-8",
       "status": "review-candidate",
-      "sourceSnapshot": "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/.codex-tmp/authoring/cells/coast/c4-8/c4-8-l2.png",
-      "sourceSha256": "e2d55a67b9f12ecfd4f407a587542010a88b8fc6b54b85da0f52b683463569cf",
+      "sourceSnapshot": "art-source/career-world/water/cutout-sources/coast-c4-8-l2.png",
+      "sourceSha256": "e7847593d394ffe7daf9ad72d367d5d2e04e451c71b13e470929b068d07f9236",
       "canonicalPath": "/career-world/layers/terrain/authority/tiles/l2-review/coast-c4-8-site.webp",
-      "canonicalSha256": "3b99344ed46d8b8bf3f626e7f5892b730d2df6249d01fde925d3843cc6cdbc93"
+      "canonicalSha256": "b5a43154f1002bbcca187265967e03d34bcace8dbad44e5ec27bb6696f41aad5"
     },
     {
       "territory": "coast",

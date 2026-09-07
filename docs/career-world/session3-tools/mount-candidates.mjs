@@ -17,6 +17,8 @@ import crypto from "node:crypto";
 import sharp from "sharp";
 sharp.cache(false);
 const DRY = process.argv.includes("--dry");
+// Rebuild only the existing mount's recorded source snapshots during a repair.
+const RECORDED = process.argv.includes("--recorded");
 // --tone <gains.json>: a candidate takes the MEAN of its authored neighbours'
 // serve-time gains (it has none of its own), applied as the same bilinear field
 // world-register.mjs uses, so a preview does not stand out from equalised land.
@@ -44,6 +46,7 @@ const REVIEW = `${A}/tiles/l2-review`, CONFIG = "art-source/career-world/land-mo
 const KEPT = 2048, BLEED = 256;
 const sha = (buf) => crypto.createHash("sha256").update(buf).digest("hex");
 const root = process.cwd().replace(/\\/g, "/");
+const recorded = RECORDED ? JSON.parse(fs.readFileSync(CONFIG, "utf8")).cells : null;
 
 const cells = [];
 for (const t of ["tanium", "ninjaone", "coast"]) {
@@ -61,7 +64,10 @@ for (const t of ["tanium", "ninjaone", "coast"]) {
   const [bx, by] = def.lattice.block;
   for (const id of ids) {
     if (ledger.cells[id]) continue;                                   // authored — served by the release feed
-    const l2 = `.codex-tmp/authoring/cells/${t}/${id}/${id}-l2.png`;
+    const entry = recorded?.find((c) => c.territory === t && c.id === id);
+    if (RECORDED && !entry) continue;
+    const l2 = entry ? entry.sourceSnapshot : `.codex-tmp/authoring/cells/${t}/${id}/${id}-l2.png`;
+    if (entry && !fs.existsSync(l2)) throw new Error(`Recorded candidate source missing: ${l2}`);
     if (!fs.existsSync(l2)) continue;                                 // no candidate in hand
     const [c, r] = id.slice(1).split("-").map(Number);
     cells.push({ territory: t, id, l2, wx: bx + c, wy: by + r });
@@ -72,6 +78,9 @@ fs.mkdirSync(REVIEW, { recursive: true });
 const entries = [];
 for (const c of cells) {
   const source = fs.readFileSync(c.l2);
+  if (RECORDED && sha(source) !== recorded.find((entry) => entry.territory === c.territory && entry.id === c.id).sourceSha256) {
+    throw new Error(`Recorded candidate source changed: ${c.l2}`);
+  }
   const name = `${c.territory}-${c.id}-site.webp`;
   let kept = sharp(source).extract({ left: BLEED, top: BLEED, width: KEPT, height: KEPT });
   let gain = 1;
@@ -95,14 +104,15 @@ for (const c of cells) {
   if (!DRY) fs.writeFileSync(path.join(REVIEW, name), canonical);
   entries.push({
     territory: c.territory, id: c.id, status: "review-candidate",
-    sourceSnapshot: `${root}/${c.l2}`, sourceSha256: sha(source),
+    sourceSnapshot: RECORDED ? c.l2.replace(/\\/g, "/") : `${root}/${c.l2}`, sourceSha256: sha(source),
     canonicalPath: `/career-world/layers/terrain/authority/tiles/l2-review/${name}`, canonicalSha256: sha(canonical),
   });
 }
 // review tiles of cells that are no longer candidates
 let removed = 0;
 const keep = new Set(entries.flatMap((e) => [`${e.territory}-${e.id}-site.webp`, `${e.territory}-${e.id}-capital.webp`]));
-for (const f of fs.existsSync(REVIEW) ? fs.readdirSync(REVIEW) : []) {
+// A recorded repair does not clean up unrelated historical review assets.
+for (const f of !RECORDED && fs.existsSync(REVIEW) ? fs.readdirSync(REVIEW) : []) {
   if (keep.has(f) || !f.endsWith(".webp")) continue;
   if (!DRY) fs.rmSync(path.join(REVIEW, f));
   removed += 1;

@@ -63,7 +63,12 @@ for (let i = 0; i < land.length; i++) land[i] = pixels[i * 4 + 3] >= 128 ? 1 : 0
 console.log(`Deriving water fields from ${terrain.tiles.length} served terrain cells (${WIDTH}x${HEIGHT}).`);
 const { data, stats } = encodeWaterField(land, WIDTH, HEIGHT, metresPerPixel, RANGE_METRES);
 stats.provisionalCoastPixels = markProvisionalCoast(data, land, WIDTH, HEIGHT, rectangles, RANGE_METRES / metresPerPixel);
-const originalMarine=marineFlowMarkers(data);
+// The narrower geometric inlet rule must not overrule explicitly mapped
+// inland flow. Keep the established broad-sea handoff for annotation protection;
+// unannotated rocky inlets still use the new marine classification above.
+const handoffData=encodeWaterField(land,WIDTH,HEIGHT,metresPerPixel,RANGE_METRES,8).data;
+markProvisionalCoast(handoffData,land,WIDTH,HEIGHT,rectangles,RANGE_METRES/metresPerPixel);
+const originalMarine=marineFlowMarkers(handoffData);
 const features = [];
 if(island.cells.length!==terrain.tiles.length||new Set(island.cells.map(cell=>cell.tileId)).size!==terrain.tiles.length
   ||terrain.tiles.some(tile=>!island.cells.some(cell=>cell.tileId===tile.id)))throw new Error("Inland inventory must cover every mounted cell exactly once.");

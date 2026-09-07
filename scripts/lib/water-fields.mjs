@@ -32,7 +32,7 @@ export function distanceTransform(mask, width, height, target) {
   return distance;
 }
 
-export function classifyWater(land, shore, width, height, pixelsPerMetre) {
+export function classifyWater(land, shore, width, height, pixelsPerMetre, broadClearanceMetres = 3) {
   const sea = new Uint8Array(land.length);
   const queue = new Uint32Array(land.length);
   let head = 0, tail = 0;
@@ -52,7 +52,10 @@ export function classifyWater(land, shore, width, height, pixelsPerMetre) {
   // no evidenced outlet and deliberately receive ripples rather than a guessed
   // river direction. This is a visual flow potential, not surveyed hydrology.
   const potential = new Int32Array(land.length).fill(-1);
-  const broad = 8 * pixelsPerMetre;
+  // Rocky coves can be only several metres clear of their banks/stacks. An
+  // eight-metre clearance excluded entire coastal basins and assigned them
+  // artificial river flow. Narrow streams still require an outlet potential.
+  const broad = broadClearanceMetres * pixelsPerMetre;
   head = 0; tail = 0;
   for (let i = 0; i < land.length; i++) {
     if (sea[i] && shore[i] >= broad) potential[i] = 0;
@@ -79,10 +82,10 @@ export function classifyWater(land, shore, width, height, pixelsPerMetre) {
   return { sea, potential };
 }
 
-export function encodeWaterField(land, width, height, metresPerPixel, rangeMetres) {
+export function encodeWaterField(land, width, height, metresPerPixel, rangeMetres, broadClearanceMetres = 3) {
   const shore = distanceTransform(land, width, height, 1);
   const dry = distanceTransform(land, width, height, 0);
-  const { sea, potential } = classifyWater(land, shore, width, height, 1 / metresPerPixel);
+  const { sea, potential } = classifyWater(land, shore, width, height, 1 / metresPerPixel, broadClearanceMetres);
   const data = Buffer.alloc(land.length * 3);
   const byte = (x) => Math.round(Math.max(0, Math.min(1, x)) * 255);
   let pools = 0, streams = 0;

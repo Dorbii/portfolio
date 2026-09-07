@@ -1,0 +1,92 @@
+{
+  "baseCommit": "904487be",
+  "fieldInputHash": "16b7fcde51419c352b66d2fd18e3c0994af215e5060bbf3296af80af77baf4e9",
+  "authored": [
+    {
+      "territory": "coast",
+      "id": "c1-8",
+      "rgbChanges": 0,
+      "alphaIncreases": 0,
+      "alphaDecreases": 890,
+      "newClear": 775
+    },
+    {
+      "territory": "coast",
+      "id": "c6-0",
+      "rgbChanges": 0,
+      "alphaIncreases": 0,
+      "alphaDecreases": 785,
+      "newClear": 622
+    },
+    {
+      "territory": "coast",
+      "id": "c7-8",
+      "rgbChanges": 0,
+      "alphaIncreases": 0,
+      "alphaDecreases": 1562,
+      "newClear": 1186
+    },
+    {
+      "territory": "ninjaone",
+      "id": "c3-1",
+      "rgbChanges": 0,
+      "alphaIncreases": 0,
+      "alphaDecreases": 0,
+      "newClear": 0
+    },
+    {
+      "territory": "tanium",
+      "id": "c4-2",
+      "rgbChanges": 0,
+      "alphaIncreases": 0,
+      "alphaDecreases": 512,
+      "newClear": 359
+    },
+    {
+      "territory": "tanium",
+      "id": "c6-1",
+      "rgbChanges": 0,
+      "alphaIncreases": 0,
+      "alphaDecreases": 2663,
+      "newClear": 2252
+    },
+    {
+      "territory": "tanium",
+      "id": "c6-2",
+      "rgbChanges": 0,
+      "alphaIncreases": 0,
+      "alphaDecreases": 1551,
+      "newClear": 1247
+    }
+  ],
+  "candidates": [
+    {
+      "id": "c1-4",
+      "previousSource": "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/.codex-tmp/authoring/cells/coast/c1-4/c1-4-l2.png",
+      "previousSourceHash": "62c1a60c59ec5182df097fe2741bb71523dc6b787c49edf47a4e4a804602a642",
+      "source": "art-source/career-world/water/cutout-sources/coast-c1-4-l2.png",
+      "sourceHash": "e49a80a0b90ca0c044f645452c028ef590c1149679ea9d0c11e64b229e02950d",
+      "clear": 35922,
+      "feather": 2705,
+      "rgbChanges": 0,
+      "alphaIncreases": 0,
+      "alphaDecreases": 38627,
+      "newClear": 35922
+    },
+    {
+      "id": "c4-8",
+      "previousSource": "C:/Users/Steve/Documents/Github/portfolio/.claude/worktrees/land-lod-completion/.codex-tmp/authoring/cells/coast/c4-8/c4-8-l2.png",
+      "previousSourceHash": "e2d55a67b9f12ecfd4f407a587542010a88b8fc6b54b85da0f52b683463569cf",
+      "source": "art-source/career-world/water/cutout-sources/coast-c4-8-l2.png",
+      "sourceHash": "e7847593d394ffe7daf9ad72d367d5d2e04e451c71b13e470929b068d07f9236",
+      "clear": 281242,
+      "feather": 9081,
+      "rgbChanges": 0,
+      "alphaIncreases": 0,
+      "alphaDecreases": 290323,
+      "newClear": 281242
+    }
+  ],
+  "retainedGorgeMist": true,
+  "annotatedPointsUnexpectedlyChangedToOcean": []
+}
