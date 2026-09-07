@@ -4,7 +4,41 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-07 03:15 UTC, LATEST (current):** **SERVED 03:12Z (commit
+**2026-09-07 16:00 UTC, LATEST (current):** **SERVED 15:56Z (commit
+bfecd0ab) — THE CHAIN'S RUNES ARE STANDING STONES ROOTED IN THE LAND.**
+Owner 03:20 (his clock), on the fitted discs: *"These runes need to look like
+they are part of the land not stones on top of it. Think like stonehedge"*.
+One generation round (chain-element.mjs, packets menhir / trilithon / henge,
+each against `.codex-tmp/chain/land-reference.jpg` — T c3-1's ground at 1:1
+— and the canon; 3-6 min each, in parallel via
+`.codex-tmp/session4/standing-gen.sh`): seven menhirs with turf skirts
+(delivered with REAL alpha, not magenta — key() now takes the delivery's own
+alpha when its corners are transparent), a trilithon on magenta, a henge
+ring with an altar (alpha). Sizes: the tallest menhir 64 px (a boulder and a
+half), the trilithon 110 px, the henge 240 px wide; sidecars carry
+`standing: true` and anchorRow = the feet. **build-chain-layer.mjs:**
+stampStanding() plants an element on its feet, re-hues its turf to the local
+ground, sinks the rows above each column's foot into the ground colour, puts
+a contact shadow under every foot, fades it under cliffs; placeMenhirs()
+rings seven stones round the node on the view's ellipse (north pair each
+side at R 180 clear of the trilithon, three south at R 150), drawn north to
+south; a trilithon stands at EVERY node just north of the groove (the groove
+runs in front of its feet, the spoke rises behind it); the spoke leaves the
+trunk square for 0.4 cell then runs straight to the henge (a far leader's
+straight line read as a second chain beside the trunk); the henge sits by
+its centre at the hub, spokes end at its rim. **rune-chain.def.json:**
+hubs[0].leaders = [3.5, 5.5, 6.5] (the nodes with a line to the server; the
+cablecar node at 0.45 sits at the sea; the trial leaders 2.2 / 4.8 dropped —
+4.8 stood on c4-1's cliff edge). Commits: ae97098e (code), cb423c1d
+(elements + def), bfecd0ab (served). Pictures sent 16:00Z:
+`island/pair3-c3-1-node.jpg`, `node-c5-1.jpg`, `pair3-c3-0-henge.jpg`,
+`rows-standing.jpg`. **His word wanted:** the standing stones as served
+(keep / send back with a crop); the henge's place (T c3-0, north of the
+capital) and the spokes' long lines across c4-0 / c5-0; the four bay cells;
+the palette-gate recalibration. The disc/panel path stays as the fallback
+when an element file is absent.
+
+**2026-09-07 03:15 UTC:** **SERVED 03:12Z (commit
 e1f47311) — THE CHAIN LAYER FITTED TO THE WORLD'S VIEW AND SCALE.** Owner
 02:50 (his clock), on four crops of the served hub, leaders and panels: *"I
 think the main issue here is perspective and scale"*. Diagnosis: the canon is
