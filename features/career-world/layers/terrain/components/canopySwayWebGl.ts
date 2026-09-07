@@ -81,17 +81,20 @@ out vec4 outColor;
 void main() {
   vec4 field = texture(u_sway, v_uv);
   if (field.a < 0.01) discard;
-  float weight = field.r;                 // 0 at the crown's foot, 1 at its top
-  float height = field.g * 510.0;         // the crown's height in land texels
-  float phase = field.b * 6.2831853;
-  // a tall pine swings slowly, a sapling flutters
-  float rate = 2.6 / (1.0 + height / 36.0);
-  float swing = 0.65 * sin(u_time * rate + phase)
-    + 0.35 * sin(u_time * rate * 2.31 + phase * 1.7 + v_uv.y * 9.0);
-  // gusts roll across the tile, so neighbours do not all lean at once
-  float gust = 0.5 + 0.5 * sin(u_time * 0.29 + phase * 0.4 + (v_uv.x * u_wind.x + v_uv.y * u_wind.y) * 5.0);
-  // a crown's top travels about a twelfth of its height in the world's wind
-  float amplitude = clamp(0.085 * height, 1.0, 8.0) * u_motion;
+  float weight = pow(field.r, 1.3);       // 0 at the crown's local foot, 1 a crown-height above it; feet stay planted
+  float height = field.g * 510.0;         // the local crown height in land texels (capped at a tree by the field)
+  float phase = field.b * 6.2831853;      // per tree, or a smooth noise across a dense stand
+  // the wind's run across the tile, in land texels along the wind
+  float along = (v_uv.x * u_wind.x + v_uv.y * u_wind.y) * 2048.0;
+  // a tall pine swings slowly, a sapling flutters: periods of about 2.5-4.5 s
+  float rate = 4.0 / (1.0 + height / 60.0);
+  // the swing, with a wave travelling downwind through the canopy (one every 300 texels)
+  float swing = 0.6 * sin(u_time * rate + phase - along * 0.021)
+    + 0.4 * sin(u_time * rate * 2.31 + phase * 1.7 - along * 0.05 + v_uv.y * 9.0);
+  // gusts roll across the tile (one every 600 texels), so neighbours do not all lean at once
+  float gust = 0.5 + 0.5 * sin(u_time * 0.35 + phase * 0.4 - along * 0.0105);
+  // a crown's top travels about a seventh of its height in the world's wind
+  float amplitude = clamp(0.14 * height, 1.5, 14.0) * u_motion;
   vec2 shift = u_wind * amplitude * weight * swing * (0.4 + 0.6 * gust);
   shift.y *= 0.35;
   vec4 land = texture(u_land, v_uv - shift * u_texel);

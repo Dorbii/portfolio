@@ -25,11 +25,11 @@ interface CanopySwayProps {
 }
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
-// the world's land plane is 16 cells of 2048 px: a crown's largest swing (8 px
+// the world's land plane is 16 cells of 2048 px: a crown's largest swing (14 px
 // at L0) must reach a quarter of a screen pixel before the pass is worth a frame
 const WORLD_LAND_PX = 16 * 2048;
 const MINIMUM_SCREEN_SWING = 0.25;
-const LARGEST_SWING_PX = 8;
+const LARGEST_SWING_PX = 14;
 
 function usePrefersReducedMotion(): boolean {
   const [reduced, setReduced] = useState(true);

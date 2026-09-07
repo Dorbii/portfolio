@@ -4,9 +4,16 @@
 // no sprites). Reads the cell's land layer, finds the conifer crowns (dark
 // saturated green with needle texture, closed, blobs of 150 px or more), and
 // writes the field the runtime's sway pass samples per pixel:
-//   R = the sway weight up the crown (0 at its foot, 255 at its top)
-//   G = the crown's height in px / 2 (its period: tall crowns swing slower)
-//   B = a phase per crown (no two neighbours in step)
+//   R = the sway weight: 0 at the crown's foot, 255 a crown-height above it.
+//       The foot is LOCAL — the first non-crown pixel below in the same
+//       column — so a dense stand (one merged blob to the classifier: 74-89%
+//       of the canopy in the forest cells, owner 2026-09-07 17:20 "not seeing
+//       it") sways as a canopy instead of as one 500-px tree with its feet at
+//       the bottom of the whole wood
+//   G = the local crown height / 2, capped at CROWN_CAP px (a merged stand
+//       swings like its trees, not like the stand)
+//   B = a phase: per crown for a single tree; for a merged stand a smooth
+//       value noise across it, so waves travel through the canopy
 //   A = coverage: the crown dilated by the largest displacement, soft-edged,
 //       so the pass also moves the ground right round a crown and no static
 //       edge is left showing behind a swaying one
@@ -22,6 +29,9 @@ const arg = (f, d) => { const i = process.argv.indexOf(f); return i >= 0 ? proce
 const ONLY = (arg("--only", "") || "").split(",").filter(Boolean), SHEET = arg("--sheet");
 const ART = "art-source/career-world/l2-land", A = "public/career-world/layers/terrain/authority";
 const KEPT = 2048, B = 256, OUT_PX = 1024, MIN_CROWN = 150, RING = 4;
+const CROWN_CAP = 110;          // px at L0: a crown taller than this is a stand
+const SINGLE_TREE_MAX = 150;    // a blob taller than this is a merged stand
+const NOISE_PX = 56;            // the phase noise grid across a stand
 const luma = (r, g, b) => 0.2126 * r + 0.7152 * g + 0.0722 * b;
 const hueOf = (r, g, b) => {
   const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
@@ -29,6 +39,13 @@ const hueOf = (r, g, b) => {
   let h = mx === r ? 60 * (((g - b) / (mx - mn)) % 6) : mx === g ? 60 * ((b - r) / (mx - mn) + 2) : 60 * ((r - g) / (mx - mn) + 4);
   if (h < 0) h += 360;
   return h;
+};
+const hash01 = (a, b, seed) => { let h = (a * 374761393 + b * 668265263 + seed * 2246822519) >>> 0; h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+const smooth = (t) => t * t * (3 - 2 * t);
+const valueNoise = (x, y, seed) => {
+  const gx = x / NOISE_PX, gy = y / NOISE_PX, x0 = Math.floor(gx), y0 = Math.floor(gy), tx = smooth(gx - x0), ty = smooth(gy - y0);
+  const n00 = hash01(x0, y0, seed), n10 = hash01(x0 + 1, y0, seed), n01 = hash01(x0, y0 + 1, seed), n11 = hash01(x0 + 1, y0 + 1, seed);
+  return (n00 * (1 - tx) + n10 * tx) * (1 - ty) + (n01 * (1 - tx) + n11 * tx) * ty;
 };
 const sheets = [];
 let done = 0;
@@ -38,6 +55,7 @@ for (const t of ["ninjaone", "tanium", "coast"]) {
     if (ONLY.length && !ONLY.includes(`${t}:${id}`)) continue;
     const f = `${ART}/${t}/${id}/${id}-l2.png`;
     if (!fs.existsSync(f)) continue;
+    const seed = (t.charCodeAt(0) * 131 + Number(id[1]) * 17 + Number(id[3])) >>> 0;
     const img = await sharp(f).extract({ left: B, top: B, width: KEPT, height: KEPT }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
     const W = KEPT, d = img.data;
     // 1. candidates: dark saturated green
@@ -75,7 +93,7 @@ for (const t of ["ninjaone", "tanium", "coast"]) {
       return out;
     };
     const closed = ero(dil(keep, 2), 2);
-    // 4. crowns: components of MIN_CROWN px or more, each with its foot, height and phase
+    // 4. crowns: components of MIN_CROWN px or more, each with its height and phase
     const lab = new Int32Array(W * W), comps = [], st = [];
     for (let p = 0; p < W * W; p += 1) {
       if (closed[p] === 0 || lab[p] !== 0) continue;
@@ -86,23 +104,34 @@ for (const t of ["ninjaone", "tanium", "coast"]) {
         for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= W || yy >= W) continue; const r = yy * W + xx; if (closed[r] !== 0 && lab[r] === 0) { lab[r] = cid; st.push(r); } }
       }
       if (members.length < MIN_CROWN) { for (const q of members) lab[q] = -1; comps.push(null); continue; }
-      comps.push({ miny, maxy, height: maxy - miny + 1, phase: (cid * 2654435761 >>> 0) & 255, n: members.length });
+      const height = maxy - miny + 1;
+      comps.push({ height, stand: height > SINGLE_TREE_MAX, phase: (cid * 2654435761 >>> 0) & 255, n: members.length });
     }
-    // 5. the field: R weight up the crown, G height/2, B phase, A 255 in the crown
+    // 5. the local foot: for every crown pixel, rows down to the first non-crown pixel in its column
+    const foot = new Int32Array(W * W);
+    for (let x = 0; x < W; x += 1) {
+      let run = 0;
+      for (let y = W - 1; y >= 0; y -= 1) {
+        const p = y * W + x;
+        if (lab[p] > 0) { run += 1; foot[p] = run; } else run = 0;
+      }
+    }
+    // 6. the field: R weight up from the local foot, G the local height/2, B phase, A 255 in the crown
     const field = Buffer.alloc(W * W * 4);
-    let crownPx = 0, crowns = 0;
+    let crownPx = 0, crowns = 0, standPx = 0;
     for (const c of comps) if (c) crowns += 1;
     for (let p = 0; p < W * W; p += 1) {
       const cid = lab[p]; if (cid <= 0) continue;
       const c = comps[cid - 1]; if (!c) continue;
-      const y = Math.floor(p / W), o = p * 4;
-      field[o] = Math.round(255 * Math.max(0, Math.min(1, (c.maxy - y) / c.height)));
-      field[o + 1] = Math.min(255, Math.round(c.height / 2));
-      field[o + 2] = c.phase;
+      const x = p % W, y = (p - x) / W, o = p * 4;
+      const local = Math.min(c.height, CROWN_CAP);
+      field[o] = Math.round(255 * Math.max(0, Math.min(1, (foot[p] - 1) / local)));
+      field[o + 1] = Math.min(255, Math.round(local / 2));
+      field[o + 2] = c.stand ? Math.round(255 * valueNoise(x, y, seed)) : c.phase;
       field[o + 3] = 255;
-      crownPx += 1;
+      crownPx += 1; if (c.stand) standPx += 1;
     }
-    // 6. the ring: RING passes of 1-px dilation copying the values of a crown neighbour, alpha falling off
+    // 7. the ring: RING passes of 1-px dilation copying the values of a crown neighbour, alpha falling off
     let cur = Buffer.from(field);
     for (let k = 1; k <= RING; k += 1) {
       const nxt = Buffer.from(cur);
@@ -122,7 +151,7 @@ for (const t of ["ninjaone", "tanium", "coast"]) {
     fs.mkdirSync(`${A}/tiles/l2-${t}`, { recursive: true });
     await sharp(png).webp({ quality: 90, alphaQuality: 90 }).toFile(`${A}/tiles/l2-${t}/${id}-sway.webp`);
     done += 1;
-    console.log(`  ${t[0].toUpperCase()} ${id}: ${crowns} crowns, ${(100 * crownPx / (W * W)).toFixed(1)}% of the cell`);
+    console.log(`  ${t[0].toUpperCase()} ${id}: ${crowns} crowns, ${(100 * crownPx / (W * W)).toFixed(1)}% of the cell, ${crownPx ? Math.round(100 * standPx / crownPx) : 0}% of it in stands`);
     if (SHEET) {
       const view = Buffer.alloc(W * W * 3);
       for (let p = 0; p < W * W; p += 1) {
