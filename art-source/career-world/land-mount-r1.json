@@ -1,7 +1,7 @@
 {
   "purpose": "Local mounting of every current candidate as a review preview (the land lane owns what the mount shows — owner 2026-09-05: 'if the mount has stale land please update it as you are land authority'); does not mark these candidates accepted or modify authoring ledgers.",
   "writtenBy": "docs/career-world/session3-tools/mount-candidates.mjs",
-  "at": "2026-09-07T03:12:04.068Z",
+  "at": "2026-09-07T15:55:59.344Z",
   "cells": [
     {
       "territory": "coast",
