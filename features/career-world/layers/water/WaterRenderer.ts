@@ -90,6 +90,7 @@ export class WaterRenderer {
     this.scene = scene;
     delete canvas.dataset.gpuStageError;
     canvas.dataset.surfaceRevision = "ocean-life-visibility-r7";
+    canvas.dataset.inlandRevision = "inland-profiles-bed-r8";
     let program: WebGLProgram | null = null;
     let vao: WebGLVertexArrayObject | null = null;
     let texture: WebGLTexture | null = null;

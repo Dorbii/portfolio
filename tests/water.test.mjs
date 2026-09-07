@@ -3,7 +3,7 @@ import test from "node:test";
 import fs from "node:fs/promises";
 import crypto from "node:crypto";
 import sharp from "sharp";
-import { distanceTransform, encodeWaterField, applyFlowFeature, markProvisionalCoast,marineFlowMarkers,restoreMarineFlow } from "../scripts/lib/water-fields.mjs";
+import { distanceTransform, encodeWaterField, applyFlowFeature, markProvisionalCoast,marineFlowMarkers,restoreMarineFlow,completeAnnotatedWater } from "../scripts/lib/water-fields.mjs";
 import { buildFieldPages } from "../features/career-world/layers/water/fieldPages.ts";
 import { createWaveSpectrum, WAVE_CASCADES, waveHeights } from "../features/career-world/layers/water/ocean/spectrum.ts";
 import { normalizeWaterState, selectWaterFields, waveAngularFrequency } from "../features/career-world/layers/water/model.ts";
@@ -29,6 +29,26 @@ test("inland flow annotations retain the prior open-ocean material classificatio
   for(let i=0;i<markers.length;i++)if(markers[i])assert.deepEqual(changed.subarray(i*3+1,i*3+3),original.subarray(i*3+1,i*3+3));
   const pond=10*width+10;
   assert.notDeepEqual(changed.subarray(pond*3+1,pond*3+3),original.subarray(pond*3+1,pond*3+3));
+});
+
+test("annotated channels fill connected side pools without changing land, open sea or unannotated water",()=>{
+  const width=30,height=20,land=new Uint8Array(width*height).fill(1);
+  for(let y=2;y<18;y++)for(let x=3;x<15;x++)land[y*width+x]=0;
+  for(let y=4;y<9;y++)for(let x=22;x<27;x++)land[y*width+x]=0;
+  const before=encodeWaterField(land,width,height,1,24).data;
+  // Reproduce a small-clearance marine classification inside the larger
+  // annotation handoff, with a distinct open-sea boundary at the outlet.
+  for(let i=0;i<land.length;i++)if(!land[i]){before[i*3+1]=128;before[i*3+2]=128;}
+  const marine=new Uint16Array(land.length);
+  for(let x=3;x<15;x++)marine[17*width+x]=(128<<8)|128;
+  const data=Buffer.from(before);
+  applyFlowFeature(data,land,width,height,[[7,3],[7,14]],1,0.6);
+  completeAnnotatedWater(data,before,land,marine,width,height);
+  assert.ok(Math.hypot(data[(10*width+13)*3+1]-128,data[(10*width+13)*3+2]-128)>20);
+  for(let i=0;i<land.length;i++){
+    assert.equal(data[i*3],before[i*3]);
+    if(land[i]||marine[i]||i%width>=22)assert.deepEqual(data.subarray(i*3,i*3+3),before.subarray(i*3,i*3+3));
+  }
 });
 
 test("shared wind stays normalized and water controls round-trip without private lighting controls", () => {

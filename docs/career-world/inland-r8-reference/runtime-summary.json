@@ -1,0 +1,360 @@
+{
+  "views": [
+    {
+      "name": "raised-shelf-final",
+      "camera": {
+        "origin": [
+          0.3328112125254089,
+          0.2600877978613689
+        ],
+        "rect": {
+          "height": 511.890625,
+          "width": 910.03125,
+          "x": 16.984375,
+          "y": 79.84375
+        },
+        "span": [
+          0.035000133542932146,
+          0.035
+        ]
+      },
+      "field": "4b9702a6a0ad78412a896920bf14fffe6ddbe383f7629c01a5393a240af1f1f6",
+      "state": "ready",
+      "pending": "0",
+      "landPending": "0",
+      "settled": "true",
+      "glError": 0,
+      "gpuP50Ms": "0.750",
+      "gpuP95Ms": "22.074"
+    },
+    {
+      "name": "forest-lower-final",
+      "camera": {
+        "origin": [
+          0.3914965152597839,
+          0.3920045595179938
+        ],
+        "rect": {
+          "height": 511.890625,
+          "width": 910.03125,
+          "x": 16.984375,
+          "y": 79.84375
+        },
+        "span": [
+          0.035000133542932146,
+          0.035
+        ]
+      },
+      "field": "4b9702a6a0ad78412a896920bf14fffe6ddbe383f7629c01a5393a240af1f1f6",
+      "state": "ready",
+      "pending": "0",
+      "landPending": "0",
+      "settled": "true",
+      "glError": 0,
+      "gpuP50Ms": "5.532",
+      "gpuP95Ms": "24.596"
+    },
+    {
+      "name": "broad-drop-final",
+      "camera": {
+        "origin": [
+          0.2598131656504089,
+          0.4586111111111111
+        ],
+        "rect": {
+          "height": 511.890625,
+          "width": 910.03125,
+          "x": 16.984375,
+          "y": 79.84375
+        },
+        "span": [
+          0.035000133542932146,
+          0.035
+        ]
+      },
+      "field": "4b9702a6a0ad78412a896920bf14fffe6ddbe383f7629c01a5393a240af1f1f6",
+      "state": "ready",
+      "pending": "0",
+      "landPending": "0",
+      "settled": "true",
+      "glError": 0,
+      "gpuP50Ms": "5.284",
+      "gpuP95Ms": "24.466"
+    },
+    {
+      "name": "fern-pond-final",
+      "camera": {
+        "origin": [
+          0.39655098354607177,
+          0.7981652011073116
+        ],
+        "rect": {
+          "height": 511.890625,
+          "width": 910.03125,
+          "x": 16.984375,
+          "y": 79.84375
+        },
+        "span": [
+          0.035000133542932146,
+          0.035
+        ]
+      },
+      "field": "4b9702a6a0ad78412a896920bf14fffe6ddbe383f7629c01a5393a240af1f1f6",
+      "state": "ready",
+      "pending": "0",
+      "landPending": "0",
+      "settled": "true",
+      "glError": 0,
+      "gpuP50Ms": "5.284",
+      "gpuP95Ms": "24.466"
+    },
+    {
+      "name": "headwater-step-final",
+      "camera": {
+        "origin": [
+          0.3822496890879089,
+          0.7912222222222224
+        ],
+        "rect": {
+          "height": 511.890625,
+          "width": 910.03125,
+          "x": 16.984375,
+          "y": 79.84375
+        },
+        "span": [
+          0.035000133542932146,
+          0.035
+        ]
+      },
+      "field": "4b9702a6a0ad78412a896920bf14fffe6ddbe383f7629c01a5393a240af1f1f6",
+      "state": "ready",
+      "pending": "0",
+      "landPending": "0",
+      "settled": "true",
+      "glError": 0,
+      "gpuP50Ms": "2.061",
+      "gpuP95Ms": "25.640"
+    },
+    {
+      "name": "fern-bench-final",
+      "camera": {
+        "origin": [
+          0.4009874820566589,
+          0.8178416924496553
+        ],
+        "rect": {
+          "height": 511.890625,
+          "width": 910.03125,
+          "x": 16.984375,
+          "y": 79.84375
+        },
+        "span": [
+          0.035000133542932146,
+          0.035
+        ]
+      },
+      "field": "4b9702a6a0ad78412a896920bf14fffe6ddbe383f7629c01a5393a240af1f1f6",
+      "state": "ready",
+      "pending": "0",
+      "landPending": "0",
+      "settled": "true",
+      "glError": 0,
+      "gpuP50Ms": "1.076",
+      "gpuP95Ms": "22.715"
+    },
+    {
+      "name": "quarry-fall-final",
+      "camera": {
+        "origin": [
+          0.4445360660410339,
+          0.46591746729631434
+        ],
+        "rect": {
+          "height": 511.890625,
+          "width": 910.03125,
+          "x": 16.984375,
+          "y": 79.84375
+        },
+        "span": [
+          0.035000133542932146,
+          0.035
+        ]
+      },
+      "field": "4b9702a6a0ad78412a896920bf14fffe6ddbe383f7629c01a5393a240af1f1f6",
+      "state": "ready",
+      "pending": "0",
+      "landPending": "0",
+      "settled": "true",
+      "glError": 0,
+      "gpuP50Ms": "4.341",
+      "gpuP95Ms": "22.824"
+    },
+    {
+      "name": "bridge-fall-final",
+      "camera": {
+        "origin": [
+          0.12565789221290893,
+          0.7137777777777777
+        ],
+        "rect": {
+          "height": 511.890625,
+          "width": 910.03125,
+          "x": 16.984375,
+          "y": 79.84375
+        },
+        "span": [
+          0.035000133542932146,
+          0.035
+        ]
+      },
+      "field": "4b9702a6a0ad78412a896920bf14fffe6ddbe383f7629c01a5393a240af1f1f6",
+      "state": "ready",
+      "pending": "0",
+      "landPending": "0",
+      "settled": "true",
+      "glError": 0,
+      "gpuP50Ms": "0.706",
+      "gpuP95Ms": "21.373"
+    },
+    {
+      "name": "world-final",
+      "camera": {
+        "origin": [
+          0,
+          0.000001907748894469652
+        ],
+        "rect": {
+          "height": 511.890625,
+          "width": 910.03125,
+          "x": 16.984375,
+          "y": 79.84375
+        },
+        "span": [
+          1,
+          0.9999961845022112
+        ]
+      },
+      "field": "4b9702a6a0ad78412a896920bf14fffe6ddbe383f7629c01a5393a240af1f1f6",
+      "state": "ready",
+      "pending": "0",
+      "landPending": "0",
+      "settled": "true",
+      "glError": 0,
+      "gpuP50Ms": "0.793",
+      "gpuP95Ms": "18.041"
+    },
+    {
+      "name": "territory-final",
+      "camera": {
+        "origin": [
+          0.2572913487073044,
+          0.2
+        ],
+        "rect": {
+          "height": 511.890625,
+          "width": 910.03125,
+          "x": 16.984375,
+          "y": 79.84375
+        },
+        "span": [
+          0.1666673025853912,
+          0.16666666666666669
+        ]
+      },
+      "field": "4b9702a6a0ad78412a896920bf14fffe6ddbe383f7629c01a5393a240af1f1f6",
+      "state": "ready",
+      "pending": "0",
+      "landPending": "0",
+      "settled": "true",
+      "glError": 0,
+      "gpuP50Ms": "0.865",
+      "gpuP95Ms": "21.713"
+    }
+  ],
+  "motion": [
+    {
+      "name": "motion-0",
+      "camera": {
+        "origin": [
+          0.4445360660410339,
+          0.46591746729631434
+        ],
+        "rect": {
+          "height": 511.890625,
+          "width": 910.03125,
+          "x": 16.984375,
+          "y": 79.84375
+        },
+        "span": [
+          0.035000133542932146,
+          0.035
+        ]
+      },
+      "time": "395.359,395.359",
+      "sha256": "49384489198c2a29bd3e8e0bac652fa265e4bdfa54ea5ca3e7e98e0491f9d562"
+    },
+    {
+      "name": "motion-1",
+      "camera": {
+        "origin": [
+          0.4445360660410339,
+          0.46591746729631434
+        ],
+        "rect": {
+          "height": 511.890625,
+          "width": 910.03125,
+          "x": 16.984375,
+          "y": 79.84375
+        },
+        "span": [
+          0.035000133542932146,
+          0.035
+        ]
+      },
+      "time": "395.956,395.956",
+      "sha256": "e4eeefa76fda161c2c3cf90f17619c6194f8b46d3f7cb5bf09a970ef506bf438"
+    },
+    {
+      "name": "motion-2",
+      "camera": {
+        "origin": [
+          0.4445360660410339,
+          0.46591746729631434
+        ],
+        "rect": {
+          "height": 511.890625,
+          "width": 910.03125,
+          "x": 16.984375,
+          "y": 79.84375
+        },
+        "span": [
+          0.035000133542932146,
+          0.035
+        ]
+      },
+      "time": "396.621,396.621",
+      "sha256": "b6e01b3cf532654622f8e5324123c3fa76fee481988771f8200b4e0fa3143d6a"
+    },
+    {
+      "name": "motion-3",
+      "camera": {
+        "origin": [
+          0.4445360660410339,
+          0.46591746729631434
+        ],
+        "rect": {
+          "height": 511.890625,
+          "width": 910.03125,
+          "x": 16.984375,
+          "y": 79.84375
+        },
+        "span": [
+          0.035000133542932146,
+          0.035
+        ]
+      },
+      "time": "397.257,397.257",
+      "sha256": "3792646312341609219be46a65d60783fc9e2a97249064e551664598b4920051"
+    }
+  ]
+}

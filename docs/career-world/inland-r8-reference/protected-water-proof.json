@@ -1,0 +1,20 @@
+{
+  "protectedFields": [
+    {
+      "id": "l2-c1-1",
+      "differingPixels": 0,
+      "wetDifferingPixels": 0,
+      "flowDifferingPixels": 0
+    },
+    {
+      "id": "l2-c3-1",
+      "differingPixels": 4885,
+      "wetDifferingPixels": 0,
+      "flowDifferingPixels": 0
+    }
+  ],
+  "gorgeShader": {
+    "vertex": "e6025b236c53608f2d6d8f1ca81861432b625387dfc5fda9d25f35d2a98d52e3",
+    "fragment": "60f985091f745df9b315ddf4626267fb37738308c12bdf2aa6640c0df338fa17"
+  }
+}

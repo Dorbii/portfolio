@@ -3,11 +3,11 @@ import terrain from "../../../../../public/career-world/layers/terrain/authority
 // Water-owned art direction anchored to existing land registrations. These
 // choices color only submerged materials; they never repaint the land.
 export const INLAND_PALETTES = {
-  meadow: { sand: [0.11, 0.17, 0.13], stone: [0.20, 0.24, 0.18], deep: [0.012, 0.065, 0.071] },
+  meadow: { sand: [0.20, 0.18, 0.105], stone: [0.28, 0.27, 0.20], deep: [0.012, 0.065, 0.071] },
   amethyst: { sand: [0.045, 0.125, 0.235], stone: [0.21, 0.15, 0.29], deep: [0.008, 0.065, 0.15] },
   crystal: { sand: [0.095, 0.18, 0.23], stone: [0.24, 0.31, 0.34], deep: [0.013, 0.068, 0.12] },
-  limestone: { sand: [0.20, 0.22, 0.155], stone: [0.32, 0.33, 0.26], deep: [0.018, 0.093, 0.10] },
-  forest: { sand: [0.085, 0.125, 0.105], stone: [0.17, 0.21, 0.145], deep: [0.008, 0.056, 0.060] },
+  limestone: { sand: [0.27, 0.25, 0.17], stone: [0.35, 0.34, 0.27], deep: [0.018, 0.093, 0.10] },
+  forest: { sand: [0.14, 0.13, 0.09], stone: [0.23, 0.24, 0.18], deep: [0.008, 0.056, 0.060] },
 } as const;
 
 export const INLAND_REGION_PALETTES: Readonly<Record<string, keyof typeof INLAND_PALETTES>> = {

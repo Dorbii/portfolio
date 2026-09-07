@@ -1,6 +1,12 @@
 # Ocean / inland continuation — 2026-09-06
 
-## Latest owner revision — r7
+## Latest owner revision — inland r8
+
+Owner: “the ocean we can call done for now.” Ocean scope is held at 46e75848. Inland now has source-traced fall profiles, audited water-only alpha repairs, revised bed/bank shading, completed water-body coverage, and a reconciled 108-feature inventory across the current 67-cell mount. See [INLAND-WATER-REVIEW.md](INLAND-WATER-REVIEW.md) for current evidence, retired annotations and verification limits.
+
+Typecheck/lint/build, 40 focused checks, water provenance and protected-authoring checks pass. Full suite remains red on the same four baseline failures (124 pass, one skipped). Runtime art remains for owner review. Earlier sections below are historical checkpoints; their deferred mapping and ocean-review to-dos are superseded by r8.
+
+## Previous owner revision — r7
 
 Owner still rarely saw aquatic life after two density passes. The revision changes visibility, keeping the r6 population, size ranges and trajectories. Near-surface animals are no longer excluded over seabed deeper than 22 m. Swimming depth is now 0.45–1.15 m, capped by local depth; resolved small fish retain coverage sooner; flank/ray contrast is stronger and unresolved stripe detail is filtered. Land, water fields, reefs, wave behavior and shared camera/LoD are unchanged. Renderer revision: `ocean-life-visibility-r7`.
 

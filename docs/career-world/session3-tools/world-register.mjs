@@ -35,6 +35,8 @@ const listArg = (flag) => {
 };
 const arg1 = (flag) => listArg(flag)[0] || null;
 const WANTED = listArg("--territory");
+// A repair can update affected cells while preserving unrelated served bytes.
+const ONLY_CELLS = new Set(listArg("--only-cells"));
 const ALL = ["ninjaone", "tanium", "coast"];      // feed order: NinjaOne first (its ids are the old ones)
 // --tone <gains.json>: exposure equalisation at SERVE time (tone-harmonise.mjs
 // writes the table; owner 2026-09-05: "lets fix all the patchy non-uniformed
@@ -145,8 +147,10 @@ for (const t of ALL) {
     const cap = `${id}-capital.webp`, site = `${id}-site.webp`;
     const capFile = path.join(outDir, cap), siteFile = path.join(outDir, site);
     const l1 = await cellImage(pyr, 1, col, row), l0 = await cellImage(pyr, 0, col, row);
-    const stale = FORCE || TONE || CHAIN || !fs.existsSync(capFile) || !fs.existsSync(siteFile)
-      || fs.statSync(capFile).mtimeMs < l1.newest || fs.statSync(siteFile).mtimeMs < l0.newest;
+    const selected = !ONLY_CELLS.size || ONLY_CELLS.has(`${t}:${id}`);
+    if (!selected && (!fs.existsSync(capFile) || !fs.existsSync(siteFile))) throw new Error(`Unselected cell has no served snapshot: ${t}:${id}`);
+    const stale = selected && (FORCE || TONE || CHAIN || !fs.existsSync(capFile) || !fs.existsSync(siteFile)
+      || fs.statSync(capFile).mtimeMs < l1.newest || fs.statSync(siteFile).mtimeMs < l0.newest);
     if (stale) {
       if (!DRY) {
         for (const [lvl, file, size] of [[l1, capFile, 1024], [l0, siteFile, 2048]]) {

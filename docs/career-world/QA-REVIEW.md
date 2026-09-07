@@ -1600,3 +1600,23 @@ All program elements are shown; none was silently dropped. The diagram has `0` u
 - .codex-tmp/qa/life-readability-r7/aquatic-motion.webp: 20 actual screenshots over 9.433 simulated seconds, exported losslessly at native crop resolution with measured timing. No interpolated movement. All layer toggles and normal time restored; temporary viewport overrides cleared.
 
 The mis-scaled page captures made during viewport setup are diagnostic artifacts, not visual evidence; use the normal-view frames and animated proof above.
+
+**Codex (inland r8, 2026-09-07):** Owner says “the ocean we can call done for now” and explicitly requests inland waterfall alignment, remaining water cutouts, and riverbed/bank transitions. Ocean modules/assets remain at 46e75848. Mapped falls now use source-traced profiles and measured widths; their rectangular cloned-rock backing is removed. Alpha-only cuts cover 20 authored cells plus the neutral-white quarry waterfall. Source RGB is preserved. Current 67-cell mount and 39-fall atlas rebuilt; 23 deferred annotations restored/repositioned, three retired with provenance, three new source-visible features added, for 108 active features.
+
+**Codex (r8 material/coverage):** Added shallower banks, wet contact, irregular clustered cobbles and a textured bed using resident artwork. Live review exposed a hard inland/marine stripe at broad inlet reach and a marine crescent at the fern pond. Connected-body completion now fills annotated inland water up to the established sea handoff; unannotated inlets and broad-sea markers are preserved. A synthetic side-pool/outlet test protects this behavior. The existing retired/deferred test was expanded to assert retained provenance and exclusion from active draws, reflecting the owner-authorized reconciliation; no existing test was removed or weakened to hide a regression.
+
+**Codex (r8 preservation/evidence):** Main gorge shader strings are byte-identical. Purple-brook fields are identical. Gorge water pixels and flow bytes are identical; 4,885 dry-side distance pixels near the southern boundary reflect neighboring cutouts. Rocks, tree cover and bridges remain occluders. The final ten camera/state captures report ready, no pending land/water loads, settled cameras and GL error zero. Four normal-motion frames share a camera and advance water time 395.359 to 397.257. These are implementation/runtime findings, not visual acceptance.
+
+**Codex (r8 gates/limits):** Typecheck, lint (0 errors / 30 existing warnings), production build, field provenance and protected-authoring checks pass. Final focused tests 40/40; full suite 124 pass / four inherited failures / one skipped. Full verify remains red on the same capital-envelope, paving, territory-resegmentation and Kaizen-topography failures. Build was run separately. The broad dry-land performance cull was rejected because it changed translucent-land compositing; do not cite its timing as a final win. Final color, spray and brightness remain for owner review. Current inventory and source evidence: INLAND-WATER-REVIEW.md and inland-r8-reference/.
+
+- .codex-tmp/qa/inland-r8/raised-shelf-final.png: Source-traced short drop joins the terminal pool with a shallow textured bank.
+- .codex-tmp/qa/inland-r8/forest-lower-final.png: Forest cascade follows the curved opening and retains tree/rock occlusion.
+- .codex-tmp/qa/inland-r8/broad-drop-final.png: The wide drop and its lateral pool share inland material without the previous straight marine boundary.
+- .codex-tmp/qa/inland-r8/fern-pond-final.png: Fern pond material reaches its water boundary, including the previous marine crescent.
+- .codex-tmp/qa/inland-r8/headwater-step-final.png: The newly mapped upper west headwater step follows the source-visible shelf descent.
+- .codex-tmp/qa/inland-r8/fern-bench-final.png: The fern outlet follows the bench bend and landing reach.
+- .codex-tmp/qa/inland-r8/quarry-fall-final.png: The neutral-white baked waterfall is cut from land and replaced by the aligned moving sheet.
+- .codex-tmp/qa/inland-r8/bridge-fall-final.png: The shelf waterfall passes behind the existing bridge; the bridge remains opaque.
+- .codex-tmp/qa/inland-r8/world-final.png: Reverse zoom returns to the current island mount with water and land ready.
+- .codex-tmp/qa/inland-r8/territory-final.png: Territory view retains the current coast, registration and stable land/water residency.
+- .codex-tmp/qa/inland-r8/motion-0.png through motion-3.png: four native frames over 1.898 simulated seconds at one camera; distinct frame hashes, normal motion restored.

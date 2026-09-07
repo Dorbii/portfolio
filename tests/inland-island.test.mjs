@@ -3,6 +3,7 @@ import crypto from 'node:crypto';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import sharp from 'sharp';
+import {INLAND_FALL_PROFILE_SAMPLES} from '../features/career-world/layers/water/inland/profile.ts';
 const read=async path=>JSON.parse(await fs.readFile(path));
 const inventory=await read('art-source/career-world/water/inland-island-r1.json');
 const legacy=await read('art-source/career-world/water/flow-features-r1.json');
@@ -25,11 +26,16 @@ test('inland inventory covers every mounted cell and every declared water featur
   assert.ok(fields.features.every(f=>f.waterPixels>0));
 });
 
-test('deferred inland annotations retain their source and never enter active fields or fall draws',()=>{
+test('deferred and retired inland annotations retain provenance and never enter active fields or fall draws',()=>{
   const activeIds=new Set(fields.features.map(f=>f.id));
   const fallIds=new Set(atlas.falls.map(f=>f.id));
   const pendingIds=new Set();
   for(const cell of inventory.cells){
+    for(const retired of cell.retiredFeatures??[]){
+      assert.ok(retired.reason&&retired.previousSource&&retired.previousSha256);
+      assert.ok(!activeIds.has(retired.feature.id),'retired feature entered active fields');
+      assert.ok(!fallIds.has(retired.feature.id),'retired feature entered fall atlas');
+    }
     const pending=cell.pendingReview;
     if(!pending)continue;
     assert.ok(pending.previousSource&&pending.previousSha256&&pending.reason);
@@ -53,6 +59,12 @@ test('mapped falls share a current atlas with bounded context coordinates and de
   for(const fall of atlas.falls){
     assert.ok(fall.flight[0]>0&&Number.isFinite(fall.flight[1]));
     assert.ok(fall.widthScale>0&&fall.effectScale>0);
+    assert.equal(fall.profile.length,INLAND_FALL_PROFILE_SAMPLES*4);
+    for(let i=0;i<fall.profile.length;i+=4){
+      assert.ok(fall.profile.slice(i,i+4).every(Number.isFinite));
+      assert.ok(fall.profile[i+2]>=0);
+      if(i)assert.ok(fall.profile[i+1]>fall.profile[i-3]);
+    }
     for(let axis=0;axis<2;axis++){
       assert.ok(fall.atlas[axis]>=0&&fall.atlas[axis]+fall.atlas[axis+2]<=1);
       for(const point of [fall.lip,fall.foot,fall.upstream]){

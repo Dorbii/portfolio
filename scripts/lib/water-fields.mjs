@@ -128,6 +128,33 @@ export function restoreMarineFlow(data,markers){
   }
 }
 
+// An annotation selects a water body, not a hard-edged material corridor.
+// Complete only connected inland water within the established sea handoff.
+// Unannotated inlets, dry pixels and open-sea markers remain untouched.
+export function completeAnnotatedWater(data, before, land, marine, width, height) {
+  const visited=new Uint8Array(land.length),queue=new Uint32Array(land.length);
+  let head=0,tail=0,changed=0;
+  for(let i=0;i<land.length;i++)if(!land[i]&&!marine[i]
+    &&(data[i*3+1]!==before[i*3+1]||data[i*3+2]!==before[i*3+2])){
+    visited[i]=1;queue[tail++]=i;
+  }
+  const visit=(i,from)=>{
+    if(visited[i]||land[i]||marine[i])return;
+    visited[i]=1;queue[tail++]=i;
+    const g=data[i*3+1],b=data[i*3+2];
+    if(Math.hypot(g/255*2-1,b/255*2-1)>=0.045)return;
+    const vx=data[from*3+1]/255*2-1,vy=data[from*3+2]/255*2-1;
+    const scale=Math.min(1,0.6/Math.max(0.001,Math.hypot(vx,vy)));
+    data[i*3+1]=Math.round((0.5+vx*scale*0.5)*255);
+    data[i*3+2]=Math.round((0.5+vy*scale*0.5)*255);changed++;
+  };
+  while(head<tail){const i=queue[head++],x=i%width;
+    if(x)visit(i-1,i);if(x+1<width)visit(i+1,i);
+    if(i>=width)visit(i-width,i);if(i+width<width*height)visit(i+width,i);
+  }
+  return changed;
+}
+
 export function applyFlowFeature(data, land, width, height, points, radius, strength) {
   const distances = new Map();
   for (let s = 1; s < points.length; s++) {

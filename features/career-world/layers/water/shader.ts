@@ -59,6 +59,9 @@ void main() {
   float shore = (field.r - 0.5) * 2.0 * uRange;
   vec2 flow = field.gb * 2.0 - 1.0;
   float inland = smoothstep(0.045, 0.14, length(flow));
+  // The ocean overlay has no inland contributors. The base pass still runs
+  // beneath land so existing translucent terrain compositing is unchanged.
+  if(uDebug<0.5&&uDetailPass>0.5&&inland>0.999){fragColor=vec4(0);return;}
   float geographyCoast = 1.0 - smoothstep(0.008, 0.03, -flow.x);
   vec2 stepUv = max(vec2(uPixelMetres), uWorldMetres / uFieldSize.xy) / uWorldMetres;
   vec2 gradient = vec2(

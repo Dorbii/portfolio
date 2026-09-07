@@ -13,7 +13,7 @@ for(const [index,fall] of falls.entries()){
   const {data,info}=await sharp(bytes).ensureAlpha().raw().toBuffer({resolveWithObject:true});
   const local=p=>p.map((n,a)=>(n-tile.worldBounds.origin[a])/tile.worldBounds.span[a]);
   const lip=local(fall.points[0]),foot=local(fall.points.at(-1)),upstream=local(fall.upstream);
-  const points=[lip,foot,upstream];
+  const points=[...fall.profile.points.map(local),lip,foot,upstream];
   const left=Math.max(0,Math.floor((Math.min(...points.map(p=>p[0]))-.095)*info.width));
   const top=Math.max(0,Math.floor((Math.min(...points.map(p=>p[1]))-.07)*info.height));
   const right=Math.min(info.width,Math.ceil((Math.max(...points.map(p=>p[0]))+.095)*info.width));
@@ -37,12 +37,20 @@ for(const [index,fall] of falls.entries()){
   const drop=(footWorld[1]-lipWorld[1])*world[1];
   if(drop<=0)throw new Error(`Non-descending mapped fall: ${fall.id}`);
   const duration=(Math.sqrt(1.5**2+2*9.81*.86*drop)-1.5)/(9.81*.86);
+  const profilePoints=fall.profile.points.map(p=>p.map((n,a)=>n*world[a]));
+  const arcs=[0];for(let i=1;i<profilePoints.length;i++)arcs.push(arcs.at(-1)+Math.hypot(...profilePoints[i].map((n,a)=>n-profilePoints[i-1][a])));
+  const profile=profilePoints.flatMap((point,i)=>{
+    const age=i<fall.profile.lipIndex?-(arcs[fall.profile.lipIndex]-arcs[i])/1.5
+      :(Math.sqrt(1.5**2+2*9.81*.86*Math.max(0,point[1]-lipWorld[1]*world[1]))-1.5)/(9.81*.86);
+    return [...point,fall.profile.halfWidths[i],age];
+  });
   const context={origin:[tile.worldBounds.origin[0]+left/info.width*tile.worldBounds.span[0],tile.worldBounds.origin[1]+top/info.height*tile.worldBounds.span[1]],
     span:[(right-left)/info.width*tile.worldBounds.span[0],(bottom-top)/info.height*tile.worldBounds.span[1]]};
   const x=(index%8)*256+2,y=Math.floor(index/8)*512+2;
   overlays.push({input:await sharp(bytes).extract({left,top,width:right-left,height:bottom-top}).resize(252,508,{fit:'fill'}).png().toBuffer(),left:x,top:y});
   entries.push({id:fall.id,tileId:fall.tileId,source,sourceHash,lip:lipWorld,foot:footWorld,upstream:fall.upstream,hasLanding:fall.hasLanding!==false,
-    context,atlas:[x/width,y/height,252/width,508/height],
+    context,atlas:[x/width,y/height,252/width,508/height],profile,
+    profileLipIndex:fall.profile.lipIndex,opaqueProfileSamples:fall.profile.opaqueSamples,
     backingOffset:fall.backingOffset.map((n,a)=>n*tile.worldBounds.span[a]/context.span[a]),
     flight:[duration,(footWorld[0]-lipWorld[0])*world[0]/duration],
     widthScale:Math.max(.12,Math.min(1.25,widthMetres/3.2)),

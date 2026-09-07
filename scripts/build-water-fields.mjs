@@ -2,8 +2,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
 import sharp from "sharp";
-import { applyFlowFeature, distanceTransform, encodeWaterField, markProvisionalCoast,marineFlowMarkers,restoreMarineFlow } from "./lib/water-fields.mjs";
+import { applyFlowFeature, distanceTransform, encodeWaterField, markProvisionalCoast,marineFlowMarkers,restoreMarineFlow,completeAnnotatedWater } from "./lib/water-fields.mjs";
 import { WORLD_PLANE } from "../features/career-world/shared/world.ts";
+import { traceInlandFall } from "./lib/inland-fall-profile.mjs";
 
 sharp.cache(false);
 const ROOT = process.cwd();
@@ -28,6 +29,8 @@ for (const tile of terrain.tiles) {
 }
 const generatorHash = hash(Buffer.concat([
   await fs.readFile(new URL(import.meta.url)), await fs.readFile(new URL("./lib/water-fields.mjs", import.meta.url)),
+  await fs.readFile(new URL("./lib/inland-fall-profile.mjs", import.meta.url)),
+  await fs.readFile(new URL("../features/career-world/layers/water/inland/profile.ts", import.meta.url)),
 ]));
 const inputHash = hash(Buffer.from(JSON.stringify({ terrain: hash(sourceBytes), annotations: hash(annotationBytes), sourceAssets, world: WORLD_PLANE, generatorHash })));
 if (process.argv.includes("--check")) {
@@ -69,6 +72,7 @@ stats.provisionalCoastPixels = markProvisionalCoast(data, land, WIDTH, HEIGHT, r
 const handoffData=encodeWaterField(land,WIDTH,HEIGHT,metresPerPixel,RANGE_METRES,8).data;
 markProvisionalCoast(handoffData,land,WIDTH,HEIGHT,rectangles,RANGE_METRES/metresPerPixel);
 const originalMarine=marineFlowMarkers(handoffData);
+const beforeAnnotations=Buffer.from(data);
 const features = [];
 if(island.cells.length!==terrain.tiles.length||new Set(island.cells.map(cell=>cell.tileId)).size!==terrain.tiles.length
   ||terrain.tiles.some(tile=>!island.cells.some(cell=>cell.tileId===tile.id)))throw new Error("Inland inventory must cover every mounted cell exactly once.");
@@ -95,17 +99,29 @@ for(const cell of island.cells){
       }
     record(pool,"pool",[pool.point],changed);
   }
+  const sourceImage=cell.falls.length?await sharp(cell.source).ensureAlpha().raw().toBuffer({resolveWithObject:true}):null;
   for(const fall of cell.falls){
-    const points=[fall.lip,fall.foot];
+    const profile=traceInlandFall(sourceImage.data,sourceImage.info.width,sourceImage.info.height,fall);
+    const points=profile.points.slice(profile.lipIndex);
     const changed=applyFlowFeature(data,land,WIDTH,HEIGHT,points.map(field),radius(fall.radius),1);
-    record(fall,"fall",points,changed,{upstream:world(fall.upstream),hasLanding:fall.hasLanding,
-      widthMetres:Math.max(0.6,Math.min(4.0,radius(fall.radius)*metresPerPixel)),backingOffset:fall.backingOffset,sourcePath:tile.sources.site.path});
+    record(fall,"fall",points,changed,{upstream:world(profile.points[0]),hasLanding:fall.hasLanding,
+      widthMetres:Math.max(0.6,Math.min(4.0,radius(fall.radius)*metresPerPixel)),backingOffset:fall.backingOffset,sourcePath:tile.sources.site.path,
+      profile:{points:profile.points.map(world),halfWidths:profile.halfWidths.map(n=>n*tile.worldBounds.span[0]*worldSize[0]*contract.mPerWorldPx),
+        lipIndex:profile.lipIndex,opaqueSamples:profile.opaqueSamples,maximumAdjustmentPixels:profile.maximumAdjustmentPixels}});
   }
 }
+stats.completedAnnotatedWaterPixels=completeAnnotatedWater(data,beforeAnnotations,land,originalMarine,WIDTH,HEIGHT);
 // Preserve the already-reviewed gorge and purple-brook interpretation last.
 for (const cell of annotations.cells) {
   const tile = terrain.tiles.find((entry) => entry.id === cell.tileId);
   if (!tile) continue;
+  const x0=Math.round(tile.worldBounds.origin[0]*WIDTH),y0=Math.round(tile.worldBounds.origin[1]*HEIGHT);
+  const x1=x0+Math.round(tile.worldBounds.span[0]*WIDTH),y1=y0+Math.round(tile.worldBounds.span[1]*HEIGHT);
+  // A neighboring annotation must not spread its inferred water body into
+  // the source-bound legacy cells. Their own paths are applied below.
+  for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){
+    const i=(y*WIDTH+x)*3;data[i+1]=beforeAnnotations[i+1];data[i+2]=beforeAnnotations[i+2];
+  }
   if (hash(await fs.readFile(cell.source)) !== cell.sha256) throw new Error(`Flow annotation ${cell.tileId} needs review: its source artwork changed.`);
   const toField = ([x, y]) => [
     (tile.worldBounds.origin[0] + (x - contract.bleedPx) / contract.keptPx * tile.worldBounds.span[0]) * WIDTH,

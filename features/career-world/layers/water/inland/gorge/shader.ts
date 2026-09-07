@@ -1,5 +1,6 @@
 import { WATER_LIGHTING_SHADER } from "../../../lighting/water/shader.ts";
 import { GORGE_FALL, gorgeFlight } from "./model.ts";
+import { INLAND_FALL_PROFILE_SAMPLES } from "../profile.ts";
 
 const vector=(p:readonly number[])=>`vec2(${p.map(n=>n.toFixed(8)).join(",")})`;
 const flight=gorgeFlight();
@@ -20,6 +21,8 @@ uniform vec2 uUpstream;
 uniform vec2 uFlight;
 uniform float uWidthScale;
 uniform float uEffectScale;
+uniform vec4 uProfile[${INLAND_FALL_PROFILE_SAMPLES}];
+vec4 profileAt(float s){float t=clamp(s,0.0,1.0)*${(INLAND_FALL_PROFILE_SAMPLES-1).toFixed(1)};int i=min(int(floor(t)),${INLAND_FALL_PROFILE_SAMPLES-2});return mix(uProfile[i],uProfile[i+1],t-float(i));}
 #define LIP (uFall.xy*WORLD)
 #define FOOT (uFall.zw*WORLD)
 #define UPSTREAM (uUpstream*WORLD)`:`const vec2 LIP=${vector(GORGE_FALL.lip)}*WORLD;
@@ -50,7 +53,17 @@ void main(){
     position=FOOT+((c*2.0-1.0)*vec2(8.0,5.5)-vec2(0,1.2))*${mapped?"uEffectScale":"1.0"};
   }else{
     float s=(float(gl_VertexID/6)+c.y)/64.0;
-    float along=max(0.0,(s-0.12)/0.88);
+    ${mapped?`vec4 shape=profileAt(s),before=profileAt(max(0.0,s-0.015)),after=profileAt(min(1.0,s+0.015));
+    vec2 tangent=normalize(after.xy-before.xy),side=vec2(-tangent.y,tangent.x);
+    float along=max(0.0,(s-0.19)/0.81),ribbon=vRibbon;
+    float lane=ribbon<0.5?0.0:(ribbon-3.5)*0.19;
+    float pulse=0.55+0.45*pow(sin((shape.w-uTime)*3.1+ribbon*4.7),2.0);
+    float width=ribbon<0.5?1.0:0.22*pulse;
+    float flutter=sin(shape.w*3.5-uTime*2.0+ribbon*3.7)*0.05*along;
+    vAcross=(lane+flutter+(c.x*2.0-1.0)*width)*shape.z;
+    position=shape.xy+side*vAcross;
+    vTravel=shape.w;
+    vUv=vec2(c.x,s);`:`float along=max(0.0,(s-0.12)/0.88);
     float age=along*${mapped?"uFlight.x":flight.duration.toFixed(8)};
     vTravel=age;
     vec2 velocity=vec2(${mapped?"uFlight.y":flight.velocityX.toFixed(8)},${GORGE_FALL.entrySpeed.toFixed(8)});
@@ -69,7 +82,7 @@ void main(){
     flutter+=sin(age*8.0-uTime*3.3+ribbon)*0.035*along;
     vAcross=(spread+flutter+(c.x*2.0-1.0)*width)*${mapped?"uWidthScale":"1.0"};
     position.x+=vAcross;
-    vUv=vec2(c.x,s);
+    vUv=vec2(c.x,s);`}
   }
   vWorld=position/WORLD;
   vec2 screen=(vWorld-uCamera.xy)/uCamera.zw;
@@ -126,7 +139,7 @@ void main(){
     float core=exp(-dot(cloud*vec2(2.1,3.0),cloud*vec2(2.1,3.0)));
     float plume=exp(-cloud.x*cloud.x*4.0-pow(cloud.y+0.26,2.0)*15.0)*(0.45+warp*0.55);
     float grain=noise(q*vec2(28,17)+vec2(uTime*0.7,-uTime*1.2));
-    alpha=core*(0.20+grain*0.45)*(1.0-land)+plume*0.25;
+    alpha=core*(0.20+grain*0.45)*(1.0-land)+plume*0.25;${mapped?"alpha*=1.0-smoothstep(0.25,0.85,land);":""}
     linear=illuminatedFoam(vWorld);
   }else{
     float across=vUv.x*2.0-1.0;
@@ -147,7 +160,7 @@ void main(){
     alpha=edge*(vRibbon<0.5?0.82*(0.86+body*0.14):0.36*lower*smoothstep(0.53,0.78,fragments));
     if(vRibbon>0.5)alpha*=detail;
     alpha*=1.0-smoothstep(0.92,1.0,vUv.y);
-    ${mapped?"if(vUv.y<0.12)alpha*=1.0-land;":""}
+    ${mapped?"alpha*=1.0-smoothstep(0.25,0.85,land);":""}
   }
   alpha*=uOpacity;
   if(alpha<0.001)discard;

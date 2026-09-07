@@ -1,0 +1,182 @@
+[
+  {
+    "id": "l2-c1-3",
+    "source": "art-source/career-world/l2-land/ninjaone/c1-3/c1-3-l2.png",
+    "beforeHash": "41ceb66549516839fbc7c31b2b32dd8ffba627ce339b83596caf74c48edac3cf",
+    "afterHash": "7ec0a7058b3969799e1b9cf9b60c29b9e391de1674b3fe8a6b091e5e359379bb",
+    "cutPixels": 149,
+    "rgbChanges": 0,
+    "alphaIncreases": 0
+  },
+  {
+    "id": "l2-c2-0",
+    "source": "art-source/career-world/l2-land/ninjaone/c2-0/c2-0-l2.png",
+    "beforeHash": "8d800f0c396d9c6b7b2f1696b3eabf16b64a16b79126083ee1849b498e8ba2a1",
+    "afterHash": "568e3be29a1a9ef322dd367baf5fe6b7a332bb4f06e021e23487ec2d81ee3217",
+    "cutPixels": 671,
+    "rgbChanges": 0,
+    "alphaIncreases": 0
+  },
+  {
+    "id": "l2-c2-3",
+    "source": "art-source/career-world/l2-land/ninjaone/c2-3/c2-3-l2.png",
+    "beforeHash": "b79734fd911de8851bd5bc6491e75e043c0eb56b8ca97df7e5941b890f171491",
+    "afterHash": "07dbc4dffff15ebe71e710ec14a1a075cde9547ceb15b49b3cfd1ff0d1c37af6",
+    "cutPixels": 396,
+    "rgbChanges": 0,
+    "alphaIncreases": 0
+  },
+  {
+    "id": "l2-c3-0",
+    "source": "art-source/career-world/l2-land/ninjaone/c3-0/c3-0-l2.png",
+    "beforeHash": "8bad4d0c28de1118b2223b5d2b890432d1ec4bf1cbc9698a4204b31efb6b9a3d",
+    "afterHash": "dd5253286238356a027fc354eaa1dea161ff67ba0c23285a49e9919f9baa23e0",
+    "cutPixels": 5180,
+    "rgbChanges": 0,
+    "alphaIncreases": 0
+  },
+  {
+    "id": "l2-c3-2",
+    "source": "art-source/career-world/l2-land/ninjaone/c3-2/c3-2-l2.png",
+    "beforeHash": "6aa67ce80451d156f7097d2c8f83de62af1c8b81571493a64389eb11522959c3",
+    "afterHash": "2153fc20134b29cf9e4937190b77e06f8c9b7f7a2ef843125c0c9c6105f0e586",
+    "cutPixels": 19162,
+    "rgbChanges": 0,
+    "alphaIncreases": 0
+  },
+  {
+    "id": "l2-c4-1",
+    "source": "art-source/career-world/l2-land/ninjaone/c4-1/c4-1-l2.png",
+    "beforeHash": "51bd412622ba3b0d74b8ab379af7409ab311f5eac1b7580d47cad7b04b4dd7b3",
+    "afterHash": "68c7cc1954b7ec22f1a504e7058e9f164522bfc78d7e5381f6b9122bb7eec6ee",
+    "cutPixels": 295,
+    "rgbChanges": 0,
+    "alphaIncreases": 0
+  },
+  {
+    "id": "l2-c4-3",
+    "source": "art-source/career-world/l2-land/ninjaone/c4-3/c4-3-l2.png",
+    "beforeHash": "32b47f670e994b811f10d3f4403d72d824830b2bb3ae8242db43def5e0ef9dec",
+    "afterHash": "f7318417f7ac7fffb0361f7e77e4fddf24cafc63f1e19c3b774e6aad7c61ae2a",
+    "cutPixels": 4627,
+    "rgbChanges": 0,
+    "alphaIncreases": 0
+  },
+  {
+    "id": "l2-tanium-c0-1",
+    "source": "art-source/career-world/l2-land/tanium/c0-1/c0-1-l2.png",
+    "beforeHash": "4a470899e76b8249e2eeb84afe96e1adb3b8871e1826322f94e73be9d122733d",
+    "afterHash": "ea5e1b832eb7d6efa4c1d44effadfe1ec968a024a4ab52f8c5735299a4b55dc0",
+    "cutPixels": 4264,
+    "rgbChanges": 0,
+    "alphaIncreases": 0
+  },
+  {
+    "id": "l2-tanium-c1-2",
+    "source": "art-source/career-world/l2-land/tanium/c1-2/c1-2-l2.png",
+    "beforeHash": "fd6565fcb5e618bac26fd10674abe305c6f7d8387177feb10844943427e618f5",
+    "afterHash": "ac3494b070944dd8bd5e1eb70171c83172cecbc38006c7ea1eac63f974200fd2",
+    "cutPixels": 4914,
+    "rgbChanges": 0,
+    "alphaIncreases": 0
+  },
+  {
+    "id": "l2-tanium-c2-2",
+    "source": "art-source/career-world/l2-land/tanium/c2-2/c2-2-l2.png",
+    "beforeHash": "b6f05bc404df01a2aa1f4dc594b8bcd0b922b9a388d8042760e3c2a24279eda0",
+    "afterHash": "759461c60a398fc03596655be05b1dc618649aa9357dc3ec36a5077d1a814024",
+    "cutPixels": 2235,
+    "rgbChanges": 0,
+    "alphaIncreases": 0
+  },
+  {
+    "id": "l2-tanium-c3-0",
+    "source": "art-source/career-world/l2-land/tanium/c3-0/c3-0-l2.png",
+    "beforeHash": "e9b03af8677473fa1b132209b10145fa441f69cf0350ff35293e61297eee2284",
+    "afterHash": "47adaddfac8ca157ae19dec0ad08d0093ba1d0cf0014a9cf99459016fe91f88f",
+    "cutPixels": 13412,
+    "rgbChanges": 0,
+    "alphaIncreases": 0
+  },
+  {
+    "id": "l2-tanium-c3-2",
+    "source": "art-source/career-world/l2-land/tanium/c3-2/c3-2-l2.png",
+    "beforeHash": "3ac5562911caf2540ffabb1b02d6fc7f1782acd86e217a8db0fd46e1366ea6ab",
+    "afterHash": "67db889bd4d8124987cd5a0bf523215b113c3a3cbba7c0cc6096b1a07c66f075",
+    "cutPixels": 4499,
+    "rgbChanges": 0,
+    "alphaIncreases": 0
+  },
+  {
+    "id": "l2-tanium-c4-1",
+    "source": "art-source/career-world/l2-land/tanium/c4-1/c4-1-l2.png",
+    "beforeHash": "f056111675af368186a64e74855cb4f270bf5dd2aebd16ea1197d016e222a2a8",
+    "afterHash": "233d9131825239c439f4942555abf4283249470561c04ee5f4b2b08558633358",
+    "cutPixels": 573,
+    "rgbChanges": 0,
+    "alphaIncreases": 0
+  },
+  {
+    "id": "l2-tanium-c4-2",
+    "source": "art-source/career-world/l2-land/tanium/c4-2/c4-2-l2.png",
+    "beforeHash": "8ef5794e611b68e90b1404fbcb07f58d1e774692154bd748375683b57937479f",
+    "afterHash": "f401cbb4665eeec49c804628a0346eedcb78d486392637ced09f3d739f9aa47c",
+    "cutPixels": 39178,
+    "rgbChanges": 0,
+    "alphaIncreases": 0
+  },
+  {
+    "id": "l2-tanium-c5-1",
+    "source": "art-source/career-world/l2-land/tanium/c5-1/c5-1-l2.png",
+    "beforeHash": "c8898686b540f95c74902cd45797233166a90eaef50274cfb52c82080bac4021",
+    "afterHash": "cbd3bc92d51259d0412854e522129a0a8025a542c75e57ea84cdf4db5bfa9bdb",
+    "cutPixels": 3698,
+    "rgbChanges": 0,
+    "alphaIncreases": 0
+  },
+  {
+    "id": "l2-tanium-c5-2",
+    "source": "art-source/career-world/l2-land/tanium/c5-2/c5-2-l2.png",
+    "beforeHash": "0c5585651ffafcc1e2799fb2eda9b76065542e951b48aefff185a1f3bdb66745",
+    "afterHash": "9231a7cbd42e7d71f50ce35354a9791f56b995168cc625429203583fc9a59a71",
+    "cutPixels": 826,
+    "rgbChanges": 0,
+    "alphaIncreases": 0
+  },
+  {
+    "id": "l2-tanium-c6-2",
+    "source": "art-source/career-world/l2-land/tanium/c6-2/c6-2-l2.png",
+    "beforeHash": "c6b0b865231d96a7c960a006f799fc0f54ed4684ac717c3acaee256e2236fe2d",
+    "afterHash": "ad0b7765ed75f1cd7cd4cc7e31a2c68a759c1aebc3aa49c9e539ec715b2d3e54",
+    "cutPixels": 3670,
+    "rgbChanges": 0,
+    "alphaIncreases": 0
+  },
+  {
+    "id": "l2-tanium-c1-1",
+    "source": "art-source/career-world/l2-land/tanium/c1-1/c1-1-l2.png",
+    "beforeHash": "b18dfacafbc3973f0473043071d75411c01eac7d2742c0adf60dc1d173f41666",
+    "afterHash": "88a2a20cf981818e6bcb1aac91b761c7d591fd6e6ab55428d5e017a8a480d274",
+    "cutPixels": 3252,
+    "rgbChanges": 0,
+    "alphaIncreases": 0
+  },
+  {
+    "id": "l2-tanium-c3-1",
+    "source": "art-source/career-world/l2-land/tanium/c3-1/c3-1-l2.png",
+    "beforeHash": "6e868b9ff47b8ac6d1bb94bdd6de4ee5d6b2cee9e4ba7fd6c2798b5133e5426e",
+    "afterHash": "5322090fe0b53f376b1e7b3bdb93d2d81efb234462f1f6e1e320013fa5034284",
+    "cutPixels": 4470,
+    "rgbChanges": 0,
+    "alphaIncreases": 0
+  },
+  {
+    "id": "l2-coast-c4-0",
+    "source": "art-source/career-world/l2-land/coast/c4-0/c4-0-l2.png",
+    "beforeHash": "347d15a300e0455c8d367a4a15a6212a4706ef63664603f4a7edd0d5533edd9f",
+    "afterHash": "8baed6fac8f92de179a3e72030b295683caf31b66cdc8988048a8f5d50b2a6f4",
+    "cutPixels": 2502,
+    "rgbChanges": 0,
+    "alphaIncreases": 0
+  }
+]

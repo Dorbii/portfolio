@@ -16,6 +16,7 @@ import "./ocean-detail-layout.test.mjs";
 import "./land-mount.test.mjs";
 import "./inland-palettes.test.mjs";
 import "./inland-island.test.mjs";
+import "./inland-fall-profile.test.mjs";
 import "./lighting.test.mjs";
 import "./stitch-content-aware-seam.test.mjs";
 import "./world-authoring-plan-territory.test.mjs";

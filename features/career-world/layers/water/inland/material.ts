@@ -41,12 +41,14 @@ vec3 inlandMaterial(vec2 p, float shore, vec2 flow, float time, float weather) {
 
   // Inland-owned stationary mineral bed. Depth is a bank-distance proxy;
   // the existing flow field supplies motion class without changing coverage.
-  float depth=mix(0.45+distance*0.58,0.30+distance*0.42,stream);
+  float bankWidth=mix(0.65,1.35,noise2(p*0.08+vec2(3,17)));
+  float depth=mix(0.16+distance*0.52,0.10+distance*0.28,stream);
+  depth*=smoothstep(0.0,bankWidth,distance)*(0.88+0.24*noise2(p*0.12+8.0));
   depth+=gorgePoolDepth(p)*smoothstep(0.15,1.0,distance);
   depth=min(depth,9.0);
   vec2 bottom=p+slope*min(depth,3.0)*0.6;
   InlandPalette palette=inlandPalette(p/uWorldMetres);
-  vec3 bed=inlandBed(bottom,palette,p/uWorldMetres);
+  vec3 bed=inlandBed(bottom,palette,p/uWorldMetres,distance,depth,stream);
   float focusing=1.0-smoothstep(0.015,0.095,abs(inlandFlowNoise(bottom*1.2+vec2(time*0.10,-time*0.07))-0.5));
   bed*=1.0+focusing*0.28*resolved*exp(-depth*0.45);
   float clarity=0.65+noise2(p*0.025+41.0)*0.55;
