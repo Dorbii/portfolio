@@ -67,39 +67,68 @@ void main() {
 }
 `;
 
+// WIND AS LIGHT (owner 2026-09-07 22:30: "couldnt we do something clever with
+// the foliage mask and using shadows/lighting to portray movement? Basically
+// just cycling the masks with w.e. art/shadow work we want to make it seem
+// like its moving a specific way/direction?"). The paint never moves — the
+// earlier warp read as jelly and could not find trees in a dense stand. Over
+// the canopy mask the pass rolls GUST FRONTS downwind: each front brightens
+// the needles as the wind turns them (a quick rise, a slow fade, a shade just
+// behind), carries streaks stretched along the wind, and a fine flutter under
+// it; the tops catch more than the feet. Everything is a luminance gain on
+// the land's own pixels, so where no gust passes the overlay is the land.
 const FRAGMENT_SHADER = `#version 300 es
 precision highp float;
 uniform sampler2D u_land;
 uniform sampler2D u_sway;
-uniform vec2 u_texel;      // one land texel in uv
+uniform vec2 u_texel;      // one land texel in uv (unused by the light pass; kept for the warp's interface)
 uniform vec2 u_wind;       // unit vector, texture space (y down)
 uniform float u_motion;    // the world's wind motion 0..1
 uniform float u_time;      // seconds
 uniform float u_opacity;
 in vec2 v_uv;
 out vec4 outColor;
+
+float hash21(vec2 p) {
+  vec3 q = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973));
+  q += dot(q, q.yzx + 33.33);
+  return fract((q.x + q.y) * q.z);
+}
+float vnoise(vec2 p) {
+  vec2 i = floor(p), f = fract(p);
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash21(i), hash21(i + vec2(1.0, 0.0)), u.x),
+             mix(hash21(i + vec2(0.0, 1.0)), hash21(i + vec2(1.0, 1.0)), u.x), u.y);
+}
+
 void main() {
   vec4 field = texture(u_sway, v_uv);
   if (field.a < 0.01) discard;
-  float weight = pow(field.r, 1.3);       // 0 at the crown's local foot, 1 a crown-height above it; feet stay planted
-  float height = field.g * 510.0;         // the local crown height in land texels (capped at a tree by the field)
-  float phase = field.b * 6.2831853;      // per tree, or a smooth noise across a dense stand
-  // the wind's run across the tile, in land texels along the wind
-  float along = (v_uv.x * u_wind.x + v_uv.y * u_wind.y) * 2048.0;
-  // a tall pine swings slowly, a sapling flutters: periods of about 2.5-4.5 s
-  float rate = 4.0 / (1.0 + height / 60.0);
-  // the swing, with a wave travelling downwind through the canopy (one every 300 texels)
-  float swing = 0.6 * sin(u_time * rate + phase - along * 0.021)
-    + 0.4 * sin(u_time * rate * 2.31 + phase * 1.7 - along * 0.05 + v_uv.y * 9.0);
-  // gusts roll across the tile (one every 600 texels), so neighbours do not all lean at once
-  float gust = 0.5 + 0.5 * sin(u_time * 0.35 + phase * 0.4 - along * 0.0105);
-  // a crown's top travels about a seventh of its height in the world's wind
-  float amplitude = clamp(0.14 * height, 1.5, 14.0) * u_motion;
-  vec2 shift = u_wind * amplitude * weight * swing * (0.4 + 0.6 * gust);
-  shift.y *= 0.35;
-  vec4 land = texture(u_land, v_uv - shift * u_texel);
+  float weight = field.r;                 // 0 at the crown's local foot, 1 a crown-height above it
+  float phase = field.b;                  // per tree, or a smooth noise across a dense stand
+  vec4 land = texture(u_land, v_uv);      // the paint stays put
+  vec2 p = v_uv * 2048.0;                 // land texels
+  float along = dot(p, u_wind);
+  float across = dot(p, vec2(-u_wind.y, u_wind.x));
+  float t = u_time * (0.6 + 0.8 * u_motion);
+  // gust fronts travelling downwind: one every ~360 texels at ~90 texels/s,
+  // each tree a little early or late so the fronts are not ruler lines
+  float g = fract((along - t * 90.0) / 360.0 + phase * 0.35 + across / 1400.0);
+  float front = smoothstep(0.0, 0.12, g) * (1.0 - smoothstep(0.12, 0.78, g));
+  float lee = smoothstep(0.78, 0.9, g) * (1.0 - smoothstep(0.9, 1.0, g));    // the shade just behind a gust
+  // flurries: a slower, larger envelope so not every gust is a full one
+  float env = 0.5 + 0.5 * sin((along - t * 40.0) / 900.0 * 6.2831853 + across / 600.0);
+  float gust = front * (0.35 + 0.65 * env);
+  // streaks stretched along the wind, scrolling with the gust
+  float streak = vnoise(vec2(along * 0.012 - t * 1.1, across * 0.07 + phase * 3.0)) * 2.0 - 1.0;
+  // the needles turning: a fine flutter under the gust
+  float flutter = 0.5 + 0.5 * sin(t * 9.0 + phase * 40.0 + across * 0.31 + along * 0.19);
+  float lift = 0.35 + 0.65 * weight;      // the tops catch it, the feet stay in shade
+  float gain = (0.16 * gust * (0.65 + 0.35 * streak) + 0.05 * gust * flutter - 0.05 * lee * env) * lift;
+  vec3 rgb = land.rgb * (1.0 + gain);
+  rgb += gain * vec3(0.0, 0.012, 0.024);  // the silvering of turned needles: a touch cooler
   float alpha = land.a * field.a * u_opacity;
-  outColor = vec4(land.rgb * alpha, alpha);
+  outColor = vec4(rgb * alpha, alpha);
 }
 `;
 

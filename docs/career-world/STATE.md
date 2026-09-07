@@ -4,7 +4,53 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-07 16:45 UTC, LATEST (current):** **THE FOLIAGE PHASE HAS BEGUN:
+**2026-09-07 23:00 UTC, LATEST (current):** **FOLIAGE MOTION IS NOW WIND AS
+LIGHT, NOT A WARP; THE HEADER BUTTONS ARE GONE; TWO STALE WATCHERS STOPPED.**
+Owner, over the afternoon (his clock): a crop of BLACK crowns 17:10 (fixed:
+the pass now loads its own textures, see below); *"not seeing it… what
+technique are you using here?"* on a dense stand; *"did the art always look
+this blurry up close? Do we need to prevent the LoD from getting this
+close?"*; *"can you get rid of these? we dont use them anymore"* (the World /
+territory / Labels buttons); *"I think we need to rethink this idea/technique
+for the foliage animations"*; then *"couldnt we do something clever with the
+foliage mask and using shadows/lighting to portray movement? Basically just
+cycling the masks with w.e. art/shadow work we want to make it seem like its
+moving a specific way/direction?"*; *"why cant we just use the foliage mask
+and cut that from the art and then replace the gaps with the assets?"*; *"can
+you stop any tasks that is stuck"*. **Why the warp failed:** the crown mask
+is a colour classifier and in the forest cells 74-89% of the canopy is one
+merged, hole-riddled blob — v2 (weight from each column's local foot, height
+capped at 110 px, noise phase across a stand; commit 9c6a7a6c) still left
+half the crown pixels in T c2-1 under 0.2 weight; and per-pixel displacement
+of drawn branch structure reads as jelly, worse under magnification.
+**Now (canopySwayWebGl.ts):** the paint never moves. Over the coverage mask
+the fragment rolls gust fronts downwind (one every ~360 texels at ~90
+texels/s, each tree early or late by its phase, a quick rise and slow fade,
+a shade band behind), a flurry envelope every ~900 texels, streaks of
+stretched value noise scrolling with the gust, a fine flutter under it, all
+as a luminance gain (up to +16% at the tops, +5% flutter, −5% lee) with a
+touch of cool as the needles turn; weight = the tops catch more. The field
+(sway-field.mjs v2: R local-foot weight, G height/2, B phase, A coverage) is
+unchanged and still serves. Same pass, registry, camera mapping, health
+attributes. **The blur:** the site tiles are 2048 px per cell; the camera's
+minimum span 0.02 puts ~3 device px on one painted texel on his display
+(1004 css px at dpr 2); 1:1 is span ≈ 0.06. The change is two constants,
+`shared/camera.ts` CAMERA_MINIMUM_SPAN and its typed mirror in
+`shared/lod/policy.ts` POLICY_CAMERA_MINIMUM_SPAN (0.02 → ~0.06); not
+applied — his word. **The buttons:** WorldInterface.tsx no longer renders
+World / territories / Labels; the QA toggles stay behind the development
+flag; tests/structures.test.mjs flipped (commit 0fe7a858). **The cut-out
+route (his question):** possible — cut the crowns by the mask as sprites OF
+THEMSELVES, fill the holes from the surrounding ground, bend each about its
+foot; the costs are the hole fill (an inpaint or a clone; invisible at rest
+because the sprite covers it) and splitting a dense stand into trees (tip
+detection on the mask's skyline); the risk is the painted stand turning
+into a sprite forest. Held in reserve behind the light pass. **Stale
+tasks:** b3p3gr3b6 and bb7a0k80l were `tail -f` watchers on the old bake
+logs from 2026-09-04, not bakes; stopped. **Still wanted from him:** the
+zoom cap; the four bay cells; the henge's place; the palette gate.
+
+**2026-09-07 16:45 UTC:** **THE FOLIAGE PHASE HAS BEGUN:
 CANOPY SWAY IS LIVE ON THE DEV SERVER (commit 3934c427 + the amplitude
 commit after it).** Owner 15:58 (his clock), on the standing stones: *"that
 works go ahead and commit that then we can do the foliage animation and
