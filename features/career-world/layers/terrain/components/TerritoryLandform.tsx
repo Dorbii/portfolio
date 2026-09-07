@@ -6,12 +6,12 @@ import {
   useState,
 } from "react";
 import type { CameraView, Pair } from "../../../shared/camera";
+import { CanopySway } from "./CanopySway";
 import {
-  CanopySway,
   createCanopySwayRegistry,
   type CanopySwayRegistry,
-} from "./CanopySway";
-import type { CanopySwayTile } from "./canopySwayWebGl";
+  type CanopySwayTile,
+} from "./canopySwayWebGl";
 import {
   advanceLodPresentationFade,
   DETAIL_POLICY,

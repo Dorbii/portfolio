@@ -19,6 +19,20 @@ export interface CanopySwayTile {
   readonly worldBounds: CameraView;
 }
 
+// What TerritoryLandform publishes each render for the pass to read: the
+// site-tier tiles it drew, the site tier's opacity, and its backing-store
+// size so both canvases map the camera alike. (Kept here, not in the
+// component module, so Vite can fast-refresh the component alone.)
+export interface CanopySwayRegistry {
+  tiles: readonly CanopySwayTile[];
+  opacity: number;
+  pixelSize: readonly [number, number];
+}
+
+export function createCanopySwayRegistry(): CanopySwayRegistry {
+  return { tiles: [], opacity: 0, pixelSize: [1, 1] };
+}
+
 export interface CanopySwayFrame {
   readonly tiles: readonly CanopySwayTile[];
   readonly opacity: number;

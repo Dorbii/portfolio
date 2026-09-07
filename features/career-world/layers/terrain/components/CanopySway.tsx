@@ -15,20 +15,9 @@ import {
 } from "../../../shared/weather";
 import {
   createCanopySwayRenderer,
+  type CanopySwayRegistry,
   type CanopySwayRenderer,
-  type CanopySwayTile,
 } from "./canopySwayWebGl";
-
-export interface CanopySwayRegistry {
-  tiles: readonly CanopySwayTile[];
-  opacity: number;
-  /** The land canvas's backing-store size, so both canvases map the camera alike. */
-  pixelSize: readonly [number, number];
-}
-
-export function createCanopySwayRegistry(): CanopySwayRegistry {
-  return { tiles: [], opacity: 0, pixelSize: [1, 1] };
-}
 
 interface CanopySwayProps {
   readonly camera: CameraView;
