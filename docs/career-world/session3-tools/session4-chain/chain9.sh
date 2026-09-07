@@ -15,6 +15,15 @@ for id in c3-1 c5-1 c2-1 c1-1 c6-1 c0-1; do
   if [ ! -f "$src" ]; then say "$id: no plain attempt in the working folder — skipped"; continue; fi
   # skip a cell whose plain attempt already landed (its layer is newer than the candidate)
   if [ "art-source/career-world/l2-land/tanium/$id/$id-l2.png" -nt ".codex-tmp/authoring/cells/tanium/$id/$id-l2.png" ]; then say "$id: the plain regen already landed — skipped"; continue; fi
+  # c0-1's plain attempt left four crossings unmet (17:33Z): its water is opened
+  # at every authored edge first (mask only), so the stitch does not dead-end a beck
+  if [ "$id" = c0-1 ]; then
+    for spec in "left coast/c0-6" "right tanium/c1-1" "top tanium/c0-0" "bottom tanium/c0-2"; do
+      set -- $spec; edge="$1"; nb="$2"; nbid="${nb#*/}"
+      [ -f "art-source/career-world/l2-land/$nb/$nbid-l2.png" ] || continue
+      node docs/career-world/session3-tools/conform-seam-water.mjs tanium c0-1 --edge "$edge" --neighbour "art-source/career-world/l2-land/$nb/$nbid-l2.png" --max 512 --write 2>&1 | grep -E "total|written" | head -2
+    done
+  fi
   say "$id: the plain regen stitched on his word"
   CELL_OWNER_ACCEPT="owner 2026-09-06 17:25, on the served world: 'the center tiles that had the old attempt at the chain still need regen cause now it just has conflicting chains with the overlay' — the plain regen goes in; the chain is the layer" \
     node tools/world-authoring/cell.mjs --territory tanium --cell "$cell" --redo --force --describe-file "art-source/career-world/l2-land/tanium/briefs/$id.md" 2>&1 | grep -E "OVERRIDE|accepted, stitched|NOT accepted" | head -3
