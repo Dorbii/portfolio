@@ -124,9 +124,12 @@ void main() {
   // the needles turning: a fine flutter under the gust
   float flutter = 0.5 + 0.5 * sin(t * 9.0 + phase * 40.0 + across * 0.31 + along * 0.19);
   float lift = 0.35 + 0.65 * weight;      // the tops catch it, the feet stay in shade
-  float gain = (0.16 * gust * (0.65 + 0.35 * streak) + 0.05 * gust * flutter - 0.05 * lee * env) * lift;
-  vec3 rgb = land.rgb * (1.0 + gain);
-  rgb += gain * vec3(0.0, 0.012, 0.024);  // the silvering of turned needles: a touch cooler
+  // the silvering is ADDED, not multiplied: dark needles barely change under a
+  // percentage, and the owner's first look read as stagnant (2026-09-07 23:40)
+  float pale = (0.22 * gust * (0.65 + 0.35 * streak) + 0.07 * gust * flutter) * lift;
+  float shade = 0.08 * lee * env * lift;
+  vec3 rgb = land.rgb + pale * vec3(0.78, 0.86, 0.72) - shade * land.rgb;
+  rgb += pale * vec3(0.0, 0.03, 0.06);    // the turned needles a touch cooler
   float alpha = land.a * field.a * u_opacity;
   outColor = vec4(rgb * alpha, alpha);
 }

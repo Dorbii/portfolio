@@ -24,6 +24,13 @@ interface CanopySwayProps {
   readonly registry: MutableRefObject<CanopySwayRegistry>;
 }
 
+// OFF (owner 2026-09-07 23:45, on the wind-as-light pass: "yeah that looks
+// super wrong. Idk if we can do it this way if this is the result"): neither
+// a warp nor a light pass over painted crowns has read as wind — the warp as
+// jelly, the light as flicker. The pass and its fields stay for a mock of the
+// cut-out route on one cell, or for retirement; the world shows still trees.
+export const CANOPY_PASS_ENABLED = false;
+
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 // the world's land plane is 16 cells of 2048 px: a crown's largest swing (14 px
 // at L0) must reach a quarter of a screen pixel before the pass is worth a frame
@@ -54,7 +61,7 @@ export function CanopySway({ camera, registry }: CanopySwayProps) {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || prefersReducedMotion) {
+    if (!canvas || prefersReducedMotion || !CANOPY_PASS_ENABLED) {
       return;
     }
     const gl = canvas.getContext("webgl2", {
@@ -143,6 +150,9 @@ export function CanopySway({ camera, registry }: CanopySwayProps) {
     };
   }, [prefersReducedMotion, registry]);
 
+  if (!CANOPY_PASS_ENABLED) {
+    return null;
+  }
   return (
     <canvas
       aria-hidden="true"
