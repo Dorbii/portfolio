@@ -750,13 +750,12 @@ export function TerritoryLandform({
             continue;   // a candidate preview has no sway field
           }
           const key = streamImageKey(tile.id, "site");
-          const image = streamTileRefs.current.get(key);
-          if (!image || !decodedStreamKeysRef.current.has(key)) {
-            continue;
+          if (!decodedStreamKeysRef.current.has(key)) {
+            continue;   // only tiles this frame actually drew at the site tier
           }
           swayTiles.push({
             key,
-            image,
+            landPath: sitePath,
             swayPath: sitePath.replace(/-site\.webp$/, "-sway.webp"),
             worldBounds: tile.worldBounds,
           });

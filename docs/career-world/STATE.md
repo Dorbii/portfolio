@@ -41,7 +41,7 @@ clean (run with the main checkout's node_modules: `../../../node_modules/.bin/ts
 **Verified on the live server** (Browser pane, site detail over a Tanium
 beck with conifers): the sway canvas covered 3.75% of the viewport with
 crown pixels and 3,903 of them changed between two frames 450 ms apart
-(mean diff 2.8 at the first amplitude 0.05); after the raise to 0.085 and a fresh load: 84,960 covered, 9,920 moved, mean diff 5.6. Commits 3934c427, 832ac125, 9879eeb8 (the registry moved into the WebGL module so Vite fast-refreshes the component). **To
+(mean diff 2.8 at the first amplitude 0.05); after the raise to 0.085 and a fresh load: 84,960 covered, 9,920 moved, mean diff 5.6. Commits 3934c427, 832ac125, 9879eeb8 (the registry moved into the WebGL module so Vite fast-refreshes the component). **Owner 17:10 (his clock) sent a crop of BLACK crowns:** the pass uploaded the terrain layer's own HTMLImageElements, which that layer releases or replaces on its own schedule; a failed texImage2D (GL_INVALID_VALUE 1281) left an incomplete texture, and WebGL samples an incomplete texture as black exactly where the coverage was. Fix: the pass loads its OWN images by path (the site webp from the browser cache, and the sway webp), decodes them, checks every upload with getError, and publishes health on the canvas (, , , ). Verified after a fresh load: glError 0, 0 failures, the covered pixels average RGB (55, 60, 26), 28,772 moved. **To
 review:** reload, zoom into any forest until the panel reads SITE DETAIL;
 the crowns move, the ground does not; OS reduced-motion turns it off.
 **Next in the phase** (his order, from the plan): fog over the gorge (N

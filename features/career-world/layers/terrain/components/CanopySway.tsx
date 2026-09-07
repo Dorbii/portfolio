@@ -121,6 +121,11 @@ export function CanopySway({ camera, registry }: CanopySwayProps) {
         wasDrawing = drawing;
         setMotionState(drawing ? "animating" : "idle");
       }
+      const health = renderer.health();
+      canvas.dataset.swayTiles = String(health.tilesDrawn);
+      canvas.dataset.swayTextures = String(health.texturesResident);
+      canvas.dataset.swayUploadFailures = String(health.uploadFailures);
+      canvas.dataset.swayLoadFailures = String(health.loadFailures);
     };
     const onVisibility = () => {
       hidden = document.visibilityState === "hidden";

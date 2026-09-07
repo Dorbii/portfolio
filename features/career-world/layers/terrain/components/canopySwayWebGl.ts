@@ -10,11 +10,18 @@
 // stirs. Pixels outside the coverage are discarded: the static land shows
 // through untouched. The pass never edits the terrain canvas; it rides over
 // it with the same camera mapping.
+//
+// The pass loads its OWN images by path (the land tile and its field), decodes
+// them, and checks every upload: the first build uploaded the terrain layer's
+// image objects, which that layer releases or replaces on its own schedule,
+// and a failed upload left an incomplete texture that sampled BLACK — the
+// owner's crop of black crowns, 2026-09-07 17:10. The bytes come from the
+// browser cache the terrain layer already filled.
 import type { CameraView, Pair } from "../../../shared/camera";
 
 export interface CanopySwayTile {
   readonly key: string;
-  readonly image: HTMLImageElement;
+  readonly landPath: string;
   readonly swayPath: string;
   readonly worldBounds: CameraView;
 }
@@ -40,6 +47,13 @@ export interface CanopySwayFrame {
   readonly wind: Pair;
   readonly motion: number;
   readonly timeSeconds: number;
+}
+
+export interface CanopySwayHealth {
+  readonly tilesDrawn: number;
+  readonly texturesResident: number;
+  readonly uploadFailures: number;
+  readonly loadFailures: number;
 }
 
 const VERTEX_SHADER = `#version 300 es
@@ -86,11 +100,19 @@ void main() {
 }
 `;
 
+type TextureState = "loading" | "ready" | "failed";
+
+interface LoadedTexture {
+  texture: WebGLTexture | null;
+  state: TextureState;
+  width: number;
+  height: number;
+  image: HTMLImageElement | null;
+}
+
 interface TileTextures {
-  land: WebGLTexture;
-  sway: WebGLTexture | null;
-  swayState: "loading" | "ready" | "missing";
-  swayImage: HTMLImageElement | null;
+  readonly land: LoadedTexture;
+  readonly sway: LoadedTexture;
   lastUsedAt: number;
 }
 
@@ -109,23 +131,11 @@ function compile(gl: WebGL2RenderingContext, type: number, source: string): WebG
   return shader;
 }
 
-function uploadImage(gl: WebGL2RenderingContext, image: HTMLImageElement): WebGLTexture {
-  const texture = gl.createTexture();
-  if (!texture) throw new Error("Unable to allocate a canopy sway texture.");
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  return texture;
-}
-
 export interface CanopySwayRenderer {
   /** Draws one frame; returns the number of tiles drawn. */
   draw(frame: CanopySwayFrame, width: number, height: number): number;
   clear(): void;
+  health(): CanopySwayHealth;
   dispose(): void;
 }
 
@@ -147,6 +157,9 @@ export function createCanopySwayRenderer(gl: WebGL2RenderingContext): CanopySway
     position: gl.getAttribLocation(program, "a_position"),
     uv: gl.getAttribLocation(program, "a_uv"),
   };
+  if (attributes.position < 0 || attributes.uv < 0) {
+    throw new Error("Canopy sway attributes are missing.");
+  }
   const uniform = (name: string) => {
     const location = gl.getUniformLocation(program, name);
     if (!location) throw new Error(`Canopy sway uniform ${name} is missing.`);
@@ -174,41 +187,83 @@ export function createCanopySwayRenderer(gl: WebGL2RenderingContext): CanopySway
   const quad = new Float32Array(6 * 4);
   const textures = new Map<string, TileTextures>();
   let disposed = false;
+  let tilesDrawn = 0;
+  let uploadFailures = 0;
+  let loadFailures = 0;
+
+  const upload = (image: HTMLImageElement): WebGLTexture | null => {
+    if (image.naturalWidth === 0 || image.naturalHeight === 0) return null;
+    const texture = gl.createTexture();
+    if (!texture) return null;
+    // clear any stale error so the check below is this upload's own
+    while (gl.getError() !== gl.NO_ERROR) { /* drain */ }
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    if (gl.getError() !== gl.NO_ERROR) {
+      gl.deleteTexture(texture);
+      return null;
+    }
+    return texture;
+  };
+
+  const load = (path: string, owner: LoadedTexture) => {
+    const image = new Image();
+    image.decoding = "async";
+    owner.image = image;
+    const fail = () => {
+      if (owner.image !== image) return;
+      owner.state = "failed";
+      owner.image = null;
+      loadFailures += 1;
+    };
+    image.onload = () => {
+      image.decode().then(() => {
+        if (disposed || owner.image !== image) return;
+        const texture = upload(image);
+        if (!texture) {
+          uploadFailures += 1;
+          fail();
+          return;
+        }
+        owner.texture = texture;
+        owner.width = image.naturalWidth;
+        owner.height = image.naturalHeight;
+        owner.state = "ready";
+        owner.image = null;   // the bytes live on the GPU now
+      }).catch(fail);
+    };
+    image.onerror = fail;
+    image.src = path;
+  };
 
   const release = (entry: TileTextures) => {
-    gl.deleteTexture(entry.land);
-    if (entry.sway) gl.deleteTexture(entry.sway);
-    if (entry.swayImage) {
-      entry.swayImage.onload = null;
-      entry.swayImage.onerror = null;
-      entry.swayImage.src = "";
+    for (const part of [entry.land, entry.sway]) {
+      if (part.texture) gl.deleteTexture(part.texture);
+      if (part.image) {
+        part.image.onload = null;
+        part.image.onerror = null;
+        part.image.src = "";
+        part.image = null;
+      }
     }
   };
 
   const texturesFor = (tile: CanopySwayTile, now: number): TileTextures => {
     let entry = textures.get(tile.key);
     if (!entry) {
-      const swayImage = new Image();
-      swayImage.decoding = "async";
-      const created: TileTextures = {
-        land: uploadImage(gl, tile.image),
-        sway: null,
-        swayState: "loading",
-        swayImage,
-        lastUsedAt: now,
-      };
-      swayImage.onload = () => {
-        if (disposed || textures.get(tile.key) !== created) return;
-        created.sway = uploadImage(gl, swayImage);
-        created.swayState = "ready";
-      };
-      swayImage.onerror = () => {
-        if (textures.get(tile.key) !== created) return;
-        created.swayState = "missing";   // a candidate preview, or a cell with no field yet: nothing to sway
-      };
-      swayImage.src = tile.swayPath;
-      textures.set(tile.key, created);
-      entry = created;
+      const land: LoadedTexture = { texture: null, state: "loading", width: 1, height: 1, image: null };
+      const sway: LoadedTexture = { texture: null, state: "loading", width: 1, height: 1, image: null };
+      entry = { land, sway, lastUsedAt: now };
+      textures.set(tile.key, entry);
+      load(tile.landPath, land);
+      load(tile.swayPath, sway);
     }
     entry.lastUsedAt = now;
     return entry;
@@ -235,7 +290,7 @@ export function createCanopySwayRenderer(gl: WebGL2RenderingContext): CanopySway
       const { camera } = frame;
       for (const tile of frame.tiles) {
         const entry = texturesFor(tile, now);
-        if (entry.swayState !== "ready" || !entry.sway) continue;
+        if (entry.land.state !== "ready" || entry.sway.state !== "ready" || !entry.land.texture || !entry.sway.texture) continue;
         const { origin, span } = tile.worldBounds;
         // the tile's rectangle in clip space (y up), the same mapping the land canvas draws with
         const left = ((origin[0] - camera.origin[0]) / camera.span[0]) * 2 - 1;
@@ -253,11 +308,11 @@ export function createCanopySwayRenderer(gl: WebGL2RenderingContext): CanopySway
         ]);
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
         gl.bufferData(gl.ARRAY_BUFFER, quad, gl.DYNAMIC_DRAW);
-        gl.uniform2f(uniforms.texel, 1 / tile.image.naturalWidth, 1 / tile.image.naturalHeight);
+        gl.uniform2f(uniforms.texel, 1 / entry.land.width, 1 / entry.land.height);
         gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, entry.land);
+        gl.bindTexture(gl.TEXTURE_2D, entry.land.texture);
         gl.activeTexture(gl.TEXTURE1);
-        gl.bindTexture(gl.TEXTURE_2D, entry.sway);
+        gl.bindTexture(gl.TEXTURE_2D, entry.sway.texture);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
         drawn += 1;
       }
@@ -269,12 +324,16 @@ export function createCanopySwayRenderer(gl: WebGL2RenderingContext): CanopySway
           textures.delete(key);
         }
       }
+      tilesDrawn = drawn;
       return drawn;
     },
     clear() {
       if (disposed) return;
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
+    },
+    health() {
+      return { tilesDrawn, texturesResident: textures.size, uploadFailures, loadFailures };
     },
     dispose() {
       if (disposed) return;
