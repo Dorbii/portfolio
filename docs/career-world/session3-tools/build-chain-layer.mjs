@@ -472,7 +472,7 @@ for (const [col, row] of cellsToDo) {
     // tall), the trunk left clear: four to the north, three to the south a
     // little further out, drawn north to south so the nearer stand in front
     const deg = (d) => (d * Math.PI) / 180;
-    const spots = [[210, 120], [250, 120], [290, 120], [330, 120], [45, 150], [90, 150], [135, 150]];
+    const spots = [[195, 180], [215, 180], [325, 180], [345, 180], [45, 150], [90, 150], [135, 150]];   // the north pair each side stands clear of the trilithon (147 px wide) that marks the leader
     const places = spots.map(([a, R], i) => ({ st: menhirs[i % menhirs.length], x: cx + R * Math.cos(deg(a)), y: cy + R * 0.73 * Math.sin(deg(a)) })).sort((p, q) => p.y - q.y);
     for (const p of places) stampStanding(p.st, p.x, p.y);
   };
@@ -488,10 +488,17 @@ for (const [col, row] of cellsToDo) {
       const dx = hx - ax, dy = hy - ay, len = Math.hypot(dx, dy); if (len === 0) continue;
       const ux = dx / len, uy = dy / len;
       const leaderR = trilithonEl ? trilithonEl.info.width / 2 : leaderEl ? leaderEl.info.width / 2 : 0;
-      const sx = ax + ux * (leaderR * 0.6), sy = ay + uy * (leaderR * 0.6), ex = hx - ux * (hubR * 0.85), ey = hy - uy * (hubR * 0.85);
+      // the spoke leaves the trunk square (toward the hub's side, 0.4 of a
+      // cell), then runs straight to the hub's rim: a branch off the chain, not
+      // a second chain beside it (a far leader's straight line ran nearly
+      // parallel to the trunk for a cell, 2026-09-07)
+      const side = hy < ay ? -1 : 1, kx = ax, ky = ay + side * 0.4 * CELL;
+      const dx2 = hx - kx, dy2 = hy - ky, len2 = Math.hypot(dx2, dy2) || 1, ux2 = dx2 / len2, uy2 = dy2 / len2;
+      const sx = ax, sy = ay + side * leaderR * 0.6, ex = hx - ux2 * (hubR * 0.85), ey = hy - uy2 * (hubR * 0.85);
       const inThisCell = (x, y) => x >= -CELL && y >= -CELL && x <= 2 * CELL && y <= 2 * CELL;
-      if (inThisCell(sx, sy) || inThisCell(ex, ey) || inThisCell((sx + ex) / 2, (sy + ey) / 2)) strokeSlot(sx, sy, ex, ey, SPOKE_SCALE);
-      if (Math.floor(lx) === col && Math.floor(ly) === row) { if (trilithonEl) stampStanding(trilithonEl, ax, ay - 26); else stamp(leaderEl, ax, ay, 8); }   // the trilithon stands just north of the groove, which runs in front of its feet
+      const seg = (x1, y1, x2, y2) => { if (inThisCell(x1, y1) || inThisCell(x2, y2) || inThisCell((x1 + x2) / 2, (y1 + y2) / 2)) strokeSlot(x1, y1, x2, y2, SPOKE_SCALE); };
+      seg(sx, sy, kx, ky); seg(kx, ky, ex, ey);
+      if (Math.floor(lx) === col && Math.floor(ly) === row && !trilithonEl) stamp(leaderEl, ax, ay, 8);   // with the trilithon element the leaders are the nodes, stamped there
     }
     if (Math.floor(hub.at[0]) === col && Math.floor(hub.at[1]) === row) { if (hengeEl) stampStanding(hengeEl, hx, hy, true); else stamp(hubEl, hx, hy); }
     if ((hub.leaders || []).some((lx) => Math.floor(lx) === col) || (Math.floor(hub.at[0]) === col && Math.floor(hub.at[1]) === row)) console.log(`  ${id}: hub at [${hub.at}] with ${hub.leaders.length} leader(s) — spokes drawn where they cross this cell`);
@@ -499,6 +506,7 @@ for (const [col, row] of cellsToDo) {
   // the nodes: the panel element centred on the node, over the kerb, masked by land
   for (const n of route.nodes || []) {
     if ((!node && !menhirs.length) || n.cell[0] !== col || n.cell[1] !== row) continue;
+    if (trilithonEl) stampStanding(trilithonEl, (n.at[0] - col) * CELL, (n.at[1] - row) * CELL - 26);   // the leader among its endpoints, just north of the groove, which runs in front of its feet
     if (menhirs.length) placeMenhirs((n.at[0] - col) * CELL, (n.at[1] - row) * CELL);
     else stamp(node, (n.at[0] - col) * CELL, (n.at[1] - row) * CELL, 5);   // bedded like the discs: the rim takes the ground's hue, the face its grain, an occlusion ring
   }

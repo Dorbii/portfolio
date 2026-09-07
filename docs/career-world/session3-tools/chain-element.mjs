@@ -356,6 +356,8 @@ async function key(src, which) {
   const cs = [corner(2, 2), corner(W - 3, 2), corner(2, H - 3), corner(W - 3, H - 3)];
   const KEYC = cs.map((c) => c.join(",")).sort()[1].split(",").map(Number);   // a median-ish corner
   const black = Math.max(...KEYC) < 30;
+  const alphaKeyed = d[3] === 0 && d[((H - 1) * W + (W - 1)) * 4 + 3] === 0;   // the model delivered real transparency instead of the key (the menhir and henge did, 2026-09-07): its own alpha is the key
+  if (alphaKeyed) console.log("  " + which + ": the delivery carries its own alpha (transparent corners) — used as the key");
   const near = black ? 14 : 40, far = black ? 40 : 90;
   console.log(`  ${which}: key colour from the corners ${JSON.stringify(KEYC)} (${black ? "black" : "magenta"})`);
   let top = H, bottom = -1, n = 0;
@@ -363,7 +365,7 @@ async function key(src, which) {
     const o = (y * W + x) * 4, r = d[o], g = d[o + 1], b = d[o + 2];
     // a soft halo is keyed by its distance from the key colour
     const dist = Math.hypot(KEYC[0] - r, KEYC[1] - g, KEYC[2] - b);
-    let a = dist < near ? 0 : dist < far ? Math.round(255 * (dist - near) / (far - near)) : 255;
+    let a = alphaKeyed ? d[o + 3] : dist < near ? 0 : dist < far ? Math.round(255 * (dist - near) / (far - near)) : 255;
     // the model paints moss and grass tufts round stone whatever the packet
     // says: green-hued, saturated pixels are not the element (the stone is
     // pale and grey, the groove dark) — they go, and so does the key's spill
@@ -372,7 +374,7 @@ async function key(src, which) {
     if (green) a = 0;
     // red or magenta specks (the key's colour family bleeding at an edge, seen on the cluster's stones) are not stone either
     if (r > 150 && g < 90 && sat > 0.5) a = 0;
-    if (a > 0 && a < 255 && !black && !NO_DESPILL) {   // despill: take the key's share out of a blended edge pixel (a black key needs none — a dark edge reads as occlusion)
+    if (a > 0 && a < 255 && !black && !alphaKeyed && !NO_DESPILL) {   // despill: take the key's share out of a blended edge pixel (a black key needs none — a dark edge reads as occlusion)
       const k = a / 255;
       for (let c = 0; c < 3; c += 1) d[o + c] = Math.max(0, Math.min(255, Math.round((d[o + c] - KEYC[c] * (1 - k)) / k)));
     }
