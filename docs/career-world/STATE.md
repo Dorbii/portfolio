@@ -4,7 +4,58 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-07 23:00 UTC, LATEST (current):** **FOLIAGE MOTION IS NOW WIND AS
+**2026-09-08 00:30 UTC, LATEST (current):** **FOLIAGE MOTION IS OFF; THE
+CUT-OUT ROUTE IS COSTED AND WAITS ON HIS WORD; THE OCEAN THREAD HAS A
+DIAGNOSIS NOTE; THE LANE IS CLEAN AT 91441dd8.** Owner 23:45 (his clock), on
+the wind-as-light pass at full strength: *"yeah that looks super wrong. Idk
+if we can do it this way if this is the result"* → `CANOPY_PASS_ENABLED =
+false` in `layers/terrain/components/CanopySway.tsx` (commit 9ad81ca5): the
+component renders nothing, the land shows still trees; the pass code, the
+WebGL module and the 63 sway fields stay for the cut-out route. Verdict on
+record: neither a per-pixel warp nor a luminance pass over painted crowns
+reads as wind — the warp as jelly, the light as flicker/wash. **The cut-out
+route** (his idea, "cut the foliage out with the mask, patch the land, then
+re-add as sprites"): the trees become sprites OF THEMSELVES (cut by the
+mask, the hole under each filled from the surrounding ground, put back in
+place, bent about the foot in a vertex shader; at rest pixel-identical to
+today). Counted: 3,096 single trees (≤150 px tall) across the world, a
+median of 26 per cell, T c2-1 the busiest at 277; single trees are 27% of
+crown pixels, dense stands (73%) would stay still in a first version.
+**Costed live** (his worry: "the end user experiencing lag"): 600 and 2,000
+bent, textured sprite quads drawn every frame over the page made no
+measurable difference to the frame interval; atlas memory ≤2 MB decoded per
+cell against the 16 MB site tile; residency inherits the terrain policy
+(camera + 192 px prefetch, 384 px retention, 192 MB cap = twelve site
+tiles); a frame-time guard (half rate, then stop) is part of the design.
+**Proposed and not started:** a one-cell mock on T c3-1's moor, overlay
+only, ~2 h — he interrupted at the start ("wait"); no go yet. **Ocean
+performance (owner: "no fix, I'll pass it on"):**
+`docs/career-world/OCEAN-PERF-DIAGNOSIS-2026-09-07.md` (commit 91441dd8) —
+the app's Browser pane paces frames (30 Hz cap active, ~0.5 Hz occluded),
+so pane wall-clock is not the page's cost and the earlier "28 fps" figure
+was the pane; the water's own counters read 1.6-1.8 ms GPU + 0.5 ms CPU per
+frame at 1004x564; the 1-2 s gpuP95 is the timer straddling throttled idle;
+the structural suspect at real display sizes is the per-frame WebGL→2D
+canvas copy of the detail pass in WaterRenderer.ts (~L287-293). **Other
+rulings this evening:** the World / territory / Labels buttons removed
+(0fe7a858); the two 68-71 h "running" tasks were `tail -f` watchers on the
+Sep-4 bake logs, stopped; the blur is magnification past the site tiles'
+1:1 (min span 0.02 → ~3 device px per painted texel on his display) — the
+cap is two constants (`shared/camera.ts` CAMERA_MINIMUM_SPAN and its typed
+mirror in `shared/lod/policy.ts`), NOT applied, his word; land-art PATCHING
+instead of regeneration is feasible (a masked window to the edit model,
+feathered back, `cell.mjs --restitch`, no gates) — tool not built, would
+start on the beck-over-cliff seam in his crop; three of his five defect
+crops are the chain LAYER (fixable in build-chain-layer.mjs). **Still
+wanted from him:** go / drop on the c3-1 mock; the zoom cap; the four bay
+cells; the henge's place; the palette gate. **Note for the next session:**
+this worktree has no node_modules — typecheck/lint via
+`../../../node_modules/.bin/tsc` and `.../eslint`; long bash heredocs with
+`!` or backticks die in this shell (write files with the Write tool); the
+app's cwd flips to the main checkout — cd into the worktree by absolute
+path every command.
+
+**2026-09-07 23:00 UTC:** **FOLIAGE MOTION IS NOW WIND AS
 LIGHT, NOT A WARP; THE HEADER BUTTONS ARE GONE; TWO STALE WATCHERS STOPPED.**
 Owner, over the afternoon (his clock): a crop of BLACK crowns 17:10 (fixed:
 the pass now loads its own textures, see below); *"not seeing it… what
