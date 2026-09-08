@@ -4,7 +4,49 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-08 04:30 UTC, LATEST (current):** **HIS FIRST LOOK AT THE MOCK:
+**2026-09-08 11:30 UTC, LATEST (current):** **T c3-1's POOL OUTLET
+REDIRECTED INTO ITS GULLY ON HIS CROP; THE WIND AND THE CHAIN CUTS STILL
+WAIT ON HIS SECOND LOOK. LANE AT 7720f0e6, NINE COMMITS ON MAIN 873f4a99,
+TREE CLEAN, THE DEV SERVER PARKED ON THE CROSSING.** Owner, a crop of the
+trunk crossing: *"I think the water needs a redirect cause its off the
+water path"*. **What it was:** above the trunk the served tile carried a
+40-px cut through plain meadow (the generation's wet-paint strip, traced
+bank-to-bank into the mask, so the water rendered there) beside the
+painted stony gully, whose floor had a 10-px sliver of cut; they merged
+just below the trunk. The inland stream annotation ran left of both and is
+motion-only (applyFlowFeature writes water pixels only), so it was not the
+cause; the water fields were pixel-identical to main's (392 files). **The
+repair, in the RECORDED SOURCES then the documented land-repair path**
+(`redirect-c3-1-outlet.mjs`, tracked; backups in
+`.codex-tmp/session6/backup`): the meadow cut closed (alpha back, the wet
+paint filled by a pull-push base from clean meadow with the grain of the
+band 60 px to its left, a 21x21 high-pass so the cobbled pattern survives)
+and the gully floor opened 24 px wide along its centreline from the pool
+through the trunk into the channel below (2-px feather); the mask
+updated to match. Then `cell.mjs --restitch` (a CONTROL first on the
+unchanged sources: 0 written, 168 byte-identical, the pyramid identical),
+11 tiles written; the chain overlay for c3-1 rebuilt (the kerb masks by
+the land's alpha, so the groove now breaks at the gully, not at the
+meadow); `world-register --tone --chain --only-cells tanium:c3-1`;
+`build:land-mount`; the inland inventory's c3-1 stream path moved onto the
+feeder, the pool, the gully and the channel (29 points, radius kept at
+0.045, note updated) and its hash refreshed; `build:water`; the sprite set
+re-cut (76 singles); the suite at its four baseline failures. Before/after
+(`.codex-tmp/session6/redirect-before-after.jpg`) sent to him; live at the
+crossing the water runs down the gully and the closed strip reads as
+meadow, a faint darker band near the pool at 1:1. **Still wanted from
+him:** the wind's second look (waving or not; amplitude by
+`?trees.amplitude=`); the chain cuts; the redirect; what "not blending"
+means on a crop; then the four bay cells, the henge's place, the palette
+gate. **Note for the next session:** a re-slice of a served cell from its
+pyramid is only safe after checking the served tile against the pyramid —
+the trunk cells' served tiles differed from a fresh slice by re-encode
+noise and 16-164 alpha px (patched inside the cuts instead, 2026-09-08
+04:30 block); the water fields hash the served bytes, and the inland
+inventory refuses a changed source until its hash is refreshed after
+review; `npm test` leaves both `plan.json` CRLF-dirty.
+
+**2026-09-08 04:30 UTC:** **HIS FIRST LOOK AT THE MOCK:
 THE WIND RE-TUNED ONCE, THE CHAIN NOW BEHIND THE CROWNS IN FRONT OF IT;
 BOTH WAIT ON HIS SECOND LOOK. LANE `claude/foliage-animation-88bcad` AT
 a7602433, SIX COMMITS ON MAIN 873f4a99, TREE CLEAN.** Owner, on the mock
