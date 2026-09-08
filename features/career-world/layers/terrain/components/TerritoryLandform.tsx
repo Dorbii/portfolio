@@ -7,6 +7,7 @@ import {
 } from "react";
 import type { CameraView, Pair } from "../../../shared/camera";
 import { CanopySway } from "./CanopySway";
+import { TreeSprites } from "./TreeSprites";
 import {
   createCanopySwayRegistry,
   type CanopySwayRegistry,
@@ -1281,6 +1282,7 @@ export function TerritoryLandform({
       ref={canvasRef}
     />
     <CanopySway camera={camera} registry={canopySwayRef} />
+    <TreeSprites camera={camera} registry={canopySwayRef} />
     </>
   );
 }

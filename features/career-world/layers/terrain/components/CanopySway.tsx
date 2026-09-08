@@ -38,7 +38,7 @@ const WORLD_LAND_PX = 16 * 2048;
 const MINIMUM_SCREEN_SWING = 0.25;
 const LARGEST_SWING_PX = 14;
 
-function usePrefersReducedMotion(): boolean {
+export function usePrefersReducedMotion(): boolean {
   const [reduced, setReduced] = useState(true);
   useEffect(() => {
     const query = window.matchMedia(REDUCED_MOTION_QUERY);
