@@ -93,22 +93,27 @@ void main() {
   float H = max(a_tree.y, 8.0);
   // rows above the foot bend, the foot and the ground rim under it stay
   float above = clamp((a_foot.y - texel.y) / H, 0.0, 1.25);
-  float bend = pow(above, 1.7);
+  float bend = pow(above, 1.5);
   float phase = a_tree.x;
-  // the gust fronts of the light pass, rolling downwind through the cell
+  // ONE wind the whole cell shares (owner 2026-09-08 on the first tuning:
+  // "a bit too animated ... not consistent enough, they are kinda waving"):
+  // a slow gust front every ~600 texels drifting downwind at ~60 texels/s,
+  // a slow rise and a slower relax, so neighbours lean together and let go
+  // together; a tree's own phase only nudges it
   float along = dot(a_foot, u_wind);
   float across = dot(a_foot, vec2(-u_wind.y, u_wind.x));
   float t = u_time * (0.6 + 0.8 * u_motion);
-  float g = fract((along - t * 90.0) / 360.0 + phase * 0.35 + across / 1400.0);
-  float front = smoothstep(0.0, 0.12, g) * (1.0 - smoothstep(0.12, 0.78, g));
-  float env = 0.5 + 0.5 * sin((along - t * 40.0) / 900.0 * 6.2831853 + across / 600.0);
-  float gust = front * (0.35 + 0.65 * env);
-  // a pine swings slowly, a sapling quickly; two harmonics so it is not a metronome
-  float hz = 0.9 / (1.0 + H / 60.0);
-  float osc = sin(6.2831853 * (hz * t + phase)) + 0.35 * sin(6.2831853 * (2.3 * hz * t + 1.7 * phase));
-  // a lean under the gust, a sway about the lean, a little idle motion always
-  float swing = 0.18 + 0.62 * gust + 0.2 * osc * (0.5 + 0.5 * gust);
-  vec2 lean = vec2(u_wind.x, u_wind.y * 0.5);
+  float g = fract((along - t * 60.0) / 600.0 + across / 2400.0 + phase * 0.06);
+  float front = smoothstep(0.0, 0.25, g) * (1.0 - smoothstep(0.25, 0.9, g));
+  float env = 0.55 + 0.45 * sin((along - t * 25.0) / 1500.0 * 6.2831853 + across / 900.0);
+  float gust = front * env;
+  // a slow sway about the lean whose phase follows position, not the tree,
+  // so it travels through a stand as one motion; pines slower than saplings
+  float hz = 0.28 / (1.0 + H / 90.0);
+  float osc = sin(6.2831853 * (hz * t) - along / 900.0 * 6.2831853 + phase * 0.5);
+  float swing = 0.12 + 0.7 * gust + 0.12 * osc * (0.4 + 0.6 * gust);
+  // the lean is sideways on screen; the wind's downward part barely nods the tops
+  vec2 lean = vec2(u_wind.x, u_wind.y * 0.25);
   vec2 offset = lean * (u_amplitude * H * swing * bend) * u_pass;
   vec2 p = (texel + offset) / u_tilePx;
   gl_Position = vec4(mix(u_tileClip.x, u_tileClip.z, p.x), mix(u_tileClip.y, u_tileClip.w, p.y), 0.0, 1.0);

@@ -27,8 +27,9 @@ interface TreeSpritesProps {
 }
 
 export const TREE_SPRITES_ENABLED = true;
-// the top of a crown leans this fraction of its height at a full gust
-const DEFAULT_AMPLITUDE = 0.1;
+// the top of a crown leans this fraction of its height at a full gust (0.1
+// read as waving to the owner, 2026-09-08; half of that is a lean)
+const DEFAULT_AMPLITUDE = 0.05;
 const WORLD_LAND_PX = 16 * 2048;
 const TALLEST_SINGLE_TREE_PX = 150;
 const MINIMUM_SCREEN_SWING = 0.25;
