@@ -3027,7 +3027,7 @@
     },
     {
       "tileId": "l2-tanium-c3-1",
-      "note": "Candidate central river and shelf pool.",
+      "note": "Central river: the north feeder, the shelf pool, its outlet redirected into the stony gully (owner 2026-09-08: off the water path), the channel south.",
       "source": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-1-site.webp",
       "coordinateSpace": "served-normalized",
       "streams": [
@@ -3035,48 +3035,120 @@
           "id": "tanium-candidate-central-river",
           "path": [
             [
-              0.7,
+              0.76,
               0
             ],
             [
-              0.82,
-              0.11
+              0.824,
+              0.063
             ],
             [
-              0.915,
-              0.205
+              0.888,
+              0.125
             ],
             [
-              0.917,
-              0.267
+              0.938,
+              0.188
             ],
             [
-              0.82,
-              0.345
+              0.942,
+              0.219
             ],
             [
-              0.7,
-              0.4
+              0.905,
+              0.281
             ],
             [
-              0.65,
-              0.5
+              0.8,
+              0.33
             ],
             [
-              0.63,
-              0.6
+              0.742,
+              0.367
             ],
             [
-              0.62,
-              0.7
+              0.735,
+              0.41
             ],
             [
-              0.648,
-              0.83
+              0.725,
+              0.449
             ],
             [
-              0.6,
-              0.94
+              0.71,
+              0.488
+            ],
+            [
+              0.701,
+              0.508
+            ],
+            [
+              0.684,
+              0.527
+            ],
+            [
+              0.669,
+              0.542
+            ],
+            [
+              0.659,
+              0.563
+            ],
+            [
+              0.669,
+              0.594
+            ],
+            [
+              0.679,
+              0.625
+            ],
+            [
+              0.683,
+              0.656
+            ],
+            [
+              0.677,
+              0.688
+            ],
+            [
+              0.674,
+              0.719
+            ],
+            [
+              0.666,
+              0.75
+            ],
+            [
+              0.665,
+              0.781
+            ],
+            [
+              0.669,
+              0.813
+            ],
+            [
+              0.685,
+              0.844
+            ],
+            [
+              0.686,
+              0.875
+            ],
+            [
+              0.673,
+              0.906
+            ],
+            [
+              0.664,
+              0.938
+            ],
+            [
+              0.649,
+              0.969
+            ],
+            [
+              0.64,
+              1
             ]
           ],
           "radius": 0.045
@@ -3093,7 +3165,7 @@
         }
       ],
       "falls": [],
-      "sha256": "fc06cebc8b1cf164ecfdf7f11a79d0a5ee63e986f702b09d53bbd7cff5d9eb46",
+      "sha256": "40b97f21436c15722e8cb80ae133d548aed7db6f3de6d0b20420fd7c65f0acd4",
       "reconciliation": "reviewed-current-art-r8"
     },
     {

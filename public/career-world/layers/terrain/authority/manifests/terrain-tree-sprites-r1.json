@@ -3,10 +3,10 @@
   "note": "cells with a cut-out sprite set: the runtime fetches <id>-trees.json and <id>-trees.webp for these only (tree-sprites.mjs)",
   "cells": {
     "l2-tanium/c3-1": {
-      "trees": 77,
+      "trees": 76,
       "atlas": [
         2048,
-        492
+        481
       ]
     }
   }

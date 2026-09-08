@@ -2,7 +2,7 @@
   "version": 1,
   "source": "public/career-world/layers/terrain/authority/manifests/terrain-local-mount-r1.json",
   "sourceHash": "2c0df9c64ce36464925b17dcec244332f4d62b802f5a206f11199358d0aa9e42",
-  "inputHash": "e97b2cb2861f3ed8f3271fe5a1cf5701c8f734ad808cfef4fc53b76010ac59db",
+  "inputHash": "dfdb3aa49cb9e03ee0762b3ee4c4b601ef41aecc78820e22b30707347adfff66",
   "generatorHash": "9e4663eae26fbb5179465ee5199ae7d59778212e51c8a3683b7f1618e22eb627",
   "sourceAssets": [
     {
@@ -127,7 +127,7 @@
     },
     {
       "path": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-1-site.webp",
-      "sha256": "fc06cebc8b1cf164ecfdf7f11a79d0a5ee63e986f702b09d53bbd7cff5d9eb46"
+      "sha256": "40b97f21436c15722e8cb80ae133d548aed7db6f3de6d0b20420fd7c65f0acd4"
     },
     {
       "path": "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-2-site.webp",
@@ -13613,51 +13613,123 @@
       "id": "tanium-candidate-central-river",
       "kind": "stream",
       "tileId": "l2-tanium-c3-1",
-      "waterPixels": 8052,
+      "waterPixels": 10108,
       "points": [
         [
-          0.35625,
+          0.36,
           0.6666666666666666
         ],
         [
-          0.36375,
-          0.6788888888888889
+          0.364,
+          0.6736666666666666
         ],
         [
-          0.3696875,
-          0.6894444444444444
+          0.368,
+          0.6805555555555555
         ],
         [
-          0.3698125,
-          0.6963333333333332
+          0.371125,
+          0.6875555555555555
         ],
         [
-          0.36375,
-          0.705
+          0.371375,
+          0.691
         ],
         [
-          0.35625,
-          0.711111111111111
+          0.3690625,
+          0.6978888888888889
         ],
         [
-          0.353125,
-          0.7222222222222222
+          0.3625,
+          0.7033333333333333
         ],
         [
-          0.351875,
-          0.7333333333333333
+          0.358875,
+          0.7074444444444444
         ],
         [
-          0.35125,
-          0.7444444444444444
+          0.3584375,
+          0.7122222222222222
         ],
         [
-          0.353,
-          0.7588888888888888
+          0.3578125,
+          0.7165555555555555
         ],
         [
-          0.35,
-          0.7711111111111111
+          0.356875,
+          0.7208888888888888
+        ],
+        [
+          0.3563125,
+          0.723111111111111
+        ],
+        [
+          0.35525,
+          0.7252222222222222
+        ],
+        [
+          0.35431250000000003,
+          0.7268888888888888
+        ],
+        [
+          0.3536875,
+          0.7292222222222222
+        ],
+        [
+          0.35431250000000003,
+          0.7326666666666666
+        ],
+        [
+          0.3549375,
+          0.736111111111111
+        ],
+        [
+          0.3551875,
+          0.7395555555555555
+        ],
+        [
+          0.3548125,
+          0.7431111111111111
+        ],
+        [
+          0.354625,
+          0.7465555555555555
+        ],
+        [
+          0.354125,
+          0.75
+        ],
+        [
+          0.3540625,
+          0.7534444444444444
+        ],
+        [
+          0.35431250000000003,
+          0.7569999999999999
+        ],
+        [
+          0.35531250000000003,
+          0.7604444444444444
+        ],
+        [
+          0.355375,
+          0.7638888888888888
+        ],
+        [
+          0.3545625,
+          0.7673333333333333
+        ],
+        [
+          0.354,
+          0.7708888888888888
+        ],
+        [
+          0.3530625,
+          0.7743333333333333
+        ],
+        [
+          0.3525,
+          0.7777777777777777
         ]
       ]
     },
@@ -13665,7 +13737,7 @@
       "id": "tanium-candidate-shelf-pool",
       "kind": "pool",
       "tileId": "l2-tanium-c3-1",
-      "waterPixels": 2091,
+      "waterPixels": 1870,
       "points": [
         [
           0.3596875,
@@ -14227,7 +14299,7 @@
     },
     {
       "tileId": "l2-tanium-c3-1",
-      "note": "Candidate central river and shelf pool.",
+      "note": "Central river: the north feeder, the shelf pool, its outlet redirected into the stony gully (owner 2026-09-08: off the water path), the channel south.",
       "streams": 1,
       "pools": 1,
       "falls": 0
@@ -14443,7 +14515,7 @@
       "tiles": [
         {
           "id": "0/4-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/4-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/4-0.png",
           "origin": [
             0.125,
             0
@@ -14460,7 +14532,7 @@
         },
         {
           "id": "0/5-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/5-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/5-0.png",
           "origin": [
             0.15625,
             0
@@ -14477,7 +14549,7 @@
         },
         {
           "id": "0/6-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/6-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/6-0.png",
           "origin": [
             0.1875,
             0
@@ -14494,7 +14566,7 @@
         },
         {
           "id": "0/7-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/7-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/7-0.png",
           "origin": [
             0.21875,
             0
@@ -14511,7 +14583,7 @@
         },
         {
           "id": "0/8-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/8-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/8-0.png",
           "origin": [
             0.25,
             0
@@ -14528,7 +14600,7 @@
         },
         {
           "id": "0/9-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/9-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/9-0.png",
           "origin": [
             0.28125,
             0
@@ -14545,7 +14617,7 @@
         },
         {
           "id": "0/10-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/10-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/10-0.png",
           "origin": [
             0.3125,
             0
@@ -14562,7 +14634,7 @@
         },
         {
           "id": "0/11-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/11-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/11-0.png",
           "origin": [
             0.34375,
             0
@@ -14579,7 +14651,7 @@
         },
         {
           "id": "0/12-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/12-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/12-0.png",
           "origin": [
             0.375,
             0
@@ -14596,7 +14668,7 @@
         },
         {
           "id": "0/13-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/13-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/13-0.png",
           "origin": [
             0.40625,
             0
@@ -14613,7 +14685,7 @@
         },
         {
           "id": "0/14-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/14-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/14-0.png",
           "origin": [
             0.4375,
             0
@@ -14630,7 +14702,7 @@
         },
         {
           "id": "0/15-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/15-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/15-0.png",
           "origin": [
             0.46875,
             0
@@ -14647,7 +14719,7 @@
         },
         {
           "id": "0/16-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/16-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/16-0.png",
           "origin": [
             0.5,
             0
@@ -14664,7 +14736,7 @@
         },
         {
           "id": "0/17-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/17-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/17-0.png",
           "origin": [
             0.53125,
             0
@@ -14681,7 +14753,7 @@
         },
         {
           "id": "0/3-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/3-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/3-1.png",
           "origin": [
             0.09375,
             0.05555555555555555
@@ -14698,7 +14770,7 @@
         },
         {
           "id": "0/4-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/4-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/4-1.png",
           "origin": [
             0.125,
             0.05555555555555555
@@ -14715,7 +14787,7 @@
         },
         {
           "id": "0/5-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/5-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/5-1.png",
           "origin": [
             0.15625,
             0.05555555555555555
@@ -14732,7 +14804,7 @@
         },
         {
           "id": "0/6-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/6-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/6-1.png",
           "origin": [
             0.1875,
             0.05555555555555555
@@ -14749,7 +14821,7 @@
         },
         {
           "id": "0/7-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/7-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/7-1.png",
           "origin": [
             0.21875,
             0.05555555555555555
@@ -14766,7 +14838,7 @@
         },
         {
           "id": "0/8-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/8-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/8-1.png",
           "origin": [
             0.25,
             0.05555555555555555
@@ -14783,7 +14855,7 @@
         },
         {
           "id": "0/9-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/9-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/9-1.png",
           "origin": [
             0.28125,
             0.05555555555555555
@@ -14800,7 +14872,7 @@
         },
         {
           "id": "0/10-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/10-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/10-1.png",
           "origin": [
             0.3125,
             0.05555555555555555
@@ -14817,7 +14889,7 @@
         },
         {
           "id": "0/11-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/11-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/11-1.png",
           "origin": [
             0.34375,
             0.05555555555555555
@@ -14834,7 +14906,7 @@
         },
         {
           "id": "0/12-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/12-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/12-1.png",
           "origin": [
             0.375,
             0.05555555555555555
@@ -14851,7 +14923,7 @@
         },
         {
           "id": "0/13-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/13-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/13-1.png",
           "origin": [
             0.40625,
             0.05555555555555555
@@ -14868,7 +14940,7 @@
         },
         {
           "id": "0/14-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/14-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/14-1.png",
           "origin": [
             0.4375,
             0.05555555555555555
@@ -14885,7 +14957,7 @@
         },
         {
           "id": "0/15-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/15-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/15-1.png",
           "origin": [
             0.46875,
             0.05555555555555555
@@ -14902,7 +14974,7 @@
         },
         {
           "id": "0/16-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/16-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/16-1.png",
           "origin": [
             0.5,
             0.05555555555555555
@@ -14919,7 +14991,7 @@
         },
         {
           "id": "0/17-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/17-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/17-1.png",
           "origin": [
             0.53125,
             0.05555555555555555
@@ -14936,7 +15008,7 @@
         },
         {
           "id": "0/3-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/3-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/3-2.png",
           "origin": [
             0.09375,
             0.1111111111111111
@@ -14953,7 +15025,7 @@
         },
         {
           "id": "0/4-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/4-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/4-2.png",
           "origin": [
             0.125,
             0.1111111111111111
@@ -14970,7 +15042,7 @@
         },
         {
           "id": "0/5-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/5-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/5-2.png",
           "origin": [
             0.15625,
             0.1111111111111111
@@ -14987,7 +15059,7 @@
         },
         {
           "id": "0/6-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/6-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/6-2.png",
           "origin": [
             0.1875,
             0.1111111111111111
@@ -15004,7 +15076,7 @@
         },
         {
           "id": "0/7-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/7-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/7-2.png",
           "origin": [
             0.21875,
             0.1111111111111111
@@ -15021,7 +15093,7 @@
         },
         {
           "id": "0/8-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/8-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/8-2.png",
           "origin": [
             0.25,
             0.1111111111111111
@@ -15038,7 +15110,7 @@
         },
         {
           "id": "0/9-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/9-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/9-2.png",
           "origin": [
             0.28125,
             0.1111111111111111
@@ -15055,7 +15127,7 @@
         },
         {
           "id": "0/10-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/10-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/10-2.png",
           "origin": [
             0.3125,
             0.1111111111111111
@@ -15072,7 +15144,7 @@
         },
         {
           "id": "0/11-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/11-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/11-2.png",
           "origin": [
             0.34375,
             0.1111111111111111
@@ -15089,7 +15161,7 @@
         },
         {
           "id": "0/12-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/12-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/12-2.png",
           "origin": [
             0.375,
             0.1111111111111111
@@ -15106,7 +15178,7 @@
         },
         {
           "id": "0/13-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/13-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/13-2.png",
           "origin": [
             0.40625,
             0.1111111111111111
@@ -15123,7 +15195,7 @@
         },
         {
           "id": "0/14-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/14-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/14-2.png",
           "origin": [
             0.4375,
             0.1111111111111111
@@ -15140,7 +15212,7 @@
         },
         {
           "id": "0/15-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/15-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/15-2.png",
           "origin": [
             0.46875,
             0.1111111111111111
@@ -15157,7 +15229,7 @@
         },
         {
           "id": "0/16-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/16-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/16-2.png",
           "origin": [
             0.5,
             0.1111111111111111
@@ -15174,7 +15246,7 @@
         },
         {
           "id": "0/17-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/17-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/17-2.png",
           "origin": [
             0.53125,
             0.1111111111111111
@@ -15191,7 +15263,7 @@
         },
         {
           "id": "0/3-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/3-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/3-3.png",
           "origin": [
             0.09375,
             0.16666666666666666
@@ -15208,7 +15280,7 @@
         },
         {
           "id": "0/4-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/4-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/4-3.png",
           "origin": [
             0.125,
             0.16666666666666666
@@ -15225,7 +15297,7 @@
         },
         {
           "id": "0/5-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/5-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/5-3.png",
           "origin": [
             0.15625,
             0.16666666666666666
@@ -15242,7 +15314,7 @@
         },
         {
           "id": "0/6-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/6-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/6-3.png",
           "origin": [
             0.1875,
             0.16666666666666666
@@ -15259,7 +15331,7 @@
         },
         {
           "id": "0/7-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/7-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/7-3.png",
           "origin": [
             0.21875,
             0.16666666666666666
@@ -15276,7 +15348,7 @@
         },
         {
           "id": "0/8-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/8-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/8-3.png",
           "origin": [
             0.25,
             0.16666666666666666
@@ -15293,7 +15365,7 @@
         },
         {
           "id": "0/9-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/9-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/9-3.png",
           "origin": [
             0.28125,
             0.16666666666666666
@@ -15310,7 +15382,7 @@
         },
         {
           "id": "0/10-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/10-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/10-3.png",
           "origin": [
             0.3125,
             0.16666666666666666
@@ -15327,7 +15399,7 @@
         },
         {
           "id": "0/11-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/11-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/11-3.png",
           "origin": [
             0.34375,
             0.16666666666666666
@@ -15344,7 +15416,7 @@
         },
         {
           "id": "0/12-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/12-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/12-3.png",
           "origin": [
             0.375,
             0.16666666666666666
@@ -15361,7 +15433,7 @@
         },
         {
           "id": "0/13-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/13-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/13-3.png",
           "origin": [
             0.40625,
             0.16666666666666666
@@ -15378,7 +15450,7 @@
         },
         {
           "id": "0/14-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/14-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/14-3.png",
           "origin": [
             0.4375,
             0.16666666666666666
@@ -15395,7 +15467,7 @@
         },
         {
           "id": "0/15-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/15-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/15-3.png",
           "origin": [
             0.46875,
             0.16666666666666666
@@ -15412,7 +15484,7 @@
         },
         {
           "id": "0/16-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/16-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/16-3.png",
           "origin": [
             0.5,
             0.16666666666666666
@@ -15429,7 +15501,7 @@
         },
         {
           "id": "0/17-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/17-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/17-3.png",
           "origin": [
             0.53125,
             0.16666666666666666
@@ -15446,7 +15518,7 @@
         },
         {
           "id": "0/4-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/4-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/4-4.png",
           "origin": [
             0.125,
             0.2222222222222222
@@ -15463,7 +15535,7 @@
         },
         {
           "id": "0/5-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/5-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/5-4.png",
           "origin": [
             0.15625,
             0.2222222222222222
@@ -15480,7 +15552,7 @@
         },
         {
           "id": "0/6-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/6-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/6-4.png",
           "origin": [
             0.1875,
             0.2222222222222222
@@ -15497,7 +15569,7 @@
         },
         {
           "id": "0/7-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/7-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/7-4.png",
           "origin": [
             0.21875,
             0.2222222222222222
@@ -15514,7 +15586,7 @@
         },
         {
           "id": "0/8-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/8-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/8-4.png",
           "origin": [
             0.25,
             0.2222222222222222
@@ -15531,7 +15603,7 @@
         },
         {
           "id": "0/9-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/9-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/9-4.png",
           "origin": [
             0.28125,
             0.2222222222222222
@@ -15548,7 +15620,7 @@
         },
         {
           "id": "0/10-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/10-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/10-4.png",
           "origin": [
             0.3125,
             0.2222222222222222
@@ -15565,7 +15637,7 @@
         },
         {
           "id": "0/11-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/11-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/11-4.png",
           "origin": [
             0.34375,
             0.2222222222222222
@@ -15582,7 +15654,7 @@
         },
         {
           "id": "0/12-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/12-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/12-4.png",
           "origin": [
             0.375,
             0.2222222222222222
@@ -15599,7 +15671,7 @@
         },
         {
           "id": "0/13-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/13-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/13-4.png",
           "origin": [
             0.40625,
             0.2222222222222222
@@ -15616,7 +15688,7 @@
         },
         {
           "id": "0/14-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/14-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/14-4.png",
           "origin": [
             0.4375,
             0.2222222222222222
@@ -15633,7 +15705,7 @@
         },
         {
           "id": "0/15-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/15-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/15-4.png",
           "origin": [
             0.46875,
             0.2222222222222222
@@ -15650,7 +15722,7 @@
         },
         {
           "id": "0/16-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/16-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/16-4.png",
           "origin": [
             0.5,
             0.2222222222222222
@@ -15667,7 +15739,7 @@
         },
         {
           "id": "0/17-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/17-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/17-4.png",
           "origin": [
             0.53125,
             0.2222222222222222
@@ -15684,7 +15756,7 @@
         },
         {
           "id": "0/4-5",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/4-5.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/4-5.png",
           "origin": [
             0.125,
             0.2777777777777778
@@ -15701,7 +15773,7 @@
         },
         {
           "id": "0/5-5",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/5-5.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/5-5.png",
           "origin": [
             0.15625,
             0.2777777777777778
@@ -15718,7 +15790,7 @@
         },
         {
           "id": "0/6-5",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/6-5.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/6-5.png",
           "origin": [
             0.1875,
             0.2777777777777778
@@ -15735,7 +15807,7 @@
         },
         {
           "id": "0/7-5",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/7-5.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/7-5.png",
           "origin": [
             0.21875,
             0.2777777777777778
@@ -15752,7 +15824,7 @@
         },
         {
           "id": "0/8-5",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/8-5.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/8-5.png",
           "origin": [
             0.25,
             0.2777777777777778
@@ -15769,7 +15841,7 @@
         },
         {
           "id": "0/9-5",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/9-5.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/9-5.png",
           "origin": [
             0.28125,
             0.2777777777777778
@@ -15786,7 +15858,7 @@
         },
         {
           "id": "0/10-5",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/10-5.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/10-5.png",
           "origin": [
             0.3125,
             0.2777777777777778
@@ -15803,7 +15875,7 @@
         },
         {
           "id": "0/11-5",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/11-5.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/11-5.png",
           "origin": [
             0.34375,
             0.2777777777777778
@@ -15820,7 +15892,7 @@
         },
         {
           "id": "0/12-5",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/12-5.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/12-5.png",
           "origin": [
             0.375,
             0.2777777777777778
@@ -15837,7 +15909,7 @@
         },
         {
           "id": "0/13-5",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/13-5.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/13-5.png",
           "origin": [
             0.40625,
             0.2777777777777778
@@ -15854,7 +15926,7 @@
         },
         {
           "id": "0/14-5",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/14-5.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/14-5.png",
           "origin": [
             0.4375,
             0.2777777777777778
@@ -15871,7 +15943,7 @@
         },
         {
           "id": "0/15-5",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/15-5.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/15-5.png",
           "origin": [
             0.46875,
             0.2777777777777778
@@ -15888,7 +15960,7 @@
         },
         {
           "id": "0/16-5",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/16-5.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/16-5.png",
           "origin": [
             0.5,
             0.2777777777777778
@@ -15905,7 +15977,7 @@
         },
         {
           "id": "0/17-5",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/17-5.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/17-5.png",
           "origin": [
             0.53125,
             0.2777777777777778
@@ -15922,7 +15994,7 @@
         },
         {
           "id": "0/5-6",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/5-6.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/5-6.png",
           "origin": [
             0.15625,
             0.3333333333333333
@@ -15939,7 +16011,7 @@
         },
         {
           "id": "0/6-6",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/6-6.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/6-6.png",
           "origin": [
             0.1875,
             0.3333333333333333
@@ -15956,7 +16028,7 @@
         },
         {
           "id": "0/7-6",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/7-6.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/7-6.png",
           "origin": [
             0.21875,
             0.3333333333333333
@@ -15973,7 +16045,7 @@
         },
         {
           "id": "0/8-6",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/8-6.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/8-6.png",
           "origin": [
             0.25,
             0.3333333333333333
@@ -15990,7 +16062,7 @@
         },
         {
           "id": "0/9-6",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/9-6.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/9-6.png",
           "origin": [
             0.28125,
             0.3333333333333333
@@ -16007,7 +16079,7 @@
         },
         {
           "id": "0/10-6",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/10-6.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/10-6.png",
           "origin": [
             0.3125,
             0.3333333333333333
@@ -16024,7 +16096,7 @@
         },
         {
           "id": "0/11-6",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/11-6.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/11-6.png",
           "origin": [
             0.34375,
             0.3333333333333333
@@ -16041,7 +16113,7 @@
         },
         {
           "id": "0/12-6",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/12-6.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/12-6.png",
           "origin": [
             0.375,
             0.3333333333333333
@@ -16058,7 +16130,7 @@
         },
         {
           "id": "0/13-6",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/13-6.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/13-6.png",
           "origin": [
             0.40625,
             0.3333333333333333
@@ -16075,7 +16147,7 @@
         },
         {
           "id": "0/14-6",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/14-6.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/14-6.png",
           "origin": [
             0.4375,
             0.3333333333333333
@@ -16092,7 +16164,7 @@
         },
         {
           "id": "0/15-6",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/15-6.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/15-6.png",
           "origin": [
             0.46875,
             0.3333333333333333
@@ -16109,7 +16181,7 @@
         },
         {
           "id": "0/16-6",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/16-6.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/16-6.png",
           "origin": [
             0.5,
             0.3333333333333333
@@ -16126,7 +16198,7 @@
         },
         {
           "id": "0/4-7",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/4-7.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/4-7.png",
           "origin": [
             0.125,
             0.3888888888888889
@@ -16143,7 +16215,7 @@
         },
         {
           "id": "0/5-7",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/5-7.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/5-7.png",
           "origin": [
             0.15625,
             0.3888888888888889
@@ -16160,7 +16232,7 @@
         },
         {
           "id": "0/6-7",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/6-7.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/6-7.png",
           "origin": [
             0.1875,
             0.3888888888888889
@@ -16177,7 +16249,7 @@
         },
         {
           "id": "0/7-7",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/7-7.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/7-7.png",
           "origin": [
             0.21875,
             0.3888888888888889
@@ -16194,7 +16266,7 @@
         },
         {
           "id": "0/8-7",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/8-7.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/8-7.png",
           "origin": [
             0.25,
             0.3888888888888889
@@ -16211,7 +16283,7 @@
         },
         {
           "id": "0/9-7",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/9-7.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/9-7.png",
           "origin": [
             0.28125,
             0.3888888888888889
@@ -16228,7 +16300,7 @@
         },
         {
           "id": "0/10-7",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/10-7.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/10-7.png",
           "origin": [
             0.3125,
             0.3888888888888889
@@ -16245,7 +16317,7 @@
         },
         {
           "id": "0/11-7",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/11-7.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/11-7.png",
           "origin": [
             0.34375,
             0.3888888888888889
@@ -16262,7 +16334,7 @@
         },
         {
           "id": "0/12-7",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/12-7.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/12-7.png",
           "origin": [
             0.375,
             0.3888888888888889
@@ -16279,7 +16351,7 @@
         },
         {
           "id": "0/13-7",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/13-7.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/13-7.png",
           "origin": [
             0.40625,
             0.3888888888888889
@@ -16296,7 +16368,7 @@
         },
         {
           "id": "0/14-7",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/14-7.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/14-7.png",
           "origin": [
             0.4375,
             0.3888888888888889
@@ -16313,7 +16385,7 @@
         },
         {
           "id": "0/15-7",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/15-7.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/15-7.png",
           "origin": [
             0.46875,
             0.3888888888888889
@@ -16330,7 +16402,7 @@
         },
         {
           "id": "0/16-7",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/16-7.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/16-7.png",
           "origin": [
             0.5,
             0.3888888888888889
@@ -16347,7 +16419,7 @@
         },
         {
           "id": "0/4-8",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/4-8.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/4-8.png",
           "origin": [
             0.125,
             0.4444444444444444
@@ -16364,7 +16436,7 @@
         },
         {
           "id": "0/5-8",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/5-8.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/5-8.png",
           "origin": [
             0.15625,
             0.4444444444444444
@@ -16381,7 +16453,7 @@
         },
         {
           "id": "0/6-8",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/6-8.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/6-8.png",
           "origin": [
             0.1875,
             0.4444444444444444
@@ -16398,7 +16470,7 @@
         },
         {
           "id": "0/7-8",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/7-8.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/7-8.png",
           "origin": [
             0.21875,
             0.4444444444444444
@@ -16415,7 +16487,7 @@
         },
         {
           "id": "0/8-8",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/8-8.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/8-8.png",
           "origin": [
             0.25,
             0.4444444444444444
@@ -16432,7 +16504,7 @@
         },
         {
           "id": "0/9-8",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/9-8.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/9-8.png",
           "origin": [
             0.28125,
             0.4444444444444444
@@ -16449,7 +16521,7 @@
         },
         {
           "id": "0/10-8",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/10-8.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/10-8.png",
           "origin": [
             0.3125,
             0.4444444444444444
@@ -16466,7 +16538,7 @@
         },
         {
           "id": "0/11-8",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/11-8.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/11-8.png",
           "origin": [
             0.34375,
             0.4444444444444444
@@ -16483,7 +16555,7 @@
         },
         {
           "id": "0/12-8",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/12-8.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/12-8.png",
           "origin": [
             0.375,
             0.4444444444444444
@@ -16500,7 +16572,7 @@
         },
         {
           "id": "0/13-8",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/13-8.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/13-8.png",
           "origin": [
             0.40625,
             0.4444444444444444
@@ -16517,7 +16589,7 @@
         },
         {
           "id": "0/14-8",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/14-8.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/14-8.png",
           "origin": [
             0.4375,
             0.4444444444444444
@@ -16534,7 +16606,7 @@
         },
         {
           "id": "0/15-8",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/15-8.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/15-8.png",
           "origin": [
             0.46875,
             0.4444444444444444
@@ -16551,7 +16623,7 @@
         },
         {
           "id": "0/16-8",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/16-8.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/16-8.png",
           "origin": [
             0.5,
             0.4444444444444444
@@ -16568,7 +16640,7 @@
         },
         {
           "id": "0/17-8",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/17-8.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/17-8.png",
           "origin": [
             0.53125,
             0.4444444444444444
@@ -16585,7 +16657,7 @@
         },
         {
           "id": "0/3-9",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/3-9.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/3-9.png",
           "origin": [
             0.09375,
             0.5
@@ -16602,7 +16674,7 @@
         },
         {
           "id": "0/4-9",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/4-9.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/4-9.png",
           "origin": [
             0.125,
             0.5
@@ -16619,7 +16691,7 @@
         },
         {
           "id": "0/5-9",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/5-9.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/5-9.png",
           "origin": [
             0.15625,
             0.5
@@ -16636,7 +16708,7 @@
         },
         {
           "id": "0/6-9",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/6-9.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/6-9.png",
           "origin": [
             0.1875,
             0.5
@@ -16653,7 +16725,7 @@
         },
         {
           "id": "0/7-9",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/7-9.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/7-9.png",
           "origin": [
             0.21875,
             0.5
@@ -16670,7 +16742,7 @@
         },
         {
           "id": "0/8-9",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/8-9.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/8-9.png",
           "origin": [
             0.25,
             0.5
@@ -16687,7 +16759,7 @@
         },
         {
           "id": "0/9-9",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/9-9.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/9-9.png",
           "origin": [
             0.28125,
             0.5
@@ -16704,7 +16776,7 @@
         },
         {
           "id": "0/10-9",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/10-9.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/10-9.png",
           "origin": [
             0.3125,
             0.5
@@ -16721,7 +16793,7 @@
         },
         {
           "id": "0/11-9",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/11-9.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/11-9.png",
           "origin": [
             0.34375,
             0.5
@@ -16738,7 +16810,7 @@
         },
         {
           "id": "0/12-9",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/12-9.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/12-9.png",
           "origin": [
             0.375,
             0.5
@@ -16755,7 +16827,7 @@
         },
         {
           "id": "0/13-9",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/13-9.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/13-9.png",
           "origin": [
             0.40625,
             0.5
@@ -16772,7 +16844,7 @@
         },
         {
           "id": "0/14-9",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/14-9.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/14-9.png",
           "origin": [
             0.4375,
             0.5
@@ -16789,7 +16861,7 @@
         },
         {
           "id": "0/15-9",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/15-9.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/15-9.png",
           "origin": [
             0.46875,
             0.5
@@ -16806,7 +16878,7 @@
         },
         {
           "id": "0/16-9",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/16-9.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/16-9.png",
           "origin": [
             0.5,
             0.5
@@ -16823,7 +16895,7 @@
         },
         {
           "id": "0/17-9",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/17-9.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/17-9.png",
           "origin": [
             0.53125,
             0.5
@@ -16840,7 +16912,7 @@
         },
         {
           "id": "0/18-9",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/18-9.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/18-9.png",
           "origin": [
             0.5625,
             0.5
@@ -16857,7 +16929,7 @@
         },
         {
           "id": "0/2-10",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/2-10.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/2-10.png",
           "origin": [
             0.0625,
             0.5555555555555556
@@ -16874,7 +16946,7 @@
         },
         {
           "id": "0/3-10",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/3-10.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/3-10.png",
           "origin": [
             0.09375,
             0.5555555555555556
@@ -16891,7 +16963,7 @@
         },
         {
           "id": "0/4-10",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/4-10.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/4-10.png",
           "origin": [
             0.125,
             0.5555555555555556
@@ -16908,7 +16980,7 @@
         },
         {
           "id": "0/5-10",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/5-10.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/5-10.png",
           "origin": [
             0.15625,
             0.5555555555555556
@@ -16925,7 +16997,7 @@
         },
         {
           "id": "0/6-10",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/6-10.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/6-10.png",
           "origin": [
             0.1875,
             0.5555555555555556
@@ -16942,7 +17014,7 @@
         },
         {
           "id": "0/7-10",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/7-10.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/7-10.png",
           "origin": [
             0.21875,
             0.5555555555555556
@@ -16959,7 +17031,7 @@
         },
         {
           "id": "0/8-10",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/8-10.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/8-10.png",
           "origin": [
             0.25,
             0.5555555555555556
@@ -16976,7 +17048,7 @@
         },
         {
           "id": "0/9-10",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/9-10.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/9-10.png",
           "origin": [
             0.28125,
             0.5555555555555556
@@ -16993,7 +17065,7 @@
         },
         {
           "id": "0/10-10",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/10-10.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/10-10.png",
           "origin": [
             0.3125,
             0.5555555555555556
@@ -17010,7 +17082,7 @@
         },
         {
           "id": "0/11-10",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/11-10.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/11-10.png",
           "origin": [
             0.34375,
             0.5555555555555556
@@ -17027,7 +17099,7 @@
         },
         {
           "id": "0/12-10",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/12-10.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/12-10.png",
           "origin": [
             0.375,
             0.5555555555555556
@@ -17044,7 +17116,7 @@
         },
         {
           "id": "0/13-10",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/13-10.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/13-10.png",
           "origin": [
             0.40625,
             0.5555555555555556
@@ -17061,7 +17133,7 @@
         },
         {
           "id": "0/14-10",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/14-10.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/14-10.png",
           "origin": [
             0.4375,
             0.5555555555555556
@@ -17078,7 +17150,7 @@
         },
         {
           "id": "0/15-10",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/15-10.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/15-10.png",
           "origin": [
             0.46875,
             0.5555555555555556
@@ -17095,7 +17167,7 @@
         },
         {
           "id": "0/16-10",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/16-10.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/16-10.png",
           "origin": [
             0.5,
             0.5555555555555556
@@ -17112,7 +17184,7 @@
         },
         {
           "id": "0/17-10",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/17-10.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/17-10.png",
           "origin": [
             0.53125,
             0.5555555555555556
@@ -17129,7 +17201,7 @@
         },
         {
           "id": "0/18-10",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/18-10.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/18-10.png",
           "origin": [
             0.5625,
             0.5555555555555556
@@ -17146,7 +17218,7 @@
         },
         {
           "id": "0/19-10",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/19-10.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/19-10.png",
           "origin": [
             0.59375,
             0.5555555555555556
@@ -17163,7 +17235,7 @@
         },
         {
           "id": "0/1-11",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/1-11.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/1-11.png",
           "origin": [
             0.03125,
             0.6111111111111112
@@ -17180,7 +17252,7 @@
         },
         {
           "id": "0/2-11",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/2-11.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/2-11.png",
           "origin": [
             0.0625,
             0.6111111111111112
@@ -17197,7 +17269,7 @@
         },
         {
           "id": "0/3-11",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/3-11.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/3-11.png",
           "origin": [
             0.09375,
             0.6111111111111112
@@ -17214,7 +17286,7 @@
         },
         {
           "id": "0/4-11",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/4-11.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/4-11.png",
           "origin": [
             0.125,
             0.6111111111111112
@@ -17231,7 +17303,7 @@
         },
         {
           "id": "0/5-11",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/5-11.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/5-11.png",
           "origin": [
             0.15625,
             0.6111111111111112
@@ -17248,7 +17320,7 @@
         },
         {
           "id": "0/6-11",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/6-11.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/6-11.png",
           "origin": [
             0.1875,
             0.6111111111111112
@@ -17265,7 +17337,7 @@
         },
         {
           "id": "0/7-11",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/7-11.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/7-11.png",
           "origin": [
             0.21875,
             0.6111111111111112
@@ -17282,7 +17354,7 @@
         },
         {
           "id": "0/8-11",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/8-11.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/8-11.png",
           "origin": [
             0.25,
             0.6111111111111112
@@ -17299,7 +17371,7 @@
         },
         {
           "id": "0/9-11",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/9-11.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/9-11.png",
           "origin": [
             0.28125,
             0.6111111111111112
@@ -17316,7 +17388,7 @@
         },
         {
           "id": "0/10-11",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/10-11.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/10-11.png",
           "origin": [
             0.3125,
             0.6111111111111112
@@ -17333,7 +17405,7 @@
         },
         {
           "id": "0/11-11",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/11-11.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/11-11.png",
           "origin": [
             0.34375,
             0.6111111111111112
@@ -17346,11 +17418,11 @@
             256,
             256
           ],
-          "sha256": "aca2658d0f52b60795e27000a1f60c2bb2871686bca73c2c91c6282f234e6954"
+          "sha256": "f310a6b6d5e726e7a8bfdfeb527732116ce5e1200cd38bf6428b02b9ff0f4490"
         },
         {
           "id": "0/12-11",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/12-11.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/12-11.png",
           "origin": [
             0.375,
             0.6111111111111112
@@ -17367,7 +17439,7 @@
         },
         {
           "id": "0/13-11",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/13-11.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/13-11.png",
           "origin": [
             0.40625,
             0.6111111111111112
@@ -17384,7 +17456,7 @@
         },
         {
           "id": "0/14-11",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/14-11.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/14-11.png",
           "origin": [
             0.4375,
             0.6111111111111112
@@ -17401,7 +17473,7 @@
         },
         {
           "id": "0/15-11",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/15-11.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/15-11.png",
           "origin": [
             0.46875,
             0.6111111111111112
@@ -17418,7 +17490,7 @@
         },
         {
           "id": "0/16-11",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/16-11.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/16-11.png",
           "origin": [
             0.5,
             0.6111111111111112
@@ -17435,7 +17507,7 @@
         },
         {
           "id": "0/17-11",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/17-11.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/17-11.png",
           "origin": [
             0.53125,
             0.6111111111111112
@@ -17452,7 +17524,7 @@
         },
         {
           "id": "0/18-11",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/18-11.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/18-11.png",
           "origin": [
             0.5625,
             0.6111111111111112
@@ -17469,7 +17541,7 @@
         },
         {
           "id": "0/19-11",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/19-11.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/19-11.png",
           "origin": [
             0.59375,
             0.6111111111111112
@@ -17486,7 +17558,7 @@
         },
         {
           "id": "0/20-11",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/20-11.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/20-11.png",
           "origin": [
             0.625,
             0.6111111111111112
@@ -17503,7 +17575,7 @@
         },
         {
           "id": "0/1-12",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/1-12.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/1-12.png",
           "origin": [
             0.03125,
             0.6666666666666666
@@ -17520,7 +17592,7 @@
         },
         {
           "id": "0/2-12",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/2-12.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/2-12.png",
           "origin": [
             0.0625,
             0.6666666666666666
@@ -17537,7 +17609,7 @@
         },
         {
           "id": "0/3-12",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/3-12.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/3-12.png",
           "origin": [
             0.09375,
             0.6666666666666666
@@ -17554,7 +17626,7 @@
         },
         {
           "id": "0/4-12",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/4-12.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/4-12.png",
           "origin": [
             0.125,
             0.6666666666666666
@@ -17571,7 +17643,7 @@
         },
         {
           "id": "0/5-12",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/5-12.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/5-12.png",
           "origin": [
             0.15625,
             0.6666666666666666
@@ -17588,7 +17660,7 @@
         },
         {
           "id": "0/6-12",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/6-12.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/6-12.png",
           "origin": [
             0.1875,
             0.6666666666666666
@@ -17605,7 +17677,7 @@
         },
         {
           "id": "0/7-12",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/7-12.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/7-12.png",
           "origin": [
             0.21875,
             0.6666666666666666
@@ -17622,7 +17694,7 @@
         },
         {
           "id": "0/8-12",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/8-12.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/8-12.png",
           "origin": [
             0.25,
             0.6666666666666666
@@ -17639,7 +17711,7 @@
         },
         {
           "id": "0/9-12",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/9-12.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/9-12.png",
           "origin": [
             0.28125,
             0.6666666666666666
@@ -17656,7 +17728,7 @@
         },
         {
           "id": "0/10-12",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/10-12.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/10-12.png",
           "origin": [
             0.3125,
             0.6666666666666666
@@ -17669,11 +17741,11 @@
             256,
             256
           ],
-          "sha256": "3893f467691c4c936de8cdb53cc1635fdb3c6f6a75f7fdf7d8954e49dd92cd20"
+          "sha256": "dedebe2a76538d8396624c38fc4680366d7928635a51d8217e1d7d07ad694257"
         },
         {
           "id": "0/11-12",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/11-12.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/11-12.png",
           "origin": [
             0.34375,
             0.6666666666666666
@@ -17686,11 +17758,11 @@
             256,
             256
           ],
-          "sha256": "70c04ac05c1fc072225dbabf474df8fd13c7e4941802ccdfd3ecd6ff91211ebd"
+          "sha256": "1df04058ca5b8073206e8cb08a9b81caa9dfb1b5fd32db63389933f6e634b9f3"
         },
         {
           "id": "0/12-12",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/12-12.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/12-12.png",
           "origin": [
             0.375,
             0.6666666666666666
@@ -17707,7 +17779,7 @@
         },
         {
           "id": "0/13-12",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/13-12.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/13-12.png",
           "origin": [
             0.40625,
             0.6666666666666666
@@ -17724,7 +17796,7 @@
         },
         {
           "id": "0/14-12",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/14-12.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/14-12.png",
           "origin": [
             0.4375,
             0.6666666666666666
@@ -17741,7 +17813,7 @@
         },
         {
           "id": "0/15-12",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/15-12.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/15-12.png",
           "origin": [
             0.46875,
             0.6666666666666666
@@ -17758,7 +17830,7 @@
         },
         {
           "id": "0/16-12",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/16-12.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/16-12.png",
           "origin": [
             0.5,
             0.6666666666666666
@@ -17775,7 +17847,7 @@
         },
         {
           "id": "0/17-12",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/17-12.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/17-12.png",
           "origin": [
             0.53125,
             0.6666666666666666
@@ -17792,7 +17864,7 @@
         },
         {
           "id": "0/18-12",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/18-12.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/18-12.png",
           "origin": [
             0.5625,
             0.6666666666666666
@@ -17809,7 +17881,7 @@
         },
         {
           "id": "0/19-12",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/19-12.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/19-12.png",
           "origin": [
             0.59375,
             0.6666666666666666
@@ -17826,7 +17898,7 @@
         },
         {
           "id": "0/20-12",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/20-12.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/20-12.png",
           "origin": [
             0.625,
             0.6666666666666666
@@ -17843,7 +17915,7 @@
         },
         {
           "id": "0/1-13",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/1-13.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/1-13.png",
           "origin": [
             0.03125,
             0.7222222222222222
@@ -17860,7 +17932,7 @@
         },
         {
           "id": "0/2-13",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/2-13.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/2-13.png",
           "origin": [
             0.0625,
             0.7222222222222222
@@ -17877,7 +17949,7 @@
         },
         {
           "id": "0/3-13",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/3-13.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/3-13.png",
           "origin": [
             0.09375,
             0.7222222222222222
@@ -17894,7 +17966,7 @@
         },
         {
           "id": "0/4-13",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/4-13.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/4-13.png",
           "origin": [
             0.125,
             0.7222222222222222
@@ -17911,7 +17983,7 @@
         },
         {
           "id": "0/5-13",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/5-13.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/5-13.png",
           "origin": [
             0.15625,
             0.7222222222222222
@@ -17928,7 +18000,7 @@
         },
         {
           "id": "0/6-13",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/6-13.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/6-13.png",
           "origin": [
             0.1875,
             0.7222222222222222
@@ -17945,7 +18017,7 @@
         },
         {
           "id": "0/7-13",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/7-13.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/7-13.png",
           "origin": [
             0.21875,
             0.7222222222222222
@@ -17962,7 +18034,7 @@
         },
         {
           "id": "0/8-13",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/8-13.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/8-13.png",
           "origin": [
             0.25,
             0.7222222222222222
@@ -17979,7 +18051,7 @@
         },
         {
           "id": "0/9-13",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/9-13.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/9-13.png",
           "origin": [
             0.28125,
             0.7222222222222222
@@ -17996,7 +18068,7 @@
         },
         {
           "id": "0/10-13",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/10-13.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/10-13.png",
           "origin": [
             0.3125,
             0.7222222222222222
@@ -18009,11 +18081,11 @@
             256,
             256
           ],
-          "sha256": "de0fcf34776e65f65d8d5db7751927e3524742a522cdab5a7e71fece9ee149b2"
+          "sha256": "8d8199219bff11353edccdcf7550cd554ae4f616d83e2a7ee0a2115186f52b6e"
         },
         {
           "id": "0/11-13",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/11-13.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/11-13.png",
           "origin": [
             0.34375,
             0.7222222222222222
@@ -18026,11 +18098,11 @@
             256,
             256
           ],
-          "sha256": "642f94ca87645e93c3bfda664f9fb5940d12ec9854e5edd878dc77d6f8dd8ce8"
+          "sha256": "83f458a368043f67ae14e655b1df49dfc4987f48415b2562a7613b6d5cb7ce8a"
         },
         {
           "id": "0/12-13",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/12-13.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/12-13.png",
           "origin": [
             0.375,
             0.7222222222222222
@@ -18047,7 +18119,7 @@
         },
         {
           "id": "0/13-13",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/13-13.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/13-13.png",
           "origin": [
             0.40625,
             0.7222222222222222
@@ -18064,7 +18136,7 @@
         },
         {
           "id": "0/14-13",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/14-13.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/14-13.png",
           "origin": [
             0.4375,
             0.7222222222222222
@@ -18081,7 +18153,7 @@
         },
         {
           "id": "0/15-13",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/15-13.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/15-13.png",
           "origin": [
             0.46875,
             0.7222222222222222
@@ -18098,7 +18170,7 @@
         },
         {
           "id": "0/16-13",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/16-13.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/16-13.png",
           "origin": [
             0.5,
             0.7222222222222222
@@ -18115,7 +18187,7 @@
         },
         {
           "id": "0/17-13",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/17-13.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/17-13.png",
           "origin": [
             0.53125,
             0.7222222222222222
@@ -18132,7 +18204,7 @@
         },
         {
           "id": "0/18-13",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/18-13.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/18-13.png",
           "origin": [
             0.5625,
             0.7222222222222222
@@ -18149,7 +18221,7 @@
         },
         {
           "id": "0/2-14",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/2-14.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/2-14.png",
           "origin": [
             0.0625,
             0.7777777777777778
@@ -18166,7 +18238,7 @@
         },
         {
           "id": "0/3-14",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/3-14.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/3-14.png",
           "origin": [
             0.09375,
             0.7777777777777778
@@ -18183,7 +18255,7 @@
         },
         {
           "id": "0/4-14",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/4-14.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/4-14.png",
           "origin": [
             0.125,
             0.7777777777777778
@@ -18200,7 +18272,7 @@
         },
         {
           "id": "0/5-14",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/5-14.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/5-14.png",
           "origin": [
             0.15625,
             0.7777777777777778
@@ -18217,7 +18289,7 @@
         },
         {
           "id": "0/6-14",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/6-14.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/6-14.png",
           "origin": [
             0.1875,
             0.7777777777777778
@@ -18234,7 +18306,7 @@
         },
         {
           "id": "0/7-14",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/7-14.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/7-14.png",
           "origin": [
             0.21875,
             0.7777777777777778
@@ -18251,7 +18323,7 @@
         },
         {
           "id": "0/8-14",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/8-14.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/8-14.png",
           "origin": [
             0.25,
             0.7777777777777778
@@ -18268,7 +18340,7 @@
         },
         {
           "id": "0/9-14",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/9-14.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/9-14.png",
           "origin": [
             0.28125,
             0.7777777777777778
@@ -18285,7 +18357,7 @@
         },
         {
           "id": "0/10-14",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/10-14.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/10-14.png",
           "origin": [
             0.3125,
             0.7777777777777778
@@ -18302,7 +18374,7 @@
         },
         {
           "id": "0/11-14",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/11-14.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/11-14.png",
           "origin": [
             0.34375,
             0.7777777777777778
@@ -18315,11 +18387,11 @@
             256,
             256
           ],
-          "sha256": "fd327146fcbedea3dfdf78937199aecafd605966124020006315d74df6df1e77"
+          "sha256": "cf775be1b76340754d23c66744b487507fdc1b7f46b0b5dfb30578ccf02d87b0"
         },
         {
           "id": "0/12-14",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/12-14.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/12-14.png",
           "origin": [
             0.375,
             0.7777777777777778
@@ -18336,7 +18408,7 @@
         },
         {
           "id": "0/13-14",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/13-14.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/13-14.png",
           "origin": [
             0.40625,
             0.7777777777777778
@@ -18353,7 +18425,7 @@
         },
         {
           "id": "0/14-14",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/14-14.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/14-14.png",
           "origin": [
             0.4375,
             0.7777777777777778
@@ -18370,7 +18442,7 @@
         },
         {
           "id": "0/15-14",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/15-14.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/15-14.png",
           "origin": [
             0.46875,
             0.7777777777777778
@@ -18387,7 +18459,7 @@
         },
         {
           "id": "0/16-14",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/16-14.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/16-14.png",
           "origin": [
             0.5,
             0.7777777777777778
@@ -18404,7 +18476,7 @@
         },
         {
           "id": "0/17-14",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/17-14.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/17-14.png",
           "origin": [
             0.53125,
             0.7777777777777778
@@ -18421,7 +18493,7 @@
         },
         {
           "id": "0/18-14",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/18-14.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/18-14.png",
           "origin": [
             0.5625,
             0.7777777777777778
@@ -18438,7 +18510,7 @@
         },
         {
           "id": "0/19-14",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/19-14.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/19-14.png",
           "origin": [
             0.59375,
             0.7777777777777778
@@ -18455,7 +18527,7 @@
         },
         {
           "id": "0/2-15",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/2-15.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/2-15.png",
           "origin": [
             0.0625,
             0.8333333333333334
@@ -18472,7 +18544,7 @@
         },
         {
           "id": "0/3-15",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/3-15.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/3-15.png",
           "origin": [
             0.09375,
             0.8333333333333334
@@ -18489,7 +18561,7 @@
         },
         {
           "id": "0/4-15",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/4-15.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/4-15.png",
           "origin": [
             0.125,
             0.8333333333333334
@@ -18506,7 +18578,7 @@
         },
         {
           "id": "0/5-15",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/5-15.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/5-15.png",
           "origin": [
             0.15625,
             0.8333333333333334
@@ -18523,7 +18595,7 @@
         },
         {
           "id": "0/6-15",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/6-15.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/6-15.png",
           "origin": [
             0.1875,
             0.8333333333333334
@@ -18540,7 +18612,7 @@
         },
         {
           "id": "0/7-15",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/7-15.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/7-15.png",
           "origin": [
             0.21875,
             0.8333333333333334
@@ -18557,7 +18629,7 @@
         },
         {
           "id": "0/8-15",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/8-15.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/8-15.png",
           "origin": [
             0.25,
             0.8333333333333334
@@ -18574,7 +18646,7 @@
         },
         {
           "id": "0/9-15",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/9-15.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/9-15.png",
           "origin": [
             0.28125,
             0.8333333333333334
@@ -18591,7 +18663,7 @@
         },
         {
           "id": "0/10-15",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/10-15.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/10-15.png",
           "origin": [
             0.3125,
             0.8333333333333334
@@ -18608,7 +18680,7 @@
         },
         {
           "id": "0/11-15",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/11-15.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/11-15.png",
           "origin": [
             0.34375,
             0.8333333333333334
@@ -18625,7 +18697,7 @@
         },
         {
           "id": "0/12-15",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/12-15.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/12-15.png",
           "origin": [
             0.375,
             0.8333333333333334
@@ -18642,7 +18714,7 @@
         },
         {
           "id": "0/13-15",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/13-15.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/13-15.png",
           "origin": [
             0.40625,
             0.8333333333333334
@@ -18659,7 +18731,7 @@
         },
         {
           "id": "0/14-15",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/14-15.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/14-15.png",
           "origin": [
             0.4375,
             0.8333333333333334
@@ -18676,7 +18748,7 @@
         },
         {
           "id": "0/15-15",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/15-15.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/15-15.png",
           "origin": [
             0.46875,
             0.8333333333333334
@@ -18693,7 +18765,7 @@
         },
         {
           "id": "0/16-15",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/16-15.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/16-15.png",
           "origin": [
             0.5,
             0.8333333333333334
@@ -18710,7 +18782,7 @@
         },
         {
           "id": "0/17-15",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/17-15.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/17-15.png",
           "origin": [
             0.53125,
             0.8333333333333334
@@ -18727,7 +18799,7 @@
         },
         {
           "id": "0/18-15",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/18-15.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/18-15.png",
           "origin": [
             0.5625,
             0.8333333333333334
@@ -18744,7 +18816,7 @@
         },
         {
           "id": "0/19-15",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/19-15.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/19-15.png",
           "origin": [
             0.59375,
             0.8333333333333334
@@ -18761,7 +18833,7 @@
         },
         {
           "id": "0/5-16",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/5-16.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/5-16.png",
           "origin": [
             0.15625,
             0.8888888888888888
@@ -18778,7 +18850,7 @@
         },
         {
           "id": "0/6-16",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/6-16.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/6-16.png",
           "origin": [
             0.1875,
             0.8888888888888888
@@ -18795,7 +18867,7 @@
         },
         {
           "id": "0/7-16",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/7-16.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/7-16.png",
           "origin": [
             0.21875,
             0.8888888888888888
@@ -18812,7 +18884,7 @@
         },
         {
           "id": "0/8-16",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/8-16.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/8-16.png",
           "origin": [
             0.25,
             0.8888888888888888
@@ -18829,7 +18901,7 @@
         },
         {
           "id": "0/9-16",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/9-16.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/9-16.png",
           "origin": [
             0.28125,
             0.8888888888888888
@@ -18846,7 +18918,7 @@
         },
         {
           "id": "0/10-16",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/10-16.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/10-16.png",
           "origin": [
             0.3125,
             0.8888888888888888
@@ -18863,7 +18935,7 @@
         },
         {
           "id": "0/11-16",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/11-16.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/11-16.png",
           "origin": [
             0.34375,
             0.8888888888888888
@@ -18880,7 +18952,7 @@
         },
         {
           "id": "0/12-16",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/12-16.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/12-16.png",
           "origin": [
             0.375,
             0.8888888888888888
@@ -18897,7 +18969,7 @@
         },
         {
           "id": "0/13-16",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/13-16.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/13-16.png",
           "origin": [
             0.40625,
             0.8888888888888888
@@ -18914,7 +18986,7 @@
         },
         {
           "id": "0/14-16",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/14-16.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/14-16.png",
           "origin": [
             0.4375,
             0.8888888888888888
@@ -18931,7 +19003,7 @@
         },
         {
           "id": "0/15-16",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/15-16.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/15-16.png",
           "origin": [
             0.46875,
             0.8888888888888888
@@ -18948,7 +19020,7 @@
         },
         {
           "id": "0/16-16",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/16-16.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/16-16.png",
           "origin": [
             0.5,
             0.8888888888888888
@@ -18965,7 +19037,7 @@
         },
         {
           "id": "0/17-16",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/17-16.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/17-16.png",
           "origin": [
             0.53125,
             0.8888888888888888
@@ -18982,7 +19054,7 @@
         },
         {
           "id": "0/18-16",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/18-16.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/18-16.png",
           "origin": [
             0.5625,
             0.8888888888888888
@@ -18999,7 +19071,7 @@
         },
         {
           "id": "0/11-17",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/11-17.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/11-17.png",
           "origin": [
             0.34375,
             0.9444444444444444
@@ -19016,7 +19088,7 @@
         },
         {
           "id": "0/12-17",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/12-17.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/12-17.png",
           "origin": [
             0.375,
             0.9444444444444444
@@ -19033,7 +19105,7 @@
         },
         {
           "id": "0/13-17",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/13-17.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/13-17.png",
           "origin": [
             0.40625,
             0.9444444444444444
@@ -19050,7 +19122,7 @@
         },
         {
           "id": "0/14-17",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/14-17.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/14-17.png",
           "origin": [
             0.4375,
             0.9444444444444444
@@ -19067,7 +19139,7 @@
         },
         {
           "id": "0/16-17",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/16-17.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/16-17.png",
           "origin": [
             0.5,
             0.9444444444444444
@@ -19084,7 +19156,7 @@
         },
         {
           "id": "0/17-17",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L0/17-17.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L0/17-17.png",
           "origin": [
             0.53125,
             0.9444444444444444
@@ -19110,7 +19182,7 @@
       "tiles": [
         {
           "id": "1/1-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/1-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/1-0.png",
           "origin": [
             0.0625,
             0
@@ -19127,7 +19199,7 @@
         },
         {
           "id": "1/2-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/2-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/2-0.png",
           "origin": [
             0.125,
             0
@@ -19144,7 +19216,7 @@
         },
         {
           "id": "1/3-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/3-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/3-0.png",
           "origin": [
             0.1875,
             0
@@ -19161,7 +19233,7 @@
         },
         {
           "id": "1/4-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/4-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/4-0.png",
           "origin": [
             0.25,
             0
@@ -19178,7 +19250,7 @@
         },
         {
           "id": "1/5-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/5-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/5-0.png",
           "origin": [
             0.3125,
             0
@@ -19195,7 +19267,7 @@
         },
         {
           "id": "1/6-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/6-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/6-0.png",
           "origin": [
             0.375,
             0
@@ -19212,7 +19284,7 @@
         },
         {
           "id": "1/7-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/7-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/7-0.png",
           "origin": [
             0.4375,
             0
@@ -19229,7 +19301,7 @@
         },
         {
           "id": "1/8-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/8-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/8-0.png",
           "origin": [
             0.5,
             0
@@ -19246,7 +19318,7 @@
         },
         {
           "id": "1/1-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/1-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/1-1.png",
           "origin": [
             0.0625,
             0.1111111111111111
@@ -19263,7 +19335,7 @@
         },
         {
           "id": "1/2-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/2-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/2-1.png",
           "origin": [
             0.125,
             0.1111111111111111
@@ -19280,7 +19352,7 @@
         },
         {
           "id": "1/3-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/3-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/3-1.png",
           "origin": [
             0.1875,
             0.1111111111111111
@@ -19297,7 +19369,7 @@
         },
         {
           "id": "1/4-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/4-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/4-1.png",
           "origin": [
             0.25,
             0.1111111111111111
@@ -19314,7 +19386,7 @@
         },
         {
           "id": "1/5-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/5-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/5-1.png",
           "origin": [
             0.3125,
             0.1111111111111111
@@ -19331,7 +19403,7 @@
         },
         {
           "id": "1/6-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/6-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/6-1.png",
           "origin": [
             0.375,
             0.1111111111111111
@@ -19348,7 +19420,7 @@
         },
         {
           "id": "1/7-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/7-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/7-1.png",
           "origin": [
             0.4375,
             0.1111111111111111
@@ -19365,7 +19437,7 @@
         },
         {
           "id": "1/8-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/8-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/8-1.png",
           "origin": [
             0.5,
             0.1111111111111111
@@ -19382,7 +19454,7 @@
         },
         {
           "id": "1/2-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/2-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/2-2.png",
           "origin": [
             0.125,
             0.2222222222222222
@@ -19399,7 +19471,7 @@
         },
         {
           "id": "1/3-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/3-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/3-2.png",
           "origin": [
             0.1875,
             0.2222222222222222
@@ -19416,7 +19488,7 @@
         },
         {
           "id": "1/4-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/4-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/4-2.png",
           "origin": [
             0.25,
             0.2222222222222222
@@ -19433,7 +19505,7 @@
         },
         {
           "id": "1/5-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/5-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/5-2.png",
           "origin": [
             0.3125,
             0.2222222222222222
@@ -19450,7 +19522,7 @@
         },
         {
           "id": "1/6-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/6-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/6-2.png",
           "origin": [
             0.375,
             0.2222222222222222
@@ -19467,7 +19539,7 @@
         },
         {
           "id": "1/7-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/7-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/7-2.png",
           "origin": [
             0.4375,
             0.2222222222222222
@@ -19484,7 +19556,7 @@
         },
         {
           "id": "1/8-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/8-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/8-2.png",
           "origin": [
             0.5,
             0.2222222222222222
@@ -19501,7 +19573,7 @@
         },
         {
           "id": "1/2-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/2-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/2-3.png",
           "origin": [
             0.125,
             0.3333333333333333
@@ -19518,7 +19590,7 @@
         },
         {
           "id": "1/3-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/3-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/3-3.png",
           "origin": [
             0.1875,
             0.3333333333333333
@@ -19535,7 +19607,7 @@
         },
         {
           "id": "1/4-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/4-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/4-3.png",
           "origin": [
             0.25,
             0.3333333333333333
@@ -19552,7 +19624,7 @@
         },
         {
           "id": "1/5-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/5-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/5-3.png",
           "origin": [
             0.3125,
             0.3333333333333333
@@ -19569,7 +19641,7 @@
         },
         {
           "id": "1/6-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/6-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/6-3.png",
           "origin": [
             0.375,
             0.3333333333333333
@@ -19586,7 +19658,7 @@
         },
         {
           "id": "1/7-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/7-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/7-3.png",
           "origin": [
             0.4375,
             0.3333333333333333
@@ -19603,7 +19675,7 @@
         },
         {
           "id": "1/8-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/8-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/8-3.png",
           "origin": [
             0.5,
             0.3333333333333333
@@ -19620,7 +19692,7 @@
         },
         {
           "id": "1/1-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/1-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/1-4.png",
           "origin": [
             0.0625,
             0.4444444444444444
@@ -19637,7 +19709,7 @@
         },
         {
           "id": "1/2-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/2-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/2-4.png",
           "origin": [
             0.125,
             0.4444444444444444
@@ -19654,7 +19726,7 @@
         },
         {
           "id": "1/3-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/3-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/3-4.png",
           "origin": [
             0.1875,
             0.4444444444444444
@@ -19671,7 +19743,7 @@
         },
         {
           "id": "1/4-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/4-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/4-4.png",
           "origin": [
             0.25,
             0.4444444444444444
@@ -19688,7 +19760,7 @@
         },
         {
           "id": "1/5-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/5-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/5-4.png",
           "origin": [
             0.3125,
             0.4444444444444444
@@ -19705,7 +19777,7 @@
         },
         {
           "id": "1/6-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/6-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/6-4.png",
           "origin": [
             0.375,
             0.4444444444444444
@@ -19722,7 +19794,7 @@
         },
         {
           "id": "1/7-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/7-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/7-4.png",
           "origin": [
             0.4375,
             0.4444444444444444
@@ -19739,7 +19811,7 @@
         },
         {
           "id": "1/8-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/8-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/8-4.png",
           "origin": [
             0.5,
             0.4444444444444444
@@ -19756,7 +19828,7 @@
         },
         {
           "id": "1/9-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/9-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/9-4.png",
           "origin": [
             0.5625,
             0.4444444444444444
@@ -19773,7 +19845,7 @@
         },
         {
           "id": "1/0-5",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/0-5.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/0-5.png",
           "origin": [
             0,
             0.5555555555555556
@@ -19790,7 +19862,7 @@
         },
         {
           "id": "1/1-5",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/1-5.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/1-5.png",
           "origin": [
             0.0625,
             0.5555555555555556
@@ -19807,7 +19879,7 @@
         },
         {
           "id": "1/2-5",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/2-5.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/2-5.png",
           "origin": [
             0.125,
             0.5555555555555556
@@ -19824,7 +19896,7 @@
         },
         {
           "id": "1/3-5",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/3-5.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/3-5.png",
           "origin": [
             0.1875,
             0.5555555555555556
@@ -19841,7 +19913,7 @@
         },
         {
           "id": "1/4-5",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/4-5.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/4-5.png",
           "origin": [
             0.25,
             0.5555555555555556
@@ -19858,7 +19930,7 @@
         },
         {
           "id": "1/5-5",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/5-5.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/5-5.png",
           "origin": [
             0.3125,
             0.5555555555555556
@@ -19871,11 +19943,11 @@
             256,
             256
           ],
-          "sha256": "399f9c377e5959cecd0193c68d03bd6ece6bb9d3c84967c18f62f6f9551edc7d"
+          "sha256": "2826b0a2ba8f281252b3d65febcb7a9368a2ea8c8a9b57a4ce7c82fa1da11d54"
         },
         {
           "id": "1/6-5",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/6-5.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/6-5.png",
           "origin": [
             0.375,
             0.5555555555555556
@@ -19892,7 +19964,7 @@
         },
         {
           "id": "1/7-5",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/7-5.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/7-5.png",
           "origin": [
             0.4375,
             0.5555555555555556
@@ -19909,7 +19981,7 @@
         },
         {
           "id": "1/8-5",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/8-5.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/8-5.png",
           "origin": [
             0.5,
             0.5555555555555556
@@ -19926,7 +19998,7 @@
         },
         {
           "id": "1/9-5",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/9-5.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/9-5.png",
           "origin": [
             0.5625,
             0.5555555555555556
@@ -19943,7 +20015,7 @@
         },
         {
           "id": "1/10-5",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/10-5.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/10-5.png",
           "origin": [
             0.625,
             0.5555555555555556
@@ -19960,7 +20032,7 @@
         },
         {
           "id": "1/0-6",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/0-6.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/0-6.png",
           "origin": [
             0,
             0.6666666666666666
@@ -19977,7 +20049,7 @@
         },
         {
           "id": "1/1-6",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/1-6.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/1-6.png",
           "origin": [
             0.0625,
             0.6666666666666666
@@ -19994,7 +20066,7 @@
         },
         {
           "id": "1/2-6",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/2-6.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/2-6.png",
           "origin": [
             0.125,
             0.6666666666666666
@@ -20011,7 +20083,7 @@
         },
         {
           "id": "1/3-6",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/3-6.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/3-6.png",
           "origin": [
             0.1875,
             0.6666666666666666
@@ -20028,7 +20100,7 @@
         },
         {
           "id": "1/4-6",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/4-6.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/4-6.png",
           "origin": [
             0.25,
             0.6666666666666666
@@ -20045,7 +20117,7 @@
         },
         {
           "id": "1/5-6",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/5-6.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/5-6.png",
           "origin": [
             0.3125,
             0.6666666666666666
@@ -20058,11 +20130,11 @@
             256,
             256
           ],
-          "sha256": "540eba99f54e8bde34712b018f8f421f038c589db71a6847f5cf60695f183993"
+          "sha256": "b3b48edf8df153ec16e3772e9f6b919e1251660800142c5edfb84c5d6d455448"
         },
         {
           "id": "1/6-6",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/6-6.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/6-6.png",
           "origin": [
             0.375,
             0.6666666666666666
@@ -20079,7 +20151,7 @@
         },
         {
           "id": "1/7-6",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/7-6.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/7-6.png",
           "origin": [
             0.4375,
             0.6666666666666666
@@ -20096,7 +20168,7 @@
         },
         {
           "id": "1/8-6",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/8-6.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/8-6.png",
           "origin": [
             0.5,
             0.6666666666666666
@@ -20113,7 +20185,7 @@
         },
         {
           "id": "1/9-6",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/9-6.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/9-6.png",
           "origin": [
             0.5625,
             0.6666666666666666
@@ -20130,7 +20202,7 @@
         },
         {
           "id": "1/10-6",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/10-6.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/10-6.png",
           "origin": [
             0.625,
             0.6666666666666666
@@ -20147,7 +20219,7 @@
         },
         {
           "id": "1/1-7",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/1-7.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/1-7.png",
           "origin": [
             0.0625,
             0.7777777777777778
@@ -20164,7 +20236,7 @@
         },
         {
           "id": "1/2-7",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/2-7.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/2-7.png",
           "origin": [
             0.125,
             0.7777777777777778
@@ -20181,7 +20253,7 @@
         },
         {
           "id": "1/3-7",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/3-7.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/3-7.png",
           "origin": [
             0.1875,
             0.7777777777777778
@@ -20198,7 +20270,7 @@
         },
         {
           "id": "1/4-7",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/4-7.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/4-7.png",
           "origin": [
             0.25,
             0.7777777777777778
@@ -20215,7 +20287,7 @@
         },
         {
           "id": "1/5-7",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/5-7.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/5-7.png",
           "origin": [
             0.3125,
             0.7777777777777778
@@ -20228,11 +20300,11 @@
             256,
             256
           ],
-          "sha256": "4a49f2aeca6c935f44f39deb96c1bd287999e632618d8c314ffb30b9df00290c"
+          "sha256": "83a54120ac080d7d73e7e08fe1afee92a0e88557d58b5cb561c9e1b08fc3e8a7"
         },
         {
           "id": "1/6-7",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/6-7.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/6-7.png",
           "origin": [
             0.375,
             0.7777777777777778
@@ -20249,7 +20321,7 @@
         },
         {
           "id": "1/7-7",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/7-7.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/7-7.png",
           "origin": [
             0.4375,
             0.7777777777777778
@@ -20266,7 +20338,7 @@
         },
         {
           "id": "1/8-7",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/8-7.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/8-7.png",
           "origin": [
             0.5,
             0.7777777777777778
@@ -20283,7 +20355,7 @@
         },
         {
           "id": "1/9-7",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/9-7.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/9-7.png",
           "origin": [
             0.5625,
             0.7777777777777778
@@ -20300,7 +20372,7 @@
         },
         {
           "id": "1/2-8",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/2-8.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/2-8.png",
           "origin": [
             0.125,
             0.8888888888888888
@@ -20317,7 +20389,7 @@
         },
         {
           "id": "1/3-8",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/3-8.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/3-8.png",
           "origin": [
             0.1875,
             0.8888888888888888
@@ -20334,7 +20406,7 @@
         },
         {
           "id": "1/4-8",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/4-8.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/4-8.png",
           "origin": [
             0.25,
             0.8888888888888888
@@ -20351,7 +20423,7 @@
         },
         {
           "id": "1/5-8",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/5-8.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/5-8.png",
           "origin": [
             0.3125,
             0.8888888888888888
@@ -20368,7 +20440,7 @@
         },
         {
           "id": "1/6-8",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/6-8.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/6-8.png",
           "origin": [
             0.375,
             0.8888888888888888
@@ -20385,7 +20457,7 @@
         },
         {
           "id": "1/7-8",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/7-8.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/7-8.png",
           "origin": [
             0.4375,
             0.8888888888888888
@@ -20402,7 +20474,7 @@
         },
         {
           "id": "1/8-8",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/8-8.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/8-8.png",
           "origin": [
             0.5,
             0.8888888888888888
@@ -20419,7 +20491,7 @@
         },
         {
           "id": "1/9-8",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L1/9-8.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L1/9-8.png",
           "origin": [
             0.5625,
             0.8888888888888888
@@ -20445,7 +20517,7 @@
       "tiles": [
         {
           "id": "2/0-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L2/0-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L2/0-0.png",
           "origin": [
             0,
             0
@@ -20462,7 +20534,7 @@
         },
         {
           "id": "2/1-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L2/1-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L2/1-0.png",
           "origin": [
             0.125,
             0
@@ -20479,7 +20551,7 @@
         },
         {
           "id": "2/2-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L2/2-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L2/2-0.png",
           "origin": [
             0.25,
             0
@@ -20496,7 +20568,7 @@
         },
         {
           "id": "2/3-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L2/3-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L2/3-0.png",
           "origin": [
             0.375,
             0
@@ -20513,7 +20585,7 @@
         },
         {
           "id": "2/4-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L2/4-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L2/4-0.png",
           "origin": [
             0.5,
             0
@@ -20530,7 +20602,7 @@
         },
         {
           "id": "2/1-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L2/1-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L2/1-1.png",
           "origin": [
             0.125,
             0.2222222222222222
@@ -20547,7 +20619,7 @@
         },
         {
           "id": "2/2-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L2/2-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L2/2-1.png",
           "origin": [
             0.25,
             0.2222222222222222
@@ -20564,7 +20636,7 @@
         },
         {
           "id": "2/3-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L2/3-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L2/3-1.png",
           "origin": [
             0.375,
             0.2222222222222222
@@ -20581,7 +20653,7 @@
         },
         {
           "id": "2/4-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L2/4-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L2/4-1.png",
           "origin": [
             0.5,
             0.2222222222222222
@@ -20598,7 +20670,7 @@
         },
         {
           "id": "2/0-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L2/0-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L2/0-2.png",
           "origin": [
             0,
             0.4444444444444444
@@ -20615,7 +20687,7 @@
         },
         {
           "id": "2/1-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L2/1-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L2/1-2.png",
           "origin": [
             0.125,
             0.4444444444444444
@@ -20632,7 +20704,7 @@
         },
         {
           "id": "2/2-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L2/2-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L2/2-2.png",
           "origin": [
             0.25,
             0.4444444444444444
@@ -20645,11 +20717,11 @@
             256,
             256
           ],
-          "sha256": "9a906bda1a943721fea9724dd9787fa7435d991e4738d5d4c888f7c5ea03b88c"
+          "sha256": "af6fb93f9ed2390e92dd162c8ae7257c9e0931bc5d52b9cffca5ebad5f694f76"
         },
         {
           "id": "2/3-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L2/3-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L2/3-2.png",
           "origin": [
             0.375,
             0.4444444444444444
@@ -20666,7 +20738,7 @@
         },
         {
           "id": "2/4-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L2/4-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L2/4-2.png",
           "origin": [
             0.5,
             0.4444444444444444
@@ -20683,7 +20755,7 @@
         },
         {
           "id": "2/5-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L2/5-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L2/5-2.png",
           "origin": [
             0.625,
             0.4444444444444444
@@ -20700,7 +20772,7 @@
         },
         {
           "id": "2/0-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L2/0-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L2/0-3.png",
           "origin": [
             0,
             0.6666666666666666
@@ -20717,7 +20789,7 @@
         },
         {
           "id": "2/1-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L2/1-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L2/1-3.png",
           "origin": [
             0.125,
             0.6666666666666666
@@ -20734,7 +20806,7 @@
         },
         {
           "id": "2/2-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L2/2-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L2/2-3.png",
           "origin": [
             0.25,
             0.6666666666666666
@@ -20747,11 +20819,11 @@
             256,
             256
           ],
-          "sha256": "e128b4ed755a93ff054d7b98de38353c917cae60276332988d236efe4fc469fa"
+          "sha256": "cdbc4a646275053e3331e75ec6433af7a68c7d58d185a1072e0b4028f323d0f9"
         },
         {
           "id": "2/3-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L2/3-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L2/3-3.png",
           "origin": [
             0.375,
             0.6666666666666666
@@ -20768,7 +20840,7 @@
         },
         {
           "id": "2/4-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L2/4-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L2/4-3.png",
           "origin": [
             0.5,
             0.6666666666666666
@@ -20785,7 +20857,7 @@
         },
         {
           "id": "2/5-3",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L2/5-3.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L2/5-3.png",
           "origin": [
             0.625,
             0.6666666666666666
@@ -20802,7 +20874,7 @@
         },
         {
           "id": "2/1-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L2/1-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L2/1-4.png",
           "origin": [
             0.125,
             0.8888888888888888
@@ -20819,7 +20891,7 @@
         },
         {
           "id": "2/2-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L2/2-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L2/2-4.png",
           "origin": [
             0.25,
             0.8888888888888888
@@ -20836,7 +20908,7 @@
         },
         {
           "id": "2/3-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L2/3-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L2/3-4.png",
           "origin": [
             0.375,
             0.8888888888888888
@@ -20853,7 +20925,7 @@
         },
         {
           "id": "2/4-4",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L2/4-4.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L2/4-4.png",
           "origin": [
             0.5,
             0.8888888888888888
@@ -20879,7 +20951,7 @@
       "tiles": [
         {
           "id": "3/0-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L3/0-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L3/0-0.png",
           "origin": [
             0,
             0
@@ -20896,7 +20968,7 @@
         },
         {
           "id": "3/1-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L3/1-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L3/1-0.png",
           "origin": [
             0.25,
             0
@@ -20913,7 +20985,7 @@
         },
         {
           "id": "3/2-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L3/2-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L3/2-0.png",
           "origin": [
             0.5,
             0
@@ -20930,7 +21002,7 @@
         },
         {
           "id": "3/0-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L3/0-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L3/0-1.png",
           "origin": [
             0,
             0.4444444444444444
@@ -20947,7 +21019,7 @@
         },
         {
           "id": "3/1-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L3/1-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L3/1-1.png",
           "origin": [
             0.25,
             0.4444444444444444
@@ -20960,11 +21032,11 @@
             256,
             256
           ],
-          "sha256": "e77ef69a6b26f4121b28b394c007eac68212133dc41114bbefd08fa5af837696"
+          "sha256": "eaf9fffe90cc5cb4904504906e12b00cb08ec2ee4741da6e7e5eba2046160763"
         },
         {
           "id": "3/2-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L3/2-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L3/2-1.png",
           "origin": [
             0.5,
             0.4444444444444444
@@ -20981,7 +21053,7 @@
         },
         {
           "id": "3/0-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L3/0-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L3/0-2.png",
           "origin": [
             0,
             0.8888888888888888
@@ -20998,7 +21070,7 @@
         },
         {
           "id": "3/1-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L3/1-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L3/1-2.png",
           "origin": [
             0.25,
             0.8888888888888888
@@ -21015,7 +21087,7 @@
         },
         {
           "id": "3/2-2",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L3/2-2.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L3/2-2.png",
           "origin": [
             0.5,
             0.8888888888888888
@@ -21041,7 +21113,7 @@
       "tiles": [
         {
           "id": "4/0-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L4/0-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L4/0-0.png",
           "origin": [
             0,
             0
@@ -21054,11 +21126,11 @@
             256,
             256
           ],
-          "sha256": "ec05355b0ab8adf55584d97d45725ca4f5d2ba548b7d1eae5e1aa08f8198790d"
+          "sha256": "8efe08afc3f130bde1cdc8313660b5ea7a0eaf61400a3139770394c96c5b7a03"
         },
         {
           "id": "4/1-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L4/1-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L4/1-0.png",
           "origin": [
             0.5,
             0
@@ -21075,7 +21147,7 @@
         },
         {
           "id": "4/0-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L4/0-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L4/0-1.png",
           "origin": [
             0,
             0.8888888888888888
@@ -21092,7 +21164,7 @@
         },
         {
           "id": "4/1-1",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L4/1-1.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L4/1-1.png",
           "origin": [
             0.5,
             0.8888888888888888
@@ -21118,7 +21190,7 @@
       "tiles": [
         {
           "id": "5/0-0",
-          "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/L5/0-0.png",
+          "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/L5/0-0.png",
           "origin": [
             0,
             0
@@ -21131,19 +21203,19 @@
             256,
             144
           ],
-          "sha256": "45771cbf5825e1249f48ce22f3058e5a66579526d540c23a051ab5e62642de0b"
+          "sha256": "923121f95816260cf851aa44b75cb6cb568a5f003d74b2e52926311ebd9639ba"
         }
       ]
     }
   ],
   "seabedGeometry": {
-    "path": "/career-world/layers/water/fields-r1/e97b2cb2861f3ed8/seabed-geography.png",
+    "path": "/career-world/layers/water/fields-r1/dfdb3aa49cb9e03e/seabed-geography.png",
     "dimensions": [
       2048,
       1152
     ],
     "rangeMetres": 192,
-    "sha256": "b0a46074c00e0daab23acb1753634474b73ce3027f7d962893037e8bbd20b640",
+    "sha256": "7d8cfd977dafa73f9050ba7bfd560ef6f59e6cbcdaa6eb1adf0717feb9746d5d",
     "channels": "R coast distance 0..192m; G marine coverage; B natural coast confidence"
   },
   "channels": {
@@ -21153,7 +21225,7 @@
   "geometry": "Current served land alpha only. Water remains beneath land; this field does not erase terrain.",
   "flow": "Sea-connected channels follow a broad-water outlet potential. Closed water has no inferred direction.",
   "stats": {
-    "pools": 193627,
+    "pools": 193156,
     "streams": 33316,
     "seaPixels": 25946836,
     "provisionalCoastPixels": 63293,
