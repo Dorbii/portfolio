@@ -1,0 +1,15 @@
+import fs from 'node:fs/promises';import crypto from 'node:crypto';import {execFileSync} from 'node:child_process';import sharp from 'sharp';
+const dir='art-source/career-world/water/pond-bank-r9',registration=JSON.parse(await fs.readFile(dir+'/registration.json')),{crop,source}=registration,fullDir=dir+'/full-chain';await fs.mkdir(fullDir,{recursive:true});
+const log=execFileSync(process.execPath,['docs/career-world/session3-tools/build-chain-layer.mjs','--cell','c4-0','--unmasked','--out',fullDir],{encoding:'utf8',maxBuffer:16*1024*1024,windowsHide:true});await fs.writeFile(dir+'/canonical-groove-build.log',log);
+const canonicalPath=fullDir+'/tanium-c4-0-chain.png',canonical=await sharp(canonicalPath).ensureAlpha().raw().toBuffer(),{data:land,info}=await sharp(source).ensureAlpha().raw().toBuffer({resolveWithObject:true}),permission=await sharp(dir+'/permission-mask.png').toColourspace('b-w').raw().toBuffer(),N=crop.width,feature=Buffer.alloc(N*N*4),min=[N,N],max=[-1,-1];
+for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+ const i=y*N+x,p=i*4,cx=x+crop.left-256,cy=y+crop.top-256;if(cx<0||cy<0||cx>=2048||cy>=2048)continue;
+ const c=(cy*2048+cx)*4,l=((y+crop.top)*info.width+x+crop.left)*4;
+ const alpha=Math.round(canonical[c+3]*(1-land[l+3]/255)*permission[i]/255);if(!alpha)continue;
+ feature[p]=canonical[c];feature[p+1]=canonical[c+1];feature[p+2]=canonical[c+2];feature[p+3]=alpha;
+ min[0]=Math.min(min[0],x);min[1]=Math.min(min[1],y);max[0]=Math.max(max[0],x);max[1]=Math.max(max[1],y);
+}
+if(max[0]<0)throw new Error('No canonical grooves cross the pond');
+const rect={left:Math.max(0,min[0]-4),top:Math.max(0,min[1]-4),width:Math.min(N,max[0]+5)-Math.max(0,min[0]-4),height:Math.min(N,max[1]+5)-Math.max(0,min[1]-4)},texture=await sharp(feature,{raw:{width:N,height:N,channels:4}}).extract(rect).webp({lossless:true}).toBuffer(),hash=crypto.createHash('sha256').update(texture).digest('hex'),name='submerged-groove-'+hash.slice(0,16)+'.webp',out='public/career-world/layers/water/inland';await fs.writeFile(out+'/'+name,texture);
+const mount=JSON.parse(await fs.readFile('public/career-world/layers/terrain/authority/manifests/terrain-local-mount-r1.json')),tile=mount.tiles.find(t=>t.id==='l2-tanium-c4-0'),sourceCrop={left:rect.left+crop.left-256,top:rect.top+crop.top-256,width:rect.width,height:rect.height},origin=[sourceCrop.left,sourceCrop.top].map((n,k)=>tile.worldBounds.origin[k]+n/2048*tile.worldBounds.span[k]),span=[rect.width,rect.height].map((n,k)=>n/2048*tile.worldBounds.span[k]);
+await fs.writeFile(out+'/submerged-groove-r9.json',JSON.stringify({version:2,tileId:tile.id,origin,span,texture:{path:'/career-world/layers/water/inland/'+name,dimensions:[rect.width,rect.height],sha256:hash},source:canonicalPath,sourceCrop,landSource:source,permissionMask:dir+'/permission-mask.png',permissionCrop:crop,routeSource:'art-source/career-world/l2-land/tanium/rune-chain.def.json',elementSource:'art-source/career-world/chain/kerb-element.png'},null,2)+'\n');console.log({sourceCrop,texture:name});

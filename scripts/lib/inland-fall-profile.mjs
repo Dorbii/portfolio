@@ -39,17 +39,37 @@ export function traceInlandFall(rgba,width,height,fall){
   }
   let best=0;for(let k=1;k<columns;k++)if(previous[k]<previous[best])best=k;
   if(!Number.isFinite(previous[best]))throw new Error(`No bounded fall trace: ${fall.id}`);
-  const points=Array(count);
+  let points=Array(count);
   for(let row=count-1;row>=0;row--){points[row]=[left+best*step,guide[row][1]];if(row)best=parents[row*columns+best];}
   const maxHalf=Math.max(6,fall.radius*width*1.15);
-  const halfWidths=points.map((point,i)=>{
+  // Width belongs to the upper river's ground plane, not to the projected
+  // gravity path. A reviewed lip edge overrides the inferred ground normal.
+  const lipEdge=fall.lipEdge?.map(pixel);
+  const across=lipEdge?[lipEdge[1][0]-lipEdge[0][0],lipEdge[1][1]-lipEdge[0][1]]:[b[1]-a[1],-(b[0]-a[0])*0.25];
+  const acrossLength=Math.hypot(...across)||1,n=across.map(v=>v/acrossLength);
+  const measure=(point,i)=>{
     if(!wet(...point))return 0;
-    const start=points[Math.max(0,i-1)],end=points[Math.min(count-1,i+1)];
-    const dx=end[0]-start[0],dy=end[1]-start[1],length=Math.hypot(dx,dy)||1,n=[-dy/length,dx/length];
-    const sides=[-1,1].map(sign=>{let distance=0;for(let d=1;d<=maxHalf;d++){if(!wet(point[0]+n[0]*d*sign,point[1]+n[1]*d*sign))break;distance=d;}return distance;});
+    let side=n;
+    if(fall.style==='cascade'){
+      const a=points[Math.max(0,i-1)],b=points[Math.min(points.length-1,i+1)],dx=b[0]-a[0],dy=b[1]-a[1],length=Math.hypot(dx,dy)||1;
+      side=[-dy/length,dx/length];
+    }
+    const sides=[-1,1].map(sign=>{let distance=0;for(let d=1;d<=maxHalf;d++){if(!wet(point[0]+side[0]*d*sign,point[1]+side[1]*d*sign))break;distance=d;}return distance;});
     return Math.min(...sides)*.86;
-  });
+  };
+  let halfWidths=points.map(measure),landingAdjustmentPixels=0;
+  const crest=halfWidths.slice(lipIndex,lipIndex+7).find(w=>w>2);
+  if(crest&&fall.hasLanding!==false&&fall.style!=='cascade'){
+    const opens=halfWidths.findIndex((w,i)=>i>=Math.ceil(count*.6)&&w>crest*1.8&&w>crest+4);
+    if(opens>lipIndex+5){
+      const end=opens-1,original=points;
+      landingAdjustmentPixels=Math.hypot(...original.at(-1).map((v,a)=>v-original[end][a]));
+      points=original.map((p,i)=>{if(i<=lipIndex)return p;const t=lipIndex+(end-lipIndex)*(i-lipIndex)/(count-1-lipIndex),j=Math.min(end-1,Math.floor(t));return original[j].map((v,a)=>v+(original[j+1][a]-v)*(t-j));});
+      halfWidths=points.map(measure);
+    }
+  }
   return {points:points.map(p=>[p[0]/width,p[1]/height]),halfWidths:halfWidths.map(n=>n/width),lipIndex,
+    edgeDirection:n,landingAdjustmentPixels,
     opaqueSamples:points.filter(p=>!wet(...p)).length,
     maximumAdjustmentPixels:Math.max(...points.map((p,i)=>Math.abs(p[0]-guide[i][0])))};
 }

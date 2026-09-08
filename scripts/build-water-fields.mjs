@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
 import sharp from "sharp";
-import { applyFlowFeature, distanceTransform, encodeWaterField, markProvisionalCoast,marineFlowMarkers,restoreMarineFlow,completeAnnotatedWater } from "./lib/water-fields.mjs";
+import { applyFlowFeature, distanceTransform, encodeWaterField, markProvisionalCoast,marineFlowMarkers,restoreMarineFlow,completeAnnotatedWater,applyMarineRegion } from "./lib/water-fields.mjs";
 import { WORLD_PLANE } from "../features/career-world/shared/world.ts";
 import { traceInlandFall } from "./lib/inland-fall-profile.mjs";
 
@@ -73,7 +73,7 @@ const handoffData=encodeWaterField(land,WIDTH,HEIGHT,metresPerPixel,RANGE_METRES
 markProvisionalCoast(handoffData,land,WIDTH,HEIGHT,rectangles,RANGE_METRES/metresPerPixel);
 const originalMarine=marineFlowMarkers(handoffData);
 const beforeAnnotations=Buffer.from(data);
-const features = [];
+const features = [],marineRegions=[];
 if(island.cells.length!==terrain.tiles.length||new Set(island.cells.map(cell=>cell.tileId)).size!==terrain.tiles.length
   ||terrain.tiles.some(tile=>!island.cells.some(cell=>cell.tileId===tile.id)))throw new Error("Inland inventory must cover every mounted cell exactly once.");
 for(const cell of island.cells){
@@ -86,6 +86,7 @@ for(const cell of island.cells){
     if(!changed)throw new Error(`Inland feature misses served water: ${feature.id}`);
     features.push({id:feature.id,kind,tileId:tile.id,waterPixels:changed,points:points.map(world),...extra});
   };
+  for(const region of cell.marineRegions??[])marineRegions.push({...region,tileId:tile.id,bounds:region.bounds.map(world)});
   for(const stream of cell.streams){
     const changed=applyFlowFeature(data,land,WIDTH,HEIGHT,stream.path.map(field),radius(stream.radius),0.6);
     record(stream,"stream",stream.path,changed);
@@ -104,10 +105,11 @@ for(const cell of island.cells){
     const profile=traceInlandFall(sourceImage.data,sourceImage.info.width,sourceImage.info.height,fall);
     const points=profile.points.slice(profile.lipIndex);
     const changed=applyFlowFeature(data,land,WIDTH,HEIGHT,points.map(field),radius(fall.radius),1);
-    record(fall,"fall",points,changed,{upstream:world(profile.points[0]),hasLanding:fall.hasLanding,
+    record(fall,"fall",points,changed,{upstream:world(profile.points[0]),hasLanding:fall.hasLanding,style:fall.style,
       widthMetres:Math.max(0.6,Math.min(4.0,radius(fall.radius)*metresPerPixel)),backingOffset:fall.backingOffset,sourcePath:tile.sources.site.path,
       profile:{points:profile.points.map(world),halfWidths:profile.halfWidths.map(n=>n*tile.worldBounds.span[0]*worldSize[0]*contract.mPerWorldPx),
-        lipIndex:profile.lipIndex,opaqueSamples:profile.opaqueSamples,maximumAdjustmentPixels:profile.maximumAdjustmentPixels}});
+        lipIndex:profile.lipIndex,edgeDirection:profile.edgeDirection,landingAdjustmentPixels:profile.landingAdjustmentPixels,
+        opaqueSamples:profile.opaqueSamples,maximumAdjustmentPixels:profile.maximumAdjustmentPixels}});
   }
 }
 stats.completedAnnotatedWaterPixels=completeAnnotatedWater(data,beforeAnnotations,land,originalMarine,WIDTH,HEIGHT);
@@ -138,6 +140,7 @@ for (const cell of annotations.cells) {
 // Inland annotations may describe a fall reaching the sea, but cannot turn
 // previously open ocean into a circular inland-material patch at its foot.
 restoreMarineFlow(data,originalMarine);
+stats.marineOverridePixels=marineRegions.reduce((count,region)=>count+applyMarineRegion(data,land,WIDTH,HEIGHT,region.bounds.map(p=>[p[0]*WIDTH,p[1]*HEIGHT])),0);
 await fs.mkdir(OUT, { recursive: true });
 // Wider-range ocean geography supplies coastal shelves. It is derived from
 // the same served alpha, so shelves follow the island rather than freehand blobs.
@@ -159,7 +162,7 @@ const seabedDirectory = path.join(OUT, inputHash.slice(0, 16));
 await fs.mkdir(seabedDirectory, { recursive: true });
 await fs.writeFile(path.join(seabedDirectory, "seabed-geography.png"), seabedPng);
 const manifest = {
-  version: 1, source: SOURCE, sourceHash: hash(sourceBytes), inputHash, generatorHash, sourceAssets, features,
+  version: 1, source: SOURCE, sourceHash: hash(sourceBytes), inputHash, generatorHash, sourceAssets, features, marineRegions,
   inlandInventory:island.cells.map(cell=>({tileId:cell.tileId,note:cell.note,streams:cell.streams.length,pools:cell.pools.length,falls:cell.falls.length})),
   worldSize, metresPerWorldUnit: contract.mPerWorldPx, rangeMetres: RANGE_METRES,
   dimensions: [WIDTH, HEIGHT], tileSize: TILE, levels: [],

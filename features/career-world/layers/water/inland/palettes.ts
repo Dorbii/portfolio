@@ -3,11 +3,18 @@ import terrain from "../../../../../public/career-world/layers/terrain/authority
 // Water-owned art direction anchored to existing land registrations. These
 // choices color only submerged materials; they never repaint the land.
 export const INLAND_PALETTES = {
-  meadow: { sand: [0.20, 0.18, 0.105], stone: [0.28, 0.27, 0.20], deep: [0.012, 0.065, 0.071] },
+  meadow: { sand: [0.145, 0.15, 0.12], stone: [0.23, 0.25, 0.23], deep: [0.007, 0.049, 0.068] },
   amethyst: { sand: [0.045, 0.125, 0.235], stone: [0.21, 0.15, 0.29], deep: [0.008, 0.065, 0.15] },
   crystal: { sand: [0.095, 0.18, 0.23], stone: [0.24, 0.31, 0.34], deep: [0.013, 0.068, 0.12] },
-  limestone: { sand: [0.27, 0.25, 0.17], stone: [0.35, 0.34, 0.27], deep: [0.018, 0.093, 0.10] },
-  forest: { sand: [0.14, 0.13, 0.09], stone: [0.23, 0.24, 0.18], deep: [0.008, 0.056, 0.060] },
+  limestone: { sand: [0.19, 0.20, 0.17], stone: [0.29, 0.31, 0.28], deep: [0.009, 0.061, 0.083] },
+  forest: { sand: [0.105, 0.12, 0.10], stone: [0.19, 0.22, 0.19], deep: [0.005, 0.038, 0.052] },
+} as const;
+
+// Grain scale, loose-cobble coverage, and fractured bedrock coverage.
+const BED_MIXES = {
+  meadow: [0.58,0.30,0.08], amethyst: [0.85,0.70,0.18],
+  crystal: [0.32,0.38,0.72], limestone: [0.16,0.25,0.88],
+  forest: [0.90,0.92,0.12],
 } as const;
 
 export const INLAND_REGION_PALETTES: Readonly<Record<string, keyof typeof INLAND_PALETTES>> = {
@@ -38,11 +45,11 @@ export const INLAND_REGIONS = terrain.tiles.filter(tile => tile.id in INLAND_REG
 const vector = (values: readonly number[]) => `vec${values.length}(${values.map(n => n.toFixed(7)).join(",")})`;
 const palette = (name: keyof typeof INLAND_PALETTES) => {
   const p = INLAND_PALETTES[name];
-  return `InlandPalette(${vector(p.sand)},${vector(p.stone)},${vector(p.deep)})`;
+  return `InlandPalette(${vector(p.sand)},${vector(p.stone)},${vector(p.deep)},${vector(BED_MIXES[name])})`;
 };
 
 export const INLAND_PALETTE_SHADER = /* glsl */ `
-struct InlandPalette { vec3 sand; vec3 stone; vec3 deep; };
+struct InlandPalette { vec3 sand; vec3 stone; vec3 deep; vec3 bed; };
 InlandPalette inlandPalette(vec2 world) {
   InlandPalette result=${palette("meadow")};
   ${INLAND_REGIONS.map(region => `{
@@ -53,6 +60,7 @@ InlandPalette inlandPalette(vec2 world) {
     result.sand=mix(result.sand,region.sand,weight);
     result.stone=mix(result.stone,region.stone,weight);
     result.deep=mix(result.deep,region.deep,weight);
+    result.bed=mix(result.bed,region.bed,weight);
   }`).join("\n")}
   return result;
 }

@@ -128,6 +128,19 @@ export function restoreMarineFlow(data,markers){
   }
 }
 
+// Owner-reviewed tidal inlets can be narrower than the automatic sea rule.
+// This changes material classification only, never the land/shore channel.
+export function applyMarineRegion(data, land, width, height, bounds) {
+  const [[x0,y0],[x1,y1]]=bounds;let changed=0;
+  for(let y=Math.max(0,Math.floor(y0));y<Math.min(height,Math.ceil(y1));y++)
+    for(let x=Math.max(0,Math.floor(x0));x<Math.min(width,Math.ceil(x1));x++){
+      const i=y*width+x;if(land[i])continue;
+      if(data[i*3+1]===128&&data[i*3+2]===128)continue;
+      data[i*3+1]=128;data[i*3+2]=128;changed++;
+    }
+  return changed;
+}
+
 // An annotation selects a water body, not a hard-edged material corridor.
 // Complete only connected inland water within the established sea handoff.
 // Unannotated inlets, dry pixels and open-sea markers remain untouched.

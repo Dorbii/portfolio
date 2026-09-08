@@ -1,0 +1,10 @@
+{
+  "source": "art-source/career-world/l2-land/tanium/c4-0/c4-0-l2.png",
+  "chain": "art-source/career-world/chain/cells/tanium-c4-0-chain.png",
+  "crop": {
+    "left": 574,
+    "top": 1194,
+    "width": 1024,
+    "height": 1024
+  }
+}

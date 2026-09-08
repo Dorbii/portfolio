@@ -1,0 +1,22 @@
+{
+  "source": "art-source/career-world/l2-land/tanium/c4-0/c4-0-l2.png",
+  "chain": "art-source/career-world/chain/cells/tanium-c4-0-chain.png",
+  "crop": {
+    "left": 574,
+    "top": 1194,
+    "width": 1024,
+    "height": 1024
+  },
+  "rgbChangedPixels": 256539,
+  "alphaDecreasedPixels": 17323,
+  "alphaIncreasedPixels": 11248,
+  "changesOutsidePermissionMask": 0,
+  "featureRectangle": {
+    "left": 624,
+    "top": 1459,
+    "width": 409,
+    "height": 177
+  },
+  "featureRectangleSpace": "kept-cell-pixels",
+  "featureFromCanonicalRoute": true
+}

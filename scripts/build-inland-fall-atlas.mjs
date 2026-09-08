@@ -40,7 +40,7 @@ for(const [index,fall] of falls.entries()){
   const profilePoints=fall.profile.points.map(p=>p.map((n,a)=>n*world[a]));
   const arcs=[0];for(let i=1;i<profilePoints.length;i++)arcs.push(arcs.at(-1)+Math.hypot(...profilePoints[i].map((n,a)=>n-profilePoints[i-1][a])));
   const profile=profilePoints.flatMap((point,i)=>{
-    const age=i<fall.profile.lipIndex?-(arcs[fall.profile.lipIndex]-arcs[i])/1.5
+    const age=fall.style==='cascade'?(arcs[i]-arcs[fall.profile.lipIndex])/2.4:i<fall.profile.lipIndex?-(arcs[fall.profile.lipIndex]-arcs[i])/1.5
       :(Math.sqrt(1.5**2+2*9.81*.86*Math.max(0,point[1]-lipWorld[1]*world[1]))-1.5)/(9.81*.86);
     return [...point,fall.profile.halfWidths[i],age];
   });
@@ -48,9 +48,10 @@ for(const [index,fall] of falls.entries()){
     span:[(right-left)/info.width*tile.worldBounds.span[0],(bottom-top)/info.height*tile.worldBounds.span[1]]};
   const x=(index%8)*256+2,y=Math.floor(index/8)*512+2;
   overlays.push({input:await sharp(bytes).extract({left,top,width:right-left,height:bottom-top}).resize(252,508,{fit:'fill'}).png().toBuffer(),left:x,top:y});
-  entries.push({id:fall.id,tileId:fall.tileId,source,sourceHash,lip:lipWorld,foot:footWorld,upstream:fall.upstream,hasLanding:fall.hasLanding!==false,
+  entries.push({id:fall.id,tileId:fall.tileId,source,sourceHash,style:fall.style,lip:lipWorld,foot:footWorld,upstream:fall.upstream,hasLanding:fall.hasLanding!==false,
     context,atlas:[x/width,y/height,252/width,508/height],profile,
-    profileLipIndex:fall.profile.lipIndex,opaqueProfileSamples:fall.profile.opaqueSamples,
+    profileLipIndex:fall.profile.lipIndex,edgeDirection:fall.profile.edgeDirection,
+    landingAdjustmentPixels:fall.profile.landingAdjustmentPixels,opaqueProfileSamples:fall.profile.opaqueSamples,
     backingOffset:fall.backingOffset.map((n,a)=>n*tile.worldBounds.span[a]/context.span[a]),
     flight:[duration,(footWorld[0]-lipWorld[0])*world[0]/duration],
     widthScale:Math.max(.12,Math.min(1.25,widthMetres/3.2)),

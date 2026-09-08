@@ -21,6 +21,8 @@ uniform vec2 uUpstream;
 uniform vec2 uFlight;
 uniform float uWidthScale;
 uniform float uEffectScale;
+uniform vec2 uEdgeDirection;
+uniform float uCascade;
 uniform vec4 uProfile[${INLAND_FALL_PROFILE_SAMPLES}];
 vec4 profileAt(float s){float t=clamp(s,0.0,1.0)*${(INLAND_FALL_PROFILE_SAMPLES-1).toFixed(1)};int i=min(int(floor(t)),${INLAND_FALL_PROFILE_SAMPLES-2});return mix(uProfile[i],uProfile[i+1],t-float(i));}
 #define LIP (uFall.xy*WORLD)
@@ -53,14 +55,19 @@ void main(){
     position=FOOT+((c*2.0-1.0)*vec2(8.0,5.5)-vec2(0,1.2))*${mapped?"uEffectScale":"1.0"};
   }else{
     float s=(float(gl_VertexID/6)+c.y)/64.0;
-    ${mapped?`vec4 shape=profileAt(s),before=profileAt(max(0.0,s-0.015)),after=profileAt(min(1.0,s+0.015));
-    vec2 tangent=normalize(after.xy-before.xy),side=vec2(-tangent.y,tangent.x);
-    float along=max(0.0,(s-0.19)/0.81),ribbon=vRibbon;
-    float lane=ribbon<0.5?0.0:(ribbon-3.5)*0.19;
-    float pulse=0.55+0.45*pow(sin((shape.w-uTime)*3.1+ribbon*4.7),2.0);
-    float width=ribbon<0.5?1.0:0.22*pulse;
-    float flutter=sin(shape.w*3.5-uTime*2.0+ribbon*3.7)*0.05*along;
-    vAcross=(lane+flutter+(c.x*2.0-1.0)*width)*shape.z;
+    ${mapped?`vec4 shape=profileAt(s);
+    vec2 side=uEdgeDirection;
+    if(uCascade>0.5){vec2 d=profileAt(min(1.0,s+0.015)).xy-profileAt(max(0.0,s-0.015)).xy;side=normalize(vec2(-d.y,d.x));}
+    // One aperture-bound surface; detail travels through its material.
+    // Independent ribbons used to overlap and reveal straight strip edges.
+    float along=max(0.0,(s-0.19)/0.81);
+    float crestWidth=0.0;
+    for(int i=6;i<13;i++){if(uProfile[i].z>0.02){crestWidth=uProfile[i].z;break;}}
+    // Aperture width bounds the flow; a widening pool must not become a
+    // trapezoidal falling sheet. Acceleration contracts the falling stream.
+    float stretch=sqrt(1.5/(1.5+9.81*max(0.0,shape.w)));
+    float width=uCascade>0.5?shape.z:min(shape.z,crestWidth*mix(1.0,stretch,0.35));
+    vAcross=(c.x*2.0-1.0)*width;
     position=shape.xy+side*vAcross;
     vTravel=shape.w;
     vUv=vec2(c.x,s);`:`float along=max(0.0,(s-0.12)/0.88);
@@ -106,7 +113,8 @@ ${mapped?`uniform vec4 uContext;
 uniform vec4 uAtlasRect;
 uniform vec2 uBacking;
 uniform vec4 uFall;
-uniform float uWidthScale;`:""}
+uniform float uWidthScale;
+uniform float uCascade;`:""}
 out vec4 color;
 ${WATER_LIGHTING_SHADER}
 float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
@@ -142,7 +150,47 @@ void main(){
     alpha=core*(0.20+grain*0.45)*(1.0-land)+plume*0.25;${mapped?"alpha*=1.0-smoothstep(0.25,0.85,land);":""}
     linear=illuminatedFoam(vWorld);
   }else{
+${mapped?`    if(uCascade>0.5){
+      float edge=1.0-smoothstep(0.60,1.0,abs(vUv.x*2.0-1.0));
+      vec2 q=vec2(vAcross*2.1,(vTravel-uTime)*3.2);
+      q.x+=(noise(q*vec2(0.33,0.18))-0.5)*0.7;
+      float ridges=noise(q*vec2(1.8,0.48));
+      float broken=noise(q*vec2(0.52,1.15)+7.0);
+      float whitewater=pow(smoothstep(0.35,0.77,ridges*0.65+broken*0.35),2.0);
+      float resolved=1.0-smoothstep(0.15,0.7,uPixel);
+      float reach=smoothstep(0.04,0.25,vUv.y)*(1.0-smoothstep(0.80,1.0,vUv.y));
+      alpha=edge*reach*(0.025+whitewater*0.58)*resolved;
+      alpha*=1.0-smoothstep(0.25,0.85,land);
+      linear=illuminatedFoam(vWorld);
+    }else{
     float across=vUv.x*2.0-1.0;
+    float descent=smoothstep(0.16,0.28,vUv.y);
+    float toe=smoothstep(0.65,0.98,vUv.y);
+    float detail=1.0-smoothstep(0.12,0.6,uPixel);
+    float age=max(0.0,vTravel),travel=(vTravel-uTime)*4.8;
+    vec2 q=vec2(vAcross*2.2,travel);
+    q.x+=(noise(vec2(vAcross*0.7,travel*0.11))-0.5)*0.55;
+    float broad=noise(q*vec2(0.62,0.28));
+    float threads=noise(q*vec2(2.8,0.72)+17.0);
+    float veins=smoothstep(0.40,0.78,broad*0.45+threads*0.55);
+    float streaks=smoothstep(0.38,0.72,noise(q*vec2(1.15,0.12)+31.0));
+    float breakup=noise(q*vec2(0.35,0.65)+6.0);
+    // The crest turns from horizontal flow to a falling face. Its diffuse
+    // and reflected light use the shared sun, ambient and cloud state.
+    vec3 normal=normalize(vec3(across*0.16+(threads-0.5)*0.13*detail,
+      mix(-0.12,-0.94,descent),mix(1.0,0.34,descent)));
+    vec3 transmission=vec3(0.016,0.047,0.052)*(0.72+0.28*broad);
+    linear=waterOptics(transmission,normal,0.30,vWorld);
+    vec3 foam=illuminateWater(vec3(0.72,0.82,0.79),normal,18.0,vWorld);
+    float aeration=0.30+0.24*sqrt(min(age,2.0))+veins*0.30+streaks*0.13;
+    aeration=mix(aeration,0.77+breakup*0.15,toe);
+    linear=mix(linear,foam,clamp(aeration,0.0,0.96));
+    float lip=smoothstep(0.08,0.23,vUv.y);
+    float edge=1.0-smoothstep(0.70,1.0,abs(across)+(breakup-0.5)*0.16*toe);
+    float landing=1.0-smoothstep(0.82+0.09*noise(vec2(vAcross*3.0,7.1)),1.0,vUv.y);
+    alpha=edge*lip*(0.94+0.05*veins)*landing;
+    alpha*=1.0-smoothstep(0.25,0.85,land);
+    }`:`    float across=vUv.x*2.0-1.0;
     float edge=1.0-smoothstep(0.55,1.0,abs(across));
     // One coherent material across all strips: no repeated per-ribbon
     // highlights or six independent bright lanes down the whole drop.
@@ -160,7 +208,7 @@ void main(){
     alpha=edge*(vRibbon<0.5?0.82*(0.86+body*0.14):0.36*lower*smoothstep(0.53,0.78,fragments));
     if(vRibbon>0.5)alpha*=detail;
     alpha*=1.0-smoothstep(0.92,1.0,vUv.y);
-    ${mapped?"alpha*=1.0-smoothstep(0.25,0.85,land);":""}
+    ${mapped?"alpha*=1.0-smoothstep(0.25,0.85,land);":""}`}
   }
   alpha*=uOpacity;
   if(alpha<0.001)discard;

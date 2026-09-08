@@ -17,6 +17,7 @@ uniform float uTime;
 uniform float uSeed;
 uniform float uPixel;
 uniform float uSprayScale;
+uniform float uMapped;
 out vec2 vUv;
 out vec2 vWorld;
 out float vAlpha;
@@ -41,10 +42,10 @@ void main(){
     radius=(0.8+age*(0.35+s*0.25))*uSprayScale;
     alpha=0.065;
   }else{
-    float vz=(7.0+s*5.2)*sqrt(uSprayScale);
+    float vz=mix(7.0+s*5.2,2.2+s*2.4,uMapped)*sqrt(uSprayScale);
     z=vz*age-4.905*age*age;
     position+=radial*(1.8+t*2.6)*age*uSprayScale;
-    float physicalRadius=(0.045+s*0.11)*uSprayScale;
+    float physicalRadius=mix(0.045+s*0.11,0.015+s*0.035,uMapped)*uSprayScale;
     radius=max(physicalRadius,uPixel*0.55);
     float coverage=min(1.0,physicalRadius*physicalRadius/(radius*radius));
     alpha=0.5*coverage;
@@ -107,7 +108,7 @@ export class InlandSprayRenderer {
     this.vao=vao;
     try{this.lighting=new WaterLighting(gl,this.program,invalidate);}
     catch(error){gl.deleteVertexArray(vao);gl.deleteProgram(this.program);throw error;}
-    for(const name of ["uCamera","uWorld","uFall","uTime","uSeed","uPixel","uOpacity","uSprayScale"])
+    for(const name of ["uCamera","uWorld","uFall","uTime","uSeed","uPixel","uOpacity","uSprayScale","uMapped"])
       this.uniforms[name]=gl.getUniformLocation(this.program,name);
     try{this.gorge=new GorgeWaterfallRenderer(gl,invalidate);}
     catch(error){this.lighting.destroy();gl.deleteVertexArray(vao);gl.deleteProgram(this.program);throw error;}
@@ -133,7 +134,9 @@ export class InlandSprayRenderer {
     let draws=gorgeDraws;
     INLAND_FALL_ENDPOINTS.forEach((fall,index)=>{
       const top=fall.path[0],foot=fall.point;
-      const scale=MAPPED_FALLS.find(mapped=>mapped.id===fall.id)?.effectScale??1;
+      const mapped=MAPPED_FALLS.find(mapped=>mapped.id===fall.id);
+      const scale=mapped?.effectScale??1;
+      if(mapped&&(!fall.hasLanding||mapped.style==="cascade"))return;
       if((foot[1]-top[1])*WORLD[1]/(scene.camera.span[0]*WORLD[0]/gl.drawingBufferWidth)<5)return;
       const margin=18;
       if(Math.max(top[0],foot[0])+margin/WORLD[0]<scene.camera.origin[0]
@@ -143,8 +146,9 @@ export class InlandSprayRenderer {
       gl.uniform4f(u.uFall,top[0],top[1],foot[0],foot[1]);
       gl.uniform1f(u.uSeed,fall.id==="great-gorge-fall"?19.7:fall.id==="gorge-lower-cascade"?143.4:19.7+index*123.7);
       gl.uniform1f(u.uSprayScale,scale);
+      gl.uniform1f(u.uMapped,Number(Boolean(mapped)));
       // The lower cascade disappears into the gorge; it has no visible impact.
-      gl.drawArrays(gl.TRIANGLES,fall.hasLanding?0:216*6,(fall.hasLanding?256:40)*6);draws++;
+      gl.drawArrays(gl.TRIANGLES,fall.hasLanding?0:216*6,(mapped?216:fall.hasLanding?256:40)*6);draws++;
     });
     return draws;
   }

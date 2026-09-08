@@ -59,6 +59,10 @@ test('mapped falls share a current atlas with bounded context coordinates and de
   for(const fall of atlas.falls){
     assert.ok(fall.flight[0]>0&&Number.isFinite(fall.flight[1]));
     assert.ok(fall.widthScale>0&&fall.effectScale>0);
+    assert.ok(fall.edgeDirection.every(Number.isFinite));
+    assert.ok(fall.style==="cascade"||fall.style==="curtain");
+    assert.ok(Math.abs(Math.hypot(...fall.edgeDirection)-1)<1e-8);
+    assert.ok(fall.landingAdjustmentPixels>=0);
     assert.equal(fall.profile.length,INLAND_FALL_PROFILE_SAMPLES*4);
     for(let i=0;i<fall.profile.length;i+=4){
       assert.ok(fall.profile.slice(i,i+4).every(Number.isFinite));
@@ -73,4 +77,38 @@ test('mapped falls share a current atlas with bounded context coordinates and de
       }
     }
   }
+});
+
+test('the submerged stone groove has bounded registration and a transparent texture border',async()=>{
+  const feature=await read('public/career-world/layers/water/inland/submerged-groove-r9.json');
+  const tile=terrain.tiles.find(tile=>tile.id===feature.tileId);
+  assert.ok(tile);
+  for(let axis=0;axis<2;axis++){
+    assert.ok(feature.span[axis]>0);
+    assert.ok(feature.origin[axis]>=tile.worldBounds.origin[axis]);
+    assert.ok(feature.origin[axis]+feature.span[axis]<=tile.worldBounds.origin[axis]+tile.worldBounds.span[axis]);
+  }
+  const bytes=await fs.readFile('public'+feature.texture.path);
+  assert.equal(hash(bytes),feature.texture.sha256);
+  const {data,info}=await sharp(bytes).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+  assert.deepEqual([info.width,info.height],feature.texture.dimensions);
+  let coverage=0;
+  for(let y=0;y<info.height;y++)for(let x=0;x<info.width;x++){
+    const alpha=data[(y*info.width+x)*4+3];coverage+=alpha;
+    if(x===0||y===0||x===info.width-1||y===info.height-1)assert.equal(alpha,0);
+  }
+  assert.ok(coverage>0);
+  const canonical=await sharp(feature.source).ensureAlpha().raw().toBuffer();
+  const land=await sharp(feature.landSource).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+  const permission=await sharp(feature.permissionMask).toColourspace('b-w').raw().toBuffer();
+  let verified=0;
+  for(let y=0;y<info.height;y++)for(let x=0;x<info.width;x++){
+    const sx=feature.sourceCrop.left+x,sy=feature.sourceCrop.top+y,c=(sy*2048+sx)*4;
+    const lp=((sy+256)*land.info.width+sx+256)*4;
+    const px=sx+256-feature.permissionCrop.left,py=sy+256-feature.permissionCrop.top;
+    if(canonical[c+3]>128&&land.data[lp+3]===0&&permission[py*feature.permissionCrop.width+px]===255){
+      assert.equal(data[(y*info.width+x)*4+3],canonical[c+3]);verified++;
+    }
+  }
+  assert.ok(verified>0,'canonical submerged route coverage was lost');
 });

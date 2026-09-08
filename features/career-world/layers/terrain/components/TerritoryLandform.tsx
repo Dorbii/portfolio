@@ -6,6 +6,12 @@ import {
   useState,
 } from "react";
 import type { CameraView, Pair } from "../../../shared/camera";
+import { CanopySway } from "./CanopySway";
+import {
+  createCanopySwayRegistry,
+  type CanopySwayRegistry,
+  type CanopySwayTile,
+} from "./canopySwayWebGl";
 import {
   advanceLodPresentationFade,
   DETAIL_POLICY,
@@ -136,6 +142,8 @@ export function TerritoryLandform({
   suppressDetailedStreaming = false,
 }: TerritoryLandformProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  // the canopy sway pass reads what this frame drew at the site tier
+  const canopySwayRef = useRef<CanopySwayRegistry>(createCanopySwayRegistry());
   const worldPlateRef = useRef<HTMLImageElement | null>(null);
   const worldPlateDecodedRef = useRef(false);
   const detailPlateRef = useRef<HTMLImageElement | null>(null);
@@ -731,6 +739,34 @@ export function TerritoryLandform({
     // capital tier until the site tiles arrive.
     drawStreamTier("capital", capitalOpacity);
     drawStreamTier("site", siteOpacity);
+    // the canopy sway pass (CanopySway.tsx) moves the crowns of the site-tier
+    // tiles drawn this frame; it maps the camera to the same backing store
+    {
+      const swayTiles: CanopySwayTile[] = [];
+      if (siteOpacity > LOD_PRESENTATION_EPSILON) {
+        for (const tile of visibleStreamTiles) {
+          const sitePath = tile.sources.site.path;
+          if (sitePath.includes("/l2-review/")) {
+            continue;   // a candidate preview has no sway field
+          }
+          const key = streamImageKey(tile.id, "site");
+          if (!decodedStreamKeysRef.current.has(key)) {
+            continue;   // only tiles this frame actually drew at the site tier
+          }
+          swayTiles.push({
+            key,
+            landPath: sitePath,
+            swayPath: sitePath.replace(/-site\.webp$/, "-sway.webp"),
+            worldBounds: tile.worldBounds,
+          });
+        }
+      }
+      canopySwayRef.current = {
+        tiles: swayTiles,
+        opacity: siteOpacity,
+        pixelSize: [width, height],
+      };
+    }
     canvas.dataset.streamResolutionTier = siteOpacity > 0.5
       ? "site"
       : "capital";
@@ -1219,6 +1255,7 @@ export function TerritoryLandform({
   }, [queueRender]);
 
   return (
+    <>
     <canvas
       aria-hidden="true"
       className={
@@ -1243,5 +1280,7 @@ export function TerritoryLandform({
       data-territory-lod={detailOpacity.toFixed(3)}
       ref={canvasRef}
     />
+    <CanopySway camera={camera} registry={canopySwayRef} />
+    </>
   );
 }

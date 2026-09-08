@@ -41,8 +41,8 @@ vec3 inlandMaterial(vec2 p, float shore, vec2 flow, float time, float weather) {
 
   // Inland-owned stationary mineral bed. Depth is a bank-distance proxy;
   // the existing flow field supplies motion class without changing coverage.
-  float bankWidth=mix(0.65,1.35,noise2(p*0.08+vec2(3,17)));
-  float depth=mix(0.16+distance*0.52,0.10+distance*0.28,stream);
+  float bankWidth=mix(0.35,0.72,noise2(p*0.08+vec2(3,17)));
+  float depth=mix(0.35+distance*0.68,0.35+distance*0.48,stream);
   depth*=smoothstep(0.0,bankWidth,distance)*(0.88+0.24*noise2(p*0.12+8.0));
   depth+=gorgePoolDepth(p)*smoothstep(0.15,1.0,distance);
   depth=min(depth,9.0);
@@ -51,9 +51,9 @@ vec3 inlandMaterial(vec2 p, float shore, vec2 flow, float time, float weather) {
   vec3 bed=inlandBed(bottom,palette,p/uWorldMetres,distance,depth,stream);
   float focusing=1.0-smoothstep(0.015,0.095,abs(inlandFlowNoise(bottom*1.2+vec2(time*0.10,-time*0.07))-0.5));
   bed*=1.0+focusing*0.28*resolved*exp(-depth*0.45);
-  float clarity=0.65+noise2(p*0.025+41.0)*0.55;
+  float clarity=1.05+noise2(p*0.025+41.0)*0.40;
   vec3 deep=palette.deep;
-  vec3 attenuation=exp(-vec3(0.44,0.19,0.14)*depth*clarity);
+  vec3 attenuation=exp(-vec3(0.85,0.42,0.27)*depth*clarity);
   vec3 transmission=mix(deep,bed,attenuation);
   vec3 color=waterOptics(transmission,normal,0.20+stream*0.08+weather*0.05,p/uWorldMetres);
 
@@ -70,6 +70,7 @@ vec3 inlandMaterial(vec2 p, float shore, vec2 flow, float time, float weather) {
   foam=max(foam,impact);
   foam=max(foam,gorgePoolFoam(p,time)*resolved*smoothstep(0.0,0.4,distance));
   color=mix(color,illuminatedFoam(p/uWorldMetres),clamp(foam*uInlandEffects,0.0,0.88));
+  color*=1.0-gorgePoolOcclusion(p)*0.48*uLightingEnabled;
   vec3 abyss=waterOptics(vec3(0.006,0.024,0.038),normal,0.32,p/uWorldMetres);
   return mix(color,abyss,gorgeLowerDescent(p)*0.88);
 }

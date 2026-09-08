@@ -19,13 +19,19 @@ sharp.cache(false);
 const WHICH = process.argv[2] && !process.argv[2].startsWith("--") ? process.argv[2] : "both";
 const DRY = process.argv.includes("--dry");
 const REKEY = process.argv.includes("--rekey");      // key the delivered source again, no generation
-const KEEP_GREEN = process.argv.includes("--keep-green");   // do not strip green-hued pixels (a panel's lichen is green too)
+const STANDING = ["menhir", "trilithon", "henge"].includes(WHICH);   // standing stones: anchored at their feet, their turf kept
+const KEEP_GREEN = process.argv.includes("--keep-green") || STANDING;   // do not strip green-hued pixels (a panel's lichen is green too)
 const NO_DESPILL = process.argv.includes("--no-despill");   // leave blended edge pixels as delivered
 const arg = (f, d) => { const i = process.argv.indexOf(f); return i >= 0 ? process.argv[i + 1] : d; };
 const argNum = (f, d) => { const i = process.argv.indexOf(f); return i >= 0 ? Number(process.argv[i + 1]) : d; };
 // the world's own kerb, measured on the old c3-1 at L0 (2048 px = 97.6 m): the
 // stones with their groove stand about 45 px tall; a rune panel is 6-8 m, ~140 px
 const KERB_PX = argNum("--kerb-px", 45), PANEL_PX = argNum("--panel-px", 140);
+// standing stones (owner 2026-09-07: "think like stonehenge"): the world's
+// boulders are ~40 px and its conifers ~70 px tall at L0, so a menhir stands
+// about a boulder and a half, a trilithon a tree and a half, the henge ring
+// about 11 m across
+const MENHIR_PX = argNum("--menhir-px", 64), TRILITHON_PX = argNum("--trilithon-px", 110), HENGE_PX = argNum("--henge-px", 240);
 const TAG = arg("--tag", "r1");                      // the element files' revision: <which>-element-<tag>.png
 const WORKTAG = TAG === "r1" ? "" : `-${TAG}`;       // a second generation keeps its own working folder
 const ROOT = process.cwd().replace(/\\/g, "/");
@@ -33,8 +39,12 @@ const OUT = "art-source/career-world/chain";
 const WORK = ".codex-tmp/chain";
 const REF = `${WORK}/kerb-reference.jpg`;
 const CANON = "art-source/career-world/l2-land/ninjaone/seed/L2-seed-region-r2-source.png";
+const LANDREF = `${WORK}/land-reference.jpg`;   // the world's ground at 1:1 (T c3-1: meadow, boulders, conifers, a cliff of columns)
 fs.mkdirSync(OUT, { recursive: true });
 fs.mkdirSync(WORK, { recursive: true });
+if (!fs.existsSync(LANDREF)) {
+  await sharp("public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-1-site.webp").extract({ left: 0, top: 560, width: 1000, height: 640 }).jpeg({ quality: 92 }).toFile(LANDREF);
+}
 if (!fs.existsSync(REF)) {
   // the reference: the old c3-1's chain band (the kerb the owner accepted), from git
   const old = `${WORK}/c3-1-old-l2.png`;
@@ -187,6 +197,130 @@ deliver its raw output untouched as \`node-source.png\`. Your prompt says:
 Then write \`${ROOT}/${WORK}/node${WORKTAG}/report.json\`:
 \`{ "element": "node", "file": "node-source.png", "size": [w, h], "calls": 1, "notes": "..." }\`.
 Do not resize, crop, recolour or key anything yourself. One call only.`,
+  menhir: `# The rune chain's MENHIR element — one generation, magenta key
+
+You are the worker of an image pipeline. Deliver files into
+\`${ROOT}/${WORK}/menhir${WORKTAG}/\` (create it). Work only there.
+
+Load \`${ROOT}/${LANDREF}\` with the built-in \`view_image\` tool: the world's
+ground at 1:1 — meadow, boulders about 40 px across, conifers about 70 px
+tall, a cliff of basalt columns — in the canon's high-oblique view (from
+above and a little in front: the tops of things show foreshortened, their
+front faces show below). Also load \`${ROOT}/${CANON}\` (the style canon:
+brush, palette family, flat lighting).
+
+This world's rune chain is a network drawn as an ancient monument. The
+ENDPOINTS are STANDING STONES — think Stonehenge: rough megaliths rooted in
+the earth, not stones set upon it. Then make ONE \`image_gen\` call in GENERATE
+mode for a SQUARE image, and deliver its raw output untouched as
+\`menhir-source.png\`. Your prompt says, in words:
+
+- The whole image is a FLAT, PURE MAGENTA background (red 255, green 0, blue 255)
+  with exactly one group on it: SEVEN standing stones of pale weathered basalt,
+  each a single unworked upright slab two to three times taller than wide,
+  seen from the same high-oblique view (from above and a little in front, so
+  the TOP of each stone shows as a narrow foreshortened face and its FRONT
+  face shows tall below it), scattered loosely across the image with clear
+  magenta between them — none touching, none overlapping — no two alike: some
+  lean a little, one has fallen and lies half-sunk, one is broken short.
+- Each stone carries ONE weathered rune cut into its front face (a different
+  mark on each — a spiral, crossed lines, a lozenge, waves, a ring of dots, a
+  branching line, a triangle), worn shallow, lichen in the cut.
+- The foot of every stone ends in a ragged skirt of turf and packed earth —
+  a few tufts of grass growing up against the stone, worn ground around the
+  base — so it reads as rooted in the ground, grown into it over centuries.
+- At the reference's scale: a stone stands about a boulder and a half tall,
+  no taller than a conifer.
+- Flat ambient light only: no sun, no cast shadows — only the depth shading
+  under each stone's top edge and at its foot. No ground beyond each stone's
+  own skirt, nothing else — magenta everywhere else, with hard edges and no
+  magenta halo.
+
+Then write \`${ROOT}/${WORK}/menhir${WORKTAG}/report.json\`:
+\`{ "element": "menhir", "file": "menhir-source.png", "size": [w, h], "calls": 1, "notes": "..." }\`.
+Do not resize, crop, recolour or key anything yourself. One call only.`,
+  trilithon: `# The rune chain's TRILITHON element — one generation, magenta key
+
+You are the worker of an image pipeline. Deliver files into
+\`${ROOT}/${WORK}/trilithon${WORKTAG}/\` (create it). Work only there.
+
+Load \`${ROOT}/${LANDREF}\` with the built-in \`view_image\` tool: the world's
+ground at 1:1 — meadow, boulders about 40 px across, conifers about 70 px
+tall, a cliff of basalt columns — in the canon's high-oblique view (from
+above and a little in front). Also load \`${ROOT}/${CANON}\` (the style canon:
+brush, palette family, flat lighting).
+
+This world's rune chain is a network drawn as an ancient monument. A LEADER
+on the chain is a TRILITHON — think Stonehenge: two uprights and a lintel,
+rooted in the earth. Then make ONE \`image_gen\` call in GENERATE mode for a
+SQUARE image, and deliver its raw output untouched as \`trilithon-source.png\`.
+Your prompt says, in words:
+
+- The whole image is a FLAT, PURE MAGENTA background (red 255, green 0, blue 255)
+  with exactly one thing on it, centred and large: a TRILITHON of pale
+  weathered basalt — two upright standing stones, each about three times
+  taller than wide, standing a little apart, with a third stone lying across
+  their tops as a lintel — seen from the same high-oblique view (from above
+  and a little in front: the lintel's top face shows as a foreshortened band
+  with its front face below it; the uprights' front faces show tall, their
+  tops hidden under the lintel). Through the gap between the uprights,
+  nothing but magenta.
+- Each upright carries one weathered rune cut into its front face; the
+  lintel is plain. Ancient, worn, chipped, lichen in the joints, nothing
+  square-cut.
+- The feet of the uprights end in a ragged skirt of turf and packed earth —
+  tufts of grass growing up against the stone, worn ground around the base —
+  so the monument reads as rooted in the ground, not set down on it.
+- At the reference's scale the trilithon stands about a conifer and a half
+  tall.
+- Flat ambient light only: no sun, no cast shadows — only the depth shading
+  under the lintel and at the feet. No ground beyond the skirt, nothing else —
+  magenta everywhere else, with hard edges and no magenta halo.
+
+Then write \`${ROOT}/${WORK}/trilithon${WORKTAG}/report.json\`:
+\`{ "element": "trilithon", "file": "trilithon-source.png", "size": [w, h], "calls": 1, "notes": "..." }\`.
+Do not resize, crop, recolour or key anything yourself. One call only.`,
+  henge: `# The rune chain's HENGE element — one generation, magenta key
+
+You are the worker of an image pipeline. Deliver files into
+\`${ROOT}/${WORK}/henge${WORKTAG}/\` (create it). Work only there.
+
+Load \`${ROOT}/${LANDREF}\` with the built-in \`view_image\` tool: the world's
+ground at 1:1 — meadow, boulders about 40 px across, conifers about 70 px
+tall, a cliff of basalt columns — in the canon's high-oblique view (from
+above and a little in front). Also load \`${ROOT}/${CANON}\` (the style canon:
+brush, palette family, flat lighting).
+
+This world's rune chain is a network drawn as an ancient monument. The
+SERVER, far off the chain, is a HENGE — Stonehenge itself: a ring of standing
+stones rooted in the earth. Then make ONE \`image_gen\` call in GENERATE mode
+for a SQUARE image, and deliver its raw output untouched as \`henge-source.png\`.
+Your prompt says, in words:
+
+- The whole image is a FLAT, PURE MAGENTA background (red 255, green 0, blue 255)
+  with exactly one thing on it, centred and filling most of the image: a RING
+  of about TWELVE standing stones of pale weathered basalt, seen from the same
+  high-oblique view (from above and a little in front), so the ring is an
+  ELLIPSE about three quarters as tall as it is wide: the stones at the back
+  (top of the image) a little smaller and higher, the stones at the front
+  (bottom) larger and lower, each an upright slab two to three times taller
+  than wide, a few pairs joined at the top by lintels, two fallen and lying
+  half-sunk; in the middle of the ring one large flat altar slab, half-sunk in
+  the ground, with a big weathered spiral carved on it. Inside the ring and
+  between the stones, nothing but magenta.
+- Every stone's foot ends in a ragged skirt of turf and packed earth — tufts
+  of grass growing up against the stone, worn ground around the base — so the
+  ring reads as rooted in the ground, grown into it over centuries. Ancient,
+  worn, chipped, lichen in the joints.
+- At the reference's scale a stone stands about a conifer tall; the ring is
+  about six conifers wide.
+- Flat ambient light only: no sun, no cast shadows — only the depth shading
+  under top edges and at the feet. No ground beyond each stone's skirt,
+  nothing else — magenta everywhere else, with hard edges and no magenta halo.
+
+Then write \`${ROOT}/${WORK}/henge${WORKTAG}/report.json\`:
+\`{ "element": "henge", "file": "henge-source.png", "size": [w, h], "calls": 1, "notes": "..." }\`.
+Do not resize, crop, recolour or key anything yourself. One call only.`,
 };
 
 const codex = (process.env.CODEX_BIN || "codex").replace(/\\/g, "/");
@@ -222,6 +356,8 @@ async function key(src, which) {
   const cs = [corner(2, 2), corner(W - 3, 2), corner(2, H - 3), corner(W - 3, H - 3)];
   const KEYC = cs.map((c) => c.join(",")).sort()[1].split(",").map(Number);   // a median-ish corner
   const black = Math.max(...KEYC) < 30;
+  const alphaKeyed = d[3] === 0 && d[((H - 1) * W + (W - 1)) * 4 + 3] === 0;   // the model delivered real transparency instead of the key (the menhir and henge did, 2026-09-07): its own alpha is the key
+  if (alphaKeyed) console.log("  " + which + ": the delivery carries its own alpha (transparent corners) — used as the key");
   const near = black ? 14 : 40, far = black ? 40 : 90;
   console.log(`  ${which}: key colour from the corners ${JSON.stringify(KEYC)} (${black ? "black" : "magenta"})`);
   let top = H, bottom = -1, n = 0;
@@ -229,7 +365,7 @@ async function key(src, which) {
     const o = (y * W + x) * 4, r = d[o], g = d[o + 1], b = d[o + 2];
     // a soft halo is keyed by its distance from the key colour
     const dist = Math.hypot(KEYC[0] - r, KEYC[1] - g, KEYC[2] - b);
-    let a = dist < near ? 0 : dist < far ? Math.round(255 * (dist - near) / (far - near)) : 255;
+    let a = alphaKeyed ? d[o + 3] : dist < near ? 0 : dist < far ? Math.round(255 * (dist - near) / (far - near)) : 255;
     // the model paints moss and grass tufts round stone whatever the packet
     // says: green-hued, saturated pixels are not the element (the stone is
     // pale and grey, the groove dark) — they go, and so does the key's spill
@@ -238,7 +374,7 @@ async function key(src, which) {
     if (green) a = 0;
     // red or magenta specks (the key's colour family bleeding at an edge, seen on the cluster's stones) are not stone either
     if (r > 150 && g < 90 && sat > 0.5) a = 0;
-    if (a > 0 && a < 255 && !black && !NO_DESPILL) {   // despill: take the key's share out of a blended edge pixel (a black key needs none — a dark edge reads as occlusion)
+    if (a > 0 && a < 255 && !black && !alphaKeyed && !NO_DESPILL) {   // despill: take the key's share out of a blended edge pixel (a black key needs none — a dark edge reads as occlusion)
       const k = a / 255;
       for (let c = 0; c < 3; c += 1) d[o + c] = Math.max(0, Math.min(255, Math.round((d[o + c] - KEYC[c] * (1 - k)) / k)));
     }
@@ -282,6 +418,34 @@ async function key(src, which) {
     scale = PANEL_PX / Math.max(1, W / 5);
     out = await sharp(out).resize(Math.round(k.width * scale), Math.round(k.height * scale), { kernel: "lanczos3" }).png().toBuffer();
     console.log(`  cluster: scaled x${scale.toFixed(3)} (the leader ~${PANEL_PX} px at L0)`);
+  } else if (which === "menhir") {
+    // the tallest stone of the set is MENHIR_PX tall
+    const k = await sharp(out).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    const KW = k.info.width, KH = k.info.height, kd = k.data, lab = new Int32Array(KW * KH); let tallest = 1;
+    const st = [];
+    for (let p = 0; p < KW * KH; p += 1) {
+      if (kd[p * 4 + 3] <= 64 || lab[p]) continue;
+      let miny = KH, maxy = 0, n = 0; st.push(p); lab[p] = 1;
+      while (st.length) { const q = st.pop(); const x = q % KW, y = (q - x) / KW; n += 1; if (y < miny) miny = y; if (y > maxy) maxy = y;
+        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= KW || yy >= KH) continue; const r = yy * KW + xx; if (!lab[r] && kd[r * 4 + 3] > 64) { lab[r] = 1; st.push(r); } } }
+      if (n >= 400 && maxy - miny + 1 > tallest) tallest = maxy - miny + 1;
+    }
+    scale = MENHIR_PX / tallest;
+    out = await sharp(out).resize(Math.round(KW * scale), Math.round(KH * scale), { kernel: "lanczos3" }).png().toBuffer();
+    console.log(`  menhir: tallest stone ${tallest} rows → scaled x${scale.toFixed(3)} (${MENHIR_PX} px at L0)`);
+  } else if (which === "trilithon") {
+    const k = await sharp(out).metadata();
+    scale = TRILITHON_PX / Math.max(1, sBottom - sTop + 1);
+    out = await sharp(out).resize(Math.round(k.width * scale), Math.round(k.height * scale), { kernel: "lanczos3" }).png().toBuffer();
+    console.log(`  trilithon: ${sBottom - sTop + 1} rows → scaled x${scale.toFixed(3)} (${TRILITHON_PX} px at L0)`);
+  } else if (which === "henge") {
+    // the ring's width is HENGE_PX: the solid columns
+    const k = await sharp(out).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    const KW = k.info.width, KH = k.info.height, kd = k.data; let cL = KW, cR = -1;
+    for (let x = 0; x < KW; x += 1) { let c = 0; for (let y = 0; y < KH; y += 2) if (kd[(y * KW + x) * 4 + 3] > 64) c += 1; if (c > KH / 80) { if (x < cL) cL = x; cR = x; } }
+    scale = HENGE_PX / Math.max(1, cR - cL + 1);
+    out = await sharp(out).resize(Math.round(KW * scale), Math.round(KH * scale), { kernel: "lanczos3" }).png().toBuffer();
+    console.log(`  henge: ${cR - cL + 1} solid columns → scaled x${scale.toFixed(3)} (${HENGE_PX} px at L0)`);
   } else {
     // panels: the group is about three panels tall; a panel is PANEL_PX
     const k = await sharp(out).metadata();
@@ -292,7 +456,7 @@ async function key(src, which) {
   const file = `${OUT}/${which}-element-${TAG}.png`;
   fs.writeFileSync(file, out);
   const m = await sharp(file).metadata();
-  fs.writeFileSync(`${OUT}/${which}-element-${TAG}.json`, JSON.stringify({ element: which, width: m.width, height: m.height, anchorRow: Math.round((grooveRow - y0 + 0.5) * scale), source: src, keyed: new Date().toISOString(), note: which === "kerb" ? "anchorRow = the groove (the darkest row): build-chain-layer.mjs puts it on the route" : "anchorRow = the darkest row; the panels' band is centred on the route" }, null, 1));
+  fs.writeFileSync(`${OUT}/${which}-element-${TAG}.json`, JSON.stringify({ element: which, width: m.width, height: m.height, anchorRow: Math.round(((STANDING ? sBottom : grooveRow) - y0 + 0.5) * scale), standing: STANDING, source: src, keyed: new Date().toISOString(), note: which === "kerb" ? "anchorRow = the groove (the darkest row): build-chain-layer.mjs puts it on the route" : "anchorRow = the darkest row; the panels' band is centred on the route" }, null, 1));
   console.log(`  ${which}: ${file} ${m.width}x${m.height}, anchor row ${Math.round((grooveRow - y0 + 0.5) * scale)}`);
   return file;
 }

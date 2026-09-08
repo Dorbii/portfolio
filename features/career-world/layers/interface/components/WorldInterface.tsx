@@ -258,9 +258,7 @@ export function WorldInterface({
   showTerritoryQa,
   territories,
   onFocus,
-  onReset,
   onToggleGrid,
-  onToggleLandmarkLabels,
   onToggleTopography,
   onToggleTerritoryQa,
 }: WorldInterfaceProps) {
@@ -343,40 +341,17 @@ export function WorldInterface({
         ))}
       </div>
 
-      <div
-        aria-label="World view controls"
-        className="career-world__controls"
-        data-ready={isInteractive}
-        role="group"
-      >
-        <button
-          aria-pressed={activeViewId === "world"}
-          disabled={!isInteractive}
-          onClick={onReset}
-          type="button"
+      {/* The view buttons (World, the territories, Labels) are gone: owner
+          2026-09-07, "we dont use them anymore and its just noise on the
+          screen now". The camera is the wheel, the drag and the arrow keys;
+          the QA toggles stay behind the development flag. */}
+      {enableDevelopmentTools ? (
+        <div
+          aria-label="World view controls"
+          className="career-world__controls"
+          data-ready={isInteractive}
+          role="group"
         >
-          World
-        </button>
-        {territories.map((territory) => (
-          <button
-            aria-pressed={activeViewId === territory.id}
-            disabled={!isInteractive}
-            key={territory.id}
-            onClick={() => onFocus(territory.id)}
-            type="button"
-          >
-            {territory.label}
-          </button>
-        ))}
-        <button
-          aria-pressed={showLandmarkLabels}
-          disabled={!isInteractive}
-          onClick={onToggleLandmarkLabels}
-          type="button"
-        >
-          Labels
-        </button>
-        {enableDevelopmentTools ? (
           <>
             <button
               aria-pressed={showTopography}
@@ -406,8 +381,8 @@ export function WorldInterface({
               Grid
             </button>
           </>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
 
       <p className="career-world__camera-hint">
         Wheel to zoom · drag to pan · arrow keys to move

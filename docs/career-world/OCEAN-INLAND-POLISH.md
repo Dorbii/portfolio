@@ -1,6 +1,10 @@
 # Ocean / inland continuation — 2026-09-06
 
-## Latest owner revision — inland r8
+## Latest owner revision — inland r9 and full land merge
+
+Owner requested the complete land branch through 162faa9e and the combined result on main. The newer water work is retained. Current coverage is 67 cells / 108 inland features, with 19 mapped cascades, 20 mapped curtains and the two bespoke gorge segments. Repairs, varied transparent beds, the one-time pond bank and its submerged groove are documented in [INLAND-WATER-REVIEW.md](INLAND-WATER-REVIEW.md). Typecheck/build and 44 focused tests pass; full suite is 128 pass / four baseline failures / one skipped. Earlier sections below are historical.
+
+## Previous owner revision — inland r8
 
 Owner: “the ocean we can call done for now.” Ocean scope is held at 46e75848. Inland now has source-traced fall profiles, audited water-only alpha repairs, revised bed/bank shading, completed water-body coverage, and a reconciled 108-feature inventory across the current 67-cell mount. See [INLAND-WATER-REVIEW.md](INLAND-WATER-REVIEW.md) for current evidence, retired annotations and verification limits.
 

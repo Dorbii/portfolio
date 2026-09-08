@@ -18,6 +18,16 @@ float gorgePoolDepth(vec2 p){
   float bottom=1.0-smoothstep(0.45,1.05,length((p-lowerFoot-vec2(0,1.0))/vec2(4.0,3.8)));
   return max(basin,bottom*6.0);
 }
+float gorgePoolOcclusion(vec2 p){
+  vec2 foot=gorgePoolFoot(),outlet=gorgePoolOutlet();
+  // The landing lies below the cliff, inside its shaded recess. The broad
+  // soft contact continues into the outlet instead of outlining a bright disk.
+  vec2 center=mix(foot,outlet,0.43);
+  vec2 q=(p-center)/vec2(9.5,7.5);
+  float recess=exp(-dot(q,q)*1.4);
+  float wall=smoothstep(foot.x-5.0,foot.x+3.5,p.x);
+  return recess*(0.55+0.45*wall);
+}
 float gorgeLowerDescent(vec2 p){
   vec2 start=gorgePoolOutlet(),end=${vector(GORGE_FALL.lowerFoot)}*uWorldMetres;
   vec2 axis=end-start;
@@ -30,13 +40,14 @@ vec2 gorgePoolRipples(vec2 p,float time){
   float r=length(delta);
   float phase=r*4.2-time*3.4+noise2(p*0.19)*0.7;
   float envelope=gorgePoolMask(p)*smoothstep(0.8,2.3,r)*exp(-r*0.18);
-  return delta/max(r,0.1)*cos(phase)*envelope*0.11;
+  float breakup=smoothstep(0.22,0.72,noise2(p*0.34+time*0.03));
+  return delta/max(r,0.1)*cos(phase)*envelope*0.032*breakup;
 }
 float gorgePoolFoam(vec2 p,float time){
   vec2 foot=gorgePoolFoot(),outlet=gorgePoolOutlet();
   float r=length((p-foot)/vec2(1.0,0.65));
   float ring=pow(max(0.0,sin(r*4.2-time*3.4+noise2(p*0.19)*0.7)),12.0);
-  ring*=gorgePoolMask(p)*smoothstep(1.8,3.0,r)*exp(-r*0.16)*0.16;
+  ring*=gorgePoolMask(p)*smoothstep(1.8,3.0,r)*exp(-r*0.24)*0.045;
   ring*=0.35+0.65*noise2(p*0.43);
   vec2 start=mix(foot,outlet,0.30),axis=outlet-start;
   float lengthAxis=length(axis);

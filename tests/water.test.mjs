@@ -3,7 +3,7 @@ import test from "node:test";
 import fs from "node:fs/promises";
 import crypto from "node:crypto";
 import sharp from "sharp";
-import { distanceTransform, encodeWaterField, applyFlowFeature, markProvisionalCoast,marineFlowMarkers,restoreMarineFlow,completeAnnotatedWater } from "../scripts/lib/water-fields.mjs";
+import { distanceTransform, encodeWaterField, applyFlowFeature, markProvisionalCoast,marineFlowMarkers,restoreMarineFlow,completeAnnotatedWater,applyMarineRegion } from "../scripts/lib/water-fields.mjs";
 import { buildFieldPages } from "../features/career-world/layers/water/fieldPages.ts";
 import { createWaveSpectrum, WAVE_CASCADES, waveHeights } from "../features/career-world/layers/water/ocean/spectrum.ts";
 import { normalizeWaterState, selectWaterFields, waveAngularFrequency } from "../features/career-world/layers/water/model.ts";
@@ -48,6 +48,21 @@ test("annotated channels fill connected side pools without changing land, open s
   for(let i=0;i<land.length;i++){
     assert.equal(data[i*3],before[i*3]);
     if(land[i]||marine[i]||i%width>=22)assert.deepEqual(data.subarray(i*3,i*3+3),before.subarray(i*3,i*3+3));
+  }
+});
+
+test("reviewed marine regions override river classification while preserving shores, dry rock and neighboring water",()=>{
+  const width=18,height=15,land=new Uint8Array(width*height);
+  land[7*width+8]=1;
+  const data=encodeWaterField(land,width,height,1,24).data;
+  applyFlowFeature(data,land,width,height,[[1,7],[16,7]],4,0.6);
+  const before=Buffer.from(data),bounds=[[4,4],[12,11]];
+  assert.ok(applyMarineRegion(data,land,width,height,bounds)>0);
+  for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+    const i=y*width+x;
+    assert.equal(data[i*3],before[i*3]);
+    if(land[i]||x<4||x>=12||y<4||y>=11)assert.deepEqual(data.subarray(i*3,i*3+3),before.subarray(i*3,i*3+3));
+    else assert.ok(Math.hypot(data[i*3+1]/255*2-1,data[i*3+2]/255*2-1)<0.045);
   }
 });
 
@@ -267,7 +282,8 @@ test("inland spray is independent of ocean visibility, obeys effects/camera, and
   const before=allocated.size;
   const spray=new InlandSprayRenderer(gl,()=>undefined);
   t.after(()=>spray.destroy());
-  const fall=manifest.features.find(feature=>feature.kind==="fall");
+  const fall=manifest.features.find(feature=>feature.kind==="fall"&&feature.style==="curtain"&&feature.hasLanding!==false);
+  assert.ok(fall);
   const endpoint=fall.points.at(-1);
   const visible={...scene,oceanVisible:false,camera:{origin:endpoint.map(n=>n-0.025),span:[0.05,0.05]}};
   assert.ok(spray.render(visible,7)>0);
@@ -275,6 +291,9 @@ test("inland spray is independent of ocean visibility, obeys effects/camera, and
   assert.equal(spray.render({...visible,inlandEffects:false},9),0);
   assert.equal(spray.render({...visible,inlandVisible:false},9),0);
   assert.equal(spray.render({...visible,camera:{origin:[0,0],span:[0.01,0.01]}},9),0);
+  const cascade=manifest.features.find(feature=>feature.kind==="fall"&&feature.style==="cascade");
+  assert.ok(cascade);
+  assert.equal(spray.render({...visible,camera:{origin:cascade.points.at(-1).map(n=>n-0.008),span:[0.016,0.016]}},7),0);
   spray.destroy();spray.destroy();
   assert.equal(allocated.size,before);
 });

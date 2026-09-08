@@ -31,6 +31,9 @@ const KERB = arg("--kerb", `${ART}/chain/kerb-element.png`), NODE = arg("--node"
 const CLUSTER = arg("--cluster", `${ART}/chain/cluster-element.png`);   // a leader and its endpoints, at a branch's apex
 const HUB = arg("--hub", `${ART}/chain/hub-element.png`), LEADER = arg("--leader", `${ART}/chain/leader-element.png`);   // the server far off the chain, the leaders on it
 const OUT = arg("--out", `${ART}/chain/cells`), PREVIEW = arg("--preview");
+// Water-owned floor artwork may reuse the exact complete route/element.
+// This optional export never changes the authored land source.
+const UNMASKED = process.argv.includes("--unmasked"), ONLY_CELL = arg("--cell");
 const CELL = 2048, BLEED = 256;
 const route = JSON.parse(fs.readFileSync(`${ART}/l2-land/tanium/rune-chain.def.json`, "utf8"));
 const W = route.waypoints;
@@ -49,7 +52,108 @@ const kerb = await sharp(KERB).ensureAlpha().raw().toBuffer({ resolveWithObject:
 const KW = kerb.info.width, KH = kerb.info.height;
 const sidecar = (f) => { const j = f.replace(/\.png$/, ".json"); return fs.existsSync(j) ? JSON.parse(fs.readFileSync(j, "utf8")) : null; };
 const KA = sidecar(KERB)?.anchorRow ?? Math.round(KH / 2);   // the groove's row in the element: it sits on the route
-const node = fs.existsSync(NODE) ? await sharp(NODE).ensureAlpha().raw().toBuffer({ resolveWithObject: true }) : null;
+// THE WORLD'S VIEW (owner 2026-09-07 02:50, on the served hub and leaders:
+// "the main issue here is perspective and scale"): the canon is a high
+// oblique — a circle on the ground is an ellipse about 0.73 as tall as it is
+// wide (the crater tarn in N c1-0 measures 455 x 330 px) — and the elements
+// came from image_gen as top-down coins: true circles, a rim all the way
+// round, spike stubs where the cluster's scratches were cut off. So every
+// disc is fitted to its own circle (the stubs go), foreshortened to the view
+// and sized to the groove: a panel a little wider than the groove is tall, a
+// leader two grooves, the hub four. The panels keep their spread (each
+// shrinks about its own centre; the arrangement tightens a little).
+const VIEW_ASPECT = 0.73;
+const LEADER_PX = 90, HUB_PX = 170, PANEL_SCALE = 0.55, PANEL_LAYOUT = 0.8, SPOKE_SCALE = 0.85;
+const rawOf = (img) => img.ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+async function prepDisc(file, targetW) {
+  if (!fs.existsSync(file)) return null;
+  const el = await rawOf(sharp(file));
+  const EW = el.info.width, EH = el.info.height, d = el.data;
+  const solid = (x, y) => x >= 0 && y >= 0 && x < EW && y < EH && d[(y * EW + x) * 4 + 3] > 64;
+  let sx = 0, sy = 0, n = 0;
+  for (let y = 0; y < EH; y += 1) for (let x = 0; x < EW; x += 1) if (solid(x, y)) { sx += x; sy += y; n += 1; }
+  const cx = sx / n, cy = sy / n, dists = [];
+  for (let y = 0; y < EH; y += 1) for (let x = 0; x < EW; x += 1) if (solid(x, y) && !(solid(x - 1, y) && solid(x + 1, y) && solid(x, y - 1) && solid(x, y + 1))) dists.push(Math.hypot(x - cx, y - cy));
+  dists.sort((a, b) => a - b);
+  const r = dists[Math.floor(dists.length * 0.35)];       // the disc's own radius: the stubs are the far tail of the edge distances
+  const cut = Buffer.from(d);
+  for (let y = 0; y < EH; y += 1) for (let x = 0; x < EW; x += 1) {
+    const dd = Math.hypot(x - cx, y - cy) - r, o = (y * EW + x) * 4;
+    if (dd > 1.5) cut[o + 3] = 0; else if (dd > -0.5) cut[o + 3] = Math.round(cut[o + 3] * (1.5 - dd) / 2);
+  }
+  const L = Math.max(0, Math.round(cx - r - 2)), T = Math.max(0, Math.round(cy - r - 2));
+  const S = Math.min(EW - L, EH - T, Math.round(2 * r + 4));
+  const w = targetW, h = Math.round(targetW * VIEW_ASPECT);
+  const res = await rawOf(sharp(cut, { raw: { width: EW, height: EH, channels: 4 } }).extract({ left: L, top: T, width: S, height: S }).resize(w, h, { kernel: "lanczos3" }));
+  console.log(`  ${path.basename(file)}: a disc of r ${r.toFixed(0)} px in ${EW} x ${EH} → ${w} x ${h} (view ${VIEW_ASPECT})`);
+  return res;
+}
+async function prepNode(file) {
+  if (!fs.existsSync(file)) return null;
+  const el = await rawOf(sharp(file));
+  const EW = el.info.width, EH = el.info.height, d = el.data;
+  const lab = new Int32Array(EW * EH), comps = [], stack = [];
+  for (let p = 0; p < EW * EH; p += 1) {
+    if (d[p * 4 + 3] <= 64 || lab[p]) continue;
+    const id = comps.length + 1; let minx = EW, maxx = 0, miny = EH, maxy = 0, n = 0;
+    stack.push(p); lab[p] = id;
+    while (stack.length) {
+      const q = stack.pop(); const x = q % EW, y = (q - x) / EW; n += 1;
+      if (x < minx) minx = x; if (x > maxx) maxx = x; if (y < miny) miny = y; if (y > maxy) maxy = y;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= EW || yy >= EH) continue; const r = yy * EW + xx; if (!lab[r] && d[r * 4 + 3] > 64) { lab[r] = id; stack.push(r); } }
+    }
+    comps.push({ id, minx, maxx, miny, maxy, n });
+  }
+  const panels = comps.filter((c) => c.n >= 400);          // the panels; crumbs go
+  const layers = [];
+  for (const c of panels) {
+    const bw = c.maxx - c.minx + 1, bh = c.maxy - c.miny + 1, buf = Buffer.alloc(bw * bh * 4);
+    for (let y = 0; y < bh; y += 1) for (let x = 0; x < bw; x += 1) { const p = (c.miny + y) * EW + c.minx + x; if (lab[p] === c.id) buf.set(d.subarray(p * 4, p * 4 + 4), (y * bw + x) * 4); }
+    const w = Math.max(1, Math.round(bw * PANEL_SCALE)), h = Math.max(1, Math.round(bh * PANEL_SCALE * VIEW_ASPECT));
+    const png = await sharp(buf, { raw: { width: bw, height: bh, channels: 4 } }).resize(w, h, { kernel: "lanczos3" }).png().toBuffer();
+    const ccx = (c.minx + c.maxx) / 2, ccy = (c.miny + c.maxy) / 2;
+    const nx = EW / 2 + (ccx - EW / 2) * PANEL_LAYOUT, ny = EH / 2 + (ccy - EH / 2) * PANEL_LAYOUT;
+    layers.push({ input: png, left: Math.max(0, Math.round(nx - w / 2)), top: Math.max(0, Math.round(ny - h / 2)) });
+  }
+  const res = await rawOf(sharp({ create: { width: EW, height: EH, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } }).composite(layers));
+  console.log(`  ${path.basename(file)}: ${panels.length} panels (of ${comps.length} parts) scaled x${PANEL_SCALE}, foreshortened ${VIEW_ASPECT}, spread x${PANEL_LAYOUT}`);
+  return res;
+}
+const node = await prepNode(NODE);
+const leaderPrepped = await prepDisc(LEADER, LEADER_PX), hubPrepped = await prepDisc(HUB, HUB_PX);
+// STANDING STONES (owner 2026-09-07 03:20: "These runes need to look like
+// they are part of the land not stones on top of it. Think like stonehedge"):
+// menhirs on an ellipse round each node, a trilithon at each leader, a henge
+// at the hub — every one placed on its FEET (the sidecar's anchor row), its
+// turf skirt re-hued to the local ground, its lowest rows sunk into the ground
+// colour, a contact shadow under every foot. An element that exists replaces
+// the disc or panel it stands for; chain-element.mjs menhir|trilithon|henge
+// generates them.
+const MENHIR = arg("--menhir", `${ART}/chain/menhir-element.png`), TRILITHON = arg("--trilithon", `${ART}/chain/trilithon-element.png`), HENGE = arg("--henge", `${ART}/chain/henge-element.png`);
+const loadStanding = async (file) => { if (!fs.existsSync(file)) return null; const el = await rawOf(sharp(file)); el.anchor = sidecar(file)?.anchorRow ?? el.info.height - 1; return el; };
+function splitStones(el) {           // the menhir set into its stones, each on its own feet, west to east
+  const EW = el.info.width, EH = el.info.height, d = el.data, lab = new Int32Array(EW * EH), comps = [], st = [];
+  for (let p = 0; p < EW * EH; p += 1) {
+    if (d[p * 4 + 3] <= 64 || lab[p]) continue;
+    const id = comps.length + 1; let minx = EW, maxx = 0, miny = EH, maxy = 0, n = 0; st.push(p); lab[p] = id;
+    while (st.length) {
+      const q = st.pop(); const x = q % EW, y = (q - x) / EW; n += 1;
+      if (x < minx) minx = x; if (x > maxx) maxx = x; if (y < miny) miny = y; if (y > maxy) maxy = y;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= EW || yy >= EH) continue; const r = yy * EW + xx; if (!lab[r] && d[r * 4 + 3] > 64) { lab[r] = id; st.push(r); } }
+    }
+    comps.push({ id, minx, maxx, miny, maxy, n });
+  }
+  const stones = [];
+  for (const c of comps.filter((c) => c.n >= 400).sort((a, b) => a.minx - b.minx)) {
+    const bw = c.maxx - c.minx + 3, bh = c.maxy - c.miny + 3, buf = Buffer.alloc(bw * bh * 4);
+    for (let y = 0; y < bh; y += 1) for (let x = 0; x < bw; x += 1) { const sx = c.minx - 1 + x, sy = c.miny - 1 + y; if (sx < 0 || sy < 0 || sx >= EW || sy >= EH) continue; const p = sy * EW + sx; if (lab[p] === c.id) buf.set(d.subarray(p * 4, p * 4 + 4), (y * bw + x) * 4); }
+    stones.push({ data: buf, info: { width: bw, height: bh }, anchor: bh - 2 });
+  }
+  return stones;
+}
+const menhirEl = await loadStanding(MENHIR), trilithonEl = await loadStanding(TRILITHON), hengeEl = await loadStanding(HENGE);
+const menhirs = menhirEl ? splitStones(menhirEl) : [];
+if (menhirEl) console.log(`  standing: ${menhirs.length} menhirs${trilithonEl ? ", a trilithon " + trilithonEl.info.width + "x" + trilithonEl.info.height : ""}${hengeEl ? ", a henge " + hengeEl.info.width + "x" + hengeEl.info.height : ""}`);
 fs.mkdirSync(OUT, { recursive: true });
 // every Tanium cell gets a pass: the trunk's row, and any cell a hub or a spoke
 // falls in (the per-cell drawing clips itself; an empty overlay is not written)
@@ -59,15 +163,21 @@ for (let r = 0; r < grid.rows; r += 1) for (let c = 0; c < grid.cols; c += 1) ce
 const previews = [];
 for (const [col, row] of cellsToDo) {
   const id = `c${col}-${row}`;
+  if (ONLY_CELL && id !== ONLY_CELL) continue;
   // the land that masks the chain: the working folder's candidate when it is
   // newer than the authored layer (the preview the owner sees), else the
   // authored layer; a cell with neither is skipped
   const authored = `${ART}/l2-land/tanium/${id}/${id}-l2.png`, candidate = `.codex-tmp/authoring/cells/tanium/${id}/${id}-l2.png`;
   const newer = (a, b) => fs.existsSync(a) && (!fs.existsSync(b) || fs.statSync(a).mtimeMs > fs.statSync(b).mtimeMs);
-  const landFile = newer(candidate, authored) ? candidate : fs.existsSync(authored) ? authored : null;
+  const landFile = UNMASKED ? (fs.existsSync(authored) ? authored : null) : newer(candidate, authored) ? candidate : fs.existsSync(authored) ? authored : null;
   if (!landFile) { console.log(`  ${id}: no land layer yet — skipped`); continue; }
   const land = await sharp(landFile).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const LW = land.info.width, lb = Math.round((LW - CELL) / 2);
+  if (UNMASKED) {
+    const mean=[0,0,0];let count=0;
+    for(let i=0;i<land.data.length;i+=64)if(land.data[i+3]>=250){for(let k=0;k<3;k++)mean[k]+=land.data[i+k];count++;}
+    for(let i=0;i<land.data.length;i+=4)if(land.data[i+3]<128){for(let k=0;k<3;k++)land.data[i+k]=Math.round(mean[k]/Math.max(1,count));land.data[i+3]=255;}
+  }
   const out = Buffer.alloc(CELL * CELL * 4);
   // BEDDING (owner 2026-09-06: "that looks stickered on"): the element is cut
   // INTO this ground, not laid on it — per column the land's own colour just
@@ -235,11 +345,15 @@ for (const [col, row] of cellsToDo) {
     }
     texMean[ty * TN + tx] = n ? s / n : 0; texStd[ty * TN + tx] = n ? Math.sqrt(Math.max(0, s2 / n - (s / n) ** 2)) : 0;
   }
-  const texAt = (arr, x, y) => arr[Math.min(TN - 1, Math.floor(y / TX)) * TN + Math.min(TN - 1, Math.floor(x / TX))];
+  const texAt = (arr, x, y) => {                           // bilinear: a per-block value printed a 16-px checker on the hub's face (owner's crop, 2026-09-07)
+    const fx = Math.min(TN - 1, Math.max(0, x / TX - 0.5)), fy = Math.min(TN - 1, Math.max(0, y / TX - 0.5));
+    const x0 = Math.floor(fx), y0 = Math.floor(fy), x1 = Math.min(TN - 1, x0 + 1), y1 = Math.min(TN - 1, y0 + 1), tx = fx - x0, ty = fy - y0;
+    return arr[y0 * TN + x0] * (1 - tx) * (1 - ty) + arr[y0 * TN + x1] * tx * (1 - ty) + arr[y1 * TN + x0] * (1 - tx) * ty + arr[y1 * TN + x1] * tx * ty;
+  };
   const CLIFF_LO = 34, CLIFF_HI = 52;                      // luma sd: below = ground, above = a cliff face
   const cliffFade = (x, y) => { const sd = texAt(texStd, x, y); return sd <= CLIFF_LO ? 1 : sd >= CLIFF_HI ? 0 : 1 - (sd - CLIFF_LO) / (CLIFF_HI - CLIFF_LO); };
   const grain = (x, y) => { const p = landPx(x, y), m = texAt(texMean, x, y); return m > 0 ? (lumaOf(p[0], p[1], p[2]) - m) / m : 0; };   // the land's high-frequency, about ±0.3
-  const stamp = (el, cxCell, cyCell) => {       // a disc BEDDED into the land: its rim takes the ground's hue, its face the ground's grain, feathered, with an occlusion ring
+  const stamp = (el, cxCell, cyCell, rim = 12) => {   // rim: the band (px) over which the ground's hue takes the edge — narrower for small stones, or a panel is all rim       // a disc BEDDED into the land: its rim takes the ground's hue, its face the ground's grain, feathered, with an occlusion ring
     if (!el) return;
     const EW = el.info.width, EH = el.info.height, x0 = Math.round(cxCell) - Math.round(EW / 2), y0 = Math.round(cyCell) - Math.round(EH / 2);
     // distance to the element's edge (up to 16 px) by erosion passes
@@ -270,7 +384,7 @@ for (const [col, row] of cellsToDo) {
       if (a === 0) continue;
       let er = el.data[eo], eg = el.data[eo + 1], eb = el.data[eo + 2];
       if (ground) {
-        const t = dd <= 12 ? 0.55 - 0.4 * (dd / 12) : 0.15;              // the rim takes the ground's hue, the face a little
+        const t = dd <= rim ? 0.55 - 0.4 * (dd / rim) : 0.15;              // the rim takes the ground's hue, the face a little
         const el2 = lumaOf(er, eg, eb), k = el2 / groundL;
         er = Math.round(er * (1 - t) + Math.min(255, ground[0] * k) * t); eg = Math.round(eg * (1 - t) + Math.min(255, ground[1] * k) * t); eb = Math.round(eb * (1 - t) + Math.min(255, ground[2] * k) * t);
       }
@@ -309,44 +423,101 @@ for (const [col, row] of cellsToDo) {
       }
     }
   };
-  const hubEl = fs.existsSync(HUB) ? await sharp(HUB).ensureAlpha().raw().toBuffer({ resolveWithObject: true }) : null;
-  const leaderEl = fs.existsSync(LEADER) ? await sharp(LEADER).ensureAlpha().raw().toBuffer({ resolveWithObject: true }) : null;
+  const stampStanding = (el, cxCell, yCell, centred = false) => {
+    // a standing stone (or a set) ROOTED in the land: placed on its feet (the
+    // anchor row at yCell; by its centre when asked), its turf skirt re-hued
+    // to the local ground, the rows just above each column's foot sunk into
+    // the ground colour, the land's grain faintly on the stone, faded under
+    // cliffs, and a contact shadow on the ground under every foot
+    if (!el) return;
+    const EW = el.info.width, EH = el.info.height;
+    const x0 = Math.round(cxCell) - Math.round(EW / 2), y0 = Math.round(yCell) - (centred ? Math.round(EH / 2) : el.anchor);
+    const solid = (ex, ey) => ex >= 0 && ey >= 0 && ex < EW && ey < EH && el.data[(ey * EW + ex) * 4 + 3] > 64;
+    const feet = new Int16Array(EW).fill(-1);
+    for (let ex = 0; ex < EW; ex += 1) for (let ey = EH - 1; ey >= 0; ey -= 1) if (solid(ex, ey)) { feet[ex] = ey; break; }
+    let gr = 0, gg = 0, gb = 0, gn = 0;
+    for (let ey = -12; ey < EH + 12; ey += 6) for (let ex = -12; ex < EW + 12; ex += 6) {
+      const x = x0 + ex, y = y0 + ey; if (x < 0 || y < 0 || x >= CELL || y >= CELL || solid(ex, ey)) continue;
+      const p = landPx(x, y); if (p[3] < 128) continue; gr += p[0]; gg += p[1]; gb += p[2]; gn += 1;
+    }
+    const ground = gn ? [gr / gn, gg / gn, gb / gn] : null, groundL = ground ? Math.max(1, lumaOf(...ground)) : 1;
+    for (let ey = 0; ey < EH; ey += 1) for (let ex = 0; ex < EW; ex += 1) {
+      const x = x0 + ex, y = y0 + ey; if (x < 0 || y < 0 || x >= CELL || y >= CELL) continue;
+      const eo = (ey * EW + ex) * 4, a0 = el.data[eo + 3]; if (a0 === 0) continue;
+      const lp = landPx(x, y); if (lp[3] < 128) continue;
+      const edge = !(solid(ex - 1, ey) && solid(ex + 1, ey) && solid(ex, ey - 1) && solid(ex, ey + 1));
+      const a = Math.round(a0 * (edge ? 0.7 : 1) * Math.max(0.35, cliffFade(x, y))); if (a === 0) continue;
+      let er = el.data[eo], eg = el.data[eo + 1], eb = el.data[eo + 2];
+      if (ground) {
+        const mx = Math.max(er, eg, eb), mn = Math.min(er, eg, eb), sat = mx ? (mx - mn) / mx : 0;
+        const turf = eg >= er && eg >= eb && sat > 0.18;                 // the skirt the model drew takes the local ground
+        const foot = feet[ex] >= 0 ? feet[ex] - ey : 99;                 // rows above this column's foot
+        const t = turf ? 0.65 : foot < 8 ? 0.55 * (1 - foot / 8) : 0.06;
+        const k = lumaOf(er, eg, eb) / groundL;
+        er = Math.round(er * (1 - t) + Math.min(255, ground[0] * k) * t); eg = Math.round(eg * (1 - t) + Math.min(255, ground[1] * k) * t); eb = Math.round(eb * (1 - t) + Math.min(255, ground[2] * k) * t);
+      }
+      const gn2 = 1 + 0.2 * grain(x, y);
+      er = Math.max(0, Math.min(255, Math.round(er * gn2))); eg = Math.max(0, Math.min(255, Math.round(eg * gn2))); eb = Math.max(0, Math.min(255, Math.round(eb * gn2)));
+      const o = (y * CELL + x) * 4, kk = a / 255;
+      for (let c = 0; c < 3; c += 1) out[o + c] = Math.round([er, eg, eb][c] * kk + out[o + c] * (1 - kk));
+      out[o + 3] = Math.max(out[o + 3], a);
+    }
+    for (let ex = -6; ex < EW + 6; ex += 1) {                            // the contact shadow under the nearest foot
+      let fy = -1, fd = 7;
+      for (let i = -6; i <= 6; i += 1) { const c2 = ex + i; if (c2 < 0 || c2 >= EW || feet[c2] < 0) continue; if (Math.abs(i) < fd) { fd = Math.abs(i); fy = feet[c2]; } }
+      if (fy < 0) continue;
+      for (let dy = -3; dy <= 8; dy += 1) {
+        const ey = fy + dy, x = x0 + ex, y = y0 + ey; if (x < 0 || y < 0 || x >= CELL || y >= CELL || solid(ex, ey)) continue;
+        const lp = landPx(x, y); if (lp[3] < 128) continue;
+        const w = 0.5 * (1 - fd / 7) * (dy < 0 ? 1 + dy / 4 : 1 - dy / 9); if (w <= 0) continue;
+        const o = (y * CELL + x) * 4;
+        if (out[o + 3] > 0) { for (let c = 0; c < 3; c += 1) out[o + c] = Math.round(out[o + c] * (1 - w * 0.6)); continue; }
+        out[o] = 12; out[o + 1] = 10; out[o + 2] = 8; out[o + 3] = Math.round(255 * w);
+      }
+    }
+  };
+  const placeMenhirs = (cx, cy) => {
+    // the endpoints on an ellipse round the leader (the world's view: 0.73
+    // tall), the trunk left clear: four to the north, three to the south a
+    // little further out, drawn north to south so the nearer stand in front
+    const deg = (d) => (d * Math.PI) / 180;
+    const spots = [[195, 180], [215, 180], [325, 180], [345, 180], [45, 150], [90, 150], [135, 150]];   // the north pair each side stands clear of the trilithon (147 px wide) that marks the leader
+    const places = spots.map(([a, R], i) => ({ st: menhirs[i % menhirs.length], x: cx + R * Math.cos(deg(a)), y: cy + R * 0.73 * Math.sin(deg(a)) })).sort((p, q) => p.y - q.y);
+    for (const p of places) stampStanding(p.st, p.x, p.y);
+  };
+  const hubEl = hubPrepped, leaderEl = leaderPrepped;      // fitted to the view once, at load
   const toLocal = (gx, gy) => [(gx - col) * CELL, (gy - row) * CELL];
   for (const hub of route.hubs || []) {
     const [hx, hy] = toLocal(hub.at[0], hub.at[1]);
-    const hubR = hubEl ? hubEl.info.width / 2 : 0;
+    const hubR = hengeEl ? hengeEl.info.width / 2 : hubEl ? hubEl.info.width / 2 : 0;
     for (const lx of hub.leaders || []) {
       const ly = yAt(lx); if (ly == null) continue;
       const [ax, ay] = toLocal(lx, ly);
       // the spoke: from the trunk (a little past the leader disc) to the hub's rim
       const dx = hx - ax, dy = hy - ay, len = Math.hypot(dx, dy); if (len === 0) continue;
       const ux = dx / len, uy = dy / len;
-      const leaderR = leaderEl ? leaderEl.info.width / 2 : 0;
-      const sx = ax + ux * (leaderR * 0.6), sy = ay + uy * (leaderR * 0.6), ex = hx - ux * (hubR * 0.85), ey = hy - uy * (hubR * 0.85);
+      const leaderR = trilithonEl ? trilithonEl.info.width / 2 : leaderEl ? leaderEl.info.width / 2 : 0;
+      // the spoke leaves the trunk square (toward the hub's side, 0.4 of a
+      // cell), then runs straight to the hub's rim: a branch off the chain, not
+      // a second chain beside it (a far leader's straight line ran nearly
+      // parallel to the trunk for a cell, 2026-09-07)
+      const side = hy < ay ? -1 : 1, kx = ax, ky = ay + side * 0.4 * CELL;
+      const dx2 = hx - kx, dy2 = hy - ky, len2 = Math.hypot(dx2, dy2) || 1, ux2 = dx2 / len2, uy2 = dy2 / len2;
+      const sx = ax, sy = ay + side * leaderR * 0.6, ex = hx - ux2 * (hubR * 0.85), ey = hy - uy2 * (hubR * 0.85);
       const inThisCell = (x, y) => x >= -CELL && y >= -CELL && x <= 2 * CELL && y <= 2 * CELL;
-      if (inThisCell(sx, sy) || inThisCell(ex, ey) || inThisCell((sx + ex) / 2, (sy + ey) / 2)) strokeSlot(sx, sy, ex, ey, 0.6);
-      if (Math.floor(lx) === col && Math.floor(ly) === row) stamp(leaderEl, ax, ay);
+      const seg = (x1, y1, x2, y2) => { if (inThisCell(x1, y1) || inThisCell(x2, y2) || inThisCell((x1 + x2) / 2, (y1 + y2) / 2)) strokeSlot(x1, y1, x2, y2, SPOKE_SCALE); };
+      seg(sx, sy, kx, ky); seg(kx, ky, ex, ey);
+      if (Math.floor(lx) === col && Math.floor(ly) === row && !trilithonEl) stamp(leaderEl, ax, ay, 8);   // with the trilithon element the leaders are the nodes, stamped there
     }
-    if (Math.floor(hub.at[0]) === col && Math.floor(hub.at[1]) === row) stamp(hubEl, hx, hy);
+    if (Math.floor(hub.at[0]) === col && Math.floor(hub.at[1]) === row) { if (hengeEl) stampStanding(hengeEl, hx, hy, true); else stamp(hubEl, hx, hy); }
     if ((hub.leaders || []).some((lx) => Math.floor(lx) === col) || (Math.floor(hub.at[0]) === col && Math.floor(hub.at[1]) === row)) console.log(`  ${id}: hub at [${hub.at}] with ${hub.leaders.length} leader(s) — spokes drawn where they cross this cell`);
   }
   // the nodes: the panel element centred on the node, over the kerb, masked by land
   for (const n of route.nodes || []) {
-    if (!node || n.cell[0] !== col || n.cell[1] !== row) continue;
-    const NW = node.info.width, NH = node.info.height;
-    const cx = Math.round((n.at[0] - col) * CELL), cy = Math.round((n.at[1] - row) * CELL);
-    const x0 = cx - Math.round(NW / 2), y0 = cy - Math.round(NH / 2);   // integer origin: a fractional index writes nothing into a Buffer
-    for (let ny = 0; ny < NH; ny += 1) for (let nx = 0; nx < NW; nx += 1) {
-      const x = x0 + nx, y = y0 + ny;
-      if (x < 0 || y < 0 || x >= CELL || y >= CELL) continue;
-      const no = (ny * NW + nx) * 4, a = node.data[no + 3];
-      if (a === 0) continue;
-      const lo = ((lb + y) * LW + lb + x) * 4;
-      if (land.data[lo + 3] < 128) continue;
-      const o = (y * CELL + x) * 4, k = a / 255;
-      for (let c = 0; c < 3; c += 1) out[o + c] = Math.round(node.data[no + c] * k + out[o + c] * (1 - k));
-      out[o + 3] = Math.max(out[o + 3], a);
-    }
+    if ((!node && !menhirs.length) || n.cell[0] !== col || n.cell[1] !== row) continue;
+    if (trilithonEl) stampStanding(trilithonEl, (n.at[0] - col) * CELL, (n.at[1] - row) * CELL - 26);   // the leader among its endpoints, just north of the groove, which runs in front of its feet
+    if (menhirs.length) placeMenhirs((n.at[0] - col) * CELL, (n.at[1] - row) * CELL);
+    else stamp(node, (n.at[0] - col) * CELL, (n.at[1] - row) * CELL, 5);   // bedded like the discs: the rim takes the ground's hue, the face its grain, an occlusion ring
   }
   const file = path.join(OUT, `tanium-${id}-chain.png`);
   let n = 0; for (let i = 3; i < out.length; i += 4) if (out[i] > 0) n += 1;

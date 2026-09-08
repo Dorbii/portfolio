@@ -1,0 +1,10 @@
+{
+ "element": "henge",
+ "width": 244,
+ "height": 214,
+ "anchorRow": 213,
+ "standing": true,
+ "source": ".codex-tmp/chain/henge/henge-source.png",
+ "keyed": "2026-09-07T15:48:24.634Z",
+ "note": "anchorRow = the darkest row; the panels' band is centred on the route"
+}

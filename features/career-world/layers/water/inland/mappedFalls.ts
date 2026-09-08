@@ -26,7 +26,7 @@ export class MappedFallsRenderer {
     this.vao=vao;
     try{this.lighting=new WaterLighting(gl,this.program,invalidate);}
     catch(error){gl.deleteVertexArray(vao);gl.deleteProgram(this.program);throw error;}
-    for(const name of ["uCamera","uTime","uPass","uOpacity","uCliff","uPixel","uFall","uUpstream","uFlight","uWidthScale","uEffectScale","uContext","uAtlasRect","uBacking","uProfile[0]"])
+    for(const name of ["uCamera","uTime","uPass","uOpacity","uCliff","uPixel","uFall","uUpstream","uFlight","uWidthScale","uEffectScale","uContext","uAtlasRect","uBacking","uProfile[0]","uEdgeDirection","uCascade"])
       this.uniforms[name]=gl.getUniformLocation(this.program,name);
     this.image=new Image();
     this.image.onload=()=>{
@@ -58,11 +58,13 @@ export class MappedFallsRenderer {
       gl.uniform4f(u.uFall,fall.lip[0],fall.lip[1],fall.foot[0],fall.foot[1]);
       gl.uniform2f(u.uUpstream,fall.upstream[0],fall.upstream[1]);gl.uniform2f(u.uFlight,fall.flight[0],fall.flight[1]);
       gl.uniform4fv(u["uProfile[0]"],profiles.get(fall.id)!);
+      gl.uniform2f(u.uEdgeDirection,fall.edgeDirection[0],fall.edgeDirection[1]);
+      gl.uniform1f(u.uCascade,Number(fall.style==="cascade"));
       gl.uniform1f(u.uWidthScale,fall.widthScale);gl.uniform1f(u.uEffectScale,fall.effectScale);gl.uniform1f(u.uOpacity,scene.state.opacity*lod);
       gl.uniform4f(u.uContext,fall.context.origin[0],fall.context.origin[1],fall.context.span[0],fall.context.span[1]);gl.uniform4f(u.uAtlasRect,fall.atlas[0],fall.atlas[1],fall.atlas[2],fall.atlas[3]);
       gl.uniform2f(u.uBacking,fall.backingOffset[0],fall.backingOffset[1]);
-      gl.uniform1f(u.uPass,1);gl.drawArraysInstanced(gl.TRIANGLES,0,64*6,7);draws++;
-      if(fall.hasLanding&&screenHeight>5){gl.uniform1f(u.uPass,2);gl.drawArrays(gl.TRIANGLES,0,6);draws++;}
+      gl.uniform1f(u.uPass,1);gl.drawArrays(gl.TRIANGLES,0,64*6);draws++;
+      if(fall.style!=="cascade"&&fall.hasLanding&&screenHeight>5){gl.uniform1f(u.uPass,2);gl.drawArrays(gl.TRIANGLES,0,6);draws++;}
     }
     return draws;
   }

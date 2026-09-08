@@ -11,6 +11,7 @@ import { GpuTimer } from "./GpuTimer.ts";
 import { SpectralOcean } from "./ocean/SpectralOcean.ts";
 import type { WaveEvent } from "./ocean/events/model.ts";
 import { SeabedTextures } from "./ocean/seabed/SeabedTextures.ts";
+import { InlandBedFeatureTexture } from "./inland/bedFeatureTexture.ts";
 
 const LEVELS = fieldManifest.levels as unknown as readonly WaterFieldLevel[];
 const MAX_TEXTURES = 64;
@@ -53,6 +54,7 @@ export class WaterRenderer {
   private readonly timer: GpuTimer;
   private readonly spectrum: SpectralOcean | null;
   private readonly seabed: SeabedTextures;
+  private readonly bedFeature: InlandBedFeatureTexture;
   private readonly detailCanvas?: HTMLCanvasElement;
   private readonly detailContext: CanvasRenderingContext2D | null;
   private readonly detailPass: WebGLUniformLocation | null;
@@ -90,7 +92,7 @@ export class WaterRenderer {
     this.scene = scene;
     delete canvas.dataset.gpuStageError;
     canvas.dataset.surfaceRevision = "ocean-life-visibility-r7";
-    canvas.dataset.inlandRevision = "inland-profiles-bed-r8";
+    canvas.dataset.inlandRevision = "inland-sheet-lighting-r9";
     let program: WebGLProgram | null = null;
     let vao: WebGLVertexArrayObject | null = null;
     let texture: WebGLTexture | null = null;
@@ -98,6 +100,7 @@ export class WaterRenderer {
     let lighting: WaterLighting | null = null;
     let spectrum: SpectralOcean | null = null;
     let seabed: SeabedTextures | null = null;
+    let bedFeature: InlandBedFeatureTexture | null = null;
     try {
       program = linkProgram(gl, WATER_VERTEX, WATER_FRAGMENT);
       vao = gl.createVertexArray();
@@ -127,6 +130,7 @@ export class WaterRenderer {
       lighting = new WaterLighting(gl, program, invalidate);
       this.lighting = lighting;
       seabed = new SeabedTextures(gl, program, invalidate); this.seabed = seabed;
+      bedFeature = new InlandBedFeatureTexture(gl, program, invalidate); this.bedFeature = bedFeature;
       if (gl.getExtension("EXT_color_buffer_float")) {
         try { spectrum = new SpectralOcean(gl, DEFAULT_WORLD_WIND_STATE.directionDegrees * Math.PI / 180); }
         catch (error) { canvas.dataset.waveError = error instanceof Error ? error.message : String(error); }
@@ -144,7 +148,7 @@ export class WaterRenderer {
     } catch (error) {
       for (const timer of this.timeouts.values()) clearTimeout(timer);
       for (const image of this.loading.values()) { image.onload = null; image.onerror = null; image.src = ""; }
-      lighting?.destroy(); spectrum?.destroy(); seabed?.destroy(); this.timer.destroy();
+      lighting?.destroy(); spectrum?.destroy(); seabed?.destroy(); bedFeature?.destroy(); this.timer.destroy();
       if (pages) gl.deleteTexture(pages);
       if (texture) gl.deleteTexture(texture);
       if (vao) gl.deleteVertexArray(vao);
@@ -285,6 +289,8 @@ export class WaterRenderer {
     gl.uniform2f(u.uVisible, Number(scene.oceanVisible), Number(scene.inlandVisible));
     this.lighting.bind(scene.light);
     const seabedState = this.seabed.bind(scene.seabedVisible !== false, scene.oceanDetailsVisible !== false && Boolean(this.detailContext));
+    this.bedFeature.bind();
+    this.canvas.dataset.inlandBedFeatureState=this.bedFeature.state;
     gl.uniform1f(this.aquaticLife, Number(scene.aquaticLifeVisible !== false));
     const overlayVisible=scene.oceanVisible && (scene.coastalEffects || scene.aquaticLifeVisible !== false || scene.oceanDetailsVisible !== false) && seabedState.floorReady && !scene.debug;
     gl.uniform1f(u.uDebug, Number(scene.debug));
@@ -338,6 +344,7 @@ export class WaterRenderer {
     this.resident.clear();
     this.lighting.destroy();
     this.seabed.destroy();
+    this.bedFeature.destroy();
     if (this.detailContext && this.detailCanvas) this.detailContext.clearRect(0, 0, this.detailCanvas.width, this.detailCanvas.height);
     this.spectrum?.destroy();
     this.timer.destroy();

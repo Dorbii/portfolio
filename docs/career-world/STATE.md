@@ -4,7 +4,249 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-06 17:05 UTC, LATEST (current):** **SERVED 17:02Z (commit 2e53f695)
+**2026-09-08 00:30 UTC, LATEST (current):** **FOLIAGE MOTION IS OFF; THE
+CUT-OUT ROUTE IS COSTED AND WAITS ON HIS WORD; THE OCEAN THREAD HAS A
+DIAGNOSIS NOTE; THE LANE IS CLEAN AT 91441dd8.** Owner 23:45 (his clock), on
+the wind-as-light pass at full strength: *"yeah that looks super wrong. Idk
+if we can do it this way if this is the result"* → `CANOPY_PASS_ENABLED =
+false` in `layers/terrain/components/CanopySway.tsx` (commit 9ad81ca5): the
+component renders nothing, the land shows still trees; the pass code, the
+WebGL module and the 63 sway fields stay for the cut-out route. Verdict on
+record: neither a per-pixel warp nor a luminance pass over painted crowns
+reads as wind — the warp as jelly, the light as flicker/wash. **The cut-out
+route** (his idea, "cut the foliage out with the mask, patch the land, then
+re-add as sprites"): the trees become sprites OF THEMSELVES (cut by the
+mask, the hole under each filled from the surrounding ground, put back in
+place, bent about the foot in a vertex shader; at rest pixel-identical to
+today). Counted: 3,096 single trees (≤150 px tall) across the world, a
+median of 26 per cell, T c2-1 the busiest at 277; single trees are 27% of
+crown pixels, dense stands (73%) would stay still in a first version.
+**Costed live** (his worry: "the end user experiencing lag"): 600 and 2,000
+bent, textured sprite quads drawn every frame over the page made no
+measurable difference to the frame interval; atlas memory ≤2 MB decoded per
+cell against the 16 MB site tile; residency inherits the terrain policy
+(camera + 192 px prefetch, 384 px retention, 192 MB cap = twelve site
+tiles); a frame-time guard (half rate, then stop) is part of the design.
+**Proposed and not started:** a one-cell mock on T c3-1's moor, overlay
+only, ~2 h — he interrupted at the start ("wait"); no go yet. **Ocean
+performance (owner: "no fix, I'll pass it on"):**
+`docs/career-world/OCEAN-PERF-DIAGNOSIS-2026-09-07.md` (commit 91441dd8) —
+the app's Browser pane paces frames (30 Hz cap active, ~0.5 Hz occluded),
+so pane wall-clock is not the page's cost and the earlier "28 fps" figure
+was the pane; the water's own counters read 1.6-1.8 ms GPU + 0.5 ms CPU per
+frame at 1004x564; the 1-2 s gpuP95 is the timer straddling throttled idle;
+the structural suspect at real display sizes is the per-frame WebGL→2D
+canvas copy of the detail pass in WaterRenderer.ts (~L287-293). **Other
+rulings this evening:** the World / territory / Labels buttons removed
+(0fe7a858); the two 68-71 h "running" tasks were `tail -f` watchers on the
+Sep-4 bake logs, stopped; the blur is magnification past the site tiles'
+1:1 (min span 0.02 → ~3 device px per painted texel on his display) — the
+cap is two constants (`shared/camera.ts` CAMERA_MINIMUM_SPAN and its typed
+mirror in `shared/lod/policy.ts`), NOT applied, his word; land-art PATCHING
+instead of regeneration is feasible (a masked window to the edit model,
+feathered back, `cell.mjs --restitch`, no gates) — tool not built, would
+start on the beck-over-cliff seam in his crop; three of his five defect
+crops are the chain LAYER (fixable in build-chain-layer.mjs). **Still
+wanted from him:** go / drop on the c3-1 mock; the zoom cap; the four bay
+cells; the henge's place; the palette gate. **Note for the next session:**
+this worktree has no node_modules — typecheck/lint via
+`../../../node_modules/.bin/tsc` and `.../eslint`; long bash heredocs with
+`!` or backticks die in this shell (write files with the Write tool); the
+app's cwd flips to the main checkout — cd into the worktree by absolute
+path every command.
+
+**2026-09-07 23:00 UTC:** **FOLIAGE MOTION IS NOW WIND AS
+LIGHT, NOT A WARP; THE HEADER BUTTONS ARE GONE; TWO STALE WATCHERS STOPPED.**
+Owner, over the afternoon (his clock): a crop of BLACK crowns 17:10 (fixed:
+the pass now loads its own textures, see below); *"not seeing it… what
+technique are you using here?"* on a dense stand; *"did the art always look
+this blurry up close? Do we need to prevent the LoD from getting this
+close?"*; *"can you get rid of these? we dont use them anymore"* (the World /
+territory / Labels buttons); *"I think we need to rethink this idea/technique
+for the foliage animations"*; then *"couldnt we do something clever with the
+foliage mask and using shadows/lighting to portray movement? Basically just
+cycling the masks with w.e. art/shadow work we want to make it seem like its
+moving a specific way/direction?"*; *"why cant we just use the foliage mask
+and cut that from the art and then replace the gaps with the assets?"*; *"can
+you stop any tasks that is stuck"*. **Why the warp failed:** the crown mask
+is a colour classifier and in the forest cells 74-89% of the canopy is one
+merged, hole-riddled blob — v2 (weight from each column's local foot, height
+capped at 110 px, noise phase across a stand; commit 9c6a7a6c) still left
+half the crown pixels in T c2-1 under 0.2 weight; and per-pixel displacement
+of drawn branch structure reads as jelly, worse under magnification.
+**Now (canopySwayWebGl.ts):** the paint never moves. Over the coverage mask
+the fragment rolls gust fronts downwind (one every ~360 texels at ~90
+texels/s, each tree early or late by its phase, a quick rise and slow fade,
+a shade band behind), a flurry envelope every ~900 texels, streaks of
+stretched value noise scrolling with the gust, a fine flutter under it, all
+as a luminance gain (up to +16% at the tops, +5% flutter, −5% lee) with a
+touch of cool as the needles turn; weight = the tops catch more. The field
+(sway-field.mjs v2: R local-foot weight, G height/2, B phase, A coverage) is
+unchanged and still serves. Same pass, registry, camera mapping, health
+attributes. (First served silent: the light shader stopped reading u_texel, the compiler dropped it, getUniformLocation returned null and the strict lookup threw inside a swallowed catch — no motion, no error. Now only the samplers are required, and a pass that fails to build warns on the console and sets data-motion-mode=failed.) Verified 23:20Z on a moor with conifers at site detail: 2 tiles, 101,096 crown pixels covered, 0 failures, a gust front changing 2.6% of them by >12 luma levels in a 500 ms sample. **The blur:** the site tiles are 2048 px per cell; the camera's
+minimum span 0.02 puts ~3 device px on one painted texel on his display
+(1004 css px at dpr 2); 1:1 is span ≈ 0.06. The change is two constants,
+`shared/camera.ts` CAMERA_MINIMUM_SPAN and its typed mirror in
+`shared/lod/policy.ts` POLICY_CAMERA_MINIMUM_SPAN (0.02 → ~0.06); not
+applied — his word. **The buttons:** WorldInterface.tsx no longer renders
+World / territories / Labels; the QA toggles stay behind the development
+flag; tests/structures.test.mjs flipped (commit 0fe7a858). **The cut-out
+route (his question):** possible — cut the crowns by the mask as sprites OF
+THEMSELVES, fill the holes from the surrounding ground, bend each about its
+foot; the costs are the hole fill (an inpaint or a clone; invisible at rest
+because the sprite covers it) and splitting a dense stand into trees (tip
+detection on the mask's skyline); the risk is the painted stand turning
+into a sprite forest. Held in reserve behind the light pass. **Stale
+tasks:** b3p3gr3b6 and bb7a0k80l were `tail -f` watchers on the old bake
+logs from 2026-09-04, not bakes; stopped. **Still wanted from him:** the
+zoom cap; the four bay cells; the henge's place; the palette gate.
+
+**2026-09-07 16:45 UTC:** **THE FOLIAGE PHASE HAS BEGUN:
+CANOPY SWAY IS LIVE ON THE DEV SERVER (commit 3934c427 + the amplitude
+commit after it).** Owner 15:58 (his clock), on the standing stones: *"that
+works go ahead and commit that then we can do the foliage animation and
+detail work before the city step"*. The plan's item 2 (canopy sway from the
+crown masks over the BAKED pixels, no sprites, no regeneration; reduced
+motion respected; above land, below structures) is built as two halves.
+**Data — `sway-field.mjs`** (tracked): per authored cell, the conifer
+crowns are found in the land layer (dark saturated green, hue 60-170, sat >
+0.28, luma < 95, needle texture = 9x9 luma sd > 9, closed by 2 px, blobs >=
+150 px) and written as a FIELD at 1024 px: R = the weight up the crown (0
+at its foot, 255 at its top), G = crown height / 2, B = a phase per crown,
+A = coverage (the crown + a 4-px soft ring so no static edge shows behind
+a moving one) → `art-source/…/<id>-sway.png` and
+`public/…/tiles/l2-<t>/<id>-sway.webp` (63 cells, 3,497 crowns, 4.1 MB;
+T c1-1 37% of the cell, T c2-1 293 crowns; shore cells 0-1). Probe sheet
+`.codex-tmp/session5/canopy-probe.jpg`. **Runtime — the terrain layer
+(land-owned):** `components/canopySwayWebGl.ts` (a WebGL2 pass: per
+resident site-tier tile a quad over its screen rect, the fragment reads the
+field and samples the land texture displaced downwind by weight × amplitude
+(0.085 × crown height, 1-8 texels, × wind motion 0.68) × a per-crown swing
+(rate 2.6/(1 + h/36) so pines swing slowly and saplings flutter) × a rolling
+gust; pixels outside the coverage are discarded; textures cached per tile
+and evicted 4 s after the camera leaves) and `components/CanopySway.tsx`
+(its own animation frame; draws nothing under prefers-reduced-motion, while
+the page is hidden, when the site tier is not showing, or when 8 texels
+would move under a quarter of a screen pixel; `data-motion-mode`
+idle/animating/reduced). **`TerritoryLandform.tsx`** publishes the site-tier
+tiles it drew this frame (key, image, world bounds, the `-sway.webp` path;
+l2-review candidates skipped) plus the site opacity and its backing-store
+size into a registry ref, and mounts `<CanopySway>` after its canvas (a
+fragment; same classes, so it sits over the land canvas at z-index 3, under
+the water). The two ocean-owned files are untouched. Typecheck and lint
+clean (run with the main checkout's node_modules: `../../../node_modules/.bin/tsc`).
+**Verified on the live server** (Browser pane, site detail over a Tanium
+beck with conifers): the sway canvas covered 3.75% of the viewport with
+crown pixels and 3,903 of them changed between two frames 450 ms apart
+(mean diff 2.8 at the first amplitude 0.05); after the raise to 0.085 and a fresh load: 84,960 covered, 9,920 moved, mean diff 5.6. Commits 3934c427, 832ac125, 9879eeb8 (the registry moved into the WebGL module so Vite fast-refreshes the component). **Owner 17:10 (his clock) sent a crop of BLACK crowns:** the pass uploaded the terrain layer's own HTMLImageElements, which that layer releases or replaces on its own schedule; a failed texImage2D (GL_INVALID_VALUE 1281) left an incomplete texture, and WebGL samples an incomplete texture as black exactly where the coverage was. Fix: the pass loads its OWN images by path (the site webp from the browser cache, and the sway webp), decodes them, checks every upload with getError, and publishes health on the canvas (data-sway-tiles, data-sway-textures, data-sway-upload-failures, data-sway-load-failures). Verified after a fresh load: glError 0, 0 failures, the covered pixels average RGB (55, 60, 26), 28,772 moved. **To
+review:** reload, zoom into any forest until the panel reads SITE DETAIL;
+the crowns move, the ground does not; OS reduced-motion turns it off.
+**Next in the phase** (his order, from the plan): fog over the gorge (N
+c3-1 first), the floating islands warped in place (masked bob and
+breathing), the rune chain's travelling light (the lighting layer, along
+rune-chain.def.json), foliage detail. **Still wanted from him:** the four
+bay cells; the henge's place and the spokes' long lines; the palette-gate
+recalibration.
+
+**2026-09-07 16:00 UTC:** **SERVED 15:56Z (commit
+bfecd0ab) — THE CHAIN'S RUNES ARE STANDING STONES ROOTED IN THE LAND.**
+Owner 03:20 (his clock), on the fitted discs: *"These runes need to look like
+they are part of the land not stones on top of it. Think like stonehedge"*.
+One generation round (chain-element.mjs, packets menhir / trilithon / henge,
+each against `.codex-tmp/chain/land-reference.jpg` — T c3-1's ground at 1:1
+— and the canon; 3-6 min each, in parallel via
+`.codex-tmp/session4/standing-gen.sh`): seven menhirs with turf skirts
+(delivered with REAL alpha, not magenta — key() now takes the delivery's own
+alpha when its corners are transparent), a trilithon on magenta, a henge
+ring with an altar (alpha). Sizes: the tallest menhir 64 px (a boulder and a
+half), the trilithon 110 px, the henge 240 px wide; sidecars carry
+`standing: true` and anchorRow = the feet. **build-chain-layer.mjs:**
+stampStanding() plants an element on its feet, re-hues its turf to the local
+ground, sinks the rows above each column's foot into the ground colour, puts
+a contact shadow under every foot, fades it under cliffs; placeMenhirs()
+rings seven stones round the node on the view's ellipse (north pair each
+side at R 180 clear of the trilithon, three south at R 150), drawn north to
+south; a trilithon stands at EVERY node just north of the groove (the groove
+runs in front of its feet, the spoke rises behind it); the spoke leaves the
+trunk square for 0.4 cell then runs straight to the henge (a far leader's
+straight line read as a second chain beside the trunk); the henge sits by
+its centre at the hub, spokes end at its rim. **rune-chain.def.json:**
+hubs[0].leaders = [3.5, 5.5, 6.5] (the nodes with a line to the server; the
+cablecar node at 0.45 sits at the sea; the trial leaders 2.2 / 4.8 dropped —
+4.8 stood on c4-1's cliff edge). Commits: ae97098e (code), cb423c1d
+(elements + def), bfecd0ab (served). Pictures sent 16:00Z:
+`island/pair3-c3-1-node.jpg`, `node-c5-1.jpg`, `pair3-c3-0-henge.jpg`,
+`rows-standing.jpg`. **His word wanted:** the standing stones as served
+(keep / send back with a crop); the henge's place (T c3-0, north of the
+capital) and the spokes' long lines across c4-0 / c5-0; the four bay cells;
+the palette-gate recalibration. The disc/panel path stays as the fallback
+when an element file is absent.
+
+**2026-09-07 03:15 UTC:** **SERVED 03:12Z (commit
+e1f47311) — THE CHAIN LAYER FITTED TO THE WORLD'S VIEW AND SCALE.** Owner
+02:50 (his clock), on four crops of the served hub, leaders and panels: *"I
+think the main issue here is perspective and scale"*. Diagnosis: the canon is
+a high oblique (cell.mjs: "High oblique 2.5D … Not top-down") — the crater
+tarn in N c1-0 measures 455 x 330 px, so a ground circle is an ellipse 0.73
+as tall as wide — while the discs came from image_gen as top-down coins
+(true circles, a rim all round, spike stubs where the cluster's scratches
+were cut off; the hub = the leader x1.8) at 5-15 m, three times the world's
+boulders; the hub's face carried a 16-px checker from the per-block texture
+mean in the bedding. **build-chain-layer.mjs:** at load, prepDisc fits each
+disc to its own circle (radius = the 35th percentile of edge distances from
+the centroid; the stubs are the tail), crops, foreshortens to VIEW_ASPECT
+0.73 and sizes it to the groove (LEADER_PX 90, HUB_PX 170); prepNode splits
+the node element into its 7 panels, scales each x0.55 (x0.73 tall) about
+its own centre, spread x0.8; the panels are now bedded by stamp() like the
+discs (rim band 5 px; leader 8; hub 12 — `rim` parameter, or a small stone
+is all rim); texAt is bilinear (the checker is gone); spokes are the groove
+at 0.85 (0.6 read as a drawn line). Before/after pairs sent 03:10Z
+(`island/pair-c3-1-node.jpg`, `pair-c3-0-hub.jpg`, `pair-c4-1-plateau.jpg`).
+Not touched: the c4-1 leader at x 4.8 sits on the plateau's cliff edge and
+the trunk crosses the column face there (the cliff fade does not fire on
+column tops) — placement is his (route.hubs[0].leaders), or a stronger
+cliff test; the top-centre panel of a node straddles the spoke. Still
+wanted from him: the four bay cells; the hub keep/move/drop; the
+palette-gate recalibration.
+
+**2026-09-07 02:45 UTC:** **SERVED 17:43Z (commit
+9ebf0350) — THE SIX CHAIN CELLS ARE PLAIN LAND UNDER THE CHAIN LAYER;
+NOTHING IS RUNNING; HIS EYE IS THE NEXT STEP.** Owner 17:25 (his clock):
+*"the center tiles that had the old attempt at the chain still need regen
+cause now it just has conflicting chains with the overlay"*; 17:55: *"can I
+kick off the ocean work?"* → told yes, from 2e53f695 or the latest served
+commit (the later serves change no coast water). chain8 (c6-1 and c0-1
+plain regens: both refused, c0-1 on rock lighting 0.217 + 4 crossings) →
+**chain9** stitched the six plain regens on his words — c3-1, c5-1, c2-1,
+c1-1, c6-1, c0-1 (c0-1's crossings opened first with conform-seam-water
+against c0-6 / c1-1 / c0-0 / c0-2); the gates overridden (palette, tone,
+crossings, fringe, rock lighting) are recorded in each ledger entry's
+ownerOverride — and served 17:40-17:43Z: tone gains, the chain layer
+rebuilt over all 21 Tanium cells (the seven trunk cells; the trial hub's
+spokes through c4-1 and c2-2 / c3-2 / c4-2), 63 tiles registered, the 4
+candidate previews (c0-5, c1-3, c1-4, c4-8), mount + water fields, commit
+9ebf0350. The rebuilt overlays of c0-1 / c1-1 / c6-1 and chain9.sh's tracked
+copy: commit 948311e3 (02:40Z). The dev server on :3000 serves this
+worktree (c0-1's site webp hash matches the file). **Authored: NinjaOne
+20/20, Tanium 21/21, coast 22/27** (c8-4 stays sea by plan; the four bay
+cells are previewed candidates on the served world; c4-8's candidate keeps
+its painted lagoon opaque — the water-cut pass runs on authored cells only,
+so after an acceptance run `water-cut-pass.mjs --fix --only coast:c4-8`).
+Picture sent 02:45Z: `.codex-tmp/session4/island/island-grid-L2-chain.jpg`
+(mosaics rebuilt from the pyramid; `island-chain.mjs` lays the chain
+overlays on the Tanium mosaic before island-grid boxes it; marks: the four
+bay cells, T c3-0's trial hub). **His word wanted:** the four bay cells
+(refused on: c0-5 palette dBG 0.278; c1-3 4 crossings, band-conformed, tone
+23.1; c1-4 fringe 8.61% + 1 crossing + tone 24.7; c4-8 rock lighting 0.243,
+fringe 24.7%, 1 crossing) — accept on eye with CELL_OWNER_ACCEPT … `--redo
+--force`, or send back with a crop; the trial hub in T c3-0 (keep / move /
+drop) and where the spokes leave the trunk; the palette-gate recalibration
+(0.30 / 20) offered, unanswered; the kerb's leftover highlights if he minds.
+**Later:** the light on the groove (the effect layer), the land animation
+layer, the city, the stitch test (`tests/world-authoring-stitch.test.mjs`
+expects edit-target.jpg ±6 since lock 18d — not yet run with the lock free).
+
+**2026-09-06 17:05 UTC:** **SERVED 17:02Z (commit 2e53f695)
 — THE WORLD IS CURRENT FOR THE OCEAN THREAD; THE WATER-CUT PASS IS COMMITTED
 (c2f27814).** Owner 17:40-17:50 (his clock): "fix this spot [c7-8's shore]
 and do a full pass to make sure all the water of the land tiles is cut

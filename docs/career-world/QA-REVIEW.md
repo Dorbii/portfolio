@@ -1620,3 +1620,34 @@ The mis-scaled page captures made during viewport setup are diagnostic artifacts
 - .codex-tmp/qa/inland-r8/world-final.png: Reverse zoom returns to the current island mount with water and land ready.
 - .codex-tmp/qa/inland-r8/territory-final.png: Territory view retains the current coast, registration and stable land/water residency.
 - .codex-tmp/qa/inland-r8/motion-0.png through motion-3.png: four native frames over 1.898 simulated seconds at one camera; distinct frame hashes, normal motion restored.
+
+
+**Codex (inland r9 reframe, 2026-09-07):** Owner rejects the mapped falls again and supplies a pond-mask shape, a marine-classification correction, remaining painted-water examples, and authorization to use lighting/shadows. Merely fitting the earlier translucent ribbon model to source channels did not resolve its flat-sheet appearance. This revision changes the representation: one continuous mapped sheet, a blended crest, a falling-face normal under shared lighting, aerated filaments, and impact-local spray instead of overlapping ribbons and straight-line curtain particles. The pond has two source rims across the Coast c4-0 / NinjaOne c2-0 boundary; use one world-registered cutout across both authored sources, following the owner marked oval. Diagnose each remaining source patch before cutting. Ocean material/style, camera and shared LoD remain outside this revision.
+
+
+**Codex (r9 test classification):** The spray-independence test selected the first mapped drop, which is now a bed-following cascade under the owner-requested waterfall correction. Its blanket spray fixture is superseded, not its visibility/effects/cleanup guarantees. Select an explicitly airborne curtain for the existing assertions and add a cascade-without-airborne-spray assertion; retain every existing control and resource-release check. The earlier new-loader failure was our Node strip-only syntax regression; the loader was corrected to explicit class fields without changing that test.
+
+**Codex (r9 combined delivery):** Owner requested the full land branch at 162faa9e and all current work committed to main. The merge keeps the newer water implementation, takes the land branch’s final canopy-off/interface state, and rebuilds conflicting generated outputs from combined sources. Current 67-cell mount, 108 inland features, 19 cascades / 20 curtains + two bespoke gorge segments. Owner-marked waterway, pond seam, marine arm and painted-water remnants are repaired; false stone-cap opacity restored. A one-time bounded T c4-0 bank patch uses the second of two built-in ImageGen candidates and carries the carved line in a separate refracted/depth-tinted bed texture. The earlier no-water-on-chain source note is superseded for that pond by the owner’s direct request.
+
+**Codex (r9 verification):** Typecheck/build, current-water inputs, protected authoring and 44 focused tests pass. Lint 0 errors / 32 warnings. Full suite 128 pass / four baseline failures / one skipped. Original RGB is preserved outside the explicitly authorized pond patch; all of that patch’s RGB changes stay within its permission mask. Final camera/state evidence is recorded in inland-r9-reference/runtime-summary.json. This is a reviewable implementation, not owner visual acceptance.
+
+- .codex-tmp/qa/inland-r9/pond-floor-final.png: Repaired T c4-0 shore; the carved groove continues beneath water and meets both land-side ends.
+- .codex-tmp/qa/inland-r9/pond-bed-off.png: Disabling L3_4 hides both bed detail and the submerged groove.
+- .codex-tmp/qa/inland-r9/pond-bed-on.png: Re-enabling L3_4 restores the groove and substrate at the paused inland clock.
+- .codex-tmp/qa/inland-r9/forest-cascade-final.png: The forest reach uses transparent surface foam over its bed.
+- .codex-tmp/qa/inland-r9/raised-cascade-final.png: The low step uses cascade treatment and the dry stone cap is restored.
+- .codex-tmp/qa/inland-r9/tarn-cascade-final.png: The bending connector uses surface flow without airborne curtain spray.
+- .codex-tmp/qa/inland-r9/silver-waterway-final.png: The marked former grey route is a continuous water opening.
+- .codex-tmp/qa/inland-r9/silver-fall-final.png: The silver curtain starts at the source cliff lip and reaches its toe.
+- .codex-tmp/qa/inland-r9/east-plane-final.png: The east cliff uses the owner-registered lip orientation and base point.
+- .codex-tmp/qa/inland-r9/limestone-bed-final.png: Limestone water uses fractured bedrock rather than forest cobbles.
+- .codex-tmp/qa/inland-r9/gorge-pool-final.png: The landing pool has a shaded recess and subdued broken ripples.
+- .codex-tmp/qa/inland-r9/pond-seam-final.png: The duplicated pond rim is removed inside one connected water mask.
+- .codex-tmp/qa/inland-r9/marine-inlet-final.png: The narrow tidal arm renders as ocean.
+- .codex-tmp/qa/inland-r9/stacks-final.png: Painted water between coastal stacks is replaced by live water.
+- .codex-tmp/qa/inland-r9/wedge-final.png: The painted wedge/outline is removed while the tall column remains.
+- .codex-tmp/qa/inland-r9/world-final.png: The reverse camera transition retains the complete 67-cell mount.
+- .codex-tmp/qa/inland-r9/pond-motion-0.png through pond-motion-3.png: native captures with normal inland motion restored.
+
+
+**Codex (r9 full-width submerged correction):** Owner crop showed the generated crossing retained only one of the two converging grooves. The final bed texture now comes from the canonical route and kerb element, exported without the water clip for T c4-0 and then clipped into the pond bed. Both complete grooves preserve their route, width and spacing; no third ImageGen candidate was used. The bank patch is unchanged (idempotent rebuild: zero RGB/alpha changes). A mechanical test compares every fully submerged canonical route pixel to the extracted texture, preventing partial-line loss. pond-floor-final.png is refreshed with both grooves.

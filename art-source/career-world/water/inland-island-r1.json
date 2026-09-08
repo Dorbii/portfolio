@@ -137,7 +137,8 @@
           "backingOffset": [
             0.04,
             0
-          ]
+          ],
+          "style": "cascade"
         }
       ],
       "sha256": "1ac86581bca0ee93dd39c5206a2d871f8a75662c2811529d6c6e8d3b01dd5fca",
@@ -244,7 +245,8 @@
           "backingOffset": [
             0.05,
             0
-          ]
+          ],
+          "style": "cascade"
         }
       ],
       "sha256": "61e6fec6b935b26d9b9e54e30d9b4d5439210e1377dd7b81f6013241235f7d12",
@@ -446,7 +448,8 @@
           "backingOffset": [
             0.07,
             0
-          ]
+          ],
+          "style": "cascade"
         }
       ],
       "sha256": "dab41b2d840f3c76fa4e2a38cd184f8ae2ed91e4bb7e78c29309fd447d25e802",
@@ -551,7 +554,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "cascade"
         },
         {
           "id": "forest-lower-drop",
@@ -572,10 +576,11 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "cascade"
         }
       ],
-      "sha256": "414cbcea8adf349e1e496ed962efddad842b142f0fb7f9c5897682e25fc95cef",
+      "sha256": "9aa62f82617b8b3f73a8e61fac18cb558a2cb5763cac82cb72d49a91bf097caa",
       "reconciliation": "annotation-water-mask-unchanged"
     },
     {
@@ -665,10 +670,11 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "cascade"
         }
       ],
-      "sha256": "3899b80d3b772414fd282747c780f8ce993d4f0f4d216cad2f9c493e27c8098a",
+      "sha256": "ee52bc1b67e501dbc173ed57a8bb37dfdb8954b1f66fdc6b52c71850f2f12872",
       "reconciliation": "annotation-water-mask-unchanged"
     },
     {
@@ -754,7 +760,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "cascade"
         }
       ],
       "sha256": "4527eb5656d166f1d6ff17e20c837e3b14066b9df52f3cfe38bc3dcdd04bc961",
@@ -905,7 +912,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "curtain"
         },
         {
           "id": "rock-tarn-short-fall",
@@ -926,7 +934,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "cascade"
         }
       ],
       "sha256": "13eef9d1b27b418df1ea969cd31c9d3ff9454ded458819cd2d38b1a5cac91acd",
@@ -1038,7 +1047,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "cascade"
         },
         {
           "id": "eastern-forest-lower-drop",
@@ -1059,10 +1069,11 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "cascade"
         }
       ],
-      "sha256": "6d29f2e72652172238810c70da20e6433c2663c0421b05714739c5d4d0c13c53",
+      "sha256": "ecdd6b5f86648d17906d7102bf1f7963b0368082239376f68b60b71a943e61ea",
       "reconciliation": "annotation-water-mask-unchanged"
     },
     {
@@ -1115,12 +1126,12 @@
         {
           "id": "silver-upland-drop",
           "lip": [
-            0.6863702979970688,
-            0.41866145578895947
+            0.677978515625,
+            0.479736328125
           ],
           "foot": [
-            0.66,
-            0.5
+            0.650390625,
+            0.59814453125
           ],
           "upstream": [
             0.705,
@@ -1131,10 +1142,22 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "curtain",
+          "lipEdge": [
+            [
+              0.65625,
+              0.47412109375
+            ],
+            [
+              0.69970703125,
+              0.4853515625
+            ]
+          ],
+          "planeReference": "r9 source cliff lip and toe: old anchors placed the curtain on the upstream reach."
         }
       ],
-      "sha256": "2deed0182f73e9d567ab5638a48e52f75aca4e5e72aa6137b84daf51dbc2098b",
+      "sha256": "ef8c555bceb844dc21dc6f5e973e8a2dde1edfefc610dd55f1d4c606d6b8beff",
       "reconciliation": "annotation-water-mask-unchanged"
     },
     {
@@ -1208,12 +1231,12 @@
         {
           "id": "east-sea-cliff-fall",
           "lip": [
-            0.885,
-            0.43
+            0.8784095331422187,
+            0.40554307853131744
           ],
           "foot": [
-            0.905,
-            0.55
+            0.8858882257566145,
+            0.49805583208733556
           ],
           "upstream": [
             0.875,
@@ -1224,7 +1247,19 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "lipEdge": [
+            [
+              0.8607047299586787,
+              0.41601579747867234
+            ],
+            [
+              0.8961143363257587,
+              0.3950703595839625
+            ]
+          ],
+          "planeReference": "Owner purple plane 304fb9d8, registered against surrounding terrain; lip and cliff-base anchors, r9.",
+          "style": "curtain"
         }
       ],
       "sha256": "e7485c45bff87325516b6081a5873848776c5d4a617a2ea2746696e1b94c0acd",
@@ -1350,7 +1385,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "curtain"
         }
       ],
       "sha256": "0efabf381d7808090c5a41e3cebcc82dd521fd8f98c48f815ae4c3df92884b47",
@@ -1435,7 +1471,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "curtain"
         }
       ],
       "sha256": "c4a3ba2f72562a08f73c3bafea07e3e993f024a9b599391c640f55cc926c0365",
@@ -1518,10 +1555,11 @@
           "backingOffset": [
             0.05,
             0
-          ]
+          ],
+          "style": "curtain"
         }
       ],
-      "sha256": "f17683f75722a469e82ec2974b48682474fd3e6a49d13c21364a888b2aa816c6",
+      "sha256": "6b837478815dceec8973727a086569414febc131cdbdbbe247b32e7dc72c91df",
       "reconciliation": "reviewed-current-art-r8",
       "retiredFeatures": [
         {
@@ -1628,7 +1666,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "cascade"
         }
       ],
       "sha256": "ea14fc68d625c923ba41bac40a036b12909e987049444717697b219a52aaff7e",
@@ -1642,7 +1681,7 @@
       "streams": [],
       "pools": [],
       "falls": [],
-      "sha256": "14b0bf5934e0771525d7cde6411fecda03bfe0af97bfb9220e5074115d869fc4",
+      "sha256": "1e0946daabf4c34e0db2905c68cfbe2cda9dd7b155838007a8692d17c2ce68a3",
       "reconciliation": "annotation-water-mask-unchanged"
     },
     {
@@ -1732,7 +1771,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "curtain"
         },
         {
           "id": "tanium-gold-second-fall",
@@ -1753,7 +1793,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "cascade"
         },
         {
           "id": "tanium-gold-coast-drop",
@@ -1774,7 +1815,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "cascade"
         }
       ],
       "sha256": "9f80f8f54c65e7ee81bbda33f6a080b1aa638e819661594412220da25ef4ee67",
@@ -1862,7 +1904,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "cascade"
         },
         {
           "id": "tanium-north-middle-step",
@@ -1883,7 +1926,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "cascade"
         },
         {
           "id": "tanium-north-lower-step",
@@ -1904,10 +1948,11 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "cascade"
         }
       ],
-      "sha256": "aecc1ce3e2d8f3a7501af32d6e95b751419a5b9bfe5eb6aa7a0013c05c6ca72e",
+      "sha256": "d6d21d50117620a4708322a95119734a33c65efd0ef4ba248584f535ba386fb8",
       "reconciliation": "reviewed-current-art-r8"
     },
     {
@@ -2076,7 +2121,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "curtain"
         },
         {
           "id": "tanium-central-middle-drop",
@@ -2097,7 +2143,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "curtain"
         },
         {
           "id": "tanium-central-lower-drop",
@@ -2118,7 +2165,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "curtain"
         },
         {
           "id": "tanium-central-coast-drop",
@@ -2139,7 +2187,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "curtain"
         },
         {
           "id": "tanium-east-upper-drop",
@@ -2160,7 +2209,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "curtain"
         },
         {
           "id": "tanium-east-middle-drop",
@@ -2181,7 +2231,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "curtain"
         },
         {
           "id": "tanium-east-coast-drop",
@@ -2202,7 +2253,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "curtain"
         }
       ],
       "sha256": "40f9399d5770a2e6d50a4c9b1ccf44d50d0f75871f4cb25cb169978734074d51",
@@ -2248,7 +2300,7 @@
         }
       ],
       "falls": [],
-      "sha256": "d38377698ff1f1ab0b07dc1bc8c4e71e16dbf0fa8dabc1b5f9837363b39bd50f",
+      "sha256": "9a461bf041afa1b8489fecf2bb97a4602cbc106dd47c8dd493e8e8c46a2905b3",
       "reconciliation": "reviewed-current-art-r8",
       "retiredFeatures": [
         {
@@ -2397,7 +2449,8 @@
           "backingOffset": [
             0,
             0
-          ]
+          ],
+          "style": "cascade"
         },
         {
           "id": "tanium-west-first-drop",
@@ -2418,7 +2471,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "curtain"
         },
         {
           "id": "tanium-west-second-drop",
@@ -2439,7 +2493,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "curtain"
         },
         {
           "id": "tanium-west-coast-fall",
@@ -2460,7 +2515,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "curtain"
         },
         {
           "id": "tanium-fern-bench-fall",
@@ -2481,7 +2537,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "cascade"
         },
         {
           "id": "tanium-fern-coast-fall",
@@ -2502,7 +2559,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "curtain"
         }
       ],
       "sha256": "83bc78b0c4a1de4b19db6667e026cfe310e40be50b53b079f2998b48ceea8554",
@@ -2516,7 +2574,7 @@
       "streams": [],
       "pools": [],
       "falls": [],
-      "sha256": "cd49938000e3ffaf3278b24765a7ae2756cf8705fa28b83578f6a1c4065af738",
+      "sha256": "acbca458638eef36fee96ee75b6736145ffa2562538b6c3cacc00c0f32e0b222",
       "reconciliation": "annotation-water-mask-unchanged"
     },
     {
@@ -2583,7 +2641,7 @@
         }
       ],
       "falls": [],
-      "sha256": "b09c2f1fb128f16e646e8a2fc9cfcb5b0079edfd1afa6f94446c848200d89db8",
+      "sha256": "e5c8d3f3ccbe1014e826f55dea4d55a85e7c900bcad5baf6fe73d14716bf8ff0",
       "reconciliation": "reviewed-current-art-r8"
     },
     {
@@ -2666,7 +2724,7 @@
       "streams": [],
       "pools": [],
       "falls": [],
-      "sha256": "db1f83b94ba7b35ec62a6df33c3f07478a9cc3f6eae13e42bc7a20c5a33694bc",
+      "sha256": "856d33091e63c0b989f73c45fad83434eb114d374da74e22994d3f61191c74f0",
       "reconciliation": "annotation-water-mask-unchanged"
     },
     {
@@ -2677,7 +2735,7 @@
       "streams": [],
       "pools": [],
       "falls": [],
-      "sha256": "336b6a964b89abe438cb35c55356f7faf3d555c1c083f804768c6bbd24a59056",
+      "sha256": "b88ef180385a7bf3cbc81152ef22ae47c3a62b6e9094ecce135d9ffdcdf24e01",
       "reconciliation": "annotation-water-mask-unchanged"
     },
     {
@@ -2789,7 +2847,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "cascade"
         },
         {
           "id": "tanium-quarry-upper-cut",
@@ -2810,7 +2869,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "curtain"
         },
         {
           "id": "tanium-quarry-lower-cut",
@@ -2831,7 +2891,8 @@
           "backingOffset": [
             0.035,
             0
-          ]
+          ],
+          "style": "curtain"
         }
       ],
       "sha256": "c844e2387cb7f8f8cf4619ff45d2d0e6b20c3a24d7868466678393a3f6f33e5f",
@@ -2888,7 +2949,7 @@
       ],
       "pools": [],
       "falls": [],
-      "sha256": "677f5c5ea149374ed0ad991680c3cf8e75d3dd760c9eb61472edf77742d02da8",
+      "sha256": "fae4059a5092129e3c9fa7137c20538d2c2a0e8ebf962b714b8f3b35bc60eff2",
       "reconciliation": "reviewed-current-art-r8"
     },
     {
@@ -2899,7 +2960,7 @@
       "streams": [],
       "pools": [],
       "falls": [],
-      "sha256": "09749acdbfaeda270dc89fa2dfb7e17b4d6e6fe4b24c1774ebeec8dfbbb78e7d",
+      "sha256": "2680eff396562f17eb87950bd8b01e4aae1bf16ce3df66502f5cc7e88eae476d",
       "reconciliation": "reviewed-current-art-r8",
       "retiredFeatures": [
         {
@@ -3032,7 +3093,7 @@
         }
       ],
       "falls": [],
-      "sha256": "94b97b2f70bdf5f6b83a2ed42f7a9f66588ddb5e1a2f8a3f390983fcedaac31d",
+      "sha256": "2e6d22151b9012390656175407604993cd3b84f7e647ed67b8b456f283a2b4f8",
       "reconciliation": "reviewed-current-art-r8"
     },
     {
@@ -3095,7 +3156,7 @@
         }
       ],
       "falls": [],
-      "sha256": "3f0a8081d12ee87993f5723630c8aa3fbb19f88763381fa766c1c7191cbec3ae",
+      "sha256": "df0fa7b54a615ab0ec797ffaf6ecea91f833eb3aca1ef7a6581e058311f05486",
       "reconciliation": "reviewed-current-art-r8"
     },
     {
@@ -3177,7 +3238,7 @@
         }
       ],
       "falls": [],
-      "sha256": "0a215a993a8cc83d209278315bbfd872f4f6ec93ef9e3ef07c127f129f41c17f",
+      "sha256": "10a3b826f4e09e8938046b598a95edfaa3d7aa110f173455cc1e108b923d873d",
       "reconciliation": "annotation-water-mask-unchanged"
     },
     {
@@ -3199,7 +3260,7 @@
       "streams": [],
       "pools": [],
       "falls": [],
-      "sha256": "645df67e2f31306385c1737ec7287ac1695c77bb712005330642e3c3f9f9e089",
+      "sha256": "20c805ec28e02cb56bdf6854677c801b416430e4984f5de517ca54aed7a99f2f",
       "reconciliation": "annotation-water-mask-unchanged"
     },
     {
@@ -3233,7 +3294,23 @@
       "pools": [],
       "falls": [],
       "sha256": "2798f3b5e8bb2ecb5e23acde3c0444015540832292c0d85423e7d47afcb700f6",
-      "reconciliation": "new-cell-pending"
+      "reconciliation": "new-cell-pending",
+      "marineRegions": [
+        {
+          "id": "northwest-tidal-inlet",
+          "bounds": [
+            [
+              0.43,
+              0.56
+            ],
+            [
+              0.93,
+              0.84
+            ]
+          ],
+          "reason": "Owner screenshot 19621df1: this narrow coastal arm is ocean, not river. Matched to coast c1-0 against the land artwork."
+        }
+      ]
     },
     {
       "tileId": "l2-coast-c1-1",
@@ -3309,7 +3386,7 @@
       "streams": [],
       "pools": [],
       "falls": [],
-      "sha256": "51cdee680ae7df5185e7bbc6f63fd2300057879f31dd5aa47e0366d28cf0c2e1",
+      "sha256": "cb9c784cfc2a146adf7f541314ee00f45a3ae4e2b706ee4b69124e5ef8c79385",
       "reconciliation": "new-cell-pending"
     },
     {
@@ -3320,7 +3397,7 @@
       "streams": [],
       "pools": [],
       "falls": [],
-      "sha256": "87e971fa138181b46e8b9a19061d3348b50dd9c739907a5200bf2b60f64a0e68",
+      "sha256": "6b4100238b88d7c5276532d9c6e2528a1201145c8501fbfa8d3a6d2f41f9733a",
       "reconciliation": "new-cell-pending"
     },
     {
@@ -3331,7 +3408,7 @@
       "streams": [],
       "pools": [],
       "falls": [],
-      "sha256": "abdbf418a0a5f66ee222110053ba035f7d9553f8ef543a078cf4c1efafa608c6",
+      "sha256": "405726f31154e378cd24e969e665a7cca4c1941e85f331f0d6ace00df7ec231a",
       "reconciliation": "new-cell-pending"
     },
     {
