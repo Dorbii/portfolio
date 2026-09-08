@@ -1,0 +1,13 @@
+{
+  "format": "career-world/tree-sprites@r1",
+  "note": "cells with a cut-out sprite set: the runtime fetches <id>-trees.json and <id>-trees.webp for these only (tree-sprites.mjs)",
+  "cells": {
+    "l2-tanium/c3-1": {
+      "trees": 81,
+      "atlas": [
+        2048,
+        520
+      ]
+    }
+  }
+}
