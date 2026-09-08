@@ -4,7 +4,62 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-08 02:30 UTC, LATEST (current):** **THE CUT-OUT MOCK IS BUILT ON
+**2026-09-08 04:30 UTC, LATEST (current):** **HIS FIRST LOOK AT THE MOCK:
+THE WIND RE-TUNED ONCE, THE CHAIN NOW BEHIND THE CROWNS IN FRONT OF IT;
+BOTH WAIT ON HIS SECOND LOOK. LANE `claude/foliage-animation-88bcad` AT
+a7602433, SIX COMMITS ON MAIN 873f4a99, TREE CLEAN.** Owner, on the mock
+live (his crops of the trunk line on T c3-1): *"I think they are a bit too
+animated if im being honest, or at least not consistent enough, they are
+kinda waving to me lol. in addition the chain overlay is passing over the
+trees and looks like it isnt blending into the environment at all"*.
+**The wind (commit dfb0583c, `treeSpritesWebGl.ts`):** the first tuning
+gave every tree its own beat (a two-harmonic sway at its own rate and
+phase) under gust fronts every 360 texels — that is the waving. Now ONE
+wind the cell shares: a gust front every ~600 texels drifting downwind at
+~60 texels/s with a slow rise and a slower relax, so neighbours lean
+together and let go together; the sway's phase follows position along the
+wind (a travelling motion through a stand), a tree's own phase only
+nudges; the lean halved (`DEFAULT_AMPLITUDE` 0.05 of the crown height at
+the top, `?trees.amplitude=` to try others), the tops barely nod
+(wind.y x 0.25). Not yet seen by him. If "not consistent" meant the
+singles moving beside still stands, that is the v1 design (stands stay)
+and the answer is the stand split, not tuning. **The chain (commit
+a7602433):** the chain is composited INTO the served tiles by
+world-register --chain, so the fix is in `build-chain-layer.mjs`: after a
+cell's overlay is drawn, the crowns (the shared classifier, now
+`crown-mask.mjs`, used by the sprite tool too) are found on the plain land;
+a crown whose foot stands below the overlay's solid near edge in its own
+columns is IN FRONT, and the overlay is cut away under its silhouette (the
+mask closed by 5 px, grown 1, a half-alpha 1-px edge — the raw mask showed
+wall through every needle gap and read as a tree-shaped hole); a crown
+rooted inside or above the band stays behind, as behind a wall. Per cell:
+c0-1 3 in front / 4 behind, c1-1 2/7, c2-1 6/4, c3-0 1/1, c3-1 2/5, c4-0
+1/3, c4-1 1/0, c5-1 6/5, c6-1 2/3. The ten chain cells re-registered
+(`world-register.mjs --tone tone-gains-r1.json --chain
+art-source/career-world/chain/cells --only-cells tanium:...`, 54 s; the
+feed unchanged; the tone table untouched; mount and water not rebuilt —
+neither reads the served pixels). Before/after at 2x:
+`.codex-tmp/session6/chain-c3-1-cuts-2x.jpg`, sent to him. c3-1's sprite
+set re-cut from the re-served tile: 77 singles, 42% of its crown pixels.
+**"Not blending into the environment":** not addressed — the kerb element
+itself (a pale top-down strip against the painting's three-quarter stone
+terraces) is the likely reason, an element-art matter (chain-element.mjs
+packets) not a compositing one; ask him to mark what reads wrong on a
+crop before touching it. **Verified:** typecheck, lint, the sprite test;
+the re-served tile reproduced at rest by the new set (the tool's contract);
+the pass drawing 81 → 77 sprites live at site detail with the pane
+visible (`data-tree-sprites`, `data-motion-mode=animating`, EMA frame
+5.8 ms). **Still wanted from him:** the wind's second look (waving or
+not; amplitude); the chain cuts (right, or still passing over); what "not
+blending" means on a crop; then the four bay cells, the henge's place, the
+palette gate. **Note for the next session:** the pane must be VISIBLE for
+any of this to move (a hidden pane fires zero animation frames; the camera
+can still be parked by keyboard: `+` and the arrows commit synchronously);
+the suite leaves three JSONs CRLF-dirty (both `plan.json`,
+`ocean-detail-layout-r1.json`) — `git checkout --` them; the same four
+suite tests fail on main.
+
+**2026-09-08 02:30 UTC:** **THE CUT-OUT MOCK IS BUILT ON
 T c3-1 AND WAITS ON HIS EYES; THE LANE IS `claude/foliage-animation-88bcad`,
 REBASED ON MAIN 873f4a99, THREE COMMITS, TREE CLEAN.** Owner: *"can you
 resume the foliage animation work? Main should be up to date so you can
