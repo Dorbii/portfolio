@@ -34,11 +34,15 @@ feeder, the pool, the gully and the channel (29 points, radius kept at
 re-cut (76 singles); the suite at its four baseline failures. Before/after
 (`.codex-tmp/session6/redirect-before-after.jpg`) sent to him; live at the
 crossing the water runs down the gully and the closed strip reads as
-meadow, a faint darker band near the pool at 1:1. **Still wanted from
-him:** the wind's second look (waving or not; amplitude by
-`?trees.amplitude=`); the chain cuts; the redirect; what "not blending"
-means on a crop; then the four bay cells, the henge's place, the palette
-gate. **Note for the next session:** a re-slice of a served cell from its
+meadow, a faint darker band near the pool at 1:1. **His second look at the wind (later
+that morning):** *"they are a little too subtle for the movement. Had to
+really look for it"* — the character is accepted, the amount was not:
+third tuning (`DEFAULT_AMPLITUDE` 0.05 → 0.08, gusts every ~480 texels at
+~80 texels/s, a six-second cycle, the sway between them 0.12 → 0.18, still
+one shared wind). **Still wanted from him:** the wind's third look (if it
+reads, the roll-out to the 63 cells is his go); the chain cuts; the
+redirect; what "not blending" means on a crop; then the four bay cells,
+the henge's place, the palette gate. **Note for the next session:** a re-slice of a served cell from its
 pyramid is only safe after checking the served tile against the pyramid —
 the trunk cells' served tiles differed from a fresh slice by re-encode
 noise and 16-164 alpha px (patched inside the cuts instead, 2026-09-08

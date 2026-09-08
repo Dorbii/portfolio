@@ -97,21 +97,24 @@ void main() {
   float phase = a_tree.x;
   // ONE wind the whole cell shares (owner 2026-09-08 on the first tuning:
   // "a bit too animated ... not consistent enough, they are kinda waving"):
-  // a slow gust front every ~600 texels drifting downwind at ~60 texels/s,
-  // a slow rise and a slower relax, so neighbours lean together and let go
-  // together; a tree's own phase only nudges it
+  // a gust front every ~480 texels drifting downwind at ~80 texels/s (a
+  // six-second cycle), a quick rise and a slower relax, so neighbours lean
+  // together and let go together; a tree's own phase only nudges it. On the
+  // second tuning ("a little too subtle ... had to really look for it") the
+  // gusts came closer and the sway between them grew, with the lean itself
+  // raised in TreeSprites.tsx
   float along = dot(a_foot, u_wind);
   float across = dot(a_foot, vec2(-u_wind.y, u_wind.x));
   float t = u_time * (0.6 + 0.8 * u_motion);
-  float g = fract((along - t * 60.0) / 600.0 + across / 2400.0 + phase * 0.06);
-  float front = smoothstep(0.0, 0.25, g) * (1.0 - smoothstep(0.25, 0.9, g));
-  float env = 0.55 + 0.45 * sin((along - t * 25.0) / 1500.0 * 6.2831853 + across / 900.0);
+  float g = fract((along - t * 80.0) / 480.0 + across / 2400.0 + phase * 0.06);
+  float front = smoothstep(0.0, 0.2, g) * (1.0 - smoothstep(0.2, 0.85, g));
+  float env = 0.6 + 0.4 * sin((along - t * 30.0) / 1500.0 * 6.2831853 + across / 900.0);
   float gust = front * env;
-  // a slow sway about the lean whose phase follows position, not the tree,
-  // so it travels through a stand as one motion; pines slower than saplings
-  float hz = 0.28 / (1.0 + H / 90.0);
+  // a sway about the lean whose phase follows position, not the tree, so it
+  // travels through a stand as one motion; pines slower than saplings
+  float hz = 0.35 / (1.0 + H / 90.0);
   float osc = sin(6.2831853 * (hz * t) - along / 900.0 * 6.2831853 + phase * 0.5);
-  float swing = 0.12 + 0.7 * gust + 0.12 * osc * (0.4 + 0.6 * gust);
+  float swing = 0.12 + 0.7 * gust + 0.18 * osc * (0.4 + 0.6 * gust);
   // the lean is sideways on screen; the wind's downward part barely nods the tops
   vec2 lean = vec2(u_wind.x, u_wind.y * 0.25);
   vec2 offset = lean * (u_amplitude * H * swing * bend) * u_pass;
