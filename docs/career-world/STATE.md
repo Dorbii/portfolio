@@ -4,7 +4,78 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
-**2026-09-08 00:30 UTC, LATEST (current):** **FOLIAGE MOTION IS OFF; THE
+**2026-09-08 02:30 UTC, LATEST (current):** **THE CUT-OUT MOCK IS BUILT ON
+T c3-1 AND WAITS ON HIS EYES; THE LANE IS `claude/foliage-animation-88bcad`,
+REBASED ON MAIN 873f4a99, THREE COMMITS, TREE CLEAN.** Owner: *"can you
+resume the foliage animation work? Main should be up to date so you can
+branch off of it"*, then *"no main should be fixed now"* / *"and be the
+working copy"* — main was checked out in the codex worktree
+`ocean-inland-polish` all session, so the lane branched from main's tip and
+fast-forwards into it (`git merge --ff-only claude/foliage-animation-88bcad`
+from that worktree). **Data — `tree-sprites.mjs`** (tracked, commit
+052e4afd): the crown classifier is sway-field's; a SINGLE is a component
+≤150 px tall AND wide, clear of the tile border; each is cut from the
+SERVED site tile (so at rest the sprite is the tile's pixels), opaque over
+the crown and a 3-px rim, feathered 2 px beyond; the PATCH under it is
+opaque over the same rim and filled from ground ≥4 px from ANY crown
+(pull-push base) with the grain (9x9 high-pass) of a coherent band below
+the foot, or above, or beside — the first probe mirrored the grain across
+the hole's edge and rebuilt a ghost of the tree out of its own fringe,
+visible even at half zoom. Sprite and patch pack into one lossless atlas
+with a JSON manifest, and `manifests/terrain-tree-sprites-r1.json` lists
+the cells that have a set so the runtime never fetches for one that does
+not. **T c3-1: 81 single trees (44% of its crown pixels), 24 stands still;
+atlas 2048x520, 690 kB.** World count with this tool (`--count`): 2,746
+singles, 21% of the crown pixels (the lost count of 3,096 / 27% took
+height only). **Runtime** (commit c4835810): `treeSpritesWebGl.ts` + `TreeSprites.tsx`,
+mounted in TerritoryLandform after the (off) CanopySway on the same
+registry; per tile with a set, instanced strips of 8 rows draw every patch
+still, then every sprite with rows above the foot displaced by
+pow(above/H, 1.7) x amplitude 0.10 x H x swing, swing = 0.18 + 0.62 x gust
+(the light pass's fronts, rolling downwind) + 0.2 x a two-harmonic sway
+(0.9/(1 + H/60) Hz: pines slow, saplings quick); the lean is
+(wind.x, wind.y x 0.5). URL tuning `?trees.amplitude=0.1&trees.speed=1`;
+kill switch `TREE_SPRITES_ENABLED`; a frame-time guard (EMA over 60 ms for
+1.5 s → half rate, over 120 ms → stop, retry after 10 s; gaps over 500 ms
+are throttling and not counted); health on the canvas
+(`data-tree-tiles`, `-sprites`, `-sets`, `-load-failures`, `data-frame-ms`,
+`data-motion-guard`, `data-motion-mode`). **Verified:** offline, patches +
+sprites at rest composite to the served tile with a max channel
+difference of 0 over all 4.19M px; in the page, the module drawn
+off-screen (dynamic import, readPixels) loads the set with 0 failures,
+draws 81 sprites over 6.37% of a 1024-px tile, and 23,933 px change
+between t=0 and t=1.7 s, GL error 0. **NOT verified: the live look.** The
+app's Browser pane was hidden the whole session and a hidden pane starves
+requestAnimationFrame to ZERO frames (measured three times), so no loop
+ran and the wheel could not zoom (the camera commits through a rAF
+queue); the camera was parked on c3-1 through the keyboard path (`+` and
+the arrows commit synchronously). The dev server is up
+(`career-world-dev` from the worktree's launch.json; node resolves up to
+the main checkout's node_modules): show the pane, zoom into T c3-1 (the
+capital shelf) until SITE DETAIL, and the single conifers lean and sway
+while the stands stay. Probe sheet
+`.codex-tmp/session6/trees-c3-1-probe.jpg` (regenerate with `--sheet`),
+sent to him. **What his go / drop decides:** go → the same tool over the
+63 cells (2,746 trees, ~2 min, atlases under a megabyte each, no
+regeneration) and tuning by eye; drop → `TREE_SPRITES_ENABLED = false`
+and the sets stay on disk. Not decided by it: the stands (79% of the
+world's crown pixels), which a second step would split at the skyline's
+tips or leave still. **Tests:** `tests/tree-sprites.test.mjs` (commit
+15c12a3a) checks every listed set exists and fits; the suite is 129 pass /
+4 fail and the same four fail on main (capital envelope, town-plan paving,
+resegmentation islands, Kaizen topography). The suite REWRITES three JSONs
+with CRLF (both `plan.json`, `ocean-detail-layout-r1.json`) — content
+identical — `git checkout --` them before a rebase. **Still wanted from
+him:** the mock's verdict; the four bay cells; the henge's place; the
+palette gate. (The zoom cap: the free camera already floors at the site
+tiles' 1:1 in CSS px for the viewport — `interactiveArtResolvingMinimumSpan`
+in WorldScene.tsx, commit fe1a511e — which is still 2 device px per texel
+on his dpr-2 display; a dpr-aware floor is his call, not applied.) **Note for the
+next session:** unchanged from below — no node_modules in the worktree
+(`../../../node_modules/.bin/tsc`, `.../eslint`), write files with the
+Write tool, cd into the worktree by absolute path every command.
+
+**2026-09-08 00:30 UTC:** **FOLIAGE MOTION IS OFF; THE
 CUT-OUT ROUTE IS COSTED AND WAITS ON HIS WORD; THE OCEAN THREAD HAS A
 DIAGNOSIS NOTE; THE LANE IS CLEAN AT 91441dd8.** Owner 23:45 (his clock), on
 the wind-as-light pass at full strength: *"yeah that looks super wrong. Idk
