@@ -24,6 +24,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
+import { crownMask, crownComponents } from "./crown-mask.mjs";
 sharp.cache(false);
 const arg = (f, d) => { const i = process.argv.indexOf(f); return i >= 0 ? process.argv[i + 1] : d; };
 const ART = "art-source/career-world";
@@ -518,6 +519,52 @@ for (const [col, row] of cellsToDo) {
     if (trilithonEl) stampStanding(trilithonEl, (n.at[0] - col) * CELL, (n.at[1] - row) * CELL - 26);   // the leader among its endpoints, just north of the groove, which runs in front of its feet
     if (menhirs.length) placeMenhirs((n.at[0] - col) * CELL, (n.at[1] - row) * CELL);
     else stamp(node, (n.at[0] - col) * CELL, (n.at[1] - row) * CELL, 5);   // bedded like the discs: the rim takes the ground's hue, the face its grain, an occlusion ring
+  }
+  // TREES IN FRONT (owner 2026-09-08, on the served c3-1: "the chain overlay
+  // is passing over the trees and looks like it isnt blending into the
+  // environment at all"): a conifer crown whose foot stands below the
+  // overlay's solid near edge in its own columns is IN FRONT of the chain, so
+  // the overlay is cut away under the crown and the tree shows over it; a
+  // crown whose foot is inside or above the band stands behind, and the
+  // chain stays in front of it as a wall does. The crowns are the shared
+  // classifier's (crown-mask.mjs), the same trees the sprite pass moves.
+  {
+    const crop = Buffer.alloc(CELL * CELL * 4);
+    for (let y = 0; y < CELL; y += 1) land.data.copy(crop, y * CELL * 4, ((lb + y) * LW + lb) * 4, ((lb + y) * LW + lb + CELL) * 4);
+    const closed = crownMask(crop, CELL);
+    const { comps } = crownComponents(closed, CELL, 150);
+    let cut = 0, behind = 0;
+    for (const c of comps) {
+      if (!c) continue;
+      let overlaps = 0, bottom = -1;
+      for (let y = Math.max(0, c.miny - 2); y <= Math.min(CELL - 1, c.maxy + 6); y += 1) {
+        for (let x = Math.max(0, c.minx - 2); x <= Math.min(CELL - 1, c.maxx + 2); x += 1) {
+          const a = out[(y * CELL + x) * 4 + 3];
+          if (a === 0) continue;
+          if (y <= c.maxy + 2) overlaps += 1;
+          if (a >= 128 && Math.abs(x - c.footX) <= 4 && y > bottom) bottom = y;
+        }
+      }
+      if (overlaps === 0) continue;
+      if (bottom < 0 || c.footY < bottom - 3) { behind += 1; continue; }
+      // the cut is the crown's SILHOUETTE, not the classifier's ragged mask
+      // (the first cut showed wall through every needle gap and read as a
+      // tree-shaped hole): the mask closed by 5 px, grown 1 px, its edge
+      // half-cut so the wall meets the crown softly
+      const bx0 = Math.max(0, c.minx - 8), by0 = Math.max(0, c.miny - 8), bw = Math.min(CELL, c.maxx + 9) - bx0, bh = Math.min(CELL, c.maxy + 9) - by0;
+      const local = new Uint8Array(bw * bh);
+      for (const q of c.members) { const x = q % CELL, y = (q - x) / CELL; local[(y - by0) * bw + (x - bx0)] = 1; }
+      const grow = (src, r) => { const o = new Uint8Array(bw * bh); for (let y = 0; y < bh; y += 1) for (let x = 0; x < bw; x += 1) { if (!src[y * bw + x]) continue; for (let j = -r; j <= r; j += 1) for (let i = -r; i <= r; i += 1) { const xx = x + i, yy = y + j; if (xx >= 0 && yy >= 0 && xx < bw && yy < bh) o[yy * bw + xx] = 1; } } return o; };
+      const shrink = (src, r) => { const o = new Uint8Array(bw * bh); for (let y = 0; y < bh; y += 1) for (let x = 0; x < bw; x += 1) { let ok = 1; for (let j = -r; j <= r && ok; j += 1) for (let i = -r; i <= r; i += 1) { const xx = x + i, yy = y + j; if (xx < 0 || yy < 0 || xx >= bw || yy >= bh || !src[yy * bw + xx]) { ok = 0; break; } } o[y * bw + x] = ok; } return o; };
+      const solid = grow(shrink(grow(local, 5), 5), 1), edge = grow(solid, 1);
+      for (let y = 0; y < bh; y += 1) for (let x = 0; x < bw; x += 1) {
+        const p = y * bw + x; if (!edge[p]) continue;
+        const o = ((by0 + y) * CELL + bx0 + x) * 4;
+        out[o + 3] = solid[p] ? 0 : Math.round(out[o + 3] * 0.5);
+      }
+      cut += 1;
+    }
+    if (cut || behind) console.log(`  ${id}: ${cut} crown(s) stand in front of the chain and cut through it, ${behind} behind it`);
   }
   const file = path.join(OUT, `tanium-${id}-chain.png`);
   let n = 0; for (let i = 3; i < out.length; i += 4) if (out[i] > 0) n += 1;
