@@ -34,11 +34,26 @@ mask closed by 5 px, grown 1, a half-alpha 1-px edge — the raw mask showed
 wall through every needle gap and read as a tree-shaped hole); a crown
 rooted inside or above the band stays behind, as behind a wall. Per cell:
 c0-1 3 in front / 4 behind, c1-1 2/7, c2-1 6/4, c3-0 1/1, c3-1 2/5, c4-0
-1/3, c4-1 1/0, c5-1 6/5, c6-1 2/3. The ten chain cells re-registered
-(`world-register.mjs --tone tone-gains-r1.json --chain
-art-source/career-world/chain/cells --only-cells tanium:...`, 54 s; the
-feed unchanged; the tone table untouched; mount and water not rebuilt —
-neither reads the served pixels). Before/after at 2x:
+1/3, c4-1 1/0, c5-1 6/5, c6-1 2/3. **How the served tiles were changed —
+NOT by a re-register.** A fresh `world-register.mjs --tone --chain
+--only-cells` re-slice of the ten cells came back differing from main's
+served tiles far beyond the cuts (0.5-0.8M px of re-encode noise per
+trunk cell, and 16-164 alpha px per cell — c5-0, with no cut, came back
+byte-identical, so the pipeline is deterministic and the alpha diffs sit
+where my cuts meet the chain's soft edge over water; not diagnosed
+further). So main's tiles were PATCHED instead
+(`.codex-tmp/session6/patch-chain-cuts.mjs`, a scratch script): inside
+the pixels where the rebuilt overlay lost alpha against main's overlay,
+grown 1 px, RGB from the re-slice; everywhere else main's RGB; ALL alpha
+main's. Verified per cell: alpha diffs 0 against main; site 1.7k-73k px
+patched; the rest re-encode noise (q90, one generation). Then the inland
+inventory (`art-source/career-world/water/inland-island-r1.json`, the
+water lane's; INLAND-WATER-REVIEW: "a changed source hash requires review
+of its annotations before refreshing") — reviewed by that measurement
+(no water pixel changed) and its sha256 refreshed for the nine patched
+cells; `build:land-mount` and `build:water` re-run (the water fields hash
+the served bytes; tests 105/114/132 went red until they were).
+Before/after at 2x:
 `.codex-tmp/session6/chain-c3-1-cuts-2x.jpg`, sent to him. c3-1's sprite
 set re-cut from the re-served tile: 77 singles, 42% of its crown pixels.
 **"Not blending into the environment":** not addressed — the kerb element

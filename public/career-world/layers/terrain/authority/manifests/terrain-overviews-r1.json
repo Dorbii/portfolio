@@ -7,7 +7,7 @@
       1664,
       936
     ],
-    "sha256": "09987cef1fc224cd2ee36065a5b7b3e30d76b89172e9b5eff0240ddab046711b"
+    "sha256": "ce330a4f60ad0e1d047aefa236c6d3b7ba3c6dc0df3c29c4ac25277e6023bd8a"
   },
   "territory": {
     "path": "/career-world/layers/terrain/authority/textures/world-land-detail-4x-r1.png?v=c451ce725765fe50",
@@ -15,7 +15,7 @@
       6656,
       3744
     ],
-    "sha256": "2bf146402b51fe55919350a2c377c888239929add49319fae1740544ec050dcd"
+    "sha256": "84fad8059321960b1addc0ca8cc7a5f980953fa56fd95439be5473cefb03fbcb"
   },
   "mask": {
     "path": "/career-world/layers/terrain/authority/masks/world-land-mask-r5.png",

@@ -1559,7 +1559,7 @@
           "style": "curtain"
         }
       ],
-      "sha256": "6b837478815dceec8973727a086569414febc131cdbdbbe247b32e7dc72c91df",
+      "sha256": "d7987d1634119355dbed7903cd96b072f38e9d158646b605b39d9dae8bd21439",
       "reconciliation": "reviewed-current-art-r8",
       "retiredFeatures": [
         {
@@ -1952,7 +1952,7 @@
           "style": "cascade"
         }
       ],
-      "sha256": "d6d21d50117620a4708322a95119734a33c65efd0ef4ba248584f535ba386fb8",
+      "sha256": "c84a10b5441047ac723f09f6f0e534894df2fc700e141038ccfff0bf84fd3511",
       "reconciliation": "reviewed-current-art-r8"
     },
     {
@@ -2300,7 +2300,7 @@
         }
       ],
       "falls": [],
-      "sha256": "9a461bf041afa1b8489fecf2bb97a4602cbc106dd47c8dd493e8e8c46a2905b3",
+      "sha256": "702b4c3d53425d5923f9c6d650f3e52f371a6a51b662a8813b0f16006acc3d05",
       "reconciliation": "reviewed-current-art-r8",
       "retiredFeatures": [
         {
@@ -2641,7 +2641,7 @@
         }
       ],
       "falls": [],
-      "sha256": "e5c8d3f3ccbe1014e826f55dea4d55a85e7c900bcad5baf6fe73d14716bf8ff0",
+      "sha256": "032d263b53e379c6fecdfe706b001595fa05ddf04326b3295d7bdfe5383ebf55",
       "reconciliation": "reviewed-current-art-r8"
     },
     {
@@ -2735,7 +2735,7 @@
       "streams": [],
       "pools": [],
       "falls": [],
-      "sha256": "b88ef180385a7bf3cbc81152ef22ae47c3a62b6e9094ecce135d9ffdcdf24e01",
+      "sha256": "e079780d59b0883ad3ecf7fc5ae62bafca672b105b36ea9a55b071130fb67dc2",
       "reconciliation": "annotation-water-mask-unchanged"
     },
     {
@@ -2949,7 +2949,7 @@
       ],
       "pools": [],
       "falls": [],
-      "sha256": "fae4059a5092129e3c9fa7137c20538d2c2a0e8ebf962b714b8f3b35bc60eff2",
+      "sha256": "7632084f961c5451a2ac09e8d8df5b7f30669edaec0b51914342c1d29d269abc",
       "reconciliation": "reviewed-current-art-r8"
     },
     {
@@ -2960,7 +2960,7 @@
       "streams": [],
       "pools": [],
       "falls": [],
-      "sha256": "2680eff396562f17eb87950bd8b01e4aae1bf16ce3df66502f5cc7e88eae476d",
+      "sha256": "0d0f17867fdc152dec7a3c3ae78b7894b0b14e280712bda60d88075f5e445a8f",
       "reconciliation": "reviewed-current-art-r8",
       "retiredFeatures": [
         {
@@ -3093,7 +3093,7 @@
         }
       ],
       "falls": [],
-      "sha256": "2e6d22151b9012390656175407604993cd3b84f7e647ed67b8b456f283a2b4f8",
+      "sha256": "fc06cebc8b1cf164ecfdf7f11a79d0a5ee63e986f702b09d53bbd7cff5d9eb46",
       "reconciliation": "reviewed-current-art-r8"
     },
     {
@@ -3156,7 +3156,7 @@
         }
       ],
       "falls": [],
-      "sha256": "df0fa7b54a615ab0ec797ffaf6ecea91f833eb3aca1ef7a6581e058311f05486",
+      "sha256": "615d07b26bdbca59f1e666946a9bd7d48d09cd3bb3604d1e3b0cc9d4cbd702ef",
       "reconciliation": "reviewed-current-art-r8"
     },
     {
