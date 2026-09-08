@@ -7,6 +7,7 @@ import "./lod-presentation.test.mjs";
 import "./rural-environment.test.mjs";
 import "./structures.test.mjs";
 import "./terrain-residency.test.mjs";
+import "./tree-sprites.test.mjs";
 import "./world-territory-resegmentation.test.mjs";
 import "./town-fabric.test.mjs";
 import "./town-surface.test.mjs";
