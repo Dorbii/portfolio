@@ -13,6 +13,15 @@ export interface SceneLighting extends WorldLight {
 export const CLOUD_SHADOW_TEXTURE = "/career-world/layers/lighting/cloud-shadow-r1.png";
 export const CLOUD_SHADOW_REPEAT_TEXTURE = "/career-world/layers/lighting/cloud-shadow-repeat-r1.png";
 
+// An identity SVG filter still creates an expensive browser compositing pass.
+// Use the actual illumination factors, so every non-neutral light is preserved.
+export function needsLandLightingFilter(light: SceneLighting): boolean {
+  return light.enabled && (
+    light.landGain.some((gain) => gain !== 1) ||
+    light.directFraction.some((fraction) => fraction * light.cloudStrength !== 0)
+  );
+}
+
 export function linearRgb(hex: string): [number, number, number] {
   return [1, 3, 5].map((offset) => {
     const value = parseInt(hex.slice(offset, offset + 2), 16) / 255;

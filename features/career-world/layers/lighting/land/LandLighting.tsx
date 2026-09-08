@@ -2,7 +2,7 @@
 
 import { useId, type ReactNode } from "react";
 import type { CameraView } from "../../../shared/camera";
-import { CLOUD_SHADOW_REPEAT_TEXTURE, type SceneLighting } from "../model";
+import { CLOUD_SHADOW_REPEAT_TEXTURE, needsLandLightingFilter, type SceneLighting } from "../model";
 
 export function LandLighting({ camera, light, enabled = true, children }: {
   readonly camera: CameraView;
@@ -14,8 +14,9 @@ export function LandLighting({ camera, light, enabled = true, children }: {
   const gain = light.landGain;
   const matrix = `${gain[0]} 0 0 0 0  0 ${gain[1]} 0 0 0  0 0 ${gain[2]} 0 0  0 0 0 1 0`;
   const shadow = light.directFraction.map((value) => value * light.cloudStrength);
+  const filtered = enabled && needsLandLightingFilter(light);
   return <div className="career-world__land-lighting" data-lighting-target="land" data-lighting-hour={light.hour.toFixed(2)}>
-    <svg width="0" height="0" aria-hidden="true" focusable="false" style={{ position: "absolute" }}>
+    {filtered && <svg width="0" height="0" aria-hidden="true" focusable="false" style={{ position: "absolute" }}>
       <defs>
         <filter id={id} x="0" y="0" width="1" height="1" filterUnits="objectBoundingBox" primitiveUnits="objectBoundingBox" colorInterpolationFilters="linearRGB">
           <feColorMatrix in="SourceGraphic" type="matrix" values={matrix} result="lit" />
@@ -32,8 +33,8 @@ export function LandLighting({ camera, light, enabled = true, children }: {
           <feComposite in="lit" in2="shadow" operator="arithmetic" k1="1" k2="0" k3="0" k4="0" />
         </filter>
       </defs>
-    </svg>
-    <div className="career-world__land-lighting-surface" style={{ filter: enabled && light.enabled ? `url(#${id})` : undefined }}>
+    </svg>}
+    <div className="career-world__land-lighting-surface" style={{ filter: filtered ? `url(#${id})` : undefined }}>
       {children}
     </div>
   </div>;

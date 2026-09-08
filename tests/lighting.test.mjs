@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import fs from "node:fs/promises";
 import sharp from "sharp";
-import { lightingIrradiance, linearRgb, resolveSceneLighting, srgbByte } from "../features/career-world/layers/lighting/model.ts";
+import { needsLandLightingFilter, lightingIrradiance, linearRgb, resolveSceneLighting, srgbByte } from "../features/career-world/layers/lighting/model.ts";
 import { waterFallbackColor } from "../features/career-world/layers/lighting/water/WaterLighting.ts";
 
 const base = JSON.parse(await fs.readFile("public/career-world/layers/world-backdrop/manifests/world-light-r1.json", "utf8"));
@@ -14,6 +14,25 @@ test("neutral daylight preserves the original land RGB gain and original world l
   assert.equal(light.ambientColor, base.ambientColor);
   for (const gain of light.landGain) assert.ok(Math.abs(gain - 1) < 1e-10);
   assert.equal(light.cloudStrength, 0);
+});
+
+test("bypassing neutral land lighting preserves illumination across daylight and weather ranges", () => {
+  for (const hour of [0, 6.5, 9, 12.9, 13, 13.1, 18, 22]) {
+    for (const weather of [0, 0.45, 0.5, 0.51, 1]) {
+      const light = resolveSceneLighting(hour, weather, base);
+      const filtered = needsLandLightingFilter(light);
+      for (const cloudSample of [0, 0.35, 1]) {
+        for (let i = 0; i < 3; i++) {
+          const shadow = 1 - light.directFraction[i] * light.cloudStrength * (1 - cloudSample);
+          const original = light.landGain[i] * shadow;
+          const optimized = filtered ? original : 1;
+          assert.equal(optimized, original);
+        }
+      }
+      if (hour === 13 && weather <= 0.5) assert.equal(filtered, false);
+      assert.equal(needsLandLightingFilter({ ...light, enabled: false }), false);
+    }
+  }
 });
 
 test("daylight cycle is continuous across midnight and changes both adapters' lighting", () => {
