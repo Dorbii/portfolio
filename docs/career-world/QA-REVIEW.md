@@ -1749,3 +1749,12 @@ Builder lint and builder/embedded module syntax pass; controls inspected in brow
 - `branches.json`, `browser-proof.json`, `final-proof.json` - actual layered rest reconstruction differences 0, changed source-layer bytes 0, changes outside cut area 0; real Rest pose control identical; sampled ground/pivot/scale differences 0, movement 4,401 changed channel bytes. No angle-zero original-image bypass.
 
 Builder lint and source syntax pass. All output remains in quarantine, source/served assets and world runtime unchanged. Only five groups move; hidden-region reconstruction and contour accuracy remain visual risks. Next: owner's motion/edge verdict, not an automatic rollout.
+
+
+## FOLIAGE-REFERENCES-2026-09-09 - external art and motion leads
+
+**Owner:** the original-pixel motion is more drastic but can improve; changing the tree art is acceptable if it fits the existing world. Asked to explore `https://elements.envato.com/stock-video/tree+alpha`, not limit the search to those results, and welcomed fantasy foliage. Later explicitly endorsed the mushroom idea.
+
+**Codex:** Researched public Envato listings/previews and coordinated external environment sets. Eight-source visual board at :3240, with publisher-hosted previews and source links; no production assets downloaded, purchased or integrated. Recommended visual lead is TriForge's top-down fantasy forest; Sunbox provides coordinated fantasy understory examples. Envato conifer, Jeffrey pine, boxwood and sagebrush loops are motion/source-media leads. The complete mushroom forest clip is a composition reference (no alpha, non-looping). These are judgments and vendor listing claims, not proven world fits or tested downloadable files. Full sourced shortlist: `FOLIAGE-REFERENCE-SHORTLIST-2026-09-09.md`.
+
+Board evidence `.codex-tmp/qa/foliage-reference-board/{board.png,board-proof.json}`: 8 cards, no preview error messages, conifer and mushroom previews loaded/played; other clips remain user-playable references, not fully inspected source files. Builder lint / embedded script syntax pass. Existing prototype and world code/art unchanged. Owner's mushroom endorsement informs direction; it is not approval of a particular purchased asset or placement.

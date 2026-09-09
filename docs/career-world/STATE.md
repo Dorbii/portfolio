@@ -4,6 +4,21 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
+**2026-09-09 - EXTERNAL FOLIAGE REFERENCES; MUSHROOM DIRECTION WELCOMED.**
+Owner finds the original-pixel motion more drastic but wants better; explicitly
+allows changing tree art if it fits the world, asks to explore Envato tree-alpha
+and other references, and welcomes fantasy foliage. This reopens new authored
+assets as an option; it does not rehabilitate the rejected generated kit.
+Reference board at :3240 has 8 sources, with public Envato previews streamed
+from the publisher and no acquired production media. First visual lead:
+TriForge Top Down Fantasy Forest; motion leads: boltiongraphics full conifer,
+Badhn Jeffrey pine / boxwood / sagebrush. Sunbox Magical Forest and an Envato
+mushroom forest supply fantasy-family/composition ideas. Owner explicitly likes
+the mushroom idea. No specific asset or implementation approved. Research and
+limits: `FOLIAGE-REFERENCE-SHORTLIST-2026-09-09.md`. Recommendation: one coherent
+family and a grounded mixed-cluster art test at the existing camera/light before
+more animation implementation. No world/renderer changes during this research.
+
 **2026-09-09 - ORIGINAL-PIXEL BRANCH STUDY RUNNING; owner review pending.**
 Owner authorized the source-preserving experiment ("agreed please proceed").
 Viewer :3230 uses the actual T c3-1 pine, with five hand-selected outer branch
