@@ -1727,3 +1727,10 @@ Evidence `.codex-tmp/qa/layered-pine-study/style-comparison-native.png` and `sty
 - `.codex-tmp/qa/layered-pine-study/grove-proof.json` - actual Rest pose control: 0 differing bytes; 7 trees / 9 shrub clumps / 49 moving layers, painter order true, lower-border delta 0, pivot error about 3e-6 px, moving sample 81,745 changed channel bytes. Mechanics only; not visual acceptance.
 
 Builder lint and builder/embedded module syntax pass; controls inspected in browser. Builders: `session3-tools/build-grove-study.mjs`, viewer `session3-tools/grove-study.html`; generated source manifest `grove-sources.json`. No production integration or full-suite claim.
+
+
+**Owner (GROVE / REPLACEMENT-KIT REJECTION, 2026-09-09):** "see that looks super bad compared to what was there. The art doesnt match the environment ya know".
+
+**Codex:** Inspected the current grove again. The style/integration problem is visible in its still comparison: newly generated pines and the separate decorative shrub/fern atlas do not read as one painting with the environment. This is an owner rejection of the replacement art direction, despite the earlier positive response to motion. No more style-generation attempts on this kit (2/2 style candidates exhausted), no palette/blur concealment, no promotion. Original terrain and foliage art are intact; isolated candidates remain as evidence.
+
+**Proposed reframe, not started:** preserve the source painting as the visual baseline. Manually isolate real branch groups from one original painted tree, retain their source pixels and locations, and first demonstrate an unchanged rest composite. Only then test bounded branch movement. Hidden-area fill and recovery of overlapping original branches are unresolved authoring work; successful animation is not guaranteed. Retain the original static art if that preservation cannot be achieved.

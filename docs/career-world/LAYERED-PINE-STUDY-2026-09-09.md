@@ -116,3 +116,8 @@ Owner requested a cluster of trees and bushes. [Grove viewer](http://localhost:3
 - Ground: unchanged crop [730,1110,560,420] from T c3-1 site tile. Existing painted background objects remain visible. The arrangement is illustrative, not a world placement proposal.
 - Output under `.codex-tmp/qa/layered-pine-study/`: `grove.html`, `grove-ground.png`, `bush-atlas.png`, `grove-sources.json`, `grove-proof.json`, `grove-comparison.png`, `grove-without-bushes.png`.
 - Actual Rest pose comparison is byte-identical. The moving test sample changes 81,745 channel bytes; lower border unchanged, ground-foot draw order valid, pivot precision error ~3e-6 px. Builder lint / source syntax pass. No full application test run or production readiness claim for this isolated composition preview.
+
+
+## Owner rejection of the replacement-art direction
+
+The grove comparison was rejected on 2026-09-09: "see that looks super bad compared to what was there. The art doesnt match the environment ya know". This supersedes the candidate-review status above. The generated pine kit and mixed-atlas grove are not candidates for promotion; no further style generations on this kit. All original world art remains intact. Keep the experiment as evidence of motion mechanics, not a visual success. Any next proof should work from the original painted foliage, establish faithful appearance at rest first, and treat hidden-area fill/branch separation as unresolved. That proof has not been implemented.

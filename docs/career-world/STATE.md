@@ -4,6 +4,20 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
+**2026-09-09 - GENERATED GROVE / REPLACEMENT KIT REJECTED. STOP THIS ROUTE.**
+Owner: "see that looks super bad compared to what was there. The art doesnt
+match the environment ya know". The mismatch is present in the still view:
+newly generated pines plus a separate decorative shrub atlas read as pasted
+components in the painted terrain. The 2/2 style candidates did not establish
+art fidelity. Do not spend another generation on this kit, recolor/blur it into
+place, or promote it. Preserve all candidate artifacts and mechanics as evidence.
+The original environment and served foliage art have not been replaced.
+Proposed next proof, not started: manually separate a few real branch groups
+from ONE existing painted tree, keeping original pixels/placement and requiring
+an unchanged rest composite before experimenting with movement. Hidden-area
+fill and faithful overlap recovery remain unresolved; no promise of success.
+If that cannot preserve the painting, retain the original static artwork.
+
 **2026-09-09 - GROVE COMPARISON OPEN, owner review pending.**
 Owner asked to see a cluster of trees and bushes. New isolated viewer:
 `http://localhost:3220/grove.html`, 7 added layered pines / 49 moving parts,
