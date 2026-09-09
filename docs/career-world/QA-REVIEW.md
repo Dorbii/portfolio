@@ -1758,3 +1758,17 @@ Builder lint and source syntax pass. All output remains in quarantine, source/se
 **Codex:** Researched public Envato listings/previews and coordinated external environment sets. Eight-source visual board at :3240, with publisher-hosted previews and source links; no production assets downloaded, purchased or integrated. Recommended visual lead is TriForge's top-down fantasy forest; Sunbox provides coordinated fantasy understory examples. Envato conifer, Jeffrey pine, boxwood and sagebrush loops are motion/source-media leads. The complete mushroom forest clip is a composition reference (no alpha, non-looping). These are judgments and vendor listing claims, not proven world fits or tested downloadable files. Full sourced shortlist: `FOLIAGE-REFERENCE-SHORTLIST-2026-09-09.md`.
 
 Board evidence `.codex-tmp/qa/foliage-reference-board/{board.png,board-proof.json}`: 8 cards, no preview error messages, conifer and mushroom previews loaded/played; other clips remain user-playable references, not fully inspected source files. Builder lint / embedded script syntax pass. Existing prototype and world code/art unchanged. Owner's mushroom endorsement informs direction; it is not approval of a particular purchased asset or placement.
+
+
+## ORIGINAL-FOLIAGE-BLENDER-2026-09-09 - original static source test (owner review pending)
+
+**Owner:** no source pack ownership; "can you use these as a reference and make our own?" Clarified whether 3D belongs in a 2D portfolio, then explicitly approved the narrowed offline test: "got it thats fine pelase proceed".
+
+**Codex:** Original Blender geometry/materials for one pine and four mushrooms, rendered to transparent 2D PNGs and placed beside the existing painted trees at :3250. No external pack assets or ImageGen. Source terrain unchanged; no world renderer, registration, camera or LoD change. One art revision from the dense/dark initial candidate opens branch spacing, sculpts depth for the fixed view and adjusts source highlights. First candidate retained. Full provenance, offline projection/light interpretation, sources and reproduction: `ORIGINAL-FOLIAGE-BLENDER-STUDY-2026-09-09.md`.
+
+Visual assessment, not an acceptance verdict: the pine is still sharper and more regular than the painted foliage; mushroom stems are hard to read. Do not proceed to animation or a full kit on mechanical results alone. Owner review of this static comparison is the next action.
+
+- `.codex-tmp/qa/original-foliage-blender/comparison-browser.png` - original terrain and added specimens side by side at native image scale, original painted trees retained.
+- `.codex-tmp/qa/original-foliage-blender/detail-browser.png` - actual enlarged inspection open in the browser.
+- `.codex-tmp/qa/original-foliage-blender/verification.json` - 768x768 RGBA renders, alpha ranges 0..255, no clipped alpha bounds, unchanged source hash, 0 changed pixels outside placement overlay. Mechanics only.
+- `.codex-tmp/qa/original-foliage-blender/browser-proof.json` - comparison/detail images loaded, disclosure opens, no horizontal overflow. Python syntax and Blender render/save pass. Full app suite not rerun for this isolated offline artifact; no production edits.

@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Original foliage · static art test</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#161b19;color:#e4e7db;font:15px/1.5 system-ui,sans-serif}main{max-width:1320px;margin:auto;padding:24px}h1{font:500 25px/1.2 Georgia,serif;margin:0 0 8px}p{max-width:940px;color:#bcc3b6;margin:8px 0 18px}header small{color:#a9ba91;letter-spacing:.12em;font-size:11px}figure{margin:0;min-width:0}figcaption{margin:10px 0;color:#c9cfbf;font-size:13px}img{display:block;max-width:100%;height:auto;background:#202824}a{color:#d9cc9f}.comparison{display:grid;grid-template-columns:1fr 1fr;gap:20px}.comparison img{width:620px}.tag{color:#acbb91}details{margin-top:22px;border-top:1px solid #3a433a;padding-top:15px}summary{cursor:pointer;color:#d9cc9f}.detail{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;margin-top:16px}.detail img{width:500px;image-rendering:pixelated}.detail p{max-width:400px}nav{display:flex;gap:22px;margin:24px 0 0;flex-wrap:wrap}footer{font-size:12px;color:#95a08e;margin-top:20px}@media(max-width:850px){.comparison{grid-template-columns:1fr}main{padding:16px}}
+</style>
+<main>
+<header><small>FOLIAGE / ORIGINAL SOURCE STUDY 01</small><h1>A pine and a small mushroom colony</h1>
+<p>Static art test. The new pine is on the open ground to the right; the original painted trees remain on the left. The mushroom cluster sits to the right of the new tree.</p></header>
+<section class="comparison" aria-label="Terrain comparison">
+<figure><figcaption>01 / Existing world art</figcaption><img src="original-context.png" width="620" height="460" alt="Existing painted conifers on olive terrain among stone terraces"></figure>
+<figure><figcaption><span class="tag">02 / Original Blender assets, rendered as 2D</span></figcaption><img src="candidate-context.png" width="620" height="460" alt="Same unchanged terrain with one new dark pine and four rust-colored mushrooms on the right"></figure>
+</section>
+<details><summary>Inspect the new assets at 2×</summary><div class="detail"><img src="candidate-detail.png" width="750" height="810" alt="Enlarged view of the new pine and mushroom cluster on the terrain"><p>Check the canopy silhouette, branch spacing, mushroom cap shape, and ground contact. This is a pixel enlargement of the same composite, with no detail generation or smoothing.<br><br>The pine is denser than the existing painted trees. The mushroom perspective is a high-oblique test; the shared live camera has not changed.</p></div></details>
+<nav aria-label="Study files"><a href="candidate-full-tile.png">Full terrain tile</a><a href="pine.png">Transparent pine</a><a href="mushrooms.png">Transparent mushrooms</a><a href="original-foliage.blend" download>Blender source</a></nav>
+<footer>Original procedural geometry and materials. Static preview only; motion and world integration await art review.</footer>
+</main>
+</html>

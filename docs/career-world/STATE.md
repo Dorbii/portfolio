@@ -4,6 +4,19 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
+**2026-09-09 - ORIGINAL BLENDER FOLIAGE STATIC TEST; OWNER REVIEW PENDING.**
+Owner has no paid source packs and asked to make our own from broad references.
+Explicitly approved offline 3D-to-2D authoring after clarifying the portfolio
+remains 2D, narrowed to one pine and a mushroom cluster before animation.
+Comparison open at :3250. Original procedural meshes/materials; real RGBA PNGs
+and editable Blender source in `.codex-tmp/qa/original-foliage-blender/`.
+One art revision opens branch spacing and adjusts source highlights; r1 retained.
+Current visual concern: pine remains too crisp/regular, mushroom stems hard to
+read at the high-oblique angle. Mechanical passes do not establish art fit.
+No live world, terrain, camera, LoD, manifest or animation changes. Next: owner
+reviews the static comparison before kit expansion/motion. Source, constraints,
+reproduction and proof: `ORIGINAL-FOLIAGE-BLENDER-STUDY-2026-09-09.md`.
+
 **2026-09-09 - EXTERNAL FOLIAGE REFERENCES; MUSHROOM DIRECTION WELCOMED.**
 Owner finds the original-pixel motion more drastic but wants better; explicitly
 allows changing tree art if it fits the world, asks to explore Envato tree-alpha
