@@ -1690,3 +1690,16 @@ To restore: run `node docs/career-world/session3-tools/build-tree-light-study.mj
 **Codex - REJECTED LIGHTING STUDY; TWO-STRIKE REFRAME:** Sampled beginning/middle/late frames saved under `.codex-tmp/qa/foliage-light-study/rejected-v2/`. The candidate's bough faces visibly change light while their outlines and overlaps remain fixed; my interpretation is lighting pulsing on a static painting rather than wind-driven foliage. This is consistent with the implementation's RGB-only adjustment (`tree-light-study.html`, `pixels()`), and owner acceptance is explicitly absent. Do not increase gain or tune the same light-mask method a third time.
 
 **Proposed pipeline change:** author one pine as a fixed trunk plus separate transparent branch-clump layers with actual attachment pivots and hidden-area fill. Move those clumps with small rigid rotations and differing recovery under one gust; lighting is secondary. Unlike the previous silhouette-derived mesh, this representation can change branch edges and overlaps without bending a fused painting. Requires an authored one-tree proof and owner review before wider adoption; no promise of visual success. Existing candidates retained as evidence; no new renderer/asset changes or rollout performed in this review.
+
+
+## LAYERED-PINE-STUDY-2026-09-09 - new layered asset proof (owner review pending)
+
+**Owner:** "go for it" on the proposal to author a fixed trunk and separate branch-clump layers.
+
+**Codex:** Viewer at `http://localhost:3220/`. Same new asset still/animated, six independent boughs plus leader, fixed woody attachment pivots, damped response to shared wind pressure. No source texture distortion or lighting animation. ImageGen 2/2 calls returned RGB checkerboard backgrounds; no third call, no production alpha claim. r1 source is untouched on disk; the diagnostic renderer filters its neutral background. See `LAYERED-PINE-STUDY-2026-09-09.md` for prompts, exact generated source paths, asset hashes, reproduction and limitations. New tree seated on the visible trunk root [108,199] in the comparison crop; the old classifier foot [88,199] was offset. No world registration or served asset changed.
+
+- `.codex-tmp/qa/layered-pine-study/comparison-native.png` - still and animated versions of the same new layered tree at 1x art scale, in the original test-area context.
+- `.codex-tmp/qa/layered-pine-study/comparison-inspection.png` - 2x view for inspecting bough seams and root placement; motion's visual quality remains the owner's call.
+- `.codex-tmp/qa/layered-pine-study/final-proof.json` - 7 moving layers; rest difference 0; protected ground difference 0; pivot error 0; scale drift ~1.31e-8; three-second moving pose differs in 16,500 channel bytes. Actual Rest pose UI control also returned identical canvases. Initial scaled draw differed from later identical draws; settled sampling is primed before measurement, without weakening the equality check. Exact browser cause was not established.
+
+Builder lint and builder/embedded script syntax pass; isolated canvas prototype only, no full app-suite claim. RGB kit still needs clean alpha and art review before promotion. Next: owner evaluates this layered motion; no acceptance or rollout implied.

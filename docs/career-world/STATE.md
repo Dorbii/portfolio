@@ -4,6 +4,24 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
+**2026-09-09 - LAYERED-PINE PROTOTYPE RUNNING; owner review pending.**
+Owner authorized the new layered-art representation. Isolated viewer at
+`http://localhost:3220/` compares the same new pine still vs animated: six
+separate boughs and a leader rotate about fixed attachments under shared wind,
+with damped recovery; trunk and central fill stay fixed. No texture warping or
+animated illumination. Built-in ImageGen spent 2/2 candidates; both returned
+1254x1254 RGB with painted checkerboards. Viewer uses display-only neutral
+background filtering of r1, preserves source files, and explicitly flags that
+proper alpha is required before promotion. No third generation; no world edits.
+Mechanical proof: rest pose identical, protected ground unchanged, pivot drift
+0, scale drift ~1.31e-8; real Rest pose control verified. First scaled draw was
+not stable; priming before baseline fixed repeated-draw identity (underlying
+browser cause not established). New trunk aligned at crop [108,199] by eye,
+not the original classifier's [88,199] leaf-bottom proxy. Syntax/builder lint
+pass. Full instructions, source locations/prompts, limits and evidence:
+`LAYERED-PINE-STUDY-2026-09-09.md`. Next: owner judges movement and new art;
+no rollout or visual acceptance claimed.
+
 **2026-09-09 - LIGHTING STUDY REJECTED; REFRAME REQUIRED.**
 Owner's second recording (20260909-1604-44.4794750.mp4, 14.87 s) confirms
 visibility but rejects the look: "I see it now but its not really looking right".

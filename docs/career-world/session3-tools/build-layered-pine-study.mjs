@@ -1,0 +1,10 @@
+import fs from "node:fs";
+import path from "node:path";
+const root = path.resolve(import.meta.dirname, "../../..");
+const out = path.join(root, ".codex-tmp/qa/layered-pine-study");
+const atlas = path.join(out, "parts-r1.png");
+if (!fs.existsSync(atlas)) throw new Error("The quarantined layered-pine kit is missing. See the study notes for its generated source.");
+fs.copyFileSync(path.join(import.meta.dirname, "layered-pine-study.html"), path.join(out, "index.html"));
+fs.copyFileSync(path.join(root, ".codex-tmp/qa/foliage-light-study/context.png"), path.join(out, "context.png"));
+fs.copyFileSync(path.join(root, "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-1-trees.webp"), path.join(out, "patch-atlas.webp"));
+console.log(out);
