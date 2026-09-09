@@ -4,6 +4,22 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
+**2026-09-09 - LIGHTING STUDY REJECTED; REFRAME REQUIRED.**
+Owner's second recording (20260909-1604-44.4794750.mp4, 14.87 s) confirms
+visibility but rejects the look: "I see it now but its not really looking right".
+Sampled frames are in `.codex-tmp/qa/foliage-light-study/rejected-v2/`.
+Interpretation: fixed bough faces brighten/darken without convincing changes to
+needle orientation, silhouettes or overlaps. The study changes RGB on fixed
+pixels; it cannot supply those motion cues. Both light-study candidates have
+now failed the owner's visual requirement. Do not tune gain, phase, noise, or
+wave patterns again. No promotion or runtime changes in this review.
+Proposed next pipeline: one pine with a fixed trunk and separately authored
+branch-clump layers, attachment pivots and hidden-area fill; animate those
+pieces with bounded rigid rotations under a shared gust, then use shading as
+secondary feedback. This is a different asset representation, not another
+inferred warp of the flattened painting. Its feasibility and appearance still
+need a one-tree proof; it is a recommendation, not completed or accepted work.
+
 **2026-09-09 - LIGHT STUDY v2 visibility tuning, owner review pending.**
 Owner could not see the v1 effect even with strength at 2. The clock was
 advancing, but a sampled frame was identical to static during the long lull.
