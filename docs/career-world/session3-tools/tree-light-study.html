@@ -15,11 +15,13 @@
 </div>
 <div class="controls">
 <button id="play" type="button">Pause</button>
+<button id="gust" type="button">Hold gust</button>
+<button id="calm" type="button">Hold calm</button>
 <label>Strength <input id="strength" aria-label="Lighting strength" type="range" min="0" max="2" step="0.05" value="1"><output id="amount">1.00</output></label>
 <label>View <select id="scale" aria-label="View scale"><option value="1">1× art pixels</option><option value="2">2× inspection</option></select></label>
 <label><input id="regions" type="checkbox">Show cluster regions</label>
 </div>
-<p class="note">Watch the needles on the larger pine, not the smaller tree at the left edge. Strength 0 restores the original pixels. This is an isolated study; it does not change the live world.</p>
+<p class="note">Use Hold gust and Hold calm to compare the endpoints, then Play to watch the transition. This stronger diagnostic version tests whether the cluster response is visible. Strength 0 restores the original pixels; the live world is unchanged.</p>
 <p class="debug" id="status" role="status">Loading the reference painting…</p>
 </main>
 <script type="module">
@@ -79,16 +81,16 @@ for(const cluster of clusters){
 }
 const smooth=(a,b,x)=>{x=Math.max(0,Math.min(1,(x-a)/(b-a)));return x*x*(3-2*x);};
 function response(t,c){
- const phase=((t-c.lag)%7.8+7.8)%7.8;
- const gust=smooth(.3,1.45,phase)*(1-smooth(1.45,5.5,phase));
- const settle=Math.sin((phase-1.45)*c.rate*6.283)*Math.exp(-Math.max(0,phase-1.45)*.9);
+ const phase=((t-c.lag)%5.8+5.8)%5.8;
+ const gust=smooth(.1,1.0,phase)*(1-smooth(1.0,5.5,phase));
+ const settle=Math.sin((phase-1.0)*c.rate*6.283)*Math.exp(-Math.max(0,phase-1.0)*.9);
  // Cluster flutter is strongest during the gust; it is deliberately small.
  return .72*gust+.20*settle*gust+.06*Math.sin(t*7.1*c.rate)*gust;
 }
 function pixels(t,strength){
  const result=new ImageData(new Uint8ClampedArray(source.data),width,height);
  const delta=new Float32Array(width*height);
- for(const c of rig){const amount=response(t,c)*strength*17;for(const[p,w]of c.points)delta[p]+=w*amount;}
+ for(const c of rig){const amount=response(t,c)*strength*48;for(const[p,w]of c.points)delta[p]+=w*amount;}
  for(let p=0;p<delta.length;p++)if(delta[p]){
   // Preserve the painted green/gold relationship; no flashing white layer.
   for(let k=0;k<3;k++)result.data[p*4+k]=Math.max(0,Math.min(255,source.data[p*4+k]+delta[p]*[.88,1,.76][k]));
@@ -115,10 +117,13 @@ status.textContent=`${rig.length} authored cluster responses · silhouette and g
 if(restChanged||outside||alphaChanged)throw new Error('Lighting study violated its fixed-art contract.');
 let playing=!matchMedia('(prefers-reduced-motion: reduce)').matches,time=1.8,last=performance.now(),strength=1;
 const button=document.querySelector('#play');button.textContent=playing?'Pause':'Play';
+const renderCurrent=()=>{draw(time,strength,document.querySelector('#regions').checked);candidate.dataset.time=time.toFixed(3);};
 button.onclick=()=>{playing=!playing;button.textContent=playing?'Pause':'Play';};
-document.querySelector('#strength').oninput=e=>{strength=Number(e.target.value);document.querySelector('#amount').value=strength.toFixed(2);};
+document.querySelector('#gust').onclick=()=>{playing=false;time=1.4;button.textContent='Play';renderCurrent();};
+document.querySelector('#calm').onclick=()=>{playing=false;time=0;button.textContent='Play';renderCurrent();};
+document.querySelector('#strength').oninput=e=>{strength=Number(e.target.value);document.querySelector('#amount').value=strength.toFixed(2);renderCurrent();};
 document.querySelector('#scale').onchange=e=>{for(const c of[original,candidate]){c.style.width=width*Number(e.target.value)+'px';c.style.height=height*Number(e.target.value)+'px';}};
-function loop(now){if(playing&&!document.hidden)time+=Math.min((now-last)/1000,.1);last=now;draw(time,strength,document.querySelector('#regions').checked);candidate.dataset.time=time.toFixed(3);requestAnimationFrame(loop);}
+function loop(now){if(playing&&!document.hidden)time+=Math.min((now-last)/1000,.1);last=now;renderCurrent();requestAnimationFrame(loop);}
 requestAnimationFrame(loop);
 </script>
 </html>

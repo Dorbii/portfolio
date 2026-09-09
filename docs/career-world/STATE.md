@@ -4,6 +4,18 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
+**2026-09-09 - LIGHT STUDY v2 visibility tuning, owner review pending.**
+Owner could not see the v1 effect even with strength at 2. The clock was
+advancing, but a sampled frame was identical to static during the long lull.
+The diagnostic gain is now 48 rather than 17; cycle 5.8 rather than 7.8 seconds
+with a shorter lull. Hold gust / Hold calm controls render their endpoints
+synchronously, including while paused. Browser verified calm = original pixels;
+held gust at strength 1 changes 2,179 pixels by >=8 channel values (max 44),
+with unchanged alpha / outside-crown pixels. Evidence: light-study
+`visibility-v2.json`, `held-gust-v2.png`. Playing at :3210, same fixed silhouette,
+no world changes. If this is visible but still does not read as wind, do not
+continue raising gain; this is the second lighting-study candidate.
+
 **2026-09-09 - ONE-TREE CLUSTER-LIGHT STUDY, owner review pending.**
 Owner says the branch prototype still looks weird and clarified that the old
 lighting pass failed because it looked like ocean waves over the forest, not
