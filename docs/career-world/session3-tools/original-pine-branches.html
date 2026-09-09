@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Original pine — source-pixel branch study</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#121915;color:#e3e8df;font:16px system-ui,sans-serif}main{max-width:1060px;margin:30px auto;padding:0 24px}h1{font-size:27px;font-weight:550;margin-bottom:10px}p{line-height:1.5;color:#b3c0b1;max-width:850px}.views{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:24px 0}figure{margin:0}figcaption{margin-bottom:12px;font-weight:600}.stage{min-height:280px;display:flex;align-items:center;justify-content:center;background:#1b241d;border:1px solid #3b4b3d;overflow:auto}canvas{width:220px;height:240px}.controls{display:flex;align-items:center;flex-wrap:wrap;gap:16px}button,select{font:inherit;color:inherit;background:#27352a;border:1px solid #617260;border-radius:4px;padding:8px 13px;cursor:pointer}input{accent-color:#b3d591}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #a3d0ed;outline-offset:3px}label{display:flex;align-items:center;gap:8px}output{min-width:3em}.note{font-size:14px}.debug{font-size:13px;color:#a8b7a5;margin-top:18px}details{margin-top:20px;color:#b3c0b1}.pieces{display:flex;align-items:center;gap:24px;flex-wrap:wrap}.pieces img{image-rendering:pixelated;max-width:150px}a{color:#c5daaa}@media(max-width:650px){main{margin-top:20px}.views{grid-template-columns:1fr}}
+</style>
+<main>
+<h1>The original painted pine</h1>
+<p>Five branch groups are separated from this painting. Their original pixels move as rigid pieces; the rest of the tree and landscape stay fixed. Rest pose reassembles the painting exactly.</p>
+<div class="views">
+<figure><figcaption>Original painting · still</figcaption><div class="stage"><canvas id="original" width="220" height="240" aria-label="Original painted pine"></canvas></div></figure>
+<figure><figcaption>Original branch pieces · in wind</figcaption><div class="stage"><canvas id="moving" width="220" height="240" aria-label="Original pine with five animated source-pixel branch groups"></canvas></div></figure>
+</div>
+<div class="controls">
+<button id="play" type="button">Pause</button><button id="rest" type="button">Rest pose</button>
+<label>Wind <input id="strength" aria-label="Wind strength" type="range" min="0" max="2" step="0.05" value="1"><output id="amount">1.00</output></label>
+<label>View <select id="scale" aria-label="View scale"><option value="1">1× art pixels</option><option value="2">2× inspection</option></select></label>
+<label><input id="cuts" type="checkbox">Show selected branches</label>
+<label><input id="under" type="checkbox">Inspect hidden fill</label>
+</div>
+<p class="note">No replacement art, recolouring or moving light. The small revealed areas use existing canopy pixels and the earlier ground patch. Inspect those edges as the boughs move; this remains a one-tree trial.</p>
+<p id="status" class="debug" role="status">Loading source layers…</p>
+<details><summary>Inspect the separated source pieces</summary><div id="pieces" class="pieces"></div></details>
+</main>
+<script type="module">
+const W=220,H=240;
+const load=src=>new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=reject;im.src=src;});
+const manifest=await fetch('branches.json').then(r=>r.json());
+const [original,base,front]=await Promise.all([load('original.png'),load('underpainting.png'),load('trunk-front.png')]);
+const branches=await Promise.all(manifest.branches.map(async(p,i)=>({...p,index:i,image:await load(p.file),angle:0,velocity:0})));
+branches.sort((a,b)=>a.pivot[1]-b.pivot[1]);
+for(const p of branches){const image=document.createElement('img');image.src=p.file;image.alt=p.id;image.style.width=p.size[0]*3+'px';document.querySelector('#pieces').append(image);}
+const left=document.querySelector('#original'),right=document.querySelector('#moving');
+const a=left.getContext('2d',{willReadFrequently:true}),b=right.getContext('2d',{willReadFrequently:true});
+a.drawImage(original,0,0);
+const source=a.getImageData(0,0,W,H);
+const stage=document.createElement('canvas');stage.width=W;stage.height=H;
+const ctx=stage.getContext('2d',{willReadFrequently:true});
+let maxPivotError=0,maxScaleError=0;
+function draw(animated,selection=false,hidden=false){
+ ctx.clearRect(0,0,W,H);ctx.drawImage(base,0,0);
+ if(!hidden)for(const p of branches){
+  ctx.save();ctx.translate(...p.pivot);ctx.rotate(animated?p.angle:0);
+  const matrix=ctx.getTransform(),pin=matrix.transformPoint(new DOMPoint(0,0));
+  maxPivotError=Math.max(maxPivotError,Math.hypot(pin.x-p.pivot[0],pin.y-p.pivot[1]));
+  maxScaleError=Math.max(maxScaleError,Math.abs(Math.hypot(matrix.a,matrix.b)-1),Math.abs(Math.hypot(matrix.c,matrix.d)-1));
+  ctx.drawImage(p.image,p.origin[0]-p.pivot[0],p.origin[1]-p.pivot[1]);
+  if(selection){ctx.strokeStyle=`hsl(${p.index*67} 85% 70%)`;ctx.lineWidth=.7;ctx.beginPath();p.polygon.forEach(([x,y],i)=>i?ctx.lineTo(x-p.pivot[0],y-p.pivot[1]):ctx.moveTo(x-p.pivot[0],y-p.pivot[1]));ctx.closePath();ctx.stroke();ctx.fillStyle='#ffdc82';ctx.fillRect(-1,-1,2,2);}
+  ctx.restore();
+ }
+ // The unchanged original trunk covers the attachment seams.
+ ctx.drawImage(front,0,0);
+ return ctx.getImageData(0,0,W,H);
+}
+const wind=t=>.42+.24*Math.sin(t*.83)+.14*Math.sin(t*1.39+1.7)+.08*Math.sin(t*2.11+.4);
+function step(t,dt,strength){
+ for(const p of branches){
+  const pressure=wind(t),target=-.095*strength*p.flex*pressure;
+  const flutter=.003*strength*pressure*Math.sin(t*(4.4+p.hz)+p.index*.65);
+  const omega=2*Math.PI*p.hz;
+  p.velocity+=(omega*omega*(target+flutter-p.angle)-2*.75*omega*p.velocity)*dt;
+  p.angle+=p.velocity*dt;
+ }
+}
+function reset(){for(const p of branches){p.angle=0;p.velocity=0;}}
+const difference=(x,y)=>{let count=0;for(let i=0;i<x.length;i++)count+=x[i]!==y[i]?1:0;return count;};
+const restored=draw(false);
+const restDifference=difference(source.data,restored.data);
+for(let t=0;t<3;t+=1/120)step(t,1/120,1);
+const sample=draw(true);let groundDifference=0;
+for(let y=190;y<H;y++)for(let x=0;x<W;x++){const o=(y*W+x)*4;for(let k=0;k<4;k++)groundDifference+=source.data[o+k]!==sample.data[o+k]?1:0;}
+const proof={build:manifest.proof,restDifference,groundDifference,maxPivotError,maxScaleError,movingBytes:difference(source.data,sample.data)};
+right.dataset.proof=JSON.stringify(proof);
+if(restDifference||groundDifference||maxPivotError>1e-5||maxScaleError>1e-5)throw new Error('Original-painting preservation or rigid-motion check failed.');
+reset();
+document.querySelector('#status').textContent=`${branches.length} source-pixel branch groups · rest composite identical · trunk and ground fixed`;
+const play=document.querySelector('#play'),cuts=document.querySelector('#cuts'),under=document.querySelector('#under');
+let playing=!matchMedia('(prefers-reduced-motion: reduce)').matches,time=0,strength=1,last=performance.now();
+play.textContent=playing?'Pause':'Play';
+function render(){
+ a.putImageData(source,0,0);
+ if(cuts.checked){a.strokeStyle='#edcf73';a.lineWidth=.7;for(const p of branches){a.beginPath();p.polygon.forEach(([x,y],i)=>i?a.lineTo(x,y):a.moveTo(x,y));a.closePath();a.stroke();}}
+ b.putImageData(draw(true,cuts.checked,under.checked),0,0);
+ right.dataset.time=time.toFixed(3);right.dataset.angle=(Math.max(...branches.map(p=>Math.abs(p.angle)))*180/Math.PI).toFixed(2);
+}
+play.onclick=()=>{playing=!playing;play.textContent=playing?'Pause':'Play';};
+document.querySelector('#rest').onclick=()=>{playing=false;play.textContent='Play';reset();render();};
+document.querySelector('#strength').oninput=e=>{strength=Number(e.target.value);document.querySelector('#amount').value=strength.toFixed(2);if(strength===0){reset();render();}};
+document.querySelector('#scale').onchange=e=>{for(const c of[left,right]){c.style.width=W*Number(e.target.value)+'px';c.style.height=H*Number(e.target.value)+'px';}};
+cuts.onchange=render;under.onchange=render;
+function loop(now){if(playing&&!document.hidden&&!under.checked){let dt=Math.min((now-last)/1000,.05);while(dt>0){const h=Math.min(dt,1/120);time+=h;step(time,h,strength);dt-=h;}}last=now;render();requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+</script>
+</html>

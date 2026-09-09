@@ -1734,3 +1734,18 @@ Builder lint and builder/embedded module syntax pass; controls inspected in brow
 **Codex:** Inspected the current grove again. The style/integration problem is visible in its still comparison: newly generated pines and the separate decorative shrub/fern atlas do not read as one painting with the environment. This is an owner rejection of the replacement art direction, despite the earlier positive response to motion. No more style-generation attempts on this kit (2/2 style candidates exhausted), no palette/blur concealment, no promotion. Original terrain and foliage art are intact; isolated candidates remain as evidence.
 
 **Proposed reframe, not started:** preserve the source painting as the visual baseline. Manually isolate real branch groups from one original painted tree, retain their source pixels and locations, and first demonstrate an unchanged rest composite. Only then test bounded branch movement. Hidden-area fill and recovery of overlapping original branches are unresolved authoring work; successful animation is not guaranteed. Retain the original static art if that preservation cannot be achieved.
+
+
+## ORIGINAL-PINE-BRANCH-STUDY-2026-09-09 - original pixels, layered outer boughs (owner review pending)
+
+**Owner:** "agreed please proceed" on preserving the source painting and proving the rest pose before movement.
+
+**Codex:** Built a one-tree experiment at :3230. Five hand-selected outer branch contours, intersected with the two-pixel-expanded source crown; fixed source trunk region drawn over attachments. Layers contain 1,424 unchanged original pixels. Private underpainting changes only that selection: 925 canopy pixels from uncut original donors, 499 from the existing ground patch. No ImageGen, palette change, whole-painting warp, or animated lighting. Source data and limitations in `ORIGINAL-PINE-BRANCH-STUDY-2026-09-09.md`.
+
+- `.codex-tmp/qa/original-pine-branches/comparison-native.png` - actual original painting and source-layer candidate at native size.
+- `.codex-tmp/qa/original-pine-branches/comparison-inspection.png` - 2x view to inspect bough edges and small revealed regions; no naturalness claim.
+- `.codex-tmp/qa/original-pine-branches/selected-branches.png` - authored branch contours and pivots over the source/candidate.
+- `.codex-tmp/qa/original-pine-branches/hidden-fill.png` - the reconstruction with moving pieces hidden. Sampling boundaries are visible when fully exposed; inspect what the actual motion reveals.
+- `branches.json`, `browser-proof.json`, `final-proof.json` - actual layered rest reconstruction differences 0, changed source-layer bytes 0, changes outside cut area 0; real Rest pose control identical; sampled ground/pivot/scale differences 0, movement 4,401 changed channel bytes. No angle-zero original-image bypass.
+
+Builder lint and source syntax pass. All output remains in quarantine, source/served assets and world runtime unchanged. Only five groups move; hidden-region reconstruction and contour accuracy remain visual risks. Next: owner's motion/edge verdict, not an automatic rollout.

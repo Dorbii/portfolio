@@ -4,6 +4,21 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
+**2026-09-09 - ORIGINAL-PIXEL BRANCH STUDY RUNNING; owner review pending.**
+Owner authorized the source-preserving experiment ("agreed please proceed").
+Viewer :3230 uses the actual T c3-1 pine, with five hand-selected outer branch
+groups, original RGB/alpha pixels, and a fixed original trunk/front layer.
+No replacement generation or relighting. 1,424 selected pixels; hidden fill
+uses 925 original-canopy donor samples and 499 pixels from the existing ground
+patch. Outside the cut area is unchanged. Actual offline and browser layer
+recompositions equal the original at rest, without an original-image shortcut;
+the Rest pose control also gives zero different bytes. Wind sample: ground /
+pivot / scale errors 0. Hidden-fill quality and cut-edge behavior still need
+the owner's eyes; exposed sampling boundaries are a risk. Builder lint and
+script syntax pass. No world art/runtime changes. See
+`ORIGINAL-PINE-BRANCH-STUDY-2026-09-09.md` for source data, reproduction and
+proof. Next: review this one tree; no rollout or visual acceptance claimed.
+
 **2026-09-09 - GENERATED GROVE / REPLACEMENT KIT REJECTED. STOP THIS ROUTE.**
 Owner: "see that looks super bad compared to what was there. The art doesnt
 match the environment ya know". The mismatch is present in the still view:
