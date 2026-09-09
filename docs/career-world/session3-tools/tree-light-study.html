@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>One pine — cluster lighting study</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#121915;color:#e3e8df;font:16px system-ui,sans-serif}main{max-width:1050px;margin:36px auto;padding:0 24px}h1{font-size:27px;font-weight:550;margin-bottom:10px}p{line-height:1.5;color:#b3c0b1;max-width:800px}.views{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:26px 0}figure{margin:0}figcaption{margin-bottom:12px;font-weight:600}.stage{min-height:280px;display:flex;align-items:center;justify-content:center;background:#1b241d;border:1px solid #3b4b3d}canvas{width:220px;height:240px;image-rendering:auto}.controls{display:flex;align-items:center;flex-wrap:wrap;gap:18px}button,select{font:inherit;color:inherit;background:#27352a;border:1px solid #617260;border-radius:4px;padding:8px 13px;cursor:pointer}input{accent-color:#b3d591}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #a3d0ed;outline-offset:3px}label{display:flex;align-items:center;gap:8px}output{min-width:3em}.note{font-size:14px}.debug{font-size:13px;color:#a8b7a5;margin-top:18px}@media(max-width:650px){main{margin-top:20px}.views{grid-template-columns:1fr}.stage{min-height:260px}.controls{gap:14px}}
+</style>
+<main>
+<h1>One pine, light moving within its branches</h1>
+<p>Compare the same painted tree. On the right, the needle clusters catch and lose light under a gust. Its silhouette, trunk, ground and sun direction stay fixed.</p>
+<div class="views">
+<figure><figcaption>Original · static</figcaption><div class="stage"><canvas id="original" width="220" height="240" aria-label="Original pine in the landscape"></canvas></div></figure>
+<figure><figcaption>Cluster lighting · candidate</figcaption><div class="stage"><canvas id="candidate" width="220" height="240" aria-label="Pine with animated lighting on its needle clusters"></canvas></div></figure>
+</div>
+<div class="controls">
+<button id="play" type="button">Pause</button>
+<label>Strength <input id="strength" aria-label="Lighting strength" type="range" min="0" max="2" step="0.05" value="1"><output id="amount">1.00</output></label>
+<label>View <select id="scale" aria-label="View scale"><option value="1">1× art pixels</option><option value="2">2× inspection</option></select></label>
+<label><input id="regions" type="checkbox">Show cluster regions</label>
+</div>
+<p class="note">Watch the needles on the larger pine, not the smaller tree at the left edge. Strength 0 restores the original pixels. This is an isolated study; it does not change the live world.</p>
+<p class="debug" id="status" role="status">Loading the reference painting…</p>
+</main>
+<script type="module">
+const width=220,height=240;
+// These regions were placed on the visible boughs of this particular pine.
+// Paired faces change light together; there is no translating light/noise field.
+const clusters=[
+ {p:[[106,55],[114,65],[115,78],[108,87],[100,81],[101,70]], ridge:[105,70,113,75],lag:0.02,rate:1.08},
+ {p:[[105,84],[97,85],[95,95],[81,108],[96,107],[109,97]],ridge:[86,103,106,90],lag:0.12,rate:0.91},
+ {p:[[111,81],[124,87],[122,94],[135,101],[119,107],[107,97]],ridge:[111,90,130,99],lag:0.07,rate:1.17},
+ {p:[[105,108],[91,109],[88,119],[70,133],[91,130],[107,117]],ridge:[76,128,105,112],lag:0.19,rate:0.84},
+ {p:[[111,103],[126,110],[125,119],[138,125],[122,136],[110,119]],ridge:[112,112,135,125],lag:0.14,rate:1.05},
+ {p:[[102,129],[88,132],[83,143],[61,157],[80,160],[99,145]],ridge:[66,153,101,134],lag:0.23,rate:0.78},
+ {p:[[111,125],[128,138],[126,146],[141,152],[130,165],[111,150]],ridge:[112,140,138,153],lag:0.20,rate:0.94},
+ {p:[[104,151],[87,155],[83,166],[60,177],[79,184],[99,166]],ridge:[66,177,103,157],lag:0.29,rate:0.73},
+ {p:[[113,150],[126,161],[125,167],[136,174],[128,182],[110,169]],ridge:[113,162,133,175],lag:0.26,rate:0.88},
+];
+const load=src=>new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=reject;im.src=src;});
+const original=document.querySelector('#original'),candidate=document.querySelector('#candidate');
+const originalCtx=original.getContext('2d'),ctx=candidate.getContext('2d');
+const [art,maskImage]=await Promise.all([load('context.png'),load('crown.png')]);
+originalCtx.drawImage(art,0,0);
+const source=originalCtx.getImageData(0,0,width,height);
+const work=document.createElement('canvas');work.width=width;work.height=height;
+const workCtx=work.getContext('2d',{willReadFrequently:true});
+workCtx.drawImage(maskImage,0,0);
+const crown=workCtx.getImageData(0,0,width,height).data;
+const occupied=new Float32Array(width*height),rig=[];
+for(const cluster of clusters){
+ workCtx.clearRect(0,0,width,height);workCtx.fillStyle='white';workCtx.beginPath();
+ cluster.p.forEach(([x,y],i)=>i?workCtx.lineTo(x,y):workCtx.moveTo(x,y));workCtx.closePath();workCtx.fill();
+ const coverage=workCtx.getImageData(0,0,width,height).data;
+ const points=[];let positive=0,negative=0;
+ const [x0,y0,x1,y1]=cluster.ridge;
+ for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+  const p=y*width+x;
+  if(crown[p*4+3]===0||coverage[p*4+3]===0||occupied[p]>=1)continue;
+  const a=coverage[p*4+3]/255*(1-occupied[p]);
+  // A fixed normal-turning response on the upper face and underside of the
+  // painted bough, not brightness travelling across it. Keep the dark
+  // occlusion core stable by limiting its response.
+  const ridgeY=y0+(y1-y0)*Math.max(0,Math.min(1,(x-x0)/(x1-x0)));
+  const face=Math.tanh((ridgeY-y)/2.8);
+  const luma=.2126*source.data[p*4]+.7152*source.data[p*4+1]+.0722*source.data[p*4+2];
+  const detail=Math.min(1,Math.max(0,(luma-13)/30));
+  const weight=face*a*detail;
+  if(weight>=0)positive+=weight;else negative-=weight;
+  points.push([p,weight]);occupied[p]+=a;
+ }
+ // Each cluster redistributes light instead of brightening the whole crown.
+ // Limiting the larger lobe avoids amplifying a tiny underside into black.
+ if(positive>0&&negative>0){
+  const balance=Math.min(positive,negative);
+  for(const point of points)point[1]*=point[1]>0?balance/positive:balance/negative;
+  rig.push({...cluster,points});
+ }
+}
+const smooth=(a,b,x)=>{x=Math.max(0,Math.min(1,(x-a)/(b-a)));return x*x*(3-2*x);};
+function response(t,c){
+ const phase=((t-c.lag)%7.8+7.8)%7.8;
+ const gust=smooth(.3,1.45,phase)*(1-smooth(1.45,5.5,phase));
+ const settle=Math.sin((phase-1.45)*c.rate*6.283)*Math.exp(-Math.max(0,phase-1.45)*.9);
+ // Cluster flutter is strongest during the gust; it is deliberately small.
+ return .72*gust+.20*settle*gust+.06*Math.sin(t*7.1*c.rate)*gust;
+}
+function pixels(t,strength){
+ const result=new ImageData(new Uint8ClampedArray(source.data),width,height);
+ const delta=new Float32Array(width*height);
+ for(const c of rig){const amount=response(t,c)*strength*17;for(const[p,w]of c.points)delta[p]+=w*amount;}
+ for(let p=0;p<delta.length;p++)if(delta[p]){
+  // Preserve the painted green/gold relationship; no flashing white layer.
+  for(let k=0;k<3;k++)result.data[p*4+k]=Math.max(0,Math.min(255,source.data[p*4+k]+delta[p]*[.88,1,.76][k]));
+ }
+ return result;
+}
+function draw(t,strength,showRegions){
+ ctx.putImageData(pixels(t,strength),0,0);
+ if(showRegions)rig.forEach((c,i)=>{ctx.strokeStyle=`hsl(${i*41} 80% 65%)`;ctx.lineWidth=.8;ctx.beginPath();c.p.forEach(([x,y],n)=>n?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.stroke();});
+}
+// Runtime-independent pixel checks; this diagnoses containment and identity,
+// never whether the visual effect is convincing.
+const rest=pixels(2,0),test=pixels(2,1);
+let outside=0,restChanged=0,changed=0,totalDelta=0,alphaChanged=0;
+for(let p=0;p<width*height;p++){
+ let different=false;
+ for(let k=0;k<4;k++){restChanged+=rest.data[p*4+k]!==source.data[p*4+k]?1:0;if(k<3){different ||= test.data[p*4+k]!==source.data[p*4+k];totalDelta+=test.data[p*4+k]-source.data[p*4+k];}}
+ if(different){changed++;if(crown[p*4+3]===0)outside++;}
+ if(test.data[p*4+3]!==source.data[p*4+3])alphaChanged++;
+}
+candidate.dataset.proof=JSON.stringify({clusters:rig.length,restChanged,outside,alphaChanged,changed,totalDelta});
+const status=document.querySelector('#status');
+status.textContent=`${rig.length} authored cluster responses · silhouette and ground fixed · light only`;
+if(restChanged||outside||alphaChanged)throw new Error('Lighting study violated its fixed-art contract.');
+let playing=!matchMedia('(prefers-reduced-motion: reduce)').matches,time=1.8,last=performance.now(),strength=1;
+const button=document.querySelector('#play');button.textContent=playing?'Pause':'Play';
+button.onclick=()=>{playing=!playing;button.textContent=playing?'Pause':'Play';};
+document.querySelector('#strength').oninput=e=>{strength=Number(e.target.value);document.querySelector('#amount').value=strength.toFixed(2);};
+document.querySelector('#scale').onchange=e=>{for(const c of[original,candidate]){c.style.width=width*Number(e.target.value)+'px';c.style.height=height*Number(e.target.value)+'px';}};
+function loop(now){if(playing&&!document.hidden)time+=Math.min((now-last)/1000,.1);last=now;draw(time,strength,document.querySelector('#regions').checked);candidate.dataset.time=time.toFixed(3);requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+</script>
+</html>

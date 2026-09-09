@@ -1667,3 +1667,16 @@ Evidence under `.codex-tmp/qa/foliage-resume-2026-09-09/`:
 - `branch-site-t0.png` and `branch-site-t1.png` - temporal views of the branch candidate for human review, not a quality score.
 
 **Next:** Steve judges whether branch/cluster motion reads as wind. If it still reads as rubber, do not repeat amplitude/noise tuning; reconsider the approximate rig against authored, separately layered branches. Dense stands remain a separate unresolved coverage task.
+
+
+## FOLIAGE-LIGHT-STUDY-2026-09-09 - fixed-silhouette, per-cluster lighting (owner review pending)
+
+**Owner clarification:** the earlier lighting rejection was because it looked like ocean waves in the lighting rather than individual trees blowing. Owner authorized trying the proposed one-tree study. The latest deformed-sprite recording was also rejected as weird; mechanical passes did not settle visual quality.
+
+**Codex:** New standalone comparison at `http://localhost:3210/`, copied from the existing pine at T c3-1 foot [208,879], crop [120,680,220,240]. Nine hand-placed branch-cluster regions intersect that pine's existing crown component. Each region redistributes light between a fixed upper face and underside, with balanced positive/negative response; shared gust timing plus slight per-cluster lag/settling. No scrolling lighting field, pixel displacement or new images. The world renderer and all served assets are unchanged. This approximates changing orientation using authored response masks; it is not recovered leaf geometry or a physically verified relight.
+
+- `.codex-tmp/qa/foliage-light-study/comparison-native.png` - static original and lighting candidate at identical 1x art size in surrounding terrain.
+- `.codex-tmp/qa/foliage-light-study/verification.json` - actual strength-zero canvas equals the original (0 different channel bytes), pause holds time; self-check reports 9 clusters, 0 changed pixels outside crown, 0 alpha changes, 2,694 changed pixels at its test phase, aggregate RGB delta 9 (near-balanced brightness, not a quality score).
+- Builder and embedded module syntax PASS; builder lint PASS; browser error/warning log empty. Strength, pause/resume, zoom and mask overlay operated in browser. Source builder and complete viewer tracked in `docs/career-world/session3-tools/{build-tree-light-study.mjs,tree-light-study.html}`.
+
+To restore: run `node docs/career-world/session3-tools/build-tree-light-study.mjs`, then `python -m http.server 3210 --bind 127.0.0.1 --directory .codex-tmp/qa/foliage-light-study`. No world deployment or full-suite readiness claim; next decision is Steve's visual verdict.

@@ -4,6 +4,23 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
+**2026-09-09 - ONE-TREE CLUSTER-LIGHT STUDY, owner review pending.**
+Owner says the branch prototype still looks weird and clarified that the old
+lighting pass failed because it looked like ocean waves over the forest, not
+because lighting-driven movement was categorically rejected. Owner authorized
+a new one-tree experiment. An isolated static/candidate comparison is running
+at `http://localhost:3210/` (world renderer at :3000 unchanged).
+`session3-tools/build-tree-light-study.mjs` builds the existing T c3-1 pine
+(foot [208,879]) into `.codex-tmp/qa/foliage-light-study/`; the tracked
+`tree-light-study.html` authors nine fixed bough regions, paired light/shade
+responses balanced within each cluster, one gust with cluster-specific lag and
+settling. No advected brightness/noise band, UV/geometry movement, or new art.
+Controls: pause, strength 0-2, 1x/2x inspection, region overlay. Original pixels
+at strength zero, all alpha and pixels outside the classified crown unchanged;
+pause/resume, browser errors, syntax and builder lint checked. No full world
+suite rerun because no runtime or served-world assets changed. Next: owner
+compares this study to static at art-native size; no rollout or visual acceptance.
+
 **2026-09-09 — BRANCH-MOTION PROTOTYPE, owner review pending.**
 Owner rejected the third whole-tree tuning: "The trees are just not animated
 enough I think, or maybe its the fact the leaves/pines dont move idk but it
