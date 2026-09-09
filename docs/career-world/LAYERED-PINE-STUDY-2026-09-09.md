@@ -104,3 +104,15 @@ Return a genuinely transparent RGBA PNG: alpha exactly zero everywhere outside t
 Preserve the exact existing nine parts, their positions, dimensions, colors, lighting, branch shapes, brushwork, and attachment stems. No repainting, no relighting, no extra branches, no assembled trees. Keep the entire 1254x1254 atlas canvas. This is a game sprite sheet which must composite directly over terrain; real alpha is mandatory.
 ```
 </details>
+
+
+## Grove comparison
+
+Owner requested a cluster of trees and bushes. [Grove viewer](http://localhost:3220/grove.html) shows seven added layered pines with nine existing shrub/fern clumps, still versus in wind. Bushes are static; their visibility can be toggled. Single-tree comparison remains at :3220/index.html.
+
+- New files: `session3-tools/build-grove-study.mjs`, `session3-tools/grove-study.html`. Run the builder after the layered-pine assets exist; the existing server serves `grove.html`.
+- Same style-r2 pine kit and motion parameters, independent tree states with modest spatial gust delays. Tree scales range from 0.75 to 1.10 of the single-tree study. Front-to-back order follows each object's ground foot; contact shade is a static preview layer under the group.
+- Bush source: `fern-cluster` from `public/career-world/shared-assets/environment/foliage/foliage-pool-r1.json`, using its declared atlas/crop. These are existing decorative shrub/fern clumps, not newly authored or animated bushes.
+- Ground: unchanged crop [730,1110,560,420] from T c3-1 site tile. Existing painted background objects remain visible. The arrangement is illustrative, not a world placement proposal.
+- Output under `.codex-tmp/qa/layered-pine-study/`: `grove.html`, `grove-ground.png`, `bush-atlas.png`, `grove-sources.json`, `grove-proof.json`, `grove-comparison.png`, `grove-without-bushes.png`.
+- Actual Rest pose comparison is byte-identical. The moving test sample changes 81,745 channel bytes; lower border unchanged, ground-foot draw order valid, pivot precision error ~3e-6 px. Builder lint / source syntax pass. No full application test run or production readiness claim for this isolated composition preview.

@@ -1714,3 +1714,16 @@ Builder lint and builder/embedded script syntax pass; isolated canvas prototype 
 Source crop margins expanded where new art exceeded old rectangles; local pivot offsets compensate exactly so atlas-space attachment locations and all world positions/scales remain unchanged. Wind pressure, spring equations, frequencies, flex values and strength default unchanged. `style-r2-inspection.json`: all nine parts contained after expansion. `style-r2-proof.json`: actual Rest pose control gives 0 different bytes; protected ground / pivot error 0; scale drift ~1.31e-8; 7 moving layers. Syntax and builder lint pass; no full application test claim for this isolated art study.
 
 Evidence `.codex-tmp/qa/layered-pine-study/style-comparison-native.png` and `style-comparison-inspection.png`: original painting vs current animated style candidate at equal scale, without claiming a match. Sources, prompts, hashes and limitations in `LAYERED-PINE-STUDY-2026-09-09.md`. No world renderer, manifest or served-world asset changes; prior candidates retained.
+
+
+## GROVE-STUDY-2026-09-09 - trees and bushes together (owner review pending)
+
+**Owner:** "can I see how a cluster of trees and bushes look?"
+
+**Codex:** Isolated :3220/grove.html comparison: 7 layered pines using style-r2 kit, 49 moving parts, 9 static shrub/fern clumps from the repo's existing `fern-cluster` shared resource. No ImageGen, no new bush-art claim. Same spring/pressure model as the single-tree study, per-tree spatial gust delay; objects draw in ground-foot order. Layout tightened from the initial spread-out arrangement and given static ground-contact shade. Background is the original T c3-1 crop [730,1110,560,420]; existing painted content remains, and the world is unchanged.
+
+- `.codex-tmp/qa/layered-pine-study/grove-comparison.png` - still/animated grove at native art scale, bushes visible.
+- `.codex-tmp/qa/layered-pine-study/grove-without-bushes.png` - view with the bush visibility control disabled, for judging its contribution.
+- `.codex-tmp/qa/layered-pine-study/grove-proof.json` - actual Rest pose control: 0 differing bytes; 7 trees / 9 shrub clumps / 49 moving layers, painter order true, lower-border delta 0, pivot error about 3e-6 px, moving sample 81,745 changed channel bytes. Mechanics only; not visual acceptance.
+
+Builder lint and builder/embedded module syntax pass; controls inspected in browser. Builders: `session3-tools/build-grove-study.mjs`, viewer `session3-tools/grove-study.html`; generated source manifest `grove-sources.json`. No production integration or full-suite claim.

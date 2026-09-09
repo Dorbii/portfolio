@@ -4,6 +4,19 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
+**2026-09-09 - GROVE COMPARISON OPEN, owner review pending.**
+Owner asked to see a cluster of trees and bushes. New isolated viewer:
+`http://localhost:3220/grove.html`, 7 added layered pines / 49 moving parts,
+9 existing `fern-cluster` shrub/fern sprites (static). Same style-r2 pine
+art and spring parameters, with small spatial delays under one shared gust.
+Instances sorted by ground-foot depth; static contact shade under the group.
+Unedited 560x420 source-terrain crop [730,1110] from T c3-1; background's
+painted vegetation stays as-is. No new ImageGen or world edits. Rest control
+returns identical canvases; lower border unchanged, painter order checked,
+pivot error ~3e-6 px. Native still/animated comparison and bushes toggle
+verified. Builder lint and script syntax pass. Sources, builder, snapshot and
+proof are listed in the grove section of `LAYERED-PINE-STUDY-2026-09-09.md`.
+
 **2026-09-09 - LAYERED PINE STYLE PASS, owner review pending.**
 Owner: "Better but the trees style doesnt seem to match the art". Held motion,
 world attachments and scales fixed. Named defect layered-pine-style-mismatch-r1,

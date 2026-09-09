@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trees and bushes — grove study</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#121915;color:#e3e8df;font:16px system-ui,sans-serif}main{max-width:1240px;margin:30px auto;padding:0 24px}h1{font-size:27px;font-weight:550;margin-bottom:10px}p{line-height:1.5;color:#b3c0b1;max-width:900px}.views{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:24px 0}figure{margin:0}figcaption{margin-bottom:12px;font-weight:600}.stage{background:#1b241d;border:1px solid #3b4b3d;overflow:auto}canvas{display:block;width:560px;height:420px;max-width:100%;object-fit:contain;height:auto}.controls{display:flex;align-items:center;flex-wrap:wrap;gap:18px}button{font:inherit;color:inherit;background:#27352a;border:1px solid #617260;border-radius:4px;padding:8px 13px;cursor:pointer}input{accent-color:#b3d591}button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #a3d0ed;outline-offset:3px}label{display:flex;align-items:center;gap:8px}output{min-width:3em}.note{font-size:14px}.debug{font-size:13px;color:#a8b7a5;margin-top:16px}a{color:#c6daaa}@media(max-width:760px){main{margin-top:20px}.views{grid-template-columns:1fr}}
+</style>
+<main>
+<h1>Trees and bushes together</h1>
+<p>A small grove using the current layered pine and existing repo shrub/fern clumps. Trees share a gust with a slight delay across the group; their roots stay planted.</p>
+<div class="views">
+<figure><figcaption>Grove · still</figcaption><div class="stage"><canvas id="still" width="560" height="420" aria-label="Seven trees and nine shrub clumps at rest"></canvas></div></figure>
+<figure><figcaption>Grove · in wind</figcaption><div class="stage"><canvas id="moving" width="560" height="420" aria-label="The grove with animated tree branches"></canvas></div></figure>
+</div>
+<div class="controls">
+<button id="play" type="button">Pause</button><button id="rest" type="button">Rest pose</button>
+<label>Wind <input id="strength" aria-label="Wind strength" type="range" min="0" max="2" step="0.05" value="1"><output id="amount">1.00</output></label>
+<label><input id="bushes" type="checkbox" checked>Show bushes</label>
+<a href="index.html">Single-tree comparison</a>
+</div>
+<p class="note">The bushes are static in this composition test. The grove is an illustrative arrangement on an unedited crop of repo terrain; it has not been added to the world. Pine art remains a candidate with display-only background filtering.</p>
+<p id="status" class="debug" role="status">Loading the grove…</p>
+</main>
+<script type="module">
+const W=560,H=420;
+const load=src=>new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=reject;image.src=src;});
+const [source,ground,bushImage,sources]=await Promise.all([load('parts-style-r2.png'),load('grove-ground.png'),load('bush-atlas.png'),fetch('grove-sources.json').then(r=>r.json())]);
+const atlas=document.createElement('canvas');atlas.width=source.width;atlas.height=source.height;
+const ax=atlas.getContext('2d',{willReadFrequently:true});ax.drawImage(source,0,0);
+const pixels=ax.getImageData(0,0,atlas.width,atlas.height);
+for(let i=0;i<pixels.data.length;i+=4){const r=pixels.data[i],g=pixels.data[i+1],b=pixels.data[i+2],lo=Math.min(r,g,b),hi=Math.max(r,g,b);if(lo>145&&hi-lo<60)pixels.data[i+3]=0;}
+ax.putImageData(pixels,0,0);
+// Same art coordinates, sockets and spring parameters as the one-tree study.
+const pieces={
+ trunk:{r:[152,10,132,424],p:[72,407],x:108,y:199,sx:.14,sy:.33},
+ leader:{r:[503,34,234,378],p:[122,360],x:108,y:101,sx:.13,sy:.13,flex:.42,hz:1.1},
+ upperL:{r:[874,101,341,303],p:[323,79],x:108,y:94,sx:.105,sy:.105,flex:.8,hz:1.0},
+ upperR:{r:[25,475,359,305],p:[18,97],x:108,y:96,sx:.105,sy:.105,flex:.9,hz:1.12},
+ middleL:{r:[427,458,381,351],p:[362,96],x:108,y:119,sx:.12,sy:.12,flex:.8,hz:.83},
+ middleR:{r:[861,456,379,356],p:[24,99],x:108,y:122,sx:.12,sy:.12,flex:.85,hz:.91},
+ lowerL:{r:[3,854,400,382],p:[382,70],x:108,y:145,sx:.14,sy:.14,flex:.65,hz:.66},
+ lowerR:{r:[433,857,393,380],p:[22,72],x:108,y:148,sx:.14,sy:.14,flex:.7,hz:.74},
+ back:{r:[917,839,237,403],p:[125,378],x:108,y:181,sx:.20,sy:.23},
+ front:{r:[917,839,237,403],p:[125,378],x:108,y:179,sx:.08,sy:.23},
+};
+const partOrder=['back','lowerL','lowerR','middleL','middleR','trunk','front','upperL','upperR','leader'];
+const treeLayout=[[230,176,.86],[310,167,.75],[370,201,.94],[175,270,.86],[270,258,1.10],[358,290,.93],[427,310,.78]];
+const bushLayout=[[190,224,.13],[296,195,.11],[396,244,.12],[218,281,.14],[306,278,.12],[401,300,.135],[165,319,.15],[267,327,.145],[359,337,.15]];
+const trees=treeLayout.map(([x,y,scale],id)=>({kind:'tree',id,x,y,scale,delay:(x*.91+y*.41)/300,parts:Object.fromEntries(Object.entries(pieces).map(([name,p])=>[name,{...p,angle:0,velocity:0}]))}));
+const bushes=bushLayout.map(([x,y,scale],id)=>({kind:'bush',id,x,y,scale}));
+const objects=[...trees,...bushes].sort((a,b)=>a.y-b.y);
+const still=document.querySelector('#still'),moving=document.querySelector('#moving');
+const a=still.getContext('2d',{willReadFrequently:true}),b=moving.getContext('2d',{willReadFrequently:true});
+const composite=document.createElement('canvas');composite.width=W;composite.height=H;
+const ctx=composite.getContext('2d',{willReadFrequently:true});
+let maxPivotError=0;
+function drawTree(tree,animated){
+ ctx.save();ctx.translate(tree.x,tree.y);ctx.scale(tree.scale,tree.scale);ctx.translate(-108,-199);
+ for(const name of partOrder){
+  const p=tree.parts[name];ctx.save();ctx.translate(p.x,p.y);ctx.rotate(animated?p.angle:0);ctx.scale(p.sx,p.sy);
+  const pin=ctx.getTransform().transformPoint(new DOMPoint(0,0));
+  maxPivotError=Math.max(maxPivotError,Math.hypot(pin.x-(tree.x+(p.x-108)*tree.scale),pin.y-(tree.y+(p.y-199)*tree.scale)));
+  ctx.drawImage(atlas,...p.r,-p.p[0],-p.p[1],p.r[2],p.r[3]);ctx.restore();
+ }
+ ctx.restore();
+}
+function draw(animated,showBushes){
+ ctx.clearRect(0,0,W,H);ctx.drawImage(ground,0,0);
+ // Static contact shade belongs beneath the entire group, not on a
+ // foreground crown when objects overlap. Source terrain stays untouched.
+ for(const object of objects){
+  if(object.kind==='bush'&&!showBushes)continue;
+  const rx=object.kind==='tree'?11*object.scale:180*object.scale;
+  const ry=object.kind==='tree'?4*object.scale:45*object.scale;
+  ctx.save();ctx.translate(object.x+1.5,object.y+1);ctx.scale(rx,ry);
+  const shade=ctx.createRadialGradient(0,0,0,0,0,1);shade.addColorStop(0,'rgba(17,23,12,.28)');shade.addColorStop(1,'rgba(17,23,12,0)');
+  ctx.fillStyle=shade;ctx.beginPath();ctx.arc(0,0,1,0,Math.PI*2);ctx.fill();ctx.restore();
+ }
+ for(const object of objects){
+  if(object.kind==='tree')drawTree(object,animated);
+  else if(showBushes){const r=sources.bush.crop;ctx.drawImage(bushImage,...r,object.x-220*object.scale,object.y-410*object.scale,r[2]*object.scale,r[3]*object.scale);}
+ }
+ return ctx.getImageData(0,0,W,H);
+}
+function wind(t){return .42+.24*Math.sin(t*.83)+.14*Math.sin(t*1.39+1.7)+.08*Math.sin(t*2.11+.4);}
+function step(t,dt,strength){
+ for(const tree of trees){
+  const localTime=t-tree.delay,pressure=wind(localTime);let index=0;
+  for(const p of Object.values(tree.parts)){
+   if(!p.flex)continue;
+   const target=-.105*strength*p.flex*pressure,flutter=.0035*strength*pressure*Math.sin(localTime*(4.5+p.hz)+index*.65),omega=2*Math.PI*p.hz;
+   p.velocity+=(omega*omega*(target+flutter-p.angle)-2*.72*omega*p.velocity)*dt;p.angle+=p.velocity*dt;index++;
+  }
+ }
+}
+function reset(){for(const tree of trees)for(const p of Object.values(tree.parts)){p.angle=0;p.velocity=0;}}
+const difference=(left,right)=>{let count=0;for(let i=0;i<left.length;i++)if(left[i]!==right[i])count++;return count;};
+draw(false,true);const rest=draw(false,true),zero=draw(true,true);
+const restDifference=difference(rest.data,zero.data);
+for(let t=0;t<3;t+=1/120)step(t,1/120,1);
+const gust=draw(true,true);let borderChanged=0;
+for(let y=H-30;y<H;y++)for(let x=0;x<W;x++){const o=(y*W+x)*4;for(let k=0;k<4;k++)if(rest.data[o+k]!==gust.data[o+k])borderChanged++;}
+const proof={trees:trees.length,bushClumps:bushes.length,movingLayers:trees.reduce((n,t)=>n+Object.values(t.parts).filter(p=>p.flex).length,0),restDifference,borderChanged,maxPivotError,movingBytes:difference(rest.data,gust.data),painterOrder:objects.every((o,i)=>i===0||objects[i-1].y<=o.y)};
+moving.dataset.proof=JSON.stringify(proof);
+if(restDifference||borderChanged||maxPivotError>1e-4||!proof.painterOrder)throw new Error('Grove pose, attachment or painter-order check failed.');
+reset();
+const showBushes=document.querySelector('#bushes'),button=document.querySelector('#play');
+let playing=!matchMedia('(prefers-reduced-motion: reduce)').matches,time=0,strength=1,last=performance.now();
+let staticFrame=draw(false,true);a.putImageData(staticFrame,0,0);
+document.querySelector('#status').textContent='7 layered pines · 9 existing shrub/fern clumps · bushes static';
+button.textContent=playing?'Pause':'Play';
+const render=()=>{b.putImageData(draw(true,showBushes.checked),0,0);moving.dataset.time=time.toFixed(3);moving.dataset.maxAngle=(Math.max(...trees.flatMap(t=>Object.values(t.parts).map(p=>Math.abs(p.angle))))*180/Math.PI).toFixed(2);};
+button.onclick=()=>{playing=!playing;button.textContent=playing?'Pause':'Play';};
+document.querySelector('#rest').onclick=()=>{playing=false;button.textContent='Play';reset();render();};
+document.querySelector('#strength').oninput=e=>{strength=Number(e.target.value);document.querySelector('#amount').value=strength.toFixed(2);if(strength===0){reset();render();}};
+showBushes.onchange=()=>{staticFrame=draw(false,showBushes.checked);a.putImageData(staticFrame,0,0);render();};
+function loop(now){if(playing&&!document.hidden){let dt=Math.min((now-last)/1000,.05);while(dt>0){const h=Math.min(dt,1/120);time+=h;step(time,h,strength);dt-=h;}}last=now;render();requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+</script>
+</html>

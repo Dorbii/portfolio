@@ -1,0 +1,16 @@
+import fs from "node:fs";
+import path from "node:path";
+import sharp from "sharp";
+const root = path.resolve(import.meta.dirname, "../../..");
+const out = path.join(root, ".codex-tmp/qa/layered-pine-study");
+if (!fs.existsSync(path.join(out, "parts-style-r2.png"))) throw new Error("Build the layered-pine study first; its quarantined atlas is required.");
+const source = path.join(root, "public/career-world/layers/terrain/authority/tiles/l2-tanium/c3-1-site.webp");
+const crop = { left: 730, top: 1110, width: 560, height: 420 };
+await sharp(source).extract(crop).png().toFile(path.join(out, "grove-ground.png"));
+const pool = JSON.parse(fs.readFileSync(path.join(root, "public/career-world/shared-assets/environment/foliage/foliage-pool-r1.json"), "utf8"));
+const bush = pool.resources.find(item => item.id === "fern-cluster");
+if (!bush) throw new Error("The shared shrub/fern resource is missing.");
+fs.copyFileSync(path.join(root, "public", bush.atlasPath), path.join(out, "bush-atlas.png"));
+fs.writeFileSync(path.join(out, "grove-sources.json"), JSON.stringify({ ground: { source: path.relative(root, source), crop }, bush }, null, 2));
+fs.copyFileSync(path.join(import.meta.dirname, "grove-study.html"), path.join(out, "grove.html"));
+console.log(path.join(out, "grove.html"));
