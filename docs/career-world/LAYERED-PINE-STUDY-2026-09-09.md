@@ -29,6 +29,49 @@ The viewer reuses the existing original pine's ground patch inside its local com
 
 Next: Steve judges the layered motion, separately from the new art's style. No acceptance, production readiness, or coverage/rollout claim.
 
+
+## Style-only follow-up
+
+Owner found the movement better but the new tree's style mismatched the repo. The wind and spring model, frequencies, flex values, destination positions and scales were held fixed. New named defect `layered-pine-style-mismatch-r1`, 2 built-in imagegen candidates; no further generation in this style pass.
+
+- Current: `.codex-tmp/qa/layered-pine-study/parts-style-r2.png`, 1254x1254 RGB, SHA-256 `7f2b9c774f599a48905b0c938ca0e1e098f087cec676be8ea30e3ded372e5d0b`; generated original `C:/Users/Steve/.codex/generated_images/01a0868d-0b09-7483-b8e6-199cf211d9e4/exec-6ad60b58-54f5-4c02-aced-e9b97b37eb86.png`.
+- Prior style candidate: `parts-style-r1.png`, generated `exec-f430193a-6218-44d5-b0c2-ea055d26317f.png` in that same generated-images directory. It remains available for comparison; not selected for current preview.
+- r1 changed the marks but still packed small sprays into the assembled pine. r2 uses fewer broad, hooked forms and dark undersides. This is the candidate's design, not a visual-match verdict.
+- Crop margins expanded for leader, upper-left, lower-left and central foliage. Local pivot offsets rebase when a crop origin moves; the atlas-space woody attachment pixel stays identical. All parts fit the final rectangles; source bounding results in `style-r2-inspection.json` (old and final crop results retained separately).
+- Viewer now defaults to original repo painting on the left. Uncheck `Repo reference on left` to compare the new tree at rest with its moving version. The actual rest control was checked again: 0 differing bytes. Self-check ground / pivot errors remain 0; scale drift ~1.31e-8. Proof: `style-r2-proof.json`.
+- Screenshots: `style-comparison-native.png`, `style-comparison-inspection.png`. Source remains RGB with a display-only background filter; no world promotion or clean-alpha claim. The style still needs Steve's verdict.
+
+<details>
+<summary>Exact style-pass prompts</summary>
+
+### Candidate 1
+
+```text
+Use case: style-transfer. Named defect: layered-pine-style-mismatch-r1.
+Edit IMAGE 1, the 1254x1254 pine-parts atlas. IMAGE 2 is the authoritative STYLE reference, showing the existing dark painted pine in its game landscape.
+The current atlas looks too realistic: its individually rendered thin needles, fine texture and wispy branch edges do NOT match the broader, chunky painted needle masses in image 2. Repaint the NINE existing parts to match image 2's visual language. This needs a change in shape language and brushwork, not just a color filter.
+STYLE AUTHORITY, image 2: dense dark forest-green evergreen masses; broad overlapping fan-like and spade-like needle clumps; a few decisive olive highlights along the curved upper branch edges; deep muted blue-green/near-black underside shapes; compact, solid silhouette tiers; visibly simplified painterly strategy-game illustration. Paint needles as grouped brush shapes, not many realistic individual needles. The bark should be similarly simplified. Avoid yellow-orange foliage, photorealism, fine fibrous detail, shaggy/fluffy edges, feathery spruce sprays, tiny high-frequency noise, pencil hatching, plastic shine, and blur.
+LAYOUT LOCK, image 1: preserve the exact 1254x1254 canvas, all nine parts in the same cells, each part's extents, orientation, scale, woody attachment stem and stem endpoint position. Do not add parts, merge parts, move parts, mirror them, or draw assembled trees. Keep the long bare trunk and the same leader, six left/right boughs, and narrow back-crown piece. The existing animation rig depends on these bounds and attachment positions.
+Each left bough still has its attachment stem at its right end; each right bough still attaches at its left end. Build the broad painted needle clumps around those existing branch structures, with solid overlapping dark masses and restrained broad highlights matching image 2. Keep the parts spatially separate.
+Background: clean flat white, no checkerboard, no grey pattern, no shadows outside the parts. This RGB comparison atlas will be keyed only in an isolated prototype. No ground, no wall, no text, no labels, no borders.
+Priority order: match image 2's painted pine style; preserve image 1's exact part layout and attachment locations; keep all parts complete and separated.
+```
+
+### Candidate 2
+
+```text
+Style-only correction, candidate 2 of 2 for layered-pine-style-mismatch-r1.
+IMAGE 1 is the current parts sheet and the exact LAYOUT authority. IMAGE 2 is the STYLE authority: the large dark pine in the repo landscape.
+The assembled current parts still look like many little leafy sprays; the reference tree is made of a small number of large dark sculptural tiers. Match the SIZE OF THE PAINTED FORMS, not merely its colors.
+Repaint each of the six side boughs as TWO OR THREE LARGE overlapping fan/wedge forms of evergreen needles, with thick coherent curved upper edges and deep shadow beneath. Each fan should occupy a substantial fraction of its branch. Do not paint rows of individual leaves, little sprays, separated needle blades, fronds, fine hatching or feathery twig detail. In the final game each bough is only about 40-55 pixels wide; tiny marks are the wrong scale. Use very few broad intentional strokes and large continuous dark shapes.
+The crown leader should have THREE broad tiers below a pointed top, not many tiny tiers. The narrow back-foliage piece should similarly have just a few broad conifer tiers.
+The precise visual language is the pine in IMAGE 2: almost-black blue-green underside masses, dark muted forest green faces, spare olive-gold painted accents on the curved upper lips, firm scalloped / hooked triangular outer profiles, no outlined broadleaf/laurel leaves. No blur. No photographic detail. No glossy material. No furry texture. Treat each bough like a small piece cut from that illustrated reference pine.
+Keep IMAGE 1's 1254x1254 canvas, all nine part locations, woody stems and attachment endpoint coordinates, trunk and branch lengths, part orientations and approximate outer bounds EXACT. The animator's rig is already locked. Keep the pieces separate and complete. Bare trunk stays the same slender shape with broad simplified bark painting.
+Flat pure white background, no checkerboard or cast shadows. No labels or text. Do not draw assembled trees. Do not change lighting direction. The six boughs must remain six boughs; simplify the painted foliage forms inside them instead of adding components.
+```
+</details>
+
+
 <details>
 <summary>Exact built-in imagegen prompts</summary>
 

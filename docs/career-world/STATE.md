@@ -4,6 +4,21 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
+**2026-09-09 - LAYERED PINE STYLE PASS, owner review pending.**
+Owner: "Better but the trees style doesnt seem to match the art". Held motion,
+world attachments and scales fixed. Named defect layered-pine-style-mismatch-r1,
+2/2 ImageGen candidates: first simplified needles but still read as many small
+sprays when assembled; second uses broad hooked dark tiers with restrained
+olive edge highlights. Current atlas `parts-style-r2.png` (1254x1254 RGB) is
+quarantine-only; same display background filter, no production alpha claim.
+Viewer :3220 now shows the actual repo painting on the left by default; turn
+off "Repo reference on left" for new-art still/moving comparison. A few source
+crop margins expanded with local pivots rebased to keep the same atlas-space
+attachment pixels. Every part fits; zero rest/ground/pivot drift. Source crops,
+not wind/spring parameters, changed. Syntax/builder lint and reference/rest
+controls checked. No world asset or renderer changes. See the style section of
+`LAYERED-PINE-STUDY-2026-09-09.md`. Next: owner's style verdict; no match claimed.
+
 **2026-09-09 - LAYERED-PINE PROTOTYPE RUNNING; owner review pending.**
 Owner authorized the new layered-art representation. Isolated viewer at
 `http://localhost:3220/` compares the same new pine still vs animated: six

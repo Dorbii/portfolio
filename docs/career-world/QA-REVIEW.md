@@ -1703,3 +1703,14 @@ To restore: run `node docs/career-world/session3-tools/build-tree-light-study.mj
 - `.codex-tmp/qa/layered-pine-study/final-proof.json` - 7 moving layers; rest difference 0; protected ground difference 0; pivot error 0; scale drift ~1.31e-8; three-second moving pose differs in 16,500 channel bytes. Actual Rest pose UI control also returned identical canvases. Initial scaled draw differed from later identical draws; settled sampling is primed before measurement, without weakening the equality check. Exact browser cause was not established.
 
 Builder lint and builder/embedded script syntax pass; isolated canvas prototype only, no full app-suite claim. RGB kit still needs clean alpha and art review before promotion. Next: owner evaluates this layered motion; no acceptance or rollout implied.
+
+
+## LAYERED-PINE-STYLE-2026-09-09 - style-only candidates (owner review pending)
+
+**Owner:** "Better but the trees style doesnt seem to match the art".
+
+**Codex:** Motion configuration held fixed; new kit's fine needle sprays differed from the broad dark painted tiers in the source pine. Named defect `layered-pine-style-mismatch-r1`, 2/2 built-in ImageGen calls. r1 simplified the marks but still read as many small sprays in the assembled view; r2 reduces each bough to a few broad hooked masses. r2 is mounted only in the isolated :3220 comparison. Original repo crop is now the default left reference; the toggle restores the new-art static comparison. No style equivalence or acceptance claimed. Raw RGB art still requires clean alpha before promotion.
+
+Source crop margins expanded where new art exceeded old rectangles; local pivot offsets compensate exactly so atlas-space attachment locations and all world positions/scales remain unchanged. Wind pressure, spring equations, frequencies, flex values and strength default unchanged. `style-r2-inspection.json`: all nine parts contained after expansion. `style-r2-proof.json`: actual Rest pose control gives 0 different bytes; protected ground / pivot error 0; scale drift ~1.31e-8; 7 moving layers. Syntax and builder lint pass; no full application test claim for this isolated art study.
+
+Evidence `.codex-tmp/qa/layered-pine-study/style-comparison-native.png` and `style-comparison-inspection.png`: original painting vs current animated style candidate at equal scale, without claiming a match. Sources, prompts, hashes and limitations in `LAYERED-PINE-STUDY-2026-09-09.md`. No world renderer, manifest or served-world asset changes; prior candidates retained.

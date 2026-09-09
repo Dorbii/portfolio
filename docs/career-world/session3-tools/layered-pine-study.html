@@ -7,25 +7,26 @@
 </style>
 <main>
 <h1>One pine built from separate branches</h1>
-<p>The same new layered asset on both sides. On the right, complete boughs rotate at their attachments and settle after gusts. The trunk stays fixed; the branch artwork does not stretch or change brightness.</p>
+<p>Compare the candidate's broader painted clumps with the repo's original pine. The branch motion is unchanged. Turn off the reference to compare the new artwork still and moving.</p>
 <div class="views">
-<figure><figcaption>Layered pine · still</figcaption><div class="stage"><canvas id="still" width="220" height="240" aria-label="New layered pine at rest"></canvas></div></figure>
-<figure><figcaption>Layered pine · in wind</figcaption><div class="stage"><canvas id="moving" width="220" height="240" aria-label="The same pine with moving bough layers"></canvas></div></figure>
+<figure><figcaption id="left-title">Repo painting · reference</figcaption><div class="stage"><canvas id="still" width="220" height="240" aria-label="Pine reference or new layered pine at rest"></canvas></div></figure>
+<figure><figcaption>Style candidate · in wind</figcaption><div class="stage"><canvas id="moving" width="220" height="240" aria-label="Style candidate with moving bough layers"></canvas></div></figure>
 </div>
 <div class="controls">
 <button id="play" type="button">Pause</button><button id="rest" type="button">Rest pose</button>
 <label>Wind <input id="strength" aria-label="Wind strength" type="range" min="0" max="2" step="0.05" value="1"><output id="amount">1.00</output></label>
 <label>View <select id="scale" aria-label="View scale"><option value="1">1× art pixels</option><option value="2">2× inspection</option></select></label>
 <label><input id="pivots" type="checkbox">Show attachments</label>
+<label><input id="reference" type="checkbox" checked>Repo reference on left</label>
 </div>
-<p class="note">Judge the movement first. This is a new art candidate, not a replacement for the existing pine. Its generated background is filtered out only while drawing; the kit is not ready for production.</p>
+<p class="note">Judge the painted shapes and palette against the repo reference. This is a new art candidate, not a replacement for the existing pine. Its generated background is filtered out only while drawing; the kit is not ready for production.</p>
 <p id="status" class="debug" role="status">Loading the parts…</p>
-<details><summary>Inspect the separate source pieces</summary><p>Original generated RGB atlas, including its unwanted painted checkerboard. No source pixels were rewritten.</p><img src="parts-r1.png" alt="Source atlas of trunk, leader, six boughs and central foliage"></details>
+<details><summary>Inspect the separate source pieces</summary><p>Style candidate RGB atlas on white. Its source file is unchanged by the preview renderer.</p><img src="parts-style-r2.png" alt="Style candidate atlas of trunk, leader, six boughs and central foliage"></details>
 </main>
 <script type="module">
 const W=220,H=240;
 const load=src=>new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=reject;i.src=src;});
-const [source,context,patch]=await Promise.all([load('parts-r1.png'),load('context.png'),load('patch-atlas.webp')]);
+const [source,context,patch]=await Promise.all([load('parts-style-r2.png'),load('context.png'),load('patch-atlas.webp')]);
 const atlas=document.createElement('canvas');atlas.width=source.width;atlas.height=source.height;
 const atlasCtx=atlas.getContext('2d',{willReadFrequently:true});atlasCtx.drawImage(source,0,0);
 const keyed=atlasCtx.getImageData(0,0,atlas.width,atlas.height);let removed=0;
@@ -38,6 +39,7 @@ for(let i=0;i<keyed.data.length;i+=4){
 atlasCtx.putImageData(keyed,0,0);
 const background=document.createElement('canvas');background.width=W;background.height=H;
 const bg=background.getContext('2d');bg.drawImage(context,0,0);
+const referenceFrame=bg.getImageData(0,0,W,H);
 // Existing tree's already-authored ground patch. No new terrain modification.
 bg.drawImage(patch,103,0,103,157,49,48,103,157);
 // Rects and woody attachment points read from this particular generated
@@ -45,15 +47,15 @@ bg.drawImage(patch,103,0,103,157,49,48,103,157);
 // separately authored width/height to fit the composition.
 const pieces={
  trunk:{r:[152,10,132,424],p:[72,407],x:88,y:199,sx:.14,sy:.33},
- leader:{r:[503,34,228,378],p:[122,360],x:88,y:101,sx:.13,sy:.13,flex:.42,hz:1.1},
- upperL:{r:[874,106,341,280],p:[323,74],x:88,y:94,sx:.105,sy:.105,flex:.8,hz:1.0},
+ leader:{r:[503,34,234,378],p:[122,360],x:88,y:101,sx:.13,sy:.13,flex:.42,hz:1.1},
+ upperL:{r:[874,101,341,303],p:[323,79],x:88,y:94,sx:.105,sy:.105,flex:.8,hz:1.0},
  upperR:{r:[25,475,359,305],p:[18,97],x:88,y:96,sx:.105,sy:.105,flex:.9,hz:1.12},
  middleL:{r:[427,458,381,351],p:[362,96],x:88,y:119,sx:.12,sy:.12,flex:.8,hz:.83},
  middleR:{r:[861,456,379,356],p:[24,99],x:88,y:122,sx:.12,sy:.12,flex:.85,hz:.91},
- lowerL:{r:[3,860,400,376],p:[382,64],x:88,y:145,sx:.14,sy:.14,flex:.65,hz:.66},
+ lowerL:{r:[3,854,400,382],p:[382,70],x:88,y:145,sx:.14,sy:.14,flex:.65,hz:.66},
  lowerR:{r:[433,857,393,380],p:[22,72],x:88,y:148,sx:.14,sy:.14,flex:.7,hz:.74},
- back:{r:[917,845,237,397],p:[125,372],x:88,y:181,sx:.20,sy:.23},
- front:{r:[917,845,237,397],p:[125,372],x:88,y:179,sx:.08,sy:.23},
+ back:{r:[917,839,237,403],p:[125,378],x:88,y:181,sx:.20,sy:.23},
+ front:{r:[917,839,237,403],p:[125,378],x:88,y:179,sx:.08,sy:.23},
 };
 const order=['back','lowerL','lowerR','middleL','middleR','trunk','front','upperL','upperR','leader'];
 // The mask's lowest foliage point is x88; the painted trunk/root is x108.
@@ -108,14 +110,15 @@ if(restDifference||groundChanged||maxPivotError>1e-6||maxScaleError>1e-6)throw n
 reset();
 document.querySelector('#status').textContent='Six separate boughs and a crown leader · fixed attachments · no animated light or texture distortion';
 let playing=!matchMedia('(prefers-reduced-motion: reduce)').matches,strength=1,time=0,last=performance.now();
-const button=document.querySelector('#play'),markers=document.querySelector('#pivots');
+const button=document.querySelector('#play'),markers=document.querySelector('#pivots'),reference=document.querySelector('#reference');
 button.textContent=playing?'Pause':'Play';
-const render=()=>{draw(a,false,markers.checked);draw(b,true,markers.checked);moving.dataset.time=time.toFixed(3);moving.dataset.maxAngleDegrees=(Math.max(...bones.map(p=>Math.abs(p.angle)))*180/Math.PI).toFixed(2);};
+const render=()=>{if(reference.checked)a.putImageData(referenceFrame,0,0);else draw(a,false,markers.checked);draw(b,true,markers.checked);moving.dataset.time=time.toFixed(3);moving.dataset.maxAngleDegrees=(Math.max(...bones.map(p=>Math.abs(p.angle)))*180/Math.PI).toFixed(2);};
 button.onclick=()=>{playing=!playing;button.textContent=playing?'Pause':'Play';};
 document.querySelector('#rest').onclick=()=>{playing=false;button.textContent='Play';reset();render();};
 document.querySelector('#strength').oninput=e=>{strength=Number(e.target.value);document.querySelector('#amount').value=strength.toFixed(2);if(strength===0){reset();render();}};
 document.querySelector('#scale').onchange=e=>{for(const c of[still,moving]){c.style.width=W*Number(e.target.value)+'px';c.style.height=H*Number(e.target.value)+'px';}};
 markers.onchange=render;
+reference.onchange=()=>{document.querySelector('#left-title').textContent=reference.checked?'Repo painting · reference':'Layered pine · still';render();};
 function loop(now){
  if(playing&&!document.hidden){let dt=Math.min((now-last)/1000,.05);while(dt>0){const h=Math.min(dt,1/120);time+=h;step(time,h,strength);dt-=h;}}
  last=now;render();requestAnimationFrame(loop);
