@@ -1779,3 +1779,12 @@ Visual assessment, not an acceptance verdict: the pine is still sharper and more
 **Codex:** Candidate rejected; retain :3250 and its screenshots/source as review evidence. My visual interpretation is that the pine still reads as stacked geometry and the mushroom caps as pebble-like forms, with insufficient painted edge/branch treatment and stem readability. Opening the tiers and adjusting source highlights did not establish a world-art match. Stop this procedural-mesh/material iteration; no animation, kit expansion or promotion. This is evidence against this implementation, not proof that offline 3D authoring cannot work.
 
 **Reframe:** The outstanding problem is source art quality, not motion mechanics. Keep original world foliage as the baseline. A replacement now requires deliberate painted silhouettes, surface marks and branch forms before it is rigged; another parameter pass or automatic return to the already rejected generated kit is not a credible correction. A viable new authoring method remains unresolved; no new asset-generation run or production change is implied.
+
+
+## FOLIAGE-CLEANUP-2026-09-09 - owner requested removal; deletion blocked
+
+**Owner:** "thats fine can you remove the tests work/files to reclaim that space?"
+
+**Codex:** Audited abandoned experiment directories, isolated prototype builders/viewers and this task's generated image sources. Inventory `FOLIAGE-CLEANUP-2026-09-09.json`: 24 exact targets, 153 files, 45,184,086 bytes. Paths resolved within individually approved directories; no reparse-point targets; app/features/scripts/tests have no imports of the dedicated viewers/builders. Preserved runtime tree-sprite tooling and shared tests, the useful reference board, and unrelated terrain backups.
+
+Automatic approval review blocked both the combined deletion command and the narrower explicit-path recursive directory deletion, with only "blocked by policy" supplied as reason. No files deleted; all 24 targets still exist. This inventory is pending work, not a deletion receipt. Stopped only the four exact Python experiment servers on 3210, 3220, 3230 and 3250. Main world and reference board return HTTP 200. No production code, assets or test changes; no full suite rerun for this audit/server shutdown. Previous preview links are now offline; their files remain on disk.

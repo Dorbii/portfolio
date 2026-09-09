@@ -4,6 +4,17 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
+**2026-09-09 - CLEANUP REQUESTED; FILE DELETION BLOCKED BY TOOL POLICY.**
+Owner requested removing the experiment work/files to reclaim space. Audited
+24 exact targets (153 files, 45,184,086 bytes / 43.09 MiB), with no live runtime
+consumers. Inventory: `FOLIAGE-CLEANUP-2026-09-09.json`. All targets remain;
+no space reclaimed. Automatic approval review rejected the combined deletion
+and a narrower explicit-path directory deletion as "blocked by policy" without
+further reason. No alternate deletion workaround attempted. Four experiment
+servers (:3210/:3220/:3230/:3250) stopped; world :3000 and references :3240
+still return HTTP 200. Keep live assets, shared tests/helpers, references and
+unrelated session6 terrain backups. Historical preview links below are offline.
+
 **2026-09-09 - OWNER REJECTED ORIGINAL BLENDER STATIC TEST.**
 Owner: "not quite hitting the mark imo". The :3250 procedural tree/mushrooms
 remain quarantined with source/evidence preserved. No more parameter passes on
