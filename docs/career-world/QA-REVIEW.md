@@ -1772,3 +1772,10 @@ Visual assessment, not an acceptance verdict: the pine is still sharper and more
 - `.codex-tmp/qa/original-foliage-blender/detail-browser.png` - actual enlarged inspection open in the browser.
 - `.codex-tmp/qa/original-foliage-blender/verification.json` - 768x768 RGBA renders, alpha ranges 0..255, no clipped alpha bounds, unchanged source hash, 0 changed pixels outside placement overlay. Mechanics only.
 - `.codex-tmp/qa/original-foliage-blender/browser-proof.json` - comparison/detail images loaded, disclosure opens, no horizontal overflow. Python syntax and Blender render/save pass. Full app suite not rerun for this isolated offline artifact; no production edits.
+
+
+**Owner (ORIGINAL BLENDER STATIC TEST REJECTION, 2026-09-09):** "not quite hitting the mark imo".
+
+**Codex:** Candidate rejected; retain :3250 and its screenshots/source as review evidence. My visual interpretation is that the pine still reads as stacked geometry and the mushroom caps as pebble-like forms, with insufficient painted edge/branch treatment and stem readability. Opening the tiers and adjusting source highlights did not establish a world-art match. Stop this procedural-mesh/material iteration; no animation, kit expansion or promotion. This is evidence against this implementation, not proof that offline 3D authoring cannot work.
+
+**Reframe:** The outstanding problem is source art quality, not motion mechanics. Keep original world foliage as the baseline. A replacement now requires deliberate painted silhouettes, surface marks and branch forms before it is rigged; another parameter pass or automatic return to the already rejected generated kit is not a credible correction. A viable new authoring method remains unresolved; no new asset-generation run or production change is implied.

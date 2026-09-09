@@ -4,6 +4,15 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
+**2026-09-09 - OWNER REJECTED ORIGINAL BLENDER STATIC TEST.**
+Owner: "not quite hitting the mark imo". The :3250 procedural tree/mushrooms
+remain quarantined with source/evidence preserved. No more parameter passes on
+this mesh/material approach, no animation or full kit, no production promotion.
+Codex's read: stacked branch geometry and pebble-like caps still do not fit the
+painted world. Original foliage stays the baseline. Source art authoring remains
+the unsolved bottleneck; do not silently restart the rejected generated kit.
+See the owner verdict and reframe appended to QA-REVIEW.md.
+
 **2026-09-09 - ORIGINAL BLENDER FOLIAGE STATIC TEST; OWNER REVIEW PENDING.**
 Owner has no paid source packs and asked to make our own from broad references.
 Explicitly approved offline 3D-to-2D authoring after clarifying the portfolio
