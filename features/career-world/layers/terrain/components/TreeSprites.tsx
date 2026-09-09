@@ -14,6 +14,7 @@ import {
   windVectorFromDegrees,
 } from "../../../shared/weather";
 import { usePrefersReducedMotion } from "./CanopySway";
+import { createTreeMotionGuard } from "./treeMotionGuard";
 import type { CanopySwayRegistry } from "./canopySwayWebGl";
 import {
   createTreeSpritesRenderer,
@@ -35,17 +36,6 @@ const DEFAULT_AMPLITUDE = 0.08;
 const WORLD_LAND_PX = 16 * 2048;
 const TALLEST_SINGLE_TREE_PX = 150;
 const MINIMUM_SCREEN_SWING = 0.25;
-// the guard: a page frame is "long" past 60 ms and "very long" past 120 ms
-// (the app's pane paces frames at 30 Hz, so 33 ms is normal); a gap over
-// 500 ms is throttling, not cost, and is not counted
-const LONG_FRAME_MS = 60;
-const VERY_LONG_FRAME_MS = 120;
-const GUARD_PATIENCE_MS = 1500;
-const GUARD_RETRY_MS = 10000;
-const UNCOUNTED_GAP_MS = 500;
-
-type GuardMode = "full" | "half" | "stopped";
-
 function tuning(name: string, fallback: number): number {
   if (typeof window === "undefined") return fallback;
   const value = Number(new URLSearchParams(window.location.search).get(name));
@@ -87,52 +77,23 @@ export function TreeSprites({ camera, registry }: TreeSpritesProps) {
     const motion = DEFAULT_WORLD_WIND_STATE.motion;
     const amplitude = tuning("trees.amplitude", DEFAULT_AMPLITUDE);
     const speed = tuning("trees.speed", 1);
+    const branchSetting = new URLSearchParams(window.location.search).get("trees.branches");
+    const branches = branchSetting === "0" ? 0 : tuning("trees.branches", 1);
+    canvas.dataset.branchMotion = branches > 0 ? "articulated" : "off";
     const startedAt = performance.now();
     let frame = 0;
     let running = true;
     let hidden = document.visibilityState === "hidden";
     let wasDrawing = false;
     let cleared = true;
-    let lastFrameAt = startedAt;
-    let frameEma = 16;
-    let longSince = 0;
-    let guard: GuardMode = "full";
-    let guardChangedAt = startedAt;
+    const motionGuard = createTreeMotionGuard(startedAt);
     let parity = 0;
-
-    const updateGuard = (now: number) => {
-      const gap = now - lastFrameAt;
-      lastFrameAt = now;
-      if (gap < UNCOUNTED_GAP_MS) {
-        frameEma += (gap - frameEma) * 0.1;
-      }
-      if (guard === "stopped") {
-        if (now - guardChangedAt > GUARD_RETRY_MS) {
-          guard = "full";
-          guardChangedAt = now;
-          frameEma = 16;
-          longSince = 0;
-        }
-        return;
-      }
-      const threshold = guard === "full" ? LONG_FRAME_MS : VERY_LONG_FRAME_MS;
-      if (frameEma > threshold) {
-        if (!longSince) longSince = now;
-        if (now - longSince > GUARD_PATIENCE_MS) {
-          guard = guard === "full" ? "half" : "stopped";
-          guardChangedAt = now;
-          longSince = 0;
-        }
-      } else {
-        longSince = 0;
-      }
-    };
 
     const loop = (now: number) => {
       if (!running) return;
       frame = requestAnimationFrame(loop);
       if (hidden) return;
-      updateGuard(now);
+      const { mode: guard, frameMs } = motionGuard.update(now);
       canvas.dataset.motionGuard = guard;
       parity = 1 - parity;
       if (guard === "half" && parity) return;
@@ -168,6 +129,7 @@ export function TreeSprites({ camera, registry }: TreeSpritesProps) {
         motion,
         timeSeconds: ((now - startedAt) / 1000) * speed,
         amplitude,
+        branches,
       }, width, height);
       cleared = false;
       const drawing = drawn > 0;
@@ -180,11 +142,11 @@ export function TreeSprites({ camera, registry }: TreeSpritesProps) {
       canvas.dataset.treeSprites = String(health.spritesDrawn);
       canvas.dataset.treeSets = String(health.setsResident);
       canvas.dataset.treeLoadFailures = String(health.loadFailures);
-      canvas.dataset.frameMs = frameEma.toFixed(1);
+      canvas.dataset.frameMs = frameMs.toFixed(1);
     };
     const onVisibility = () => {
       hidden = document.visibilityState === "hidden";
-      lastFrameAt = performance.now();
+      motionGuard.resetTiming(performance.now());
     };
     document.addEventListener("visibilitychange", onVisibility);
     frame = requestAnimationFrame(loop);

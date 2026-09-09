@@ -4,6 +4,42 @@ Rewritten 2026-08-30, post territory-resegmentation. The permanent record is `do
 
 ## Where things stand (one paragraph)
 
+**2026-09-09 — BRANCH-MOTION PROTOTYPE, owner review pending.**
+Owner rejected the third whole-tree tuning: "The trees are just not animated
+enough I think, or maybe its the fact the leaves/pines dont move idk but it
+doesnt look like a tree blowing in the wind". Do not increase trunk lean again
+as the same fix. The one-cell trial now derives branch joints from actual
+crown protrusions: 252 joints on 73 of 76 singles; 3 have no clear tiers.
+A 12-column / 24-row mesh adds branch rotations and smaller cluster flutter
+under the existing shared gust, with trunk centre/ground pinned. This is an
+approximate rig of painted clusters, not individual-needle geometry. The 25
+stands (58% of this cell's classified crown pixels) still do not animate.
+Art images and all existing registration records are unchanged; the generator
+adds only joint data to the trial manifest. The frame guard now recovers full
+rate after sustained normal frames. GPU proof: branch-on/off at rest identical,
+14,121 pixels changed by articulation at fixed time, zero sampled feet changed,
+zero GL errors. Current live: 76 sprites, full guard, no load errors; reduced
+motion checked. Gates: typecheck/build PASS, lint 0 errors / 33 existing warnings,
+suite 132 pass / 4 same baseline fail / 1 skip. Evidence and limitations in
+`FOLIAGE-RESUME-2026-09-09.md`; branch screenshots in QA-REVIEW.md. Next is
+owner review of this branch-motion candidate, then a rollout decision.
+
+**2026-09-09 — Codex resumed the foliage lane at `18cdcc27`.**
+Located Claude's final exchange and verified the third tuning in current code:
+76 sprites on T c3-1, amplitude 0.08, shared gusts; the owner's third motion
+verdict is still pending. No runtime, generated asset, camera, water, or
+worldwide sprite rollout changes were made during recovery. The earlier claim
+that the motion's character was accepted is Claude's interpretation; the
+owner's recorded words were only that the second tuning was too subtle.
+Restored the dev server at `http://localhost:3000/` from this worktree and
+opened the crossing at site resolution. Browser proof: 76 sprites, one set,
+zero load failures, full motion guard, no warning/error logs; idle at world
+zoom and animating again after returning. Fixed-camera frames show changing
+tree pixels while the sampled ground is byte-identical. Typecheck PASS;
+lint has warnings but no errors; suite 130 pass / 4 pre-existing fail / 1 skip;
+separate production build PASS. Evidence and next action:
+`docs/career-world/FOLIAGE-RESUME-2026-09-09.md`.
+
 **2026-09-08 11:30 UTC, LATEST (current):** **T c3-1's POOL OUTLET
 REDIRECTED INTO ITS GULLY ON HIS CROP; THE WIND AND THE CHAIN CUTS STILL
 WAIT ON HIS SECOND LOOK. LANE AT 7720f0e6, NINE COMMITS ON MAIN 873f4a99,

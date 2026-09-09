@@ -1651,3 +1651,19 @@ The mis-scaled page captures made during viewport setup are diagnostic artifacts
 
 
 **Codex (r9 full-width submerged correction):** Owner crop showed the generated crossing retained only one of the two converging grooves. The final bed texture now comes from the canonical route and kerb element, exported without the water clip for T c4-0 and then clipped into the pond bed. Both complete grooves preserve their route, width and spacing; no third ImageGen candidate was used. The bank patch is unchanged (idempotent rebuild: zero RGB/alpha changes). A mechanical test compares every fully submerged canonical route pixel to the extracted texture, preventing partial-line loss. pond-floor-final.png is refreshed with both grooves.
+
+
+## FOLIAGE-BRANCH-2026-09-09 - single-cell branch-motion candidate (owner review pending)
+
+**Owner:** "The trees are just not animated enough I think, or maybe its the fact the leaves/pines dont move idk but it doesnt look like a tree blowing in the wind".
+
+**Codex:** Reframed from another lean-amplitude adjustment to silhouette-derived branch joints and hierarchical mesh articulation. Trial remains T c3-1: 252 joints / 73 rigged singles, 3 trunk-only singles, 25 stands still. Source images and prior registrations unchanged. Trunk-centre/ground weights pin the sprite; at-rest branch-on/off GPU pixels identical and sampled feet unchanged. Frame-guard half-rate recovery has deterministic regression coverage. Typecheck/build PASS; lint 0 errors / 33 baseline warnings; suite 132 pass / 4 baseline fail / 1 skip. No owner acceptance or worldwide rollout claimed. Details: `FOLIAGE-RESUME-2026-09-09.md`.
+
+Evidence under `.codex-tmp/qa/foliage-resume-2026-09-09/`:
+- `branch-world.png` - world framing is preserved; the tree pass is idle at this zoom.
+- `branch-territory.png` - the Tanium test cell in territory context; no geographic mount change.
+- `branch-capital.png` - capital framing on the same test cell before moving to native detail.
+- `branch-site.png` - current mounted candidate at the crossing; 76 sprites drawing, branch motion enabled, full guard, zero load errors (`branch-final-health.json`).
+- `branch-site-t0.png` and `branch-site-t1.png` - temporal views of the branch candidate for human review, not a quality score.
+
+**Next:** Steve judges whether branch/cluster motion reads as wind. If it still reads as rubber, do not repeat amplitude/noise tuning; reconsider the approximate rig against authored, separately layered branches. Dense stands remain a separate unresolved coverage task.

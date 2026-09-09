@@ -8,9 +8,9 @@
 // foot stay, the top leans downwind under a gust that rolls through the cell,
 // and sways about that lean. At rest the sprite is the tile's own pixels over
 // its own place, so the world with the pass off and the world with the pass
-// at rest are the same picture. The paint is never warped: a sprite moves as
-// one silhouette, which is what a tree in wind does and what the per-pixel
-// warp (jelly) and the light pass (flicker) could not read as.
+// at rest are the same picture. Silhouette-derived branch joints add crown
+// articulation to the trunk bend. The mesh deforms around these joints;
+// no fragment noise, animated UV sampling, or relighting is used.
 //
 // Like the sway pass, every image is loaded by path from the browser cache
 // and every upload is checked. Tiles without a sprite set cost nothing: the
@@ -37,6 +37,7 @@ interface TreeSpriteRecord {
   readonly foot: readonly [number, number];
   readonly height: number;
   readonly phase: number;
+  readonly branches?: readonly [readonly number[], readonly number[]];
   readonly sprite: readonly [number, number];
   readonly patch: readonly [number, number];
 }
@@ -57,6 +58,8 @@ export interface TreeSpritesFrame {
   readonly timeSeconds: number;
   /** the top of a crown moves this fraction of the crown's height at a full lean */
   readonly amplitude: number;
+  /** zero keeps the previous whole-tree-only motion for comparison */
+  readonly branches?: number;
 }
 
 export interface TreeSpritesHealth {
@@ -66,9 +69,11 @@ export interface TreeSpritesHealth {
   readonly loadFailures: number;
 }
 
-// the bend is a strip of ROWS rows so a lean is a curve, not a shear
-const ROWS = 8;
-const FLOATS_PER_INSTANCE = 16;
+// Mesh density supports trunk bending and independently weighted branch tiers.
+const ROWS = 24;
+const COLUMNS = 12;
+const GRID_VERTICES = ROWS * COLUMNS * 6;
+const FLOATS_PER_INSTANCE = 24;
 const EVICT_AFTER_MS = 4000;
 
 const VERTEX_SHADER = `#version 300 es
@@ -79,6 +84,8 @@ in vec2 a_foot;          // the tree's foot in tile texels
 in vec4 a_spriteRect;    // atlas uv rect of the sprite crop
 in vec4 a_patchRect;     // atlas uv rect of the patch crop
 in vec2 a_tree;          // phase 0..1, crown height in texels
+in vec4 a_branchesLeft;  // silhouette-derived joint heights, zero = unused
+in vec4 a_branchesRight;
 uniform vec4 u_tileClip; // the tile's left, top, right, bottom in clip space
 uniform float u_tilePx;
 uniform float u_pass;    // 0 the patch (still), 1 the sprite (bent)
@@ -86,6 +93,7 @@ uniform vec2 u_wind;     // unit vector, texture space (y down)
 uniform float u_motion;
 uniform float u_time;
 uniform float u_amplitude;
+uniform float u_branches;
 out vec2 v_uv;
 
 void main() {
@@ -117,7 +125,38 @@ void main() {
   float swing = 0.12 + 0.7 * gust + 0.18 * osc * (0.4 + 0.6 * gust);
   // the lean is sideways on screen; the wind's downward part barely nods the tops
   vec2 lean = vec2(u_wind.x, u_wind.y * 0.25);
-  vec2 offset = lean * (u_amplitude * H * swing * bend) * u_pass;
+  vec2 offset = lean * (u_amplitude * H * swing * bend);
+  // Articulated crown detail: joints come from protruding tiers in the
+  // source silhouette. Each side rotates about the trunk, with a delayed
+  // response and a smaller needle-cluster flutter. The trunk and ground
+  // rim have zero branch weight. UVs and illumination never animate.
+  float dx = texel.x - a_foot.x;
+  float side = dx < 0.0 ? -1.0 : 1.0;
+  float halfWidth = max(side < 0.0 ? a_foot.x - a_box.x : a_box.x + a_box.z - a_foot.x, 1.0);
+  float lateral = clamp(abs(dx) / halfWidth, 0.0, 1.0);
+  float branchWeight = smoothstep(0.08, 0.65, lateral) * smoothstep(0.12, 0.22, above);
+  vec4 joints = side < 0.0 ? a_branchesLeft : a_branchesRight;
+  vec2 branchOffset = vec2(0.0);
+  float totalWeight = 0.0;
+  for (int i = 0; i < 4; i++) {
+    float joint = joints[i];
+    if (joint <= 0.0) continue;
+    float distanceToJoint = (above - joint) / 0.11;
+    float weight = exp(-distanceToJoint * distanceToJoint);
+    float delayed = t - joint * 0.55;
+    float branchPhase = joint * 9.0 + side * 0.8 + phase;
+    float response = sin(delayed * (4.1 + joint) - along / 210.0 + branchPhase);
+    float flutter = sin(delayed * 13.0 + branchPhase) * sin(delayed * 8.7 - branchPhase);
+    float angle = u_amplitude * u_branches * u_wind.x
+      * (0.65 * gust + 1.2 * response * (0.25 + 0.75 * gust)
+         + 0.18 * flutter * gust * lateral);
+    vec2 arm = vec2(dx, (joint - above) * H);
+    float c = cos(angle), s = sin(angle);
+    branchOffset += (vec2(c * arm.x - s * arm.y, s * arm.x + c * arm.y) - arm) * weight;
+    totalWeight += weight;
+  }
+  offset += branchOffset / max(1.0, totalWeight) * branchWeight;
+  offset *= u_pass;
   vec2 p = (texel + offset) / u_tilePx;
   gl_Position = vec4(mix(u_tileClip.x, u_tileClip.z, p.x), mix(u_tileClip.y, u_tileClip.w, p.y), 0.0, 1.0);
   vec4 rect = u_pass > 0.5 ? a_spriteRect : a_patchRect;
@@ -185,6 +224,8 @@ function instanceData(manifest: TreeSpriteManifest): Float32Array {
     data[o + 10] = tree.patch[0] / atlasWidth; data[o + 11] = tree.patch[1] / atlasHeight;
     data[o + 12] = (tree.patch[0] + width) / atlasWidth; data[o + 13] = (tree.patch[1] + height) / atlasHeight;
     data[o + 14] = tree.phase; data[o + 15] = tree.height;
+    data.set(tree.branches?.[0] ?? [0, 0, 0, 0], o + 16);
+    data.set(tree.branches?.[1] ?? [0, 0, 0, 0], o + 20);
   });
   return data;
 }
@@ -223,6 +264,8 @@ export function createTreeSpritesRenderer(gl: WebGL2RenderingContext): TreeSprit
     spriteRect: attribute("a_spriteRect"),
     patchRect: attribute("a_patchRect"),
     tree: attribute("a_tree"),
+    branchesLeft: attribute("a_branchesLeft"),
+    branchesRight: attribute("a_branchesRight"),
   };
   const uniform = (name: string, required = false) => {
     const location = gl.getUniformLocation(program, name);
@@ -238,14 +281,18 @@ export function createTreeSpritesRenderer(gl: WebGL2RenderingContext): TreeSprit
     motion: uniform("u_motion"),
     time: uniform("u_time"),
     amplitude: uniform("u_amplitude"),
+    branches: uniform("u_branches"),
     opacity: uniform("u_opacity"),
   };
-  // the shared strip: ROWS rows of two triangles over the unit square
-  const grid = new Float32Array(ROWS * 6 * 2);
+  // A shared mesh allows each side of a branch to flex around a still
+  // centreline. Patches use the same mesh with displacement disabled.
+  const grid = new Float32Array(GRID_VERTICES * 2);
   for (let row = 0; row < ROWS; row += 1) {
-    const y0 = row / ROWS;
-    const y1 = (row + 1) / ROWS;
-    grid.set([0, y0, 1, y0, 0, y1, 0, y1, 1, y0, 1, y1], row * 12);
+    for (let column = 0; column < COLUMNS; column += 1) {
+      const x0 = column / COLUMNS, x1 = (column + 1) / COLUMNS;
+      const y0 = row / ROWS, y1 = (row + 1) / ROWS;
+      grid.set([x0, y0, x1, y0, x0, y1, x0, y1, x1, y0, x1, y1], (row * COLUMNS + column) * 12);
+    }
   }
   const gridBuffer = gl.createBuffer();
   if (!gridBuffer) throw new Error("Unable to allocate the tree sprite geometry.");
@@ -272,6 +319,8 @@ export function createTreeSpritesRenderer(gl: WebGL2RenderingContext): TreeSprit
       [attributes.spriteRect, 4, 24],
       [attributes.patchRect, 4, 40],
       [attributes.tree, 2, 56],
+      [attributes.branchesLeft, 4, 64],
+      [attributes.branchesRight, 4, 80],
     ];
     for (const [location, size, offset] of perInstance) {
       gl.enableVertexAttribArray(location);
@@ -391,6 +440,7 @@ export function createTreeSpritesRenderer(gl: WebGL2RenderingContext): TreeSprit
       gl.uniform1f(uniforms.motion, frame.motion);
       gl.uniform1f(uniforms.time, frame.timeSeconds);
       gl.uniform1f(uniforms.amplitude, frame.amplitude);
+      gl.uniform1f(uniforms.branches, frame.branches ?? 1);
       gl.uniform1f(uniforms.opacity, frame.opacity);
       let tiles = 0;
       let sprites = 0;
@@ -412,9 +462,9 @@ export function createTreeSpritesRenderer(gl: WebGL2RenderingContext): TreeSprit
         gl.bindVertexArray(set.vao);
         // every patch first, still; then every sprite, bent — both in painter's order
         gl.uniform1f(uniforms.pass, 0);
-        gl.drawArraysInstanced(gl.TRIANGLES, 0, ROWS * 6, set.count);
+        gl.drawArraysInstanced(gl.TRIANGLES, 0, GRID_VERTICES, set.count);
         gl.uniform1f(uniforms.pass, 1);
-        gl.drawArraysInstanced(gl.TRIANGLES, 0, ROWS * 6, set.count);
+        gl.drawArraysInstanced(gl.TRIANGLES, 0, GRID_VERTICES, set.count);
         gl.bindVertexArray(null);
         tiles += 1;
         sprites += set.count;

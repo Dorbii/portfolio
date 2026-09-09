@@ -22,6 +22,7 @@
 import fs from "node:fs";
 import sharp from "sharp";
 import { crownMask, crownComponents } from "./crown-mask.mjs";
+import { deriveBranchJoints } from "./tree-branch-rig.mjs";
 sharp.cache(false);
 const arg = (f, d) => { const i = process.argv.indexOf(f); return i >= 0 ? process.argv[i + 1] : d; };
 const has = (f) => process.argv.includes(f);
@@ -228,6 +229,7 @@ for (const t of ["ninjaone", "tanium", "coast"]) {
       }
       trees.push({
         box: [l, tp, w, h], foot: [c.footX, c.footY], height: c.h,
+        branches: deriveBranchJoints(mask, w, h, [c.footX - l, c.footY - tp], c.h),
         phase: ((c.id * 2654435761) >>> 0) % 1000 / 1000, sprite, patch, w, h,
       });
     }
@@ -247,7 +249,7 @@ for (const t of ["ninjaone", "tanium", "coast"]) {
       format: "career-world/tree-sprites@r1",
       territory: t, cell: id, tilePx: W,
       atlas: { path: `/career-world/layers/terrain/authority/tiles/l2-${t}/${id}-trees.webp`, size: [ATLAS_W, atlasH] },
-      trees: trees.map((tr, i) => ({ box: tr.box, foot: tr.foot, height: tr.height, phase: tr.phase, sprite: place[i].sprite, patch: place[i].patch })),
+      trees: trees.map((tr, i) => ({ box: tr.box, foot: tr.foot, height: tr.height, phase: tr.phase, branches: tr.branches, sprite: place[i].sprite, patch: place[i].patch })),
     };
     fs.writeFileSync(`${A}/tiles/l2-${t}/${id}-trees.json`, JSON.stringify(manifest));
     worldManifest.cells[`l2-${t}/${id}`] = { trees: trees.length, atlas: [ATLAS_W, atlasH] };
